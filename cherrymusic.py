@@ -7,7 +7,7 @@ from urllib.parse import quote
 
 import hashlib
 
-import cache
+
             
 class CherryModel:
     def __init__(self,config, cache):
