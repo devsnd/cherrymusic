@@ -30,7 +30,7 @@ class SQLiteCache(object):
             self.db.execute('CREATE TABLE dictionary (word text)')
             self.db.execute('CREATE TABLE search (drowid int, frowid int)')
             print('Creating index for dictionary and search tables... ',end='')
-            self.conn.execute('CREATE INDEX idx_dictionary ON dictionary(rowid,word)')
+            self.conn.execute('CREATE INDEX idx_dictionary ON dictionary(word)')
             self.conn.execute('CREATE INDEX idx_search ON search(drowid,frowid)');
             print('done.')
             print('Connected to Database. ('+DBFILENAME+')')
