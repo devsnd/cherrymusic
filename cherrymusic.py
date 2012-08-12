@@ -461,6 +461,7 @@ def start(config):
         'log.error_file': os.path.join(os.path.dirname(__file__), 'site.log'),  
         'environment': 'production',
         "server.socket_host": "0.0.0.0",
+        'server.socket_port': 8080, #TODO make port avaiable in config
         })  
     cherrypy.tree.mount(root,'/',
         config={
@@ -484,6 +485,7 @@ def start(config):
             }
                     
     })    
+    print('Starting server on port 8080 ...') #TODO display actually used port
     cherrypy.engine.start()  
     
   
