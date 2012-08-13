@@ -9,7 +9,7 @@ CACHEFILENAME = 'cherry.cache.db' #set to ':memory:' to keep _everything_ in ram
 scanreportinterval = 1
 AUTOSAVEINTERVAL = 50
 debug = False
-performanceTest = True
+performanceTest = False
 keepInRam = False
 
 class SQLiteCache(object):
