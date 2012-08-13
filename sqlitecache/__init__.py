@@ -37,18 +37,7 @@ class SQLiteCache(object):
         #I don't care about journaling!
         self.conn.execute('PRAGMA synchronous = OFF')
         self.conn.execute('PRAGMA journal_mode = MEMORY')
-        self.checkIfRootUpdated()       
-        
-    def dumpToFile(self):
-        if 'y' == input('Write db dump to file?'):
-            filename = 'dump.db' #TODO prompt for name
-            print('Writing to '+filename+' ... ',end='')
-            f = open('dump.db','w')
-            for line in self.conn.iterdump():
-                f.write('%s\n' % line)
-            f.close()
-            print('done.')
-                
+        self.checkIfRootUpdated()                       
     
     def checkIfRootUpdated(self):
         changed = False
@@ -101,10 +90,7 @@ class SQLiteCache(object):
         if changed:
             print('Commiting changes...', end='')
             self.conn.commit()
-            print('done.')
-            
-            self.dumpToFile()
-        
+            print('done.')        
                 
     def removeFromDB(self,filerowid):
         print("""removeFromDB: NOT IMPLEMENTED! should remove file """+str(filerowid))

@@ -85,7 +85,11 @@ class CherryModel:
             else:
                 ret.append(MusicEntry(self.strippath(file),dir=True))
         return ret
-
+   
+    def saveplaylist(value):
+        if not os.path.exists(dir):
+            os.makedirs("playlists")
+        
 
 class MusicEntry:
     def __init__(self, path, compact=False, dir=False, repr=None):
@@ -284,6 +288,8 @@ class Root(object):
                 if not value.strip():
                     return """<span style="width:100%; text-align: center; float: left;">if you're looking for nothing, you'll be getting nothing.</span>"""
                 return self.html.render(self.model.search(value.strip()))
+        elif action == 'saveplaylist':
+            self.model.saveplaylist(value)
         else:
             dirtorender = value
             dirtorenderabspath = os.path.join(self.config.config[self.config.BASEDIR],value)
