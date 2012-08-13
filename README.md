@@ -4,6 +4,7 @@ cherrymusic
 cherrymusic is a standalone music server based on CherryPy and jPlayer. It is intended to be an alternative to edna
 
 Current Features:
+
     - Browsing and Stream to your music inside the browser (locally or remote)
     - Searching your music
     - Completely AJAX based (no page reloads on click, super fast)
