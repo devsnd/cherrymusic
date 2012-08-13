@@ -32,6 +32,9 @@ You can either install it, or just extract the "cherrypy" subfolder inside the c
 
     python cherrymusic.py
 
+4. Open your browser and play some music!
+
+    firefox localhost:8080
 
 Side Notes
 ==========
