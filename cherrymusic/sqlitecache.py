@@ -12,8 +12,10 @@ debug = False
 performanceTest = False
 keepInRam = False
 
+from cherrymusic import config
+
 class SQLiteCache(object):
-    def __init__(self, config):
+    def __init__(self, conf):
         DBFILENAME = CACHEFILENAME
         setupDB = not os.path.isfile(DBFILENAME) or os.path.getsize(DBFILENAME) == 0
         setupDB |= DBFILENAME == ':memory:' #always rescan when using ram db.
@@ -21,7 +23,7 @@ class SQLiteCache(object):
         
         self.conn = sqlite3.connect(DBFILENAME, check_same_thread = False)
         self.db = self.conn.cursor()
-        self.rootDir = config.config[config.BASEDIR] 
+        self.rootDir = conf.config[conf.BASEDIR] 
         
         if setupDB:
             print('Creating tables...')

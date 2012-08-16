@@ -1,0 +1,800 @@
+[16/Aug/2012:21:55:49] ENGINE Bus STARTING
+[16/Aug/2012:21:55:49] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:21:55:49] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:21:55:49] ENGINE Bus STARTED
+[16/Aug/2012:21:56:01]  Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 323, in _checkBasicResponse
+    return encrypt(auth_map["password"], auth_map["username"]) == password
+TypeError: encrypt_pw() takes exactly 1 positional argument (3 given)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 102, in run
+    hook()
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 62, in __call__
+    return self.callback(**self.kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/auth.py", line 61, in basic_auth
+    if check_auth(users, encrypt):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/auth.py", line 40, in check_auth
+    encrypt=encrypt, realm=realm):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 350, in checkResponse
+    return checker (auth_map, password, method=method, encrypt=encrypt, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 325, in _checkBasicResponse
+    return encrypt(auth_map["password"]) == password
+TypeError: encrypt_pw() takes exactly 1 positional argument (2 given)
+
+[16/Aug/2012:21:56:01] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 323, in _checkBasicResponse
+    return encrypt(auth_map["password"], auth_map["username"]) == password
+TypeError: encrypt_pw() takes exactly 1 positional argument (3 given)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 636, in respond
+    self.hooks.run('on_start_resource')
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 112, in run
+    raise exc
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 102, in run
+    hook()
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 62, in __call__
+    return self.callback(**self.kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/auth.py", line 61, in basic_auth
+    if check_auth(users, encrypt):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/auth.py", line 40, in check_auth
+    encrypt=encrypt, realm=realm):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 350, in checkResponse
+    return checker (auth_map, password, method=method, encrypt=encrypt, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 325, in _checkBasicResponse
+    return encrypt(auth_map["password"]) == password
+TypeError: encrypt_pw() takes exactly 1 positional argument (2 given)
+
+[16/Aug/2012:21:56:01]  Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 323, in _checkBasicResponse
+    return encrypt(auth_map["password"], auth_map["username"]) == password
+TypeError: encrypt_pw() takes exactly 1 positional argument (3 given)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 102, in run
+    hook()
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 62, in __call__
+    return self.callback(**self.kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/auth.py", line 61, in basic_auth
+    if check_auth(users, encrypt):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/auth.py", line 40, in check_auth
+    encrypt=encrypt, realm=realm):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 350, in checkResponse
+    return checker (auth_map, password, method=method, encrypt=encrypt, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 325, in _checkBasicResponse
+    return encrypt(auth_map["password"]) == password
+TypeError: encrypt_pw() takes exactly 1 positional argument (2 given)
+
+[16/Aug/2012:21:56:01] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 323, in _checkBasicResponse
+    return encrypt(auth_map["password"], auth_map["username"]) == password
+TypeError: encrypt_pw() takes exactly 1 positional argument (3 given)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 636, in respond
+    self.hooks.run('on_start_resource')
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 112, in run
+    raise exc
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 102, in run
+    hook()
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 62, in __call__
+    return self.callback(**self.kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/auth.py", line 61, in basic_auth
+    if check_auth(users, encrypt):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/auth.py", line 40, in check_auth
+    encrypt=encrypt, realm=realm):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 350, in checkResponse
+    return checker (auth_map, password, method=method, encrypt=encrypt, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 325, in _checkBasicResponse
+    return encrypt(auth_map["password"]) == password
+TypeError: encrypt_pw() takes exactly 1 positional argument (2 given)
+
+[16/Aug/2012:21:57:37] ENGINE Bus STOPPING
+[16/Aug/2012:21:57:37] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:21:57:37] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:21:57:37] ENGINE Bus STOPPED
+[16/Aug/2012:21:57:37] ENGINE Bus EXITING
+[16/Aug/2012:21:57:37] ENGINE Bus EXITED
+[16/Aug/2012:21:57:39] ENGINE Bus STARTING
+[16/Aug/2012:21:57:39] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:21:57:39] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:21:57:39] ENGINE Bus STARTED
+[16/Aug/2012:21:58:00]  Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 323, in _checkBasicResponse
+    return encrypt(auth_map["password"], auth_map["username"]) == password
+TypeError: encrypt_pw() takes exactly 1 positional argument (3 given)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 102, in run
+    hook()
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 62, in __call__
+    return self.callback(**self.kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/auth.py", line 61, in basic_auth
+    if check_auth(users, encrypt):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/auth.py", line 40, in check_auth
+    encrypt=encrypt, realm=realm):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 350, in checkResponse
+    return checker (auth_map, password, method=method, encrypt=encrypt, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 325, in _checkBasicResponse
+    return encrypt(auth_map["password"]) == password
+TypeError: encrypt_pw() takes exactly 1 positional argument (2 given)
+
+[16/Aug/2012:21:58:00] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 323, in _checkBasicResponse
+    return encrypt(auth_map["password"], auth_map["username"]) == password
+TypeError: encrypt_pw() takes exactly 1 positional argument (3 given)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 636, in respond
+    self.hooks.run('on_start_resource')
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 112, in run
+    raise exc
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 102, in run
+    hook()
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 62, in __call__
+    return self.callback(**self.kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/auth.py", line 61, in basic_auth
+    if check_auth(users, encrypt):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/auth.py", line 40, in check_auth
+    encrypt=encrypt, realm=realm):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 350, in checkResponse
+    return checker (auth_map, password, method=method, encrypt=encrypt, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 325, in _checkBasicResponse
+    return encrypt(auth_map["password"]) == password
+TypeError: encrypt_pw() takes exactly 1 positional argument (2 given)
+
+[16/Aug/2012:21:58:00]  Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 323, in _checkBasicResponse
+    return encrypt(auth_map["password"], auth_map["username"]) == password
+TypeError: encrypt_pw() takes exactly 1 positional argument (3 given)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 102, in run
+    hook()
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 62, in __call__
+    return self.callback(**self.kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/auth.py", line 61, in basic_auth
+    if check_auth(users, encrypt):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/auth.py", line 40, in check_auth
+    encrypt=encrypt, realm=realm):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 350, in checkResponse
+    return checker (auth_map, password, method=method, encrypt=encrypt, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 325, in _checkBasicResponse
+    return encrypt(auth_map["password"]) == password
+TypeError: encrypt_pw() takes exactly 1 positional argument (2 given)
+
+[16/Aug/2012:21:58:00] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 323, in _checkBasicResponse
+    return encrypt(auth_map["password"], auth_map["username"]) == password
+TypeError: encrypt_pw() takes exactly 1 positional argument (3 given)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 636, in respond
+    self.hooks.run('on_start_resource')
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 112, in run
+    raise exc
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 102, in run
+    hook()
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 62, in __call__
+    return self.callback(**self.kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/auth.py", line 61, in basic_auth
+    if check_auth(users, encrypt):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/auth.py", line 40, in check_auth
+    encrypt=encrypt, realm=realm):
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 350, in checkResponse
+    return checker (auth_map, password, method=method, encrypt=encrypt, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/httpauth.py", line 325, in _checkBasicResponse
+    return encrypt(auth_map["password"]) == password
+TypeError: encrypt_pw() takes exactly 1 positional argument (2 given)
+
+[16/Aug/2012:21:58:11] ENGINE Bus STOPPING
+[16/Aug/2012:21:58:11] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:21:58:11] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:21:58:11] ENGINE Bus STOPPED
+[16/Aug/2012:21:58:11] ENGINE Bus EXITING
+[16/Aug/2012:21:58:11] ENGINE Bus EXITED
+[16/Aug/2012:21:58:12] ENGINE Bus STARTING
+[16/Aug/2012:21:58:12] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:21:58:12] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:21:58:12] ENGINE Bus STARTED
+[16/Aug/2012:21:58:26] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 656, in respond
+    response.body = self.handler()
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/encoding.py", line 188, in __call__
+    self.body = self.oldhandler(*args, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cpdispatch.py", line 34, in __call__
+    return self.callable(*self.args, **self.kwargs)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/httphandler.py", line 24, in index
+    dirtorenderabspath = os.path.join(self.config.config[self.config.BASEDIR],value)
+NameError: global name 'os' is not defined
+
+[16/Aug/2012:21:59:23] ENGINE Bus STOPPING
+[16/Aug/2012:21:59:23] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:21:59:23] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:21:59:23] ENGINE Bus STOPPED
+[16/Aug/2012:21:59:23] ENGINE Bus EXITING
+[16/Aug/2012:21:59:23] ENGINE Bus EXITED
+[16/Aug/2012:21:59:24] ENGINE Bus STARTING
+[16/Aug/2012:21:59:24] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:21:59:24] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:21:59:24] ENGINE Bus STARTED
+[16/Aug/2012:21:59:26] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 656, in respond
+    response.body = self.handler()
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/encoding.py", line 188, in __call__
+    self.body = self.oldhandler(*args, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cpdispatch.py", line 34, in __call__
+    return self.callable(*self.args, **self.kwargs)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/httphandler.py", line 26, in index
+    dirtorenderabspath = os.path.join(self.config.config[self.config.BASEDIR],value)
+AttributeError: 'module' object has no attribute 'config'
+
+[16/Aug/2012:22:00:21] ENGINE Bus STOPPING
+[16/Aug/2012:22:00:21] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:00:21] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:00:21] ENGINE Bus STOPPED
+[16/Aug/2012:22:00:21] ENGINE Bus EXITING
+[16/Aug/2012:22:00:21] ENGINE Bus EXITED
+[16/Aug/2012:22:00:22] ENGINE Bus STARTING
+[16/Aug/2012:22:00:22] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:00:22] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:00:22] ENGINE Bus STARTED
+[16/Aug/2012:22:00:23] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 656, in respond
+    response.body = self.handler()
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/encoding.py", line 188, in __call__
+    self.body = self.oldhandler(*args, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cpdispatch.py", line 34, in __call__
+    return self.callable(*self.args, **self.kwargs)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/httphandler.py", line 27, in index
+    dirtorenderabspath = os.path.join(self.config.config[self.config.BASEDIR],value)
+AttributeError: 'module' object has no attribute 'config'
+
+[16/Aug/2012:22:02:01] ENGINE Bus STOPPING
+[16/Aug/2012:22:02:01] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:02:01] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:02:01] ENGINE Bus STOPPED
+[16/Aug/2012:22:02:01] ENGINE Bus EXITING
+[16/Aug/2012:22:02:01] ENGINE Bus EXITED
+[16/Aug/2012:22:02:01] ENGINE Bus STARTING
+[16/Aug/2012:22:02:01] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:02:02] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:02:02] ENGINE Bus STARTED
+[16/Aug/2012:22:02:03] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 656, in respond
+    response.body = self.handler()
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/encoding.py", line 188, in __call__
+    self.body = self.oldhandler(*args, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cpdispatch.py", line 34, in __call__
+    return self.callable(*self.args, **self.kwargs)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/httphandler.py", line 34, in index
+    self.html.render(self.model.listdir(dirtorender)) )
+AttributeError: 'module' object has no attribute 'listdir'
+
+[16/Aug/2012:22:02:33] ENGINE Bus STOPPING
+[16/Aug/2012:22:02:33] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:02:33] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:02:33] ENGINE Bus STOPPED
+[16/Aug/2012:22:02:33] ENGINE Bus EXITING
+[16/Aug/2012:22:02:33] ENGINE Bus EXITED
+[16/Aug/2012:22:02:34] ENGINE Bus STARTING
+[16/Aug/2012:22:02:34] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:02:34] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:02:34] ENGINE Bus STARTED
+[16/Aug/2012:22:02:36] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 656, in respond
+    response.body = self.handler()
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/encoding.py", line 188, in __call__
+    self.body = self.oldhandler(*args, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cpdispatch.py", line 34, in __call__
+    return self.callable(*self.args, **self.kwargs)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/httphandler.py", line 34, in index
+    self.html.render(self.model.listdir(dirtorender)) )
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/cherrymodel.py", line 36, in listdir
+    absdirpath = self.abspath(dirpath)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/cherrymodel.py", line 18, in abspath
+    return os.path.join(self.config.config[config.BASEDIR],path)
+NameError: global name 'os' is not defined
+
+[16/Aug/2012:22:04:13] ENGINE Bus STOPPING
+[16/Aug/2012:22:04:13] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:04:13] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:04:13] ENGINE Bus STOPPED
+[16/Aug/2012:22:04:13] ENGINE Bus EXITING
+[16/Aug/2012:22:04:13] ENGINE Bus EXITED
+[16/Aug/2012:22:04:14] ENGINE Bus STARTING
+[16/Aug/2012:22:04:14] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:04:14] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:04:14] ENGINE Bus STARTED
+[16/Aug/2012:22:04:15] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 656, in respond
+    response.body = self.handler()
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/encoding.py", line 188, in __call__
+    self.body = self.oldhandler(*args, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cpdispatch.py", line 34, in __call__
+    return self.callable(*self.args, **self.kwargs)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/httphandler.py", line 34, in index
+    self.html.render(self.model.listdir(dirtorender)) )
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/cherrymodel.py", line 42, in listdir
+    absdirpath = self.abspath(dirpath)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/cherrymodel.py", line 24, in abspath
+    return os.path.join(self.config.config[config.BASEDIR],path)
+NameError: global name 'config' is not defined
+
+[16/Aug/2012:22:04:36] ENGINE Bus STOPPING
+[16/Aug/2012:22:04:36] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:04:36] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:04:36] ENGINE Bus STOPPED
+[16/Aug/2012:22:04:36] ENGINE Bus EXITING
+[16/Aug/2012:22:04:36] ENGINE Bus EXITED
+[16/Aug/2012:22:04:38] ENGINE Bus STARTING
+[16/Aug/2012:22:04:38] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:04:38] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:04:38] ENGINE Bus STARTED
+[16/Aug/2012:22:04:39] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 656, in respond
+    response.body = self.handler()
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/encoding.py", line 188, in __call__
+    self.body = self.oldhandler(*args, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cpdispatch.py", line 34, in __call__
+    return self.callable(*self.args, **self.kwargs)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/httphandler.py", line 34, in index
+    self.html.render(self.model.listdir(dirtorender)) )
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/renderhtml.py", line 17, in render
+    ret += self.renderdir(entry.path)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/renderhtml.py", line 126, in renderdir
+    return self.listify(self.htmldir(filepath))
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/renderhtml.py", line 103, in htmldir
+    return '<a dir="'+dir+'" href="javascript:;" class="listdir">'+CherryModel.filename(dir)+'</a>'
+NameError: global name 'CherryModel' is not defined
+
+[16/Aug/2012:22:07:25] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 656, in respond
+    response.body = self.handler()
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/encoding.py", line 188, in __call__
+    self.body = self.oldhandler(*args, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cpdispatch.py", line 34, in __call__
+    return self.callable(*self.args, **self.kwargs)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/httphandler.py", line 34, in index
+    self.html.render(self.model.listdir(dirtorender)) )
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/renderhtml.py", line 17, in render
+    for entry in musicentries:
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/renderhtml.py", line 126, in renderdir
+    def renderdir(self, filepath,showfullpath=False):
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/renderhtml.py", line 103, in htmldir
+    def htmldir(self, dir,showfullpath=False):
+NameError: global name 'CherryModel' is not defined
+
+[16/Aug/2012:22:07:26] ENGINE Bus STOPPING
+[16/Aug/2012:22:07:31] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:07:31] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:07:31] ENGINE Bus STOPPED
+[16/Aug/2012:22:07:31] ENGINE Bus EXITING
+[16/Aug/2012:22:07:31] ENGINE Bus EXITED
+[16/Aug/2012:22:07:32] ENGINE Bus STARTING
+[16/Aug/2012:22:07:32] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:07:32] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:07:32] ENGINE Bus STARTED
+[16/Aug/2012:22:07:34] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 656, in respond
+    response.body = self.handler()
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/encoding.py", line 188, in __call__
+    self.body = self.oldhandler(*args, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cpdispatch.py", line 34, in __call__
+    return self.callable(*self.args, **self.kwargs)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/httphandler.py", line 34, in index
+    self.html.render(self.model.listdir(dirtorender)) )
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/cherrymodel.py", line 45, in listdir
+    sortedfiles = self.sortFiles(allfilesindir, absdirpath)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/cherrymodel.py", line 28, in sortFiles
+    key=lambda x : CherryModel.filename(x).upper() )
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/cherrymodel.py", line 28, in <lambda>
+    key=lambda x : CherryModel.filename(x).upper() )
+AttributeError: type object 'CherryModel' has no attribute 'filename'
+
+[16/Aug/2012:22:07:37] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 656, in respond
+    response.body = self.handler()
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/encoding.py", line 188, in __call__
+    self.body = self.oldhandler(*args, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cpdispatch.py", line 34, in __call__
+    return self.callable(*self.args, **self.kwargs)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/httphandler.py", line 34, in index
+    self.html.render(self.model.listdir(dirtorender)) )
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/cherrymodel.py", line 45, in listdir
+    sortedfiles = self.sortFiles(allfilesindir, absdirpath)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/cherrymodel.py", line 28, in sortFiles
+    key=lambda x : CherryModel.filename(x).upper() )
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/cherrymodel.py", line 28, in <lambda>
+    key=lambda x : CherryModel.filename(x).upper() )
+AttributeError: type object 'CherryModel' has no attribute 'filename'
+
+[16/Aug/2012:22:08:23] ENGINE Bus STOPPING
+[16/Aug/2012:22:08:23] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:08:23] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:08:23] ENGINE Bus STOPPED
+[16/Aug/2012:22:08:23] ENGINE Bus EXITING
+[16/Aug/2012:22:08:23] ENGINE Bus EXITED
+[16/Aug/2012:22:08:24] ENGINE Bus STARTING
+[16/Aug/2012:22:08:24] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:08:24] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:08:24] ENGINE Bus STARTED
+[16/Aug/2012:22:08:25] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 656, in respond
+    response.body = self.handler()
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/encoding.py", line 188, in __call__
+    self.body = self.oldhandler(*args, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cpdispatch.py", line 34, in __call__
+    return self.callable(*self.args, **self.kwargs)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/httphandler.py", line 34, in index
+    self.html.render(self.model.listdir(dirtorender)) )
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/cherrymodel.py", line 47, in listdir
+    sortedfiles = self.sortFiles(allfilesindir, absdirpath)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/cherrymodel.py", line 30, in sortFiles
+    key=lambda x : Util.filename(x).upper() )
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/cherrymodel.py", line 30, in <lambda>
+    key=lambda x : Util.filename(x).upper() )
+NameError: global name 'Util' is not defined
+
+[16/Aug/2012:22:09:39] ENGINE Bus STOPPING
+[16/Aug/2012:22:09:39] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:09:39] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:09:39] ENGINE Bus STOPPED
+[16/Aug/2012:22:09:39] ENGINE Bus EXITING
+[16/Aug/2012:22:09:39] ENGINE Bus EXITED
+[16/Aug/2012:22:09:40] ENGINE Bus STARTING
+[16/Aug/2012:22:09:40] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:09:40] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:09:40] ENGINE Bus STARTED
+[16/Aug/2012:22:09:42] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 656, in respond
+    response.body = self.handler()
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/encoding.py", line 188, in __call__
+    self.body = self.oldhandler(*args, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cpdispatch.py", line 34, in __call__
+    return self.callable(*self.args, **self.kwargs)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/httphandler.py", line 34, in index
+    self.html.render(self.model.listdir(dirtorender)) )
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/cherrymodel.py", line 47, in listdir
+    sortedfiles = self.sortFiles(allfilesindir, absdirpath)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/cherrymodel.py", line 30, in sortFiles
+    key=lambda x : util.filename(x).upper() )
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/cherrymodel.py", line 30, in <lambda>
+    key=lambda x : util.filename(x).upper() )
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/util.py", line 5, in filename
+    return os.path.split(path)[1]
+NameError: global name 'os' is not defined
+
+[16/Aug/2012:22:10:28] ENGINE Bus STOPPING
+[16/Aug/2012:22:10:28] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:10:28] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:10:28] ENGINE Bus STOPPED
+[16/Aug/2012:22:10:28] ENGINE Bus EXITING
+[16/Aug/2012:22:10:28] ENGINE Bus EXITED
+[16/Aug/2012:22:10:30] ENGINE Bus STARTING
+[16/Aug/2012:22:10:30] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:10:30] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:10:30] ENGINE Bus STARTED
+[16/Aug/2012:22:10:31] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 656, in respond
+    response.body = self.handler()
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/encoding.py", line 188, in __call__
+    self.body = self.oldhandler(*args, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cpdispatch.py", line 34, in __call__
+    return self.callable(*self.args, **self.kwargs)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/httphandler.py", line 34, in index
+    self.html.render(self.model.listdir(dirtorender)) )
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/renderhtml.py", line 21, in render
+    ret += self.renderdir(entry.path)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/renderhtml.py", line 130, in renderdir
+    return self.listify(self.htmldir(filepath))
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/renderhtml.py", line 107, in htmldir
+    return '<a dir="'+dir+'" href="javascript:;" class="listdir">'+Util.filename(dir)+'</a>'
+NameError: global name 'Util' is not defined
+
+[16/Aug/2012:22:11:10] ENGINE Bus STOPPING
+[16/Aug/2012:22:11:10] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:11:10] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:11:10] ENGINE Bus STOPPED
+[16/Aug/2012:22:11:10] ENGINE Bus EXITING
+[16/Aug/2012:22:11:10] ENGINE Bus EXITED
+[16/Aug/2012:22:12:11] ENGINE Bus STARTING
+[16/Aug/2012:22:12:11] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:12:12] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:12:12] ENGINE Bus STARTED
+[16/Aug/2012:22:12:13] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 656, in respond
+    response.body = self.handler()
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/encoding.py", line 188, in __call__
+    self.body = self.oldhandler(*args, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cpdispatch.py", line 34, in __call__
+    return self.callable(*self.args, **self.kwargs)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/httphandler.py", line 34, in index
+    self.html.render(self.model.listdir(dirtorender)) )
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/renderhtml.py", line 23, in render
+    ret += self.renderdir(entry.path)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/renderhtml.py", line 132, in renderdir
+    return self.listify(self.htmldir(filepath))
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/renderhtml.py", line 109, in htmldir
+    return '<a dir="'+dir+'" href="javascript:;" class="listdir">'+Util.filename(dir)+'</a>'
+NameError: global name 'Util' is not defined
+
+[16/Aug/2012:22:12:31] ENGINE Bus STOPPING
+[16/Aug/2012:22:12:31] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:12:31] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:12:31] ENGINE Bus STOPPED
+[16/Aug/2012:22:12:31] ENGINE Bus EXITING
+[16/Aug/2012:22:12:31] ENGINE Bus EXITED
+[16/Aug/2012:22:12:32] ENGINE Bus STARTING
+[16/Aug/2012:22:12:32] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:12:32] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:12:32] ENGINE Bus STARTED
+[16/Aug/2012:22:12:33] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 656, in respond
+    response.body = self.handler()
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/encoding.py", line 188, in __call__
+    self.body = self.oldhandler(*args, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cpdispatch.py", line 34, in __call__
+    return self.callable(*self.args, **self.kwargs)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/httphandler.py", line 34, in index
+    self.html.render(self.model.listdir(dirtorender)) )
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/renderhtml.py", line 25, in render
+    ret += self.renderfile(entry.path)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/renderhtml.py", line 126, in renderfile
+    return self.listify(self.htmlfile(filepath),['fileinlist'])
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/renderhtml.py", line 85, in htmlfile
+    HOSTALIAS = config.config[config.HOSTALIAS]
+NameError: global name 'config' is not defined
+
+[16/Aug/2012:22:13:19] ENGINE Bus STOPPING
+[16/Aug/2012:22:13:19] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:13:19] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:13:19] ENGINE Bus STOPPED
+[16/Aug/2012:22:13:19] ENGINE Bus EXITING
+[16/Aug/2012:22:13:19] ENGINE Bus EXITED
+[16/Aug/2012:22:13:20] ENGINE Bus STARTING
+[16/Aug/2012:22:13:20] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:13:20] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:13:20] ENGINE Bus STARTED
+[16/Aug/2012:22:13:21] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 656, in respond
+    response.body = self.handler()
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/encoding.py", line 188, in __call__
+    self.body = self.oldhandler(*args, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cpdispatch.py", line 34, in __call__
+    return self.callable(*self.args, **self.kwargs)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/httphandler.py", line 34, in index
+    self.html.render(self.model.listdir(dirtorender)) )
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/renderhtml.py", line 25, in render
+    ret += self.renderfile(entry.path)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/renderhtml.py", line 126, in renderfile
+    return self.listify(self.htmlfile(filepath),['fileinlist'])
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/renderhtml.py", line 100, in htmlfile
+    apath = 'path="'+quote(urlpath)+'"'
+NameError: global name 'quote' is not defined
+
+[16/Aug/2012:22:14:03] ENGINE Bus STOPPING
+[16/Aug/2012:22:14:03] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:14:03] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:14:03] ENGINE Bus STOPPED
+[16/Aug/2012:22:14:03] ENGINE Bus EXITING
+[16/Aug/2012:22:14:03] ENGINE Bus EXITED
+[16/Aug/2012:22:14:53] ENGINE Bus STARTING
+[16/Aug/2012:22:14:53] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:14:53] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:14:53] ENGINE Bus STARTED
+[16/Aug/2012:22:14:54] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 656, in respond
+    response.body = self.handler()
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/encoding.py", line 188, in __call__
+    self.body = self.oldhandler(*args, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cpdispatch.py", line 34, in __call__
+    return self.callable(*self.args, **self.kwargs)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/httphandler.py", line 34, in index
+    self.html.render(self.model.listdir(dirtorender)) )
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/renderhtml.py", line 27, in render
+    ret += self.renderfile(entry.path)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/renderhtml.py", line 128, in renderfile
+    return self.listify(self.htmlfile(filepath),['fileinlist'])
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/renderhtml.py", line 102, in htmlfile
+    apath = 'path="'+quote(urlpath)+'"'
+NameError: global name 'quote' is not defined
+
+[16/Aug/2012:22:15:03] ENGINE Bus STOPPING
+[16/Aug/2012:22:15:04] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:15:04] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:15:04] ENGINE Bus STOPPED
+[16/Aug/2012:22:15:04] ENGINE Bus EXITING
+[16/Aug/2012:22:15:04] ENGINE Bus EXITED
+[16/Aug/2012:22:15:06] ENGINE Bus STARTING
+[16/Aug/2012:22:15:06] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:15:06] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:15:06] ENGINE Bus STARTED
+[16/Aug/2012:22:15:07] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 656, in respond
+    response.body = self.handler()
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/encoding.py", line 188, in __call__
+    self.body = self.oldhandler(*args, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cpdispatch.py", line 34, in __call__
+    return self.callable(*self.args, **self.kwargs)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/httphandler.py", line 34, in index
+    self.html.render(self.model.listdir(dirtorender)) )
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/renderhtml.py", line 31, in wrapInsidePage
+    tabs = [self.tabify(self.rendersearchfield(),'search','Search'),
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/renderhtml.py", line 78, in rendersearchfield
+    oneliner = choice(search)
+NameError: global name 'choice' is not defined
+
+[16/Aug/2012:22:15:20] ENGINE Bus STOPPING
+[16/Aug/2012:22:15:20] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:15:20] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:15:20] ENGINE Bus STOPPED
+[16/Aug/2012:22:15:20] ENGINE Bus EXITING
+[16/Aug/2012:22:15:20] ENGINE Bus EXITED
+[16/Aug/2012:22:15:21] ENGINE Bus STARTING
+[16/Aug/2012:22:15:21] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:15:21] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:15:21] ENGINE Bus STARTED
+[16/Aug/2012:22:15:43] ENGINE Bus STOPPING
+[16/Aug/2012:22:15:43] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:15:43] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:15:43] ENGINE Bus STOPPED
+[16/Aug/2012:22:15:43] ENGINE Bus EXITING
+[16/Aug/2012:22:15:43] ENGINE Bus EXITED
+[16/Aug/2012:22:16:46] ENGINE Bus STARTING
+[16/Aug/2012:22:16:46] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:16:47] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:16:47] ENGINE Bus STARTED
+[16/Aug/2012:22:17:54] ENGINE Bus STOPPING
+[16/Aug/2012:22:17:54] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:17:54] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:17:54] ENGINE Bus STOPPED
+[16/Aug/2012:22:17:54] ENGINE Bus EXITING
+[16/Aug/2012:22:17:54] ENGINE Bus EXITED
+[16/Aug/2012:22:17:55] ENGINE Bus STARTING
+[16/Aug/2012:22:17:55] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:17:55] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:17:55] ENGINE Bus STARTED
+[16/Aug/2012:22:18:10] ENGINE Bus STOPPING
+[16/Aug/2012:22:18:10] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:18:10] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:18:10] ENGINE Bus STOPPED
+[16/Aug/2012:22:18:10] ENGINE Bus EXITING
+[16/Aug/2012:22:18:10] ENGINE Bus EXITED
+[16/Aug/2012:22:18:11] ENGINE Bus STARTING
+[16/Aug/2012:22:18:11] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:18:11] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:18:11] ENGINE Bus STARTED
+[16/Aug/2012:22:18:24] ENGINE Bus STOPPING
+[16/Aug/2012:22:18:24] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:18:24] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:18:24] ENGINE Bus STOPPED
+[16/Aug/2012:22:18:24] ENGINE Bus EXITING
+[16/Aug/2012:22:18:24] ENGINE Bus EXITED
+[16/Aug/2012:22:18:25] ENGINE Bus STARTING
+[16/Aug/2012:22:18:25] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:18:26] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:18:26] ENGINE Bus STARTED
+[16/Aug/2012:22:18:46] ENGINE Bus STOPPING
+[16/Aug/2012:22:18:46] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:18:46] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:18:46] ENGINE Bus STOPPED
+[16/Aug/2012:22:18:46] ENGINE Bus EXITING
+[16/Aug/2012:22:18:46] ENGINE Bus EXITED
+[16/Aug/2012:22:18:47] ENGINE Bus STARTING
+[16/Aug/2012:22:18:47] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:18:47] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:18:47] ENGINE Bus STARTED
+[16/Aug/2012:22:19:02] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 656, in respond
+    response.body = self.handler()
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/encoding.py", line 188, in __call__
+    self.body = self.oldhandler(*args, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cpdispatch.py", line 34, in __call__
+    return self.callable(*self.args, **self.kwargs)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/httphandler.py", line 21, in index
+    return self.html.render(self.model.search(value.strip()))
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/cherrymodel.py", line 72, in search
+    results = self.cache.searchfor(term,maxresults=self.config.config[config.MAXSEARCHRESULTS])
+NameError: global name 'config' is not defined
+
+[16/Aug/2012:22:19:45] ENGINE Bus STOPPING
+[16/Aug/2012:22:19:45] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:19:45] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:19:45] ENGINE Bus STOPPED
+[16/Aug/2012:22:19:45] ENGINE Bus EXITING
+[16/Aug/2012:22:19:45] ENGINE Bus EXITED
+[16/Aug/2012:22:19:46] ENGINE Bus STARTING
+[16/Aug/2012:22:19:46] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:19:46] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:19:46] ENGINE Bus STARTED
+[16/Aug/2012:22:19:49] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 656, in respond
+    response.body = self.handler()
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/encoding.py", line 188, in __call__
+    self.body = self.oldhandler(*args, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cpdispatch.py", line 34, in __call__
+    return self.callable(*self.args, **self.kwargs)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/httphandler.py", line 21, in index
+    return self.html.render(self.model.search(value.strip()))
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/cherrymodel.py", line 73, in search
+    results = sorted(results,key=MatchOrder(term),reverse=True)
+NameError: global name 'MatchOrder' is not defined
+
+[16/Aug/2012:22:20:13] ENGINE Bus STOPPING
+[16/Aug/2012:22:20:13] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:20:13] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:20:13] ENGINE Bus STOPPED
+[16/Aug/2012:22:20:13] ENGINE Bus EXITING
+[16/Aug/2012:22:20:13] ENGINE Bus EXITED
+[16/Aug/2012:22:21:34] ENGINE Bus STARTING
+[16/Aug/2012:22:21:34] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:21:35] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:21:35] ENGINE Bus STARTED
+[16/Aug/2012:22:21:41] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 656, in respond
+    response.body = self.handler()
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/encoding.py", line 188, in __call__
+    self.body = self.oldhandler(*args, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cpdispatch.py", line 34, in __call__
+    return self.callable(*self.args, **self.kwargs)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/httphandler.py", line 21, in index
+    return self.html.render(self.model.search(value.strip()))
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/cherrymodel.py", line 74, in search
+    results = sorted(results,key=resultorder.ResultOrder(term),reverse=True)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/resultorder.py", line 15, in __call__
+    file = CherryModel.filename(file).lower()
+NameError: global name 'CherryModel' is not defined
+
+[16/Aug/2012:22:22:15] ENGINE Bus STOPPING
+[16/Aug/2012:22:22:15] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:22:15] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:22:15] ENGINE Bus STOPPED
+[16/Aug/2012:22:22:15] ENGINE Bus EXITING
+[16/Aug/2012:22:22:15] ENGINE Bus EXITED
+[16/Aug/2012:22:22:16] ENGINE Bus STARTING
+[16/Aug/2012:22:22:16] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:22:16] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:22:16] ENGINE Bus STARTED
+[16/Aug/2012:22:22:18] HTTP Traceback (most recent call last):
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cprequest.py", line 656, in respond
+    response.body = self.handler()
+  File "/usr/lib/python3.2/site-packages/cherrypy/lib/encoding.py", line 188, in __call__
+    self.body = self.oldhandler(*args, **kwargs)
+  File "/usr/lib/python3.2/site-packages/cherrypy/_cpdispatch.py", line 34, in __call__
+    return self.callable(*self.args, **self.kwargs)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/httphandler.py", line 21, in index
+    return self.html.render(self.model.search(value.strip()))
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/cherrymodel.py", line 74, in search
+    results = sorted(results,key=resultorder.ResultOrder(term),reverse=True)
+  File "/home/tom/project/musiccherry/github-source/cherrymusic/resultorder.py", line 39, in __call__
+    file = CherryModel.stripext(file)
+NameError: global name 'CherryModel' is not defined
+
+[16/Aug/2012:22:23:06] ENGINE Bus STOPPING
+[16/Aug/2012:22:23:06] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('0.0.0.0', 8080)) shut down
+[16/Aug/2012:22:23:06] ENGINE Stopped thread '_TimeoutMonitor'.
+[16/Aug/2012:22:23:06] ENGINE Bus STOPPED
+[16/Aug/2012:22:23:06] ENGINE Bus EXITING
+[16/Aug/2012:22:23:06] ENGINE Bus EXITED
+[16/Aug/2012:22:23:07] ENGINE Bus STARTING
+[16/Aug/2012:22:23:07] ENGINE Started monitor thread '_TimeoutMonitor'.
+[16/Aug/2012:22:23:08] ENGINE Serving on 0.0.0.0:8080
+[16/Aug/2012:22:23:08] ENGINE Bus STARTED
