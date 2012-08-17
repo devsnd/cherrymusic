@@ -123,7 +123,7 @@ class SQLiteCache(object):
             scannedfolders = 0
             foldercount = len(dirlist)
             print(str(foldercount)+' folders in root directory')
-            starttime = time()
+            intervaltime = time()
             actualstarttime = time()
             
         for entry in dirlist:
@@ -138,14 +138,14 @@ class SQLiteCache(object):
             
             if toplevel:
                 self.autosave(scannedfolders)
-                if time() > starttime + scanreportinterval:
+                if time() > intervaltime + scanreportinterval:
                     print('{} / {} scanned root folders ({}% - ETA {}s)'.format(
                             scannedfolders,
                             foldercount,
                             int(scannedfolders/foldercount*1000)/10,
                             self.eta(actualstarttime,(scannedfolders+1)/foldercount)))
                             
-                    starttime = time()
+                    intervaltime = time()
                 scannedfolders += 1
         if toplevel:
             print('Scan finished!')
@@ -153,7 +153,7 @@ class SQLiteCache(object):
     def eta(self,start,percent):
         if percent <= 0:
             return 'n/a'
-        remainings = (time()-start)/percent
+        remainings = (time()-start)/percent-(time()-start)
         sec = int(remainings)
         min = int(sec/60)
         sec = sec%60
