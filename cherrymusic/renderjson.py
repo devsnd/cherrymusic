@@ -1,6 +1,6 @@
 """
-bullshit: use the json module instead.
-json.dumps(['list','of','things'])
+This class encapsulates all values returned by the cherrymodel
+to be served as json to the client.
 """
 
 import json

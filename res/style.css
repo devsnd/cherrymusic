@@ -13,9 +13,9 @@ html,body{
 	
 	/*fixed centering*/
 	left: 50%;
-	margin-left: -160px; /* Hälfte des Wertes die das Element breit ist */
 	position: fixed;
 	width: 320px;
+	margin-left: -160px; /* minus half the width */
 
 	
 	background-color: #ffffff;

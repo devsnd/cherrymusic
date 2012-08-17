@@ -17,27 +17,6 @@ class HTTPHandler(object):
 
     def index(self, action='', value='', filter=''):
         return open('res/main.html').read()
-        '''
-        if action=='search':
-                if not value.strip():
-                    return """<span style="width:100%; text-align: center; float: left;">if you're looking for nothing, you'll be getting nothing.</span>"""
-                return self.html.render(self.model.search(value.strip()))
-        elif action == 'saveplaylist':
-            self.model.saveplaylist(value)
-        else:
-            dirtorender = value
-            dirtorenderabspath = os.path.join(self.config.config[self.config.BASEDIR],value)
-            if os.path.isdir(dirtorenderabspath):
-                if action=='listdir':
-                    return self.html.render(self.model.listdir(dirtorender))
-                elif action=='compactlistdir':
-                    return self.html.render(self.model.listdir(dirtorender,filter))
-                else:
-                    return self.html.wrapInsidePage(
-                                self.html.render(self.model.listdir(dirtorender)) )
-            else:
-                return 'Error rendering dir [action: "'+action+'", value: "'+value+'"]'
-        '''
     index.exposed = True
 
     def api(self, action='', value='', filter=''):
