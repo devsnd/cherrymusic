@@ -40,6 +40,21 @@ html,body{
     width: 80px;
 }
 
+.smalltab{
+	background-color: #F02E75;
+	display: inline;
+	padding: 3px 3px 0;
+	margin-right: 4px;
+	border-radius: 5px 5px 0 0;
+	font-size: 12px;
+}
+.smalltab a{
+	text-decoration: none;
+	color: #fff;
+}
+.floatright{
+	float: right;
+}
 div#playlist-manager{
 #	position: fixed;
 #	float: right;
@@ -139,6 +154,7 @@ ul li{
 	text-decoration: none;
 	font-weight: 100;
 	color: #000000;
+	overflow: hidden;
 }
 .listdir:hover{
 	background-color: #bbbbbb;

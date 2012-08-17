@@ -14,19 +14,18 @@ class JSON(object):
         retlist = []
         for entry in musicentries:
             if entry.compact:
-                retlist.append({'type':'compact', 'path':entry.path,'label':entry.repr})
-                #retlist.append(self.pack(self.rendercompact(entry.path,entry.repr)))
+                #compact
+                retlist.append({'type':'compact', 'urlpath':entry.path,'label':entry.repr})
             elif entry.dir:
+                #dir
                 simplename = util.filename(entry.path)
                 retlist.append({'type':'dir', 'path':entry.path,'label':simplename})
-                #retlist.append(self.pack(self.renderdir(entry.path)))
             else:
+                #file
                 simplename = util.filename(entry.path)
                 urlpath = quote('/'+self.config.config['hostalias']+'/'+entry.path);
                 retlist.append({'type':'file',
                                 'urlpath':urlpath,
                                 'path':entry.path,
                                 'label':simplename})
-                #retlist.append(self.pack(self.renderfile(entry.path)))
-        #return self.pack(self.jsonlist(retlist),'results')
         return json.dumps(retlist)

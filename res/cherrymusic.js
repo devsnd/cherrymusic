@@ -43,7 +43,7 @@ function renderList(l){
                 html += listify(renderDir(e.label,e.urlpath,e.path));
                 break;
             case 'compact':
-                html += listify(renderCompact(e.label,e.urlpath));
+                html += listify(renderCompact(e.label,e.urlpath,e.label));
                 break;
             default:
                 alert('Error parsing server response!');
@@ -63,9 +63,9 @@ function renderFile(label,urlpath,dirpath){
             fullpathlabel = '<span class="fullpathlabel">'+dirpath+'</span>'
             return '<a '+atitle+' '+ahref+' '+apath+' '+cssclass+'>'+fullpathlabel+label+'</a>'
 }
-function renderCompact(label,filterpath, filter){
+function renderCompact(label,filepath, filter){
     //compact
-    return '<a dir="'+filepath+'" filter="'+filter+'" href="javascript:;" class="compactlistdir">'+filter.upper()+'</a>'
+    return '<a dir="'+filepath+'" filter="'+filter+'" href="javascript:;" class="compactlistdir">'+filter.toUpperCase()+'</a>'
 }
 function listify(html, classes){
     if(!classes){classes='';}
@@ -192,7 +192,7 @@ function initJPlayer(){
 		playlistOptions: {
 			enableRemoveControls: true
 		},
-        swfPath: "js",
+        swfPath: "res/js",
 		solution: "flash,html",
 		preload: 'metadata',
                 supplied: "mp3",
@@ -210,7 +210,9 @@ addSong = function(path,title){
     });
     pulseTab('jplayer');
 }
-
+clearPlaylist = function(){
+    mediaPlaylist.remove();
+}
 
 /*$('.save-playlist').click(function(){
 		tracks = []
@@ -293,11 +295,35 @@ $(function () {
         $("html").scrollTop(0);
         hideAllTabs();
         showTab(this.hash);
+        if('#browser' == this.hash){
+            loadBrowserIfEmpty();
+        }
         $('div.tabs ul.tabNavigation a').removeClass('selected');
         $(this).addClass('selected');
         return false;
     });//.filter(':first').click();
 });
+
+function loadBrowserIfEmpty(){
+    if('' == $('#browser').html().trim()){
+        $('div#progressscreen').fadeIn('fast');
+        $.ajax({
+        url: "/api",
+        context: $(this),
+        data: { 'action' : 'listdir' },
+        success: function(data){
+            $('#browser').html(parseAndRender(data));
+            registerlistdirs($('#browser').find('ul'));
+            registercompactlistdirs($('#browser').find('ul'));
+            registermp3s($('#browser').find('ul'));
+            $('div#progressscreen').fadeOut('fast');
+        },
+        error: function(){
+            $('div#progressscreen').fadeOut('fast');
+        }
+        });
+    }
+}
 
 $(document).ready(function(){
     origcolor = $('div.tabs ul.tabNavigation .jplayer').css('background-color');

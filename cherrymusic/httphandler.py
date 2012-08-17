@@ -2,7 +2,7 @@
 It will then call the cherrymodel, to get the 
 requested information"""
 
-import os #should have to list any folder in the future!
+import os #shouldn't have to list any folder in the future!
 
 from cherrymusic import renderhtml
 from cherrymusic import renderjson
@@ -13,8 +13,11 @@ class HTTPHandler(object):
         self.config = config
         self.html = renderhtml.HTML(config)
         self.json = renderjson.JSON(config)
+        
 
     def index(self, action='', value='', filter=''):
+        return open('res/main.html').read()
+        '''
         if action=='search':
                 if not value.strip():
                     return """<span style="width:100%; text-align: center; float: left;">if you're looking for nothing, you'll be getting nothing.</span>"""
@@ -34,6 +37,7 @@ class HTTPHandler(object):
                                 self.html.render(self.model.listdir(dirtorender)) )
             else:
                 return 'Error rendering dir [action: "'+action+'", value: "'+value+'"]'
+        '''
     index.exposed = True
 
     def api(self, action='', value='', filter=''):
