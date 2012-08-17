@@ -3,6 +3,7 @@ will delegate different calls between other classes.
 """
 
 import os
+from random import choice
 
 from cherrymusic import util
 from cherrymusic import resultorder
@@ -79,6 +80,34 @@ class CherryModel:
     def saveplaylist(value):
         if not os.path.exists(dir):
             os.makedirs("playlists")
+            
+    def motd(self):
+        artist = [ 'Hendrix',
+                    'the Beatles',
+                    'James Brown',
+                    'Nina Simone',
+                    'Mozart',
+                    'Einstein',
+                    'Bach']
+        search = [  'Wadda ya wanna hea-a?',
+                    'I would like to dance to',
+                    'Someone told me to listen to',
+                    'There is nothing better than',
+                    'The GEMA didnt let me hear',
+                    'Give me',
+                    'If only {artist} had played with',
+                    'My feet cant stop when I hear',
+                    '{artist} actually stole everything from',
+                    '{artist} really liked to listen to',
+                    '{artist} played backwards is actually',
+                    'Each Beatle had sex with',
+                    'Turn the volume up to 11, it\'s',
+                    'If {artist} made Reggae it sounded like',
+                ]
+        oneliner = choice(search)
+        if '{artist}' in oneliner:
+            oneliner=oneliner.replace('{artist}',choice(artist))
+        return oneliner
         
 
 class MusicEntry:
