@@ -214,6 +214,85 @@ clearPlaylist = function(){
     mediaPlaylist.remove();
 }
 
+function showPlaylistSaveDialog(){
+    $('#dialog input').val('');
+    $('#dialog').fadeIn('fast');
+}
+
+function savePlaylistAndHideDialog(){
+    var name = $('#dialog input').val();
+    if(name.trim() != ''){
+        savePlaylist(name);
+        $('#dialog').fadeOut('fast')
+    }
+}
+
+function savePlaylist(playlistname){
+    $.ajax({
+        url: '/api',
+        type: 'POST',
+        data: { 'action':'saveplaylist',
+                'value':JSON.stringify(
+                    {'playlist':mediaPlaylist.playlist,
+                    'playlistname':playlistname}
+                    )
+        },
+        success:function(data){
+            alert(data);
+        },
+        error:function(){
+            alert('error');
+        }
+    });
+}
+function showPlaylists(){
+    $.ajax({
+        url: '/api',
+        type: 'POST',
+        data: { 'action':'showplaylists' },
+        success:function(data){
+            var pls = '<ul>';
+            $.each($.parseJSON(data),function(i,e){
+                pls += '<li>';
+                var onclick = "loadPlaylist('"+e+"')";
+                pls += '<a class="remoteplaylist" href="javascript:;" onclick="'+onclick+'">'
+                pls += e+'</a></li>';
+            });
+            pls += '</ul>';
+            $('.available-playlists').html(pls);
+            $('.hideplayliststab').slideDown('fast');
+            $('.showplayliststab').slideUp('fast');
+            $('.available-playlists').slideDown();
+            
+        },
+        error:function(){
+            alert('error');
+        }
+    });
+}
+function hidePlaylists(){
+    $('.showplayliststab').slideDown('fast');
+    $('.hideplayliststab').slideUp('fast');
+    $('.available-playlists').slideUp();
+}
+function loadPlaylist(playlistname){
+    $.ajax({
+        url: '/api',
+        type: 'POST',
+        data: { 'action':'loadplaylist',
+                'value': playlistname
+        },
+        success:function(data){
+            $.each($.parseJSON(data),function(i,e){
+                addSong(e.mp3,e.title);
+            });
+        },
+        error:function(){
+            alert('error');
+        }
+    });
+}
+
 /*$('.save-playlist').click(function(){
 		tracks = []
 		$.each(mediaPlaylist.playlist, function(i,v) {
@@ -346,6 +425,7 @@ $(document).ready(function(){
     fetchMessageOfTheDay();
     initJPlayer();
     $('#searchfield .button').click(submitsearch);
+    $('.hideplaylisttab').hide();
 
 
 

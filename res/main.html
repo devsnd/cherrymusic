@@ -6,6 +6,7 @@
 <link href="res/skin/blue.monday/jplayer.blue.monday.css" rel="stylesheet" type="text/css" />
 <link rel="stylesheet" type="text/css" href="res/style.css">
 <script type="text/javascript" src="res/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="res/json2.min.js"></script>
 <script type="text/javascript" src="res/js/jquery.jplayer.min.js"></script>
 <script type="text/javascript" src="res/js/jplayer.playlist.js"></script>
 <script type="text/javascript" src="res/cherrymusic.js"></script>
@@ -15,6 +16,14 @@
 <!-- PROGRESS SCREEN OVERLAY START -->
 <div id="progressscreen"></div>
 <!-- PROGRESS SCREEN OVERLAY END -->
+<!-- PLAYLIST SAVE DIALOG OVERLAY START -->
+<div id="dialog" style="display: none">
+    <p>Please enter a Name for this Playlist:</p>
+    <input type="text" />
+    <a href="javascript:;" onclick="savePlaylistAndHideDialog()">Save</a>
+    <a href="javascript:;" onclick="$('#dialog').fadeOut('fast')">Close</a>
+</div>
+<!-- PLAYLIST SAVE DIALOG OVERLAY END -->
 <!-- JPLAYER START -->
 <div id="mediawrapper">
 	<div id="mediaplayer">
@@ -85,10 +94,15 @@
             <a href="javascript:;" onclick="clearPlaylist()">Clear Playlist</a>
         </div>
         <div class="smalltab">
-            <a href="javascript:;" onclick="alert('not implemented :(')">Save Playlist</a>
+            <a href="javascript:;" onclick="showPlaylistSaveDialog()">Save Playlist</a>
         </div>
-        <div class="smalltab">
-            <a href="javascript:;" onclick="alert('not implemented :(')">Show more Playlists</a>
+        <div class="smalltab showplayliststab">
+            <a href="javascript:;" onclick="showPlaylists()">Show more Playlists</a>
+        </div>
+        <div class="smalltab hideplayliststab" style="display: none">
+            <a href="javascript:;" onclick="hidePlaylists()">Hide other playlists</a>
+        </div>
+        <div class="available-playlists" style="display: none">
         </div>
         <div class="jp-playlist">
                 <ul>
