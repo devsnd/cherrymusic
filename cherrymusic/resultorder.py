@@ -3,6 +3,7 @@ fetched from the database by some mystic-voodoo-
 hocuspocus heuristics"""
 
 from cherrymusic import util
+import os
 
 class ResultOrder:
     def __init__(self, searchword):
