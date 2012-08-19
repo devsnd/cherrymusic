@@ -31,3 +31,7 @@ cherrypy/
 cherry.cache.db
 config
 cherrymusic/site.log
+
+# Eclipse metafiles
+/.project
+/.pydevproject
