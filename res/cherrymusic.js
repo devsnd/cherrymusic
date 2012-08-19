@@ -293,53 +293,80 @@ function loadPlaylist(playlistname){
     });
 }
 
-/*$('.save-playlist').click(function(){
-		tracks = []
-		$.each(mediaPlaylist.playlist, function(i,v) {
-			tracks.push(mediaPlaylist.playlist[i].mp3);
-			//alert(mediaPlaylist.playlist[i].mp3);
-		});
-		tracksstring = tracks.join(';');
-		$.ajax({
-                                        //url: "index.php",
-                                        
-                                        context: $(this),
-                                        data: {
-                                                'action' : 'saveplaylist',
-                                                'value' : tracksstring
-                                                },
-                                        success: function(data){
-						alert('playlist was saved! '+data);
-                                        }
-                });
-
-	});
-
-
-$('.load-playlist').click(function(){
-	var playlistname = $(this).html();
-	alert(playlistname);
-	$.ajax({
-		url: "index.php",
-		context: $(this),
-		data: {
-			'action' : 'loadplaylist',
-			'value' : playlistname
-		},
-		success: function(data){
-			mediaPlaylist.playlist = []
-			mediaPlaylist.original = []
-			mediaPlaylist._refresh();
-			var newplaylist = data.split('\\n');
-			for(var i in newplaylist){
-				var filename = newplaylist[i].split('/');
-				filename = filename[filename.length-1];
-				addSong(newplaylist[i],filename);
-			}
-		}
-	});
-});
-*/
+function logout(){
+    $.ajax({
+        url: '/api',
+        type: 'POST',
+        data: { 'action':'logout',
+        },
+        success:function(data){
+            reload()
+        },
+        error:function(){
+            alert('error');
+        }
+    });
+}
+/***
+ADMIN PANEL
+***/
+function toggleAdminPanel(){
+    var panel = $('#adminpanel');
+    if(panel.is(":visible")){
+        panel.slideUp();
+    } else {
+        updateUserList();
+        panel.slideDown();
+    }
+}
+function updateUserList(){
+     $.ajax({
+        url: '/api',
+        type: 'POST',
+        data: { 'action':'getuserlist' },
+        success:function(data){
+            var htmllist = ""
+            $.each($.parseJSON(data),function(i,e){
+                if(e.admin){
+                    htmllist += '<li class="admin">'
+                } else {
+                    htmllist += '<li>'
+                }
+                htmllist += e.id+' - '+e.username+'</li>';
+            });
+            $('#adminuserlist').html(htmllist)
+        },
+        error:function(){
+            alert('error');
+        }
+    });
+}
+function addNewUser(){
+    var newusername = $('#newusername').val();
+    var newpassword = $('#newpassword').val();
+    var newisadmin = $('#chkSelect').attr('checked')?true:false;
+    if(newusername.trim() == '' || newpassword.trim() == ''){
+        return;
+    }
+     $.ajax({
+        url: '/api',
+        type: 'POST',
+        data: { 'action':'adduser',
+                'value' : JSON.stringify({
+                        'username':newusername,
+                        'password':newpassword,
+                        'isadmin':newisadmin
+                        })
+                
+        },
+        success:function(data){
+            updateUserList();
+        },
+        error:function(){
+            alert('error');
+        }
+    });
+}
 
 /***
 MESSAGE OF THE DAY
@@ -416,6 +443,14 @@ function pulseTab(tabname){
     elem.animate({backgroundColor: origcolor},100);
     elem.animate({backgroundColor: '#ffffff'},100);
     elem.animate({backgroundColor: origcolor},100);
+}
+
+/***
+HELPER
+***/
+
+function reload(){
+    window.location = "http://"+window.location.host;
 }
 
 /***

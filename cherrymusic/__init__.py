@@ -31,6 +31,7 @@ class CherryMusic:
             'environment': 'production',
             "server.socket_host": "0.0.0.0",
             'server.socket_port': 8080, #TODO make port avaiable in config
+            'tools.sessions.on' : True,
             })
         cherrypy.tree.mount(self.httphandler,'/',
             config={
@@ -46,12 +47,12 @@ class CherryMusic:
                     'tools.encode.on' : True,
                     'tools.encode.encoding' : 'utf-8',
                 },
-                '/': {
-                    'tools.basic_auth.on': True,
-                    'tools.basic_auth.realm': 'Cherry Music',
-                    'tools.basic_auth.users': self.config.config[self.config.USER],
-                    'tools.basic_auth.encrypt': self.encrypt_pw
-                }
+                #'/': {
+                #    'tools.basic_auth.on': True,
+                #    'tools.basic_auth.realm': 'Cherry Music',
+                #    'tools.basic_auth.users': self.config.config[self.config.USER],
+                #    'tools.basic_auth.encrypt': self.encrypt_pw
+                #}
 
         })
         print('Starting server on port 8080 ...') #TODO display actually used port
