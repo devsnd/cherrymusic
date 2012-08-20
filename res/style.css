@@ -97,7 +97,7 @@ div#dialog{
 #searchfield .oneliner{
 	font-size: 12px;
 }
-#searchfield .button{
+.bigbutton{
 	background-repeat: no-repeat;
 	background-position: 10px 0;
 	color: #ffffff;
@@ -110,9 +110,10 @@ div#dialog{
 	border-left: 4px solid #fd84b2;
 	background-color: #F02E75;
 	border-radius: 8px;
+	text-decoration: none;
 }
 
-#searchfield .button:hover{
+.bigbutton:hover{
 	background-color: #b10a49;
 	border-right: 4px solid #fd84b2;
 	border-bottom: 4px solid #fd84b2;
@@ -120,7 +121,31 @@ div#dialog{
 	border-left: 4px solid #b10a49;
 	cursor: pointer;
 	color: #dddddd;
+}
+.button{
+	background-repeat: no-repeat;
+	background-position: 10px 0;
+	color: #ffffff;
+	display: inline;
+    padding: 2px;
+	font-size: 12px;
+	border-right: 2px solid #b10a49;
+	border-bottom: 2px solid #b10a49;
+	border-top: 2px solid #fd84b2;
+	border-left: 2px solid #fd84b2;
+	background-color: #F02E75;
+	border-radius: 4px;
+	text-decoration: none;
+}
 
+.button:hover{
+	background-color: #b10a49;
+	border-right: 2px solid #fd84b2;
+	border-bottom: 2px solid #fd84b2;
+	border-top: 2px solid #b10a49;
+	border-left: 2px solid #b10a49;
+	cursor: pointer;
+	color: #dddddd;
 }
 #searchform{
 	
@@ -240,4 +265,16 @@ li.fileinlist a{
 div.container{
 	width: 100%;
 	float: left;
+}
+/**********
+ADMIN PANEL
+**********/
+#adminpanel{
+	font-family: monospace;
+}
+#adminpanel ul li{
+	background-color: #33ff33;
+}
+#adminpanel ul li.admin{
+	background-color: #eeff33;
 }

@@ -4,6 +4,7 @@ will delegate different calls between other classes.
 
 import os
 from random import choice
+import cherrypy
 
 import pickle #only used for playlists. delete when better soluiton available!
 
@@ -68,6 +69,9 @@ class CherryModel:
         return musicentries
 
     def search(self, term):
+        user = cherrypy.session.get('username', None)
+        if user:
+            print(user+' searched for "'+term+'"')
         results = self.cache.searchfor(term,maxresults=self.config.config[self.config.MAXSEARCHRESULTS])
         results = sorted(results,key=resultorder.ResultOrder(term),reverse=True)
         results = results[:min(len(results),self.config.config[self.config.MAXSEARCHRESULTS])]

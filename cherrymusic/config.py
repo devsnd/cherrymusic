@@ -13,6 +13,7 @@ class Config(object):
         self.CACHEFILE = 'cachefile'
         self.MAXSEARCHRESULTS = 'maxsearchresults'
         self.USER = 'user'
+        self.SALT = 'salt'
         params = [
                 self.BASEDIR,
                 self.DOWNLOADABLE,
@@ -22,7 +23,8 @@ class Config(object):
                 self.CACHEFILE,
                 self.MAXSEARCHRESULTS,
                 self.HOSTALIAS,
-                self.USER
+                self.USER,
+                self.SALT                
                 ]
         confpath = 'config'
         conflines = open(confpath).readlines()
