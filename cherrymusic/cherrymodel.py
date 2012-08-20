@@ -71,10 +71,18 @@ class CherryModel:
         results = results[:min(len(results),self.config.config[self.config.MAXSEARCHRESULTS])]
         ret = []
         for file in results:
-            if os.path.isfile(os.path.join(self.config.config[self.config.BASEDIR],file)):
-                ret.append(MusicEntry(self.strippath(file)))
+            strippedpath = self.strippath(file)
+            #let only playable files appear in the search results
+            playable = strippedpath.lower().endswith(self.config.config[self.config.PLAYABLE])
+            isfile= os.path.isfile(os.path.join(self.config.config[self.config.BASEDIR],file))
+            if isfile and not playable:
+                continue
+                
+            if isfile:
+                ret.append(MusicEntry(strippedpath))
             else:
-                ret.append(MusicEntry(self.strippath(file),dir=True))
+                ret.append(MusicEntry(strippedpath,dir=True))
+
         return ret
    
     def saveplaylist(value):
