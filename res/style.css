@@ -76,7 +76,15 @@ div#progressscreen{
 	background-position: 48% 48%;
 	opacity: 0.5;
 }
-
+div#dialog{
+	background-color: #DDFFDD;
+    left: 50%;
+    margin-left: -150px;
+    padding: 20px;
+    position: fixed;
+    top: 40%;
+    width: 300px;
+}
 .tabs > div{
 	padding-top: 50px;
 }
@@ -205,6 +213,23 @@ li.fileinlist a{
 .addAllToPlaylist:hover{
 	background-color: #aaaaaa;
 }
+
+.available-playlists ul, .available-playlists ul li{
+	margin: 0;
+	padding: 0;
+}
+.remoteplaylist{
+	background-color: #555555;
+	color: #ffffff;
+	display: block;
+	margin: 0 0 2px;
+    padding: 0 10px;
+	text-decoration: none;
+}
+.remoteplaylist:hover{
+	background-color: #aaaaaa;
+}
+
 
 .splitline{
 	width: 100%;

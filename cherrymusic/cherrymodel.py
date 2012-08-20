@@ -5,6 +5,8 @@ will delegate different calls between other classes.
 import os
 from random import choice
 
+import pickle #only used for playlists. delete when better soluiton available!
+
 from cherrymusic import util
 from cherrymusic import resultorder
 
@@ -76,11 +78,7 @@ class CherryModel:
             else:
                 ret.append(MusicEntry(self.strippath(file),dir=True))
         return ret
-   
-    def saveplaylist(value):
-        if not os.path.exists(dir):
-            os.makedirs("playlists")
-            
+              
     def motd(self):
         artist = [ 'Hendrix',
                     'the Beatles',
@@ -108,6 +106,21 @@ class CherryModel:
         if '{artist}' in oneliner:
             oneliner=oneliner.replace('{artist}',choice(artist))
         return oneliner
+        
+    def savePlaylist(self, playlist, playlistname):
+        if not os.path.exists('playlists'):
+            os.makedirs("playlists")
+        playlistname+='.pls'
+        with open('playlists/'+playlistname,'wb') as f:
+            pickle.dump(playlist,f)
+        return 'success'
+    
+    def loadPlaylist(self, playlistname):
+        with open('playlists/'+playlistname,'rb') as f:
+            return pickle.load(f)
+        
+    def showPlaylists(self):
+        return os.listdir('playlists')
         
 
 class MusicEntry:
