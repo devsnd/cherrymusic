@@ -122,6 +122,7 @@ class CherryModel:
     def savePlaylist(self, playlist, playlistname):
         if not os.path.exists('playlists'):
             os.makedirs("playlists")
+        print(playlist)
         playlistname+='.pls'
         with open('playlists/'+playlistname,'wb') as f:
             pickle.dump(playlist,f)
@@ -129,7 +130,9 @@ class CherryModel:
     
     def loadPlaylist(self, playlistname):
         with open('playlists/'+playlistname,'rb') as f:
-            return pickle.load(f)
+            playlist = pickle.load(f)
+            print(playlist)
+            return playlist
         
     def showPlaylists(self):
         return os.listdir('playlists')

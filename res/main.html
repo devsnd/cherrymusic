@@ -19,7 +19,8 @@
 <!-- PLAYLIST SAVE DIALOG OVERLAY START -->
 <div id="dialog" style="display: none">
     <p>Please enter a Name for this Playlist:</p>
-    <input type="text" />
+    <input type="text" id="playlisttitle" />
+    public:<input type="checkbox" checked="checked" id="playlistpublic" />
     <a href="javascript:;" onclick="savePlaylistAndHideDialog()">Save</a>
     <a href="javascript:;" onclick="$('#dialog').fadeOut('fast')">Close</a>
 </div>

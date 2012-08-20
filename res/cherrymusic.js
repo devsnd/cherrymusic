@@ -220,20 +220,23 @@ function showPlaylistSaveDialog(){
 }
 
 function savePlaylistAndHideDialog(){
-    var name = $('#dialog input').val();
+    var name = $('#playlisttitle').val();
+    var pub = $('#playlistpublic').attr('checked')?true:false;
     if(name.trim() != ''){
-        savePlaylist(name);
+        savePlaylist(name,pub);
         $('#dialog').fadeOut('fast')
     }
 }
 
-function savePlaylist(playlistname){
+function savePlaylist(playlistname,ispublic){
     $.ajax({
         url: '/api',
         type: 'POST',
         data: { 'action':'saveplaylist',
                 'value':JSON.stringify(
-                    {'playlist':mediaPlaylist.playlist,
+                    {
+                    'playlist':mediaPlaylist.playlist,
+                    'public':ispublic,
                     'playlistname':playlistname}
                     )
         },
@@ -254,9 +257,9 @@ function showPlaylists(){
             var pls = '<ul>';
             $.each($.parseJSON(data),function(i,e){
                 pls += '<li>';
-                var onclick = "loadPlaylist('"+e+"')";
+                var onclick = "loadPlaylist('"+e[0]+"')";
                 pls += '<a class="remoteplaylist" href="javascript:;" onclick="'+onclick+'">'
-                pls += e+'</a></li>';
+                pls += e[1]+'</a></li>';
             });
             pls += '</ul>';
             $('.available-playlists').html(pls);

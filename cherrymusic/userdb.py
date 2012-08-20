@@ -34,14 +34,14 @@ class UserDB:
         
     def auth(self, username, password):
         if not (username.strip() or password.strip()):
-            return (None, None)
+            return nobody()
         cur = self.conn.cursor()
         cur.execute('''
-        SELECT username, admin FROM users
+        SELECT rowid, username, admin FROM users
         WHERE username = ? and password = ?''',
         (username,self.digest(password)))
         res = cur.fetchone()
-        return res if res else (None,None)
+        return res if res else nobody()
         
     def getUserList(self):
         cur = self.conn.cursor()
@@ -58,4 +58,5 @@ class UserDB:
         saltedpassword_bytes = self.saltedpassword(password).encode('UTF-8')
         return hashlib.sha512(saltedpassword_bytes).hexdigest()
     
-    
+    def nobody():
+        return (-1,None,None)

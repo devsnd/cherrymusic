@@ -8,6 +8,7 @@ import cherrypy
 
 from cherrymusic import renderjson
 from cherrymusic import userdb
+from cherrymusic import playlistdb
 
 debug = True
 
@@ -20,6 +21,7 @@ class HTTPHandler(object):
         self.mainpage = open('res/main.html').read()
         self.loginpage = open('res/login.html').read()
         self.userdb = userdb.UserDB(config)
+        self.playlistdb = playlistdb.PlaylistDB(config)
 
     def index(self, action='', value='', filter='', login=None, username=None, password=None):
         if debug:
@@ -27,8 +29,9 @@ class HTTPHandler(object):
             self.mainpage = open('res/main.html').read()
             self.loginpage = open('res/login.html').read()
         if login == 'login':
-            authuser, isadmin = self.userdb.auth(username,password)
+            userid, authuser, isadmin = self.userdb.auth(username,password)
             cherrypy.session['username'] = authuser
+            cherrypy.session['userid'] = userid
             cherrypy.session['admin'] = isadmin
             if authuser:
                 print('user '+authuser+' just logged in.')
@@ -51,11 +54,18 @@ class HTTPHandler(object):
             return self.model.motd()
         elif action == 'saveplaylist':
             pl = json.loads(value)
-            return self.model.savePlaylist(pl['playlist'],pl['playlistname']);
+            return self.playlistdb.savePlaylist(
+                userid = cherrypy.session['userid'],
+                public = 1 if pl['public'] else 0,
+                playlist = pl['playlist'],
+                playlisttitle = pl['playlistname']);
         elif action == 'loadplaylist':
-            return json.dumps(self.model.loadPlaylist(playlistname=value));
+            return  json.dumps(self.playlistdb.loadPlaylist(
+                                playlistid=value,
+                                userid=cherrypy.session['userid']
+                    ));
         elif action == 'showplaylists':
-            return json.dumps(self.model.showPlaylists());
+            return json.dumps(self.playlistdb.showPlaylists(cherrypy.session['userid']));
         elif action == 'logout':
             cherrypy.lib.sessions.expire()
         elif action == 'getuserlist':
