@@ -10,6 +10,7 @@ class Config(object):
         self.HOSTALIAS = 'hostalias'
         self.MAXSHOWFOLDERS = 'maxshowfolders'
         self.CACHEENABLED = 'cacheenabled'
+        self.CACHEFILE = 'cachefile'
         self.MAXSEARCHRESULTS = 'maxsearchresults'
         self.USER = 'user'
         self.SALT = 'salt'
@@ -19,6 +20,7 @@ class Config(object):
                 self.PLAYABLE,
                 self.MAXSHOWFOLDERS,
                 self.CACHEENABLED,
+                self.CACHEFILE,
                 self.MAXSEARCHRESULTS,
                 self.HOSTALIAS,
                 self.USER,
@@ -39,6 +41,9 @@ class Config(object):
         self.config[self.MAXSHOWFOLDERS] = int(self.config[self.MAXSHOWFOLDERS])
         self.config[self.MAXSEARCHRESULTS] = int(self.config[self.MAXSEARCHRESULTS])
         self.config[self.CACHEENABLED] = bool(self.config[self.CACHEENABLED])
+        
+    def __getitem__(self, key):
+        return self.config[key]
 
     def parseconfigparam(self,line,param):
         #make sure each config param is not None
