@@ -76,7 +76,9 @@ class SQLiteCache(object):
                     print('removing file with id: ' + str(removeItem) + ' ...')
                     self.removeFromDB(removeItem)
 
-                self.register_with_db(addList)
+                self.register_with_db(addList, basedir=self.rootDir)
+        else:
+            print('no changes found.')
 
     def removeFromDB(self, filerowid):
         print("""removeFromDB: NOT IMPLEMENTED! should remove file """ + str(filerowid))
@@ -167,7 +169,7 @@ class SQLiteCache(object):
         return os.path.dirname(path)
 
     @timed
-    def register_with_db(self, paths):
+    def register_with_db(self, paths, basedir):
         """adds the given paths and their contents to the media database"""
         logging.basicConfig(level=logging.DEBUG)
         logging.info("updating known media")
@@ -176,10 +178,11 @@ class SQLiteCache(object):
         try:
             self.conn.isolation_level = "IMMEDIATE"  # instant writing lock, turn off autocommit
             with self.conn:                          # implicit commit, rollback on Exception
-                for item in File.enumerate_files_in(paths, sort=True):
+                for item in File.enumerate_files_in(paths, basedir=basedir, sort=True):
                     self.register_file_with_db(item)
                     counter += 1
                     if counter % AUTOSAVEINTERVAL == 0:
+                        print('.', end='')
                         self.conn.commit()
                     if item.fullpath in paths:
                         progress.tick()
@@ -188,6 +191,7 @@ class SQLiteCache(object):
             logging.exception('')
             logging.error("error while updating media: %s %s", e.__class__.__name__, e)
             logging.error("rollback to previous commit.")
+            counter -= counter % AUTOSAVEINTERVAL
         else:
             progress.finish()
             logging.info("media update complete.")
@@ -213,7 +217,7 @@ class SQLiteCache(object):
 
     def add_to_dictionary_table(self, filename):
         word_ids = []
-        for word in SQLiteCache.searchterms(filename):
+        for word in set(SQLiteCache.searchterms(filename)):
             wordrowid = self.conn.execute('''SELECT rowid FROM dictionary WHERE word = ? LIMIT 0,1''', (word,)).fetchone()
             if wordrowid is None:
                 wordrowid = self.conn.execute('''INSERT INTO dictionary VALUES (?)''', (word,)).lastrowid
@@ -233,23 +237,43 @@ def perf(text=None):
             print(text + ' took ' + str(time() - __perftime) + 's to execute')
 
 class File():
-    def __init__(self, fullpath, parent=None):
+    def __init__(self, fullpath, parent=None, isdir=None):
         self.uid = -1
         self.name, self.ext = os.path.splitext(os.path.basename(fullpath))
         self.fullpath = fullpath
         self.parent = parent
-        self.isdir = os.path.isdir(fullpath)
+        self.isdir = os.path.isdir(os.path.abspath(self.fullpath)) if isdir is None else isdir
+        if self.isdir:
+            self.name += self.ext
+            self.ext = ''
+
+    def __str__(self):
+        return self.fullpath
+
+    def __repr__(self):
+        return ('%(fp)s%(isdir)s [%(n)s%(x)s] (%(id)s)%(pid)s' %
+             {'fp': self.fullpath,
+              'isdir': '/' if self.isdir else '',
+              'n': self.name,
+              'x': self.ext,
+              'id': self.uid,
+              'pid': ' -> ' + str(self.parent.uid) if self.parent and self.parent.uid > -1 else ''
+              })
+
 
     @classmethod
-    def enumerate_files_in(cls, paths, sort=False):
+    def enumerate_files_in(cls, paths, basedir=None, sort=False):
         """Takes a list of pathnames and turns them and their contents into
             File objects, iterating in a depth-first manner. If sort == True,
             items will turn up in the same order as they would when using the
             sorted(iterable) builtin."""
         from collections import deque
+        if basedir is None:
+            basedir = ''
         if sort:
             paths = sorted(paths, reverse=True)  # reverse: append & pop happen at the end
-        stack = deque((File(d) for d in paths))
+        to_file = lambda name: File(os.path.join(basedir, name))
+        stack = deque((to_file(d) for d in paths))
         while(len(stack) > 0):
             item = stack.pop()
             if item.isdir:
@@ -259,4 +283,5 @@ class File():
                 for name in children:
                     fullpath = os.path.join(item.fullpath, name)
                     stack.append(File(fullpath, parent=item))
+#            print(repr(item))
             yield item
