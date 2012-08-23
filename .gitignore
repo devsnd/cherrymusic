@@ -35,3 +35,4 @@ cherrymusic/site.log
 # Eclipse metafiles
 /.project
 /.pydevproject
+/.settings
