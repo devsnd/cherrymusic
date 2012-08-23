@@ -45,6 +45,9 @@ class Config(object):
     def __getitem__(self, key):
         return self.config[key]
 
+    def __setitem__(self, key, value):
+        self.config[key] = value
+
     def parseconfigparam(self,line,param):
         #make sure each config param is not None
         if not param in self.config:
