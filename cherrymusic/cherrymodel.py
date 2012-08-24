@@ -92,13 +92,21 @@ class CherryModel:
         return ret
               
     def motd(self):
-        artist = [ 'Hendrix',
+        artist = [  'Hendrix',
                     'the Beatles',
                     'James Brown',
                     'Nina Simone',
                     'Mozart',
                     'Einstein',
-                    'Bach']
+                    'Bach',
+                    'John Coltraine',
+                    'Deep Purple',
+                    'Frank Sinatra',
+                    'Django Reinhardt',
+                    'Radiohead',
+                    'The chemical brothers',
+                    'Vivaldi',
+                    'Björk']
         search = [  'Wadda ya wanna hea-a?',
                     'I would like to dance to',
                     'Someone told me to listen to',
@@ -113,10 +121,24 @@ class CherryModel:
                     'Each Beatle had sex with',
                     'Turn the volume up to 11, it\'s',
                     'If {artist} made Reggae it sounded like',
+                    '{artist} backwards is "{revartist}"',
+                    '2 songs of {artist} are only composed of haikus.',
+                    '{artist} used to sing with',
+                    '{artist} had a dog the size of',
+                    '{artist} was once sued by',
+                    '{artist} named his dog after',
+                    '{artist} claimed to be funkier than',
+                    '{artist} could never stand the music of',
+                    '{artist} could not stop listening to',
+                    '{artist} was once interviewed by',
+                    '{artist} actually has 2 noses.',
                 ]
         oneliner = choice(search)
         if '{artist}' in oneliner:
-            oneliner=oneliner.replace('{artist}',choice(artist))
+            a = choice(artist)
+            oneliner=oneliner.replace('{artist}',a)
+            if '{revartist}' in oneliner:
+                oneliner=oneliner.replace('{revartist}',a.lower()[::-1])
         return oneliner
         
     def savePlaylist(self, playlist, playlistname):
