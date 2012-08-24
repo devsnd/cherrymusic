@@ -5,9 +5,10 @@ import logging
 from operator import itemgetter
 import re
 
+import cherrymusic as cherry
 from cherrymusic.util import timed, Progress
 
-DEFAULT_CACHEFILE = ':memory:' #set to ':memory:' to keep _everything_ in ram
+DEFAULT_CACHEFILE = 'cherry.cache.db' #set to ':memory:' to keep _everything_ in ram
 scanreportinterval = 1
 AUTOSAVEINTERVAL = 100
 debug = False
@@ -15,8 +16,8 @@ performanceTest = False
 keepInRam = False
 
 class SQLiteCache(object):
-    def __init__(self, conf):
-        DBFILENAME = conf[conf.CACHEFILE]
+    def __init__(self):
+        DBFILENAME = cherry.config.search.cachefile.str
         if not DBFILENAME:
             DBFILENAME = DEFAULT_CACHEFILE
         setupDB = not os.path.isfile(DBFILENAME) or os.path.getsize(DBFILENAME) == 0
@@ -25,7 +26,7 @@ class SQLiteCache(object):
 
         self.conn = sqlite3.connect(DBFILENAME, check_same_thread=False)
         self.db = self.conn.cursor()
-        self.rootDir = conf.config[conf.BASEDIR]
+        self.rootDir = cherry.config.media.basedir.str
 
         if setupDB:
             print('Creating tables...')

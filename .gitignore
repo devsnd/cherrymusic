@@ -37,3 +37,4 @@ cherrymusic/site.log
 /.project
 /.pydevproject
 /playlist.db
+/config.db

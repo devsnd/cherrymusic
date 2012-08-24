@@ -8,20 +8,20 @@ import cherrypy
 
 import pickle #only used for playlists. delete when better soluiton available!
 
+import cherrymusic as cherry
 from cherrymusic import util
 from cherrymusic import resultorder
 
 class CherryModel:
-    def __init__(self,config, cache):
-        self.config = config
+    def __init__(self, cache):
         self.cache = cache
 
     def abspath(self,path):
-        return os.path.join(self.config.config[self.config.BASEDIR],path)
+        return os.path.join(cherry.config.media.basedir.str, path)
 
     def strippath(self,path):
-        if path.startswith(self.config.config[self.config.BASEDIR]):
-            return path[len(self.config.config[self.config.BASEDIR])+1:]
+        if path.startswith(cherry.config.media.basedir.str):
+            return path[len(cherry.config.media.basedir.str) + 1:]
         return path
 
     def sortFiles(self,files,fullpath=''):
@@ -43,7 +43,7 @@ class CherryModel:
             filterstr = filterstr.upper()
             allfilesindir = list(filter(lambda x : x.upper().startswith(filterstr), allfilesindir))
 
-        compactlisting = len(allfilesindir) > self.config.config[self.config.MAXSHOWFOLDERS]
+        compactlisting = len(allfilesindir) > cherry.config.browser.maxshowfolders.int
         sortedfiles = self.sortFiles(allfilesindir, absdirpath)
 
         filterlength = len(filterstr)+1
@@ -72,15 +72,15 @@ class CherryModel:
         user = cherrypy.session.get('username', None)
         if user:
             print(user+' searched for "'+term+'"')
-        results = self.cache.searchfor(term,maxresults=self.config.config[self.config.MAXSEARCHRESULTS])
+        results = self.cache.searchfor(term, maxresults=cherry.config.search.maxresults.int)
         results = sorted(results,key=resultorder.ResultOrder(term),reverse=True)
-        results = results[:min(len(results),self.config.config[self.config.MAXSEARCHRESULTS])]
+        results = results[:min(len(results), cherry.config.search.maxresults.int)]
         ret = []
         for file in results:
             strippedpath = self.strippath(file)
             #let only playable files appear in the search results
-            playable = strippedpath.lower().endswith(self.config.config[self.config.PLAYABLE])
-            isfile= os.path.isfile(os.path.join(self.config.config[self.config.BASEDIR],file))
+            playable = strippedpath.lower() in cherry.config.media.playable.list
+            isfile = os.path.isfile(os.path.join(cherry.config.media.basedir.str, file))
             if isfile and not playable:
                 continue
                 
