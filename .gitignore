@@ -36,3 +36,4 @@ cherrymusic/site.log
 # Eclipse metafiles
 /.project
 /.pydevproject
+/playlist.db
