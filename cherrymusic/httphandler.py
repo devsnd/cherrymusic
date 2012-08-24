@@ -9,6 +9,7 @@ import cherrypy
 from cherrymusic import renderjson
 from cherrymusic import userdb
 from cherrymusic import playlistdb
+import cherrymusic as cherry
 
 debug = True
 
@@ -103,7 +104,7 @@ class HTTPHandler(object):
                 return "You didn't think that would work, did you?"
         else:
             dirtorender = value
-            dirtorenderabspath = os.path.join(self.config.config[self.config.BASEDIR],value)
+            dirtorenderabspath = os.path.join(cherry.config.media.basedir.str,value)
             if os.path.isdir(dirtorenderabspath):
                 if action=='compactlistdir':
                     return renderer.render(self.model.listdir(dirtorender,filter))
