@@ -51,6 +51,11 @@ class UserDB:
         for id,user,admin in cur.fetchall():
             ret.append({'id':id,'username':user,'admin':admin})
         return ret
+        
+    def getUserCount(self):
+        cur = self.conn.cursor()
+        cur.execute('''SELECT COUNT(*) FROM users''')
+        return cur.fetchall()[0][0]
     
     def saltedpassword(self, password):
         return (password[1::2]+self.salt+password[::2])[::-1]

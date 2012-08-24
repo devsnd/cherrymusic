@@ -20,7 +20,7 @@ class CherryMusic:
         self._init_config()
         self.db = sqlitecache.SQLiteCache()
         self.cherrymodel = cherrymodel.CherryModel(self.db)
-        self.httphandler = httphandler.HTTPHandler(self.cherrymodel)
+        self.httphandler = httphandler.HTTPHandler(config,self.cherrymodel)
         self.server()
 
 
