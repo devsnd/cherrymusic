@@ -26,9 +26,9 @@ function submitsearch(){
     return false;
 }
 
-/***
+/********
 RENDERING
-***/
+********/
 function parseAndRender(data){
     return renderList(jQuery.parseJSON(data));
 }
@@ -212,6 +212,7 @@ addSong = function(path,title){
 }
 clearPlaylist = function(){
     mediaPlaylist.remove();
+    rememberPlaylist();
 }
 
 function showPlaylistSaveDialog(){
@@ -241,7 +242,7 @@ function savePlaylist(playlistname,ispublic){
                     )
         },
         success:function(data){
-            alert(data);
+            
         },
         error:function(){
             alert('error');
@@ -295,6 +296,45 @@ function loadPlaylist(playlistname){
         }
     });
 }
+
+function rememberPlaylistPeriodically(lastlen){
+    if (mediaPlaylist.playlist.length != lastlen){
+        /* save playlist in session */
+         $.ajax({
+            url: '/api',
+            type: 'POST',
+            data: { 'action':'rememberplaylist',
+                    'value':JSON.stringify({'playlist':mediaPlaylist.playlist})
+            },
+            success:function(data){
+                
+            },
+            error:function(){
+                alert('error rememebering playlist.');
+            }
+        });
+    }
+    // check every second if the playlist changed 
+    window.setTimeout("rememberPlaylistPeriodically("+mediaPlaylist.playlist.length+")",1000);
+}
+
+function restorePlaylist(){
+    /*restore playlist from session*/
+    $.ajax({
+        url: '/api',
+        type: 'POST',
+        data: { 'action':'restoreplaylist'},
+        success:function(data){
+            $.each($.parseJSON(data),function(i,e){
+                addSong(e.mp3,e.title);
+            });
+        },
+        error:function(){
+            alert('error');
+        }
+    });
+}
+
 
 function logout(){
     $.ajax({
@@ -464,7 +504,6 @@ $(document).ready(function(){
     initJPlayer();
     $('#searchfield .button').click(submitsearch);
     $('.hideplaylisttab').hide();
-
-
-
+    restorePlaylist();
+    rememberPlaylistPeriodically(0);
 });

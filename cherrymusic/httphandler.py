@@ -52,6 +52,11 @@ class HTTPHandler(object):
             return renderer.render(self.model.search(value.strip()))
         elif action == 'getmotd':
             return self.model.motd()
+        elif action == 'rememberplaylist':
+            pl = json.loads(value)
+            cherrypy.session['playlist'] = pl['playlist']
+        elif action == 'restoreplaylist':
+            return json.dumps(cherrypy.session.get('playlist',[]))
         elif action == 'saveplaylist':
             pl = json.loads(value)
             return self.playlistdb.savePlaylist(

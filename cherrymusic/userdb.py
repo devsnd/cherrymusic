@@ -34,14 +34,14 @@ class UserDB:
         
     def auth(self, username, password):
         if not (username.strip() or password.strip()):
-            return nobody()
+            return UserDB.nobody()
         cur = self.conn.cursor()
         cur.execute('''
         SELECT rowid, username, admin FROM users
         WHERE username = ? and password = ?''',
         (username,self.digest(password)))
         res = cur.fetchone()
-        return res if res else nobody()
+        return res if res else UserDB.nobody()
         
     def getUserList(self):
         cur = self.conn.cursor()
