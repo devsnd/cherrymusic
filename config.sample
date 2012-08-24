@@ -1,11 +1,21 @@
-BASEDIR=/absolute/path/to/music/
+[media]
+BASEDIR=/home/harpo/Music
 DOWNLOADABLE=zip bz2 gz tar
 PLAYABLE=mp3 ogg wma flac
 VIEWABLE=jpg gif png
-MAXSHOWFOLDERS=100
-CACHEENABLED=True
-MAXSEARCHRESULTS=20
-HOSTALIAS=host
-USER=user:password
-USER=user2:password2
 
+[search]
+ENABLED=True
+CACHEFILE=cherry.cache.db
+MAXRESULTS=20
+
+[browser]
+MAXSHOWFOLDERS=100
+
+[server]
+HOSTALIAS=host
+port=8080
+logfile = site.log
+
+[crypto]
+salt=

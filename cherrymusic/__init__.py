@@ -6,20 +6,33 @@
 import os
 import cherrypy
 
-from cherrymusic import config
+from cherrymusic import configuration
+from cherrymusic import configdb
 from cherrymusic import sqlitecache
 from cherrymusic import cherrymodel
 from cherrymusic import httphandler
 
+config = None
+
 class CherryMusic:
+
     def __init__(self):
-        self.config = config.Config()
-        self.db = sqlitecache.SQLiteCache(self.config)
-        self.cherrymodel = cherrymodel.CherryModel(self.config,self.db)
-        self.httphandler = httphandler.HTTPHandler(self.config,self.cherrymodel)
+        self._init_config()
+        self.db = sqlitecache.SQLiteCache()
+        self.cherrymodel = cherrymodel.CherryModel(self.db)
+        self.httphandler = httphandler.HTTPHandler(self.cherrymodel)
         self.server()
 
-    def encrypt_pw(self,pw):
+
+    def _init_config(self):
+        global config
+        cdb = configdb.ConfigDB()
+        filecfg = configuration.from_configparser('./config')
+        cdb.update(filecfg)
+        config = cdb.load()
+
+
+    def encrypt_pw(self, pw):
         #return hashlib.sha1(pw).hexdigest()
         return pw
 
@@ -27,22 +40,22 @@ class CherryMusic:
         currentserverpath = os.path.abspath(os.path.dirname(__file__))
 
         cherrypy.config.update({
-            'log.error_file': os.path.join(os.path.dirname(__file__), 'site.log'),
+            'log.error_file': os.path.join(os.path.dirname(__file__), config.server.logfile.str),
             'environment': 'production',
             "server.socket_host": "0.0.0.0",
-            'server.socket_port': 8080, #TODO make port avaiable in config
+            'server.socket_port': config.server.port.int,
             'tools.sessions.on' : True,
             })
-        cherrypy.tree.mount(self.httphandler,'/',
+        cherrypy.tree.mount(self.httphandler, '/',
             config={
                 '/res': {
                     'tools.staticdir.on': True,
-                    'tools.staticdir.dir': os.path.join(currentserverpath,'../res'),
+                    'tools.staticdir.dir': os.path.join(currentserverpath, '../res'),
                     'tools.staticdir.index': 'index.html',
                 },
-                '/'+self.config.config[self.config.HOSTALIAS]:{
+                '/' + config.server.hostalias.str:{
                     'tools.staticdir.on': True,
-                    'tools.staticdir.dir': self.config.config[self.config.BASEDIR],
+                    'tools.staticdir.dir': config.media.basedir.str,
                     'tools.staticdir.index': 'index.html',
                     'tools.encode.on' : True,
                     'tools.encode.encoding' : 'utf-8',
@@ -55,13 +68,13 @@ class CherryMusic:
                 #}
 
         })
-        print('Starting server on port 8080 ...') #TODO display actually used port
+        print('Starting server on port %s ...' % config.server.port)
         cherrypy.engine.start()
 
 
-    def serverless():
+    def serverless(self):
         cherrypy.server.unsubscribe()
-        start(config)
+        self.start()
 
     def server(self):
         cherrypy.config.update({'log.screen': True})
