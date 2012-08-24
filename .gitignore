@@ -28,10 +28,15 @@ pip-log.txt
 
 # Local deployment
 cherrypy/
-cherry.cache.db
-config
 cherrymusic/site.log
+/cherry.cache.db
+/config.db
+/playlist.db
+/user.db
+/config
 
 # Eclipse metafiles
 /.project
 /.pydevproject
+/.settings
+/.checkstyle

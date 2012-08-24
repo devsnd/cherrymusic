@@ -2,14 +2,15 @@ import hashlib
 import sqlite3
 import os
 
+import cherrymusic as cherry
+
 USERDBFILE = 'user.db'
 
 class UserDB:
-    def __init__(self, config):
+    def __init__(self):
         setupDB = not os.path.isfile(USERDBFILE) or os.path.getsize(USERDBFILE) == 0
         self.conn = sqlite3.connect(USERDBFILE, check_same_thread = False)
-        self.config = config
-        self.salt = config.config['salt']
+        self.salt = cherry.config.crypto.salt.str
         
         if setupDB:
             print('Creating user db table...')
@@ -34,14 +35,14 @@ class UserDB:
         
     def auth(self, username, password):
         if not (username.strip() or password.strip()):
-            return UserDB.nobody()
+            return self.nobody()
         cur = self.conn.cursor()
         cur.execute('''
         SELECT rowid, username, admin FROM users
         WHERE username = ? and password = ?''',
         (username,self.digest(password)))
         res = cur.fetchone()
-        return res if res else UserDB.nobody()
+        return res if res else self.nobody()
         
     def getUserList(self):
         cur = self.conn.cursor()
@@ -58,5 +59,5 @@ class UserDB:
         saltedpassword_bytes = self.saltedpassword(password).encode('UTF-8')
         return hashlib.sha512(saltedpassword_bytes).hexdigest()
     
-    def nobody():
+    def nobody(self):
         return (-1,None,None)

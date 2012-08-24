@@ -6,22 +6,23 @@ import os #shouldn't have to list any folder in the future!
 import json
 import cherrypy
 
+import cherrymusic as cherry
 from cherrymusic import renderjson
 from cherrymusic import userdb
 from cherrymusic import playlistdb
+
 
 debug = True
 
 
 class HTTPHandler(object):
-    def __init__(self, config, model):
+    def __init__(self, model):
         self.model = model
-        self.config = config
-        self.jsonrenderer = renderjson.JSON(config)
+        self.jsonrenderer = renderjson.JSON()
         self.mainpage = open('res/main.html').read()
         self.loginpage = open('res/login.html').read()
-        self.userdb = userdb.UserDB(config)
-        self.playlistdb = playlistdb.PlaylistDB(config)
+        self.userdb = userdb.UserDB()
+        self.playlistdb = playlistdb.PlaylistDB()
 
     def index(self, action='', value='', filter='', login=None, username=None, password=None):
         if debug:
@@ -86,7 +87,7 @@ class HTTPHandler(object):
                 return "You didn't think that would work, did you?"
         else:
             dirtorender = value
-            dirtorenderabspath = os.path.join(self.config.config[self.config.BASEDIR],value)
+            dirtorenderabspath = os.path.join(cherry.config.media.basedir.str, value)
             if os.path.isdir(dirtorenderabspath):
                 if action=='compactlistdir':
                     return renderer.render(self.model.listdir(dirtorender,filter))
