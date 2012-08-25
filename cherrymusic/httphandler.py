@@ -10,6 +10,7 @@ from cherrymusic import renderjson
 from cherrymusic import userdb
 from cherrymusic import playlistdb
 import cherrymusic as cherry
+from urllib import parse
 
 debug = True
 
@@ -25,7 +26,20 @@ class HTTPHandler(object):
         self.userdb = userdb.UserDB()
         self.playlistdb = playlistdb.PlaylistDB()
 
+    def issecure(self, url):
+        return parse.urlparse(url).scheme == 'https'
+        
+    def getSecureUrl(self,url):
+        u = parse.urlparse(url).netloc
+        ip = u[:u.index(':')]
+        return 'https://'+ip+':'+cherry.config.server.ssl_port.str
+
     def index(self, action='', value='', filter='', login=None, username=None, password=None):
+        
+        if cherry.config.server.use_ssl.bool and not self.issecure(cherrypy.url()):
+            print('Not secure, redirecting...')
+            raise cherrypy.HTTPRedirect(self.getSecureUrl(cherrypy.url()),302)
+            
         firstrun = 0 == self.userdb.getUserCount();
         if debug:
             #reload pages everytime in debig mode

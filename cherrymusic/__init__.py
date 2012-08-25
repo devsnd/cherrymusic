@@ -23,7 +23,6 @@ class CherryMusic:
         self.httphandler = httphandler.HTTPHandler(config,self.cherrymodel)
         self.server()
 
-
     def _init_config(self):
         global config
         cdb = configdb.ConfigDB()
@@ -31,35 +30,44 @@ class CherryMusic:
         cdb.update(filecfg)
         config = cdb.load()
 
-
-    def encrypt_pw(self, pw):
-        #return hashlib.sha1(pw).hexdigest()
-        return pw
-
     def start(self):
+        socket_host = "127.0.0.1" if config.server.localhost_only.bool else "0.0.0.0"
+        error_file_path = os.path.join(os.path.dirname(__file__), config.server.logfile.str)
         currentserverpath = os.path.abspath(os.path.dirname(__file__))
-
-        cherrypy.config.update({
-            'log.error_file': os.path.join(os.path.dirname(__file__), config.server.logfile.str),
-            'environment': 'production',
-            "server.socket_host": "0.0.0.0",
-            'server.socket_port': config.server.port.int,
-            'tools.sessions.on' : True,
-            })
-        if config.server.use_ssl.bool:
-            cherrypy.config.update({
-                'server.ssl_module':'pyopenssl',
-                'server.ssl_certificate': config.server.ssl_certificate,
-                'server.ssl_private_key': config.server.ssl_private_key,
-            })
         #check if theme is available in module
-        themedir = os.path.join(currentserverpath, '..','themes',config.look.theme.str)
+        themename = config.look.theme.str
+        defaulttheme = 'zeropointtwo'
+        themedir = os.path.join(currentserverpath, '..','themes',themename)
         #if not, use the theme in the homedir
         if not os.path.isdir(themedir):
-            themedir = os.path.join(os.path.expanduser('~'),'.cherrymusic','themes',config.look.theme.str)
+            themedir = os.path.join(os.path.expanduser('~'),'.cherrymusic','themes',themename)
         #if not available use default theme
         if not os.path.isdir(themedir):
-            themedir = os.path.join(currentserverpath, '..','themes','zeropointtwo')
+            themedir = os.path.join(currentserverpath, '..','themes',defaulttheme)
+
+        if config.server.use_ssl.bool:
+            cherrypy.config.update({
+                'server.ssl_certificate': config.server.ssl_certificate.str,
+                'server.ssl_private_key': config.server.ssl_private_key.str,
+                'server.socket_port': config.server.ssl_port.int,
+            })
+            # Create second server for http redirect:
+            redirecter = cherrypy._cpserver.Server()
+            redirecter.socket_port=config.server.port.int
+            redirecter._socket_host=socket_host
+            redirecter.thread_pool=30
+            redirecter.subscribe()
+        else:
+            cherrypy.config.update({
+                'server.socket_port': config.server.port.int,
+            })
+            
+        cherrypy.config.update({
+            'log.error_file': error_file_path,
+            'environment': 'production',
+            "server.socket_host": socket_host,
+            'tools.sessions.on' : True,
+            })
             
         cherrypy.tree.mount(self.httphandler, '/',
             config={
@@ -70,7 +78,7 @@ class CherryMusic:
                 },
                 '/theme': {
                     'tools.staticdir.on': True,
-                    'tools.staticdir.dir': , themedir
+                    'tools.staticdir.dir': themedir,
                     'tools.staticdir.index': 'index.html',
                 },
                 '/serve' :{
@@ -80,17 +88,16 @@ class CherryMusic:
                     'tools.encode.on' : True,
                     'tools.encode.encoding' : 'utf-8',
                 },
-                #'/': {
-                #    'tools.basic_auth.on': True,
-                #    'tools.basic_auth.realm': 'Cherry Music',
-                #    'tools.basic_auth.users': self.config.config[self.config.USER],
-                #    'tools.basic_auth.encrypt': self.encrypt_pw
-                #}
-
         })
         print('Starting server on port %s ...' % config.server.port)
         cherrypy.engine.start()
 
+    def pyopensslExists(self):
+        try:
+            import OpenSSL
+            return True
+        except ImportError:
+            return False
 
     def serverless(self):
         cherrypy.server.unsubscribe()

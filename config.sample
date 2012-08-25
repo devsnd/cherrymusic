@@ -49,12 +49,22 @@ port=8080
 ; the logfile in which errors will be logged
 logfile = site.log
 
+; when localhost_only is set to true, the server will not
+; be visible in the network and only play music on the
+; same computer it is running on
+localhost_only = False
+
 ; The following options allow you to use cherrymusic with
-; https encryption. If use_ssl is set to False, all other
+; https encryption. You must have "pyOpenSSL" installed to
+; be able to use it. If use_ssl is set to False, all other
 ; options will be ommited.
 use_ssl = False
-ssl_certificate = /path/to/my/cert.crt
-ssl_private_key = /path/to/my/private.key
+; The port that will listen to SSL encrypted requests. If
+; use_ssl is set to True, all unencrypted HTTP requests
+; will be redirected to this port.
+ssl_port = 8443
+ssl_certificate = certs/server.crt
+ssl_private_key = certs/server.key
 
 [crypto]
 ##########################################################
