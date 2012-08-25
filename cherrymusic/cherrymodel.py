@@ -43,7 +43,7 @@ class CherryModel:
             filterstr = filterstr.upper()
             allfilesindir = list(filter(lambda x : x.upper().startswith(filterstr), allfilesindir))
 
-        compactlisting = len(allfilesindir) > cherry.config.browser.maxshowfolders.int
+        compactlisting = len(allfilesindir) > cherry.config.browser.maxshowfiles.int
         sortedfiles = self.sortFiles(allfilesindir, absdirpath)
 
         filterlength = len(filterstr)+1

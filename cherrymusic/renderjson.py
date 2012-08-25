@@ -28,7 +28,7 @@ class JSON(object):
             else:
                 #file
                 simplename = util.filename(entry.path)
-                urlpath = quote('/' + cherry.config.server.hostalias.str + '/' + entry.path);
+                urlpath = quote('/serve/' + entry.path);
                 retlist.append({'type':'file',
                                 'urlpath':urlpath,
                                 'path':entry.path,

@@ -58,7 +58,7 @@ class CherryMusic:
                     'tools.staticdir.dir': os.path.join(currentserverpath, '..','themes',config.look.theme.str),
                     'tools.staticdir.index': 'index.html',
                 },
-                '/' + config.server.hostalias.str:{
+                '/serve' :{
                     'tools.staticdir.on': True,
                     'tools.staticdir.dir': config.media.basedir.str,
                     'tools.staticdir.index': 'index.html',

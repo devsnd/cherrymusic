@@ -1,21 +1,45 @@
 [media]
+##########################################################
+; BASEDIR specifies where the media that should be
+; served is located. It must a the absolute path, e.g.
+; BASEDIR=/absolute/path/to/media
 BASEDIR=/home/harpo/Music
-DOWNLOADABLE=zip bz2 gz tar
+
+; PLAYABLE is a space separated list of media file
+; extensions that can be played by jPlayer.
 PLAYABLE=mp3 ogg wma flac
-VIEWABLE=jpg gif png
+
 
 [search]
-ENABLED=True
+##########################################################
+; CACHEFILE specifies the filename of the file
+; database
 CACHEFILE=cherry.cache.db
+
+; MAXRESULTS set the maximum amount of search results
+; to be displayed. If MAXRESULTS is set to a higher value,
+; the search will take longer, but also more accurate.
 MAXRESULTS=20
 
+
 [browser]
-MAXSHOWFOLDERS=100
+##########################################################
+; MAXSHOWFILES specifies how many files and folders should
+; may be shown at the same time. E.g. if you open a folder
+; with more than MAXSHOWFILES, the files will be grouped 
+; according to the first letter in their name
+MAXSHOWFILES=20
+
 
 [server]
-HOSTALIAS=host
+##########################################################
+; The port the server will listen to
 port=8080
+
+; the logfile in which errors will be logged
 logfile = site.log
 
+
 [crypto]
+##########################################################
 salt=
