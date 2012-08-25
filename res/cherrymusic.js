@@ -502,7 +502,7 @@ ON DOCUMENT READY... STEADY... GO!
 $(document).ready(function(){
     fetchMessageOfTheDay();
     initJPlayer();
-    $('#searchfield .button').click(submitsearch);
+    $('#searchfield .bigbutton').click(submitsearch);
     $('.hideplaylisttab').hide();
     restorePlaylist();
     rememberPlaylistPeriodically(0);
