@@ -46,6 +46,21 @@ class CherryMusic:
             'server.socket_port': config.server.port.int,
             'tools.sessions.on' : True,
             })
+        if config.server.use_ssl.bool:
+            cherrypy.config.update({
+                'server.ssl_module':'pyopenssl',
+                'server.ssl_certificate': config.server.ssl_certificate,
+                'server.ssl_private_key': config.server.ssl_private_key,
+            })
+        #check if theme is available in module
+        themedir = os.path.join(currentserverpath, '..','themes',config.look.theme.str)
+        #if not, use the theme in the homedir
+        if not os.path.isdir(themedir):
+            themedir = os.path.join(os.path.expanduser('~'),'.cherrymusic','themes',config.look.theme.str)
+        #if not available use default theme
+        if not os.path.isdir(themedir):
+            themedir = os.path.join(currentserverpath, '..','themes','zeropointtwo')
+            
         cherrypy.tree.mount(self.httphandler, '/',
             config={
                 '/res': {
@@ -55,7 +70,7 @@ class CherryMusic:
                 },
                 '/theme': {
                     'tools.staticdir.on': True,
-                    'tools.staticdir.dir': os.path.join(currentserverpath, '..','themes',config.look.theme.str),
+                    'tools.staticdir.dir': , themedir
                     'tools.staticdir.index': 'index.html',
                 },
                 '/serve' :{

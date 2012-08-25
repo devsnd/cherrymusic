@@ -3,7 +3,7 @@
 ; BASEDIR specifies where the media that should be
 ; served is located. It must a the absolute path, e.g.
 ; BASEDIR=/absolute/path/to/media
-BASEDIR=/home/harpo/Music
+BASEDIR=/absolute/path/to/media
 
 ; PLAYABLE is a space separated list of media file
 ; extensions that can be played by jPlayer.
@@ -19,7 +19,17 @@ CACHEFILE=cherry.cache.db
 ; MAXRESULTS set the maximum amount of search results
 ; to be displayed. If MAXRESULTS is set to a higher value,
 ; the search will take longer, but also more accurate.
+; 100 is a good value, as a cd can have up to 99 tracks.
 MAXRESULTS=20
+
+[look]
+; Available themes are:
+;   - zeropointtwo
+;   - hax1337
+; To create your own theme, you can simply copy the theme
+; to ~/.cherrmusic/themes/yournewtheme and modify it to
+; your will. Then you can set theme=yournewtheme
+theme=zeropointtwo
 
 
 [browser]
@@ -39,6 +49,12 @@ port=8080
 ; the logfile in which errors will be logged
 logfile = site.log
 
+; The following options allow you to use cherrymusic with
+; https encryption. If use_ssl is set to False, all other
+; options will be ommited.
+use_ssl = False
+ssl_certificate = /path/to/my/cert.crt
+ssl_private_key = /path/to/my/private.key
 
 [crypto]
 ##########################################################
