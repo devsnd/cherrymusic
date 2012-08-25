@@ -3,7 +3,8 @@ import unittest
 import logging
 import os
 
-from cherrymusic import config
+import cherrymusic as cherry
+from cherrymusic import configuration
 from cherrymusic import sqlitecache
 
 logging.basicConfig(level=logging.WARNING)
@@ -22,11 +23,14 @@ class TestFile(object):
         else:
             self.name, self.ext = os.path.splitext(os.path.basename(fullpath))
 
+
     @classmethod
     def enumerate_files_in(cls, somewhere, sort):
         raise NotImplementedError("%s.%s.enumerate_files_in(cls, paths, sort)" % (__name__, __class__.__name__))
 
+
 class AddFilesToDatabaseTest(unittest.TestCase):
+
     testdir = 'testfiles'
     testfiles = (
                  'rootlevelfile',
@@ -36,21 +40,30 @@ class AddFilesToDatabaseTest(unittest.TestCase):
                  'first/second/secondlevelfile',
                  )
 
+
     def setupTestfiles(self):
         os.makedirs('empty', exist_ok=True)
+
 
     def removeTestfiles(self):
         os.rmdir('empty')
 
+
+    def setupConfig(self):
+        cherry.config = configuration.from_defaults()
+        cherry.config.media.basedir = 'empty'
+        cherry.config.search.cachefile = ':memory:'
+
+
     def setUp(self):
         self.setupTestfiles()
-        self.Config = config.Config()
-        self.Config[self.Config.BASEDIR] = 'empty'
-        self.Config[self.Config.CACHEFILE] = ':memory:'
-        self.Cache = sqlitecache.SQLiteCache(self.Config)
+        self.setupConfig()
+        self.Cache = sqlitecache.SQLiteCache()
+
 
     def tearDown(self):
         self.removeTestfiles()
+
 
     def test_add_to_file_table(self):
         parent = TestFile('test/', parent=None, isdir=True)
@@ -77,6 +90,7 @@ class AddFilesToDatabaseTest(unittest.TestCase):
         isdir = self.Cache.conn.execute('SELECT isdir from files WHERE rowid=?', (parent.uid,)).fetchone()[0]
         self.failUnless(isdir, "isdir got saved correctly")
 
+
     def test_add_to_dictionary_table(self):
         filename = 'abc ÖÄUßé.wurst_-_blablabla.nochmal.wurst'
         words = sqlitecache.SQLiteCache.searchterms(filename)
@@ -97,6 +111,7 @@ class AddFilesToDatabaseTest(unittest.TestCase):
             idset.remove(res[0][0])   # make sure no other tested word can use that id to pass
         self.failUnless(len(idset) == 0, "all ids accounted for")
 
+
     def test_add_to_search_table(self):
         fileid = 99
         wordids = (13, 42)
@@ -106,6 +121,7 @@ class AddFilesToDatabaseTest(unittest.TestCase):
         for wid in wordids:
             found = self.Cache.conn.execute('SELECT frowid FROM search WHERE drowid=?', (wid,)).fetchone()[0]
             self.failUnless(fileid == found, 'fileid was associated with wordid')
+
 
     def test_register_file_with_db(self):
         testnames = (
@@ -125,6 +141,7 @@ class AddFilesToDatabaseTest(unittest.TestCase):
 
 
 class FileTest(unittest.TestCase):
+
     testdir = 'testfiles'
     testfiles = (
                  'rootlevelfile',
@@ -134,12 +151,14 @@ class FileTest(unittest.TestCase):
                  'first/second/secondlevelfile',
                  )
 
+
     def setupTestfile(self, testfile):
         if testfile.isdir:
             os.makedirs(testfile.fullpath, exist_ok=True)
         else:
             if not os.path.exists(testfile.fullpath):
                 open(testfile.fullpath, 'w').close()
+
 
     def setupTestfiles(self):
         os.makedirs(__class__.testdir, exist_ok=True)
@@ -148,11 +167,13 @@ class FileTest(unittest.TestCase):
             self.setupTestfile(TestFile(filename))
         os.chdir('..')
 
+
     def removeTestfile(self, testfile):
         if testfile.isdir:
             os.rmdir(testfile.fullpath)
         else:
             os.remove(testfile.fullpath)
+
 
     def removeTestfiles(self):
         os.chdir(__class__.testdir)
@@ -161,13 +182,16 @@ class FileTest(unittest.TestCase):
         os.chdir('..')
         os.rmdir(__class__.testdir)
 
+
     def setUp(self):
         self.setupTestfiles()
+
 
     def tearDown(self):
         self.removeTestfiles()
 
-    def filesEqual(self, expected, actual):
+
+    def assertFilesEqual(self, expected, actual):
         self.failUnless(expected.fullpath == actual.fullpath, "equal fullpath %s vs %s" % (expected.fullpath, actual.fullpath))
         self.failUnless(expected.name == actual.name, "equal name %s vs %s " % (expected.name, actual.name))
         self.failUnless(expected.ext == actual.ext, 'equal extension %s vs %s' % (expected.ext, actual.ext))
@@ -181,7 +205,7 @@ class FileTest(unittest.TestCase):
             if filename.endswith('/'):
                 filename = filename[:-1]
             actual = sqlitecache.File(filename)
-            self.filesEqual(expected, actual)
+            self.assertFilesEqual(expected, actual)
 
 
     def testFileEnumerator(self):

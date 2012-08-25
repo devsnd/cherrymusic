@@ -76,8 +76,8 @@ class SQLiteCache(object):
                 for removeItem in removeList:
                     print('removing file with id: ' + str(removeItem) + ' ...')
                     self.removeFromDB(removeItem)
-
-                self.register_with_db(addList, basedir=self.rootDir)
+                if addList:
+                    self.register_with_db(addList, basedir=self.rootDir)
         else:
             print('no changes found.')
 
