@@ -59,6 +59,7 @@ localhost_only = False
 ; be able to use it. If use_ssl is set to False, all other
 ; options will be ommited.
 use_ssl = False
+
 ; The port that will listen to SSL encrypted requests. If
 ; use_ssl is set to True, all unencrypted HTTP requests
 ; will be redirected to this port.
