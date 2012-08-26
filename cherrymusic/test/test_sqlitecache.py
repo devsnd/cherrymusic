@@ -1,13 +1,10 @@
 import unittest
 
-import logging
 import os
 
 import cherrymusic as cherry
 from cherrymusic import configuration
 from cherrymusic import sqlitecache
-
-logging.basicConfig(level=logging.WARNING)
 
 class TestFile(object):
 

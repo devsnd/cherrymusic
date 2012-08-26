@@ -8,6 +8,8 @@ import re
 import cherrymusic as cherry
 from cherrymusic.util import timed, Progress
 
+logging.basicConfig(level=logging.INFO)
+
 DEFAULT_CACHEFILE = 'cherry.cache.db' #set to ':memory:' to keep _everything_ in ram
 scanreportinterval = 1
 AUTOSAVEINTERVAL = 100
@@ -172,10 +174,9 @@ class SQLiteCache(object):
     @timed
     def register_with_db(self, paths, basedir):
         """adds the given paths and their contents to the media database"""
-        logging.basicConfig(level=logging.DEBUG)
         logging.info("updating known media")
         counter = 0
-        progress = Progress(len(paths))
+        progress = Progress(len(paths) + self.count_immediate_subpaths(paths))
         try:
             self.conn.isolation_level = "IMMEDIATE"  # instant writing lock, turn off autocommit
             with self.conn:                          # implicit commit, rollback on Exception
@@ -185,9 +186,12 @@ class SQLiteCache(object):
                     if counter % AUTOSAVEINTERVAL == 0:
                         print('.', end='')
                         self.conn.commit()
-                    if item.fullpath in paths:
+                    if item.parent is None or item.parent.parent is None:
                         progress.tick()
-                        logging.debug('%s', progress.formatstr('ETA %(eta)s %(ticks)s / %(total)s (%(percent)s) | ', item.name))
+                        logging.info(progress.formatstr(' ETA %(eta)s (%(percent)s) -> ',
+                                                        self.str_to_maxlen(50,
+                                                                           self.path_from_basedir(item)
+                                                                           )))
         except Exception as e:
             logging.exception('')
             logging.error("error while updating media: %s %s", e.__class__.__name__, e)
@@ -198,6 +202,36 @@ class SQLiteCache(object):
             logging.info("media update complete.")
         finally:
             logging.info("%d file records added", counter)
+
+
+    def path_from_basedir(self, fileobj):
+        path = fileobj.name + fileobj.ext
+        if not fileobj.parent is None:
+            parentpath = self.path_from_basedir(fileobj.parent)
+            path = os.path.join(parentpath, path)
+        if fileobj.isdir:
+            path += os.path.sep
+        return path
+
+
+    def str_to_maxlen(self, maxlen, s, insert='...'):
+        '''no sanity check for maxlen and len(insert)'''
+        if len(s) > maxlen:
+            split = (maxlen - len(insert)) // 2
+            s = s[:split] + insert + s[-split:]
+        return s
+
+
+    def count_immediate_subpaths(self, pathseq):
+        basedir = cherry.config.media.basedir.str
+        counter = 0
+        for path in pathseq:
+            path = os.path.join(basedir, path)
+            if not os.path.isdir(path):
+                continue
+            counter += len(os.listdir(path))
+        return counter
+
 
     def register_file_with_db(self, fileobj):
         """add data in File object to relevant tables in media database"""
@@ -284,5 +318,4 @@ class File():
                 for name in children:
                     fullpath = os.path.join(item.fullpath, name)
                     stack.append(File(fullpath, parent=item))
-#            print(repr(item))
             yield item

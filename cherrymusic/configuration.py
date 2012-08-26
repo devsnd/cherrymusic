@@ -1,26 +1,30 @@
 import logging
+import os
 import re
 
 
 def from_defaults():
+    '''load default configuration. must work if path to standard config file is unknown.'''
     c = Configuration()
 
-    c.media.basedir = '/home/harpo/Music'
-    c.media.playable = 'mp3 ogg wma'
-    c.media.downloadable = 'zip bz2 gz tar'
-    c.media.viewable = 'jpg gif png'
+    c.media.basedir = os.path.join(os.path.expanduser('~'), 'Music')
+    c.media.playable = 'mp3 ogg wma flac'
 
-    c.search.enabled = 'True'
     c.search.cachefile = 'cherry.cache.db'
     c.search.maxresults = '20'
 
-    c.browser.maxshowfolders = '100'
+    c.look.theme = 'zeropointtwo'
 
-    c.server.hostalias = 'host'
+    c.browser.maxshowfiles = '100'
+
     c.server.port = '8080'
     c.server.logfile = 'site.log'
+    c.server.localhost_only = 'False'
 
-    c.crypto.salt = ''
+    c.server.use_ssl = 'False'
+    c.server.ssl_port = '8443'
+    c.server.ssl_certificate = 'certs/server.crt'
+    c.server.ssl_private_key = 'certs/server.key'
 
     return c
 
