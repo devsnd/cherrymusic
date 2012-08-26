@@ -29,9 +29,13 @@ def timed(func):
     return wrapper
 
 def Property(func):
-    """decorator that allows defining acessors in place as local functions.
-    func must define fget, fset, fdel and doc and `return locals()`"""
-    return property(**func)
+    """
+    decorator that allows defining acessors in place as local functions.
+    func must define fget, and may define fset, fdel and doc; `return locals()`
+    at the end. 
+    Seen at http://adam.gomaa.us/blog/2008/aug/11/the-python-property-builtin/
+    """
+    return property(**func())
 
 class Progress(object):
     """Simple, timed progress tracking. 

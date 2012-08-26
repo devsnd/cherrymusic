@@ -3,6 +3,7 @@
 #from time import time
 #import hashlib
 
+import logging
 import os
 import cherrypy
 
@@ -20,14 +21,16 @@ class CherryMusic:
         self._init_config()
         self.db = sqlitecache.SQLiteCache()
         self.cherrymodel = cherrymodel.CherryModel(self.db)
-        self.httphandler = httphandler.HTTPHandler(config,self.cherrymodel)
+        self.httphandler = httphandler.HTTPHandler(config, self.cherrymodel)
         self.server()
 
     def _init_config(self):
         global config
         cdb = configdb.ConfigDB()
+        logging.info('updating config db from %s', './config')
         filecfg = configuration.from_configparser('./config')
         cdb.update(filecfg)
+        logging.info('loading configuration from database')
         config = cdb.load()
 
     def start(self):
@@ -37,13 +40,13 @@ class CherryMusic:
         #check if theme is available in module
         themename = config.look.theme.str
         defaulttheme = 'zeropointtwo'
-        themedir = os.path.join(currentserverpath, '..','themes',themename)
+        themedir = os.path.join(currentserverpath, '..', 'themes', themename)
         #if not, use the theme in the homedir
         if not os.path.isdir(themedir):
-            themedir = os.path.join(os.path.expanduser('~'),'.cherrymusic','themes',themename)
+            themedir = os.path.join(os.path.expanduser('~'), '.cherrymusic', 'themes', themename)
         #if not available use default theme
         if not os.path.isdir(themedir):
-            themedir = os.path.join(currentserverpath, '..','themes',defaulttheme)
+            themedir = os.path.join(currentserverpath, '..', 'themes', defaulttheme)
 
         if config.server.use_ssl.bool:
             cherrypy.config.update({
@@ -53,22 +56,22 @@ class CherryMusic:
             })
             # Create second server for http redirect:
             redirecter = cherrypy._cpserver.Server()
-            redirecter.socket_port=config.server.port.int
-            redirecter._socket_host=socket_host
-            redirecter.thread_pool=30
+            redirecter.socket_port = config.server.port.int
+            redirecter._socket_host = socket_host
+            redirecter.thread_pool = 30
             redirecter.subscribe()
         else:
             cherrypy.config.update({
                 'server.socket_port': config.server.port.int,
             })
-            
+
         cherrypy.config.update({
             'log.error_file': error_file_path,
             'environment': 'production',
             "server.socket_host": socket_host,
             'tools.sessions.on' : True,
             })
-            
+
         cherrypy.tree.mount(self.httphandler, '/',
             config={
                 '/res': {
