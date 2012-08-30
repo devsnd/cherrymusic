@@ -1,9 +1,11 @@
-import os
-from time import time
-import sqlite3
 import logging
-from operator import itemgetter
+import os
 import re
+import sqlite3
+
+from collections import deque
+from operator import itemgetter
+from time import time
 
 import cherrymusic as cherry
 from cherrymusic.util import timed, Progress
@@ -176,7 +178,7 @@ class SQLiteCache(object):
         """adds the given paths and their contents to the media database"""
         logging.info("updating known media")
         counter = 0
-        progress = Progress(len(paths) + self.count_immediate_subpaths(paths))
+        progress = Progress(len(paths))
         try:
             self.conn.isolation_level = "IMMEDIATE"  # instant writing lock, turn off autocommit
             with self.conn:                          # implicit commit, rollback on Exception
@@ -184,14 +186,14 @@ class SQLiteCache(object):
                     self.register_file_with_db(item)
                     counter += 1
                     if counter % AUTOSAVEINTERVAL == 0:
-                        print('.', end='')
                         self.conn.commit()
                     if item.parent is None or item.parent.parent is None:
-                        progress.tick()
-                        logging.info(progress.formatstr(' ETA %(eta)s (%(percent)s) -> ',
-                                                        self.str_to_maxlen(50,
-                                                                           self.path_from_basedir(item)
-                                                                           )))
+                        if item.parent is None:
+                            progress.tick()
+                        logging.info(progress.formatstr(
+                                    ' ETA %(eta)s (%(percent)s) -> ',
+                                    self.trim_to_maxlen(50, self.path_from_basedir(item))
+                                    ))
         except Exception as e:
             logging.exception('')
             logging.error("error while updating media: %s %s", e.__class__.__name__, e)
@@ -214,23 +216,12 @@ class SQLiteCache(object):
         return path
 
 
-    def str_to_maxlen(self, maxlen, s, insert='...'):
+    def trim_to_maxlen(self, maxlen, s, insert='...'):
         '''no sanity check for maxlen and len(insert)'''
         if len(s) > maxlen:
             split = (maxlen - len(insert)) // 2
             s = s[:split] + insert + s[-split:]
         return s
-
-
-    def count_immediate_subpaths(self, pathseq):
-        basedir = cherry.config.media.basedir.str
-        counter = 0
-        for path in pathseq:
-            path = os.path.join(basedir, path)
-            if not os.path.isdir(path):
-                continue
-            counter += len(os.listdir(path))
-        return counter
 
 
     def register_file_with_db(self, fileobj):
@@ -240,8 +231,7 @@ class SQLiteCache(object):
             word_ids = self.add_to_dictionary_table(fileobj.name)
             self.add_to_search_table(fileobj.uid, word_ids)
         except UnicodeEncodeError as e:
-            logging.error("wrong encoding for filename '%s' (%s)", fileobj.fullpath, e.__class__.__name__)
-            raise e
+            logging.error("wrong encoding for filename '%s' (%s)", fileobj.relpath, e.__class__.__name__)
 
     def add_to_file_table(self, fileobj):
         #files(parentid, filename, ext, 1 if isdir else 0)
@@ -272,15 +262,24 @@ def perf(text=None):
             print(text + ' took ' + str(time() - __perftime) + 's to execute')
 
 class File():
-    def __init__(self, fullpath, parent=None, isdir=None):
+    def __init__(self, path, parent=None, isdir=None):
+        if len(path) > 1:
+            path = path.rstrip(os.path.sep)
+        if parent is None:
+            self.root = self
+            self.basepath = os.path.dirname(path)
+            self.basename = os.path.basename(path)
+        else:
+            if os.path.sep in path:
+                raise ValueError('non-root filepaths must be direct relative to parent: path: %s, parent: %s' % (path, parent))
+            self.root = parent.root
+            self.basename = path
         self.uid = -1
-        self.name, self.ext = os.path.splitext(os.path.basename(fullpath))
-        self.fullpath = fullpath
         self.parent = parent
-        self.isdir = os.path.isdir(os.path.abspath(self.fullpath)) if isdir is None else isdir
-        if self.isdir:
-            self.name += self.ext
-            self.ext = ''
+        if isdir is None:
+            self.isdir = os.path.isdir(os.path.abspath(self.fullpath))
+        else:
+            self.isdir = isdir
 
     def __str__(self):
         return self.fullpath
@@ -295,6 +294,35 @@ class File():
               'pid': ' -> ' + str(self.parent.uid) if self.parent and self.parent.uid > -1 else ''
               })
 
+    @property
+    def relpath(self):
+        up = self.parent
+        rp = deque((self.basename,))
+        while up is not None:
+            rp.appendleft(up.basename)
+            up = up.parent
+        return os.path.sep.join(rp)
+
+    @property
+    def fullpath(self):
+        return os.path.join(self.root.basepath, self.relpath)
+
+    @property
+    def name(self):
+        if self.isdir:
+            name = self.basename
+        else:
+            name = os.path.splitext(self.basename)[0]
+        return name
+
+    @property
+    def ext(self):
+        if self.isdir:
+            ext = ''
+        else:
+            ext = os.path.splitext(self.basename)[1]
+        return ext
+
 
     @classmethod
     def enumerate_files_in(cls, paths, basedir=None, sort=False):
@@ -302,20 +330,18 @@ class File():
             File objects, iterating in a depth-first manner. If sort == True,
             items will turn up in the same order as they would when using the
             sorted(iterable) builtin."""
-        from collections import deque
         if basedir is None:
             basedir = ''
+        to_file = lambda name: File(os.path.join(basedir, name))
         if sort:
             paths = sorted(paths, reverse=True)  # reverse: append & pop happen at the end
-        to_file = lambda name: File(os.path.join(basedir, name))
-        stack = deque((to_file(d) for d in paths))
-        while(len(stack) > 0):
-            item = stack.pop()
+        stack = deque()
+        while(stack or paths):
+            item = stack.pop() if stack else to_file(paths.pop())
             if item.isdir:
                 children = os.listdir(item.fullpath)
                 if sort:
-                    children = sorted(children, reverse=True)
+                    children = sorted(children, reverse=True) # reverse: append & pop happen at the end
                 for name in children:
-                    fullpath = os.path.join(item.fullpath, name)
-                    stack.append(File(fullpath, parent=item))
+                    stack.append(File(name, parent=item))
             yield item
