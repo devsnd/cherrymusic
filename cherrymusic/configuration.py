@@ -63,7 +63,6 @@ def from_configparser(filepath):
     """Have an ini file that the python configparser can understand? Pass the filepath
     to this function, and a matching Configuration will magically be returned."""
 
-    import os
     if not os.path.exists(filepath):
         logging.error('configuration file not found: %s', filepath)
         return None
@@ -123,7 +122,7 @@ class Property(object):
         if not (key and type(key) == type('') and cls._qual_name_patn.match(key)):
             raise KeyError("invalid property name: '%s': names must be non-empty strings, only consist of the characters: '%s' and be separated by a '%s'"
                            % (key, cls._namechars, cls._namesep))
-        cls._validate_no_keyword(key);
+        cls._validate_no_keyword(key)
 
     @classmethod
     def _validate_no_keyword(cls, key):
@@ -137,7 +136,7 @@ class Property(object):
 
     def __init__(self, name, value=None, parent=None, allow_empty_name=False):
         try:
-            __class__._validate_localkey(name)
+            self. __class__._validate_localkey(name)
         except KeyError as e:
             if not allow_empty_name or name:
                 raise e
@@ -155,7 +154,7 @@ class Property(object):
             return super().__getattribute__(name)
         if (self._converter._knows(name)):
             return self._converter[name]
-        raise AttributeError(__class__.__name__ + ' object has no attribute ' + name)
+        raise AttributeError(self.__class__.__name__ + ' object has no attribute ' + name)
 
     def __getitem__(self, name):
         return self.__getattr__(name)
@@ -239,7 +238,7 @@ class Configuration(Property):
         return view# if not self._name else {self._name: view}
 
 
-    def __to_list(self, sort=True, parentstr=''):
+    def __to_list(self, sort=True):
 
         def sort_if_needed(tuples):
             sortkey = lambda t: t.name
@@ -368,7 +367,6 @@ class Configuration(Property):
             del self._properties[Configuration._normalize(key)]
         except KeyError:
             logging.warn('trying to delete non-existent property %s%s%s', self.fullname, self._namesep, key)
-            pass
 
 
     def _untemp(self):
@@ -431,17 +429,18 @@ def _to_bool_transformer(val=None):
         try:
             return bool(_to_float_transformer(val))
         except (TypeError, ValueError, TransformError):
-                if isinstance(val, str) and val.strip().lower() in ('yes', 'true'):
-                    return True
-                if isinstance(val, str) and val.strip().lower() in ('false', 'no', ''):
-                    return False
-                raise TransformError('bool', val, default=False)
+            if isinstance(val, str) and val.strip().lower() in ('yes', 'true'):
+                return True
+            if isinstance(val, str) and val.strip().lower() in ('false', 'no', ''):
+                return False
+            raise TransformError('bool', val, default=False)
 
 
 @transformer('list')
 def _to_list_transformer(val=None):
     if isinstance(val, str):
-        return re.split(r'\W+', val)
+        val = val.replace('_', ' ')
+        return re.findall(r'\w+', val)
     if isinstance(val, (list, tuple, set)):
         return list(val)
     else:
@@ -451,7 +450,7 @@ def _to_list_transformer(val=None):
 def _to_int_transformer(val=None):
 
     def ishex(s):
-        return re.match(r'[+-]?(0(x|X))?[0-9a-fA-F]+$', s) and re.search(r'[a-fA-FxX]', s)
+        return re.match(r'[+-]?0(x|X)[0-9a-fA-F]+$', s)
 
     def isoctal(s):
         return re.match(r'[+-]?0(o|O)[0-7]+$', s)
@@ -522,7 +521,7 @@ class ValueConverter(object):
         if tname in self._transformers.keys():
             t = self._transformers[tname]
         else:
-            t = __class__.__transformers[tname]
+            t = self.__class__.__transformers[tname]
         try:
             return t(self._val)
         except TransformError as e:
@@ -530,4 +529,4 @@ class ValueConverter(object):
             return e.suggested_default
 
     def _knows(self, name):
-        return name in self._transformers.keys() or name in __class__.__transformers.keys()
+        return name in self._transformers.keys() or name in self.__class__.__transformers.keys()
