@@ -40,8 +40,8 @@ class PlaylistDB:
         self.conn = sqlite3.connect(PLAYLISTDBFILE, check_same_thread=False)
         if setupDB:
             print('Creating playlist db...')
-            self.conn.execute('CREATE TABLE playlists (title text, userid int, public int)')
-            self.conn.execute('CREATE TABLE tracks (playlistid int, track int, url text, title text)')
+            self.conn.execute('CREATE TABLE playlists (title text NOT NULL, userid int NOT NULL, public int NOT NULL)')
+            self.conn.execute('CREATE TABLE tracks (playlistid int NOT NULL, track int NOT NULL, url text NOT NULL, title text NOT NULL)')
             self.conn.commit()
             print('done.')
             print('Connected to Database. (' + PLAYLISTDBFILE + ')')
@@ -51,7 +51,7 @@ class PlaylistDB:
             print('I will not create an empty playlist. sorry.')
             return
         cursor = self.conn.cursor()
-        cursor.execute("""INSERT INTO playlists 
+        cursor.execute("""INSERT INTO playlists
             (title, userid, public) VALUES (?,?,?)""",
             (playlisttitle, userid, 1 if public else 0))
         playlistid = cursor.lastrowid;
@@ -61,14 +61,14 @@ class PlaylistDB:
             track = entry[0]
             song = entry[1]
             numberedplaylist.append((playlistid, track, song['mp3'], song['title']))
-        cursor.executemany("""INSERT INTO tracks (playlistid, track, url, title) 
+        cursor.executemany("""INSERT INTO tracks (playlistid, track, url, title)
             VALUES (?,?,?,?)""", numberedplaylist)
         self.conn.commit()
 
 
     def loadPlaylist(self, playlistid, userid):
         cursor = self.conn.cursor()
-        cursor.execute("""SELECT rowid FROM playlists WHERE 
+        cursor.execute("""SELECT rowid FROM playlists WHERE
             rowid = ? AND (public = 1 OR userid = ?) LIMIT 0,1""",
             (playlistid, userid));
         result = cursor.fetchone()
