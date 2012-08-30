@@ -146,6 +146,8 @@ class FileTest(unittest.TestCase):
                  'first/firstlevelfile',
                  'first/second/',
                  'first/second/secondlevelfile',
+                 'nonASCIItest/',
+                 'nonASCIItest/öäßÖÄÉ',
                  )
 
 
@@ -158,6 +160,8 @@ class FileTest(unittest.TestCase):
 
 
     def setupTestfiles(self):
+        import sys
+        print(sys.version)
         os.makedirs(__class__.testdir, exist_ok=True)
         os.chdir(__class__.testdir)
         for filename in __class__.testfiles:
