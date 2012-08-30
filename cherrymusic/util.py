@@ -28,9 +28,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
-import logging
 import os
 import sys
+from cherrymusic import log
 
 from time import time
 
@@ -42,7 +42,6 @@ def databaseFilePath(filename):
     if not os.path.exists(configdir):
         os.makedirs(configdir)
     configpath = os.path.join(configdir,filename)
-    print(configpath)
     return configpath
     
 def assureHomeFolderExists():
@@ -78,7 +77,7 @@ def timed(func):
         starttime = clock()
         result = func(*args, **kwargs)
         duration = clock() - starttime
-        logging.debug('%s.%s: %.4f', func.__module__, func.__name__, duration)
+        log.d('%s.%s: %.4f', func.__module__, func.__name__, duration)
         return result
     return wrapper
 

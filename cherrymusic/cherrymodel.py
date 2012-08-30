@@ -40,6 +40,7 @@ import pickle #only used for playlists. delete when better soluiton available!
 import cherrymusic as cherry
 from cherrymusic import util
 from cherrymusic import resultorder
+from cherrymusic import log
 
 class CherryModel:
     def __init__(self, cache):
@@ -100,7 +101,7 @@ class CherryModel:
     def search(self, term):
         user = cherrypy.session.get('username', None)
         if user:
-            print(user+' searched for "'+term+'"')
+            log.d(user+' searched for "'+term+'"')
         results = self.cache.searchfor(term, maxresults=cherry.config.search.maxresults.int)
         results = sorted(results,key=resultorder.ResultOrder(term),reverse=True)
         results = results[:min(len(results), cherry.config.search.maxresults.int)]
@@ -168,26 +169,7 @@ class CherryModel:
             oneliner=oneliner.replace('{artist}',a)
             if '{revartist}' in oneliner:
                 oneliner=oneliner.replace('{revartist}',a.lower()[::-1])
-        return oneliner
-        
-    def savePlaylist(self, playlist, playlistname):
-        if not os.path.exists('playlists'):
-            os.makedirs("playlists")
-        print(playlist)
-        playlistname+='.pls'
-        with open('playlists/'+playlistname,'wb') as f:
-            pickle.dump(playlist,f)
-        return 'success'
-    
-    def loadPlaylist(self, playlistname):
-        with open('playlists/'+playlistname,'rb') as f:
-            playlist = pickle.load(f)
-            print(playlist)
-            return playlist
-        
-    def showPlaylists(self):
-        return os.listdir('playlists')
-        
+        return oneliner        
 
 class MusicEntry:
     def __init__(self, path, compact=False, dir=False, repr=None):

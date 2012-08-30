@@ -28,7 +28,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
-import logging
 import os
 import cherrypy
 
@@ -38,6 +37,7 @@ from cherrymusic import sqlitecache
 from cherrymusic import cherrymodel
 from cherrymusic import httphandler
 from cherrymusic import util
+from cherrymusic import log
 
 config = None
 
@@ -54,10 +54,10 @@ class CherryMusic:
         global config
         cdb = configdb.ConfigDB()
         configFilePath = util.configurationFile()
-        logging.info('updating config db from %s', configFilePath)
+        log.i('updating config db from %s', configFilePath)
         filecfg = configuration.from_configparser(configFilePath)
         cdb.update(filecfg)
-        logging.info('loading configuration from database')
+        log.i('loading configuration from database')
         config = cdb.load()
 
     def start(self):
@@ -119,7 +119,7 @@ class CherryMusic:
                     'tools.encode.encoding' : 'utf-8',
                 },
         })
-        print('Starting server on port %s ...' % config.server.port)
+        log.i('Starting server on port %s ...' % config.server.port)
         cherrypy.engine.start()
 
     def pyopensslExists(self):

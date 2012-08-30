@@ -36,6 +36,7 @@ import uuid
 from collections import namedtuple
 
 from cherrymusic.util import databaseFilePath
+from cherrymusic import log
 
 USERDBFILE = databaseFilePath('user.db')
 
@@ -45,15 +46,15 @@ class UserDB:
         self.conn = sqlite3.connect(USERDBFILE, check_same_thread=False)
 
         if setupDB:
-            print('Creating user db table...')
-            self.conn.execute('CREATE TABLE users (username text UNIQUE NOT NULL, admin int NOT NULL, password text NOT NULL, salt text NOT NULL)')
+            log.i('Creating user db table...')
+            self.conn.execute('CREATE TABLE users (username text UNIQUE, admin int, password text, salt text)')
             self.conn.execute('CREATE INDEX idx_users ON users(username)');
-            print('done.')
-            print('Connected to Database. (' + USERDBFILE + ')')
+            log.i('done.')
+            log.i('Connected to Database. (' + USERDBFILE + ')')
 
     def addUser(self, username, password, admin):
         if not (username.strip() or password.strip()):
-            print('empty username or password!')
+            log.d('empty username or password!')
             return
         user = User.create(username, password, admin)
         self.conn.execute('''
@@ -63,7 +64,7 @@ class UserDB:
         (user.name, 1 if user.isadmin else 0, user.password, user.salt))
         self.conn.commit()
         msg = 'added user: ' + user.name
-        print(msg)
+        log.d(msg)
         return msg
 
     def auth(self, username, password):
@@ -76,11 +77,9 @@ class UserDB:
         while True:
             row = cur.fetchone()
             if row:
-                testuser = User(*row)
-                login = Crypto.scramble(password, testuser.salt) == testuser.password
+                user = User(*row)
+                login = Crypto.scramble(password, user.salt) == user.password
             if not row or login:
-                if login:
-                    user = testuser
                 break
         return user
 
@@ -132,12 +131,12 @@ class User(namedtuple('User_', 'uid name isadmin password salt')):
 
         salt = Crypto.generate_salt()
         password = Crypto.scramble(password, salt)
-        return User(-1, name, isadmin, password, salt)
+        return User(-1, name, password, salt, isadmin)
 
 
     @classmethod
     def nobody(cls):
         '''return a user object representing an unknown user'''
         if User.__NOBODY is None:
-            User.__NOBODY = User(-1, None, None, None, None)
+            User.__NOBODY = User(-1, None, None, None, False)
         return User.__NOBODY

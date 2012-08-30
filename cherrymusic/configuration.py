@@ -28,9 +28,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
-import logging
 import os
 import re
+
+from cherrymusic import log
 
 
 def from_defaults():
@@ -64,10 +65,10 @@ def from_configparser(filepath):
     to this function, and a matching Configuration will magically be returned."""
 
     if not os.path.exists(filepath):
-        logging.error('configuration file not found: %s', filepath)
+        log.e('configuration file not found: %s', filepath)
         return None
     if not os.path.isfile(filepath):
-        logging.error('configuration path is not a file: %s', filepath)
+        log.e('configuration path is not a file: %s', filepath)
         return None
 
     from configparser import ConfigParser
@@ -206,7 +207,7 @@ class Configuration(Property):
     @classmethod
     def _make_property(cls, name, value, parent):
         assert not (name is None or parent is None), "name and parent must not be None"
-        logging.debug('make property %s: %s', name, value)
+        log.d('make property %s: %s', name, value)
         Configuration._validate_localkey(name)
         if isinstance(value, dict):
             return Configuration(name=name, dic=value, parent=parent)
@@ -333,9 +334,9 @@ class Configuration(Property):
         except KeyError:
             tmpcfg = Configuration(name=key, parent=self, tmp=True)
             if warn_on_create:
-                logging.warn('config key not found, creating empty property: %s', tmpcfg.fullname)
+                log.w('config key not found, creating empty property: %s', tmpcfg.fullname)
             else:
-                logging.info('set config: %s', tmpcfg.fullname)
+                log.i('set config: %s', tmpcfg.fullname)
             return tmpcfg
 
 
@@ -366,7 +367,7 @@ class Configuration(Property):
         try:
             del self._properties[Configuration._normalize(key)]
         except KeyError:
-            logging.warn('trying to delete non-existent property %s%s%s', self.fullname, self._namesep, key)
+            log.w('trying to delete non-existent property %s%s%s', self.fullname, self._namesep, key)
 
 
     def _untemp(self):
@@ -374,9 +375,9 @@ class Configuration(Property):
             self.parent._set_local(self.name, self)
             self._tmp = self.parent._tmp
             if self._tmp:
-                logging.warn('config not set: %s', self)
+                log.w('config not set: %s', self)
             else:
-                logging.debug('temp config %s attached to %s', self, self.parent.name)
+                log.d('temp config %s attached to %s', self, self.parent.name)
 
 
 def transformer(name):
@@ -525,7 +526,7 @@ class ValueConverter(object):
         try:
             return t(self._val)
         except TransformError as e:
-            logging.warn('%s; returning default value of %s', e.msg, str(e.suggested_default))
+            log.w('%s; returning default value of %s', e.msg, str(e.suggested_default))
             return e.suggested_default
 
     def _knows(self, name):

@@ -28,7 +28,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
-import logging
+from cherrymusic import log
 import os
 import re
 import sqlite3
@@ -39,8 +39,6 @@ from time import time
 
 import cherrymusic as cherry
 from cherrymusic.util import timed, Progress, databaseFilePath
-
-logging.basicConfig(level=logging.INFO)
 
 DEFAULT_CACHEFILE = databaseFilePath('cherry.cache.db') #set to ':memory:' to keep _everything_ in ram
 scanreportinterval = 1
@@ -56,23 +54,23 @@ class SQLiteCache(object):
             DBFILENAME = DEFAULT_CACHEFILE
         setupDB = not os.path.isfile(DBFILENAME) or os.path.getsize(DBFILENAME) == 0
         setupDB |= DBFILENAME == ':memory:' #always rescan when using ram db.
-        print('Starting database... ')
+        log.i('Starting database... ')
 
         self.conn = sqlite3.connect(DBFILENAME, check_same_thread=False)
         self.db = self.conn.cursor()
         self.rootDir = cherry.config.media.basedir.str
 
         if setupDB:
-            print('Creating tables...')
+            log.i('Creating tables...')
             # Create table
-            self.db.execute('CREATE TABLE files (parent int NOT NULL, filename text NOT NULL, filetype text, isdir int NOT NULL)')
-            self.db.execute('CREATE TABLE dictionary (word text NOT NULL)')
-            self.db.execute('CREATE TABLE search (drowid int NOT NULL,, frowid int NOT NULL)')
-            print('Creating index for dictionary and search tables... ', end='')
+            self.db.execute('CREATE TABLE files (parent int, filename text, filetype text, isdir int)')
+            self.db.execute('CREATE TABLE dictionary (word text)')
+            self.db.execute('CREATE TABLE search (drowid int, frowid int)')
+            log.i('Creating index for dictionary and search tables... ', end='')
             self.conn.execute('CREATE INDEX idx_dictionary ON dictionary(word)')
             self.conn.execute('CREATE INDEX idx_search ON search(drowid,frowid)');
-            print('done.')
-            print('Connected to Database. (' + DBFILENAME + ')')
+            log.i('done.')
+            log.i('Connected to Database. (' + DBFILENAME + ')')
         #I don't care about journaling!
         self.conn.execute('PRAGMA synchronous = OFF')
         self.conn.execute('PRAGMA journal_mode = MEMORY')
@@ -80,17 +78,17 @@ class SQLiteCache(object):
 
     @timed
     def checkIfRootUpdated(self):
-        print('Checking if root folder is up to date...')
+        log.i('Checking if root folder is up to date...')
         self.db.execute('''SELECT rowid, filename, filetype FROM files WHERE parent = -1''')
         dbrootfilelist = self.db.fetchall()
         dbrootfiledict = {}
         for id, filename, ext in dbrootfilelist:
             dbrootfiledict[id] = filename + ext
         dbrootfilelist = [] #free mem
-        print('{} folders in db root'.format(len(dbrootfiledict)))
+        log.i('{} folders in db root'.format(len(dbrootfiledict)))
         realrootfiles = os.listdir(self.rootDir)
-        print('{} folders in fs root'.format(len(realrootfiles)))
-        print('Comparing db with filesystem...')
+        log.i('{} folders in fs root'.format(len(realrootfiles)))
+        log.i('Comparing db with filesystem...')
 
         removeList = [] #list of db ids
         addList = [] #list of file system paths
@@ -108,15 +106,15 @@ class SQLiteCache(object):
         if len(removeList) > 0 or len(addList) > 0:
             if 'y' == input("Changes detected ({} added, {} removed), perform rescan? (y/n)".format(len(addList), len(removeList))):
                 for removeItem in removeList:
-                    print('removing file with id: ' + str(removeItem) + ' ...')
+                    log.i('removing file with id: ' + str(removeItem) + ' ...')
                     self.removeFromDB(removeItem)
                 if addList:
                     self.register_with_db(addList, basedir=self.rootDir)
         else:
-            print('no changes found.')
+            log.i('no changes found.')
 
     def removeFromDB(self, filerowid):
-        print("""removeFromDB: NOT IMPLEMENTED! should remove file """ + str(filerowid))
+        log.e("""removeFromDB: NOT IMPLEMENTED! should remove file """ + str(filerowid))
 
     @classmethod
     def searchterms(cls, searchterm):
@@ -135,10 +133,10 @@ class SQLiteCache(object):
         for term in terms:
             query = '''SELECT search.frowid FROM dictionary JOIN search ON search.drowid = dictionary.rowid WHERE dictionary.word = ?'''
             limit = ' LIMIT 0, 250' #TODO add maximum db results as configuration parameter
-            print('Search term: ' + term)
+            log.d('Search term: ' + term)
             sql = query + limit
             if performanceTest:
-                print('Query used: ' + sql)
+                log.d('Query used: ' + sql)
             self.db.execute(sql, (term,));
             resultlist += self.db.fetchall()
 
@@ -149,19 +147,19 @@ class SQLiteCache(object):
         self.db = self.conn.cursor()
         terms = SQLiteCache.searchterms(value)
         if debug:
-            print('searchterms')
-            print(terms)
+            log.d('searchterms')
+            log.d(terms)
         results = []
         resultfileids = {}
 
-        print('querying terms: ' + str(terms))
+        log.d('querying terms: ' + str(terms))
         perf()
         fileids = self.fetchFileIds(terms)
         perf('file id fetching')
 
         if debug:
-            print('fileids')
-            print(fileids)
+            log.d('fileids')
+            log.d(fileids)
         for fileid in fileids:
             if fileid in resultfileids:
                 resultfileids[fileid] += 1
@@ -169,27 +167,27 @@ class SQLiteCache(object):
                 resultfileids[fileid] = 1
 
         if debug:
-            print('all file ids')
-            print(resultfileids)
+            log.d('all file ids')
+            log.d(resultfileids)
         #sort items by occurences and only return maxresults
         sortedresults = sorted(resultfileids.items(), key=itemgetter(1), reverse=True)
         #sortedresults = sortedresults[:min(len(resultfileids),maxresults)]
         if debug:
-            print('sortedresults')
-            print(sortedresults)
+            log.d('sortedresults')
+            log.d(sortedresults)
         bestresults = list(map(itemgetter(0), sortedresults))
         if debug:
-            print('bestresults')
-            print(bestresults)
+            log.d('bestresults')
+            log.d(bestresults)
         perf()
         for fileidtuple in bestresults:
             results.append(self.fullpath(fileidtuple[0]))
         perf('querying fullpaths')
         if debug:
-            print('resulting paths')
-            print(results)
+            log.d('resulting paths')
+            log.d(results)
         if performanceTest:
-            print('overall search took ' + str(time() - starttime) + 's')
+            log.d('overall search took ' + str(time() - starttime) + 's')
         return results
 
     def fullpath(self, filerowid):
@@ -206,7 +204,7 @@ class SQLiteCache(object):
     @timed
     def register_with_db(self, paths, basedir):
         """adds the given paths and their contents to the media database"""
-        logging.info("updating known media")
+        log.i("updating known media")
         counter = 0
         progress = Progress(len(paths))
         try:
@@ -220,20 +218,20 @@ class SQLiteCache(object):
                     if item.parent is None or item.parent.parent is None:
                         if item.parent is None:
                             progress.tick()
-                        logging.info(progress.formatstr(
+                        log.i(progress.formatstr(
                                     ' ETA %(eta)s (%(percent)s) -> ',
                                     self.trim_to_maxlen(50, self.path_from_basedir(item))
                                     ))
         except Exception as e:
-            logging.exception('')
-            logging.error("error while updating media: %s %s", e.__class__.__name__, e)
-            logging.error("rollback to previous commit.")
+            log.ex('')
+            log.e("error while updating media: %s %s", e.__class__.__name__, e)
+            log.e("rollback to previous commit.")
             counter -= counter % AUTOSAVEINTERVAL
         else:
             progress.finish()
-            logging.info("media update complete.")
+            log.i("media update complete.")
         finally:
-            logging.info("%d file records added", counter)
+            log.i("%d file records added", counter)
 
 
     def path_from_basedir(self, fileobj):
@@ -261,7 +259,7 @@ class SQLiteCache(object):
             word_ids = self.add_to_dictionary_table(fileobj.name)
             self.add_to_search_table(fileobj.uid, word_ids)
         except UnicodeEncodeError as e:
-            logging.error("wrong encoding for filename '%s' (%s)", fileobj.relpath, e.__class__.__name__)
+            log.e("wrong encoding for filename '%s' (%s)", fileobj.relpath, e.__class__.__name__)
 
     def add_to_file_table(self, fileobj):
         #files(parentid, filename, ext, 1 if isdir else 0)
@@ -289,7 +287,7 @@ def perf(text=None):
         if text == None:
             __perftime = time()
         else:
-            print(text + ' took ' + str(time() - __perftime) + 's to execute')
+            log.d(text + ' took ' + str(time() - __perftime) + 's to execute')
 
 class File():
     def __init__(self, path, parent=None, isdir=None):

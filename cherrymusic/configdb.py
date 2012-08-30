@@ -48,14 +48,14 @@ class ConfigDB(object):
         self.conn = sqlite3.connect(CONFIGDBFILE, check_same_thread=False)
 
         if setupDB:
-            print('Creating config db table...')
-            self.conn.execute('CREATE TABLE config (key text UNIQUE NOT NULL, value text)')
+            log.i('Creating config db table...')
+            self.conn.execute('CREATE TABLE config (key text UNIQUE, value text)')
             self.conn.execute('CREATE INDEX idx_config ON config(key)');
-            print('done.')
-            print('Initializing config db with default configuration...')
+            log.i('done.')
+            log.i('Initializing config db with default configuration...')
             self.reset_to_default()
-            print('done.')
-            print('Connected to Database. (' + CONFIGDBFILE + ')')
+            log.i('done.')
+            log.i('Connected to Database. (' + CONFIGDBFILE + ')')
 
     def load(self):
         cursor = self.conn.execute('SELECT * FROM config')

@@ -39,6 +39,7 @@ import cherrypy
 from cherrymusic import renderjson
 from cherrymusic import userdb
 from cherrymusic import playlistdb
+from cherrymusic import log
 import cherrymusic as cherry
 from urllib import parse
 
@@ -67,7 +68,7 @@ class HTTPHandler(object):
     def index(self, action='', value='', filter='', login=None, username=None, password=None):
 
         if cherry.config.server.use_ssl.bool and not self.issecure(cherrypy.url()):
-            print('Not secure, redirecting...')
+            log.d('Not secure, redirecting...')
             raise cherrypy.HTTPRedirect(self.getSecureUrl(cherrypy.url()), 302)
 
         firstrun = 0 == self.userdb.getUserCount();
@@ -79,7 +80,7 @@ class HTTPHandler(object):
         if login == 'login':
             self.session_auth(username, password)
             if cherrypy.session['username']:
-                print('user ' + cherrypy.session['username'] + ' just logged in.')
+                log.i('user ' + cherrypy.session['username'] + ' just logged in.')
         elif login == 'create admin user':
             if firstrun:
                 if username.strip() and password.strip():
