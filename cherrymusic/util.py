@@ -30,8 +30,35 @@
 
 import logging
 import os
+import sys
 
 from time import time
+
+def configurationFile():
+    return os.path.join(getConfigPath(),'config')
+    
+def databaseFilePath(filename):
+    configdir = os.path.join(getConfigPath(),'db')
+    if not os.path.exists(configdir):
+        os.makedirs(configdir)
+    configpath = os.path.join(configdir,filename)
+    print(configpath)
+    return configpath
+    
+def assureHomeFolderExists():
+    dir = os.path.join(os.path.expanduser('~'),'.cherrymusic','db')
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+        
+def getConfigPath():
+    if len(sys.argv)>2 and (sys.argv[1] == '-c' or sys.argv[1] == '--config-path') and os.path.exists(sys.argv[2]):
+           return sys.argv[2]
+    else:
+        assureHomeFolderExists()
+        return os.path.join(os.path.expanduser('~'),'.cherrymusic')
+    
+
+    
 
 def filename(path, pathtofile=False):
     if pathtofile:

@@ -35,7 +35,9 @@ import uuid
 
 from collections import namedtuple
 
-USERDBFILE = 'user.db'
+from cherrymusic.util import databaseFilePath
+
+USERDBFILE = databaseFilePath('user.db')
 
 class UserDB:
     def __init__(self):

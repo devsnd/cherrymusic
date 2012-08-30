@@ -35,8 +35,9 @@ import cherrymusic.configuration
 
 from cherrymusic.configuration import Configuration
 from cherrymusic import configuration
+from cherrymusic.util import databaseFilePath
 
-CONFIGDBFILE = 'config.db'
+CONFIGDBFILE = databaseFilePath('config.db')
 #CONFIGDBFILE = ':memory:'
 
 class ConfigDB(object):
