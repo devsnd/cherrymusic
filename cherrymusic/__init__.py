@@ -37,6 +37,7 @@ from cherrymusic import configdb
 from cherrymusic import sqlitecache
 from cherrymusic import cherrymodel
 from cherrymusic import httphandler
+from cherrymusic import util
 
 config = None
 
@@ -52,8 +53,9 @@ class CherryMusic:
     def _init_config(self):
         global config
         cdb = configdb.ConfigDB()
-        logging.info('updating config db from %s', './config')
-        filecfg = configuration.from_configparser('./config')
+        configFilePath = util.configurationFile()
+        logging.info('updating config db from %s', configFilePath)
+        filecfg = configuration.from_configparser(configFilePath)
         cdb.update(filecfg)
         logging.info('loading configuration from database')
         config = cdb.load()

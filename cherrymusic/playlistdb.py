@@ -30,8 +30,9 @@
 
 import os
 import sqlite3
+from cherrymusic.util import databaseFilePath
 
-PLAYLISTDBFILE = 'playlist.db'
+PLAYLISTDBFILE = databaseFilePath('playlist.db')
 
 class PlaylistDB:
     def __init__(self):
