@@ -44,9 +44,11 @@ class UserDB:
         while True:
             row = cur.fetchone()
             if row:
-                user = User(*row)
-                login = Crypto.scramble(password, user.salt) == user.password
+                testuser = User(*row)
+                login = Crypto.scramble(password, testuser.salt) == testuser.password
             if not row or login:
+                if login:
+                    user = testuser
                 break
         return user
 
@@ -98,12 +100,12 @@ class User(namedtuple('User_', 'uid name isadmin password salt')):
 
         salt = Crypto.generate_salt()
         password = Crypto.scramble(password, salt)
-        return User(-1, name, password, salt, isadmin)
+        return User(-1, name, isadmin, password, salt)
 
 
     @classmethod
     def nobody(cls):
         '''return a user object representing an unknown user'''
         if User.__NOBODY is None:
-            User.__NOBODY = User(-1, None, None, None, False)
+            User.__NOBODY = User(-1, None, None, None, None)
         return User.__NOBODY
