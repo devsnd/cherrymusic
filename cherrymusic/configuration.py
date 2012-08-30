@@ -28,76 +28,57 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
+import logging
+import os
 import re
 
-import logging
 
-logging.basicConfig(level=logging.WARN)
+def from_defaults():
+    '''load default configuration. must work if path to standard config file is unknown.'''
+    c = Configuration()
+
+    c.media.basedir = os.path.join(os.path.expanduser('~'), 'Music')
+    c.media.playable = 'mp3 ogg wma flac'
+
+    c.search.cachefile = 'cherry.cache.db'
+    c.search.maxresults = '20'
+
+    c.look.theme = 'zeropointtwo'
+
+    c.browser.maxshowfiles = '100'
+
+    c.server.port = '8080'
+    c.server.logfile = 'site.log'
+    c.server.localhost_only = 'False'
+
+    c.server.use_ssl = 'False'
+    c.server.ssl_port = '8443'
+    c.server.ssl_certificate = 'certs/server.crt'
+    c.server.ssl_private_key = 'certs/server.key'
+
+    return c
 
 
-class ValueConverter(object):
-    """ """
-    @classmethod
-    def __to_bool(cls, *args):  #TODO proper implementation
-        if not args:
-            logging.warn('no valid args given to bool transformer; returning False')
-            return False
-        val = args[0]
-        if isinstance(val, (bool, int, float, complex, list, set, dict, tuple)):
-            return bool(val)
-        try:
-            return val.__bool__()
-        except AttributeError:
-            try:
-                return bool(float(val))
-            except ValueError:
-                try:
-                    return bool(int(val))
-                except ValueError:
-                    if isinstance(val, str) and val.strip().lower() in ('yes', 'true'):
-                        return True
-                    if isinstance(val, str) and val.strip().lower() in ('false', 'no', ''):
-                        return False
-                    logging.warn("cannot parse value as bool; returning False. type: %s, value: '%s'",
-                                 val.__class__.__name__, val)
-                    return False
+def from_configparser(filepath):
+    """Have an ini file that the python configparser can understand? Pass the filepath
+    to this function, and a matching Configuration will magically be returned."""
 
-    @classmethod
-    def __to_list(cls, *args):
-        if not args:        # TODO proper implementation
-            logging.warn('no valid args given to list transformer; returning empty list')
-            return ()
-        val = args[0]
-        if isinstance(val, str):
-            return re.split(r'\W+', val)
-        else:
-            logging.warn('list transform not implemented for type %s. returning empty list')
-            return ()
+    import os
+    if not os.path.exists(filepath):
+        logging.error('configuration file not found: %s', filepath)
+        return None
+    if not os.path.isfile(filepath):
+        logging.error('configuration path is not a file: %s', filepath)
+        return None
 
-    # standard transformers
-    # TODO replace by proper ones 
-    __transformers = { str(t.__name__): t for t in [int, float, str]}
+    from configparser import ConfigParser
+    cfgp = ConfigParser()
+    cfgp.read(filepath)
+    dic = {}
+    for section_name, section in cfgp.items():
+        dic[section_name] = dict([i for i in section.items()])
+    return Configuration(dic=dic)
 
-    def __init__(self, val):
-        self._val = val
-        self._transformers = dict(__class__.__transformers)
-        self._transformers['list'] = __class__.__to_list
-        self._transformers['bool'] = __class__.__to_bool
-
-    def __getattr__(self, tname):
-        return self.__getitem__(tname)
-
-    def __getitem__(self, tname):
-        t = self._transformers[tname]
-        try:
-            if self._val is None:
-                raise ValueError
-            return t(self._val)
-        except (ValueError, TypeError):
-            return t()
-
-    def _knows(self, name):
-        return name in self._transformers.keys()
 
 class Property(object):
 
@@ -107,8 +88,8 @@ class Property(object):
     _namesep = '.'
     _name = r'([%s][%s]*)' % (_name_leadchars, _namechars)
 
-    name_patn = re.compile(r'^%s$' % (_name,))
-    qual_name_patn = re.compile(r'''
+    _name_patn = re.compile(r'^%s$' % (_name,))
+    _qual_name_patn = re.compile(r'''
                                 ^                       # start of string
                                 %(name)s                # one name
                                 (?: %(sep)s %(name)s )* # more names with leading separators (non-grouping)
@@ -132,14 +113,14 @@ class Property(object):
 
     @classmethod
     def _validate_localkey(cls, key):
-        if not (key and type(key) == str and cls.name_patn.match(key)):
+        if not (key and type(key) == str and cls._name_patn.match(key)):
             raise KeyError("invalid property name: '%s': a name must be a non-empty string, only contain the characters '%s' and not begin with '%s'"
                            % (key, cls._namechars, cls._name_nonleadchars))
         cls._validate_no_keyword(key)
 
     @classmethod
     def _validate_complexkey(cls, key):
-        if not (key and type(key) == type('') and cls.qual_name_patn.match(key)):
+        if not (key and type(key) == type('') and cls._qual_name_patn.match(key)):
             raise KeyError("invalid property name: '%s': names must be non-empty strings, only consist of the characters: '%s' and be separated by a '%s'"
                            % (key, cls._namechars, cls._namesep))
         cls._validate_no_keyword(key);
@@ -175,6 +156,9 @@ class Property(object):
         if (self._converter._knows(name)):
             return self._converter[name]
         raise AttributeError(__class__.__name__ + ' object has no attribute ' + name)
+
+    def __getitem__(self, name):
+        return self.__getattr__(name)
 
     def __bool__(self):
         return self.bool
@@ -397,23 +381,153 @@ class Configuration(Property):
                 logging.debug('temp config %s attached to %s', self, self.parent.name)
 
 
-def from_configparser(filepath):
-    """Have an ini file that the python configparser can understand? Pass the filepath
-    to this function, and a matching Configuration will magically be returned."""
-    
-    import os
-    if not os.path.exists(filepath):
-        logging.error('configuration file not found: %s', filepath)
-        return None
-    if not os.path.isfile(filepath):
-        logging.error('configuration path is not a file: %s', filepath)
-        return None
-    
-    from configparser import ConfigParser
-    cfgp = ConfigParser()
-    cfgp.read(filepath)
-    dic = {}
-    for section_name, section in cfgp.items():
-        dic[section_name] = dict([i for i in section.items()])
-    return Configuration(dic=dic)
+def transformer(name):
+    def transformer_decorator(func):
+        def transformer_wrapper(self, *args, **kwargs):
+            return func(*args, **kwargs)
+        return type(name, (object,), {'__new__': transformer_wrapper})
+    return transformer_decorator
 
+
+class TransformError(Exception):
+
+    def __init__(self, transformername, val, default=None, cause=None):
+        self._msg = "Error while trying to parse value with transformer '%s': %s" \
+                % (transformername, val)
+        self._xform = transformername
+        self._value = val
+        self._default = default
+        self._cause = cause
+        super().__init__(self._msg)
+
+    @property
+    def msg(self):
+        return self._msg
+
+    @property
+    def transformer(self):
+        return self._xform
+
+    @property
+    def badvalue(self):
+        return self._value
+
+    @property
+    def suggested_default(self):
+        return self._default
+
+    @property
+    def cause(self):
+        return self._cause
+
+
+@transformer(name='bool')
+def _to_bool_transformer(val=None):
+    if isinstance(val, (bool, int, float, complex, list, set, dict, tuple)):
+        return bool(val)
+    try:
+        return val.__bool__()
+    except AttributeError:
+        try:
+            return bool(_to_float_transformer(val))
+        except (TypeError, ValueError, TransformError):
+                if isinstance(val, str) and val.strip().lower() in ('yes', 'true'):
+                    return True
+                if isinstance(val, str) and val.strip().lower() in ('false', 'no', ''):
+                    return False
+                raise TransformError('bool', val, default=False)
+
+
+@transformer('list')
+def _to_list_transformer(val=None):
+    if isinstance(val, str):
+        return re.split(r'\W+', val)
+    if isinstance(val, (list, tuple, set)):
+        return list(val)
+    else:
+        raise TransformError('list', val, default=[])
+
+@transformer('int')
+def _to_int_transformer(val=None):
+
+    def ishex(s):
+        return re.match(r'[+-]?(0(x|X))?[0-9a-fA-F]+$', s) and re.search(r'[a-fA-FxX]', s)
+
+    def isoctal(s):
+        return re.match(r'[+-]?0(o|O)[0-7]+$', s)
+
+    try:
+        if isinstance(val, str):
+            val = val.strip()
+            if ishex(val):
+                base = 16
+            elif isoctal(val):
+                base = 8
+            else:
+                base = 10
+            try:
+                return int(val, base)
+            except ValueError:
+                return int(float(val))
+        else:
+            return int(val)
+    except (TypeError, ValueError) as e:
+        raise TransformError('int', val, default=int(), cause=e)
+
+
+@transformer('float')
+def _to_float_transformer(val=None):
+    '''may call _to_int_transformer'''
+    try:
+        if isinstance(val, str):
+            val = val.strip()
+        try:
+            return float(val)
+        except ValueError:
+            try:
+                return float(_to_int_transformer(val))
+            except TransformError as e:
+                raise e.cause if e.cause else ValueError('generic ValueError')
+    except (TypeError, ValueError) as e:
+        raise TransformError('float', val, default=float(), cause=e)
+
+
+@transformer('str')
+def _to_str_transformer(val=None):
+    if val is None:
+        return ''
+    if isinstance(val, str):
+        return val.strip()
+    return str(val)
+
+
+
+class ValueConverter(object):
+
+    __transformers = { str(t.__name__): t for t in [_to_int_transformer,
+                                                    _to_float_transformer,
+                                                    _to_bool_transformer,
+                                                    _to_list_transformer,
+                                                    _to_str_transformer,
+                                                    ]}
+
+    def __init__(self, val):
+        self._val = val
+        self._transformers = dict()
+
+    def __getattr__(self, tname):
+        return self.__getitem__(tname)
+
+    def __getitem__(self, tname):
+        if tname in self._transformers.keys():
+            t = self._transformers[tname]
+        else:
+            t = __class__.__transformers[tname]
+        try:
+            return t(self._val)
+        except TransformError as e:
+            logging.warn('%s; returning default value of %s', e.msg, str(e.suggested_default))
+            return e.suggested_default
+
+    def _knows(self, name):
+        return name in self._transformers.keys() or name in __class__.__transformers.keys()

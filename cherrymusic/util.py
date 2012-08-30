@@ -28,62 +28,124 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
+import logging
 import os
-import sqlite3
 
-from cherrymusic.configuration import Configuration
+from time import time
 
-CONFIGDBFILE = 'config.db'
-#CONFIGDBFILE = ':memory:'
+def filename(path, pathtofile=False):
+    if pathtofile:
+        return os.path.split(path)[0]
+    else:
+        return os.path.split(path)[1]
 
-class ConfigDB(object):
-    """quick and dirty implementation of a config database in sqlite3"""
+def stripext(filename):
+    if '.' in filename:
+        return filename[:filename.rindex('.')]
+    return filename
 
-    def __init__(self):
-        setupDB = not os.path.isfile(CONFIGDBFILE) or os.path.getsize(CONFIGDBFILE) == 0
-        self.conn = sqlite3.connect(CONFIGDBFILE, check_same_thread=False)
+def timed(func):
+    """decorator to time function execution and log result on DEBUG"""
+    from time import clock
+    def wrapper(*args, **kwargs):
+        starttime = clock()
+        result = func(*args, **kwargs)
+        duration = clock() - starttime
+        logging.debug('%s.%s: %.4f', func.__module__, func.__name__, duration)
+        return result
+    return wrapper
 
-        if setupDB:
-            print('Creating config db table...')
-            self.conn.execute('CREATE TABLE config (key text UNIQUE, value text)')
-            self.conn.execute('CREATE INDEX idx_config ON config(key)');
-            print('done.')
-            print('Connected to Database. (' + CONFIGDBFILE + ')')
+def Property(func):
+    """
+    decorator that allows defining acessors in place as local functions.
+    func must define fget, and may define fset, fdel and doc; `return locals()`
+    at the end. 
+    Seen at http://adam.gomaa.us/blog/2008/aug/11/the-python-property-builtin/
+    """
+    return property(**func())
 
-    def load(self):
-        cursor = self.conn.execute('SELECT * FROM config')
-        dic = {}
-        while True:
-            row = cursor.fetchone()
-            if row is None:
-                break
-            key, value = row
-            dic[key] = value
-        return Configuration(dic=dic)
+class Progress(object):
+    """Simple, timed progress tracking. 
+    Based on the notion the time to complete a task can be broken up into 
+    evenly spaced ticks, when a good estimate of total ticks
+    is known. Estimates time remaining from the time taken for past ticks.
+    The timer starts on the first tick."""
 
-    def save(self, cfg, clear=False):
-        """save cfg to database. clear==True replaces existing config completely. clear=False behaves like update."""
-        if clear:
-            self.conn.execute('DELETE FROM config')
-            self._dump(cfg)
-        else:
-            self.update(cfg)
+    def __init__(self, ticks):
+        assert ticks > 0, "expected ticks must be > 0"
+        self._ticks = 0
+        self._expected_ticks = ticks
+        self._starttime = time()
+        self._finished = False
 
-    def update(self, cfg):
-        """updates config database from cfg. entries in cfg overwrite existing keys or are created new.
-        existing entries not in cfg remain untouched."""
-        if cfg:
-            for key, value in cfg.list:
-                foundid = self.conn.execute('SELECT rowid FROM config WHERE key=?', (key,)).fetchone()
-                if foundid is None:
-                    self.conn.execute('INSERT INTO config (key, value) VALUES (?,?)', (key, value))
-                else:
-                    foundid = foundid[0]
-                    self.conn.execute('UPDATE config SET key=?, value=? WHERE rowid=?', (key, value, foundid))
-            self.conn.commit()
+    def _start(self):
+        self._starttime = time()
 
-    def _dump(self, cfg):
-        if cfg:
-            for key, value in cfg.list:
-                self.conn.execute('INSERT INTO config (key, value) VALUES (?,?)', (key, value))
-            self.conn.commit()
+    def tick(self):
+        """Register a tick with this object. The first tick starts the timer."""
+        if self._ticks == 0:
+            self._start()
+        self._ticks += 1
+
+    def finish(self):
+        """Mark this progress as finished. Setting this is final."""
+        self._finished = True
+
+    def formatstr(self, fstr, *args):
+        add = ''.join(list(args))
+        fstr = fstr % {'eta': self.etastr, 'percent': self.percentstr, 'ticks': self._ticks, 'total': self._expected_ticks}
+        return fstr + add
+
+    @property
+    def percent(self):
+        """Number estimate of percent completed. Receiving more ticks than
+        initial estimate increases this number beyond 100."""
+        if (self._finished):
+            return 100
+        return self._ticks * 100 / self._expected_ticks
+
+    @property
+    def percentstr(self):
+        """String version of `percent`. Invalid values outside of (0..100)
+        are rendered as unknown value."""
+        if (self._finished):
+            return '100%'
+        p = self.percent
+        return '%s%%' % (str(int(p)) if p <= 100 else '??')
+
+    @property
+    def starttime(self):
+        return self._starttime
+
+    @property
+    def runtime(self):
+        if (self._ticks == 0):
+            return 0
+        return time() - self.starttime
+
+    @property
+    def eta(self):
+        """Estimate of time remaining, in seconds. Ticks beyond initial estimate
+        lead to a negative value."""
+        if self._finished:
+            return 0
+        if self._ticks == 0:
+            return 0
+        return ((self._expected_ticks - self._ticks) * self.runtime / self._ticks) + 1
+
+    @property
+    def etastr(self):
+        """String version of remaining time estimate. A negative `eta` is marked
+        as positive overtime."""
+        overtime = ''
+        eta = self.eta
+        if eta < 0:
+            eta = -eta
+            overtime = '+'
+        tmp = eta
+        hh = tmp / 3600
+        tmp %= 3600
+        mm = tmp / 60
+        tmp %= 60
+        ss = tmp
+        return '%(ot)s%(hh)02d:%(mm)02d:%(ss)02d' % {'hh': hh, 'mm': mm, 'ss': ss, 'etas': eta, 'ot':overtime}

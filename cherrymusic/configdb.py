@@ -31,7 +31,10 @@
 import os
 import sqlite3
 
+import cherrymusic.configuration
+
 from cherrymusic.configuration import Configuration
+from cherrymusic import configuration
 
 CONFIGDBFILE = 'config.db'
 #CONFIGDBFILE = ':memory:'
@@ -47,6 +50,9 @@ class ConfigDB(object):
             print('Creating config db table...')
             self.conn.execute('CREATE TABLE config (key text UNIQUE, value text)')
             self.conn.execute('CREATE INDEX idx_config ON config(key)');
+            print('done.')
+            print('Initializing config db with default configuration...')
+            self.reset_to_default()
             print('done.')
             print('Connected to Database. (' + CONFIGDBFILE + ')')
 
@@ -81,6 +87,10 @@ class ConfigDB(object):
                     foundid = foundid[0]
                     self.conn.execute('UPDATE config SET key=?, value=? WHERE rowid=?', (key, value, foundid))
             self.conn.commit()
+
+    def reset_to_default(self):
+        '''clears all content from the database and reinitializes it with default values'''
+        self.save(configuration.from_defaults(), clear=True)
 
     def _dump(self, cfg):
         if cfg:

@@ -104,35 +104,59 @@ class TestProperty(unittest.TestCase):
 
     def test_value_conversions(self):
 
-        def assert_value_conversions(testvalue, expected):
+        def assert_value_conversion(kind, testvalue, expected):
             p = Property('test', testvalue)
-            self.assertEqual(expected[''], p.value, 'returned value must be equal to initialized value')
-            self.assertEqual(expected['str'], p.str, 'str conversion must return int version of value')
-            self.assertEqual(expected['int'], p.int, 'int conversion must return int version of value')
-            self.assertEqual(expected['bool'], p.bool, 'bool conversion must return int version of value')
-            self.assertEqual(expected['float'], p.float, 'float conversion must return int version of value')
+            actual = p[kind]
+            self.assertEqual(expected, actual,
+                             ('Bad %s conversion for ' + \
+                             'value: %s! expect: %s, actual: %s')
+                             % (kind, p.value, expected, actual))
 
-        assert_value_conversions('99', {
-                                        '': '99',
-                                        'str': '99',
-                                        'int': int('99'),
-                                        'bool': bool('99'),
-                                        'float': float('99'),
-                                        })
-        assert_value_conversions('scarface', {
-                                        '': 'scarface',
-                                        'str': 'scarface',
-                                        'int': 0,
-                                        'bool': bool('scarface'),
-                                        'float': float(0),
-                                                   })
-        assert_value_conversions(None, {
-                                        '': None,
-                                        'str': '',
-                                        'int': 0,
-                                        'bool': bool(None),
-                                        'float': float(0),
-                                        })
+        def assert_value_conversions(kind, val_exp_pairs):
+            for testvalue, expected in val_exp_pairs:
+                assert_value_conversion(kind, testvalue, expected)
+
+        assert_value_conversions('str', (
+                                         ('  ', ''),
+                                         (None, ''),
+                                         ))
+
+        assert_value_conversions('int', (
+                                         ('99', 99),
+                                         ('0x10', 16),
+                                         ('0o10', 8),
+                                         ('1.2', 1),
+                                         ('1.2e3', 1200),
+                                         ('pomp', 0),
+                                         (None, 0),
+                                         ))
+
+        assert_value_conversions('float', (
+                                         ('99', 99),
+                                         ('0x10', 16),
+                                         ('0o10', 8),
+                                         ('pomp', 0),
+                                         ('1.2', 1.2),
+                                         ('1.2e3', 1200),
+                                         (None, 0),
+                                         ))
+
+        assert_value_conversions('bool', (
+                                          ('1', True),
+                                          ('0', False),
+                                          ('0x1', True),
+                                          ('Yes', True),
+                                          ('NO', False),
+                                          ('truE', True),
+                                          ('False', False),
+                                          ('pomp', False),
+                                          (None, False),
+                                          ))
+
+        assert_value_conversions('list', (
+                                          ('Fee fi, fo-fum!', ['Fee', 'fi', 'fo', 'fum', '']),
+                                          (None, []),
+                                          ))
 
 
 class TestConfiguration(unittest.TestCase):
