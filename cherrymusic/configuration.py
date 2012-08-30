@@ -79,6 +79,22 @@ def from_configparser(filepath):
     return Configuration(dic=dic)
 
 
+def write_to_file(cfg, filepath):
+    """Write a configuration to the given file so that its readable by configparser"""
+    with open(filepath, mode='w', encoding='utf-8') as f:
+
+        def printf(s):
+            f.write(s + os.linesep)
+
+        lastsection = None
+        for prop in sorted(cfg.list, key=lambda p: p[0]):
+            section, subkey =  prop[0].split(Property._namesep, 1)
+            if section != lastsection:
+                lastsection = section
+                printf('%s[%s]' % (os.linesep, section,))
+            printf('%s = %s' % (subkey, prop[1]))
+
+
 class Property(object):
 
     _name_leadchars = 'a-zA-Z'
