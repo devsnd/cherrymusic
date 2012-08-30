@@ -98,6 +98,7 @@ class TestProperty(unittest.TestCase):
                                          ('1.2', 1),
                                          ('1.2e3', 1200),
                                          ('pomp', 0),
+                                         ('cafe', 0),
                                          (None, 0),
                                          ))
 
@@ -124,7 +125,7 @@ class TestProperty(unittest.TestCase):
                                           ))
 
         assert_value_conversions('list', (
-                                          ('Fee fi, fo-fum!', ['Fee', 'fi', 'fo', 'fum', '']),
+                                          ('Fee fi, fo_fum!', ['Fee', 'fi', 'fo', 'fum']),
                                           (None, []),
                                           ))
 
