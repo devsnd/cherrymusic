@@ -48,7 +48,7 @@ class ConfigDB(object):
 
         if setupDB:
             print('Creating config db table...')
-            self.conn.execute('CREATE TABLE config (key text UNIQUE, value text)')
+            self.conn.execute('CREATE TABLE config (key text UNIQUE NOT NULL, value text)')
             self.conn.execute('CREATE INDEX idx_config ON config(key)');
             print('done.')
             print('Initializing config db with default configuration...')

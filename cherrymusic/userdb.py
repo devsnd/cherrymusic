@@ -44,7 +44,7 @@ class UserDB:
 
         if setupDB:
             print('Creating user db table...')
-            self.conn.execute('CREATE TABLE users (username text UNIQUE, admin int, password text, salt text)')
+            self.conn.execute('CREATE TABLE users (username text UNIQUE NOT NULL, admin int NOT NULL, password text NOT NULL, salt text NOT NULL)')
             self.conn.execute('CREATE INDEX idx_users ON users(username)');
             print('done.')
             print('Connected to Database. (' + USERDBFILE + ')')
