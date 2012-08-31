@@ -188,11 +188,13 @@ div#dialog{
 }
 
 #mediawrapper{
-	/*float: right;
-	width: 430px;*/
+	height: 105px;
 }
 #mediaplayer{
-	/*position: fixed;*/
+	left: 0;
+    position: fixed;
+    top: 10px;
+    width: 100%;
 }
 .jp-playlist{
 	float: left;
@@ -301,6 +303,9 @@ div.container{
 /**********
 ADMIN PANEL
 **********/
+#adminpanelwrapper{
+	padding: 0 10px;
+}
 #adminpanel{
 	font-family: monospace;
 }
