@@ -40,10 +40,14 @@ from cherrymusic import util
 from cherrymusic import log
 
 config = None
+VERSION = "0.2"
 
 class CherryMusic:
 
     def __init__(self):
+        if not util.configurationFileExists():
+            configuration.write_to_file(configuration.from_defaults(),util.configurationFile())
+            self.printWelcomeAndExit()
         self._init_config()
         self.db = sqlitecache.SQLiteCache(util.databaseFilePath('cherry.cache.db'))
         self.cherrymodel = cherrymodel.CherryModel(self.db)
@@ -59,6 +63,22 @@ class CherryMusic:
         cdb.update(filecfg)
         log.i('loading configuration from database')
         config = cdb.load()
+
+    def printWelcomeAndExit(self):
+        print("""
+==========================================================================
+Welcome to CherryMusic """+VERSION+"""!
+
+To get this party started, you need to edit the configuration file, which
+resides in your home directory:
+
+    """+util.configurationFile()+"""
+
+Then you can start the server and listen to whatever you like.
+Have fun!
+==========================================================================
+""")
+        exit(0)
 
     def start(self):
         socket_host = "127.0.0.1" if config.server.localhost_only.bool else "0.0.0.0"

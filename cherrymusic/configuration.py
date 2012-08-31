@@ -38,8 +38,9 @@ from cherrymusic import util
 def from_defaults():
     '''load default configuration. must work if path to standard config file is unknown.'''
     c = Configuration()
-
-    c.media.basedir = os.path.join(os.path.expanduser('~'), 'Music')
+    
+    mediabasedir = os.path.join(os.path.expanduser('~'), 'Music')
+    c._set('media.basedir', mediabasedir, warn_on_create=False)
     c.media.basedir._desc = """
                                 BASEDIR specifies where the media that should be
                                 served is located. It must be a the absolute path, e.g.
@@ -52,8 +53,7 @@ def from_defaults():
                                 extensions that can be played by jPlayer.
                                 """
 
-
-    c.search.maxresults = '20'
+    c._set('search.maxresults', 20, warn_on_create=False)
     c.search.maxresults._desc = """
                                 MAXRESULTS set the maximum amount of search results
                                 to be displayed. If MAXRESULTS is set to a higher value,
@@ -62,7 +62,7 @@ def from_defaults():
                                 """
 
 
-    c.look.theme = 'zeropointtwo'
+    c._set('look.theme','zeropointtwo', warn_on_create=False)
     c.look.theme._desc = """
                         Available themes are: "zeropointtwo", "hax1337".
                         To create your own theme, you can simply copy the theme
@@ -70,7 +70,7 @@ def from_defaults():
                         your will. Then you can set theme=yournewtheme
                         """
 
-    c.browser.maxshowfiles = '100'
+    c._set('browser.maxshowfiles','100',False)
     c.browser.maxshowfiles._desc = '''
                                     MAXSHOWFILES specifies how many files and folders should
                                     may be shown at the same time. E.g. if you open a folder
@@ -78,7 +78,7 @@ def from_defaults():
                                     according to the first letter in their name
                                     '''
 
-    c.server.port = '8080'
+    c._set('server.port','8080',False)
     c.server.port._desc = 'The port the server will listen to.'
 
 
@@ -422,7 +422,7 @@ class Configuration(Property):
             if warn_on_create:
                 log.w('config key not found, creating empty property: %s', tmpcfg.fullname)
             else:
-                log.i('set config: %s', tmpcfg.fullname)
+                log.d('set config: %s', tmpcfg.fullname)
             return tmpcfg
 
 

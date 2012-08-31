@@ -37,6 +37,9 @@ from time import time
 def configurationFile():
     return os.path.join(getConfigPath(),'config')
     
+def configurationFileExists():
+    return os.path.exists(configurationFile())
+    
 def databaseFilePath(filename):
     configdir = os.path.join(getConfigPath(),'db')
     if not os.path.exists(configdir):
