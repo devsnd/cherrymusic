@@ -96,8 +96,8 @@ def from_defaults():
     c.server.enable_ssl._desc = '''
                                 The following options allow you to use cherrymusic with
                                 https encryption. You must have "pyOpenSSL" installed to
-                                be able to use it. If use_ssl is set to False, all other
-                                options will be ommited.
+                                be able to use it. If enable_ssl is set to False, all other
+                                ssl options will be ommited.
                                 '''
 
     c.server.ssl_port = '8443'
@@ -174,7 +174,7 @@ class Property(object):
                                 re.VERBOSE)
 
     __reserved_objects = [int, bool, float, complex, str, bytes, list, set, tuple, dict]
-    __reserved_names = ['name', 'fullname', 'value', 'parent', ]
+    __reserved_names = ['name', 'fullname', 'value', 'parent', 'reserved']
 
     @classmethod
     def reserved(cls):
