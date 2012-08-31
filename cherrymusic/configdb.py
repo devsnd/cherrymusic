@@ -35,6 +35,7 @@ import cherrymusic.configuration
 
 from cherrymusic.configuration import Configuration
 from cherrymusic import configuration
+from cherrymusic import log
 
 class ConfigDB(object):
     """quick and dirty implementation of a config database in sqlite3"""
