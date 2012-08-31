@@ -40,6 +40,7 @@ from cherrymusic import renderjson
 from cherrymusic import userdb
 from cherrymusic import playlistdb
 from cherrymusic import log
+from cherrymusic.util import databaseFilePath
 import cherrymusic as cherry
 from urllib import parse
 
@@ -54,8 +55,8 @@ class HTTPHandler(object):
         self.mainpage = open('res/main.html').read()
         self.loginpage = open('res/login.html').read()
         self.firstrunpage = open('res/firstrun.html').read()
-        self.userdb = userdb.UserDB()
-        self.playlistdb = playlistdb.PlaylistDB()
+        self.userdb = userdb.UserDB(databaseFilePath('user.db'))
+        self.playlistdb = playlistdb.PlaylistDB(databaseFilePath('playlist.db'))
 
     def issecure(self, url):
         return parse.urlparse(url).scheme == 'https'

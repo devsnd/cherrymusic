@@ -34,14 +34,10 @@ import os
 import uuid
 
 from collections import namedtuple
-
-from cherrymusic.util import databaseFilePath
 from cherrymusic import log
 
-USERDBFILE = databaseFilePath('user.db')
-
 class UserDB:
-    def __init__(self):
+    def __init__(self,USERDBFILE):
         setupDB = not os.path.isfile(USERDBFILE) or os.path.getsize(USERDBFILE) == 0
         self.conn = sqlite3.connect(USERDBFILE, check_same_thread=False)
 

@@ -30,13 +30,10 @@
 
 import os
 import sqlite3
-from cherrymusic.util import databaseFilePath
 from cherrymusic import log
 
-PLAYLISTDBFILE = databaseFilePath('playlist.db')
-
 class PlaylistDB:
-    def __init__(self):
+    def __init__(self, PLAYLISTDBFILE):
         setupDB = not os.path.isfile(PLAYLISTDBFILE) or os.path.getsize(PLAYLISTDBFILE) == 0
         self.conn = sqlite3.connect(PLAYLISTDBFILE, check_same_thread=False)
         if setupDB:

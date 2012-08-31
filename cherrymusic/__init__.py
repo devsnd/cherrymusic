@@ -45,14 +45,14 @@ class CherryMusic:
 
     def __init__(self):
         self._init_config()
-        self.db = sqlitecache.SQLiteCache()
+        self.db = sqlitecache.SQLiteCache(util.databaseFilePath('cherry.cache.db'))
         self.cherrymodel = cherrymodel.CherryModel(self.db)
         self.httphandler = httphandler.HTTPHandler(config, self.cherrymodel)
         self.server()
 
     def _init_config(self):
         global config
-        cdb = configdb.ConfigDB()
+        cdb = configdb.ConfigDB(util.databaseFilePath('config.db'))
         configFilePath = util.configurationFile()
         log.i('updating config db from %s', configFilePath)
         filecfg = configuration.from_configparser(configFilePath)

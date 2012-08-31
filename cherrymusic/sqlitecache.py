@@ -38,9 +38,8 @@ from operator import itemgetter
 from time import time
 
 import cherrymusic as cherry
-from cherrymusic.util import timed, Progress, databaseFilePath
+from cherrymusic.util import timed, Progress
 
-DEFAULT_CACHEFILE = databaseFilePath('cherry.cache.db') #set to ':memory:' to keep _everything_ in ram
 scanreportinterval = 1
 AUTOSAVEINTERVAL = 100
 debug = False
@@ -48,10 +47,7 @@ performanceTest = False
 keepInRam = False
 
 class SQLiteCache(object):
-    def __init__(self):
-        DBFILENAME = databaseFilePath('cherry.cache.db')
-        if not DBFILENAME:
-            DBFILENAME = DEFAULT_CACHEFILE
+    def __init__(self,DBFILENAME):
         setupDB = not os.path.isfile(DBFILENAME) or os.path.getsize(DBFILENAME) == 0
         setupDB |= DBFILENAME == ':memory:' #always rescan when using ram db.
         log.i('Starting database... ')

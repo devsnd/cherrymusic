@@ -35,15 +35,11 @@ import cherrymusic.configuration
 
 from cherrymusic.configuration import Configuration
 from cherrymusic import configuration
-from cherrymusic.util import databaseFilePath
-
-CONFIGDBFILE = databaseFilePath('config.db')
-#CONFIGDBFILE = ':memory:'
 
 class ConfigDB(object):
     """quick and dirty implementation of a config database in sqlite3"""
 
-    def __init__(self):
+    def __init__(self, CONFIGDBFILE):
         setupDB = not os.path.isfile(CONFIGDBFILE) or os.path.getsize(CONFIGDBFILE) == 0
         self.conn = sqlite3.connect(CONFIGDBFILE, check_same_thread=False)
 
