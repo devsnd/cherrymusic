@@ -45,7 +45,7 @@ class ConfigDB(object):
 
         if setupDB:
             log.i('Creating config db table...')
-            self.conn.execute('CREATE TABLE config (key text UNIQUE, value text)')
+            self.conn.execute('CREATE TABLE config (key text UNIQUE, value text, desc text)')
             self.conn.execute('CREATE INDEX idx_config ON config(key)');
             log.i('done.')
             log.i('Initializing config db with default configuration...')
@@ -56,13 +56,18 @@ class ConfigDB(object):
     def load(self):
         cursor = self.conn.execute('SELECT * FROM config')
         dic = {}
+        descriptions = {}
         while True:
             row = cursor.fetchone()
             if row is None:
                 break
-            key, value = row
+            key, value, desc = row
             dic[key] = value
-        return Configuration(dic=dic)
+            descriptions[key] = desc
+        cfg = Configuration(dic=dic)
+        for key, desc in descriptions.items():
+            cfg[key]._desc = desc
+        return cfg
 
     def save(self, cfg, clear=False):
         """save cfg to database. clear==True replaces existing config completely. clear=False behaves like update."""
@@ -76,13 +81,13 @@ class ConfigDB(object):
         """updates config database from cfg. entries in cfg overwrite existing keys or are created new.
         existing entries not in cfg remain untouched."""
         if cfg:
-            for key, value in cfg.list:
+            for key, value, desc in cfg.list:
                 foundid = self.conn.execute('SELECT rowid FROM config WHERE key=?', (key,)).fetchone()
                 if foundid is None:
-                    self.conn.execute('INSERT INTO config (key, value) VALUES (?,?)', (key, value))
+                    self.conn.execute('INSERT INTO config (key, value, desc) VALUES (?,?,?)', (key, value, desc))
                 else:
                     foundid = foundid[0]
-                    self.conn.execute('UPDATE config SET key=?, value=? WHERE rowid=?', (key, value, foundid))
+                    self.conn.execute('UPDATE config SET key=?, value=?, desc=? WHERE rowid=?', (key, value, desc, foundid))
             self.conn.commit()
 
     def reset_to_default(self):
@@ -91,6 +96,6 @@ class ConfigDB(object):
 
     def _dump(self, cfg):
         if cfg:
-            for key, value in cfg.list:
-                self.conn.execute('INSERT INTO config (key, value) VALUES (?,?)', (key, value))
+            for key, value, desc in cfg.list:
+                self.conn.execute('INSERT INTO config (key, value, desc) VALUES (?,?,?)', (key, value, desc))
             self.conn.commit()

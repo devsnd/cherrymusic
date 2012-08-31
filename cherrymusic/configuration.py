@@ -32,6 +32,7 @@ import os
 import re
 
 from cherrymusic import log
+from cherrymusic import util
 
 
 def from_defaults():
@@ -39,21 +40,73 @@ def from_defaults():
     c = Configuration()
 
     c.media.basedir = os.path.join(os.path.expanduser('~'), 'Music')
-    c.media.playable = 'mp3 ogg wma flac'
+    c.media.basedir._desc = """
+                                BASEDIR specifies where the media that should be
+                                served is located. It must be a the absolute path, e.g.
+                                BASEDIR=/absolute/path/to/media
+                                """
 
-    c.search.cachefile = 'cherry.cache.db'
+    c.media.playable = 'mp3 ogg wma flac'
+    c.media.playable._desc = """
+                                PLAYABLE is a space separated list of media file
+                                extensions that can be played by jPlayer.
+                                """
+
+
     c.search.maxresults = '20'
+    c.search.maxresults._desc = """
+                                MAXRESULTS set the maximum amount of search results
+                                to be displayed. If MAXRESULTS is set to a higher value,
+                                the search will take longer, but also more accurate.
+                                100 is a good value, as a cd can have up to 99 tracks.
+                                """
+
 
     c.look.theme = 'zeropointtwo'
+    c.look.theme._desc = """
+                        Available themes are: "zeropointtwo", "hax1337".
+                        To create your own theme, you can simply copy the theme
+                        to ~/.cherrmusic/themes/yournewtheme and modify it to
+                        your will. Then you can set theme=yournewtheme
+                        """
 
     c.browser.maxshowfiles = '100'
+    c.browser.maxshowfiles._desc = '''
+                                    MAXSHOWFILES specifies how many files and folders should
+                                    may be shown at the same time. E.g. if you open a folder
+                                    with more than MAXSHOWFILES, the files will be grouped 
+                                    according to the first letter in their name
+                                    '''
 
     c.server.port = '8080'
-    c.server.logfile = 'site.log'
-    c.server.localhost_only = 'False'
+    c.server.port._desc = 'The port the server will listen to.'
 
-    c.server.use_ssl = 'False'
+
+    c.server.logfile = 'site.log'
+    c.server.logfile._desc = 'the logfile in which errors will be logged'
+
+    c.server.localhost_only = 'False'
+    c.server.localhost_only._desc = '''
+                                    when localhost_only is set to true, the server will not
+                                    be visible in the network and only play music on the
+                                    same computer it is running on
+                                    '''
+
+    c.server.enable_ssl = 'False'
+    c.server.enable_ssl._desc = '''
+                                The following options allow you to use cherrymusic with
+                                https encryption. You must have "pyOpenSSL" installed to
+                                be able to use it. If enable_ssl is set to False, all other
+                                ssl options will be ommited.
+                                '''
+
     c.server.ssl_port = '8443'
+    c.server.ssl_port._desc = '''
+                                The port that will listen to SSL encrypted requests. If
+                                use_ssl is set to True, all unencrypted HTTP requests
+                                will be redirected to this port.
+                                '''
+
     c.server.ssl_certificate = 'certs/server.crt'
     c.server.ssl_private_key = 'certs/server.key'
 
@@ -89,11 +142,17 @@ def write_to_file(cfg, filepath):
 
         lastsection = None
         for prop in sorted(cfg.list, key=lambda p: p[0]):
-            section, subkey =  prop[0].split(Property._namesep, 1)
+            fullname, value, desc = prop
+            section, subkey = fullname.split(Property._namesep, 1)
             if section != lastsection:
                 lastsection = section
                 printf('%s[%s]' % (os.linesep, section,))
-            printf('%s = %s' % (subkey, prop[1]))
+            if desc:
+                printf('')
+                lines = util.phrase_to_lines(desc)
+                for line in lines:
+                    printf('; %s' % (line,))
+            printf('%s = %s' % (subkey, value))
 
 
 class Property(object):
@@ -151,7 +210,7 @@ class Property(object):
     def _normalize(cls, key):
         return key.lower()
 
-    def __init__(self, name, value=None, parent=None, allow_empty_name=False):
+    def __init__(self, name, value=None, parent=None, allow_empty_name=False, desc=None):
         try:
             self. __class__._validate_localkey(name)
         except KeyError as e:
@@ -160,6 +219,7 @@ class Property(object):
         self._name = name
         self._value = value
         self._parent = parent
+        self.__desc = desc if not desc is None else ''
         self._converter = ValueConverter(value)
 
     def __setattr__(self, name, value):
@@ -186,7 +246,7 @@ class Property(object):
         return self.float
 
     def __repr__(self):
-        return str((self.fullname, self.value))
+        return str((self.fullname, self.value, self._desc))
 
     def __str__(self):
         return self.str
@@ -216,6 +276,16 @@ class Property(object):
     @property
     def parent(self):
         return self._parent
+
+    @util.Property
+    def _desc():
+        def fget(self):
+            return self.__desc
+
+        def fset(self, desc):
+            self.__desc = desc
+
+        return locals()
 
 
 class Configuration(Property):
@@ -267,7 +337,7 @@ class Configuration(Property):
             if isinstance(p, Configuration):
                 view += p.__to_list()
             else:
-                view.append((p.fullname, p.value))
+                view.append((p.fullname, p.value, p._desc))
         return view
 
 

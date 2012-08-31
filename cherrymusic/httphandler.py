@@ -68,7 +68,7 @@ class HTTPHandler(object):
 
     def index(self, action='', value='', filter='', login=None, username=None, password=None):
 
-        if cherry.config.server.use_ssl.bool and not self.issecure(cherrypy.url()):
+        if cherry.config.server.enable_ssl.bool and not self.issecure(cherrypy.url()):
             log.d('Not secure, redirecting...')
             raise cherrypy.HTTPRedirect(self.getSecureUrl(cherrypy.url()), 302)
 

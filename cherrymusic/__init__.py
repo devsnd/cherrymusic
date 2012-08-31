@@ -75,7 +75,7 @@ class CherryMusic:
         if not os.path.isdir(themedir):
             themedir = os.path.join(currentserverpath, '..', 'themes', defaulttheme)
 
-        if config.server.use_ssl.bool:
+        if config.server.enable_ssl.bool:
             cherrypy.config.update({
                 'server.ssl_certificate': config.server.ssl_certificate.str,
                 'server.ssl_private_key': config.server.ssl_private_key.str,
