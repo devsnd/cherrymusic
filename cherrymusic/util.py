@@ -81,6 +81,23 @@ def timed(func):
         return result
     return wrapper
 
+
+def phrase_to_lines(phrase, length=80):
+    """splits a string along whitespace and distributes the parts into 
+    lines of the given length"""
+    words = phrase.split()
+    lines = []
+    line = ''
+    for word in words:
+        if len(line) + len(word) > length:
+            lines.append(line)
+            line = ''
+        line += word + ' '
+    lines.append(line)
+    return lines
+
+
+
 def Property(func):
     """
     decorator that allows defining acessors in place as local functions.

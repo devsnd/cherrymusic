@@ -90,6 +90,8 @@ class AddFilesToDatabaseTest(unittest.TestCase):
 
     def tearDown(self):
         self.removeTestfiles()
+        self.Cache.conn.close()
+
 
 
     def test_add_to_file_table(self):
