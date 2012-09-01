@@ -35,8 +35,6 @@ import os
 from random import choice
 import cherrypy
 
-import pickle #only used for playlists. delete when better soluiton available!
-
 import cherrymusic as cherry
 from cherrymusic import util
 from cherrymusic import resultorder
@@ -91,7 +89,8 @@ class CherryModel:
 
             else:
                 if os.path.isfile(subpath):
-                    musicentries.append(MusicEntry(self.strippath(subpath)))
+                    if self.isplayable(subpath):
+                        musicentries.append(MusicEntry(self.strippath(subpath)))
 
                 else:
                     musicentries.append(MusicEntry(self.strippath(subpath),dir=True))
@@ -109,18 +108,24 @@ class CherryModel:
         for file in results:
             strippedpath = self.strippath(file)
             #let only playable files appear in the search results
-            playable = strippedpath.lower() in cherry.config.media.playable.list
+            playable = self.isplayable(strippedpath)
             isfile = os.path.isfile(os.path.join(cherry.config.media.basedir.str, file))
             if isfile and not playable:
                 continue
-                
+
             if isfile:
                 ret.append(MusicEntry(strippedpath))
             else:
                 ret.append(MusicEntry(strippedpath,dir=True))
 
         return ret
-              
+
+    def isplayable(self, filename):
+        '''checks to see if there's no extension or if the extension is in
+        the configured 'playable' list'''
+        ext = os.path.splitext(filename)[1]
+        return not ext or ext[1:].lower() in cherry.config.media.playable.list
+
     def motd(self):
         artist = [  'Hendrix',
                     'the Beatles',
@@ -169,7 +174,7 @@ class CherryModel:
             oneliner=oneliner.replace('{artist}',a)
             if '{revartist}' in oneliner:
                 oneliner=oneliner.replace('{revartist}',a.lower()[::-1])
-        return oneliner        
+        return oneliner
 
 class MusicEntry:
     def __init__(self, path, compact=False, dir=False, repr=None):
