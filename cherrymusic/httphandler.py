@@ -148,6 +148,8 @@ class HTTPHandler(object):
                 return self.userdb.addUser(new['username'], new['password'], new['isadmin'])
             else:
                 return "You didn't think that would work, did you?"
+        elif action == 'getplayables':
+            return json.dumps(cherry.config.media.playable.list)
         else:
             dirtorender = value
             dirtorenderabspath = os.path.join(cherry.config.media.basedir.str, value)

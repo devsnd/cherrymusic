@@ -47,7 +47,7 @@ def from_defaults():
                                 BASEDIR=/absolute/path/to/media
                                 """
 
-    c.media.playable = 'mp3 ogg wma flac'
+    c.media.playable = 'mp3 m4a m4v ogv oga wav webm'
     c.media.playable._desc = """
                                 PLAYABLE is a space separated list of media file
                                 extensions that can be played by jPlayer.

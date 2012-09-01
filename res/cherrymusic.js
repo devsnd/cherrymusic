@@ -27,6 +27,22 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 //
 
+playableExtensions = []
+
+function loadConfig(){
+     $.ajax({      
+        url: '/api',
+        context: $(this),
+        data: { 'action' : 'getplayables' },
+        success: function(data){
+            playableExtensions = jQuery.parseJSON(data);
+        },
+        error: function(){
+            alert('error loading configuration :-(');
+        }
+    });
+}
+
 /***
 SEARCH
 ***/
@@ -85,12 +101,16 @@ function renderDir(label,urlpath,dirpath){
     return '<a dir="'+dirpath+'" href="javascript:;" class="listdir">'+dirpath+'</a>';
 }
 function renderFile(label,urlpath,dirpath){
-            atitle = 'title="'+label+'"'
-            ahref = 'href="javascript:;"'
-            cssclass = ' class="mp3file" '
-            apath = 'path="'+urlpath+'"'
-            fullpathlabel = '<span class="fullpathlabel">'+dirpath+'</span>'
-            return '<a '+atitle+' '+ahref+' '+apath+' '+cssclass+'>'+fullpathlabel+label+'</a>'
+            fullpathlabel = '<span class="fullpathlabel">'+dirpath+'</span>';
+            if(isPlayableAudioFile(urlpath)){
+                atitle = 'title="'+label+'"';
+                ahref = 'href="javascript:;"';
+                cssclass = ' class="mp3file" ';
+                apath = 'path="'+urlpath+'"';
+                return '<a '+atitle+' '+ahref+' '+apath+' '+cssclass+'>'+fullpathlabel+label+'</a>'
+            } else {
+                return '<span>'+fullpathlabel+label+'</span>';
+            }
 }
 function renderCompact(label,filepath, filter){
     //compact
@@ -102,6 +122,14 @@ function listify(html, classes){
 }
 function ulistify(html){
     return '<ul>'+html+'</ul>';
+}
+function isPlayableAudioFile(filePath){
+    for(var i=0; i<playableExtensions.length; i++){
+        if(endsWith(filePath,playableExtensions[i])){
+            return true;
+        }
+    }
+    return false;
 }
 /***
 INTERACTION
@@ -524,6 +552,11 @@ HELPER
 function reload(){
     window.location = "http://"+window.location.host;
 }
+function endsWith(str, suffix) {
+    return str.indexOf(suffix, str.length - suffix.length) !== -1;
+}
+
+
 
 /***
 ON DOCUMENT READY... STEADY... GO!
@@ -534,5 +567,6 @@ $(document).ready(function(){
     $('#searchfield .bigbutton').click(submitsearch);
     $('.hideplaylisttab').hide();
     restorePlaylist();
+    loadConfig();
     rememberPlaylistPeriodically(0);
 });
