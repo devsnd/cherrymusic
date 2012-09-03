@@ -46,6 +46,9 @@ debug = False
 performanceTest = False
 keepInRam = False
 
+if debug:
+    log.level(log.DEBUG)
+
 class SQLiteCache(object):
     def __init__(self,DBFILENAME):
         setupDB = not os.path.isfile(DBFILENAME) or os.path.getsize(DBFILENAME) == 0
@@ -240,11 +243,13 @@ class SQLiteCache(object):
         return path
 
 
-    def trim_to_maxlen(self, maxlen, s, insert='...'):
+    def trim_to_maxlen(self, maxlen, s, insert=' ... '):
         '''no sanity check for maxlen and len(insert)'''
         if len(s) > maxlen:
-            split = (maxlen - len(insert)) // 2
-            s = s[:split] + insert + s[-split:]
+            keep = maxlen - len(insert)
+            left = keep // 2
+            right = keep - left
+            s = s[:left] + insert + s[-right:]
         return s
 
 
