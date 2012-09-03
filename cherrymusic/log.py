@@ -28,13 +28,114 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 import logging
+import logging.config
+import inspect
+import os
 
-logging.basicConfig(level=logging.INFO)
+from logging import NOTSET, DEBUG, INFO, WARN, WARNING, ERROR, CRITICAL, FATAL
 
-d=logging.debug
-i=logging.info
-w=logging.warn
-e=logging.error
-c=logging.critical
-ex=logging.exception
-x=logging.exception
+
+LOGLEVEL = "INFO"
+
+CONFIG = {
+"version": 1,
+"formatters": {"brief": {"format": "%(levelname)-8s: %(message)s"},
+                "full": {"format": "%(asctime)s %(name)-20s %(levelname)-8s\n"
+                                   "from %(org_filename)s,line %(org_lineno)d"
+                                   "\n%(message)s"}
+                },
+ "handlers": {"console": {
+                   "class": "logging.StreamHandler",
+                   "formatter": "brief",
+                   "level": "DEBUG",
+                   "stream": "ext://sys.stdout"},
+              "console_priority": {
+                   "class": "logging.StreamHandler",
+                   "formatter": "brief",
+                   "level": "ERROR",
+                   "stream": "ext://sys.stderr"},
+              "logfile_error": {
+                    "class" : "logging.FileHandler",
+                    "formatter": "full",
+                    "level": "ERROR",
+                    "filename": "error.log",
+                    "encoding": "utf-8",
+                    "delay": True,},
+              },
+ "root": {"level": LOGLEVEL,
+          "handlers": ["console", "console_priority", "logfile_error"]}}
+
+logging.config.dictConfig(CONFIG)
+
+def debug(msg, *args, **kwargs):
+    '''logs a message with severity DEBUG on the caller's module logger.
+    uses the root logger if caller has no module.'''
+    _get_logger().debug(msg, *args, **kwargs)
+
+
+def info(msg, *args, **kwargs):
+    '''logs a message with severity INFO on the caller's module logger.
+    uses the root logger if caller has no module.'''
+    _get_logger().info(msg, *args, **kwargs)
+
+
+def warn(msg, *args, **kwargs):
+    '''logs a message with severity WARN on the caller's module logger.
+    uses the root logger if caller has no module.'''
+    _get_logger().warn(msg, *args, **kwargs)
+
+
+def error(msg, *args, **kwargs):
+    '''logs a message with severity ERROR on the caller's module logger.
+    uses the root logger if caller has no module.'''
+    _get_logger().error(msg, *args, **kwargs)
+
+
+def critical(msg, *args, **kwargs):
+    '''logs a message with severity CRITICAL on the caller's module logger.
+    uses the root logger if caller has no module.'''
+    _get_logger().critical(msg, *args, **kwargs)
+
+
+def exception(msg, *args, **kwargs):
+    '''logs a message with severity ERROR on the caller's module logger,
+    including exception information. uses the root logger if caller
+    has no module.'''
+    _get_logger().exception(msg, *args, **kwargs)
+
+def level(lvl):
+    '''sets the level for the caller's module logger, or, if there is no
+    module, the root logger. `lvl` is an int as defined in logging, or
+    a corresponding string respresentation.'''
+    _get_logger().setLevel(lvl)
+
+
+d = debug
+i = info
+w = warn
+e = error
+c = critical
+ex = exception
+x = exception
+
+
+def _get_logger():
+    '''find out the caller's module name and get or create a corresponding
+    logger. if caller has no module, return root logger.'''
+    caller_frm = inspect.stack()[2]
+    orgpath = caller_frm[1]
+    orgfile = os.path.basename(orgpath)
+    caller_info = {
+                    'org_filename': orgfile,
+                    'org_lineno': caller_frm[2],
+                    'org_funcName': caller_frm[3],
+                    'org_module': os.path.splitext(orgfile)[0],
+                    'org_pathname': orgpath,
+                   }
+    caller_mod = inspect.getmodule(caller_frm[0])
+    name = None if caller_mod is None else caller_mod.__name__
+    logger = logging.LoggerAdapter(logging.getLogger(name), caller_info)
+    return logger
+
+
+
