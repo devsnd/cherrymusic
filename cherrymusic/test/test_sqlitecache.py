@@ -231,7 +231,7 @@ class FileTest(unittest.TestCase):
 
     def testFileClass(self):
         for filename in self.testfiles:
-            filename = self.testdir + '/' + filename
+            filename = os.path.join(self.testdir, filename)
             expected = TestFile(filename)
             if filename.endswith(os.path.sep):
                 filename = filename[:-1]
