@@ -37,6 +37,7 @@ import cherrymusic as cherry
 from cherrymusic import configuration
 from cherrymusic import log
 from cherrymusic import sqlitecache
+from IPython.core.history import sqlite3
 
 class TestFile(object):
 
@@ -425,6 +426,40 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
                          'orphaned words must be removed')
         self.assertEqual(1, common,
                          'words still referenced elsewhere must not be removed')
+
+
+    def testRollbackOnException(self):
+
+        class BoobyTrap(sqlite3.Connection):
+            armed = False
+            count = 0
+            def arm(self):
+                __class__.armed = True
+
+            def commit(self):
+                __class__.count += 1
+                if __class__.armed:
+                    raise Exception("boom goes the dynamite")
+
+        self.Cache = sqlitecache.SQLiteCache('media.db')
+        self.Cache.conn = BoobyTrap('media.db')
+        self.Cache.checkIfRootUpdated()
+
+        removelist = self.get_fileobjects_for('root_dir')
+        for fob in removelist:
+            removeTestfile(fob)
+
+        self.Cache.conn.arm()
+
+        self.Cache.remove_dead_file_entries(removelist[0].root.fullpath)
+
+        self.assertEqual(1, BoobyTrap.count, 'commit must be called exactly once')
+        for fob in removelist:
+            self.assertTrue(self.fileid_in_db(fob.uid),
+                        'complete rollback must restore all deleted entries.'
+                        'missing: %s' % fob.relpath)
+
+
 
 
 

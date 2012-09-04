@@ -72,6 +72,7 @@ class SQLiteCache(object):
         self.conn.execute('PRAGMA journal_mode = MEMORY')
         self.checkIfRootUpdated()
 
+
     @timed
     def checkIfRootUpdated(self):
         log.i('Checking if root folder is up to date...')
@@ -289,6 +290,7 @@ class SQLiteCache(object):
               fileobj.relpath,
               )
         try:
+            self.conn.isolation_level = "IMMEDIATE"
             with self.conn:
                 for item in self.db_recursive_filelister(fileobj):
                     self.remove_file(item)
