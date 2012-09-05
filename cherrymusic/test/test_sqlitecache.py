@@ -335,6 +335,7 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
 
 
     def id_fileobj(self, fileobj):
+        '''fetches the db id for fileobj and saves it in fileobj.uid'''
         if fileobj.parent is None:
             pid = -1
         else:
@@ -380,13 +381,13 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
 
     def get_fileobjects_for(self, dirname):
         return [self.fileobjects[key] for key
-                in sorted(self.fileobjects.keys(), reverse=True)
+                in sorted(self.fileobjects.keys())
                 if key.startswith(dirname)]
 
 
     def testMissingDirIsRemovedRecursively(self):
         removelist = self.get_fileobjects_for('root_dir')
-        for fob in removelist:
+        for fob in reversed(removelist):
             removeTestfile(fob)
 
         self.Cache.remove_dead_file_entries(removelist[0].root.fullpath)
@@ -430,37 +431,51 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
 
     def testRollbackOnException(self):
 
-        class BoobyTrap(sqlite3.Connection):
-            armed = False
-            count = 0
-            def arm(self):
-                __class__.armed = True
-
-            def commit(self):
-                __class__.count += 1
-                if __class__.armed:
-                    raise Exception("boom goes the dynamite")
-
-        self.Cache = sqlitecache.SQLiteCache('media.db')
-        self.Cache.conn = BoobyTrap('media.db')
-        self.Cache.checkIfRootUpdated()
+        # SETUP
+        self.Cache = sqlitecache.SQLiteCache('test.db')
 
         removelist = self.get_fileobjects_for('root_dir')
         for fob in removelist:
+            self.id_fileobj(fob)
+        for fob in reversed(removelist):
             removeTestfile(fob)
 
-        self.Cache.conn.arm()
+        undeletable = self.fileobjects[os.path.join('root_dir',
+                                                    'first_dir',
+                                                    'first_file')]
+        deletable = [self.fileobjects[os.path.join('root_dir',
+                                                   'first_file')]]
+        class BoobyTrap(sqlite3.Connection):
+            exceptcount = 0
 
+            def execute(self, stmt, parameters=None):
+                '''triggers an Exception when the 'undeletable' item should be 
+                removed. relies on way too much knowledge of Cache internals. :(
+                '''
+
+                if stmt.lower().startswith('delete from files') \
+                  and parameters[0] == undeletable.uid:
+                    self.__class__.exceptcount += 1
+                    raise Exception("boom goes the dynamite")
+                return super().execute(stmt, parameters)
+
+        self.Cache.conn.close()
+        self.Cache.conn = BoobyTrap('test.db')
+
+        # RUN
         self.Cache.remove_dead_file_entries(removelist[0].root.fullpath)
+        removed = [f for f in removelist if not self.fileid_in_db(f.uid)]
 
-        self.assertEqual(1, BoobyTrap.count, 'commit must be called exactly once')
-        for fob in removelist:
-            self.assertTrue(self.fileid_in_db(fob.uid),
-                        'complete rollback must restore all deleted entries.'
-                        'missing: %s' % fob.relpath)
+        # CLEANUP
+        self.Cache.conn.close()
+        os.remove('test.db')
 
+        # ASSERT
+        self.assertLessEqual(1, BoobyTrap.exceptcount,
+                         'test must have raised at least one exception')
 
-
+        self.assertListEqual(deletable, removed,
+                        'complete rollback must restore all deleted entries.')
 
 
 if __name__ == "__main__":

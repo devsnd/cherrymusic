@@ -290,7 +290,6 @@ class SQLiteCache(object):
               fileobj.relpath,
               )
         try:
-            self.conn.isolation_level = "IMMEDIATE"
             with self.conn:
                 for item in self.db_recursive_filelister(fileobj):
                     self.remove_file(item)
