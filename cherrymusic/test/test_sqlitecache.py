@@ -31,13 +31,13 @@
 import unittest
 
 import os
+import sqlite3
 from pprint import pprint
 
 import cherrymusic as cherry
 from cherrymusic import configuration
 from cherrymusic import log
 from cherrymusic import sqlitecache
-from IPython.core.history import sqlite3
 
 class TestFile(object):
 
