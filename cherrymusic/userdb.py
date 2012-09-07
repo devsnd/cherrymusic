@@ -68,14 +68,13 @@ class UserDB:
         a valid user tuple will be returned; failure will return User.nobody().
         will fail if username or password are empty.'''
 
-        if not (username.strip() or password.strip()):
+        if not (username.strip() and password.strip()):
             return User.nobody()
 
         rows = self.conn.execute('SELECT rowid, username, admin, password, salt'
-                                 ' FROM users WHERE username = ?''', 
-                                 (username,)) \
+                                 ' FROM users WHERE username = ?', (username,))\
                                  .fetchall()
-        assert len(rows <= 1)
+        assert len(rows) <= 1
         if rows:
             user = User(*rows[0])
             if Crypto.scramble(password, user.salt) == user.password:

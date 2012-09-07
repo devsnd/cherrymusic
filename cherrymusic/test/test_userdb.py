@@ -35,7 +35,7 @@ log.setTest()
 from cherrymusic import userdb
 
 class TestAuthenticate(unittest.TestCase):
-    '''tests authentication functions of userdb'''
+    '''test authentication functions of userdb'''
 
     def setUp(self):
         self.users = userdb.UserDB(':memory:')
@@ -65,7 +65,7 @@ class TestAuthenticate(unittest.TestCase):
 
 
     def testNoLoginWithInvalidUser(self):
-        '''valid username and invalid password = authentication failure'''
+        '''invalid username = authentication failure'''
 
         authuser = self.users.auth('!@#$%^&*(', ')(*&^%$#')
 
