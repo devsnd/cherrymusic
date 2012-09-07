@@ -39,7 +39,8 @@ LOGLEVEL = "INFO"
 
 CONFIG = {
 "version": 1,
-"formatters": {"brief": {"format": "%(levelname)-8s: %(message)s"},
+"formatters": {"brief": {"format": "[%(asctime)s] %(levelname)-8s: %(message)s",
+                         "datefmt": "%y%m%d-%H:%M"},
                 "full": {"format": "%(asctime)s %(name)-20s %(levelname)-8s\n"
                                    "from %(org_filename)s,line %(org_lineno)d"
                                    "\n%(message)s"}
@@ -62,6 +63,12 @@ CONFIG = {
                     "encoding": "utf-8",
                     "delay": True,},
               },
+ "loggers": {"test": {
+                      "level": "WARN",
+                      "propagate": False,
+                      "handlers": ["console", ]
+                      }
+             },
  "root": {"level": LOGLEVEL,
           "handlers": ["console", "console_priority", "logfile_error"]}}
 
@@ -110,6 +117,12 @@ def level(lvl):
     _get_logger().setLevel(lvl)
 
 
+__istest = False
+def setTest(state=True):
+    global __istest
+    __istest = state
+
+
 d = debug
 i = info
 w = warn
@@ -122,6 +135,7 @@ x = exception
 def _get_logger():
     '''find out the caller's module name and get or create a corresponding
     logger. if caller has no module, return root logger.'''
+    global __istest
     caller_frm = inspect.stack()[2]
     orgpath = caller_frm[1]
     orgfile = os.path.basename(orgpath)
@@ -133,7 +147,10 @@ def _get_logger():
                     'org_pathname': orgpath,
                    }
     caller_mod = inspect.getmodule(caller_frm[0])
-    name = None if caller_mod is None else caller_mod.__name__
+    if __istest:
+        name = 'test'
+    else:
+        name = None if caller_mod is None else caller_mod.__name__
     logger = logging.LoggerAdapter(logging.getLogger(name), caller_info)
     return logger
 

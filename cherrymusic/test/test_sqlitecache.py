@@ -39,6 +39,8 @@ from cherrymusic import configuration
 from cherrymusic import log
 from cherrymusic import sqlitecache
 
+log.setTest()
+
 class TestFile(object):
 
     def __init__(self, fullpath, parent=None, isdir=None):

@@ -37,7 +37,7 @@ from collections import namedtuple
 from cherrymusic import log
 
 class UserDB:
-    def __init__(self,USERDBFILE):
+    def __init__(self, USERDBFILE):
         setupDB = not os.path.isfile(USERDBFILE) or os.path.getsize(USERDBFILE) == 0
         self.conn = sqlite3.connect(USERDBFILE, check_same_thread=False)
 
@@ -64,22 +64,23 @@ class UserDB:
         return msg
 
     def auth(self, username, password):
+        '''try to authenticate the given username and password. on success,
+        a valid user tuple will be returned; failure will return User.nobody().
+        will fail if username or password are empty.'''
+
         if not (username.strip() or password.strip()):
             return User.nobody()
-        cur = self.conn.execute('''
-        SELECT rowid, username, admin, password, salt FROM users
-        WHERE username = ?''', (username,))
-        user = User.nobody()
-        while True:
-            row = cur.fetchone()
-            if row:
-                testuser = User(*row)
-                login = Crypto.scramble(password, testuser.salt) == testuser.password
-            if not row or login:
-                if login:
-                    user = testuser
-                break
-        return user
+
+        rows = self.conn.execute('SELECT rowid, username, admin, password, salt'
+                                 ' FROM users WHERE username = ?''', 
+                                 (username,)) \
+                                 .fetchall()
+        assert len(rows <= 1)
+        if rows:
+            user = User(*rows[0])
+            if Crypto.scramble(password, user.salt) == user.password:
+                return user
+        return User.nobody()
 
     def getUserList(self):
         cur = self.conn.cursor()
@@ -120,7 +121,8 @@ class User(namedtuple('User_', 'uid name isadmin password salt')):
 
     @classmethod
     def create(cls, name, password, isadmin=False):
-        '''create a new user with given name and password. will add a random salt.'''
+        '''create a new user with given name and password.
+        will add a random salt.'''
 
         if not name.strip():
             raise ValueError('name must not be empty')
