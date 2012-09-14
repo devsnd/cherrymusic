@@ -43,7 +43,7 @@ def from_defaults():
     c._set('media.basedir', mediabasedir, warn_on_create=False)
     c.media.basedir._desc = """
                                 BASEDIR specifies where the media that should be
-                                served is located. It must be a the absolute path, e.g.
+                                served is located. It must be the absolute path, e.g.
                                 BASEDIR=/absolute/path/to/media
                                 """
 
@@ -55,10 +55,10 @@ def from_defaults():
 
     c._set('search.maxresults', 20, warn_on_create=False)
     c.search.maxresults._desc = """
-                                MAXRESULTS set the maximum amount of search results
+                                MAXRESULTS sets the maximum amount of search results
                                 to be displayed. If MAXRESULTS is set to a higher value,
                                 the search will take longer, but also more accurate.
-                                100 is a good value, as a cd can have up to 99 tracks.
+                            
                                 """
 
 
@@ -66,16 +66,17 @@ def from_defaults():
     c.look.theme._desc = """
                         Available themes are: "zeropointtwo", "hax1337".
                         To create your own theme, you can simply copy the theme
-                        to ~/.cherrmusic/themes/yournewtheme and modify it to
+                        to ~/.cherrymusic/themes/yournewtheme and modify it to
                         your will. Then you can set theme=yournewtheme
                         """
 
     c._set('browser.maxshowfiles','100',False)
     c.browser.maxshowfiles._desc = '''
                                     MAXSHOWFILES specifies how many files and folders should
-                                    may be shown at the same time. E.g. if you open a folder
+                                    be shown at the same time. E.g. if you open a folder
                                     with more than MAXSHOWFILES, the files will be grouped 
-                                    according to the first letter in their name
+                                    according to the first letter in their name.
+                                    100 is a good value, as a cd can have up to 99 tracks.
                                     '''
 
     c._set('server.port','8080',False)
