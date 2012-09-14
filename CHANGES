@@ -3,7 +3,6 @@ Changelog
 =========
 
 0.2 (in developement)
----------------------
 
  - https encryption support
  - option to listen only on localhost
@@ -20,6 +19,5 @@ Changelog
  - welcome screen for CLI and web-interface
 
 0.1 (2012-08-16)
-----------------
 
 Initial Release
