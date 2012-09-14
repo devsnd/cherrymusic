@@ -26,48 +26,84 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 //
+var playableExtensions = [];
+var REMEMBER_PLAYLIST_INTERVAL = 3000;
 
-playableExtensions = []
-
-function loadConfig(){
-     $.ajax({      
+function api(data_or_action, successfunc, errorfunc, background){
+    "use strict";
+    if(!errorfunc){
+        errorfunc = errorFunc();
+    }
+    if(!successfunc){
+        successfunc = function(){};
+    }
+    var completefunc;
+    if(background){
+        completefunc = function(){};
+    } else {
+        completefunc = function(){$('div#progressscreen').fadeOut('fast')};
+    }
+    var senddata;
+    if(typeof data_or_action === "string"){
+        senddata = {"action" : data_or_action};
+    } else {
+        senddata = data_or_action;
+    }
+    if(!background){
+        $('div#progressscreen').fadeIn('fast');
+    }
+    $.ajax({      
         url: '/api',
         context: $(this),
-        data: { 'action' : 'getplayables' },
-        success: function(data){
-            playableExtensions = jQuery.parseJSON(data);
-        },
-        error: function(){
-            alert('error loading configuration :-(');
-        }
+        type: 'POST',
+        data: senddata,
+        success: successfunc,
+        error: errorfunc,
+        complete: completefunc,
     });
+}
+
+function errorFunc(msg){
+    "use strict";
+    if(msg){
+        return function(){
+            window.alert('ERROR: '+msg+" :'(");
+        };
+    } else {
+        return function(){
+            window.alert("I'm sorry, but this is an error message...\n\nIt indicates an error... *sigh*\nSorry, it's just... my whole purpose of existance is to give bad news.\nIt's frustrating.\nWould you mind just clicking 'ok' and leave me alone?");
+        };
+    }
+}
+
+function loadConfig(){
+    "use strict";
+    var success = function(data){
+        playableExtensions = jQuery.parseJSON(data);
+    };
+    var error = errorFunc('Failed loading configuration');
+    api('getplayables',success,error);
 }
 
 /***
 SEARCH
 ***/
 function submitsearch(){
-    $('div#progressscreen').fadeIn('fast');
-    var searchfor = $('#searchfield input').val();
-    $.ajax({      
-        url: '/api',
-        context: $(this),
-        data: {
-            'action' : 'search',
-            'value' : searchfor
-            },
-        success: function(data){
-            $('#searchresults').html(parseAndRender(data));
-            registerlistdirs($('#searchresults').find('ul'));
-            registercompactlistdirs($('#searchresults').find('ul'));
-			registermp3s($('#searchresults').find('ul'));
-            $('div#progressscreen').fadeOut('fast');
-        },
-        error: function(){
-            alert("I'm sorry, but this is an error message...\n\nIt indicates an error... *sigh*\nSorry, it's just... my whole purpose of existance is to give bad news.\nIt's frustrating.\nWould you mind just clicking 'ok' and leave me alone?");
-            $('div#progressscreen').fadeOut('fast');
-        }
-    });
+    "use strict";
+    var data = {
+        'action' : 'search',
+        'value' : $('#searchfield input').val()
+    };
+    var success = function(data){
+        $('#searchresults').html(parseAndRender(data));
+        registerlistdirs($('#searchresults').find('ul'));
+        registercompactlistdirs($('#searchresults').find('ul'));
+        registermp3s($('#searchresults').find('ul'));
+    };
+    var error = function(){
+        errorFunc('failed loading search results')();
+    };
+    api(data,success,error);
     return false;
 }
 
@@ -75,10 +111,12 @@ function submitsearch(){
 RENDERING
 ********/
 function parseAndRender(data){
+    "use strict";
     return renderList(jQuery.parseJSON(data));
 }
 function renderList(l){
-    html = "";
+    "use strict";
+    var html = "";
     $.each(l, function(i, e) { 
         switch(e.type){
             case 'file':
@@ -91,41 +129,50 @@ function renderList(l){
                 html += listify(renderCompact(e.label,e.urlpath,e.label));
                 break;
             default:
-                alert('Error parsing server response!');
+                errorFunc('server response is not valid!')();
                 break;
         }
     });
     return ulistify(html);
 }
 function renderDir(label,urlpath,dirpath){
+    "use strict";
     return '<a dir="'+dirpath+'" href="javascript:;" class="listdir">'+dirpath+'</a>';
 }
 function renderFile(label,urlpath,dirpath){
-            fullpathlabel = '<span class="fullpathlabel">'+dirpath+'</span>';
-            if(isPlayableAudioFile(urlpath)){
-                atitle = 'title="'+label+'"';
-                ahref = 'href="javascript:;"';
-                cssclass = ' class="mp3file" ';
-                apath = 'path="'+urlpath+'"';
-                return '<a '+atitle+' '+ahref+' '+apath+' '+cssclass+'>'+fullpathlabel+label+'</a>'
-            } else {
-                return '<span>'+fullpathlabel+label+'</span>';
-            }
+    "use strict";
+    var fullpathlabel = Mustache.render('<span class="fullpathlabel">{{fpdirpath}}</span>',{fpdirpath:dirpath});
+    if(isPlayableAudioFile(urlpath)){
+        return Mustache.render('<a title="{{atitle}}" href="{{ahref}}" class="{{acssclass}}" path="{{apath}}">{{{afullpathlabel}}} {{alabel}}</a>', {
+                atitle : label,
+                alabel: label,
+                ahref : 'javascript:;',
+                acssclass : 'mp3file',
+                apath : urlpath,     
+                afullpathlabel : fullpathlabel,            
+            });
+    } else {
+        return '<span>'+fullpathlabel+label+'</span>';
+    }
 }
 function renderCompact(label,filepath, filter){
-    //compact
-    return '<a dir="'+filepath+'" filter="'+filter+'" href="javascript:;" class="compactlistdir">'+filter.toUpperCase()+'</a>'
+    "use strict";
+    return '<a dir="'+filepath+'" filter="'+filter+'" href="javascript:;" class="compactlistdir">'+filter.toUpperCase()+'</a>';
 }
 function listify(html, classes){
+    "use strict";
     if(!classes){classes='';}
-    return '<li '+classes+'>'+html+'</li>'
+    return '<li '+classes+'>'+html+'</li>';
 }
 function ulistify(html){
+    "use strict";
     return '<ul>'+html+'</ul>';
 }
 function isPlayableAudioFile(filePath){
+    "use strict";
     for(var i=0; i<playableExtensions.length; i++){
-        if(endsWith(filePath,playableExtensions[i])){
+        if(endsWith( filePath.toUpperCase(),
+                     playableExtensions[i].toUpperCase())){
             return true;
         }
     }
@@ -134,108 +181,96 @@ function isPlayableAudioFile(filePath){
 /***
 INTERACTION
 ***/
-$(function(){
-	listdirclick = function(mode){
-			var directory = $(this).attr("dir");
-			if($(this).siblings('ul').length>0){
-				if($(this).siblings('ul').is(":visible")){
-					$(this).siblings('ul').slideUp('slow');
-				} else {
-					$(this).siblings('ul').slideDown('slow');
-				}
-			} else {
-				$('div#progressscreen').fadeIn('fast');
-				$.ajax({
-					url: "/api",
-                    
-					context: $(this),
-					data: {
-						'action' : 'listdir',
-						'value' : directory
-						},
-					success: function(data){
-						$(this).parent().append(parseAndRender(data));
-						registerlistdirs($(this).parent().find('ul'));
-						registercompactlistdirs($(this).parent().find('ul'));
-						registermp3s($(this).parent().find('ul'));
-						$(this).siblings("ul").slideDown('slow');
-						$('div#progressscreen').fadeOut('fast');
-					}
-				});
-			}
-	}
-	compactlistdirclick = function(){
-                        var directory = $(this).attr("dir");
-			var filter = $(this).attr("filter");
-                        //alert(directory);
-                        if($(this).siblings('ul').length>0){
-                                if($(this).siblings('ul').is(":visible")){
-                                        $(this).siblings('ul').slideUp('slow');
-                                } else {
-                                        $(this).siblings('ul').slideDown('slow');
-                                }
-                        } else {
-				$('div#progressscreen').fadeIn('fast');
-
-				$.ajax({                       
-                        context: $(this),
-                        url: '/api',
-                        data: {
-                                'action' : 'compactlistdir',
-                                'value' : directory,
-                                'filter' : filter
-                        },
-                        success: function(data){
-                                $(this).parent().append(parseAndRender(data));
-                                registerlistdirs($(this).parent().find('ul'));
-                                registercompactlistdirs($(this).parent().find('ul'));
-                                registermp3s($(this).parent().find('ul'));
-                                $(this).siblings("ul").slideDown('slow');
-                                $('div#progressscreen').fadeOut('fast');
-                        }
-                });
-			}
-
-	}
-	registerlistdirs = function(parent){ 
-		$(parent).find("a.listdir").click(
-			listdirclick
-		);
-	}
-
-	registercompactlistdirs = function(parent){
-		$(parent).find("a.compactlistdir").click(
-	        	compactlistdirclick
-                );
+listdirclick = function(mode){
+        "use strict";
+        var directory = $(this).attr("dir");
+        if($(this).siblings('ul').length>0){
+            if($(this).siblings('ul').is(":visible")){
+                $(this).siblings('ul').slideUp('slow');
+            } else {
+                $(this).siblings('ul').slideDown('slow');
+            }
+        } else {
+            //$('div#progressscreen').fadeIn('fast');
+            var data = {
+                'action' : 'listdir',
+                'value' : directory
+            };
+            var currdir = this;
+            var success = function(data){
+                $(currdir).parent().append(parseAndRender(data));
+                registerlistdirs($(currdir).parent().find('ul'));
+                registercompactlistdirs($(currdir).parent().find('ul'));
+                registermp3s($(currdir).parent().find('ul'));
+                $(currdir).siblings("ul").slideDown('slow');
+            };
+            api(data,success);
         }
+};
+compactlistdirclick = function(){
+    "use strict";
+    var directory = $(this).attr("dir");
+    var filter = $(this).attr("filter");
+    //alert(directory);
+    if($(this).siblings('ul').length>0){
+        if($(this).siblings('ul').is(":visible")){
+            $(this).siblings('ul').slideUp('slow');
+        } else {
+            $(this).siblings('ul').slideDown('slow');
+        }
+    } else {
+        var data = {
+            'action' : 'compactlistdir',
+            'value' : directory,
+            'filter' : filter
+        };
+        var currdir = this;
+        var success = function(data){
+            $(currdir).parent().append(parseAndRender(data));
+            registerlistdirs($(currdir).parent().find('ul'));
+            registercompactlistdirs($(currdir).parent().find('ul'));
+            registermp3s($(currdir).parent().find('ul'));
+            $(currdir).siblings("ul").slideDown('slow');
+        };
+        api(data,success);
+    }
 
-	addAllToPlaylist = function(){
-		//alert($(this).siblings('ul').html());
-		$(this).siblings('li').find('.mp3file').each(function(){
-			addSong( $(this).attr("path"), $(this).attr("title") );
-		});
+};
+registerlistdirs = function(parent){ 
+    "use strict";
+    $(parent).find("a.listdir").click(
+        listdirclick
+    );
+};
 
-	}
+registercompactlistdirs = function(parent){
+    "use strict";
+    $(parent).find("a.compactlistdir").click(
+        compactlistdirclick
+    );
+};
 
-	registermp3s = function(parent){
-		var foundMp3 = $(parent).find(".mp3file").click(
-			function(){
-				addSong( $(this).attr("path"), $(this).attr("title") );
-			}
-		).html();
-		if(foundMp3){
-			$(parent).prepend('<a class="addAllToPlaylist" href="javascript:;">add All to Playlist</a>');
-			$(parent).children('.addAllToPlaylist').click(
-				addAllToPlaylist
-			)
-		}
-	}
+addAllToPlaylist = function(){
+    "use strict";
+    $(this).siblings('li').find('.mp3file').each(function(){
+        addSong( $(this).attr("path"), $(this).attr("title") );
+    });
+};
 
-	//register top level directories
-	registerlistdirs($("html").get());
-	registercompactlistdirs($("html").get());
-	$('div#progressscreen').fadeOut('slow');
-});
+registermp3s = function(parent){
+    "use strict";
+    var foundMp3 = $(parent).find(".mp3file").click(
+        function(){
+            addSong( $(this).attr("path"), $(this).attr("title") );
+        }
+    ).html();
+    if(foundMp3){
+        $(parent).prepend('<a class="addAllToPlaylist" href="javascript:;">add All to Playlist</a>');
+        $(parent).children('.addAllToPlaylist').click(
+            addAllToPlaylist
+        );
+    }
+};
 
 /***
 JPLAYER FUNCTIONS
@@ -252,71 +287,61 @@ function initJPlayer(){
         swfPath: "res/js",
 		solution: "flash,html",
 		preload: 'metadata',
-                supplied: "mp3",
-                wmode: "window",
-		 errorAlerts: false,
-		 warningAlerts: false
+        supplied: "mp3",
+        wmode: "window",
+        errorAlerts: false
         });
     }
 }
 
 addSong = function(path,title){
-        mediaPlaylist.add({
-	    title: title,
-	    mp3: path
+    "use strict";
+    mediaPlaylist.add({
+        title: title,
+        mp3: path
     });
     pulseTab('jplayer');
-}
+};
 clearPlaylist = function(){
+    "use strict";
     mediaPlaylist.remove();
-    rememberPlaylist();
-}
+};
 
 function showPlaylistSaveDialog(){
+    "use strict";
     $('#dialog input').val('');
     $('#dialog').fadeIn('fast');
 }
 
 function savePlaylistAndHideDialog(){
+    "use strict";
     var name = $('#playlisttitle').val();
     var pub = $('#playlistpublic').attr('checked')?true:false;
-    if(name.trim() != ''){
+    if(name.trim() !== ''){
         savePlaylist(name,pub);
-        $('#dialog').fadeOut('fast')
+        $('#dialog').fadeOut('fast');
     }
 }
 
 function savePlaylist(playlistname,ispublic){
-    $.ajax({
-        url: '/api',
-        type: 'POST',
-        data: { 'action':'saveplaylist',
-                'value':JSON.stringify(
-                    {
-                    'playlist':mediaPlaylist.playlist,
-                    'public':ispublic,
-                    'playlistname':playlistname}
-                    )
-        },
-        success:function(data){
-            
-        },
-        error:function(){
-            alert('error');
-        }
-    });
+    "use strict";
+    var data = { 'action':'saveplaylist',
+                'value':JSON.stringify({
+                            'playlist':mediaPlaylist.playlist,
+                            'public':ispublic,
+                            'playlistname':playlistname
+                        })
+                };
+    api(data);
 }
 function showPlaylists(){
-    $.ajax({
-        url: '/api',
-        type: 'POST',
-        data: { 'action':'showplaylists' },
-        success:function(data){
+    "use strict";
+    var success = function(data){
             var pls = '<ul>';
             $.each($.parseJSON(data),function(i,e){
                 pls += '<li>';
                 var onclick = "loadPlaylist('"+e[0]+"')";
-                pls += '<a class="remoteplaylist" href="javascript:;" onclick="'+onclick+'">'
+                pls += '<a class="remoteplaylist" href="javascript:;" onclick="'+onclick+'">';
                 pls += e[1]+'</a></li>';
             });
             pls += '</ul>';
@@ -324,93 +349,72 @@ function showPlaylists(){
             $('.hideplayliststab').slideDown('fast');
             $('.showplayliststab').slideUp('fast');
             $('.available-playlists').slideDown();
-            
-        },
-        error:function(){
+        };
+    var error = function(){
             alert('error');
-        }
-    });
+    };
+    api('showplaylists',success,error);
 }
 function hidePlaylists(){
+    "use strict";
     $('.showplayliststab').slideDown('fast');
     $('.hideplayliststab').slideUp('fast');
     $('.available-playlists').slideUp();
 }
 function loadPlaylist(playlistname){
-    $.ajax({
-        url: '/api',
-        type: 'POST',
-        data: { 'action':'loadplaylist',
-                'value': playlistname
-        },
-        success:function(data){
-            $.each($.parseJSON(data),function(i,e){
-                addSong(e.mp3,e.title);
-            });
-        },
-        error:function(){
-            alert('error');
-        }
-    });
+    "use strict";
+    var data = {'action':'loadplaylist',
+                'value': playlistname };
+    var success = function(data){
+        $.each($.parseJSON(data),function(i,e){
+            addSong(e.mp3,e.title);
+        });
+    };
+    var error = function(){
+        alert('error');
+    };
 }
 
 function rememberPlaylistPeriodically(lastlen){
-    if (mediaPlaylist.playlist.length != lastlen){
+    "use strict";
+    if (mediaPlaylist.playlist && mediaPlaylist.playlist.length !== lastlen){
         /* save playlist in session */
-         $.ajax({
-            url: '/api',
-            type: 'POST',
-            data: { 'action':'rememberplaylist',
-                    'value':JSON.stringify({'playlist':mediaPlaylist.playlist})
-            },
-            success:function(data){
-                
-            },
-            error:function(){
-                alert('error rememebering playlist.');
-            }
-        });
+        var data = {'action':'rememberplaylist',
+                    'value':JSON.stringify(
+                        {'playlist':mediaPlaylist.playlist}
+                    )};
+        var error = errorFunc('cannot rememebering playlist: failed to connect to server.');
+        api(data, false, error, true);
     }
-    // check every second if the playlist changed 
-    window.setTimeout("rememberPlaylistPeriodically("+mediaPlaylist.playlist.length+")",1000);
+    // check every second if the playlist changed
+    var currentLength = mediaPlaylist.playlist ? mediaPlaylist.playlist.length : 0;
+    window.setTimeout("rememberPlaylistPeriodically("+currentLength+")",REMEMBER_PLAYLIST_INTERVAL);
 }
 
 function restorePlaylist(){
+    "use strict";
     /*restore playlist from session*/
-    $.ajax({
-        url: '/api',
-        type: 'POST',
-        data: { 'action':'restoreplaylist'},
-        success:function(data){
+    var success = function(data){
             $.each($.parseJSON(data),function(i,e){
                 addSong(e.mp3,e.title);
             });
-        },
-        error:function(){
+    };
+    var error = function(){
             alert('error');
-        }
-    });
+    };
+    api('restoreplaylist',success,error);
 }
 
-
 function logout(){
-    $.ajax({
-        url: '/api',
-        type: 'POST',
-        data: { 'action':'logout',
-        },
-        success:function(data){
-            reload()
-        },
-        error:function(){
-            alert('error');
-        }
-    });
+    "use strict";
+    var success = function(data){ reload(); };
+    api('logout',success);
 }
 /***
 ADMIN PANEL
 ***/
 function toggleAdminPanel(){
+    "use strict";
     var panel = $('#adminpanel');
     if(panel.is(":visible")){
         panel.slideUp();
@@ -420,123 +424,106 @@ function toggleAdminPanel(){
     }
 }
 function updateUserList(){
-     $.ajax({
-        url: '/api',
-        type: 'POST',
-        data: { 'action':'getuserlist' },
-        success:function(data){
-            var htmllist = ""
-            $.each($.parseJSON(data),function(i,e){
-                if(e.admin){
-                    htmllist += '<li class="admin">'
-                } else {
-                    htmllist += '<li>'
-                }
-                htmllist += e.id+' - '+e.username+'</li>';
-            });
-            $('#adminuserlist').html(htmllist)
-        },
-        error:function(){
-            alert('error');
-        }
-    });
+    "use strict";
+    var success = function(data){
+        var htmllist = "";
+        $.each($.parseJSON(data),function(i,e){
+            if(e.admin){
+                htmllist += '<li class="admin">';
+            } else {
+                htmllist += '<li>';
+            }
+            htmllist += e.id+' - '+e.username+'</li>';
+        });
+        $('#adminuserlist').html(htmllist);
+    };
+    api('getuserlist',success);
 }
 function addNewUser(){
+    "use strict";
     var newusername = $('#newusername').val();
     var newpassword = $('#newpassword').val();
-    var newisadmin = $('#chkSelect').attr('checked')?true:false;
-    if(newusername.trim() == '' || newpassword.trim() == ''){
+    var newisadmin = $('#chkSelect').attr('checked')?1:0;
+    if(newusername.trim() === '' || newpassword.trim() === ''){
         return;
     }
-     $.ajax({
-        url: '/api',
-        type: 'POST',
-        data: { 'action':'adduser',
+    var data = {'action':'adduser',
                 'value' : JSON.stringify({
-                        'username':newusername,
-                        'password':newpassword,
-                        'isadmin':newisadmin
-                        })
-                
-        },
-        success:function(data){
-            updateUserList();
-        },
-        error:function(){
-            alert('error');
-        }
-    });
+                    'username':newusername,
+                    'password':newpassword,
+                    'isadmin':newisadmin
+                })};
+    var success = function(data){
+        updateUserList();
+    };
+    api(data,success);
 }
 
 /***
 MESSAGE OF THE DAY
 ***/
 function fetchMessageOfTheDay(){
-    $.ajax({
-        url: "/api",
-        context: $(this),
-        data: { 'action' : 'getmotd' },
-                success: function(data){
-                    $('#oneliner').html(data);
-                }
-    });
+    "use strict";
+    var success = function(data){
+        $('#oneliner').html(data);
+    };
+    api('getmotd', success);
 }
 
 /**
 TAB FUNCTIONALITY
 **/
 function showTab(tabid){
+    "use strict";
     $('div.tabs '+tabid).show();
 }
 function hideAllTabs(){
+    "use strict";
     $('div.tabs > div').each(function(){
             $(this).hide();
     });
 }
 
-$(function () {
+function initTabs() {
+    "use strict";
     hideAllTabs();
     showTab('#search');
     $('div.tabs ul.tabNavigation a').click(function () {
         $("html").scrollTop(0);
         hideAllTabs();
         showTab(this.hash);
-        if('#browser' == this.hash){
+        if('#browser' === this.hash){
             loadBrowserIfEmpty();
         }
         $('div.tabs ul.tabNavigation a').removeClass('selected');
         $(this).addClass('selected');
         return false;
-    });//.filter(':first').click();
-});
+    });
+}
 
 function loadBrowserIfEmpty(){
-    if('' == $('#browser').html().trim()){
-        $('div#progressscreen').fadeIn('fast');
-        $.ajax({
-        url: "/api",
-        context: $(this),
-        data: { 'action' : 'listdir' },
-        success: function(data){
+    "use strict";
+    if('' === $('#browser').html().trim()){
+        var data = { 'action' : 'listdir' };
+        var success = function(data){
             $('#browser').html(parseAndRender(data));
             registerlistdirs($('#browser').find('ul'));
             registercompactlistdirs($('#browser').find('ul'));
             registermp3s($('#browser').find('ul'));
-            $('div#progressscreen').fadeOut('fast');
-        },
-        error: function(){
-            $('div#progressscreen').fadeOut('fast');
-        }
-        });
+        };
+        api(data,success);
     }
 }
 
+origcolor = '#000000';
 $(document).ready(function(){
+    "use strict";
     origcolor = $('div.tabs ul.tabNavigation .jplayer').css('background-color');
 });
 function pulseTab(tabname){
+    "use strict";
     var elem = $('div.tabs ul.tabNavigation .'+tabname);
-    elem.stop(true, true)
+    elem.stop(true, true);
     elem.animate({backgroundColor: '#ffffff'},100);
     elem.animate({backgroundColor: origcolor},100);
     elem.animate({backgroundColor: '#ffffff'},100);
@@ -550,9 +537,11 @@ HELPER
 ***/
 
 function reload(){
+    "use strict";
     window.location = "http://"+window.location.host;
 }
 function endsWith(str, suffix) {
+    "use strict";
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
 }
 
@@ -562,6 +551,8 @@ function endsWith(str, suffix) {
 ON DOCUMENT READY... STEADY... GO!
 ***/
 $(document).ready(function(){
+    "use strict";
+    initTabs();
     fetchMessageOfTheDay();
     initJPlayer();
     $('#searchfield .bigbutton').click(submitsearch);
@@ -569,4 +560,8 @@ $(document).ready(function(){
     restorePlaylist();
     loadConfig();
     rememberPlaylistPeriodically(0);
+    //register top level directories
+	registerlistdirs($("html").get());
+	registercompactlistdirs($("html").get());
+	$('div#progressscreen').fadeOut('slow');
 });

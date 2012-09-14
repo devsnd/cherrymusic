@@ -158,21 +158,21 @@ div#dialog{
 	display: inline;
     padding: 2px;
 	font-size: 12px;
-	border-right: 2px solid #b10a49;
-	border-bottom: 2px solid #b10a49;
-	border-top: 2px solid #fd84b2;
-	border-left: 2px solid #fd84b2;
-	background-color: #F02E75;
+	border-right: 2px solid #002200;
+	border-bottom: 2px solid #002200;
+	border-top: 2px solid #008800;
+	border-left: 2px solid #008800;
+	background-color: #004400;
 	border-radius: 4px;
 	text-decoration: none;
 }
 
 .button:hover{
 	background-color: #b10a49;
-	border-right: 2px solid #fd84b2;
-	border-bottom: 2px solid #fd84b2;
-	border-top: 2px solid #b10a49;
-	border-left: 2px solid #b10a49;
+	border-right: 2px solid #008800;
+	border-bottom: 2px solid #008800;
+	border-top: 2px solid #002200;
+	border-left: 2px solid #002200;
 	cursor: pointer;
 	color: #dddddd;
 }
@@ -307,11 +307,13 @@ ADMIN PANEL
 	padding: 0 10px;
 }
 #adminpanel{
+	background-color: #002200;
+    color: #00FF00;
 	font-family: monospace;
 }
 #adminpanel ul li{
-	background-color: #33ff33;
+	background-color: #002200;
 }
 #adminpanel ul li.admin{
-	background-color: #eeff33;
+	background-color: #001133;
 }
