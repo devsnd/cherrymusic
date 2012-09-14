@@ -1,6 +1,17 @@
 from distutils.core import setup
+import os
 
-resource_files = ['res/*','themes/*']
+
+
+def listFilesRec(crawlpath, installpath):
+    filesperfolder = []
+    for r,d,f in os.walk(crawlpath):
+        files = []
+        for name in f:
+            files += [os.path.join(r,name)]
+        filesperfolder += [(os.path.join(installpath,r),files)]
+    print(filesperfolder)
+    return filesperfolder
 
 setup( 
     name = "CherryMusic",
@@ -16,9 +27,10 @@ setup(
     url = "http://www.fomori.org/cherrymusic/",
     license = 'GPL',
     install_requires=["CherryPy >= 3.2.2"],
-    packages = ['cherrymusic','cherrymusic.test'],
+    packages = ['cherrymusicserver','cherrymusicserver.test'],
     #startup script
-    scripts = ['cherrymusic.py'],
+    scripts = ['cherrymusic'],
     #data required by the declared packages
-    package_data = { 'cherrymusic' : resource_files }
+    data_files=listFilesRec('res','share/cherrymusic')+listFilesRec('themes','share/cherrymusic')
 )
+    
