@@ -18,7 +18,7 @@ setup(
     install_requires=["CherryPy >= 3.2.2"],
     packages = ['cherrymusic','cherrymusic.test'],
     #startup script
-    scripts = ['cherrymusic.py']
+    scripts = ['cherrymusic.py'],
     #data required by the declared packages
     package_data = { 'cherrymusic' : resource_files }
 )
