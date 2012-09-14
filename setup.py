@@ -10,7 +10,6 @@ def listFilesRec(crawlpath, installpath):
         for name in f:
             files += [os.path.join(r,name)]
         filesperfolder += [(os.path.join(installpath,r),files)]
-    print(filesperfolder)
     return filesperfolder
 
 setup( 
