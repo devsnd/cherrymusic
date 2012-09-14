@@ -1,4 +1,4 @@
-cherrymusic
+CherryMusic
 ===========
 
 cherrymusic is a standalone music server based on CherryPy and jPlayer. It is intended to be an 
@@ -19,7 +19,7 @@ Upcoming features:
   - searching ID3 tags
 
 Getting Started
-===============
+---------------
 
 1. Checkout or download the cherry music sources.
 
@@ -44,11 +44,11 @@ you downloaded into your cherrymusic folder. That's it.
         $ firefox localhost:8080
 
 Side Notes
-==========
+----------
 
 By default it uses HTML5 for music playback and supports flash as fallback. 
 
 Requirements
-============
+------------
 * [Python 3](http://python.org/download/releases/)
 * [CherryPy](http://www.cherrypy.org)
