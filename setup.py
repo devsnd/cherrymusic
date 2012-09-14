@@ -1,8 +1,6 @@
 from distutils.core import setup
 import os
 
-
-
 def listFilesRec(crawlpath, installpath):
     filesperfolder = []
     for r,d,f in os.walk(crawlpath):
