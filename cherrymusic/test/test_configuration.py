@@ -32,6 +32,9 @@ import unittest
 
 from cherrymusic.configuration import Property, Configuration
 
+from cherrymusic import log
+log.setTest()
+
 class TestProperty(unittest.TestCase):
 
     def setUp(self):

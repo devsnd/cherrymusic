@@ -46,8 +46,11 @@ debug = False
 performanceTest = False
 keepInRam = False
 
+if debug:
+    log.level(log.DEBUG)
+
 class SQLiteCache(object):
-    def __init__(self,DBFILENAME):
+    def __init__(self, DBFILENAME):
         setupDB = not os.path.isfile(DBFILENAME) or os.path.getsize(DBFILENAME) == 0
         setupDB |= DBFILENAME == ':memory:' #always rescan when using ram db.
         log.i('Starting database... ')
@@ -64,7 +67,7 @@ class SQLiteCache(object):
             self.db.execute('CREATE TABLE search (drowid int NOT NULL, frowid int NOT NULL)')
             log.i('Creating index for dictionary and search tables... ')
             self.conn.execute('CREATE INDEX idx_dictionary ON dictionary(word)')
-            self.conn.execute('CREATE INDEX idx_search ON search(drowid,frowid)');
+            self.conn.execute('CREATE INDEX idx_search ON search(drowid,frowid)')
             log.i('done.')
             log.i('Connected to Database. (' + DBFILENAME + ')')
         #I don't care about journaling!
@@ -72,14 +75,15 @@ class SQLiteCache(object):
         self.conn.execute('PRAGMA journal_mode = MEMORY')
         self.checkIfRootUpdated()
 
+
     @timed
     def checkIfRootUpdated(self):
         log.i('Checking if root folder is up to date...')
         self.db.execute('''SELECT rowid, filename, filetype FROM files WHERE parent = -1''')
         dbrootfilelist = self.db.fetchall()
         dbrootfiledict = {}
-        for id, filename, ext in dbrootfilelist:
-            dbrootfiledict[id] = filename + ext
+        for fid, filename, ext in dbrootfilelist:
+            dbrootfiledict[fid] = filename + ext
         dbrootfilelist = [] #free mem
         log.i('{} folders in db root'.format(len(dbrootfiledict)))
         realrootfiles = os.listdir(self.rootDir)
@@ -100,17 +104,14 @@ class SQLiteCache(object):
         #addList = sorted(addList)
         #removeList = sorted(removeList)
         if len(removeList) > 0 or len(addList) > 0:
-            if 'y' == input("Changes detected ({} added, {} removed), perform rescan? (y/n)".format(len(addList), len(removeList))):
-                for removeItem in removeList:
-                    log.i('removing file with id: ' + str(removeItem) + ' ...')
-                    self.removeFromDB(removeItem)
+            if cherry.config.search.autoupdate.bool \
+                or 'y' == input("Changes detected ({} added, {} removed), perform rescan? (y/n)".format(len(addList), len(removeList))):
+                if removeList:
+                    self.remove_dead_file_entries(self.rootDir)
                 if addList:
                     self.register_with_db(addList, basedir=self.rootDir)
         else:
             log.i('no changes found.')
-
-    def removeFromDB(self, filerowid):
-        log.e("""removeFromDB: NOT IMPLEMENTED! should remove file """ + str(filerowid))
 
     @classmethod
     def searchterms(cls, searchterm):
@@ -133,7 +134,7 @@ class SQLiteCache(object):
             sql = query + limit
             if performanceTest:
                 log.d('Query used: ' + sql)
-            self.db.execute(sql, (term,));
+            self.db.execute(sql, (term,))
             resultlist += self.db.fetchall()
 
         return resultlist
@@ -216,11 +217,11 @@ class SQLiteCache(object):
                             progress.tick()
                         log.i(progress.formatstr(
                                     ' ETA %(eta)s (%(percent)s) -> ',
-                                    self.trim_to_maxlen(50, self.path_from_basedir(item))
+                                    self.trim_to_maxlen(50, item.relpath)
                                     ))
-        except Exception as e:
+        except Exception as exc:
             log.ex('')
-            log.e("error while updating media: %s %s", e.__class__.__name__, e)
+            log.e("error while updating media: %s %s", exc.__class__.__name__, exc)
             log.e("rollback to previous commit.")
             counter -= counter % AUTOSAVEINTERVAL
         else:
@@ -230,21 +231,13 @@ class SQLiteCache(object):
             log.i("%d file records added", counter)
 
 
-    def path_from_basedir(self, fileobj):
-        path = fileobj.name + fileobj.ext
-        if not fileobj.parent is None:
-            parentpath = self.path_from_basedir(fileobj.parent)
-            path = os.path.join(parentpath, path)
-        if fileobj.isdir:
-            path += os.path.sep
-        return path
-
-
-    def trim_to_maxlen(self, maxlen, s, insert='...'):
+    def trim_to_maxlen(self, maxlen, s, insert=' ... '):
         '''no sanity check for maxlen and len(insert)'''
         if len(s) > maxlen:
-            split = (maxlen - len(insert)) // 2
-            s = s[:split] + insert + s[-split:]
+            keep = maxlen - len(insert)
+            left = keep // 2
+            right = keep - left
+            s = s[:left] + insert + s[-right:]
         return s
 
 
@@ -257,12 +250,14 @@ class SQLiteCache(object):
         except UnicodeEncodeError as e:
             log.e("wrong encoding for filename '%s' (%s)", fileobj.relpath, e.__class__.__name__)
 
+
     def add_to_file_table(self, fileobj):
         #files(parentid, filename, ext, 1 if isdir else 0)
         cursor = self.conn.execute('INSERT INTO files VALUES (?,?,?,?)', (fileobj.parent.uid if fileobj.parent else -1, fileobj.name, fileobj.ext, 1 if fileobj.isdir else 0))
         rowid = cursor.lastrowid
         fileobj.uid = rowid
         return [rowid]
+
 
     def add_to_dictionary_table(self, filename):
         word_ids = []
@@ -275,18 +270,124 @@ class SQLiteCache(object):
             word_ids.append(wordrowid)
         return word_ids
 
+
     def add_to_search_table(self, file_id, word_id_seq):
-        self.conn.executemany('INSERT INTO search VALUES (?,?)', ((wid, file_id) for wid in word_id_seq))
+        self.conn.executemany('INSERT INTO search VALUES (?,?)',
+                              ((wid, file_id) for wid in word_id_seq))
+
+
+    def remove_dead_file_entries(self, rootpath):
+        '''walk the media database and remove all entries which point
+        to non-existent paths in the filesystem.'''
+        root = File(rootpath, isdir=True)
+        lister = self.db_recursive_filelister(root)
+        lister.send(None)   # skip root
+        for item in lister:
+            if not item.exists:
+                self.remove_recursive(item)
+
+
+    def remove_recursive(self, fileobj):
+        '''recursively remove fileobj and all its children from the media db.'''
+
+        log.i('removing dead reference(s): %s "%s"',
+              'directory' if fileobj.isdir else 'file',
+              fileobj.relpath,
+              )
+        try:
+            with self.conn:
+                for item in self.db_recursive_filelister(fileobj):
+                    self.remove_file(item)
+        except Exception:
+            log.e('error while removing dead reference(s)')
+            log.e('rolled back to safe state.')
+        else:
+            log.i('done.')
+
+
+    def remove_file(self, fileobj):
+        '''removes a file entry from the db, which means removing: 
+            - all search references,
+            - all dictionary words which were orphaned by this,
+            - the reference in the files table.'''
+        try:
+            dead_wordids = self.remove_from_search(fileobj.uid)
+            self.remove_all_from_dictionary(dead_wordids)
+            self.remove_from_files(fileobj.uid)
+        except Exception as exception:
+            log.ex(exception)
+            log.e('error removing entry for %s', fileobj.relpath)
+            raise exception
+
+
+    def remove_from_search(self, fileid):
+        '''remove all references to the given fileid from the search table.
+        returns a list of all wordids which had their last search references
+        deleted during this operation.'''
+        foundlist = self.conn.execute(
+                            'SELECT drowid FROM search' \
+                            ' WHERE frowid=?', (fileid,)) \
+                            .fetchall()
+        wordset = set([t[0] for t in foundlist])
+
+        self.conn.execute('DELETE FROM search WHERE frowid=?', (fileid,))
+
+        for wid in set(wordset):
+            count = self.conn.execute('SELECT count(*) FROM search'
+                                      ' WHERE drowid=?', (wid,)) \
+                                      .fetchone()[0]
+            if count:
+                wordset.remove(wid)
+        return wordset
+
+
+    def remove_all_from_dictionary(self, wordids):
+        '''deletes all words with the given ids from the dictionary table'''
+        if not wordids:
+            return
+        args = list(zip(wordids))
+        self.conn.executemany('DELETE FROM dictionary WHERE rowid=(?)', args)
+
+
+    def remove_from_files(self, fileid):
+        '''deletes the given file id from the files table'''
+        self.conn.execute('DELETE FROM files WHERE rowid=?', (fileid,))
+
+
+    def db_recursive_filelister(self, fileobj):
+        """generator: enumerates fileobj and children listed in the db as File 
+        objects. each item is returned before children are fetched from db.
+        this means that fileobj gets bounced back as the first return value."""
+        queue = deque((fileobj,))
+        while queue:
+            item = queue.popleft()
+            yield item
+            queue.extend(self.fetch_child_files(item))
+
+
+    def fetch_child_files(self, fileobj):
+        '''fetches from files table a list of all File objects that have the
+        argument fileobj as their parent.'''
+        id_tuples = self.conn.execute(
+                            'SELECT rowid, filename, filetype, isdir' \
+                            ' FROM files where parent=?', (fileobj.uid,)) \
+                            .fetchall()
+        return [File(name + ext,
+                     parent=fileobj,
+                     isdir=False if isdir == 0 else True,
+                     uid=uid) for uid, name, ext, isdir in id_tuples]
+
 
 def perf(text=None):
-        global __perftime
-        if text == None:
-            __perftime = time()
-        else:
-            log.d(text + ' took ' + str(time() - __perftime) + 's to execute')
+    global __perftime
+    if text == None:
+        __perftime = time()
+    else:
+        log.d(text + ' took ' + str(time() - __perftime) + 's to execute')
+
 
 class File():
-    def __init__(self, path, parent=None, isdir=None):
+    def __init__(self, path, parent=None, isdir=None, uid= -1):
         if len(path) > 1:
             path = path.rstrip(os.path.sep)
         if parent is None:
@@ -298,7 +399,7 @@ class File():
                 raise ValueError('non-root filepaths must be direct relative to parent: path: %s, parent: %s' % (path, parent))
             self.root = parent.root
             self.basename = path
-        self.uid = -1
+        self.uid = uid
         self.parent = parent
         if isdir is None:
             self.isdir = os.path.isdir(os.path.abspath(self.fullpath))
@@ -320,19 +421,23 @@ class File():
 
     @property
     def relpath(self):
+        '''this File's path relative to its root.basepath'''
         up = self.parent
-        rp = deque((self.basename,))
+        components = deque((self.basename,))
         while up is not None:
-            rp.appendleft(up.basename)
+            components.appendleft(up.basename)
             up = up.parent
-        return os.path.sep.join(rp)
+        return os.path.sep.join(components)
 
     @property
     def fullpath(self):
+        '''this file's relpath with leading root.basepath'''
         return os.path.join(self.root.basepath, self.relpath)
 
     @property
     def name(self):
+        '''if this file.isdir, its complete basename; otherwise its basename
+        without extension suffix'''
         if self.isdir:
             name = self.basename
         else:
@@ -341,11 +446,18 @@ class File():
 
     @property
     def ext(self):
+        '''if this file.isdir, the empty string; otherwise the extension suffix
+        of its basename'''
         if self.isdir:
             ext = ''
         else:
             ext = os.path.splitext(self.basename)[1]
         return ext
+
+    @property
+    def exists(self):
+        '''True if this file's fullpath exists in the filesystem'''
+        return os.path.exists(self.fullpath)
 
 
     @classmethod
