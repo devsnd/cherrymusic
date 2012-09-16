@@ -10,7 +10,7 @@ Current Features:
   - search your music
   - completely AJAX based (no page reloads on click, super fast)
   - create and save playlists
-  - multiple user authentification
+  - multiple user authentication
   - saving and sharing playlists
   - HTTPS support
     
@@ -27,17 +27,23 @@ Getting Started
         $ git clone git://github.com/devsnd/cherrymusic.git ./cherrymusic
         $ cd cherrymusic
 
-2. To use cherrymusic you need [CherryPy](http://www.cherrypy.org). 
-Either install it using your favorite package-manager, or download it 
-[straight from their website](http://download.cherrypy.org/cherrypy/3.2.2/) to install it 
-yourself. To proceed without installing, just extract the `cherrypy` subfolder from the archive 
-you downloaded into your cherrymusic folder. That's it. 
+2. To use cherrymusic you need [CherryPy](http://www.cherrypy.org). There are two options:
+
+[dlink]: http://download.cherrypy.org/cherrypy/3.2.2/
+
+    - Install it. Use your favorite package manager,
+      or [download][dlink] it and do a manual install.
+
+    - If you don't want to install: get the [download][dlink] 
+      and copy the `cherrypy` subfolder it contains 
+      into the `cherrymusic` folder you created.
 
 3. Now simply start the main script using python; it will prompt you for anything else.
 
         $ python cherrymusic.py
 
-4. On first start: Edit your config file and restart the server.
+4. On first start: The server creates a config file for you. 
+   Make the necessary changes and restart the server.
 
 5. Open your browser and play some music!
 

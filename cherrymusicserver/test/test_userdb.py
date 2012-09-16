@@ -29,10 +29,10 @@
 #
 import unittest
 
-from cherrymusic import log
+from cherrymusicserver import log
 log.setTest()
 
-from cherrymusic import userdb
+from cherrymusicserver import userdb
 
 class TestAuthenticate(unittest.TestCase):
     '''test authentication functions of userdb'''

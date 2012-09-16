@@ -160,3 +160,6 @@ Have fun!
         cherrypy.config.update({'log.screen': True})
         self.start()
 
+
+def exitServer():
+    cherrypy.engine.exit()

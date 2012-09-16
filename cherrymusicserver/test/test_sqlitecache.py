@@ -32,12 +32,11 @@ import unittest
 
 import os
 import sqlite3
-from pprint import pprint
 
-import cherrymusic as cherry
-from cherrymusic import configuration
-from cherrymusic import log
-from cherrymusic import sqlitecache
+import cherrymusicserver as cherry
+from cherrymusicserver import configuration
+from cherrymusicserver import log
+from cherrymusicserver import sqlitecache
 
 log.setTest()
 
@@ -478,6 +477,51 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
 
         self.assertListEqual(deletable, removed,
                         'complete rollback must restore all deleted entries.')
+
+class SymlinkTest(unittest.TestCase):
+
+    testdir = 'deltest'
+
+    testfiles = (
+                 os.path.join('root_file'),
+                 os.path.join('root_dir', ''),
+                 )
+
+
+    def setUp(self):
+        setupTestfiles(self.testdir, self.testfiles)
+
+
+    def tearDown(self):
+        removeTestfiles(self.testdir, self.testfiles)
+
+
+    def testSkipSymlinksBelowBasedirRoot(self):
+        os.symlink(os.path.join(self.testdir, 'root_file'),
+                   os.path.join(self.testdir, 'root_dir', 'link'))
+
+        try:
+            for f in self.enumerateTestdir():
+                self.assertFalse(f.fullpath.endswith('link'),
+                                 'deeply nested link must not be returned')
+
+        finally:
+            os.remove(os.path.join(self.testdir, 'root_dir', 'link'))
+
+
+    def testNoCyclicalSymlinks(self):
+        os.symlink(os.path.abspath(self.testdir),
+                   os.path.join(self.testdir, 'link'))
+
+        try:
+            with self.assertRaises(sqlitecache.CriticalError):
+                for f in sqlitecache.File.enumerate_files_in(os.listdir(self.testdir),
+                                                             os.path.abspath(self.testdir)):
+                    pass
+
+
+        finally:
+            os.remove(os.path.join(self.testdir, 'link'))
 
 
 if __name__ == "__main__":
