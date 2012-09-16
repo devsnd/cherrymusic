@@ -224,10 +224,14 @@ class SQLiteCache(object):
                                     self.trim_to_maxlen(50, item.relpath)
                                     ))
         except Exception as exc:
+            counter -= counter % AUTOSAVEINTERVAL
+            if isinstance(exc, CriticalError):
+                log.c(exc.msg)
+                cherry.exitServer()
+                exit(1)
             log.ex('')
             log.e("error while updating media: %s %s", exc.__class__.__name__, exc)
             log.e("rollback to previous commit.")
-            counter -= counter % AUTOSAVEINTERVAL
         else:
             progress.finish()
             log.i("media update complete.")
@@ -463,6 +467,11 @@ class File():
         '''True if this file's fullpath exists in the filesystem'''
         return os.path.exists(self.fullpath)
 
+    @property
+    def islink(self):
+        '''True if this file is a symbolic link'''
+        return os.path.islink(self.fullpath)
+
 
     @classmethod
     def enumerate_files_in(cls, paths, basedir=None, sort=False):
@@ -475,9 +484,24 @@ class File():
         to_file = lambda name: File(os.path.join(basedir, name))
         if sort:
             paths = sorted(paths, reverse=True)  # reverse: append & pop happen at the end
+        knownlinktargets = set()
         stack = deque()
         while(stack or paths):
             item = stack.pop() if stack else to_file(paths.pop())
+            if item.islink:
+                rp = os.path.realpath(item.fullpath)
+                if rp in knownlinktargets:
+                    raise CriticalError("Cyclic symlink found: " + item.relpath + " creates a circle if followed."
+                                        " The program cannot handle this condition, and there are now likely"
+                                        " duplicate entries in the media database. To fix, remove " +
+                                        item.fullpath + " and restart the server.")
+                if not item.parent is None:
+                    log.e("Deeply nested symlink found: " + item.relpath +
+                                    " All links must be directly in your basedir (" +
+                                    os.path.abspath(basedir) + "). The program cannot"
+                                    " safely handle them otherwise. Skipping.")
+                    continue
+                knownlinktargets.add(rp)
             if item.isdir:
                 children = os.listdir(item.fullpath)
                 if sort:
@@ -485,3 +509,14 @@ class File():
                 for name in children:
                     stack.append(File(name, parent=item))
             yield item
+
+
+class CriticalError(Exception):
+    '''
+    An error that can not be handled and should result in program termination.
+    '''
+    def __init__(self, msg=None):
+        self.msg = '' if msg is None else msg
+
+    def __str__(self):
+        return '%s: %s' % (self.__class__.__name__, self.msg)
