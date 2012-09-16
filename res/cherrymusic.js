@@ -370,9 +370,7 @@ function loadPlaylist(playlistname){
             addSong(e.mp3,e.title);
         });
     };
-    var error = function(){
-        alert('error');
-    };
+    api(data,success)
 }
 
 function rememberPlaylistPeriodically(lastlen){
