@@ -86,24 +86,17 @@ Have fun!
         #error_file_path = os.path.join(os.path.dirname(__file__), config.server.logfile.str)
         currentserverpath = os.path.abspath(os.path.dirname(__file__))
         
-        resourcedir = util.getResourcePath(os.path.join('..','res'))
-        if not os.path.isdir(resourcedir):
-            resourcedir = util.getResourcePath('res')
+        resourcedir = os.path.abspath(util.getResourcePath('res'))
         
         #check if theme is available in module
         themename = config.look.theme.str
         defaulttheme = 'zeropointtwo'
-        #check source folder for themes
-        themedir = os.path.join(util.getResourcePath(os.path.join('..','themes')), themename)
-        #if not check /usr/share or equivalent
-        if not os.path.isdir(themedir):
-            themedir = os.path.join(util.getResourcePath('themes'), themename)
-        #if not, use the theme in the homedir
-        if not os.path.isdir(themedir):
-            themedir = os.path.join(os.path.expanduser('~'), '.cherrymusic', 'themes', themename)
-        #if not available use default theme
-        if not os.path.isdir(themedir):
-            themedir = os.path.join(util.getResourcePath('themes'), defaulttheme)
+        try:
+            #check source folder for themes
+            themedir = os.path.abspath(util.getResourcePath(os.path.join('themes', themename)))
+        except ResourceNotFound:
+            #if not available use default theme
+            themedir = os.path.abspath(util.getResourcePath(os.path.join('themes', defaulttheme)))
 
         if config.server.enable_ssl.bool:
             cherrypy.config.update({

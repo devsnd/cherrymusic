@@ -33,8 +33,6 @@ import sys
 from cherrymusicserver import log
 from time import time
 
-resourceprefix = ''
-
 def configurationFile():
     return os.path.join(getConfigPath(),'config')
     
@@ -61,15 +59,31 @@ def getConfigPath():
         return os.path.join(os.path.expanduser('~'),'.cherrymusic')
 
 def readRes(path):
-    return open(os.path.join(getResourcePath(path))).read()
+    return open(getResourcePath(path)).read()
     
-
 def getResourcePath(path):
-    global resourceprefix
-    if not resourceprefix and not os.path.exists(os.path.join(resourceprefix,path)):
-        resourceprefix = os.path.join(sys.prefix,'share','cherrymusic')
+    #check share first
+    resourceprefix = os.path.join(sys.prefix,'share','cherrymusic')
+    respath = os.path.join(resourceprefix,path)
+    if not os.path.exists(respath):
+        log.w("Couldn't find "+respath+". Trying local install path.")
+        #otherwise check local install
+        resourceprefix = '.'
+        respath = os.path.join(resourceprefix,path)
+    if not os.path.exists(respath):
+        log.w("Couldn't find "+respath+". Trying home dir.")
+        #lastly check homedir
+        resourceprefix = os.path.join(os.path.expanduser('~'),'.cherrymusic')
+        respath = os.path.join(resourceprefix,path)
+    if not os.path.exists(respath):
+        raise ResourceNotFound("Couldn't locate '"+path+"'!")
     return os.path.join(resourceprefix,path)
-    
+
+class ResourceNotFound(Exception):
+       def __init__(self, msg):
+           self.msg = msg
+       def __str__(self):
+           return repr(self.msg)
 
 def filename(path, pathtofile=False):
     if pathtofile:

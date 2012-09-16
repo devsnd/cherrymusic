@@ -367,6 +367,9 @@ div.jp-playlist {
 	background-color:#ccc;
 	border-top:1px solid #009be3;
 }
+div.jp-playlist ul li{
+	list-style: none
+}
 div.jp-type-single div.jp-title,
 div.jp-type-playlist div.jp-title,
 div.jp-type-single div.jp-playlist {
@@ -408,8 +411,11 @@ div.jp-playlist li div {
 	color: #333;
 	text-decoration: none;
 }
-/*div.jp-type-playlist*/ div.jp-playlist a:hover {
+/*div.jp-type-playlist*/ div.jp-playlist ul li div a:hover {
 	color:#0d88c1;
+}
+div.jp-playlist li:hover{
+	background-color: #dddddd !important;
 }
 /*div.jp-type-playlist*/ div.jp-playlist a.jp-playlist-current {
 	color:#0d88c1;
