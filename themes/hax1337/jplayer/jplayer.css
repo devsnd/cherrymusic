@@ -412,6 +412,11 @@ div.jp-playlist li div {
 /*div.jp-type-playlist*/ div.jp-playlist a:hover {
 	color:#0d88c1;
 }
+
+div.jp-playlist li:hover{
+	background-color: #004400 !important;
+}
+
 /*div.jp-type-playlist*/ div.jp-playlist a.jp-playlist-current {
 	color:#0d88c1;
 }
