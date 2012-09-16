@@ -32,12 +32,11 @@ import unittest
 
 import os
 import sqlite3
-from pprint import pprint
 
-import cherrymusic as cherry
-from cherrymusic import configuration
-from cherrymusic import log
-from cherrymusic import sqlitecache
+import cherrymusicserver as cherry
+from cherrymusicserver import configuration
+from cherrymusicserver import log
+from cherrymusicserver import sqlitecache
 
 log.setTest()
 

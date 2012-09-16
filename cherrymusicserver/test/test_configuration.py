@@ -30,9 +30,9 @@
 
 import unittest
 
-from cherrymusic.configuration import Property, Configuration
+from cherrymusicserver.configuration import Property, Configuration
 
-from cherrymusic import log
+from cherrymusicserver import log
 log.setTest()
 
 class TestProperty(unittest.TestCase):
