@@ -2,17 +2,17 @@
 Changelog
 ---------
 
-0.2 (in developement)
+0.2 (in development)
 
  - https encryption support
  - option to listen only on localhost
- - config and databases reside now in the user's home directory
+ - config and databases now reside in the user's home directory
  - savable playlists
  - added GPL license
  - salted user passwords
  - admin user can be created inside web-interface on first start
  - playlists are periodically saved in the session, so they're
-   not lost, when the browser or tabs are closed etc.
+   not lost when browser or tabs are closed etc.
  - theming support
  - configurable server port 
  - admin panel for creating new users
