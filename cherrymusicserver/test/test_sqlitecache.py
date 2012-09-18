@@ -478,9 +478,10 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
         self.assertListEqual(deletable, removed,
                         'complete rollback must restore all deleted entries.')
 
+
 class SymlinkTest(unittest.TestCase):
 
-    testdir = 'deltest'
+    testdir = 'linktest'
 
     testfiles = (
                  os.path.join('root_file'),
@@ -496,32 +497,35 @@ class SymlinkTest(unittest.TestCase):
         removeTestfiles(self.testdir, self.testfiles)
 
 
+    def enumeratedTestdir(self):
+        return [os.path.join(self.testdir, f.relpath) for f in sqlitecache.File\
+                .enumerate_files_in(os.listdir(self.testdir),
+                                    os.path.abspath(self.testdir))
+                ]
+
+
     def testSkipSymlinksBelowBasedirRoot(self):
-        os.symlink(os.path.join(self.testdir, 'root_file'),
-                   os.path.join(self.testdir, 'root_dir', 'link'))
+        link = os.path.join(self.testdir, 'root_dir', 'link')
+        target = os.path.join(self.testdir, 'root_file')
+        os.symlink(target, link)
 
         try:
-            for f in self.enumerateTestdir():
-                self.assertFalse(f.fullpath.endswith('link'),
-                                 'deeply nested link must not be returned')
-
+            self.assertFalse(link in self.enumeratedTestdir(),
+                            'deeply nested link must not be returned')
         finally:
-            os.remove(os.path.join(self.testdir, 'root_dir', 'link'))
+            os.remove(link)
 
 
     def testNoCyclicalSymlinks(self):
-        os.symlink(os.path.abspath(self.testdir),
-                   os.path.join(self.testdir, 'link'))
+        target = os.path.abspath(self.testdir)
+        link = os.path.join(self.testdir, 'link')
+        os.symlink(target, link)
 
         try:
-            with self.assertRaises(sqlitecache.CriticalError):
-                for f in sqlitecache.File.enumerate_files_in(os.listdir(self.testdir),
-                                                             os.path.abspath(self.testdir)):
-                    pass
-
-
+            self.assertFalse(link in self.enumeratedTestdir(),
+                            'cyclic link must not be returned')
         finally:
-            os.remove(os.path.join(self.testdir, 'link'))
+            os.remove(link)
 
 
 if __name__ == "__main__":

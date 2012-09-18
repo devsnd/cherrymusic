@@ -42,14 +42,21 @@ def from_defaults():
     mediabasedir = os.path.join(os.path.expanduser('~'), 'Music')
     c._set('media.basedir', mediabasedir, warn_on_create=False)
     c.media.basedir._desc = """
-                                BASEDIR specifies where the media that should be
-                                served is located. It must be the absolute path, e.g.
-                                BASEDIR=/absolute/path/to/media
-                                """
+                            BASEDIR specifies where the media that should be
+                            served is located. It must be the absolute path, e.g.
+                            BASEDIR=/absolute/path/to/media.
+                            
+                            Links: If your operating system supports them,
+                            you can use symlinks directly in BASEDIR. Links to
+                            directories which contain BASEDIR will be ignored,
+                            just like all links not directly in, but in sublevels
+                            of BASEDIR. This is to guard against the adverse
+                            effects of link cycles. 
+                            """
 
     c.media.playable = 'mp3 m4a m4v ogv oga wav webm'
     c.media.playable._desc = """
-                                PLAYABLE is a space separated list of media file
+                                PLAYABLE is a space-separated list of media file
                                 extensions that can be played by jPlayer.
                                 """
 
@@ -57,7 +64,7 @@ def from_defaults():
     c.search.maxresults._desc = """
                                 MAXRESULTS sets the maximum amount of search results
                                 to be displayed. If MAXRESULTS is set to a higher value,
-                                the search will take longer, but also more accurate.
+                                the search will take longer, but will also be more accurate.
                             
                                 """
 
@@ -84,7 +91,7 @@ def from_defaults():
 
 
     c.server.logfile = 'site.log'
-    c.server.logfile._desc = 'the logfile in which errors will be logged'
+    c.server.logfile._desc = 'the logfile in which server errors will be logged'
 
     c.server.localhost_only = 'False'
     c.server.localhost_only._desc = '''

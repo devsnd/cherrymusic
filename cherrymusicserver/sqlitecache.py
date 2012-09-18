@@ -89,7 +89,7 @@ class SQLiteCache(object):
         try:
             realrootfiles = os.listdir(self.rootDir)
         except OSError:
-            log.e('Cannot open "'+self.rootDir+'"!\nAre you sure you have set the right path in your configuration file?')
+            log.e('Cannot open "' + self.rootDir + '"!\nAre you sure you have set the right path in your configuration file?')
             exit(1)
         log.i('{} folders in fs root'.format(len(realrootfiles)))
         log.i('Comparing db with filesystem...')
@@ -225,10 +225,6 @@ class SQLiteCache(object):
                                     ))
         except Exception as exc:
             counter -= counter % AUTOSAVEINTERVAL
-            if isinstance(exc, CriticalError):
-                log.c(exc.msg)
-                cherry.exitServer()
-                exit(1)
             log.ex('')
             log.e("error while updating media: %s %s", exc.__class__.__name__, exc)
             log.e("rollback to previous commit.")
@@ -484,24 +480,24 @@ class File():
         to_file = lambda name: File(os.path.join(basedir, name))
         if sort:
             paths = sorted(paths, reverse=True)  # reverse: append & pop happen at the end
-        knownlinktargets = set()
         stack = deque()
         while(stack or paths):
             item = stack.pop() if stack else to_file(paths.pop())
             if item.islink:
                 rp = os.path.realpath(item.fullpath)
-                if rp in knownlinktargets:
-                    raise CriticalError("Cyclic symlink found: " + item.relpath + " creates a circle if followed."
-                                        " The program cannot handle this condition, and there are now likely"
-                                        " duplicate entries in the media database. To fix, remove " +
-                                        item.fullpath + " and restart the server.")
+                if os.path.abspath(basedir).startswith(rp) \
+                    or (os.path.islink(basedir)
+                        and
+                        os.path.realpath(basedir).startswith(rp)):
+                    log.e("Cyclic symlink found: " + item.relpath +
+                          " creates a circle if followed. Skipping.")
+                    continue
                 if not item.parent is None:
                     log.e("Deeply nested symlink found: " + item.relpath +
-                                    " All links must be directly in your basedir (" +
-                                    os.path.abspath(basedir) + "). The program cannot"
-                                    " safely handle them otherwise. Skipping.")
+                          " All links must be directly in your basedir (" +
+                          os.path.abspath(basedir) + "). The program cannot"
+                          " safely handle them otherwise. Skipping.")
                     continue
-                knownlinktargets.add(rp)
             if item.isdir:
                 children = os.listdir(item.fullpath)
                 if sort:
@@ -510,13 +506,3 @@ class File():
                     stack.append(File(name, parent=item))
             yield item
 
-
-class CriticalError(Exception):
-    '''
-    An error that can not be handled and should result in program termination.
-    '''
-    def __init__(self, msg=None):
-        self.msg = '' if msg is None else msg
-
-    def __str__(self):
-        return '%s: %s' % (self.__class__.__name__, self.msg)

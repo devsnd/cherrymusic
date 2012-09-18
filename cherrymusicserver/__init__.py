@@ -46,7 +46,7 @@ class CherryMusic:
 
     def __init__(self):
         if not util.configurationFileExists():
-            configuration.write_to_file(configuration.from_defaults(),util.configurationFile())
+            configuration.write_to_file(configuration.from_defaults(), util.configurationFile())
             self.printWelcomeAndExit()
         self._init_config()
         self.db = sqlitecache.SQLiteCache(util.databaseFilePath('cherry.cache.db'))
@@ -67,12 +67,12 @@ class CherryMusic:
     def printWelcomeAndExit(self):
         print("""
 ==========================================================================
-Welcome to CherryMusic """+VERSION+"""!
+Welcome to CherryMusic """ + VERSION + """!
 
 To get this party started, you need to edit the configuration file, which
 resides in your home directory:
 
-    """+util.configurationFile()+"""
+    """ + util.configurationFile() + """
 
 Then you can start the server and listen to whatever you like.
 Have fun!
@@ -85,9 +85,9 @@ Have fun!
         #deprecated
         #error_file_path = os.path.join(os.path.dirname(__file__), config.server.logfile.str)
         currentserverpath = os.path.abspath(os.path.dirname(__file__))
-        
+
         resourcedir = os.path.abspath(util.getResourcePath('res'))
-        
+
         #check if theme is available in module
         themename = config.look.theme.str
         defaulttheme = 'zeropointtwo'
@@ -116,7 +116,7 @@ Have fun!
             })
 
         cherrypy.config.update({
-            'log.error_file': os.path.join(os.path.expanduser('~'), '.cherrymusic','server.log'),
+            'log.error_file': os.path.join(os.path.expanduser('~'), '.cherrymusic', 'server.log'),
             'environment': 'production',
             "server.socket_host": socket_host,
             'tools.sessions.on' : True,
@@ -159,7 +159,3 @@ Have fun!
     def server(self):
         cherrypy.config.update({'log.screen': True})
         self.start()
-
-
-def exitServer():
-    cherrypy.engine.exit()
