@@ -543,6 +543,40 @@ function endsWith(str, suffix) {
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
 }
 
+/********************
+STYLE TRANSFORMATIONS
+*********************/
+//returns the size of the browser window
+function viewport() {
+    var e = window, a = 'inner';
+    if ( !( 'innerWidth' in window ) ){
+        a = 'client';
+        e = document.documentElement || document.body;
+    }
+    return { width : e[ a+'Width' ] , height : e[ a+'Height' ] }
+}
+
+var viewStyle = 'single';
+function switchView(style){
+    if(!style){
+        if('single' == viewStyle){
+            
+        }
+    }
+    if('single' == style){
+        
+    } else if('sidebyside' == style){
+        $('#jplayer').css('width','50%');
+        $('#jplayer').css('float','right');
+        $('#jplayer').css('display','block');
+        $('#jplayer').css('margin-top','36px');
+        $('#search').css('width','50%');
+        $('#search').css('float','left');
+        $('#search').css('display','block');
+    }
+}
+
+
 
 
 /***
