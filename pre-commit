@@ -50,7 +50,6 @@ ${testrunner}
 success=$?
 
 echo restoring unstaged changes...
-git reset --hard -q
 git stash pop -q
 
 if [ ${success} != 0 ]; then
