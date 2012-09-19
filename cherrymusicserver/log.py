@@ -64,7 +64,7 @@ CONFIG = {
                     "delay": True,},
               },
  "loggers": {"test": {
-                      "level": "WARN",
+                      "level": "CRITICAL",
                       "propagate": False,
                       "handlers": ["console", ]
                       }

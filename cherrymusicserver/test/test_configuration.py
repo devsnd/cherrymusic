@@ -46,7 +46,7 @@ class TestProperty(unittest.TestCase):
 
 
     def test_there_are_reserved_words(self):
-        self.failUnless(len(Property.reserved()) > 0)
+        self.assertTrue(len(Property.reserved()) > 0)
 
 
     def test_reserved_attributes_cannot_be_set(self):
@@ -83,26 +83,26 @@ class TestProperty(unittest.TestCase):
         b = Property('b', None, parent=a)
         c = Property('c', None, parent=b)
 
-        self.assertEquals('a.b.c', c.fullname, 'property.fullname must start with parent names')
-        self.assertEquals('a', a.fullname, 'when property without parent, there must be no separator in fullname')
+        self.assertEqual('a.b.c', c.fullname, 'property.fullname must start with parent names')
+        self.assertEqual('a', a.fullname, 'when property without parent, there must be no separator in fullname')
 
 
     def test_str_must_equal_value_str(self):
-        self.assertEquals(str(99), str(Property('test', 99)))
+        self.assertEqual(str(99), str(Property('test', 99)))
 
 
     def test_bool_must_equal_value_bool(self):
-        self.assertEquals(bool(99), bool(Property('test', 99)))
+        self.assertEqual(bool(99), bool(Property('test', 99)))
 
 
     def test_int_must_equal_value_int_or_0(self):
-        self.assertEquals(int('99'), int(Property('test', '99')))
-        self.assertEquals(0, int(Property('test', 'kumquat')))
+        self.assertEqual(int('99'), int(Property('test', '99')))
+        self.assertEqual(0, int(Property('test', 'kumquat')))
 
 
     def test_float_must_equal_value_float_or_0(self):
-        self.assertEquals(float('99.9'), float(Property('test', '99.9')))
-        self.assertEquals(0, float(Property('test', 'kumquat')))
+        self.assertEqual(float('99.9'), float(Property('test', '99.9')))
+        self.assertEqual(0, float(Property('test', 'kumquat')))
 
 
     def test_value_conversions(self):
@@ -175,7 +175,7 @@ class TestConfiguration(unittest.TestCase):
 
 
     def test_name_must_be_consistent_with_init(self):
-        self.assertEquals('testname', Configuration('testname').name)
+        self.assertEqual('testname', Configuration('testname').name)
 
 
 if __name__ == "__main__":

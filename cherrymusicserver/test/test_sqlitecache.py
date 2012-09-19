@@ -135,41 +135,43 @@ class AddFilesToDatabaseTest(unittest.TestCase):
         self.Cache.add_to_file_table(parent)
         self.Cache.add_to_file_table(file)
 
-        self.failUnless(file.uid >= 0, "file has valid rowid")
+        self.assertTrue(file.uid >= 0, "file must have valid rowid")
 
         res = self.Cache.conn.execute('SELECT * from files WHERE rowid=?', (file.uid,)).fetchall()
 
-        self.failUnless(1 == len(res), "exactly one file with that uid")
-        self.failUnless(4 == len(res[0]), "expect exactly four colums stored per file")
+        self.assertTrue(1 == len(res), "expect exactly one file with that uid")
+        self.assertTrue(4 == len(res[0]), "expect exactly four colums stored per file")
 
         parentid, fname, fext, isdir = res[0]
-        self.failUnless(parent.uid == parentid, "correct parent id got saved")
-        self.failUnless('filename' == fname, "filename got saved without extension")
-        self.failUnless('.extension' == fext, "extension got saved with leading .")
-        self.failIf(isdir, 'isdir somehow got set in files table')
+        self.assertTrue(parent.uid == parentid, "correct parent id must be saved")
+        self.assertTrue('filename' == fname, "filename must be saved without extension")
+        self.assertTrue('.extension' == fext, "extension must be saved with leading .")
+        self.assertFalse(isdir, 'isdir must not be set in files table')
 
         isdir = self.Cache.conn.execute('SELECT isdir from files WHERE rowid=?', (parent.uid,)).fetchone()[0]
-        self.failUnless(isdir, "isdir got saved correctly")
+        self.assertTrue(isdir, "isdir must be saved correctly")
 
 
     def test_add_to_dictionary_table(self):
+        """searchable parts of a filename must be added to the dictionary as
+        words, and a list of unique word ids returned"""
+
         filename = 'abc ÖÄUßé.wurst_-_blablabla.nochmal.wurst'
         words = sqlitecache.SQLiteCache.searchterms(filename)
 
         ids = self.Cache.add_to_dictionary_table(filename)
 
         wordset = set(words)
-        self.failUnless(len(wordset) < len(words), "there were duplicate words in the test")
+        self.assertTrue(len(wordset) < len(words), "there must be duplicate words in the test")
         idset = set(ids)
-        self.failUnless(len(ids) == len(idset), "function returned no duplicate ids")
+        self.assertTrue(len(ids) == len(idset), "there must be no duplicate ids")
         for word in wordset:
             cursor = self.Cache.conn.execute('SELECT rowid FROM dictionary WHERE word=?', (word,))
             res = cursor.fetchall()
-            self.failUnless(len(res) == 1, "exactly one row per word")
-            self.failUnless(len(idset) > 0, "there are unmatched ids")
-            self.failUnless(res[0][0] in idset, "word id got returned by function")
+            self.assertTrue(len(res) == 1, "there must be exactly one matching row per word")
+            self.assertTrue(res[0][0] in idset, "the wordid must be returned by the function")
             idset.remove(res[0][0])   # make sure no other tested word can use that id to pass
-        self.failUnless(len(idset) == 0, "all ids accounted for")
+        self.assertTrue(len(idset) == 0, "there must not be more ids than unique words")
 
 
     def test_add_to_search_table(self):
@@ -180,7 +182,7 @@ class AddFilesToDatabaseTest(unittest.TestCase):
 
         for wid in wordids:
             found = self.Cache.conn.execute('SELECT frowid FROM search WHERE drowid=?', (wid,)).fetchone()[0]
-            self.failUnless(fileid == found, 'fileid was associated with wordid')
+            self.assertTrue(fileid == found, 'fileid must be associated with wordid')
 
 
     def test_register_file_with_db(self):
@@ -197,7 +199,7 @@ class AddFilesToDatabaseTest(unittest.TestCase):
 
         found = self.Cache.searchfor('SUCHMICH', 100)
         for filename in testnames:
-            self.failUnless(filename in found, "all added files are findable by cache search")
+            self.assertTrue(filename in found, "all added files must be findable by cache search")
 
 
 
@@ -225,10 +227,10 @@ class FileTest(unittest.TestCase):
 
 
     def assertFilesEqual(self, expected, actual):
-        self.failUnless(expected.fullpath == actual.fullpath, "equal fullpath %s vs %s" % (expected.fullpath, actual.fullpath))
-        self.failUnless(expected.name == actual.name, "equal name %s vs %s " % (expected.name, actual.name))
-        self.failUnless(expected.ext == actual.ext, 'equal extension %s vs %s' % (expected.ext, actual.ext))
-        self.failUnless(expected.isdir == actual.isdir, 'equal dir flag %s vs %s (%s)' % (expected.isdir, actual.isdir, expected.fullpath))
+        self.assertTrue(expected.fullpath == actual.fullpath, "equal fullpath %s vs %s" % (expected.fullpath, actual.fullpath))
+        self.assertTrue(expected.name == actual.name, "equal name %s vs %s " % (expected.name, actual.name))
+        self.assertTrue(expected.ext == actual.ext, 'equal extension %s vs %s' % (expected.ext, actual.ext))
+        self.assertTrue(expected.isdir == actual.isdir, 'equal dir flag %s vs %s (%s)' % (expected.isdir, actual.isdir, expected.fullpath))
 
 
     def testFileClass(self):
@@ -259,10 +261,10 @@ class FileTest(unittest.TestCase):
 
         for fileobj in sqlitecache.File.enumerate_files_in(rootpaths, basedir=basedir, sort=True):
             path = fileobj.fullpath
-            self.failUnless(path in checklist, 'file returned (%s) was not in expected set (%s)' % (path, checklist))
-            self.failUnless(os.path.exists(path), 'file actually exists: %s' % (path,))
+            self.assertTrue(path in checklist, 'file returned (%s) must be in expected set (%s)' % (path, checklist))
+            self.assertTrue(os.path.exists(path), 'file must exists: %s' % (path,))
             checklist.remove(path)
-        self.failUnless(len(checklist) == 0, 'all files were enumerated? remaining=%s' % checklist)
+        self.assertTrue(len(checklist) == 0, 'all files were not enumerated. remaining=%s' % checklist)
 
 
 class RemoveFilesFromDatabaseTest(unittest.TestCase):
@@ -365,8 +367,8 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
 
         self.Cache.remove_dead_file_entries(fob.root.fullpath)
 
-        self.failIf(self.fileid_in_db(fob.uid),
-                    'file entry did not get removed from db')
+        self.assertFalse(self.fileid_in_db(fob.uid),
+                    'file entry must be removed from db')
 
 
     def testFilesWithSameNameAsMissingAreNotRemoved(self):
@@ -394,7 +396,7 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
         self.Cache.remove_dead_file_entries(removelist[0].root.fullpath)
 
         for fob in removelist:
-            self.failIf(self.fileid_in_db(fob.uid),
+            self.assertFalse(self.fileid_in_db(fob.uid),
                         'all children entries from removed dir must be removed')
 
 
