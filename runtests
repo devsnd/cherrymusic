@@ -1,0 +1,28 @@
+#!/bin/sh
+#
+# run a number of tests for the project
+
+PROJECTDIR=`dirname $0`
+TESTDIR=${PROJECTDIR}/cherrymusicserver/test
+
+if [ ! -d ${PROJECTDIR} -o ! -f ${PROJECTDIR}/cherrymusic ]; then
+    echo "cannot find main script: 'cherrymusic'" >&2
+    echo "PROJECTDIR not set correctly? to fix, edit $0" >&2
+    exit 1
+fi
+
+
+echo "running unit tests..."
+python -m unittest discover --failfast -s ${TESTDIR} -t ${PROJECTDIR}
+if [ $? != 0 ]; then
+    echo "unit test(s) failed" >&2
+    exit 1
+fi
+
+echo "checking dist metadata..."
+python ${PROJECTDIR}/setup.py check
+if [ $? != 0 ]; then
+    echo "distribution metadata check failure" >&2
+    exit 1
+fi
+
