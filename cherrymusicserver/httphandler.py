@@ -36,6 +36,7 @@ import os #shouldn't have to list any folder in the future!
 import sys
 import json
 import cherrypy
+import codecs
 
 from cherrymusicserver import renderjson
 from cherrymusicserver import userdb
@@ -155,6 +156,16 @@ class HTTPHandler(object):
                 return "You didn't think that would work, did you?"
         elif action == 'getplayables':
             return json.dumps(cherry.config.media.playable.list)
+        elif action == 'downloadpls':
+            pls = self.playlistdb.createPLS(value,cherrypy.session['userid'])
+            name = self.playlistdb.getName(value,cherrypy.session['userid'])
+            if pls and name:
+                return self.serve_string_as_file(pls,name+'.pls')
+        elif action == 'downloadm3u':
+            pls = self.playlistdb.createM3U(value,cherrypy.session['userid'])
+            name = self.playlistdb.getName(value,cherrypy.session['userid'])
+            if pls and name:
+                return self.serve_string_as_file(pls,name+'.m3u')
         else:
             dirtorender = value
             dirtorenderabspath = os.path.join(cherry.config.media.basedir.str, value)
@@ -165,3 +176,8 @@ class HTTPHandler(object):
                     return renderer.render(self.model.listdir(dirtorender))
             else:
                 return 'Error rendering dir [action: "' + action + '", value: "' + value + '"]'
+                
+    def serve_string_as_file(self,string,filename):
+        cherrypy.response.headers["Content-Type"] = "application/x-download"
+        cherrypy.response.headers["Content-Disposition"] = 'attachment; filename="'+filename+'"'
+        return codecs.encode(string,"UTF-8")

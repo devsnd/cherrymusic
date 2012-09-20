@@ -339,10 +339,22 @@ function showPlaylists(){
     var success = function(data){
             var pls = '<ul>';
             $.each($.parseJSON(data),function(i,e){
-                pls += '<li>';
-                var onclick = "loadPlaylist('"+e[0]+"')";
-                pls += '<a class="remoteplaylist" href="javascript:;" onclick="'+onclick+'">';
-                pls += e[1]+'</a></li>';
+                pls += Mustache.render(
+                    ['<li>',
+                    '<a class="remoteplaylist" onclick="loadPlaylist({{playlistid}})" href="javascript:;">',
+                    '{{playlistlabel}}',
+                    '</a>',
+                    '<a class="exportPLS button" href="/api?action=downloadpls&value={{playlistid}}">',
+                    '&darr; PLS',
+                    '</a>',
+                    '<a class="exportM3U button" href="/api?action=downloadm3u&value={{playlistid}}"">',
+                    '&darr; M3U',
+                    '</a>',
+                    '</li>'].join(''),
+                {
+                playlistid:e[0],
+                playlistlabel:e[1]
+                });
             });
             pls += '</ul>';
             $('.available-playlists').html(pls);
@@ -355,6 +367,7 @@ function showPlaylists(){
     };
     api('showplaylists',success,error);
 }
+
 function hidePlaylists(){
     "use strict";
     $('.showplayliststab').slideDown('fast');
