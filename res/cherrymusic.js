@@ -403,6 +403,15 @@ function restorePlaylist(){
     api('restoreplaylist',success,error);
 }
 
+function removePlayedFromPlaylist(){
+    if(mediaPlaylist.current != 0){
+        if(!mediaPlaylist.removing){
+            mediaPlaylist.remove(0);
+        }
+        window.setTimeout(removePlayedFromPlaylist,50);
+    }
+}
+
 function logout(){
     "use strict";
     var success = function(data){ reload(); };
