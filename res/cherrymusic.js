@@ -430,6 +430,10 @@ function logout(){
     var success = function(data){ reload(); };
     api('logout',success);
 }
+
+function displayCurrentSong(){
+    $('.cm-songtitle').html(mediaPlaylist.playlist[mediaPlaylist.current].title);
+}
 /***
 ADMIN PANEL
 ***/
@@ -618,4 +622,5 @@ $(document).ready(function(){
 	registerlistdirs($("html").get());
 	registercompactlistdirs($("html").get());
 	$('div#progressscreen').fadeOut('slow');
+    window.setInterval("displayCurrentSong()", 1000)
 });

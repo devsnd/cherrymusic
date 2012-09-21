@@ -224,8 +224,15 @@ ADMIN PANEL
 }
 
 
-
-
+/****************
+JPlayer Additions
+****************/
+.cm-songtitle{
+	font-size: 12px;
+    left: 166px;
+    position: absolute;
+    top: 10px;
+}
 
 
 
