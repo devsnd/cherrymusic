@@ -30,57 +30,21 @@ html,body{
 }
 
 
-.tabs{
-	width: 100%;
-}
 .tabs .tabNavigation{
 	height: 45px;
-	margin: 0 auto;
-	padding: 0;
-	
-	/*fixed centering*/
-	left: 50%;
-	position: fixed;
-	width: 320px;
-	margin-left: -160px; /* minus half the width */
-
-	
 	background-color: #ffffff;
-	border-radius: 4px;
 }
 
-.tabs .tabNavigation li{
-	display: inline;
-	float: left;
-	padding: 5px;
-}
 .tabs .tabNavigation li a{
-	text-decoration: none;
 	background-color: #F02E75;
-	padding: 8px;
-	border-radius: 4px;
-	font-weight: 900;
 	color: #ffffff;
-
-	display: block;
-	text-align: center;
-    width: 80px;
 }
 
 .smalltab{
 	background-color: #F02E75;
-	display: inline;
-	padding: 3px 3px 0;
-	margin-right: 4px;
-	border-radius: 5px 5px 0 0;
-	font-size: 12px;
 }
 .smalltab a{
-	text-decoration: none;
 	color: #fff;
-}
-.floatright{
-	float: right;
 }
 div#playlist-manager{
 #	position: fixed;
@@ -89,47 +53,15 @@ div#playlist-manager{
 }
 
 div#progressscreen{
-	width: 100%;
-	height: 100%;
-	left: 0;
-	margin: 0;
-	padding: 0;
-	position: fixed;
-	top: 0;
-	width: 100%;
 	background-color: #eeeeee;
-	background-image:url(loader.gif);
-	background-repeat: no-repeat;
-	background-position: 48% 48%;
-	opacity: 0.5;
 }
 div#dialog{
 	background-color: #DDFFDD;
-    left: 50%;
-    margin-left: -150px;
-    padding: 20px;
-    position: fixed;
-    top: 40%;
-    width: 300px;
-}
-.tabs > div{
-	padding-top: 50px;
-}
-
-#searchfield{
-	margin: 0 auto;
-	width: 300px;
 }
 
 #searchfield .oneliner{
-	font-size: 12px;
 }
 .bigbutton{
-	background-repeat: no-repeat;
-	background-position: 10px 0;
-	color: #ffffff;
-	display: inline;
-    padding: 3px;
 	font-size: 22px;
 	border-right: 4px solid #b10a49;
 	border-bottom: 4px solid #b10a49;
@@ -137,7 +69,6 @@ div#dialog{
 	border-left: 4px solid #fd84b2;
 	background-color: #F02E75;
 	border-radius: 8px;
-	text-decoration: none;
 }
 
 .bigbutton:hover{
@@ -146,77 +77,24 @@ div#dialog{
 	border-bottom: 4px solid #fd84b2;
 	border-top: 4px solid #b10a49;
 	border-left: 4px solid #b10a49;
-	cursor: pointer;
-	color: #dddddd;
 }
 .button{
-	background-repeat: no-repeat;
-	background-position: 10px 0;
-	color: #ffffff;
-	display: inline;
-    padding: 2px;
-	font-size: 12px;
 	border-right: 2px solid #b10a49;
 	border-bottom: 2px solid #b10a49;
 	border-top: 2px solid #fd84b2;
 	border-left: 2px solid #fd84b2;
 	background-color: #F02E75;
-	border-radius: 4px;
-	text-decoration: none;
 }
 
 .button:hover{
 	background-color: #b10a49;
-	border-right: 2px solid #fd84b2;
-	border-bottom: 2px solid #fd84b2;
-	border-top: 2px solid #b10a49;
-	border-left: 2px solid #b10a49;
 	cursor: pointer;
 	color: #dddddd;
 }
-#searchform{
-	
-}
-#searchform input{
-	width: 200px;
-	font-size: 22px;
-}
 
-#mediawrapper{
-	height: 105px;
-}
-#mediaplayer{
-	left: 0;
-    position: fixed;
-    top: 10px;
-    width: 100%;
-}
-.jp-playlist{
-	float: left;
-}
-.jp-playlist ul li{
-	
-}
-#jp_container_1{
-	width: 100%;
-}
-
-ul{
-	list-style-type: none;
-	margin: 0;
-	padding: 0 0 0 20px;
-}
-ul li{
-}
 .listdir, .compactlistdir, .fileinlist{
-	display: block;
 	background-color: #eeeeee;
-	margin: 6px 0 0;
-	padding: 2px 0 2px 5px;
-	text-decoration: none;
-	font-weight: 100;
 	color: #000000;
-	overflow: hidden;
 }
 .listdir:hover{
 	background-color: #bbbbbb;
@@ -224,8 +102,6 @@ ul li{
 
 .compactlistdir{
 	background-color: #bbddbb;
-	font-family: monospace;
-    font-size: 18px;
 }
 .compactlistdir:hover{
 	background-color: #aaccaa;
@@ -236,10 +112,7 @@ li.fileinlist{
 }
 
 li.fileinlist a{
-	display: block;
-	text-decoration: none;
 	color: #004260;
-	padding: 2px;
 }
 
 .mp3file:hover{
@@ -253,54 +126,27 @@ li.fileinlist a{
 }
 
 .helptext{
-	font-size: 9px;
 	color: #444444;
 }
 .addAllToPlaylist{
 	background-color: #555555;
 	color: #ffffff;
-	display: block;
-	margin: 5px 0;
-    padding: 10px;
-	text-decoration: none;
 }
 .addAllToPlaylist:hover{
 	background-color: #aaaaaa;
 }
 
-.available-playlists ul, .available-playlists ul li{
-	margin: 0;
-	padding: 0;
-}
 .remoteplaylist{
 	background-color: #555555;
 	color: #ffffff;
-	display: block;
-	margin: 0 0 2px;
-    padding: 0 10px;
-	text-decoration: none;
 }
 .remoteplaylist:hover{
 	background-color: #aaaaaa;
 }
 
-
-.splitline{
-	width: 100%;
-	border-top: 1px solid #000000;
-	float: left;
-	margin: 10px 0 10px 0;
-}
-div.container{
-	width: 100%;
-	float: left;
-}
 /**********
 ADMIN PANEL
 **********/
-#adminpanelwrapper{
-	padding: 0 10px;
-}
 #adminpanel{
 	font-family: monospace;
 }

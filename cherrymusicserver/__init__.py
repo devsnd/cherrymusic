@@ -128,11 +128,13 @@ Have fun!
                     'tools.staticdir.on': True,
                     'tools.staticdir.dir': resourcedir,
                     'tools.staticdir.index': 'index.html',
+                    'tools.caching.on' : False,
                 },
                 '/theme': {
                     'tools.staticdir.on': True,
                     'tools.staticdir.dir': themedir,
                     'tools.staticdir.index': 'index.html',
+                    'tools.caching.on' : False,
                 },
                 '/serve' :{
                     'tools.staticdir.on': True,
@@ -140,9 +142,12 @@ Have fun!
                     'tools.staticdir.index': 'index.html',
                     'tools.encode.on' : True,
                     'tools.encode.encoding' : 'utf-8',
+                    'tools.caching.on' : False,
                 },
         })
         log.i('Starting server on port %s ...' % config.server.port)
+        
+        cherrypy.lib.caching.expires(0) #disable expiry caching
         cherrypy.engine.start()
 
     def pyopensslExists(self):

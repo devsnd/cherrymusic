@@ -1,0 +1,234 @@
+/*
+#
+# CherryMusic - a standalone music server
+# Copyright (c) 2012 Tom Wallroth & Tilman Boerner
+#
+# Project page:
+#   http://fomori.org/cherrymusic/
+# Sources on github:
+#   http://github.com/devsnd/cherrymusic/
+#
+# licensed under GNU GPL version 3 (or later)
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+#
+*/
+
+.tabs{
+	width: 100%;
+}
+.tabs .tabNavigation{
+	height: 45px;
+	margin: 0 auto;
+	padding: 0;
+	
+	/*fixed centering*/
+	left: 50%;
+	position: fixed;
+	width: 320px;
+	margin-left: -160px; /* minus half the width */
+
+	border-radius: 4px;
+}
+.tabs .tabNavigation li{
+	display: inline;
+	float: left;
+	padding: 5px;
+}
+.tabs .tabNavigation li a{
+	text-decoration: none;
+	padding: 8px;
+	border-radius: 4px;
+	font-weight: 900;
+	display: block;
+	text-align: center;
+    width: 80px;
+}
+.smalltab{
+	display: inline;
+	padding: 3px 3px 0;
+	margin-right: 4px;
+	border-radius: 5px 5px 0 0;
+	font-size: 12px;
+}
+.smalltab a{
+	text-decoration: none;
+}
+.floatright{
+	float: right;
+}
+div#progressscreen{
+	width: 100%;
+	height: 100%;
+	left: 0;
+	margin: 0;
+	padding: 0;
+	position: fixed;
+	top: 0;
+	width: 100%;
+	background-image:url(loader.gif);
+	background-repeat: no-repeat;
+	background-position: 48% 48%;
+	opacity: 0.5;
+}
+div#dialog{
+    left: 50%;
+    margin-left: -150px;
+    padding: 20px;
+    position: fixed;
+    top: 40%;
+    width: 300px;
+}
+.tabs > div{
+	padding-top: 50px;
+}
+
+#searchfield{
+	margin: 0 auto;
+	width: 300px;
+}
+#searchfield #oneliner{
+	font-size: 12px;
+}
+.bigbutton{
+	background-repeat: no-repeat;
+	background-position: 10px 0;
+	color: #ffffff;
+	display: inline;
+    padding: 3px;
+	text-decoration: none;
+}
+.bigbutton:hover{
+	cursor: pointer;
+	color: #dddddd;
+}
+.button{
+	background-repeat: no-repeat;
+	background-position: 10px 0;
+	color: #ffffff;
+	display: inline;
+    padding: 2px;
+	font-size: 12px;
+	border-radius: 4px;
+	text-decoration: none;
+}
+.button:hover{
+	background-color: #b10a49;
+	cursor: pointer;
+	color: #dddddd;
+}
+#searchform{
+	
+}
+
+#searchform input{
+	width: 200px;
+	font-size: 22px;
+}
+#mediawrapper{
+	height: 105px;
+}
+#mediaplayer{
+	left: 0;
+    position: fixed;
+    top: 10px;
+    width: 100%;
+}
+.jp-playlist{
+	float: left;
+}
+.jp-playlist ul li{
+	
+}
+#jp_container_1{
+	width: 100%;
+}
+
+ul{
+	list-style-type: none;
+	margin: 0;
+	padding: 0 0 0 20px;
+}
+ul li{
+}
+.listdir, .compactlistdir, .fileinlist{
+	display: block;
+	margin: 6px 0 0;
+	padding: 2px 0 2px 5px;
+	text-decoration: none;
+	font-weight: 100;
+	overflow: hidden;
+}
+
+.compactlistdir{
+	font-family: monospace;
+    font-size: 18px;
+}
+li.fileinlist a{
+	display: block;
+	text-decoration: none;
+	padding: 2px;
+}
+
+.fullpathlabel{
+	display: block;
+	font-size: 80%;
+}
+
+.helptext{
+	font-size: 9px;
+}
+.addAllToPlaylist{
+	display: block;
+	margin: 5px 0;
+    padding: 10px;
+	text-decoration: none;
+}
+
+.available-playlists ul, .available-playlists ul li{
+	margin: 0;
+	padding: 0;
+}
+.remoteplaylist{
+	display: block;
+	margin: 0 0 2px;
+    padding: 0 10px;
+	text-decoration: none;
+}
+.splitline{
+	width: 100%;
+	border-top: 1px solid #000000;
+	float: left;
+	margin: 10px 0 10px 0;
+}
+div.container{
+	width: 100%;
+	float: left;
+}
+/**********
+ADMIN PANEL
+**********/
+#adminpanelwrapper{
+	padding: 0 10px;
+}
+
+
+
+
+
+
+
+
+
+

@@ -150,7 +150,7 @@ function renderFile(label,urlpath,dirpath){
                 acssclass : 'mp3file',
                 apath : urlpath,     
                 afullpathlabel : fullpathlabel,            
-            });
+            })+'<a class="floatright" href="javascript:;">&uarr;DIR</a>';
     } else {
         return '<span>'+fullpathlabel+label+'</span>';
     }
