@@ -151,7 +151,10 @@ def write_to_file(cfg, filepath):
         lastsection = None
         for prop in sorted(cfg.list, key=lambda p: p[0]):
             fullname, value, desc = prop
-            section, subkey = fullname.split(Property._namesep, 1)
+            if Property._namesep in fullname:
+                section, subkey = fullname.split(Property._namesep, 1)
+            else:
+                section, subkey = ('', fullname)
             if section != lastsection:
                 lastsection = section
                 printf('%s[%s]' % (os.linesep, section,))
@@ -312,8 +315,8 @@ class Configuration(Property):
         super().__init__(name or '', {}, parent, allow_empty_name=parent is None)
         self._tmp = tmp
         self._properties = self._value
-        self._converter._transformers['dict'] = self.__to_dict
-        self._converter._transformers['list'] = self.__to_list
+        self._converter._transformers['dict'] = lambda v: self.__to_dict()
+        self._converter._transformers['list'] = lambda v: self.__to_list(sort=True)
         if not (dic is None or isinstance(dic, dict)):
             raise ValueError("'dic' parameter must be None or a dict")
         if dic:

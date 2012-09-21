@@ -178,5 +178,30 @@ class TestConfiguration(unittest.TestCase):
         self.assertEqual('testname', Configuration('testname').name)
 
 
+    def test_list(self):
+        '''list transformer must return a list of Property tuples'''
+        c = Configuration()
+        c.a = '1'
+        c.a._desc = 'a.1'
+        c.b.x = '2'
+        c.b.x._desc = 'b.x.2'
+
+        l = c.list
+
+        self.assertTrue(len(l) == 2,
+                        'list must contain exactly 2 Property tuples')
+        self.assertTrue(('a', '1', 'a.1') in l, '')
+        self.assertTrue(('b.x', '2', 'b.x.2') in l, '')
+
+
+    def test_dir(self):
+        '''dict transformer must return a dict conforming to a dict that might
+        have been used for initialization'''
+        d = {'a':1, 'b':2}
+        c = Configuration(dic=d)
+
+        self.assertDictEqual(d, c.dict, '')
+
+
 if __name__ == "__main__":
     unittest.main()
