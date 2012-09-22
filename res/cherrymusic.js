@@ -340,16 +340,26 @@ function showPlaylists(){
             var pls = '<ul>';
             $.each($.parseJSON(data),function(i,e){
                 pls += Mustache.render(
-                    ['<li>',
-                    '<a class="remoteplaylist" onclick="loadPlaylist({{playlistid}})" href="javascript:;">',
-                    '{{playlistlabel}}',
-                    '</a>',
-                    '<a class="exportPLS button" href="/api?action=downloadpls&value={{playlistid}}">',
-                    '&darr; PLS',
-                    '</a>',
-                    '<a class="exportM3U button" href="/api?action=downloadm3u&value={{playlistid}}"">',
-                    '&darr; M3U',
-                    '</a>',
+                    ['<li id="playlist{{playlistid}}">',
+                    '<div class="remoteplaylist">',
+                        '<div class="playlisttitle">',
+                            '<a href="javascript:;" onclick="loadPlaylist({{playlistid}})">',
+                            '{{playlistlabel}}',
+                            '</a>',
+                        '</div>',
+                        '<div class="dlbutton">',
+                            '<a class="exportPLS button" href="/api?action=downloadpls&value={{playlistid}}">',
+                            '&darr; PLS',
+                            '</a>',
+                        '</div>',
+                        '<div class="dlbutton">',
+                            '<a class="exportM3U button" href="/api?action=downloadm3u&value={{playlistid}}"">',
+                            '&darr; M3U',
+                            '</a>',
+                        '</div>',
+                    '</div>',
+                    '<div class="playlistcontent">',
+                    '</div>',
                     '</li>'].join(''),
                 {
                 playlistid:e[0],
@@ -374,16 +384,23 @@ function hidePlaylists(){
     $('.hideplayliststab').slideUp('fast');
     $('.available-playlists').slideUp();
 }
-function loadPlaylist(playlistname){
+function loadPlaylist(playlistid){
     "use strict";
-    var data = {'action':'loadplaylist',
-                'value': playlistname };
-    var success = function(data){
-        $.each($.parseJSON(data),function(i,e){
-            addSong(e.mp3,e.title);
-        });
-    };
-    api(data,success)
+    var pldomid = "#playlist"+playlistid+' .playlistcontent';
+    
+    if('' === $(pldomid).html().trim()){
+        var data = {'action':'loadplaylist',
+                    'value': playlistid };
+        var success = function(data){
+            $(pldomid).append(parseAndRender(data));
+            registerlistdirs($(pldomid).find('ul'));
+            registercompactlistdirs($(pldomid).find('ul'));
+            registermp3s($(pldomid).find('ul'));
+        };
+        api(data,success)
+    } else {
+        $(pldomid).slideToggle('slow');
+    }
 }
 
 function rememberPlaylistPeriodically(lastlen){

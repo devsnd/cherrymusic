@@ -25,6 +25,9 @@
 #
 */
 
+/*****
+TABS
+*****/
 .tabs{
 	width: 100%;
 }
@@ -162,6 +165,9 @@ ul{
 }
 ul li{
 }
+/***********
+FILE LISTING
+***********/
 .listdir, .compactlistdir, .fileinlist{
 	display: block;
 	margin: 6px 0 0;
@@ -200,11 +206,32 @@ li.fileinlist a{
 	margin: 0;
 	padding: 0;
 }
+/******************
+PLAYLIST MANAGEMENT
+******************/
 .remoteplaylist{
-	display: block;
+	display: table;
 	margin: 0 0 2px;
-    padding: 0 10px;
+    padding: 0px;
 	text-decoration: none;
+	height: 22px;
+	width: 100%;
+}
+.remoteplaylist div{
+	display: table-cell;
+}
+.remoteplaylist .playlisttitle{
+}
+.remoteplaylist .playlisttitle a{
+	display: block;
+	text-decoration: none;
+	color: #fff;
+}
+.remoteplaylist .dlbutton{
+	width: 50px;
+}
+.playlistcontent{
+	margin-left: 20px;
 }
 .splitline{
 	width: 100%;

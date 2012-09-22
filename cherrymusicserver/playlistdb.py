@@ -31,6 +31,8 @@
 import os
 import sqlite3
 from cherrymusicserver import log
+from cherrymusicserver.cherrymodel import MusicEntry
+from urllib.parse import unquote
 
 class PlaylistDB:
     def __init__(self, PLAYLISTDBFILE):
@@ -76,7 +78,8 @@ class PlaylistDB:
             alltracks = cursor.fetchall()
             apiplaylist = []
             for track in alltracks:
-                apiplaylist.append({'title':track[0], 'mp3':track[1]})
+                #TODO ugly hack: playlistdb saves the "serve" dir as well...
+                apiplaylist.append(MusicEntry(path=unquote(track[1])[7:], repr=unquote(track[0])))
             return apiplaylist
 
     def getName(self, plid, userid ):

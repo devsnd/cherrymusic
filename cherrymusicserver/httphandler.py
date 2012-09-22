@@ -42,6 +42,7 @@ from cherrymusicserver import renderjson
 from cherrymusicserver import userdb
 from cherrymusicserver import playlistdb
 from cherrymusicserver import log
+from cherrymusicserver.cherrymodel import MusicEntry
 from cherrymusicserver.util import databaseFilePath, readRes
 import cherrymusicserver as cherry
 from urllib import parse
@@ -118,7 +119,7 @@ class HTTPHandler(object):
     def handle(self, renderer, action, value, filter):
         if action == 'search':
             if not value.strip():
-                return """<span style="width:100%; text-align: center; float: left;">if you're looking for nothing, you'll be getting nothing.</span>"""
+                return renderer.render([MusicEntry(path="if you're looking for nothing, you'll be getting nothing",repr="")])
             return renderer.render(self.model.search(value.strip()))
         elif action == 'getmotd':
             return self.model.motd()
@@ -135,7 +136,7 @@ class HTTPHandler(object):
                 playlist=pl['playlist'],
                 playlisttitle=pl['playlistname']);
         elif action == 'loadplaylist':
-            return  json.dumps(self.playlistdb.loadPlaylist(
+            return  renderer.render(self.playlistdb.loadPlaylist(
                                 playlistid=value,
                                 userid=cherrypy.session['userid']
                     ));
@@ -165,7 +166,7 @@ class HTTPHandler(object):
             pls = self.playlistdb.createM3U(value,cherrypy.session['userid'])
             name = self.playlistdb.getName(value,cherrypy.session['userid'])
             if pls and name:
-                return self.serve_string_as_file(pls,name+'.m3u')
+                return self.serve_string_as_file(pls,name+'.m3u')          
         else:
             dirtorender = value
             dirtorenderabspath = os.path.join(cherry.config.media.basedir.str, value)
