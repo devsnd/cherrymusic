@@ -150,7 +150,7 @@ function renderFile(label,urlpath,dirpath){
                 acssclass : 'mp3file',
                 apath : urlpath,     
                 afullpathlabel : fullpathlabel,            
-            })+'<a class="floatright" href="javascript:;">&uarr;DIR</a>';
+            });//+'<a class="floatright" href="javascript:;">&uarr;DIR</a>';
     } else {
         return '<span>'+fullpathlabel+label+'</span>';
     }
@@ -307,6 +307,9 @@ clearPlaylist = function(){
     mediaPlaylist.remove();
 };
 
+/******************
+PLAYLIST MANAGEMENT
+******************/
 function showPlaylistSaveDialog(){
     "use strict";
     $('#dialog input').val('');
@@ -441,6 +444,19 @@ function removePlayedFromPlaylist(){
         window.setTimeout(removePlayedFromPlaylist,50);
     }
 }
+
+var lastPlaylistHeight = 0;
+function resizePlaylistSlowly(){
+    var currentHeight = $('.jp-playlist').height();
+    if(lastPlaylistHeight <= currentHeight){
+        $('#jp-playlist-wrapper').animate({'min-height': currentHeight});
+    }
+    lastPlaylistHeight = currentHeight;
+}
+
+/*****
+OTHER
+*****/
 
 function logout(){
     "use strict";
@@ -644,4 +660,5 @@ $(document).ready(function(){
 	registercompactlistdirs($("html").get());
 	$('div#progressscreen').fadeOut('slow');
     window.setInterval("displayCurrentSong()", 1000)
+    window.setInterval("resizePlaylistSlowly()",2000)
 });
