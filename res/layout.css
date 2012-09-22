@@ -219,6 +219,9 @@ div.container{
 /**********
 ADMIN PANEL
 **********/
+#adminpanel{
+	background-color: #ffffff;
+}
 #adminpanelwrapper{
 	padding: 0 10px;
 }
