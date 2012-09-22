@@ -432,7 +432,11 @@ function logout(){
 }
 
 function displayCurrentSong(){
-    $('.cm-songtitle').html(mediaPlaylist.playlist[mediaPlaylist.current].title);
+    if(mediaPlaylist.playlist.length>0){
+        $('.cm-songtitle').html(mediaPlaylist.playlist[mediaPlaylist.current].title);
+    } else {
+        $('.cm-songtitle').html('');
+    }
 }
 /***
 ADMIN PANEL
