@@ -37,6 +37,7 @@ import sys
 import json
 import cherrypy
 import codecs
+from urllib.parse import unquote
 
 from cherrymusicserver import renderjson
 from cherrymusicserver import userdb
@@ -45,6 +46,8 @@ from cherrymusicserver import log
 from cherrymusicserver.cherrymodel import MusicEntry
 from cherrymusicserver.util import databaseFilePath, readRes
 import cherrymusicserver as cherry
+import cherrymusicserver.metainfo as metainfo
+
 from urllib import parse
 
 debug = True
@@ -166,7 +169,11 @@ class HTTPHandler(object):
             pls = self.playlistdb.createM3U(value,cherrypy.session['userid'])
             name = self.playlistdb.getName(value,cherrypy.session['userid'])
             if pls and name:
-                return self.serve_string_as_file(pls,name+'.m3u')          
+                return self.serve_string_as_file(pls,name+'.m3u')       
+        elif action == 'getsonginfo':
+            #TODO yet another dirty hack. removing the /serve thing is a mess.
+            abspath = os.path.join(cherry.config.media.basedir.str,unquote(value)[7:])
+            return json.dumps(metainfo.getSongInfo(abspath).dict())
         else:
             dirtorender = value
             dirtorenderabspath = os.path.join(cherry.config.media.basedir.str, value)

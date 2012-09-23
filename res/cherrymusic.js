@@ -296,11 +296,18 @@ function initJPlayer(){
 
 addSong = function(path,title){
     "use strict";
-    mediaPlaylist.add({
+    var track = {
         title: title,
         mp3: path
-    });
+    }
+    mediaPlaylist.add(track);
     pulseTab('jplayer');
+    var success = function(data){
+        var metainfo = $.parseJSON(data)
+        track.length = metainfo.length
+    }
+    api({action:'getsonginfo',
+        value: path}, success);
 };
 clearPlaylist = function(){
     "use strict";
@@ -395,7 +402,9 @@ function loadPlaylist(playlistid){
         var data = {'action':'loadplaylist',
                     'value': playlistid };
         var success = function(data){
+            $(pldomid).hide();
             $(pldomid).append(parseAndRender(data));
+            $(pldomid).slideDown('slow');
             registerlistdirs($(pldomid).find('ul'));
             registercompactlistdirs($(pldomid).find('ul'));
             registermp3s($(pldomid).find('ul'));
