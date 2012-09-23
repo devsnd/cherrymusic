@@ -29,29 +29,6 @@
 #
 
 from cherrymusicserver import log
-
-try:
-    import stagger as sta
-except ImportError:
-    sta = mockstagger()
-
-try:
-    import audioread as ar
-except ImportError:
-    ar = Mockaudioread()
-       
-def getSongInfo(filepath):
-    try:
-        tag = sta.read_tag(filepath)
-    except stagger.errors.NoTagError:
-        tag = MockTag()
-    audiolength = -1
-#    try:
-    with ar.audio_open(filepath) as f:
-        audiolength = f.duration
-#    except Exception:
-#        log.e('audioread failed!')
-    return Metainfo(tag.artist, tag.album, tag.title, tag.track, audiolength)
     
 class Metainfo():
     def __init__(self, artist, album, title, track, length):
@@ -79,11 +56,11 @@ class Mockstagger():
     def __init__(self):
         log.w('''python library "stagger" not found!
 There will be no ID-tag support!''')
-    def read_tag(path):
+    def read_tag(self, path):
         return MockTag()
         
 class MockTag():
-    def __init__():
+    def __init__(self):
         self.artist = '-'
         self.album = '-'
         self.title = '-'
@@ -104,5 +81,28 @@ Audio file length can't be determined without it!''')
 class MockAR():
     def __init__(self):
         self.duration = -1
+        
+try:
+    import stagger as sta
+except ImportError:
+    sta = Mockstagger()
+
+try:
+    import audioread as ar
+except ImportError:
+    ar = Mockaudioread()
+       
+def getSongInfo(filepath):
+    try:
+        tag = sta.read_tag(filepath)
+    except stagger.errors.NoTagError:
+        tag = MockTag()
+    audiolength = -1
+#    try:
+    with ar.audio_open(filepath) as f:
+        audiolength = f.duration
+#    except Exception:
+#        log.e('audioread failed!')
+    return Metainfo(tag.artist, tag.album, tag.title, tag.track, audiolength)
 
     
