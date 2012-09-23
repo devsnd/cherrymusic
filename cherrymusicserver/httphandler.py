@@ -67,6 +67,23 @@ class HTTPHandler(object):
         self.firstrunpage = readRes(template_firstrun)
         self.userdb = userdb.UserDB(databaseFilePath('user.db'))
         self.playlistdb = playlistdb.PlaylistDB(databaseFilePath('playlist.db'))
+        
+        self.handlers = {
+            'search' : self.api_search,
+            'rememberplaylist' : self.api_rememberplaylist,
+            'saveplaylist' : self.api_saveplaylist,
+            'loadplaylist': self.api_loadplaylist,
+            'getmotd' : self.api_getmotd,
+            'restoreplaylist' : self.api_restoreplaylist,
+            'getplayables' : self.api_getplayables,
+            'getuserlist' : self.api_getuserlist,
+            'adduser' : self.api_adduser,
+            'showplaylists' : self.api_showplaylists,
+            'logout' : self.api_logout,
+            'downloadpls' : self.api_downloadpls,
+            'downloadm3u' : self.api_downloadm3u,
+            'getsonginfo' : self.api_getsonginfo,
+        }
 
     def issecure(self, url):
         return parse.urlparse(url).scheme == 'https'
@@ -116,75 +133,89 @@ class HTTPHandler(object):
         cherrypy.session['admin'] = user.isadmin
 
     def api(self, action='', value='', filter=''):
-        return self.handle(self.jsonrenderer, action, value, filter)
-    api.exposed = True
-
-    def handle(self, renderer, action, value, filter):
-        if action == 'search':
-            if not value.strip():
-                return renderer.render([MusicEntry(path="if you're looking for nothing, you'll be getting nothing",repr="")])
-            return renderer.render(self.model.search(value.strip()))
-        elif action == 'getmotd':
-            return self.model.motd()
-        elif action == 'rememberplaylist':
-            pl = json.loads(value)
-            cherrypy.session['playlist'] = pl['playlist']
-        elif action == 'restoreplaylist':
-            return json.dumps(cherrypy.session.get('playlist', []))
-        elif action == 'saveplaylist':
-            pl = json.loads(value)
-            return self.playlistdb.savePlaylist(
-                userid=cherrypy.session['userid'],
-                public=1 if pl['public'] else 0,
-                playlist=pl['playlist'],
-                playlisttitle=pl['playlistname']);
-        elif action == 'loadplaylist':
-            return  renderer.render(self.playlistdb.loadPlaylist(
-                                playlistid=value,
-                                userid=cherrypy.session['userid']
-                    ));
-        elif action == 'showplaylists':
-            return json.dumps(self.playlistdb.showPlaylists(cherrypy.session['userid']));
-        elif action == 'logout':
-            cherrypy.lib.sessions.expire()
-        elif action == 'getuserlist':
-            if cherrypy.session['admin']:
-                return json.dumps(self.userdb.getUserList())
-            else:
-                return {'id':'-1', 'username':'nobody', 'admin':0}
-        elif action == 'adduser':
-            if cherrypy.session['admin']:
-                new = json.loads(value)
-                return self.userdb.addUser(new['username'], new['password'], new['isadmin'])
-            else:
-                return "You didn't think that would work, did you?"
-        elif action == 'getplayables':
-            return json.dumps(cherry.config.media.playable.list)
-        elif action == 'downloadpls':
-            pls = self.playlistdb.createPLS(value,cherrypy.session['userid'])
-            name = self.playlistdb.getName(value,cherrypy.session['userid'])
-            if pls and name:
-                return self.serve_string_as_file(pls,name+'.pls')
-        elif action == 'downloadm3u':
-            pls = self.playlistdb.createM3U(value,cherrypy.session['userid'])
-            name = self.playlistdb.getName(value,cherrypy.session['userid'])
-            if pls and name:
-                return self.serve_string_as_file(pls,name+'.m3u')       
-        elif action == 'getsonginfo':
-            #TODO yet another dirty hack. removing the /serve thing is a mess.
-            abspath = os.path.join(cherry.config.media.basedir.str,unquote(value)[7:])
-            return json.dumps(metainfo.getSongInfo(abspath).dict())
+        if action in self.handlers:
+            return self.handlers[action](value)
+        #todo: clean this mess:
         else:
             dirtorender = value
             dirtorenderabspath = os.path.join(cherry.config.media.basedir.str, value)
             if os.path.isdir(dirtorenderabspath):
                 if action == 'compactlistdir':
-                    return renderer.render(self.model.listdir(dirtorender, filter))
+                    return self.jsonrenderer.render(self.model.listdir(dirtorender, filter))
                 else: #if action=='listdir':
-                    return renderer.render(self.model.listdir(dirtorender))
+                    return self.jsonrenderer.render(self.model.listdir(dirtorender))
             else:
                 return 'Error rendering dir [action: "' + action + '", value: "' + value + '"]'
+    api.exposed = True
+    
+    def api_search(self, value):
+        if not value.strip():
+            return self.jsonrenderer.render([MusicEntry(path="if you're looking for nothing, you'll be getting nothing",repr="")])
+        return self.jsonrenderer.render(self.model.search(value.strip()))
+        
+    def api_rememberplaylist(self, value):
+        pl = json.loads(value)
+        cherrypy.session['playlist'] = pl['playlist']
+        
+    def api_saveplaylist(self, value):
+        pl = json.loads(value)
+        return self.playlistdb.savePlaylist(
+            userid=cherrypy.session['userid'],
+            public=1 if pl['public'] else 0,
+            playlist=pl['playlist'],
+            playlisttitle=pl['playlistname']);
+            
+    def api_loadplaylist(self,value):
+        return  self.jsonrenderer.render(self.playlistdb.loadPlaylist(
+                            playlistid=value,
+                            userid=cherrypy.session['userid']
+                ));
                 
+    def api_getmotd(self,value):
+        return self.model.motd()
+        
+    def api_restoreplaylist(self,value):
+        return json.dumps(cherrypy.session.get('playlist', []))
+        
+    def api_getplayables(self,value):
+        return json.dumps(cherry.config.media.playable.list)
+        
+    def api_getuserlist(self,value):
+        if cherrypy.session['admin']:
+            return json.dumps(self.userdb.getUserList())
+        else:
+            return {'id':'-1', 'username':'nobody', 'admin':0}
+    
+    def api_adduser(self, value):
+        if cherrypy.session['admin']:
+            new = json.loads(value)
+            return self.userdb.addUser(new['username'], new['password'], new['isadmin'])
+        else:
+            return "You didn't think that would work, did you?"
+
+    def api_showplaylists(self,value):
+        return json.dumps(self.playlistdb.showPlaylists(cherrypy.session['userid']));
+        
+    def api_logout(self,value):
+        cherrypy.lib.sessions.expire()
+        
+    def api_downloadpls(self,value):
+        pls = self.playlistdb.createPLS(value,cherrypy.session['userid'])
+        name = self.playlistdb.getName(value,cherrypy.session['userid'])
+        if pls and name:
+            return self.serve_string_as_file(pls,name+'.pls')
+            
+    def api_downloadm3u(self,value):
+        pls = self.playlistdb.createM3U(value,cherrypy.session['userid'])
+        name = self.playlistdb.getName(value,cherrypy.session['userid'])
+        if pls and name:
+            return self.serve_string_as_file(pls,name+'.m3u')       
+            
+    def api_getsonginfo(self,value):
+        #TODO yet another dirty hack. removing the /serve thing is a mess.
+        abspath = os.path.join(cherry.config.media.basedir.str,unquote(value)[7:])
+        return json.dumps(metainfo.getSongInfo(abspath).dict())
+    
     def serve_string_as_file(self,string,filename):
         cherrypy.response.headers["Content-Type"] = "application/x-download"
         cherrypy.response.headers["Content-Disposition"] = 'attachment; filename="'+filename+'"'
