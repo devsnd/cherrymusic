@@ -204,13 +204,15 @@ class HTTPHandler(object):
         cherrypy.lib.sessions.expire()
         
     def api_downloadpls(self,value):
-        pls = self.playlistdb.createPLS(value,cherrypy.session['userid'])
+        dlval = json.loads(value)
+        pls = self.playlistdb.createPLS(dlval['plid'],cherrypy.session['userid'],dlval['addr'])
         name = self.playlistdb.getName(value,cherrypy.session['userid'])
         if pls and name:
             return self.serve_string_as_file(pls,name+'.pls')
             
     def api_downloadm3u(self,value):
-        pls = self.playlistdb.createM3U(value,cherrypy.session['userid'])
+        dlval = json.loads(value)
+        pls = self.playlistdb.createM3U(dlval['plid'],cherrypy.session['userid'],dlval['addr'])
         name = self.playlistdb.getName(value,cherrypy.session['userid'])
         if pls and name:
             return self.serve_string_as_file(pls,name+'.m3u')       

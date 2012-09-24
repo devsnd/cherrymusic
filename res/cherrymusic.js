@@ -351,11 +351,19 @@ function savePlaylist(playlistname,ispublic){
                 };
     api(data);
 }
+function getAddrPort(){
+    m = (window.location+"").match(/https?:\/\/(.+?):?(\d+).*/);
+    return 'http://'+m[1]+':'+m[2];
+}
+
 function showPlaylists(){
     "use strict";
     var success = function(data){
             var pls = '<ul>';
             $.each($.parseJSON(data),function(i,e){
+                var dlvalue = JSON.stringify({ 'plid' : e[0],
+                    'addr' : getAddrPort()
+                });
                 pls += Mustache.render(
                     ['<li id="playlist{{playlistid}}">',
                     '<div class="remoteplaylist">',
@@ -368,12 +376,12 @@ function showPlaylists(){
 			            '<a href="javascript:;" class="button" onclick="confirmDeletePlaylist({{playlistid}})">x</a>',
             			'</div>',
                         '<div class="dlbutton">',
-                            '<a class="exportPLS button" href="/api?action=downloadpls&value={{playlistid}}">',
+                            '<a class="exportPLS button" href="/api?action=downloadpls&value={{dlval}}">',
                             '&darr; PLS',
                             '</a>',
                         '</div>',
                         '<div class="dlbutton">',
-                            '<a class="exportM3U button" href="/api?action=downloadm3u&value={{playlistid}}"">',
+                            '<a class="exportM3U button" href="/api?action=downloadm3u&value={{dlval}}">',
                             '&darr; M3U',
                             '</a>',
                         '</div>',
@@ -383,7 +391,8 @@ function showPlaylists(){
                     '</li>'].join(''),
                 {
                 playlistid:e[0],
-                playlistlabel:e[1]
+                playlistlabel:e[1],
+                dlval : dlvalue
                 });
             });
             pls += '</ul>';

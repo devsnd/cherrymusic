@@ -98,7 +98,7 @@ class PlaylistDB:
         if result:
             print(result)
             return result[0][1]
-        return None
+        return 'playlist'
         
     def showPlaylists(self, userid):
         cur = self.conn.cursor()
@@ -107,27 +107,29 @@ class PlaylistDB:
             public = 1 OR userid = ?""", (userid,));
         return cur.fetchall()
         
-    def createPLS(self,userid,plid):
+    def createPLS(self,userid,plid, addrstr):
         pl = self.loadPlaylist(userid, plid)
-        plsstr = '''[playlist]
-NumberOfEntries={}
-'''.format(len(pl))
-        for i,track in enumerate(pl):
-            trinfo = {  'idx':i+1,
-                        'url':track['mp3'],
-                        'name':track['title'],
-                        'length':-1,
-                    }
-            plsstr += '''
-File{idx}={url}
-Title{idx}={name}
-Length{idx}={length}
-'''.format(**trinfo)
-        return plsstr
+        if pl:
+            plsstr = '''[playlist]
+    NumberOfEntries={}
+    '''.format(len(pl))
+            for i,track in enumerate(pl):
+                trinfo = {  'idx':i+1,
+                            'url':addrstr+'/serve/'+track.path,
+                            'name':track.repr,
+                            'length':-1,
+                        }
+                plsstr += '''
+    File{idx}={url}
+    Title{idx}={name}
+    Length{idx}={length}
+    '''.format(**trinfo)
+            return plsstr
         
-    def createM3U(self,userid,plid):
+    def createM3U(self,userid,plid,addrstr):
         pl = self.loadPlaylist(userid, plid)
-        trackpaths = map(lambda x: x['mp3'],pl)
-        return '\n'.join(trackpaths)
+        if pl:
+            trackpaths = map(lambda x: addrstr+'/serve/'+x.path,pl)
+            return '\n'.join(trackpaths)
         
 
