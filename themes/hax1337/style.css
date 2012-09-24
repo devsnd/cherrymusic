@@ -56,6 +56,7 @@ div#playlist-manager{
 
 div#progressscreen{
 	background-color: #005500;
+	background-image:url(loader.gif);
 }
 div#dialog{
 	background-color: #DDFFDD;

@@ -80,7 +80,6 @@ div#progressscreen{
 	position: fixed;
 	top: 0;
 	width: 100%;
-	background-image:url(loader.gif);
 	background-repeat: no-repeat;
 	background-position: 48% 48%;
 	opacity: 0.5;
