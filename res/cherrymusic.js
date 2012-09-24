@@ -307,7 +307,7 @@ addSong = function(path,title){
         track.length = metainfo.length
     }
     api({action:'getsonginfo',
-        value: path}, success);
+        value: path}, success, false, true);
 };
 clearPlaylist = function(){
     "use strict";
