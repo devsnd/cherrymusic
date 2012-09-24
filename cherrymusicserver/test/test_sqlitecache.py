@@ -31,7 +31,9 @@
 import unittest
 
 import os
+import shutil
 import sqlite3
+import tempfile
 
 import cherrymusicserver as cherry
 from cherrymusicserver import configuration
@@ -67,6 +69,21 @@ class TestFile(object):
         raise NotImplementedError("%s.%s.enumerate_files_in(cls, paths, sort)"
                                   % (__name__, cls.__name__))
 
+tmpdir = None
+oldwd = os.getcwd()
+
+def setUpModule():
+    global tmpdir
+    tmpdir = tempfile.mkdtemp(suffix='-test_sqlitecache', prefix='tmp-cherrymusic-')
+    os.chdir(tmpdir)
+
+def tearDownModule():
+    os.chdir(oldwd)
+    shutil.rmtree(tmpdir, ignore_errors=False, onerror=None)
+
+def getAbsPath(relpath):
+    'returns the absolute path for a path relative to the global testdir'
+    return os.path.join(tmpdir, relpath)
 
 
 def setupTestfile(testfile):
@@ -93,15 +110,7 @@ def removeTestfile(testfile):
 
 
 def removeTestfiles(testdir, testfiles):
-    os.chdir(testdir)
-    for testfile in reversed(testfiles):
-        try:
-            removeTestfile(TestFile(testfile))
-        except OSError as e:
-            if not e.errno == 2:    # ignore missing files and directories
-                raise e
-    os.chdir('..')
-    os.rmdir(testdir)
+    shutil.rmtree(testdir, ignore_errors=True, onerror=None)
 
 
 
@@ -111,7 +120,7 @@ class AddFilesToDatabaseTest(unittest.TestCase):
 
     def setupConfig(self):
         cherry.config = configuration.from_defaults()
-        cherry.config.media.basedir = 'empty'
+        cherry.config.media.basedir = self.testdir
 
 
     def setUp(self):
@@ -123,7 +132,6 @@ class AddFilesToDatabaseTest(unittest.TestCase):
     def tearDown(self):
         removeTestfiles(self.testdir, ())
         self.Cache.conn.close()
-
 
 
     def test_add_to_file_table(self):
@@ -206,7 +214,8 @@ class AddFilesToDatabaseTest(unittest.TestCase):
 
 class FileTest(unittest.TestCase):
 
-    testdir = 'testfiles'
+    testdir = 'filetest'
+
     testfiles = (
                  os.path.join('rootlevelfile'),
                  os.path.join('firstdir', ''),
@@ -224,7 +233,6 @@ class FileTest(unittest.TestCase):
 
     def tearDown(self):
         removeTestfiles(self.testdir, self.testfiles)
-
 
     def assertFilesEqual(self, expected, actual):
         self.assertTrue(expected.fullpath == actual.fullpath, "equal fullpath %s vs %s" % (expected.fullpath, actual.fullpath))
@@ -506,6 +514,18 @@ class SymlinkTest(unittest.TestCase):
                 ]
 
 
+    def testRootLinkOk(self):
+        link = os.path.join(self.testdir, 'link')
+        target = os.path.join(self.testdir, 'root_file')
+        os.symlink(target, link)
+
+        try:
+            self.assertTrue(link in self.enumeratedTestdir(),
+                            'root level links must be returned')
+        finally:
+            os.remove(link)
+
+
     def testSkipSymlinksBelowBasedirRoot(self):
         link = os.path.join(self.testdir, 'root_dir', 'link')
         target = os.path.join(self.testdir, 'root_file')
@@ -529,6 +549,87 @@ class SymlinkTest(unittest.TestCase):
         finally:
             os.remove(link)
 
+
+class UpdateTest(unittest.TestCase):
+
+    testdirname = 'updatetest'
+
+    testfiles = (
+                 os.path.join('root_file'),
+                 os.path.join('root_dir', ''),
+                 )
+
+    def setupLog(self):
+        log.level(log.DEBUG)
+
+    def setupConfig(self):
+        cherry.config = configuration.from_defaults()
+        cherry.config.media.basedir = self.testdir
+        cherry.config.search.autoupdate = 'True'
+
+    def setupCache(self):
+        self.Cache = sqlitecache.SQLiteCache(':memory:')
+
+    def clearCache(self):
+        self.Cache.conn.execute('delete from files')
+        self.Cache.conn.execute('delete from dictionary')
+        self.Cache.conn.execute('delete from search')
+
+    def setUp(self):
+        self.testdir = getAbsPath(self.testdirname)
+        setupTestfiles(self.testdir, self.testfiles)
+        self.setupLog()
+        self.setupConfig()
+        self.setupCache()
+
+
+    def tearDown(self):
+        removeTestfiles(self.testdir, self.testfiles)
+        self.Cache.conn.close()
+
+
+    def test_enumerate_add(self):
+        '''items not in db must be enumerated'''
+        self.clearCache()
+        lister = self.Cache.enumerate_fs_with_db(self.testdir)
+        expected_files = [f.rstrip(os.path.sep) for f in self.testfiles]
+        lister.send(None)  # skip first item
+        for item in lister:
+            self.assertEqual(None, item.indb, 'database part must be empty, found: %s' % item.indb)
+            self.assertTrue(item.infs.relpath in expected_files, '%s %s' % (item.infs.relpath, expected_files))
+            expected_files.remove(item.infs.relpath)
+        self.assertEqual(0, len(expected_files))
+
+
+    def test_enumerate_delete(self):
+        '''items not in fs must be enumerated'''
+        removeTestfiles(self.testdir, self.testfiles)
+        lister = self.Cache.enumerate_fs_with_db(self.testdir)
+        expected_files = [f.rstrip(os.path.sep) for f in self.testfiles]
+        lister.send(None)  # skip first item
+        for item in lister:
+            self.assertEqual(None, item.infs, 'filesystem part must be empty, found: %s' % item.indb)
+            self.assertTrue(item.indb.relpath in expected_files, '%s %s' % (item.indb.relpath, expected_files))
+            expected_files.remove(item.indb.relpath)
+        self.assertEqual(0, len(expected_files))
+
+
+    def test_enumerate_same(self):
+        '''unchanged fs must have equal db'''
+        lister = self.Cache.enumerate_fs_with_db(self.testdir)
+        expected_files = [f.rstrip(os.path.sep) for f in self.testfiles]
+        lister.send(None)  # skip first item
+        for item in lister:
+            self.assertEqual(item.infs.fullpath, item.indb.fullpath)
+            self.assertTrue(item.indb.relpath in expected_files, '%s %s' % (item.indb.relpath, expected_files))
+            expected_files.remove(item.indb.relpath)
+        self.assertEqual(0, len(expected_files))
+
+
+    def test_update(self):
+        self.clearCache()
+        cherry.config.media.basedir = '/media/audio/+audiobooks'
+        self.Cache.full_update()
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
