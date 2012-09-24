@@ -1,0 +1,40 @@
+html,body{
+    font-family: monospace;
+}
+#login{
+    width: 180px;
+    margin: 0 auto;
+}
+.cm{
+    font-size: 200%;
+    margin: 0 auto;
+    color: #F02E75;
+    font-weight: 900;
+    display: block;
+    text-align: center;
+}
+.fomori{
+    text-decoration: none;
+    color: #F02E75;
+    border-bottom: 1px dotted #F02E75;
+}
+
+
+html,body{
+    font-family: monospace;
+}
+    margin: 0 auto;
+}
+.cm{
+    font-size: 200%;
+    margin: 0 auto;
+    color: #F02E75;
+    font-weight: 900;
+    display: block;
+    text-align: center;
+}
+.fomori{
+    text-decoration: none;
+    color: #F02E75;
+    border-bottom: 1px dotted #F02E75;
+}
