@@ -73,6 +73,7 @@ class HTTPHandler(object):
             'rememberplaylist' : self.api_rememberplaylist,
             'saveplaylist' : self.api_saveplaylist,
             'loadplaylist': self.api_loadplaylist,
+            'deleteplaylist' : self.api_deleteplaylist,
             'getmotd' : self.api_getmotd,
             'restoreplaylist' : self.api_restoreplaylist,
             'getplayables' : self.api_getplayables,
@@ -164,6 +165,9 @@ class HTTPHandler(object):
             public=1 if pl['public'] else 0,
             playlist=pl['playlist'],
             playlisttitle=pl['playlistname']);
+            
+    def api_deleteplaylist(self, value):
+        return self.playlistdb.deletePlaylist(value, cherrypy.session['userid'])
             
     def api_loadplaylist(self,value):
         return  self.jsonrenderer.render(self.playlistdb.loadPlaylist(
