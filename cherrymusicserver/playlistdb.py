@@ -53,21 +53,26 @@ class PlaylistDB:
         if not len(playlist):
             log.e('I will not create an empty playlist. sorry.')
             return
-        cursor = self.conn.cursor()
-        cursor.execute("""INSERT INTO playlists 
-            (title, userid, public) VALUES (?,?,?)""",
-            (playlisttitle, userid, 1 if public else 0))
-        playlistid = cursor.lastrowid;
-        #put tracknumber to each track
-        numberedplaylist = []
-        for entry in zip(range(len(playlist)), playlist):
-            track = entry[0]
-            song = entry[1]
-            numberedplaylist.append((playlistid, track, song['mp3'], song['title']))
-        cursor.executemany("""INSERT INTO tracks (playlistid, track, url, title) 
-            VALUES (?,?,?,?)""", numberedplaylist)
-        self.conn.commit()
-
+        duplicatetitles = self.conn.execute("""SELECT * FROM playlists
+            WHERE userid = ? AND title = ?""",(userid,playlisttitle)).fetchall()
+        if not duplicatetitles:
+            cursor = self.conn.cursor()
+            cursor.execute("""INSERT INTO playlists 
+                (title, userid, public) VALUES (?,?,?)""",
+                (playlisttitle, userid, 1 if public else 0))
+            playlistid = cursor.lastrowid;
+            #put tracknumber to each track
+            numberedplaylist = []
+            for entry in zip(range(len(playlist)), playlist):
+                track = entry[0]
+                song = entry[1]
+                numberedplaylist.append((playlistid, track, song['mp3'], song['title']))
+            cursor.executemany("""INSERT INTO tracks (playlistid, track, url, title) 
+                VALUES (?,?,?,?)""", numberedplaylist)
+            self.conn.commit()
+            return "success"
+        else:
+            return "This playlist name already exists! Nothing saved."
 
     def loadPlaylist(self, playlistid, userid):
         cursor = self.conn.cursor()
