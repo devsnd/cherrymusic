@@ -45,6 +45,9 @@ class PlaylistDB:
             self.conn.commit()
             log.d('done.')
             log.d('Connected to Database. (' + PLAYLISTDBFILE + ')')
+    def deletePlaylist(self, plid, userid):
+        cursor = self.conn.cursor()
+        cursor.execute("""DELETE FROM playlists WHERE rowid = ? and userid = ?""",(plid,userid))
 
     def savePlaylist(self, userid, public, playlist, playlisttitle):
         if not len(playlist):

@@ -319,6 +319,13 @@ PLAYLIST MANAGEMENT
 ******************/
 function showPlaylistSaveDialog(){
     "use strict";
+    $('#dialog').html(
+    ['<p>Please enter a Name for this Playlist:</p>',
+    '<input type="text" id="playlisttitle" />',
+    'public:<input type="checkbox" checked="checked" id="playlistpublic" />',
+    '<a class="button" href="javascript:;" onclick="savePlaylistAndHideDialog()">Save</a>',
+    '<a class="button" href="javascript:;" onclick="$(\'#dialog\').fadeOut(\'fast\')">Close</a>'].join(''));
+
     $('#dialog input').val('');
     $('#dialog').fadeIn('fast');
 }
@@ -357,6 +364,9 @@ function showPlaylists(){
                             '{{playlistlabel}}',
                             '</a>',
                         '</div>',
+            			'<div class="deletebutton">',
+			            '<a href="javascript:;" class="button" onclick="confirmDeletePlaylist({{playlistid}})">x</a>',
+            			'</div>',
                         '<div class="dlbutton">',
                             '<a class="exportPLS button" href="/api?action=downloadpls&value={{playlistid}}">',
                             '&darr; PLS',
@@ -386,6 +396,19 @@ function showPlaylists(){
             alert('error');
     };
     api('showplaylists',success,error);
+}
+
+function confirmDeletePlaylist(id){
+    $('#dialog').html(['<p>Do you really want to delete this precious playlist?</p>',
+    '<a class="button" href="javascript:;" onclick="deletePlaylistAndHideDialog('+id+')">Yes, get it out of my life</a>',
+    '<a class="button" href="javascript:;" onclick="$(\'#dialog\').fadeOut(\'fast\')">No, leave it as it is</a>'].join(''));
+    $('#dialog').fadeIn('fast');
+}
+
+function deletePlaylistAndHideDialog(id){
+    api({action:'deleteplaylist', value: id});
+    $('#dialog').fadeOut('fast');
+    showPlaylists();
 }
 
 function hidePlaylists(){

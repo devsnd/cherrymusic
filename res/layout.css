@@ -103,6 +103,15 @@ div#dialog{
 #searchfield #oneliner{
 	font-size: 12px;
 }
+.deletebutton{
+    width:30px;
+}
+.deletebutton a{
+    width:14px;
+    height:14px;
+    display: block;
+    text-align: center;
+}
 .bigbutton{
 	background-repeat: no-repeat;
 	background-position: 10px 0;
