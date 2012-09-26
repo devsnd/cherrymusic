@@ -29,6 +29,7 @@
 #
 
 import os
+import sys
 import cherrypy
 
 from cherrymusicserver import configuration
@@ -53,6 +54,8 @@ class CherryMusic:
         self.cherrymodel = cherrymodel.CherryModel(self.db)
         self.httphandler = httphandler.HTTPHandler(config, self.cherrymodel)
         self.server()
+        if '--update' in sys.argv:
+            self.db.full_update()
 
     def _init_config(self):
         global config
@@ -94,7 +97,7 @@ Have fun!
         try:
             #check source folder for themes
             themedir = os.path.abspath(util.getResourcePath(os.path.join('themes', themename)))
-        except ResourceNotFound:
+        except util.ResourceNotFound:
             #if not available use default theme
             themedir = os.path.abspath(util.getResourcePath(os.path.join('themes', defaulttheme)))
 

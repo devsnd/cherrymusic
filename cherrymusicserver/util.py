@@ -98,12 +98,12 @@ def stripext(filename):
 
 def timed(func):
     """decorator to time function execution and log result on DEBUG"""
-    from time import clock
+    from time import time
     def wrapper(*args, **kwargs):
-        starttime = clock()
+        starttime = time()
         result = func(*args, **kwargs)
-        duration = clock() - starttime
-        log.d('%s.%s: %.4f', func.__module__, func.__name__, duration)
+        duration = time() - starttime
+        log.d('%s.%s: %.4f s', func.__module__, func.__name__, duration)
         return result
     return wrapper
 
@@ -116,10 +116,10 @@ def phrase_to_lines(phrase, length=80):
     line = ''
     for word in words:
         if len(line) + len(word) > length:
-            lines.append(line)
+            lines.append(line.rstrip())
             line = ''
         line += word + ' '
-    lines.append(line)
+    lines.append(line.rstrip())
     return lines
 
 
@@ -132,6 +132,7 @@ def Property(func):
     Seen at http://adam.gomaa.us/blog/2008/aug/11/the-python-property-builtin/
     """
     return property(**func())
+
 
 class Progress(object):
     """Simple, timed progress tracking. 
@@ -161,7 +162,7 @@ class Progress(object):
     def finish(self):
         """Mark this progress as finished. Setting this is final."""
         self._finished = True
-        self._finistime = time()
+        self._finishtime = time()
 
     def formatstr(self, fstr, *args):
         add = ''.join(list(args))
@@ -228,45 +229,66 @@ class Progress(object):
 
 
 class ProgressTree(Progress):
-    def __init__(self, name=None, finishcallback=None, callbacklevel= -1):
-        super().__init__(ticks=1, name=name)
-        self._finishcallback = finishcallback
-        self._callbacklevel = callbacklevel
-        self._parent = None
+    '''
+    Extension of the Progress concept that allows spawning 'child progress'
+    objects that will contribute a tick to their parent on completion.
+    '''
+
+    def __init__(self, name=None, parent=None):
+        super(self.__class__, self).__init__(ticks=1, name=name)
+        self._parent = parent
         self._active_children = set()
         self.root = self
         self.level = 0
         self.reporter = None
 
+    def __repr__(self):
+        return '[%3d:%3d=%.2f] %d %.1f->[%s] %s' % (
+                                      self._ticks,
+                                      self._expected_ticks,
+                                      self.completeness,
+                                      len(self._active_children),
+                                      self.runtime,
+                                      self.etastr,
+                                      self.name,
+                                      )
+
     def spawnchild(self, name=None):
-        child = ProgressTree(name if not name is None else self.name)
-        child._parent = self
+        child = ProgressTree(name if not name is None else self.name, parent=self)
         child.root = self.root
         child.level = self.level + 1
         self.extend()
-        if self._callbacklevel > self.level:
-            child._callbacklevel = self._callbacklevel
-            child._finishcallback = self._finishcallback
         return child
 
     def extend(self, amount=1):
+        '''Raises the number of expected ticks by amount'''
         assert amount > 0
         if self._finished:
             self.unfinish()
         self._expected_ticks += amount
 
     def unfinish(self):
+        '''If progress resumes after a finish has been declared, undo the
+        effects of finish().'''
         self._finished = False
         if not self._parent is None:
+            self._parent.untick()
             self._parent._active_children.add(self)
 
+    def untick(self):
+        '''Take back a past tick'''
+        if self._ticks > 0:
+            if self._ticks == self._expected_ticks:
+                self.unfinish()
+            self._ticks -= 1
+
     def _start(self):
-        super()._start()
+        super(self.__class__, self)._start()
         if not self._parent is None:
             self._parent._active_children.add(self)
 
     def tick(self, report=True):
-        super().tick()
+        super(self.__class__, self).tick()
         if report and self.root.reporter:
             self.root.reporter.tick(self)
         if self._ticks == self._expected_ticks:
@@ -275,12 +297,10 @@ class ProgressTree(Progress):
     def finish(self):
         if self._finished:
             return
-        super().finish()
+        super(self.__class__, self).finish()
         if not self._parent is None:
             self._parent.tick(report=False)
             self._parent._active_children.remove(self)
-        if self._finishcallback:
-            self._finishcallback(self)
 
     @property
     def completeness(self):
@@ -322,42 +342,90 @@ class ProgressReporter(object):
     root : progress not None
         for nested progress: the origin (super parent) progress; can be == this
     '''
+
     @classmethod
-    def timefmt(cls, eta):
-        '''the default time format: [+-]hh:mm:ss'''
-        overtime = '-'
-        if eta < 0:
-            eta = -eta
-            overtime = '+'
-        tmp = eta
+    def splittime(cls, seconds):
+        tmp = seconds
         hh = tmp / 3600
         tmp %= 3600
         mm = tmp / 60
         tmp %= 60
         ss = tmp
+        return (hh, mm, ss)
+
+
+    @classmethod
+    def timefmt(cls, eta):
+        '''the default time format: [+]hh:mm:ss'''
+        overtime = ''
+        if eta < 0:
+            eta = -eta
+            overtime = '+'
+        hh, mm, ss = cls.splittime(eta)
         return '%(ot)s%(hh)02d:%(mm)02d:%(ss)02d' % {
                                                      'hh': hh,
                                                      'mm': mm,
                                                      'ss': ss,
-                                                     'etas': eta,
                                                      'ot':overtime,
                                                      }
+
+    @classmethod
+    def prettytime(cls, eta):
+        '''
+        time display with variable precision: only show the most interesting
+        time unit.
+        '''
+        def round_to(val, stepsize):
+            return (val + stepsize // 2) // stepsize * stepsize
+
+        overtime = ''
+        if eta < 0:
+            eta = -eta
+            overtime = '+'
+        hh, mm, ss = cls.splittime(eta)
+        if hh > 3:
+            timestr = '%2d hrs' % hh
+        elif hh > 0.25:
+            hh = round_to(hh * 100, 25) / 100
+            timestr = '%.2f h' % hh
+        elif mm > 0.8:
+            timestr = '%2d min' % int(mm + 0.5)
+        elif ss > 20:
+            timestr = '%2d sec' % round_to(ss, 20)
+        elif ss > 5:
+            timestr = '%2d sec' % round_to(ss, 5)
+        else:
+            timestr = '%2d sec' % ss
+        return overtime + timestr
+
+    @classmethod
+    def prettyqty(cls, amount):
+        '''return a quantity as kilos (k) or megas (M) if  justified)'''
+        if amount < 10000:
+            return '%d' % (amount,)
+        if amount < 10e6:
+            return '%dk' % (amount // 1000,)
+        if amount < 10e7:
+            return '%1.1fM' % (amount // 10e6,)
+        return '%dM' % (amount // 10e6,)
+
 
     def __init__(self, lvl= -1, dly=1, timefmt=None, namefmt=None, repf=None):
         '''
         Creates a progress reporter with the following customization options:
         
         lvl : int (default -1)
-            The maximum level in the progress hierarchy that will be reported.
+            The maximum level in the progress hierarchy that will trigger a report.
             When a report is triggered, it will contain all progress event 
             up to this level that have occurred since the last report.
-            A negative value will only report the last unreported progress event
-            with the highest available level.
+            A negative value will only use the time trigger to report the 
+            latest progress event with the highest available level (see ``dly``).
             
         dly : float (default 1)
-            The target delay between reports, in seconds. A negative value
-            will report all progress events that conform to ``lvl`` as soon
-            as they happen.
+            The target maximum delay between reports, in seconds. Triggers a
+            report conforming with ``lvl`` if ``dly`` seconds have passed
+            since the last report. Set to 0 to turn off this time trigger; 
+            set to a value < 0 to have a matching report triggered without delay.
             
         timefmt : callable(float) -> str (default ProgressReport.timefmt)
             A function that turns the number for the estimated completion time
@@ -377,8 +445,8 @@ class ProgressReporter(object):
                'tix': total number of ticks registered with this reporter,
                'progress': progress to report on, containing the raw data
         '''
-        self._eta_adjuster = MovingAverage().feed
-        self._eta_formatter = __class__.timefmt if timefmt is None else timefmt
+        self._eta_adjuster = lambda e: e + 1
+        self._eta_formatter = self.prettytime if timefmt is None else timefmt
         self._name_formatter = (lambda s: s) if namefmt is None else namefmt
         self._reportfunc = (lambda d: log.i('%(eta)s %(nam)s (%(tix)s)', d)) if repf is None else repf
         self._replevel = lvl
@@ -388,6 +456,7 @@ class ProgressReporter(object):
         self._ticks = 0
         self._lastreport = 0
 
+
     def tick(self, progress):
         '''
         Register a progress advance for progress, potentially triggering a
@@ -396,7 +465,10 @@ class ProgressReporter(object):
         self._ticks += 1
         self._maxlevel = max(self._maxlevel, progress.level)
         self._levelcache[progress.level] = progress
-        if time() - self._lastreport > self._repintvl:
+        if progress.level <= self._replevel:
+            self.report(progress)
+            del self._levelcache[progress.level]
+        elif self._repintvl and time() - self._lastreport > self._repintvl:
             self.reportlast()
 
     def reportlast(self):
@@ -404,7 +476,7 @@ class ProgressReporter(object):
         Report progress events since the last report. 
         '''
         lvl = 0
-        while lvl < self._maxlevel:
+        while lvl <= self._maxlevel:
             if lvl in self._levelcache:
                 p = self._levelcache.pop(lvl)
                 self.report(p)
@@ -414,30 +486,32 @@ class ProgressReporter(object):
 
     def report(self, progress):
         '''Trigger a report for ``progress``'''
-        self._lastreport = time()
         self._reportfunc({
               'eta': self._eta_formatter(self._eta_adjuster(progress.root.eta)),
               'nam': self._name_formatter(progress.name),
-              'tix': self._ticks,
+              'tix': self.prettyqty(self._ticks),
               'progress' : progress,
               })
+        self._lastreport = time()
 
 
 from collections import deque
 class MovingAverage(object):
-    def __init__(self, size=10):
+    def __init__(self, size=15, fill=0):
         assert size > 0
-        self._values = deque((0 for i in range(size)))
-        self._avg = 0
+        self._values = deque((fill for i in range(size)))
+        self._avg = fill
+        self._size = size
 
     @property
     def avg(self):
         return self._avg
 
     def feed(self, val):
+        '''insert a new value and get back the new average'''
         old = self._values.popleft()
         try:
-            self._avg += (val - old) / len(self._values)
+            self._avg += (val - old) / self._size
         except TypeError as tpe:
             self._values.appendleft(old)
             raise tpe

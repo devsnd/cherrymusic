@@ -28,7 +28,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
-from cherrymusicserver import log
 import os
 import re
 import sqlite3
@@ -38,6 +37,7 @@ from operator import itemgetter
 from time import time
 
 import cherrymusicserver as cherry
+from cherrymusicserver import log
 from cherrymusicserver.util import timed, Progress, ProgressTree, ProgressReporter
 
 scanreportinterval = 1
@@ -51,6 +51,7 @@ if debug:
 
 class SQLiteCache(object):
     def __init__(self, DBFILENAME):
+        self.check_basedir()
         setupDB = not os.path.isfile(DBFILENAME) or os.path.getsize(DBFILENAME) == 0
         setupDB |= DBFILENAME == ':memory:' #always rescan when using ram db.
         log.i('Starting database... ')
@@ -69,7 +70,6 @@ class SQLiteCache(object):
         #I don't care about journaling!
         self.conn.execute('PRAGMA synchronous = OFF')
         self.conn.execute('PRAGMA journal_mode = MEMORY')
-        self.checkIfRootUpdated()
 
     def __table_exists(self, name):
         return bool(self.conn.execute('SELECT name FROM sqlite_master'
@@ -104,57 +104,22 @@ class SQLiteCache(object):
 
 
     def __create_indexes(self):
+        self.conn.execute('CREATE INDEX IF NOT EXISTS idx_files_parent'
+                          ' ON files(parent)')
         self.conn.execute('CREATE INDEX IF NOT EXISTS idx_dictionary'
                           ' ON dictionary(word)')
         self.conn.execute('CREATE INDEX IF NOT EXISTS idx_search'
                           ' ON search(drowid,frowid)')
+        self.conn.execute('CREATE INDEX IF NOT EXISTS idx_search_rvs'
+                          ' ON search(frowid,drowid)')
 
 
     def __drop_indexes(self):
+        self.conn.execute('DROP INDEX IF EXISTS idx_files_parent')
         self.conn.execute('DROP INDEX IF EXISTS idx_dictionary')
         self.conn.execute('DROP INDEX IF EXISTS idx_search')
+        self.conn.execute('DROP INDEX IF EXISTS idx_search_rvs')
 
-
-    @timed
-    def checkIfRootUpdated(self):
-        log.i('Checking if root folder is up to date...')
-        self.db.execute('''SELECT rowid, filename, filetype FROM files WHERE parent = -1''')
-        dbrootfilelist = self.db.fetchall()
-        dbrootfiledict = {}
-        for fid, filename, ext in dbrootfilelist:
-            dbrootfiledict[fid] = filename + ext
-        dbrootfilelist = [] #free mem
-        log.i('{} folders in db root'.format(len(dbrootfiledict)))
-        try:
-            realrootfiles = os.listdir(self.rootDir)
-        except OSError:
-            log.e('Cannot open "' + self.rootDir + '"!\nAre you sure you have set the right path in your configuration file?')
-            exit(1)
-        log.i('{} folders in fs root'.format(len(realrootfiles)))
-        log.i('Comparing db with filesystem...')
-
-        removeList = [] #list of db ids
-        addList = [] #list of file system paths
-
-        for dbrootfile in dbrootfiledict.items():
-            if not dbrootfile[1] in realrootfiles:
-                removeList.append(dbrootfile[0])
-
-        for realfile in realrootfiles:
-            if realfile not in dbrootfiledict.values():
-                addList.append(realfile)
-
-        #addList = sorted(addList)
-        #removeList = sorted(removeList)
-        if len(removeList) > 0 or len(addList) > 0:
-            if cherry.config.search.autoupdate.bool \
-                or 'y' == input("Changes detected ({} added, {} removed), perform rescan? (y/n)".format(len(addList), len(removeList))):
-                if removeList:
-                    self.remove_dead_file_entries(self.rootDir)
-                if addList:
-                    self.register_with_db(addList, basedir=self.rootDir)
-        else:
-            log.i('no changes found.')
 
     @classmethod
     def searchterms(cls, searchterm):
@@ -241,39 +206,6 @@ class SQLiteCache(object):
             filerowid = parent
         return os.path.dirname(path)
 
-    @timed
-    def register_with_db(self, paths, basedir):
-        """adds the given paths and their contents to the media database"""
-        log.i("updating known media")
-        counter = 0
-        progress = Progress(len(paths))
-        try:
-            self.conn.isolation_level = "IMMEDIATE"  # instant writing lock, turn off autocommit
-            with self.conn:                          # implicit commit, rollback on Exception
-                for item in File.enumerate_files_in(paths, basedir=basedir, sort=True):
-                    self.register_file_with_db(item)
-                    counter += 1
-                    if counter % AUTOSAVEINTERVAL == 0:
-                        self.conn.commit()
-                    if item.parent is None or item.parent.parent is None:
-                        if item.parent is None:
-                            progress.tick()
-                        log.i(progress.formatstr(
-                                    ' ETA %(eta)s (%(percent)s) -> ',
-                                    self.trim_to_maxlen(50, item.relpath)
-                                    ))
-        except Exception as exc:
-            counter -= counter % AUTOSAVEINTERVAL
-            log.ex('')
-            log.e("error while updating media: %s %s", exc.__class__.__name__, exc)
-            log.e("rollback to previous commit.")
-        else:
-            progress.finish()
-            log.i("media update complete.")
-        finally:
-            log.i("%d file records added", counter)
-
-
     def trim_to_maxlen(self, maxlen, s, insert=' ... '):
         '''no sanity check for maxlen and len(insert)'''
         if len(s) > maxlen:
@@ -295,7 +227,6 @@ class SQLiteCache(object):
 
 
     def add_to_file_table(self, fileobj):
-        #files(parentid, filename, ext, 1 if isdir else 0)
         cursor = self.conn.execute('INSERT INTO files VALUES (?,?,?,?)', (fileobj.parent.uid if fileobj.parent else -1, fileobj.name, fileobj.ext, 1 if fileobj.isdir else 0))
         rowid = cursor.lastrowid
         fileobj.uid = rowid
@@ -319,37 +250,36 @@ class SQLiteCache(object):
                               ((wid, file_id) for wid in word_id_seq))
 
 
-    def remove_dead_file_entries(self, rootpath):
-        '''walk the media database and remove all entries which point
-        to non-existent paths in the filesystem.'''
-        root = File(rootpath, isdir=True)
-        lister = self.db_recursive_filelister(root)
-        lister.send(None)   # skip root
-        for item in lister:
-            if not item.exists:
-                self.remove_recursive(item)
-
-
-    def remove_recursive(self, fileobj):
+    def remove_recursive(self, fileobj, progress=None):
         '''recursively remove fileobj and all its children from the media db.'''
 
-        log.i(
-              'removing dead reference(s): %s "%s"',
-              'directory' if fileobj.isdir else 'file',
-              fileobj.relpath,
-              )
+
+        if progress is None:
+            log.i(
+                  'removing dead reference(s): %s "%s"',
+                  'directory' if fileobj.isdir else 'file',
+                  fileobj.relpath,
+                  )
+            factory = None
+            remove = lambda item: self.remove_file(item)
+        else:
+            def factory(new, pnt):
+                if pnt is None:
+                    return (new, None, progress)
+                return (new, pnt, pnt[2].spawnchild('[-] ' + new.relpath))
+            remove = lambda item: (self.remove_file(item[0]), item[2].tick())
+
         deld = 0
         try:
             with self.conn:
-                for item in self.db_recursive_filelister(fileobj):
-                    self.remove_file(item)
+                for item in self.db_recursive_filelister(fileobj, factory):
+                    remove(item)
                     deld += 1
-        except:
-            log.e('error while removing dead reference(s)')
+        except Exception as e:
+            log.e('error while removing dead reference(s): %s', e)
             log.e('rolled back to safe state.')
             return 0
         else:
-            log.i('done.')
             return deld
 
 
@@ -402,30 +332,52 @@ class SQLiteCache(object):
         self.conn.execute('DELETE FROM files WHERE rowid=?', (fileid,))
 
 
-    def db_recursive_filelister(self, fileobj):
+    def db_recursive_filelister(self, fileobj, factory=None):
         """generator: enumerates fileobj and children listed in the db as File 
         objects. each item is returned before children are fetched from db.
         this means that fileobj gets bounced back as the first return value."""
-        queue = deque((fileobj,))
-        while queue:
-            item = queue.popleft()
-            yield item
-            queue.extend(self.fetch_child_files(item))
+        if factory is None:
+            queue = deque((fileobj,))
+            while queue:
+                item = queue.popleft()
+                yield item
+                queue.extend(self.fetch_child_files(item))
+        else:
+            queue = deque((factory(fileobj, None),))
+            child = lambda parent: lambda item: factory(item, parent)
+            while queue:
+                item = queue.popleft()
+                yield item
+                queue.extend(map(child(item), self.fetch_child_files(item[0])))
 
 
-    def fetch_child_files(self, fileobj):
+    def fetch_child_files(self, fileobj, sort=True, reverse=False):
         '''fetches from files table a list of all File objects that have the
         argument fileobj as their parent.'''
         id_tuples = self.conn.execute(
                             'SELECT rowid, filename, filetype, isdir' \
                             ' FROM files where parent=?', (fileobj.uid,)) \
                             .fetchall()
+        if sort:
+            id_tuples = sorted(id_tuples, key=lambda t: t[1], reverse=reverse)
         return (File(name + ext,
                      parent=fileobj,
                      isdir=False if isdir == 0 else True,
                      uid=uid) for uid, name, ext, isdir in id_tuples)
 
+    def check_basedir(self):
+        basedir = cherry.config.media.basedir.str
+        if not basedir:
+            raise AssertionError('basedir is not set')
+        if not os.path.isabs(basedir):
+            raise AssertionError('basedir must be absolute path: %s' % basedir)
+        if not os.path.exists(basedir):
+            raise AssertionError("basedir doesn't exist: %s" % basedir)
+        if not os.path.isdir(basedir):
+            raise AssertionError("basedir is not a directory: %s" % basedir)
 
+
+    @timed
     def full_update(self):
         log.i('running full update...')
         firstupdate = False
@@ -451,6 +403,7 @@ class SQLiteCache(object):
 
 
     def update_db_recursive(self, fullpath, skipfirst=False):
+
         from collections import namedtuple
         Item = namedtuple('Item', 'infs indb parent progress')
         def ifac(fs, db, pnt):
@@ -458,14 +411,14 @@ class SQLiteCache(object):
             name = f.relpath or f.fullpath if f else None
             if pnt is None:
                 progress = ProgressTree(name=name)
-                progress.reporter = ProgressReporter(namefmt=lambda s: self.trim_to_maxlen(60, s))
+                progress.reporter = ProgressReporter(lvl=1, namefmt=lambda s: self.trim_to_maxlen(50, s))
             else:
                 progress = pnt.progress.spawnchild(name)
             return Item(fs, db, pnt, progress)
 
         log.d('recursive update for %s', fullpath)
         generator = self.enumerate_fs_with_db(fullpath, itemfactory=ifac)
-        skipfirst or generator.send(None)
+        skipfirst and generator.send(None)
         adds_without_commit = 0
         add = 0
         deld = 0
@@ -475,16 +428,17 @@ class SQLiteCache(object):
                     infs, indb, progress = (item.infs, item.indb, item.progress)
                     if infs and indb:
                         if infs.isdir != indb.isdir:
-                            deld += self.remove_recursive(indb)
+                            progress.name = '[±] ' + progress.name
+                            deld += self.remove_recursive(indb, progress)
                             self.register_file_with_db(infs)
                             adds_without_commit = 1
-                            progress.name = '[±] ' + progress.name
                         else:
                             progress.name = '[=] ' + progress.name
                     elif indb:
-                        deld += self.remove_recursive(item.indb)
-                        adds_without_commit = 0
                         progress.name = '[-] ' + progress.name
+                        deld += self.remove_recursive(indb, progress)
+                        adds_without_commit = 0
+                        continue    # progress ticked by remove; don't tick again
                     elif infs:
                         self.register_file_with_db(item.infs)
                         adds_without_commit += 1
@@ -495,7 +449,6 @@ class SQLiteCache(object):
                         adds_without_commit = 0
                     progress.tick()
         except Exception as exc:
-            log.ex('')
             log.e("error while updating media: %s %s", exc.__class__.__name__, exc)
             log.e("rollback to previous commit.")
             raise exc
@@ -534,13 +487,15 @@ class SQLiteCache(object):
             itemfactory(infs, indb, parent [, optional arguments])
         and must return an object satisfying the above requirements for an item.
         '''
+        from collections import OrderedDict
         basedir = cherry.config.media.basedir.str
         Item = itemfactory
         if Item is None:
             from collections import namedtuple
             Item = namedtuple('Item', 'infs indb parent')
-        assert os.path.isabs(startpath)
-        assert startpath.startswith(basedir)
+        assert os.path.isabs(startpath), 'argument must be an abolute path: "%s"' % startpath
+        assert startpath.startswith(basedir), 'argument must be a path in basedir (%s): "%s"' % (basedir, startpath)
+
         fsobj = File(startpath) if os.path.exists(startpath) else None
         dbobj = self.db_lookup(startpath)
         stack = []
@@ -550,7 +505,7 @@ class SQLiteCache(object):
             yield item
             dbchildren = {}
             if item.indb:
-                dbchildren = dict(((f.basename, f)
+                dbchildren = OrderedDict(((f.basename, f)
                                    for f in self.fetch_child_files(item.indb)))
             if item.infs and item.infs.isdir:
                 for fs_child in File.inputfilter(item.infs.children()):
@@ -691,29 +646,6 @@ class File():
             log.w('cannot listdir: %s', error)
             return ()
 
-    @classmethod
-    def enumerate_files_in(cls, paths, basedir=None, sort=False):
-        """Takes a list of pathnames and turns them and their contents into
-            File objects, iterating in a depth-first manner. If sort == True,
-            items will turn up in the same order as they would when using the
-            sorted(iterable) builtin."""
-        if basedir is None:
-            basedir = '.'
-        root = File(basedir)
-        to_file = lambda name: File(name, parent=root)
-        if sort:
-            paths = sorted(paths, reverse=True)  # reverse: append & pop happen at the end
-        paths = cls.filter_bad_links((to_file(p) for p in paths), basedir)
-        stack = deque(paths)
-        while(stack):
-            item = stack.pop()
-            yield item
-            if item.isdir:
-                children = cls.filter_bad_links(item.children(sort, reverse=True), basedir)
-                for child in children:
-                    stack.append(child)
-                del children
-
 
     @classmethod
     def inputfilter(cls, fobiter):
@@ -741,27 +673,3 @@ class File():
                           " safely handle them otherwise. Skipping.")
                     continue
             yield f
-
-
-
-
-    @classmethod
-    def filter_bad_links(cls, fileiterable, basedir):
-        for item in fileiterable:
-            if item.islink:
-                rp = os.path.realpath(item.fullpath)
-                if os.path.abspath(basedir).startswith(rp) \
-                    or (os.path.islink(basedir)
-                        and
-                        os.path.realpath(basedir).startswith(rp)):
-                    log.e("Cyclic symlink found: " + item.relpath +
-                          " creates a circle if followed. Skipping.")
-                    continue
-                if not (item.parent is None or item.parent.parent is None):
-                    log.e("Deeply nested symlink found: " + item.relpath +
-                          " All links must be directly in your basedir (" +
-                          os.path.abspath(basedir) + "). The program cannot"
-                          " safely handle them otherwise. Skipping.")
-                    continue
-            yield item
-
