@@ -153,8 +153,10 @@ div#dialog{
 #mediaplayer{
 	left: 0;
     position: fixed;
-    top: 10px;
+    top: 0;
     width: 100%;
+	background-color: #fff;
+	padding-top: 5px;
 }
 .jp-playlist{
 	float: left;

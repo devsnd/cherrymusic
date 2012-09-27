@@ -388,15 +388,14 @@ function showPlaylists(){
                 pls += Mustache.render(
                     ['<li id="playlist{{playlistid}}">',
                     '<div class="remoteplaylist">',
-                        '<div class="usernamelabel">',
-                            '<span style="background-color: {{usernamelabelcolor}}" >{{username}}</span>',
-                        '</div>',
                         '<div class="playlisttitle">',
                             '<a href="javascript:;" onclick="loadPlaylist({{playlistid}})">',
                             '{{playlistlabel}}',
                             '</a>',
                         '</div>',
-                        
+                        '<div class="usernamelabel">',
+                            '<span style="background-color: {{usernamelabelcolor}}" >{{username}}</span>',
+                        '</div>',
             			'<div class="deletebutton">',
 			            '<a href="javascript:;" class="button" onclick="confirmDeletePlaylist({{playlistid}})">x</a>',
             			'</div>',
