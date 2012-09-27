@@ -54,7 +54,7 @@ class CherryMusic:
         self.cherrymodel = cherrymodel.CherryModel(self.db)
         self.httphandler = httphandler.HTTPHandler(config, self.cherrymodel)
         self.server()
-        if '--update' in sys.argv:
+        if '--update' in sys.argv or self.db.isEmpty():
             self.db.full_update()
 
     def _init_config(self):

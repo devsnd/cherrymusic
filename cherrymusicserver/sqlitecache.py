@@ -120,6 +120,9 @@ class SQLiteCache(object):
         self.conn.execute('DROP INDEX IF EXISTS idx_search')
         self.conn.execute('DROP INDEX IF EXISTS idx_search_rvs')
 
+    def isEmpty(self):
+        nentries = self.db.execute("""SELECT COUNT(*) FROM files""").fetchone()[0];
+        return nentries 
 
     @classmethod
     def searchterms(cls, searchterm):
@@ -400,6 +403,7 @@ class SQLiteCache(object):
         if firstupdate:
             log.i('creating indexes')
             self.__create_indexes()
+        log.i('update finished!')
 
 
     def update_db_recursive(self, fullpath, skipfirst=False):

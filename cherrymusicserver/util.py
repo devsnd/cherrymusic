@@ -384,18 +384,18 @@ class ProgressReporter(object):
             overtime = '+'
         hh, mm, ss = cls.splittime(eta)
         if hh > 3:
-            timestr = '%2d hrs' % hh
+            timestr = 'ETA %2d hrs' % hh
         elif hh > 0.25:
             hh = round_to(hh * 100, 25) / 100
-            timestr = '%.2f h' % hh
+            timestr = 'ETA %.2f h' % hh
         elif mm > 0.8:
-            timestr = '%2d min' % int(mm + 0.5)
+            timestr = 'ETA %2d min' % int(mm + 0.5)
         elif ss > 20:
-            timestr = '%2d sec' % round_to(ss, 20)
+            timestr = 'ETA %2d sec' % round_to(ss, 20)
         elif ss > 5:
-            timestr = '%2d sec' % round_to(ss, 5)
+            timestr = 'ETA %2d sec' % round_to(ss, 5)
         else:
-            timestr = '%2d sec' % ss
+            timestr = 'ETA %2d sec' % ss
         return overtime + timestr
 
     @classmethod
