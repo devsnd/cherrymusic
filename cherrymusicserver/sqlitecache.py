@@ -38,7 +38,8 @@ from time import time
 
 import cherrymusicserver as cherry
 from cherrymusicserver import log
-from cherrymusicserver.util import timed, Progress, ProgressTree, ProgressReporter
+from cherrymusicserver import util
+from cherrymusicserver.progress import ProgressTree, ProgressReporter
 
 scanreportinterval = 1
 AUTOSAVEINTERVAL = 100
@@ -51,7 +52,7 @@ if debug:
 
 class SQLiteCache(object):
     def __init__(self, DBFILENAME):
-        self.check_basedir()
+        self.validate_basedir()
         setupDB = not os.path.isfile(DBFILENAME) or os.path.getsize(DBFILENAME) == 0
         setupDB |= DBFILENAME == ':memory:' #always rescan when using ram db.
         log.i('Starting database... ')
@@ -71,10 +72,12 @@ class SQLiteCache(object):
         self.conn.execute('PRAGMA synchronous = OFF')
         self.conn.execute('PRAGMA journal_mode = MEMORY')
 
+
     def __table_exists(self, name):
         return bool(self.conn.execute('SELECT name FROM sqlite_master'
                                       ' WHERE type="table" AND name=?', (name,)
                                       ).fetchall())
+
 
     def __table_is_empty(self, name):
         if not self.__table_exists(name):
@@ -120,21 +123,16 @@ class SQLiteCache(object):
         self.conn.execute('DROP INDEX IF EXISTS idx_search')
         self.conn.execute('DROP INDEX IF EXISTS idx_search_rvs')
 
+
     def isEmpty(self):
-        nentries = self.db.execute("""SELECT COUNT(*) FROM files""").fetchone()[0];
-        return nentries 
+        return self.__table_is_empty('files')
+
 
     @classmethod
     def searchterms(cls, searchterm):
         words = re.findall('(\w+)', searchterm.replace('_', ' '))
         return list(map(lambda x:x.lower(), words))
 
-    @classmethod
-    def splitext(cls, filename):
-        if '.' in filename:
-            dotindex = filename.rindex('.')
-            return (filename[:dotindex], filename[dotindex:])
-        return (filename, '')
 
     def fetchFileIds(self, terms):
         resultlist = []
@@ -208,16 +206,6 @@ class SQLiteCache(object):
             path = os.path.join(filename + fileext, path)
             filerowid = parent
         return os.path.dirname(path)
-
-    def trim_to_maxlen(self, maxlen, s, insert=' ... '):
-        '''no sanity check for maxlen and len(insert)'''
-        if len(s) > maxlen:
-            keep = maxlen - len(insert)
-            left = keep // 2
-            right = keep - left
-            s = s[:left] + insert + s[-right:]
-        return s
-
 
     def register_file_with_db(self, fileobj):
         """add data in File object to relevant tables in media database"""
@@ -368,7 +356,8 @@ class SQLiteCache(object):
                      isdir=False if isdir == 0 else True,
                      uid=uid) for uid, name, ext, isdir in id_tuples)
 
-    def check_basedir(self):
+
+    def validate_basedir(self):
         basedir = cherry.config.media.basedir.str
         if not basedir:
             raise AssertionError('basedir is not set')
@@ -380,8 +369,11 @@ class SQLiteCache(object):
             raise AssertionError("basedir is not a directory: %s" % basedir)
 
 
-    @timed
+    @util.timed
     def full_update(self):
+        '''verify complete media database against the filesystem and make
+        necesary changes.'''
+
         log.i('running full update...')
         firstupdate = False
         if not self.__table_exists('files'):
@@ -396,32 +388,34 @@ class SQLiteCache(object):
         try:
             self.update_db_recursive(cherry.config.media.basedir.str, skipfirst=True)
         except:
-            log.e('error during media update. update incomplete.')
+            log.e('error during media update. database update incomplete.')
         else:
-            log.i('media update complete.')
-
-        if firstupdate:
-            log.i('creating indexes')
-            self.__create_indexes()
-        log.i('update finished!')
+            log.i('media database update complete.')
+        finally:
+            if firstupdate:
+                log.i('creating indexes')
+                self.__create_indexes()
+            log.i('update run finished!')
 
 
     def update_db_recursive(self, fullpath, skipfirst=False):
+        '''recursively update the media database for a path in basedir'''
 
         from collections import namedtuple
         Item = namedtuple('Item', 'infs indb parent progress')
-        def ifac(fs, db, pnt):
-            f = fs if not fs is None else db
-            name = f.relpath or f.fullpath if f else None
-            if pnt is None:
+        def factory(fs, db, parent):
+            fileobj = fs if fs is not None else db
+            name = fileobj.relpath or fileobj.fullpath if fileobj else None
+            if parent is None:
                 progress = ProgressTree(name=name)
-                progress.reporter = ProgressReporter(lvl=1, namefmt=lambda s: self.trim_to_maxlen(50, s))
+                maxlen = lambda s: util.trim_to_maxlen(50, s)
+                progress.reporter = ProgressReporter(lvl=1, namefmt=maxlen)
             else:
-                progress = pnt.progress.spawnchild(name)
-            return Item(fs, db, pnt, progress)
+                progress = parent.progress.spawnchild(name)
+            return Item(fs, db, parent, progress)
 
         log.d('recursive update for %s', fullpath)
-        generator = self.enumerate_fs_with_db(fullpath, itemfactory=ifac)
+        generator = self.enumerate_fs_with_db(fullpath, itemfactory=factory)
         skipfirst and generator.send(None)
         adds_without_commit = 0
         add = 0
@@ -502,15 +496,17 @@ class SQLiteCache(object):
 
         fsobj = File(startpath) if os.path.exists(startpath) else None
         dbobj = self.db_lookup(startpath)
-        stack = []
+        stack = deque()
         stack.append(Item(fsobj, dbobj, None))
         while stack:
             item = stack.pop()
             yield item
             dbchildren = {}
             if item.indb:
-                dbchildren = OrderedDict(((f.basename, f)
-                                   for f in self.fetch_child_files(item.indb)))
+                dbchildren = OrderedDict((
+                                   (f.basename, f)
+                                   for f in self.fetch_child_files(item.indb)
+                                   ))
             if item.infs and item.infs.isdir:
                 for fs_child in File.inputfilter(item.infs.children()):
                     db_child = dbchildren.pop(fs_child.basename, None)
@@ -590,7 +586,7 @@ class File():
 
     @property
     def relpath(self):
-        '''this File's path relative to its root.basepath'''
+        '''this File's path relative to its root'''
         up = self
         components = deque()
         while up != self.root:
@@ -600,7 +596,7 @@ class File():
 
     @property
     def fullpath(self):
-        '''this file's relpath with leading root.basepath'''
+        '''this file's relpath with leading root path'''
         fp = os.path.join(self.root.basepath, self.root.basename, self.relpath)
         if len(fp) > 1:
             fp = fp.rstrip(os.path.sep)
@@ -652,14 +648,14 @@ class File():
 
 
     @classmethod
-    def inputfilter(cls, fobiter):
+    def inputfilter(cls, files_iter):
         basedir = cherry.config.media.basedir.str
-        for f in fobiter:
+        for f in files_iter:
             if not f.exists:
                 log.e('file not found: ' + f.fullpath + ' . skipping.')
                 continue
             if not f.fullpath.startswith(basedir):
-                log.e('file not in basepath: ' + f.fullpath + ' . skipping.')
+                log.e('file not in basedir: ' + f.fullpath + ' . skipping.')
                 continue
             if f.islink:
                 rp = os.path.realpath(f.fullpath)
