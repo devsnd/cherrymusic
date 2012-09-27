@@ -36,9 +36,11 @@
 
 		// Setup the css selectors for the extra interface items used by the playlist.
 		this.cssSelector.title = this.cssSelector.cssSelectorAncestor + " .jp-title"; // Note that the text is written to the decendant li node.
-        /* HACK added external playlist */
-		//this.cssSelector.playlist = this.cssSelector.cssSelectorAncestor + " .jp-playlist";
-        this.cssSelector.playlist = ".jp-playlist";
+		if(this.options.playlistOptions.playlistSelector) {
+			this.cssSelector.playlist = this.options.playlistOptions.playlistSelector;
+		} else {
+			this.cssSelector.playlist = this.cssSelector.cssSelectorAncestor + " .jp-playlist";
+		}
 		this.cssSelector.next = this.cssSelector.cssSelectorAncestor + " .jp-next";
 		this.cssSelector.previous = this.cssSelector.cssSelectorAncestor + " .jp-previous";
 		this.cssSelector.shuffle = this.cssSelector.cssSelectorAncestor + " .jp-shuffle";
@@ -102,7 +104,7 @@
 		if(!this.options.fullScreen) {
 			$(this.cssSelector.title).hide();
 		}
-       
+
 		// Remove the empty <li> from the page HTML. Allows page to be valid HTML, while not interfereing with display animations
 		$(this.cssSelector.playlist + " ul").empty();
 
@@ -131,7 +133,9 @@
 				itemClass: "jp-playlist-item",
 				freeGroupClass: "jp-free-media",
 				freeItemClass: "jp-playlist-item-free",
-				removeItemClass: "jp-playlist-item-remove"
+				removeItemClass: "jp-playlist-item-remove",
+				playlistSelector: false,
+				playtimeClass: "jp-playlist-playtime",
 			}
 		},
 		option: function(option, value) { // For changing playlist options only
@@ -215,6 +219,23 @@
 					}
 				});
 			}
+		    var playtimeSum = 0;
+		    $.each(this.playlist, function(i,v) {
+			if(self.playlist[i].length){
+			    playtimeSum += self.playlist[i].length;
+			}
+		    });
+		    if(playtimeSum){
+			$(self.cssSelector.playlist + " ul").append("<li  class='" + self.options.playlistOptions.playtimeClass + "-sum'><div><span href='javascript:;'>"+self._formatTime(playtimeSum)+"</span></div></li>");
+		    }
+		},
+		_formatTime: function(secs) {
+			secs = Math.floor(secs);
+			var s = secs%60;
+			if(s<10){ s='0'+s; }
+			var m = Math.floor(secs/60)%60;
+			if(m<10){ m='0'+m; }
+			return m+':'+s;
 		},
 		_createListItem: function(media) {
 			var self = this;
@@ -222,6 +243,10 @@
 			// Wrap the <li> contents in a <div>
 			var listItem = "<li><div>";
 
+			// Create Playtime
+		if(media.length){
+			listItem += "<span href='javascript:;' class='" + this.options.playlistOptions.playtimeClass + "'>"+self._formatTime(media.length)+"</span>";
+		}
 			// Create remove control
 			listItem += "<a href='javascript:;' class='" + this.options.playlistOptions.removeItemClass + "'>&times;</a>";
 

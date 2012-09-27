@@ -283,7 +283,16 @@ JPlayer Additions
     position: absolute;
     top: 10px;
 }
-
+.jp-playlist-playtime{
+	float: right;
+}
+.jp-playlist-playtime-sum{
+	float: right;
+}
+.jp-playlist-playtime-sum div li:hover{
+	background-color: #CCCCCC;
+	font-weight: 900;
+}
 
 
 

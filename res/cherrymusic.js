@@ -282,7 +282,8 @@ function initJPlayer(){
         cssSelectorAncestor: "#jp_container_1"
 	}, [], {
 		playlistOptions: {
-			enableRemoveControls: true
+			enableRemoveControls: true,
+            playlistSelector: '.jp-playlist',
 		},
         swfPath: "res/js",
 		solution: "flash,html",
@@ -305,6 +306,7 @@ addSong = function(path,title){
     var success = function(data){
         var metainfo = $.parseJSON(data)
         track.length = metainfo.length
+        mediaPlaylist._refresh(true);
     }
     api({action:'getsonginfo',
         value: path}, success, false, true);
@@ -497,6 +499,7 @@ function restorePlaylist(){
             $.each($.parseJSON(data),function(i,e){
                 addSong(e.mp3,e.title);
             });
+            mediaPlaylist._refresh(true);
     };
     var error = function(){
             alert('error');
