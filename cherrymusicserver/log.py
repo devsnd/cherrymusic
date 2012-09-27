@@ -39,21 +39,24 @@ LOGLEVEL = "INFO"
 
 CONFIG = {
 "version": 1,
-"formatters": {"brief": {"format": "[%(asctime)s] %(levelname)-8s: %(message)s",
+"formatters": {
+               "briefest": {"format": "[%(asctime)s] %(message)s",
                          "datefmt": "%y%m%d-%H:%M"},
-                "full": {"format": "%(asctime)s %(name)-20s %(levelname)-8s\n"
+               "brief": {"format": "[%(asctime)s] %(levelname)-8s: %(message)s",
+                         "datefmt": "%y%m%d-%H:%M"},
+                "full": {"format": "%(asctime)s %(name)-20s %(levelname)-8s\n\t"
                                    "from %(org_filename)s,line %(org_lineno)d"
-                                   "\n%(message)s"}
+                                   "\n\t%(message)s"}
                 },
  "handlers": {"console": {
                    "class": "logging.StreamHandler",
-                   "formatter": "brief",
+                   "formatter": "briefest",
                    "level": "DEBUG",
                    "stream": "ext://sys.stdout"},
               "console_priority": {
                    "class": "logging.StreamHandler",
                    "formatter": "brief",
-                   "level": "ERROR",
+                   "level": "WARNING",
                    "stream": "ext://sys.stderr"},
               "logfile_error": {
                     "class" : "logging.FileHandler",

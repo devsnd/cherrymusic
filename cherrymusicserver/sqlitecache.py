@@ -28,7 +28,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
-from cherrymusicserver import log
 import os
 import re
 import sqlite3
@@ -38,7 +37,9 @@ from operator import itemgetter
 from time import time
 
 import cherrymusicserver as cherry
-from cherrymusicserver.util import timed, Progress
+from cherrymusicserver import log
+from cherrymusicserver import util
+from cherrymusicserver.progress import ProgressTree, ProgressReporter
 
 scanreportinterval = 1
 AUTOSAVEINTERVAL = 100
@@ -51,6 +52,7 @@ if debug:
 
 class SQLiteCache(object):
     def __init__(self, DBFILENAME):
+        self.validate_basedir()
         setupDB = not os.path.isfile(DBFILENAME) or os.path.getsize(DBFILENAME) == 0
         setupDB |= DBFILENAME == ':memory:' #always rescan when using ram db.
         log.i('Starting database... ')
@@ -61,73 +63,76 @@ class SQLiteCache(object):
 
         if setupDB:
             log.i('Creating tables...')
-            # Create table
-            self.db.execute('CREATE TABLE files (parent int NOT NULL, filename text NOT NULL, filetype text, isdir int NOT NULL)')
-            self.db.execute('CREATE TABLE dictionary (word text NOT NULL)')
-            self.db.execute('CREATE TABLE search (drowid int NOT NULL, frowid int NOT NULL)')
+            self.__create_tables()
             log.i('Creating index for dictionary and search tables... ')
-            self.conn.execute('CREATE INDEX idx_dictionary ON dictionary(word)')
-            self.conn.execute('CREATE INDEX idx_search ON search(drowid,frowid)')
+            self.__create_indexes()
             log.i('done.')
             log.i('Connected to Database. (' + DBFILENAME + ')')
         #I don't care about journaling!
         self.conn.execute('PRAGMA synchronous = OFF')
         self.conn.execute('PRAGMA journal_mode = MEMORY')
-        self.checkIfRootUpdated()
 
 
-    @timed
-    def checkIfRootUpdated(self):
-        log.i('Checking if root folder is up to date...')
-        self.db.execute('''SELECT rowid, filename, filetype FROM files WHERE parent = -1''')
-        dbrootfilelist = self.db.fetchall()
-        dbrootfiledict = {}
-        for fid, filename, ext in dbrootfilelist:
-            dbrootfiledict[fid] = filename + ext
-        dbrootfilelist = [] #free mem
-        log.i('{} folders in db root'.format(len(dbrootfiledict)))
-        try:
-            realrootfiles = os.listdir(self.rootDir)
-        except OSError:
-            log.e('Cannot open "' + self.rootDir + '"!\nAre you sure you have set the right path in your configuration file?')
-            exit(1)
-        log.i('{} folders in fs root'.format(len(realrootfiles)))
-        log.i('Comparing db with filesystem...')
+    def __table_exists(self, name):
+        return bool(self.conn.execute('SELECT name FROM sqlite_master'
+                                      ' WHERE type="table" AND name=?', (name,)
+                                      ).fetchall())
 
-        removeList = [] #list of db ids
-        addList = [] #list of file system paths
 
-        for dbrootfile in dbrootfiledict.items():
-            if not dbrootfile[1] in realrootfiles:
-                removeList.append(dbrootfile[0])
+    def __table_is_empty(self, name):
+        if not self.__table_exists(name):
+            raise ValueError("table does not exist: %s" % name)
+        query = 'SELECT rowid FROM %s LIMIT 1' % (name,)
+        res = self.conn.execute(query).fetchall()
+        return not bool(res)
 
-        for realfile in realrootfiles:
-            if realfile not in dbrootfiledict.values():
-                addList.append(realfile)
 
-        #addList = sorted(addList)
-        #removeList = sorted(removeList)
-        if len(removeList) > 0 or len(addList) > 0:
-            if cherry.config.search.autoupdate.bool \
-                or 'y' == input("Changes detected ({} added, {} removed), perform rescan? (y/n)".format(len(addList), len(removeList))):
-                if removeList:
-                    self.remove_dead_file_entries(self.rootDir)
-                if addList:
-                    self.register_with_db(addList, basedir=self.rootDir)
-        else:
-            log.i('no changes found.')
+    def __create_tables(self):
+        self.__drop_tables()
+        self.conn.execute('CREATE TABLE files ('
+                          ' parent int NOT NULL,'
+                          ' filename text NOT NULL,'
+                          ' filetype text,'
+                          ' isdir int NOT NULL)')
+        self.conn.execute('CREATE TABLE dictionary (word text NOT NULL)')
+        self.conn.execute('CREATE TABLE search ('
+                          ' drowid int NOT NULL,'
+                          ' frowid int NOT NULL)')
+
+
+    def __drop_tables(self):
+        self.conn.execute('DROP TABLE IF EXISTS files')
+        self.conn.execute('DROP TABLE IF EXISTS dictionary')
+        self.conn.execute('DROP TABLE IF EXISTS search')
+
+
+    def __create_indexes(self):
+        self.conn.execute('CREATE INDEX IF NOT EXISTS idx_files_parent'
+                          ' ON files(parent)')
+        self.conn.execute('CREATE INDEX IF NOT EXISTS idx_dictionary'
+                          ' ON dictionary(word)')
+        self.conn.execute('CREATE INDEX IF NOT EXISTS idx_search'
+                          ' ON search(drowid,frowid)')
+        self.conn.execute('CREATE INDEX IF NOT EXISTS idx_search_rvs'
+                          ' ON search(frowid,drowid)')
+
+
+    def __drop_indexes(self):
+        self.conn.execute('DROP INDEX IF EXISTS idx_files_parent')
+        self.conn.execute('DROP INDEX IF EXISTS idx_dictionary')
+        self.conn.execute('DROP INDEX IF EXISTS idx_search')
+        self.conn.execute('DROP INDEX IF EXISTS idx_search_rvs')
+
+
+    def isEmpty(self):
+        return self.__table_is_empty('files')
+
 
     @classmethod
     def searchterms(cls, searchterm):
         words = re.findall('(\w+)', searchterm.replace('_', ' '))
         return list(map(lambda x:x.lower(), words))
 
-    @classmethod
-    def splitext(cls, filename):
-        if '.' in filename:
-            dotindex = filename.rindex('.')
-            return (filename[:dotindex], filename[dotindex:])
-        return (filename, '')
 
     def fetchFileIds(self, terms):
         resultlist = []
@@ -202,49 +207,6 @@ class SQLiteCache(object):
             filerowid = parent
         return os.path.dirname(path)
 
-    @timed
-    def register_with_db(self, paths, basedir):
-        """adds the given paths and their contents to the media database"""
-        log.i("updating known media")
-        counter = 0
-        progress = Progress(len(paths))
-        try:
-            self.conn.isolation_level = "IMMEDIATE"  # instant writing lock, turn off autocommit
-            with self.conn:                          # implicit commit, rollback on Exception
-                for item in File.enumerate_files_in(paths, basedir=basedir, sort=True):
-                    self.register_file_with_db(item)
-                    counter += 1
-                    if counter % AUTOSAVEINTERVAL == 0:
-                        self.conn.commit()
-                    if item.parent is None or item.parent.parent is None:
-                        if item.parent is None:
-                            progress.tick()
-                        log.i(progress.formatstr(
-                                    ' ETA %(eta)s (%(percent)s) -> ',
-                                    self.trim_to_maxlen(50, item.relpath)
-                                    ))
-        except Exception as exc:
-            counter -= counter % AUTOSAVEINTERVAL
-            log.ex('')
-            log.e("error while updating media: %s %s", exc.__class__.__name__, exc)
-            log.e("rollback to previous commit.")
-        else:
-            progress.finish()
-            log.i("media update complete.")
-        finally:
-            log.i("%d file records added", counter)
-
-
-    def trim_to_maxlen(self, maxlen, s, insert=' ... '):
-        '''no sanity check for maxlen and len(insert)'''
-        if len(s) > maxlen:
-            keep = maxlen - len(insert)
-            left = keep // 2
-            right = keep - left
-            s = s[:left] + insert + s[-right:]
-        return s
-
-
     def register_file_with_db(self, fileobj):
         """add data in File object to relevant tables in media database"""
         try:
@@ -256,7 +218,6 @@ class SQLiteCache(object):
 
 
     def add_to_file_table(self, fileobj):
-        #files(parentid, filename, ext, 1 if isdir else 0)
         cursor = self.conn.execute('INSERT INTO files VALUES (?,?,?,?)', (fileobj.parent.uid if fileobj.parent else -1, fileobj.name, fileobj.ext, 1 if fileobj.isdir else 0))
         rowid = cursor.lastrowid
         fileobj.uid = rowid
@@ -280,33 +241,37 @@ class SQLiteCache(object):
                               ((wid, file_id) for wid in word_id_seq))
 
 
-    def remove_dead_file_entries(self, rootpath):
-        '''walk the media database and remove all entries which point
-        to non-existent paths in the filesystem.'''
-        root = File(rootpath, isdir=True)
-        lister = self.db_recursive_filelister(root)
-        lister.send(None)   # skip root
-        for item in lister:
-            if not item.exists:
-                self.remove_recursive(item)
-
-
-    def remove_recursive(self, fileobj):
+    def remove_recursive(self, fileobj, progress=None):
         '''recursively remove fileobj and all its children from the media db.'''
 
-        log.i('removing dead reference(s): %s "%s"',
-              'directory' if fileobj.isdir else 'file',
-              fileobj.relpath,
-              )
+
+        if progress is None:
+            log.i(
+                  'removing dead reference(s): %s "%s"',
+                  'directory' if fileobj.isdir else 'file',
+                  fileobj.relpath,
+                  )
+            factory = None
+            remove = lambda item: self.remove_file(item)
+        else:
+            def factory(new, pnt):
+                if pnt is None:
+                    return (new, None, progress)
+                return (new, pnt, pnt[2].spawnchild('[-] ' + new.relpath))
+            remove = lambda item: (self.remove_file(item[0]), item[2].tick())
+
+        deld = 0
         try:
             with self.conn:
-                for item in self.db_recursive_filelister(fileobj):
-                    self.remove_file(item)
-        except Exception:
-            log.e('error while removing dead reference(s)')
+                for item in self.db_recursive_filelister(fileobj, factory):
+                    remove(item)
+                    deld += 1
+        except Exception as e:
+            log.e('error while removing dead reference(s): %s', e)
             log.e('rolled back to safe state.')
+            return 0
         else:
-            log.i('done.')
+            return deld
 
 
     def remove_file(self, fileobj):
@@ -358,28 +323,224 @@ class SQLiteCache(object):
         self.conn.execute('DELETE FROM files WHERE rowid=?', (fileid,))
 
 
-    def db_recursive_filelister(self, fileobj):
+    def db_recursive_filelister(self, fileobj, factory=None):
         """generator: enumerates fileobj and children listed in the db as File 
         objects. each item is returned before children are fetched from db.
         this means that fileobj gets bounced back as the first return value."""
-        queue = deque((fileobj,))
-        while queue:
-            item = queue.popleft()
-            yield item
-            queue.extend(self.fetch_child_files(item))
+        if factory is None:
+            queue = deque((fileobj,))
+            while queue:
+                item = queue.popleft()
+                yield item
+                queue.extend(self.fetch_child_files(item))
+        else:
+            queue = deque((factory(fileobj, None),))
+            child = lambda parent: lambda item: factory(item, parent)
+            while queue:
+                item = queue.popleft()
+                yield item
+                queue.extend(map(child(item), self.fetch_child_files(item[0])))
 
 
-    def fetch_child_files(self, fileobj):
+    def fetch_child_files(self, fileobj, sort=True, reverse=False):
         '''fetches from files table a list of all File objects that have the
         argument fileobj as their parent.'''
         id_tuples = self.conn.execute(
                             'SELECT rowid, filename, filetype, isdir' \
                             ' FROM files where parent=?', (fileobj.uid,)) \
                             .fetchall()
-        return [File(name + ext,
+        if sort:
+            id_tuples = sorted(id_tuples, key=lambda t: t[1], reverse=reverse)
+        return (File(name + ext,
                      parent=fileobj,
                      isdir=False if isdir == 0 else True,
-                     uid=uid) for uid, name, ext, isdir in id_tuples]
+                     uid=uid) for uid, name, ext, isdir in id_tuples)
+
+
+    def validate_basedir(self):
+        basedir = cherry.config.media.basedir.str
+        if not basedir:
+            raise AssertionError('basedir is not set')
+        if not os.path.isabs(basedir):
+            raise AssertionError('basedir must be absolute path: %s' % basedir)
+        if not os.path.exists(basedir):
+            raise AssertionError("basedir doesn't exist: %s" % basedir)
+        if not os.path.isdir(basedir):
+            raise AssertionError("basedir is not a directory: %s" % basedir)
+
+
+    @util.timed
+    def full_update(self):
+        '''verify complete media database against the filesystem and make
+        necesary changes.'''
+
+        log.i('running full update...')
+        firstupdate = False
+        if not self.__table_exists('files'):
+            firstupdate = True
+            self.__create_tables()
+        elif self.__table_is_empty('files'):
+            firstupdate = True
+        if firstupdate:
+            log.d('firstupdate: running without indexes')
+            self.__drop_indexes()
+
+        try:
+            self.update_db_recursive(cherry.config.media.basedir.str, skipfirst=True)
+        except:
+            log.e('error during media update. database update incomplete.')
+        else:
+            log.i('media database update complete.')
+        finally:
+            if firstupdate:
+                log.i('creating indexes')
+                self.__create_indexes()
+            log.i('update run finished!')
+
+
+    def update_db_recursive(self, fullpath, skipfirst=False):
+        '''recursively update the media database for a path in basedir'''
+
+        from collections import namedtuple
+        Item = namedtuple('Item', 'infs indb parent progress')
+        def factory(fs, db, parent):
+            fileobj = fs if fs is not None else db
+            name = fileobj.relpath or fileobj.fullpath if fileobj else None
+            if parent is None:
+                progress = ProgressTree(name=name)
+                maxlen = lambda s: util.trim_to_maxlen(50, s)
+                progress.reporter = ProgressReporter(lvl=1, namefmt=maxlen)
+            else:
+                progress = parent.progress.spawnchild(name)
+            return Item(fs, db, parent, progress)
+
+        log.d('recursive update for %s', fullpath)
+        generator = self.enumerate_fs_with_db(fullpath, itemfactory=factory)
+        skipfirst and generator.send(None)
+        adds_without_commit = 0
+        add = 0
+        deld = 0
+        try:
+            with self.conn:
+                for item in generator:
+                    infs, indb, progress = (item.infs, item.indb, item.progress)
+                    if infs and indb:
+                        if infs.isdir != indb.isdir:
+                            progress.name = '[±] ' + progress.name
+                            deld += self.remove_recursive(indb, progress)
+                            self.register_file_with_db(infs)
+                            adds_without_commit = 1
+                        else:
+                            progress.name = '[=] ' + progress.name
+                    elif indb:
+                        progress.name = '[-] ' + progress.name
+                        deld += self.remove_recursive(indb, progress)
+                        adds_without_commit = 0
+                        continue    # progress ticked by remove; don't tick again
+                    elif infs:
+                        self.register_file_with_db(item.infs)
+                        adds_without_commit += 1
+                        progress.name = '[+] ' + progress.name
+                    if adds_without_commit == AUTOSAVEINTERVAL:
+                        self.conn.commit()
+                        add += adds_without_commit
+                        adds_without_commit = 0
+                    progress.tick()
+        except Exception as exc:
+            log.e("error while updating media: %s %s", exc.__class__.__name__, exc)
+            log.e("rollback to previous commit.")
+            raise exc
+        finally:
+            add += adds_without_commit
+            log.i('items added %d, removed %d', add, deld)
+
+
+    def enumerate_fs_with_db(self, startpath, itemfactory=None):
+        '''
+        Starting at `startpath`, enumerates path items containing representations 
+        for each path as it exists in the filesystem and the database, 
+        respectively.
+        
+        `startpath` and `basedir` need to be absolute paths, with `startpath`
+        being a subtree of `basedir`. However, no checks are being promised to
+        enforce the latter requirement.
+        
+        Iteration is depth-first, but each path is returned before its children
+        are determined, to enable recursive corrective action like deleting a
+        whole directory from the database at once. Accordingly, the first item
+        to be returned will represent `startpath`. This item is guaranteed to be
+        returned, even if `startpath` does not exist in filesystem and database;
+        all other items will have at least one existing representation.
+        
+        `basedir`, should it happen to equal `startpath`, will be returned as an
+        item. It is up to the caller to properly deal with it.
+        
+        Each item has the following attributes: `infs`, a File object
+        representing the path in the filesystem; `indb`, a File object
+        representing the path in the database; and `parent`, the parent item.
+        All three can be None, signifying non-existence. 
+        
+        It is possible to customize item creation by providing an `itemfactory`.
+        The argument must be a callable with the following parameter signature:
+            itemfactory(infs, indb, parent [, optional arguments])
+        and must return an object satisfying the above requirements for an item.
+        '''
+        from collections import OrderedDict
+        basedir = cherry.config.media.basedir.str
+        Item = itemfactory
+        if Item is None:
+            from collections import namedtuple
+            Item = namedtuple('Item', 'infs indb parent')
+        assert os.path.isabs(startpath), 'argument must be an abolute path: "%s"' % startpath
+        assert startpath.startswith(basedir), 'argument must be a path in basedir (%s): "%s"' % (basedir, startpath)
+
+        fsobj = File(startpath) if os.path.exists(startpath) else None
+        dbobj = self.db_lookup(startpath)
+        stack = deque()
+        stack.append(Item(fsobj, dbobj, None))
+        while stack:
+            item = stack.pop()
+            yield item
+            dbchildren = {}
+            if item.indb:
+                dbchildren = OrderedDict((
+                                   (f.basename, f)
+                                   for f in self.fetch_child_files(item.indb)
+                                   ))
+            if item.infs and item.infs.isdir:
+                for fs_child in File.inputfilter(item.infs.children()):
+                    db_child = dbchildren.pop(fs_child.basename, None)
+                    stack.append(Item(fs_child, db_child, item))
+            for db_child in dbchildren.values():
+                stack.append(Item(None, db_child, item))
+            del dbchildren
+
+
+    def db_lookup(self, fullpath):
+        '''Finds an absolute path in the file database. If found, returns
+        a File object matching the database record; otherwise, returns None.
+        Paths matching a media basedir are a special case: these will yield a
+        File object with an invalid record id matching the one listed by its 
+        children.'''
+        assert os.path.isabs(fullpath)
+        basedir = cherry.config.media.basedir.str
+        if not fullpath.startswith(basedir):
+            return None
+        relpath = fullpath[len(basedir):].strip(os.path.sep)
+        root = File(basedir, isdir=True, uid= -1)
+        if not relpath:
+            return root
+        file = root
+        for part in relpath.split(os.path.sep):
+            found = False
+            for child in self.fetch_child_files(file):  # gotta be ugly: don't know if name/ext split in db
+                if part == child.basename:
+                    found = True
+                    file = child
+                    break
+            if not found:
+                return None
+        return file
 
 
 def perf(text=None):
@@ -425,18 +586,21 @@ class File():
 
     @property
     def relpath(self):
-        '''this File's path relative to its root.basepath'''
-        up = self.parent
-        components = deque((self.basename,))
-        while up is not None:
+        '''this File's path relative to its root'''
+        up = self
+        components = deque()
+        while up != self.root:
             components.appendleft(up.basename)
             up = up.parent
         return os.path.sep.join(components)
 
     @property
     def fullpath(self):
-        '''this file's relpath with leading root.basepath'''
-        return os.path.join(self.root.basepath, self.relpath)
+        '''this file's relpath with leading root path'''
+        fp = os.path.join(self.root.basepath, self.root.basename, self.relpath)
+        if len(fp) > 1:
+            fp = fp.rstrip(os.path.sep)
+        return fp
 
     @property
     def name(self):
@@ -468,41 +632,44 @@ class File():
         '''True if this file is a symbolic link'''
         return os.path.islink(self.fullpath)
 
+    def children(self, sort=True, reverse=True):
+        '''If self.isdir and self.exists, return an iterable of fileobjects 
+        corresponding to its direct content (non-recursive).
+        Otherwise, log a warning and return ().
+        '''
+        try:
+            content = os.listdir(self.fullpath)
+            if sort:
+                content = sorted(content, reverse=reverse)
+            return (File(name, parent=self) for name in content)
+        except OSError as error:
+            log.w('cannot listdir: %s', error)
+            return ()
+
 
     @classmethod
-    def enumerate_files_in(cls, paths, basedir=None, sort=False):
-        """Takes a list of pathnames and turns them and their contents into
-            File objects, iterating in a depth-first manner. If sort == True,
-            items will turn up in the same order as they would when using the
-            sorted(iterable) builtin."""
-        if basedir is None:
-            basedir = ''
-        to_file = lambda name: File(os.path.join(basedir, name))
-        if sort:
-            paths = sorted(paths, reverse=True)  # reverse: append & pop happen at the end
-        stack = deque()
-        while(stack or paths):
-            item = stack.pop() if stack else to_file(paths.pop())
-            if item.islink:
-                rp = os.path.realpath(item.fullpath)
+    def inputfilter(cls, files_iter):
+        basedir = cherry.config.media.basedir.str
+        for f in files_iter:
+            if not f.exists:
+                log.e('file not found: ' + f.fullpath + ' . skipping.')
+                continue
+            if not f.fullpath.startswith(basedir):
+                log.e('file not in basedir: ' + f.fullpath + ' . skipping.')
+                continue
+            if f.islink:
+                rp = os.path.realpath(f.fullpath)
                 if os.path.abspath(basedir).startswith(rp) \
                     or (os.path.islink(basedir)
                         and
                         os.path.realpath(basedir).startswith(rp)):
-                    log.e("Cyclic symlink found: " + item.relpath +
+                    log.e("Cyclic symlink found: " + f.relpath +
                           " creates a circle if followed. Skipping.")
                     continue
-                if not item.parent is None:
-                    log.e("Deeply nested symlink found: " + item.relpath +
+                if not (f.parent is None or f.parent.parent is None):
+                    log.e("Deeply nested symlink found: " + f.relpath +
                           " All links must be directly in your basedir (" +
                           os.path.abspath(basedir) + "). The program cannot"
                           " safely handle them otherwise. Skipping.")
                     continue
-            if item.isdir:
-                children = os.listdir(item.fullpath)
-                if sort:
-                    children = sorted(children, reverse=True) # reverse: append & pop happen at the end
-                for name in children:
-                    stack.append(File(name, parent=item))
-            yield item
-
+            yield f

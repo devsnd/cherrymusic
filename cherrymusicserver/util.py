@@ -34,56 +34,56 @@ from cherrymusicserver import log
 from time import time
 
 def configurationFile():
-    return os.path.join(getConfigPath(),'config')
-    
+    return os.path.join(getConfigPath(), 'config')
+
 def configurationFileExists():
     return os.path.exists(configurationFile())
-    
+
 def databaseFilePath(filename):
-    configdir = os.path.join(getConfigPath(),'db')
+    configdir = os.path.join(getConfigPath(), 'db')
     if not os.path.exists(configdir):
         os.makedirs(configdir)
-    configpath = os.path.join(configdir,filename)
+    configpath = os.path.join(configdir, filename)
     return configpath
-    
+
 def assureHomeFolderExists():
-    dir = os.path.join(os.path.expanduser('~'),'.cherrymusic','db')
-    if not os.path.exists(dir):
-        os.makedirs(dir)
-        
+    dirpath = os.path.join(os.path.expanduser('~'), '.cherrymusic', 'db')
+    if not os.path.exists(dirpath):
+        os.makedirs(dirpath)
+
 def getConfigPath():
-    if len(sys.argv)>2 and (sys.argv[1] == '-c' or sys.argv[1] == '--config-path') and os.path.exists(sys.argv[2]):
-           return sys.argv[2]
+    if len(sys.argv) > 2 and (sys.argv[1] == '-c' or sys.argv[1] == '--config-path') and os.path.exists(sys.argv[2]):
+        return sys.argv[2]
     else:
         assureHomeFolderExists()
-        return os.path.join(os.path.expanduser('~'),'.cherrymusic')
+        return os.path.join(os.path.expanduser('~'), '.cherrymusic')
 
 def readRes(path):
     return open(getResourcePath(path)).read()
-    
+
 def getResourcePath(path):
     #check share first
-    resourceprefix = os.path.join(sys.prefix,'share','cherrymusic')
-    respath = os.path.join(resourceprefix,path)
+    resourceprefix = os.path.join(sys.prefix, 'share', 'cherrymusic')
+    respath = os.path.join(resourceprefix, path)
     if not os.path.exists(respath):
-        log.w("Couldn't find "+respath+". Trying local install path.")
+        log.w("Couldn't find " + respath + ". Trying local install path.")
         #otherwise check local install
         resourceprefix = '.'
-        respath = os.path.join(resourceprefix,path)
+        respath = os.path.join(resourceprefix, path)
     if not os.path.exists(respath):
-        log.w("Couldn't find "+respath+". Trying home dir.")
+        log.w("Couldn't find " + respath + ". Trying home dir.")
         #lastly check homedir
-        resourceprefix = os.path.join(os.path.expanduser('~'),'.cherrymusic')
-        respath = os.path.join(resourceprefix,path)
+        resourceprefix = os.path.join(os.path.expanduser('~'), '.cherrymusic')
+        respath = os.path.join(resourceprefix, path)
     if not os.path.exists(respath):
-        raise ResourceNotFound("Couldn't locate '"+path+"'!")
-    return os.path.join(resourceprefix,path)
+        raise ResourceNotFound("Couldn't locate '" + path + "'!")
+    return os.path.join(resourceprefix, path)
 
 class ResourceNotFound(Exception):
-       def __init__(self, msg):
-           self.msg = msg
-       def __str__(self):
-           return repr(self.msg)
+    def __init__(self, msg):
+        self.msg = msg
+    def __str__(self):
+        return repr(self.msg)
 
 def filename(path, pathtofile=False):
     if pathtofile:
@@ -98,14 +98,23 @@ def stripext(filename):
 
 def timed(func):
     """decorator to time function execution and log result on DEBUG"""
-    from time import clock
     def wrapper(*args, **kwargs):
-        starttime = clock()
+        starttime = time()
         result = func(*args, **kwargs)
-        duration = clock() - starttime
-        log.d('%s.%s: %.4f', func.__module__, func.__name__, duration)
+        duration = time() - starttime
+        log.d('%s.%s: %.4f s', func.__module__, func.__name__, duration)
         return result
     return wrapper
+
+
+def trim_to_maxlen(maxlen, s, insert=' ... '):
+    '''no sanity check for maxlen and len(insert)'''
+    if len(s) > maxlen:
+        keep = maxlen - len(insert)
+        left = keep // 2
+        right = keep - left
+        s = s[:left] + insert + s[-right:]
+    return s
 
 
 def phrase_to_lines(phrase, length=80):
@@ -116,12 +125,22 @@ def phrase_to_lines(phrase, length=80):
     line = ''
     for word in words:
         if len(line) + len(word) > length:
-            lines.append(line)
+            lines.append(line.rstrip())
             line = ''
         line += word + ' '
-    lines.append(line)
+    lines.append(line.rstrip())
     return lines
 
+
+def splittime(seconds):
+    '''converts time given in seconds into a tuple: (hours, minutes, seconds)'''
+    tmp = seconds
+    hh = tmp / 3600
+    tmp %= 3600
+    mm = tmp / 60
+    tmp %= 60
+    ss = tmp
+    return (hh, mm, ss)
 
 
 def Property(func):
@@ -133,88 +152,26 @@ def Property(func):
     """
     return property(**func())
 
-class Progress(object):
-    """Simple, timed progress tracking. 
-    Based on the notion the time to complete a task can be broken up into 
-    evenly spaced ticks, when a good estimate of total ticks
-    is known. Estimates time remaining from the time taken for past ticks.
-    The timer starts on the first tick."""
 
-    def __init__(self, ticks):
-        assert ticks > 0, "expected ticks must be > 0"
-        self._ticks = 0
-        self._expected_ticks = ticks
-        self._starttime = time()
-        self._finished = False
-
-    def _start(self):
-        self._starttime = time()
-
-    def tick(self):
-        """Register a tick with this object. The first tick starts the timer."""
-        if self._ticks == 0:
-            self._start()
-        self._ticks += 1
-
-    def finish(self):
-        """Mark this progress as finished. Setting this is final."""
-        self._finished = True
-
-    def formatstr(self, fstr, *args):
-        add = ''.join(list(args))
-        fstr = fstr % {'eta': self.etastr, 'percent': self.percentstr, 'ticks': self._ticks, 'total': self._expected_ticks}
-        return fstr + add
+from collections import deque
+class MovingAverage(object):
+    def __init__(self, size=15, fill=0):
+        assert size > 0
+        self._values = deque((fill for i in range(size)))
+        self._avg = fill
+        self._size = size
 
     @property
-    def percent(self):
-        """Number estimate of percent completed. Receiving more ticks than
-        initial estimate increases this number beyond 100."""
-        if (self._finished):
-            return 100
-        return self._ticks * 100 / self._expected_ticks
+    def avg(self):
+        return self._avg
 
-    @property
-    def percentstr(self):
-        """String version of `percent`. Invalid values outside of (0..100)
-        are rendered as unknown value."""
-        if (self._finished):
-            return '100%'
-        p = self.percent
-        return '%s%%' % (str(int(p)) if p <= 100 else '??')
-
-    @property
-    def starttime(self):
-        return self._starttime
-
-    @property
-    def runtime(self):
-        if (self._ticks == 0):
-            return 0
-        return time() - self.starttime
-
-    @property
-    def eta(self):
-        """Estimate of time remaining, in seconds. Ticks beyond initial estimate
-        lead to a negative value."""
-        if self._finished:
-            return 0
-        if self._ticks == 0:
-            return 0
-        return ((self._expected_ticks - self._ticks) * self.runtime / self._ticks) + 1
-
-    @property
-    def etastr(self):
-        """String version of remaining time estimate. A negative `eta` is marked
-        as positive overtime."""
-        overtime = ''
-        eta = self.eta
-        if eta < 0:
-            eta = -eta
-            overtime = '+'
-        tmp = eta
-        hh = tmp / 3600
-        tmp %= 3600
-        mm = tmp / 60
-        tmp %= 60
-        ss = tmp
-        return '%(ot)s%(hh)02d:%(mm)02d:%(ss)02d' % {'hh': hh, 'mm': mm, 'ss': ss, 'etas': eta, 'ot':overtime}
+    def feed(self, val):
+        '''insert a new value and get back the new average'''
+        old = self._values.popleft()
+        try:
+            self._avg += (val - old) / self._size
+        except TypeError as tpe:
+            self._values.appendleft(old)
+            raise tpe
+        self._values.append(val)
+        return self._avg

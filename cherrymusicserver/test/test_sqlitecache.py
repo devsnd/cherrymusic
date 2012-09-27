@@ -31,7 +31,9 @@
 import unittest
 
 import os
+import shutil
 import sqlite3
+import tempfile
 
 import cherrymusicserver as cherry
 from cherrymusicserver import configuration
@@ -67,6 +69,21 @@ class TestFile(object):
         raise NotImplementedError("%s.%s.enumerate_files_in(cls, paths, sort)"
                                   % (__name__, cls.__name__))
 
+tmpdir = None
+oldwd = os.getcwd()
+
+def setUpModule():
+    global tmpdir
+    tmpdir = tempfile.mkdtemp(suffix='-test_sqlitecache', prefix='tmp-cherrymusic-')
+    os.chdir(tmpdir)
+
+def tearDownModule():
+    os.chdir(oldwd)
+    shutil.rmtree(tmpdir, ignore_errors=False, onerror=None)
+
+def getAbsPath(relpath):
+    'returns the absolute path for a path relative to the global testdir'
+    return os.path.join(tmpdir, relpath)
 
 
 def setupTestfile(testfile):
@@ -93,28 +110,45 @@ def removeTestfile(testfile):
 
 
 def removeTestfiles(testdir, testfiles):
-    os.chdir(testdir)
-    for testfile in reversed(testfiles):
-        try:
-            removeTestfile(TestFile(testfile))
-        except OSError as e:
-            if not e.errno == 2:    # ignore missing files and directories
-                raise e
-    os.chdir('..')
-    os.rmdir(testdir)
+    shutil.rmtree(testdir, ignore_errors=True, onerror=None)
 
+
+class SQLiteCacheTest(unittest.TestCase):
+
+    def test_init_checks_basedir(self):
+        # not set
+        cherry.config.media.basedir = ''
+        self.assertRaises(AssertionError, sqlitecache.SQLiteCache, ':memory:')
+        cherry.config.media.basedir = None
+        self.assertRaises(AssertionError, sqlitecache.SQLiteCache, ':memory:')
+
+        # not absolute path
+        cherry.config.media.basedir = 'harfnarf'
+        self.assertRaises(AssertionError, sqlitecache.SQLiteCache, ':memory:')
+
+        # doesn't exist
+        cherry.config.media.basedir = '/harfnarf'
+        self.assertRaises(AssertionError, sqlitecache.SQLiteCache, ':memory:')
+
+        # not a dir
+        testfile = TestFile('harfnarf')
+        setupTestfile(testfile)
+        cherry.config.media.basedir = os.path.abspath('harfnarf')
+        self.assertRaises(AssertionError, sqlitecache.SQLiteCache, ':memory:')
+        removeTestfile(testfile)
 
 
 class AddFilesToDatabaseTest(unittest.TestCase):
 
-    testdir = 'empty'
+    testdirname = 'empty'
 
     def setupConfig(self):
         cherry.config = configuration.from_defaults()
-        cherry.config.media.basedir = 'empty'
+        cherry.config.media.basedir = self.testdir
 
 
     def setUp(self):
+        self.testdir = getAbsPath(self.testdirname)
         setupTestfiles(self.testdir, ())
         self.setupConfig()
         self.Cache = sqlitecache.SQLiteCache(':memory:')
@@ -123,7 +157,6 @@ class AddFilesToDatabaseTest(unittest.TestCase):
     def tearDown(self):
         removeTestfiles(self.testdir, ())
         self.Cache.conn.close()
-
 
 
     def test_add_to_file_table(self):
@@ -206,7 +239,8 @@ class AddFilesToDatabaseTest(unittest.TestCase):
 
 class FileTest(unittest.TestCase):
 
-    testdir = 'testfiles'
+    testdir = 'filetest'
+
     testfiles = (
                  os.path.join('rootlevelfile'),
                  os.path.join('firstdir', ''),
@@ -225,7 +259,6 @@ class FileTest(unittest.TestCase):
     def tearDown(self):
         removeTestfiles(self.testdir, self.testfiles)
 
-
     def assertFilesEqual(self, expected, actual):
         self.assertTrue(expected.fullpath == actual.fullpath, "equal fullpath %s vs %s" % (expected.fullpath, actual.fullpath))
         self.assertTrue(expected.name == actual.name, "equal name %s vs %s " % (expected.name, actual.name))
@@ -243,33 +276,9 @@ class FileTest(unittest.TestCase):
             self.assertFilesEqual(expected, actual)
 
 
-    def testFileEnumerator(self):
-        basedir = self.testdir
-        testfiles = self.testfiles
-        rootpaths = [x for x in
-                     [
-                      (f[:-1] if f.endswith(os.path.sep) else f)
-                      for f in testfiles
-                      ]
-                     if not os.path.sep in x]
-        checklist = [basedir + os.path.sep + f for f in
-                     [x[:-1]
-                      if x.endswith(os.path.sep)
-                      else x
-                      for x in testfiles]
-                     ]
-
-        for fileobj in sqlitecache.File.enumerate_files_in(rootpaths, basedir=basedir, sort=True):
-            path = fileobj.fullpath
-            self.assertTrue(path in checklist, 'file returned (%s) must be in expected set (%s)' % (path, checklist))
-            self.assertTrue(os.path.exists(path), 'file must exists: %s' % (path,))
-            checklist.remove(path)
-        self.assertTrue(len(checklist) == 0, 'all files were not enumerated. remaining=%s' % checklist)
-
-
 class RemoveFilesFromDatabaseTest(unittest.TestCase):
 
-    testdir = 'deltest'
+    testdirname = 'deltest'
 
     testfiles = (
                  os.path.join('root_file'),
@@ -313,9 +322,11 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
 
 
     def setUp(self):
+        self.testdir = getAbsPath(self.testdirname)
         setupTestfiles(self.testdir, self.testfiles)
         self.setupConfig()
         self.Cache = sqlitecache.SQLiteCache(':memory:')
+        self.Cache.full_update()
         self.setupFileObjects()
         assert self.fileobjects[''].fullpath == os.path.abspath(self.testdir), \
                 'precondition: test rootdir has correct fullpath'
@@ -365,7 +376,7 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
         assert not fob.exists
         assert self.fileid_in_db(fob.uid)
 
-        self.Cache.remove_dead_file_entries(fob.root.fullpath)
+        self.Cache.full_update()
 
         self.assertFalse(self.fileid_in_db(fob.uid),
                     'file entry must be removed from db')
@@ -376,7 +387,7 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
         removeTestfile(fob)
         beforecount = self.db_count('files')
 
-        self.Cache.remove_dead_file_entries(fob.root.fullpath)
+        self.Cache.full_update()
 
         self.assertEqual(beforecount - 1, self.db_count('files'),
                          'exactly one file entry must be removed')
@@ -393,7 +404,7 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
         for fob in reversed(removelist):
             removeTestfile(fob)
 
-        self.Cache.remove_dead_file_entries(removelist[0].root.fullpath)
+        self.Cache.full_update()
 
         for fob in removelist:
             self.assertFalse(self.fileid_in_db(fob.uid),
@@ -404,7 +415,7 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
         fob = self.fileobjects['root_file']
         removeTestfile(fob)
 
-        self.Cache.remove_dead_file_entries(fob.root.fullpath)
+        self.Cache.full_update()
 
         searchids = self.Cache.conn.execute('SELECT count(*) FROM search'
                                             ' WHERE frowid=?', (fob.uid,)) \
@@ -417,7 +428,7 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
         fob = self.fileobjects[os.path.join('commonName', 'commonname_uniquename')]
         removeTestfile(fob)
 
-        self.Cache.remove_dead_file_entries(fob.root.fullpath)
+        self.Cache.full_update()
 
         unique = self.Cache.conn.execute('SELECT COUNT(*) FROM dictionary'
                                          ' WHERE word=?', ('uniquename',)) \
@@ -434,8 +445,25 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
 
     def testRollbackOnException(self):
 
+        class BoobyTrap(sqlite3.Connection):
+            exceptcount = 0
+
+            def execute(self, stmt, *parameters):
+                '''triggers an Exception when the 'undeletable' item should be 
+                removed. relies on way too much knowledge of Cache internals. :(
+                '''
+                if stmt.lower().startswith('delete from files') \
+                  and parameters[0][0] == undeletable.uid:
+                    self.__class__.exceptcount += 1
+                    raise Exception("boom goes the dynamite")
+                return super().execute(stmt, *parameters)
+
+
         # SETUP
-        self.Cache = sqlitecache.SQLiteCache('test.db')
+        self.Cache = sqlitecache.SQLiteCache(':memory:')
+        self.Cache.conn.close()
+        self.Cache.conn = BoobyTrap(':memory:')
+        self.Cache.full_update()
 
         removelist = self.get_fileobjects_for('root_dir')
         for fob in removelist:
@@ -448,30 +476,13 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
                                                     'first_file')]
         deletable = [self.fileobjects[os.path.join('root_dir',
                                                    'first_file')]]
-        class BoobyTrap(sqlite3.Connection):
-            exceptcount = 0
 
-            def execute(self, stmt, parameters=None):
-                '''triggers an Exception when the 'undeletable' item should be 
-                removed. relies on way too much knowledge of Cache internals. :(
-                '''
 
-                if stmt.lower().startswith('delete from files') \
-                  and parameters[0] == undeletable.uid:
-                    self.__class__.exceptcount += 1
-                    raise Exception("boom goes the dynamite")
-                return super().execute(stmt, parameters)
-
-        self.Cache.conn.close()
-        self.Cache.conn = BoobyTrap('test.db')
 
         # RUN
-        self.Cache.remove_dead_file_entries(removelist[0].root.fullpath)
+        self.Cache.full_update()
         removed = [f for f in removelist if not self.fileid_in_db(f.uid)]
 
-        # CLEANUP
-        self.Cache.conn.close()
-        os.remove('test.db')
 
         # ASSERT
         self.assertLessEqual(1, BoobyTrap.exceptcount,
@@ -483,7 +494,7 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
 
 class SymlinkTest(unittest.TestCase):
 
-    testdir = 'linktest'
+    testdirname = 'linktest'
 
     testfiles = (
                  os.path.join('root_file'),
@@ -492,18 +503,31 @@ class SymlinkTest(unittest.TestCase):
 
 
     def setUp(self):
+        self.testdir = getAbsPath(self.testdirname)
         setupTestfiles(self.testdir, self.testfiles)
-
+        cherry.config.media.basedir = self.testdir
+        self.Cache = sqlitecache.SQLiteCache(':memory:')
 
     def tearDown(self):
         removeTestfiles(self.testdir, self.testfiles)
+        self.Cache.conn.close()
 
 
     def enumeratedTestdir(self):
-        return [os.path.join(self.testdir, f.relpath) for f in sqlitecache.File\
-                .enumerate_files_in(os.listdir(self.testdir),
-                                    os.path.abspath(self.testdir))
-                ]
+        return [os.path.join(self.testdir, i.infs.relpath) for
+                i in self.Cache.enumerate_fs_with_db(self.testdir)]
+
+
+    def testRootLinkOk(self):
+        link = os.path.join(self.testdir, 'link')
+        target = os.path.join(self.testdir, 'root_file')
+        os.symlink(target, link)
+
+        try:
+            self.assertTrue(link in self.enumeratedTestdir(),
+                            'root level links must be returned')
+        finally:
+            os.remove(link)
 
 
     def testSkipSymlinksBelowBasedirRoot(self):
@@ -528,6 +552,95 @@ class SymlinkTest(unittest.TestCase):
                             'cyclic link must not be returned')
         finally:
             os.remove(link)
+
+
+class UpdateTest(unittest.TestCase):
+
+    testdirname = 'updatetest'
+
+    testfiles = (
+                 os.path.join('root_file'),
+                 os.path.join('root_dir', ''),
+                 os.path.join('root_dir', 'first_file'),
+                 )
+
+
+    def setupConfig(self):
+        cherry.config = configuration.from_defaults()
+        cherry.config.media.basedir = self.testdir
+        cherry.config.search.autoupdate = 'True'
+
+    def setupCache(self):
+        self.Cache = sqlitecache.SQLiteCache(':memory:')
+        self.Cache.full_update()
+
+    def clearCache(self):
+        self.Cache.conn.execute('delete from files')
+        self.Cache.conn.execute('delete from dictionary')
+        self.Cache.conn.execute('delete from search')
+
+    def setUp(self):
+        self.testdir = getAbsPath(self.testdirname)
+        setupTestfiles(self.testdir, self.testfiles)
+        self.setupConfig()
+        self.setupCache()
+
+
+    def tearDown(self):
+        removeTestfiles(self.testdir, self.testfiles)
+        self.Cache.conn.close()
+
+
+    def test_enumerate_add(self):
+        '''items not in db must be enumerated'''
+        self.clearCache()
+        lister = self.Cache.enumerate_fs_with_db(self.testdir)
+        expected_files = [f.rstrip(os.path.sep) for f in self.testfiles]
+        lister.send(None)  # skip first item
+        for item in lister:
+            self.assertEqual(None, item.indb, 'database part must be empty, found: %s' % item.indb)
+            self.assertTrue(item.infs.relpath in expected_files, '%s %s' % (item.infs.relpath, expected_files))
+            expected_files.remove(item.infs.relpath)
+        self.assertEqual(0, len(expected_files))
+
+
+    def test_enumerate_delete(self):
+        '''items not in fs must be enumerated'''
+        removeTestfiles(self.testdir, self.testfiles)
+        lister = self.Cache.enumerate_fs_with_db(self.testdir)
+        expected_files = [f.rstrip(os.path.sep) for f in self.testfiles]
+        lister.send(None)  # skip first item
+        for item in lister:
+            self.assertEqual(None, item.infs, 'filesystem part must be empty, found: %s' % item.indb)
+            self.assertTrue(item.indb.relpath in expected_files, '%s %s' % (item.indb.relpath, expected_files))
+            expected_files.remove(item.indb.relpath)
+        self.assertEqual(0, len(expected_files))
+
+
+    def test_enumerate_same(self):
+        '''unchanged fs must have equal db'''
+        lister = self.Cache.enumerate_fs_with_db(self.testdir)
+        expected_files = [f.rstrip(os.path.sep) for f in self.testfiles]
+        lister.send(None)  # skip first item
+        for item in lister:
+            self.assertEqual(item.infs.fullpath, item.indb.fullpath)
+            self.assertEqual(item.infs.isdir, item.indb.isdir)
+            self.assertTrue(item.indb.relpath in expected_files, '%s %s' % (item.indb.relpath, expected_files))
+            expected_files.remove(item.indb.relpath)
+        self.assertEqual(0, len(expected_files))
+
+
+    @unittest.skipIf(True, "facilitates quick manual testruns")
+    def test_update(self):
+        log.level(log.DEBUG)
+        self.clearCache()
+        cherry.config.media.basedir = '/home/til/Music'
+        self.Cache.full_update()
+        cherry.config.media.basedir = '/media/audio/+audiobooks/'# Audiobooks'
+        self.Cache.full_update()
+        cherry.config.media.basedir = '/home/til/Music'
+        self.Cache.full_update()
+        log.level(log.CRITICAL)
 
 
 if __name__ == "__main__":
