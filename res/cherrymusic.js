@@ -475,29 +475,28 @@ function loadPlaylist(playlistid){
     }
 }
 
-function rememberPlaylistPeriodically(lastlen){
+var lastPlaylist;
+function rememberPlaylistPeriodically(){
     "use strict";
-    if (mediaPlaylist.playlist && mediaPlaylist.playlist.length !== lastlen){
+    if (mediaPlaylist.playlist && lastPlaylist !== JSON.stringify(mediaPlaylist.playlist)){
         /* save playlist in session */
         var data = {'action':'rememberplaylist',
                     'value':JSON.stringify(
                         {'playlist':mediaPlaylist.playlist}
                     )};
         var error = errorFunc('cannot rememebering playlist: failed to connect to server.');
-        api(data, false, error, true);
+        var success = function(){
+            lastPlaylist = JSON.stringify(mediaPlaylist.playlist)
+        }
+        api(data, success, error, true);
     }
-    // check every second if the playlist changed
-    var currentLength = mediaPlaylist.playlist ? mediaPlaylist.playlist.length : 0;
-    window.setTimeout("rememberPlaylistPeriodically("+currentLength+")",REMEMBER_PLAYLIST_INTERVAL);
 }
 
 function restorePlaylist(){
     "use strict";
     /*restore playlist from session*/
     var success = function(data){
-            $.each($.parseJSON(data),function(i,e){
-                addSong(e.mp3,e.title);
-            });
+            mediaPlaylist.playlist = $.parseJSON(data);
             mediaPlaylist._refresh(true);
     };
     var error = function(){
@@ -709,9 +708,6 @@ function switchView(style){
     }
 }
 
-
-
-
 /***
 ON DOCUMENT READY... STEADY... GO!
 ***/
@@ -724,12 +720,12 @@ $(document).ready(function(){
     $('.hideplaylisttab').hide();
     restorePlaylist();
     loadConfig();
-    rememberPlaylistPeriodically(0);
     //register top level directories
 	registerlistdirs($("html").get());
 	registercompactlistdirs($("html").get());
 	$('div#progressscreen').fadeOut('slow');
     window.setInterval("displayCurrentSong()", 1000);
     window.setInterval("resizePlaylistSlowly()",2000);
+    window.setInterval("rememberPlaylistPeriodically()");
     $('#searchform .searchinput').focus();
 });
