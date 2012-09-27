@@ -232,6 +232,8 @@ PLAYLIST MANAGEMENT
 }
 .remoteplaylist .playlisttitle a{
 	display: block;
+    font-weight: 900;
+    margin-left: 5px;
 	text-decoration: none;
 	color: #fff;
 }
@@ -250,6 +252,16 @@ PLAYLIST MANAGEMENT
 div.container{
 	width: 100%;
 	float: left;
+}
+.usernamelabel{
+	width: 100px;
+}
+.usernamelabel span{
+	border-radius: 6px 6px 6px 6px;
+    display: block;
+    text-align: center;
+	height: 20px;
+	margin-top: 2px;
 }
 /**********
 ADMIN PANEL

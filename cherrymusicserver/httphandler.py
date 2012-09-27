@@ -132,6 +132,14 @@ class HTTPHandler(object):
         cherrypy.session['username'] = user.name
         cherrypy.session['userid'] = user.uid
         cherrypy.session['admin'] = user.isadmin
+        
+    def getUserId(self):
+        try:
+            return cherrypy.session['userid']
+        except KeyError:
+            cherrypy.lib.sessions.expire()
+            cherrypy.HTTPRedirect(cherrypy.url(), 303)
+            return ''
 
     def api(self, action='', value='', filter=''):
         if action in self.handlers:
@@ -161,18 +169,18 @@ class HTTPHandler(object):
     def api_saveplaylist(self, value):
         pl = json.loads(value)
         return self.playlistdb.savePlaylist(
-            userid=cherrypy.session['userid'],
+            userid=self.getUserId(),
             public=1 if pl['public'] else 0,
             playlist=pl['playlist'],
             playlisttitle=pl['playlistname']);
             
     def api_deleteplaylist(self, value):
-        return self.playlistdb.deletePlaylist(value, cherrypy.session['userid'])
+        return self.playlistdb.deletePlaylist(value, self.getUserId())
             
     def api_loadplaylist(self,value):
         return  self.jsonrenderer.render(self.playlistdb.loadPlaylist(
                             playlistid=value,
-                            userid=cherrypy.session['userid']
+                            userid=self.getUserId()
                 ));
                 
     def api_getmotd(self,value):
@@ -198,22 +206,26 @@ class HTTPHandler(object):
             return "You didn't think that would work, did you?"
 
     def api_showplaylists(self,value):
-        return json.dumps(self.playlistdb.showPlaylists(cherrypy.session['userid']));
+        playlists = self.playlistdb.showPlaylists(self.getUserId())
+        #translate userids to usernames:
+        for pl in playlists:
+            pl['username']=self.userdb.getNameById(pl['userid'])
+        return json.dumps(playlists);
         
     def api_logout(self,value):
         cherrypy.lib.sessions.expire()
         
     def api_downloadpls(self,value):
         dlval = json.loads(value)
-        pls = self.playlistdb.createPLS(dlval['plid'],cherrypy.session['userid'],dlval['addr'])
-        name = self.playlistdb.getName(value,cherrypy.session['userid'])
+        pls = self.playlistdb.createPLS(dlval['plid'],self.getUserId(),dlval['addr'])
+        name = self.playlistdb.getName(value,self.getUserId())
         if pls and name:
             return self.serve_string_as_file(pls,name+'.pls')
             
     def api_downloadm3u(self,value):
         dlval = json.loads(value)
-        pls = self.playlistdb.createM3U(dlval['plid'],cherrypy.session['userid'],dlval['addr'])
-        name = self.playlistdb.getName(value,cherrypy.session['userid'])
+        pls = self.playlistdb.createM3U(dlval['plid'],self.getUserId(),dlval['addr'])
+        name = self.playlistdb.getName(value,self.getUserId())
         if pls and name:
             return self.serve_string_as_file(pls,name+'.m3u')       
             

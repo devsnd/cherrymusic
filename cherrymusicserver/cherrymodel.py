@@ -94,7 +94,8 @@ class CherryModel:
 
                 else:
                     musicentries.append(MusicEntry(self.strippath(subpath),dir=True))
-
+        if musicentries == []:
+            musicentries.append(MusicEntry(path="No playable media files found.", repr=""))
         return musicentries
 
     def search(self, term):

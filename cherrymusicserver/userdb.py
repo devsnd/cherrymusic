@@ -94,6 +94,10 @@ class UserDB:
         cur.execute('''SELECT COUNT(*) FROM users''')
         return cur.fetchall()[0][0]
 
+    def getNameById(self, userid):
+        res = self.conn.execute('''SELECT username FROM users WHERE rowid = ?''',(userid,))
+        username = res.fetchone()
+        return username[0] if username else 'nobody'
 
 class Crypto(object):
 

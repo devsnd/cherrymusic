@@ -103,9 +103,10 @@ class PlaylistDB:
     def showPlaylists(self, userid):
         cur = self.conn.cursor()
         #change rowid to id to match api
-        cur.execute("""SELECT rowid as id,title FROM playlists WHERE
+        cur.execute("""SELECT rowid as id,title, userid FROM playlists WHERE
             public = 1 OR userid = ?""", (userid,));
-        return cur.fetchall()
+        res = cur.fetchall()
+        return list(map(lambda x: {'plid':x[0], 'title':x[1], 'userid':x[2]}, res))
         
     def createPLS(self,userid,plid, addrstr):
         pl = self.loadPlaylist(userid, plid)

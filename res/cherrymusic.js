@@ -356,22 +356,45 @@ function getAddrPort(){
     return 'http://'+m[1]+':'+m[2];
 }
 
+function ord(c)
+{
+  return c.charCodeAt(0);
+}
+function dec2Hex(dec){
+    var hexChars = "0123456789ABCDEF";
+    var a = dec % 16;
+    var b = (dec - a)/16;
+    hex = hexChars.charAt(b) + hexChars.charAt(a);
+    return hex;
+}
+
+function userNameToColor(username){
+    username = username.toUpperCase();
+    username+='AAA';
+    var g = ((ord(username[0])-65)*255)/30;
+    var b = ((ord(username[1])-65)*255)/30;
+    var r = ((ord(username[2])-65)*255)/30;
+    return '#'+dec2Hex(r)+dec2Hex(g)+dec2Hex(b);
+}
+
 function showPlaylists(){
     "use strict";
     var success = function(data){
+            var addressAndPort = getAddrPort();
             var pls = '<ul>';
             $.each($.parseJSON(data),function(i,e){
-                var dlvalue = JSON.stringify({ 'plid' : e[0],
-                    'addr' : getAddrPort()
-                });
                 pls += Mustache.render(
                     ['<li id="playlist{{playlistid}}">',
                     '<div class="remoteplaylist">',
+                        '<div class="usernamelabel">',
+                            '<span style="background-color: {{usernamelabelcolor}}" >{{username}}</span>',
+                        '</div>',
                         '<div class="playlisttitle">',
                             '<a href="javascript:;" onclick="loadPlaylist({{playlistid}})">',
                             '{{playlistlabel}}',
                             '</a>',
                         '</div>',
+                        
             			'<div class="deletebutton">',
 			            '<a href="javascript:;" class="button" onclick="confirmDeletePlaylist({{playlistid}})">x</a>',
             			'</div>',
@@ -390,9 +413,13 @@ function showPlaylists(){
                     '</div>',
                     '</li>'].join(''),
                 {
-                playlistid:e[0],
-                playlistlabel:e[1],
-                dlval : dlvalue
+                playlistid:e['plid'],
+                playlistlabel:e['title'],
+                dlval : JSON.stringify({ 'plid' : e['plid'],
+                    'addr' : addressAndPort
+                    }),
+                username: e['username'],
+                usernamelabelcolor: userNameToColor(e['username']),
                 });
             });
             pls += '</ul>';
@@ -700,6 +727,7 @@ $(document).ready(function(){
 	registerlistdirs($("html").get());
 	registercompactlistdirs($("html").get());
 	$('div#progressscreen').fadeOut('slow');
-    window.setInterval("displayCurrentSong()", 1000)
-    window.setInterval("resizePlaylistSlowly()",2000)
+    window.setInterval("displayCurrentSong()", 1000);
+    window.setInterval("resizePlaylistSlowly()",2000);
+    $('#searchform .searchinput').focus();
 });
