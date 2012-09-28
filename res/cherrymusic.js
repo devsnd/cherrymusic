@@ -275,7 +275,7 @@ registermp3s = function(parent){
 /***
 JPLAYER FUNCTIONS
 ***/
-function initJPlayer(){
+function initJPlayer(plSelector){
     if (typeof mediaPlaylist === 'undefined') {
 	mediaPlaylist = new jPlayerPlaylist({
         jPlayer: "#jquery_jplayer_1",
@@ -283,7 +283,7 @@ function initJPlayer(){
 	}, [], {
 		playlistOptions: {
 			enableRemoveControls: true,
-            playlistSelector: '.jp-playlist',
+            playlistSelector: plSelector,
 		},
         swfPath: "res/js",
 		solution: "flash,html",
@@ -492,7 +492,7 @@ function rememberPlaylistPeriodically(){
     }
 }
 
-function restorePlaylist(){
+function restorePlaylistAndRememberPeriodically(){
     "use strict";
     /*restore playlist from session*/
     var success = function(data){
@@ -503,6 +503,7 @@ function restorePlaylist(){
             alert('error');
     };
     api('restoreplaylist',success,error);
+        window.setInterval("rememberPlaylistPeriodically()",REMEMBER_PLAYLIST_INTERVAL );
 }
 
 function removePlayedFromPlaylist(){
@@ -534,7 +535,7 @@ function logout(){
 }
 
 function displayCurrentSong(){
-    if(mediaPlaylist.playlist.length>0){
+    if(mediaPlaylist.playlist && mediaPlaylist.current && mediaPlaylist.playlist.length>0){
         $('.cm-songtitle').html(mediaPlaylist.playlist[mediaPlaylist.current].title);
     } else {
         $('.cm-songtitle').html('');
@@ -629,6 +630,7 @@ function initTabs() {
         $(this).addClass('selected');
         return false;
     });
+    saveOriginalTabColor();
 }
 
 function loadBrowserIfEmpty(){
@@ -646,10 +648,11 @@ function loadBrowserIfEmpty(){
 }
 
 origcolor = '#000000';
-$(document).ready(function(){
+function saveOriginalTabColor(){
     "use strict";
     origcolor = $('div.tabs ul.tabNavigation .jplayer').css('background-color');
-});
+}
+
 function pulseTab(tabname){
     "use strict";
     var elem = $('div.tabs ul.tabNavigation .'+tabname);
@@ -713,12 +716,13 @@ ON DOCUMENT READY... STEADY... GO!
 ***/
 $(document).ready(function(){
     "use strict";
+    var playlistSelector = '.jp-playlist';
     initTabs();
     fetchMessageOfTheDay();
-    initJPlayer();
+    initJPlayer(playlistSelector);
     $('#searchfield .bigbutton').click(submitsearch);
     $('.hideplaylisttab').hide();
-    restorePlaylist();
+    restorePlaylistAndRememberPeriodically();
     loadConfig();
     //register top level directories
 	registerlistdirs($("html").get());
@@ -726,6 +730,11 @@ $(document).ready(function(){
 	$('div#progressscreen').fadeOut('slow');
     window.setInterval("displayCurrentSong()", 1000);
     window.setInterval("resizePlaylistSlowly()",2000);
-    window.setInterval("rememberPlaylistPeriodically()");
     $('#searchform .searchinput').focus();
+    $(playlistSelector+" ul").sortable({
+        update: function(e,ui){
+            mediaPlaylist._reorderByDomElements();
+            }
+        });
+	$(playlistSelector+" ul").disableSelection();
 });

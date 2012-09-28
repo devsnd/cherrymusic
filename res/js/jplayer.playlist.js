@@ -195,6 +195,7 @@
 			if(instant && !$.isFunction(instant)) {
 				$(this.cssSelector.playlist + " ul").empty();
 				$.each(this.playlist, function(i,v) {
+                    self.playlist[i].position = i;
 					$(self.cssSelector.playlist + " ul").append(self._createListItem(self.playlist[i]));
 				});
 				this._updateControls();
@@ -226,7 +227,7 @@
 			}
 		    });
 		    if(playtimeSum){
-			$(self.cssSelector.playlist + " ul").append("<li  class='" + self.options.playlistOptions.playtimeClass + "-sum'><div><span href='javascript:;'>"+self._formatTime(playtimeSum)+"</span></div></li>");
+			$(self.cssSelector.playlist).append("<div class='" + self.options.playlistOptions.playtimeClass + "-sum'><div><span href='javascript:;'>"+self._formatTime(playtimeSum)+"</span></div></div>");
 		    }
 		},
 		_formatTime: function(secs) {
@@ -241,7 +242,7 @@
 			var self = this;
 
 			// Wrap the <li> contents in a <div>
-			var listItem = "<li><div>";
+			var listItem = "<li pos='"+media.position+"'><div>";
 
 			// Create Playtime
 		if(media.length){
@@ -323,11 +324,24 @@
 				$(this.cssSelector.title + " li").html(this.playlist[index].title + (this.playlist[index].artist ? " <span class='jp-artist'>by " + this.playlist[index].artist + "</span>" : ""));
 			}
 		},
+        _reorderByDomElements : function(){
+            //only works for one changed element at the moment
+            var self = this;
+            var plitems = 0;
+            $.each($(this.cssSelector.playlist+" li"), function(i,v){
+                self.playlist[plitems].domPos = parseInt($(this).attr('pos'));
+                plitems++;
+            });
+            this.playlist.sort(function(a,b){return a.domPos-b.domPos});
+            
+            self._refresh(true);
+        },
 		setPlaylist: function(playlist) {
 			this._initPlaylist(playlist);
 			this._init();
 		},
 		add: function(media, playNow) {
+            media.position = this.playlist.length;
 			$(this.cssSelector.playlist + " ul").append(this._createListItem(media)).find("li:last-child").hide().slideDown(this.options.playlistOptions.addTime);
 			this._updateControls();
 			this.original.push(media);
