@@ -40,6 +40,7 @@ import codecs
 from urllib.parse import unquote
 
 from cherrymusicserver import renderjson
+from cherrymusicserver import transcode
 from cherrymusicserver import userdb
 from cherrymusicserver import playlistdb
 from cherrymusicserver import log
@@ -140,6 +141,16 @@ class HTTPHandler(object):
             cherrypy.lib.sessions.expire()
             cherrypy.HTTPRedirect(cherrypy.url(), 303)
             return ''
+            
+    def trans(self, *args):
+        if len(args):
+            newformat = args[-1][4:] #get.format
+            path = '/'.join(args[:-1])
+            fullpath = os.path.join(cherry.config.media.basedir.str, path)
+            cherrypy.response.headers["Content-Type"] = transcode.getMimeType(newformat)            
+            return transcode.transcode(fullpath, newformat, usetmpfile=True)
+    trans.exposed = True
+    trans._cp_config = {'response.stream': True}
 
     def api(self, action='', value='', filter=''):
         if action in self.handlers:
