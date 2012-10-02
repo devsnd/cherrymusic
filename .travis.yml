@@ -1,0 +1,26 @@
+# Continuous Integration config
+# travis-ci.org
+#
+# see http://about.travis-ci.org/docs/user/build-configuration/
+#
+
+language: python
+python:
+  - "3.2"
+# command to install dependencies
+install: "pip install cherrypy --use-mirrors"
+# command to run tests
+script: runtests
+
+branches:
+  # whitelist
+  only:
+    - master
+    - devel
+
+notifications:
+  email:
+    recipients:
+      - tilman.boerner@gmx.de
+    on_success: change  # [always|never|change] # default: change
+    on_failure: always  # [always|never|change] # default: always
