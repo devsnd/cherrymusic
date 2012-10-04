@@ -220,16 +220,22 @@
 					}
 				});
 			}
-		    var playtimeSum = 0;
+            this._updatePlaytime();
+		},
+        _updatePlaytime: function(){
+            var self = this;
+            var playtimeSum = 0;
 		    $.each(this.playlist, function(i,v) {
 			if(self.playlist[i].length){
 			    playtimeSum += self.playlist[i].length;
 			}
 		    });
 		    if(playtimeSum){
-			$(self.cssSelector.playlist).append("<div class='" + self.options.playlistOptions.playtimeClass + "-sum'><div><span href='javascript:;'>"+self._formatTime(playtimeSum)+"</span></div></div>");
-		    }
-		},
+                $(self.cssSelector.playlist+"-playtime-sum").html("<div><span href='javascript:;'>"+self._formatTime(playtimeSum)+"</span></div>");
+		    } else {
+                $(self.cssSelector.playlist+"-playtime-sum").html("");
+            }  
+        },
 		_formatTime: function(secs) {
 			secs = Math.floor(secs);
 			var s = secs%60;
@@ -403,7 +409,7 @@
 								self.shuffled = false;
 								self._updateControls();
 							}
-
+                            self._updatePlaytime();
 							self.removing = false;
 						});
 					}
