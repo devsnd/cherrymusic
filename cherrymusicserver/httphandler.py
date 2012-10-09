@@ -255,7 +255,7 @@ class HTTPHandler(object):
         return json.dumps(audiotranscode.getDecoders())
     
     def api_transcodingenabled(self,value):
-        return json.dumps(cherry.config.media.transcode)
+        return json.dumps(cherry.config.media.transcode.bool)
     
     def serve_string_as_file(self,string,filename):
         cherrypy.response.headers["Content-Type"] = "application/x-download"
