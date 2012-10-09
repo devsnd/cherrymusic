@@ -59,7 +59,8 @@ def getConfigPath():
         return os.path.join(os.path.expanduser('~'), '.cherrymusic')
 
 def readRes(path):
-    return open(getResourcePath(path)).read()
+    with open(getResourcePath(path)) as f:
+        return f.read()
 
 def getResourcePath(path):
     #check share first
