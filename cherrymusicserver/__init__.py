@@ -152,6 +152,7 @@ Have fun!
         
         cherrypy.lib.caching.expires(0) #disable expiry caching
         cherrypy.engine.start()
+        cherrypy.engine.block()
 
     def pyopensslExists(self):
         try:
