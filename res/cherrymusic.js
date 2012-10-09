@@ -27,7 +27,15 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 //
 var playableExtensions = [];
+var availableEncoders = [];
+var availablejPlayerFormats = [];
+var availableDecoders = [];
+var transcodingEnabled = true;
 var REMEMBER_PLAYLIST_INTERVAL = 3000;
+
+var playlistSelector = '.jp-playlist';
+
+var executeAfterConfigLoaded = []
 
 function api(data_or_action, successfunc, errorfunc, background){
     "use strict";
@@ -75,14 +83,49 @@ function errorFunc(msg){
         };
     }
 }
-
+/*******************
+CONFIGURATION LOADER
+*******************/
 function loadConfig(){
     "use strict";
     var success = function(data){
         playableExtensions = jQuery.parseJSON(data);
+        configCompletionHandler();
     };
-    var error = errorFunc('Failed loading configuration');
-    api('getplayables',success,error);
+    var error = errorFunc('Failed loading configuration for playable extensions!');
+    api('getplayables',success,error, true);
+    
+    success = function(data){
+        availableEncoders = jQuery.parseJSON(data);
+        configCompletionHandler();
+    };
+    error = errorFunc('Failed loading configuration for available Encoders!');
+    api('getencoders',success,error, true);
+    
+    success = function(data){
+        availableDecoders = jQuery.parseJSON(data);
+        configCompletionHandler();
+    };
+    error = errorFunc('Failed loading configuration for available Decoders!');
+    api('getdecoders',success,error, true);
+    
+    success = function(data){
+        transcodingEnabled = jQuery.parseJSON(data);
+        configCompletionHandler();
+    };
+    error = errorFunc('Failed loading configuration value "transcodingenabled"!');
+    api('transcodingenabled',success,error, true);
+}
+
+function configCompletionHandler(){
+    if( playableExtensions.length &&
+        availableEncoders.length &&
+        availableDecoders.length
+    ){
+        for(var i=0; i<executeAfterConfigLoaded.length; i++){
+            executeAfterConfigLoaded[i]();
+        }
+    }
 }
 
 /***
@@ -204,7 +247,7 @@ listdirclick = function(mode){
                 registermp3s($(currdir).parent().find('ul'));
                 $(currdir).siblings("ul").slideDown('slow');
             };
-            api(data,success);
+            api(data,success,errorFunc('unable to list directory'));
         }
 };
 compactlistdirclick = function(){
@@ -232,7 +275,7 @@ compactlistdirclick = function(){
             registermp3s($(currdir).parent().find('ul'));
             $(currdir).siblings("ul").slideDown('slow');
         };
-        api(data,success);
+        api(data,success,errorFunc('unable to list compact directory'));
     }
 
 };
@@ -275,7 +318,36 @@ registermp3s = function(parent){
 /***
 JPLAYER FUNCTIONS
 ***/
-function initJPlayer(plSelector){
+function setAvailableJPlayerFormats(){
+    for(var i=0; i<availableEncoders.length; i++){
+        availablejPlayerFormats.push(ext2jPlayerFormat(availableEncoders[i]));
+    }
+    sortFormatPreferrencePerBrowser();
+}
+
+function sortFormatPreferrencePerBrowser(){
+    var browser = detectBrowser();
+    //see http://www.w3schools.com/html/html5_audio.asp for available formats per browser
+    if(['msie','safari'].indexOf(browser) != -1){
+    //set preferred format for IE and safari to mp3
+        if(availableEncoders.indexOf('mp3') != -1){
+            //remove mp3
+            availableEncoders = availableEncoders.filter(function(i){return i!='mp3'});
+            //add mp3 as first playback format
+            availableEncoders.unshift('mp3');
+        }
+    } else {
+        //set to ogg for all te others
+        if(availableEncoders.indexOf('ogg') != -1){
+            //remove ogg
+            availableEncoders = availableEncoders.filter(function(i){return i!='ogg'});
+            //add ogg as first playback format
+            availableEncoders.unshift('ogg');
+        }
+    }
+}
+
+function initJPlayer(){
     if (typeof mediaPlaylist === 'undefined') {
 	mediaPlaylist = new jPlayerPlaylist({
         jPlayer: "#jquery_jplayer_1",
@@ -283,38 +355,79 @@ function initJPlayer(plSelector){
 	}, [], {
 		playlistOptions: {
 			enableRemoveControls: true,
-            playlistSelector: plSelector,
+            playlistSelector: playlistSelector,
 		},
         swfPath: "res/js",
-		solution: "flash,html",
+		solution: "html",
 		preload: 'metadata',
-        supplied: "mp3",
+        supplied: availablejPlayerFormats.join(),
         wmode: "window",
         errorAlerts: false
         });
     }
 }
 
+ext2jPlayerFormat = function(ext){
+    switch(ext){
+        case "mp3": return "mp3";
+        
+        case "ogg": 
+        case "oga": return "oga";
+        
+        case "m4a": 
+        case "mp4":
+        case "aac": return "m4a";
+        
+        case "wav": return "wav";
+        
+        case "weba": return "webma";
+    }
+}
+
 addSong = function(path,title){
     "use strict";
+    var ext = getFileTypeByExt(path);
     var track = {
         title: title,
-        mp3: path
     }
+    //add natively supported path
+    track[ext2jPlayerFormat(ext)] = path;
+    
+    if(transcodingEnabled){
+        //add transcoded paths
+        for(var i=0; i<availableEncoders.length; i++){
+            var enc = availableEncoders[i];
+            if(enc !== ext){
+                track[ext2jPlayerFormat(enc)] = getTranscodePath(path,enc);
+            }
+        }
+    }
+    
     mediaPlaylist.add(track);
     pulseTab('jplayer');
     var success = function(data){
         var metainfo = $.parseJSON(data)
-        track.length = metainfo.length
+        track.duration = metainfo.length
         mediaPlaylist._refresh(true);
     }
     api({action:'getsonginfo',
-        value: path}, success, false, true);
+        value: path}, success, errorFunc('error getting song metainfo'), true);
 };
 clearPlaylist = function(){
     "use strict";
     mediaPlaylist.remove();
 };
+/**********
+TRANSCODING
+**********/
+
+function getTranscodePath(filepath, format){
+    "use strict";
+    var match = filepath.match(/\/serve(.*)$/);
+    if(match){
+        return "/trans"+match[1]+"/get."+format;
+    }        
+}
 
 /******************
 PLAYLIST MANAGEMENT
@@ -351,7 +464,7 @@ function savePlaylist(playlistname,ispublic){
                             'playlistname':playlistname
                         })
                 };
-    api(data);
+    api(data,false,errorFunc('error saving playlist'));
 }
 function getAddrPort(){
     m = (window.location+"").match(/https?:\/\/(.+?):?(\d+).*/);
@@ -429,9 +542,9 @@ function showPlaylists(){
             $('.showplayliststab').slideUp('fast');
             $('.available-playlists').slideDown();
         };
-    var error = function(){
-            alert('error');
-    };
+    
+    var error = errorFunc('error loading external playlists');
+    
     api('showplaylists',success,error);
 }
 
@@ -443,7 +556,7 @@ function confirmDeletePlaylist(id){
 }
 
 function deletePlaylistAndHideDialog(id){
-    api({action:'deleteplaylist', value: id});
+    api({action:'deleteplaylist', value: id},false,errorFunc('error deleting playlist'));
     $('#dialog').fadeOut('fast');
     showPlaylists();
 }
@@ -469,7 +582,7 @@ function loadPlaylist(playlistid){
             registercompactlistdirs($(pldomid).find('ul'));
             registermp3s($(pldomid).find('ul'));
         };
-        api(data,success)
+        api(data,success,errorFunc('error loading external playlist'))
     } else {
         $(pldomid).slideToggle('slow');
     }
@@ -499,10 +612,7 @@ function restorePlaylistAndRememberPeriodically(){
             mediaPlaylist.playlist = $.parseJSON(data);
             mediaPlaylist._refresh(true);
     };
-    var error = function(){
-            alert('error');
-    };
-    api('restoreplaylist',success,error);
+    api('restoreplaylist',success,errorFunc('error restoring playlist'));
         window.setInterval("rememberPlaylistPeriodically()",REMEMBER_PLAYLIST_INTERVAL );
 }
 
@@ -568,7 +678,7 @@ function updateUserList(){
         });
         $('#adminuserlist').html(htmllist);
     };
-    api('getuserlist',success);
+    api('getuserlist',success,errorFunc('cannot fetch user list'));
 }
 function addNewUser(){
     "use strict";
@@ -587,7 +697,7 @@ function addNewUser(){
     var success = function(data){
         updateUserList();
     };
-    api(data,success);
+    api(data,success,errorFunc('failed to add new user'));
 }
 
 /***
@@ -598,7 +708,7 @@ function fetchMessageOfTheDay(){
     var success = function(data){
         $('#oneliner').html(data);
     };
-    api('getmotd', success);
+    api('getmotd', success, errorFunc('could not fetch message of the day'));
 }
 
 /**
@@ -643,7 +753,7 @@ function loadBrowserIfEmpty(){
             registercompactlistdirs($('#browser').find('ul'));
             registermp3s($('#browser').find('ul'));
         };
-        api(data,success);
+        api(data,success,errorFunc('failed to load file browser'));
     }
 }
 
@@ -677,7 +787,23 @@ function endsWith(str, suffix) {
     "use strict";
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
 }
+function getFileTypeByExt(filepath){
+    "use strict";
+    var extmatch = filepath.match(/.*?\.(\w+)$/);
+    if(extmatch){
+        return extmatch[1].toLowerCase();
+    }
+}
 
+function detectBrowser(){
+    var browsers = ['firefox','msie','chrome','safari','midori']
+    for(var i=0; i<browsers.length; i++){
+        if(navigator.userAgent.toLowerCase().indexOf(browsers[i])!=-1){
+            return browsers[i];
+        }
+    }
+    return 'unknown';
+}
 /********************
 STYLE TRANSFORMATIONS
 *********************/
@@ -691,39 +817,19 @@ function viewport() {
     return { width : e[ a+'Width' ] , height : e[ a+'Height' ] }
 }
 
-var viewStyle = 'single';
-function switchView(style){
-    if(!style){
-        if('single' == viewStyle){
-            
-        }
-    }
-    if('single' == style){
-        
-    } else if('sidebyside' == style){
-        $('#jplayer').css('width','50%');
-        $('#jplayer').css('float','right');
-        $('#jplayer').css('display','block');
-        $('#jplayer').css('margin-top','36px');
-        $('#search').css('width','50%');
-        $('#search').css('float','left');
-        $('#search').css('display','block');
-    }
-}
-
 /***
 ON DOCUMENT READY... STEADY... GO!
 ***/
 $(document).ready(function(){
     "use strict";
-    var playlistSelector = '.jp-playlist';
     initTabs();
     fetchMessageOfTheDay();
-    initJPlayer(playlistSelector);
     $('#searchfield .bigbutton').click(submitsearch);
     $('.hideplaylisttab').hide();
-    restorePlaylistAndRememberPeriodically();
     loadConfig();
+    executeAfterConfigLoaded.push(restorePlaylistAndRememberPeriodically);
+    executeAfterConfigLoaded.push(setAvailableJPlayerFormats);
+    executeAfterConfigLoaded.push(initJPlayer);
     //register top level directories
 	registerlistdirs($("html").get());
 	registercompactlistdirs($("html").get());

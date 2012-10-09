@@ -226,8 +226,8 @@
             var self = this;
             var playtimeSum = 0;
 		    $.each(this.playlist, function(i,v) {
-			if(self.playlist[i].length){
-			    playtimeSum += self.playlist[i].length;
+			if(self.playlist[i].duration){
+			    playtimeSum += self.playlist[i].duration;
 			}
 		    });
 		    if(playtimeSum){
@@ -251,8 +251,8 @@
 			var listItem = "<li pos='"+media.position+"'><div>";
 
 			// Create Playtime
-		if(media.length){
-			listItem += "<span href='javascript:;' class='" + this.options.playlistOptions.playtimeClass + "'>"+self._formatTime(media.length)+"</span>";
+		if(media.duration){
+			listItem += "<span href='javascript:;' class='" + this.options.playlistOptions.playtimeClass + "'>"+self._formatTime(media.duration)+"</span>";
 		}
 			// Create remove control
 			listItem += "<a href='javascript:;' class='" + this.options.playlistOptions.removeItemClass + "'>&times;</a>";

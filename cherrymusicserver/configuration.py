@@ -60,6 +60,14 @@ def from_defaults():
                                 extensions that can be played by jPlayer.
                                 """
 
+    c.media.transcode = False
+    c.media.transcode._desc = """
+                                TRANSCODE (experimental!) enables automatic live transcoding 
+                                of the media to be able to listen to every format on every device.
+                                This requires you to have the appropriate codecs installed.
+                                Please note that transcoding will significantly increase the stress on the CPU!
+                                """
+
     c._set('search.maxresults', 20, warn_on_create=False)
     c.search.maxresults._desc = """
                                 MAXRESULTS sets the maximum amount of search results
@@ -138,7 +146,30 @@ def from_configparser(filepath):
     dic = {}
     for section_name, section in cfgp.items():
         dic[section_name] = dict([i for i in section.items()])
-    return Configuration(dic=dic)
+        
+    #check if defaults contain new key
+    containedNewKey = False
+    defaults = from_defaults()
+    for prop in sorted(defaults.list, key=lambda p: p[0]):
+            fullname, value, desc = prop
+            if Property._namesep in fullname:
+                section, subkey = fullname.split(Property._namesep, 1)
+            else:
+                section, subkey = ('', fullname)
+            if not section in dic:
+                log.w('section %s not in configuration, adding.' % (section))
+                dic[section] = {}
+                containedNewKey = True
+            if subkey and not subkey in dic[section]:
+                log.w('Section Subkey "%s" not in configuration, adding.' % (fullname))
+                dic[section][subkey] = value
+                containedNewKey = True   
+    newcfg = Configuration(dic=dic)
+    if containedNewKey:
+        log.i('''Writing new configuration parameters to config file.
+Please check if those parameters are as you want them to be.''')
+        write_to_file(newcfg,filepath)
+    return newcfg
 
 
 def write_to_file(cfg, filepath):

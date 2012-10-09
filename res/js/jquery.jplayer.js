@@ -1922,6 +1922,9 @@
 					self.status.src = media[format];
 					self.status.format[format] = true;
 					self.status.formatType = format;
+                    if(media.duration){
+                        self.status.duration = media.duration;
+                    }
 					return false;
 				}
 			});

@@ -38,9 +38,9 @@ import json
 import cherrypy
 import codecs
 from urllib.parse import unquote
+import audiotranscode
 
 from cherrymusicserver import renderjson
-from cherrymusicserver import transcode
 from cherrymusicserver import userdb
 from cherrymusicserver import playlistdb
 from cherrymusicserver import log
@@ -85,6 +85,9 @@ class HTTPHandler(object):
             'downloadpls' : self.api_downloadpls,
             'downloadm3u' : self.api_downloadm3u,
             'getsonginfo' : self.api_getsonginfo,
+            'getencoders' : self.api_getencoders,
+            'getdecoders' : self.api_getdecoders,
+            'transcodingenabled': self.api_transcodingenabled,
         }
 
     def issecure(self, url):
@@ -143,12 +146,12 @@ class HTTPHandler(object):
             return ''
             
     def trans(self, *args):
-        if len(args):
+        if cherry.config.media.transcode and len(args):
             newformat = args[-1][4:] #get.format
             path = '/'.join(args[:-1])
             fullpath = os.path.join(cherry.config.media.basedir.str, path)
-            cherrypy.response.headers["Content-Type"] = transcode.getMimeType(newformat)            
-            return transcode.transcode(fullpath, newformat, usetmpfile=True)
+            cherrypy.response.headers["Content-Type"] = transcode.getMimeType(newformat)
+            return transcode.getTranscoded(fullpath, newformat, usetmpfile=True)
     trans.exposed = True
     trans._cp_config = {'response.stream': True}
 
@@ -244,6 +247,15 @@ class HTTPHandler(object):
         #TODO yet another dirty hack. removing the /serve thing is a mess.
         abspath = os.path.join(cherry.config.media.basedir.str,unquote(value)[7:])
         return json.dumps(metainfo.getSongInfo(abspath).dict())
+        
+    def api_getencoders(self, value):
+        return json.dumps(audiotranscode.getEncoders())
+        
+    def api_getdecoders(self, value):
+        return json.dumps(audiotranscode.getDecoders())
+    
+    def api_transcodingenabled(self,value):
+        return json.dumps(cherry.config.media.transcode)
     
     def serve_string_as_file(self,string,filename):
         cherrypy.response.headers["Content-Type"] = "application/x-download"
