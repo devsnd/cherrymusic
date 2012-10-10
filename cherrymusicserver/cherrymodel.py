@@ -102,7 +102,10 @@ class CherryModel:
         user = cherrypy.session.get('username', None)
         if user:
             log.d(user+' searched for "'+term+'"')
-        results = self.cache.searchfor(term, maxresults=cherry.config.search.maxresults.int,isFastSearch=isFastSearch)
+        maxresults = cherry.config.search.maxresults.int
+        if isFastSearch:
+            maxresults = 5
+        results = self.cache.searchfor(term, maxresults=maxresults,isFastSearch=isFastSearch)
         results = sorted(results,key=resultorder.ResultOrder(term),reverse=True)
         results = results[:min(len(results), cherry.config.search.maxresults.int)]
         ret = []
