@@ -180,7 +180,8 @@ function search(append=false){
     return false;
 }
 function submitsearch(){
-    fastsearch();
+    //fastsearch();
+    search();
     return false;
 }
 
