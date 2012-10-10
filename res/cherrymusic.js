@@ -396,7 +396,7 @@ function initJPlayer(){
             playlistSelector: playlistSelector,
 		},
         swfPath: "res/js",
-		solution: "html",
+		solution: "flash, html",
 		preload: 'metadata',
         supplied: availablejPlayerFormats.join(),
         wmode: "window",
