@@ -118,9 +118,9 @@ function loadConfig(){
 }
 
 function configCompletionHandler(){
-    if( playableExtensions != undefined
-        availableEncoders != undefined
-        availableDecoders != undefined
+    if( playableExtensions != undefined &&
+        availableEncoders != undefined &&
+        availableDecoders != undefined &&
         transcodingEnabled != undefined
     ){
         for(var i=0; i<executeAfterConfigLoaded.length; i++){
