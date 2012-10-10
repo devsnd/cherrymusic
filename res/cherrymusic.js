@@ -677,7 +677,7 @@ function logout(){
 }
 
 function displayCurrentSong(){
-    if(mediaPlaylist.playlist && mediaPlaylist.current && mediaPlaylist.playlist.length>0){
+    if(mediaPlaylist && mediaPlaylist.playlist && mediaPlaylist.current && mediaPlaylist.playlist.length>0){
         $('.cm-songtitle').html(mediaPlaylist.playlist[mediaPlaylist.current].title);
     } else {
         $('.cm-songtitle').html('');
