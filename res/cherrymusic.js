@@ -30,7 +30,7 @@ var playableExtensions = [];
 var availableEncoders = [];
 var availablejPlayerFormats = [];
 var availableDecoders = [];
-var transcodingEnabled = true;
+var transcodingEnabled = undefined;
 var REMEMBER_PLAYLIST_INTERVAL = 3000;
 
 var playlistSelector = '.jp-playlist';
@@ -120,7 +120,8 @@ function loadConfig(){
 function configCompletionHandler(){
     if( playableExtensions.length &&
         availableEncoders.length &&
-        availableDecoders.length
+        availableDecoders.length &&
+        transcodingEnabled != undefined
     ){
         for(var i=0; i<executeAfterConfigLoaded.length; i++){
             executeAfterConfigLoaded[i]();
@@ -858,10 +859,10 @@ $(document).ready(function(){
     fetchMessageOfTheDay();
     $('#searchfield .bigbutton').click(submitsearch);
     $('.hideplaylisttab').hide();
-    loadConfig();
     executeAfterConfigLoaded.push(restorePlaylistAndRememberPeriodically);
     executeAfterConfigLoaded.push(setAvailableJPlayerFormats);
     executeAfterConfigLoaded.push(initJPlayer);
+    loadConfig();
     //register top level directories
 	registerlistdirs($("html").get());
 	registercompactlistdirs($("html").get());
