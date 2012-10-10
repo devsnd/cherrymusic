@@ -105,9 +105,9 @@ class CherryModel:
         maxresults = cherry.config.search.maxresults.int
         if isFastSearch:
             maxresults = 5
-        results = self.cache.searchfor(term, maxresults=maxresults,isFastSearch=isFastSearch)
+        results = self.cache.searchfor(term, maxresults=cherry.config.search.maxresults.int,isFastSearch=isFastSearch)
         results = sorted(results,key=resultorder.ResultOrder(term),reverse=True)
-        results = results[:min(len(results), cherry.config.search.maxresults.int)]
+        results = results[:min(len(results), maxresults)]
         ret = []
         for file in results:
             strippedpath = self.strippath(file)
