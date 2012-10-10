@@ -335,8 +335,11 @@ addAllToPlaylist = function(){
     });
 };
 
-registermp3s = function(parent,addPlayAll=true){
+registermp3s = function(parent,addPlayAll){
     "use strict";
+    if(addPlayAll === undefined){
+        addPlayAll = true;
+    }
     var foundMp3 = $(parent).find(".mp3file").click(
         function(){
             addSong( $(this).attr("path"), $(this).attr("title") );
