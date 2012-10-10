@@ -170,7 +170,7 @@ function search(append){
         }
         registerlistdirs($('#searchresults').find('ul'));
         registercompactlistdirs($('#searchresults').find('ul'));
-        registermp3s($('#searchresults').find('ul'),addPlayAll=false);
+        registermp3s($('#searchresults').find('ul'),false);
         $('#searchresults').find('ul li.slowsearch').remove();
     };
     var error = function(){
