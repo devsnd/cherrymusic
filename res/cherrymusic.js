@@ -26,10 +26,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 //
-var playableExtensions = [];
-var availableEncoders = [];
+var playableExtensions = undefined;
+var availableEncoders = undefined;
 var availablejPlayerFormats = [];
-var availableDecoders = [];
+var availableDecoders = undefined;
 var transcodingEnabled = undefined;
 var REMEMBER_PLAYLIST_INTERVAL = 3000;
 
@@ -118,9 +118,9 @@ function loadConfig(){
 }
 
 function configCompletionHandler(){
-    if( playableExtensions.length &&
-        availableEncoders.length &&
-        availableDecoders.length &&
+    if( playableExtensions != undefined
+        availableEncoders != undefined
+        availableDecoders != undefined
         transcodingEnabled != undefined
     ){
         for(var i=0; i<executeAfterConfigLoaded.length; i++){
