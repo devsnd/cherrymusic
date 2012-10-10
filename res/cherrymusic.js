@@ -131,22 +131,54 @@ function configCompletionHandler(){
 /***
 SEARCH
 ***/
-function submitsearch(){
+function fastsearch(append=false){
+    "use strict";
+    var data = {
+        'action' : 'fastsearch',
+        'value' : $('#searchfield input').val()
+    };
+    var success = function(data){
+        if(append){
+            $('#searchresults').append(parseAndRender(data));
+        } else {
+            $('#searchresults').html(parseAndRender(data)); 
+        }
+        registerlistdirs($('#searchresults').find('ul'));
+        registercompactlistdirs($('#searchresults').find('ul'));
+        registermp3s($('#searchresults').find('ul'));
+        search(true);
+    };
+    var error = function(){
+        errorFunc('failed loading fast-search results')();
+    };
+    api(data,success,error);
+    return false;
+}
+function search(append=false){
     "use strict";
     var data = {
         'action' : 'search',
         'value' : $('#searchfield input').val()
     };
     var success = function(data){
-        $('#searchresults').html(parseAndRender(data));
+        if(append){
+            $('#searchresults').append(parseAndRender(data));
+        } else {
+            $('#searchresults').html(parseAndRender(data));
+        }
         registerlistdirs($('#searchresults').find('ul'));
         registercompactlistdirs($('#searchresults').find('ul'));
-        registermp3s($('#searchresults').find('ul'));
+        registermp3s($('#searchresults').find('ul'),addPlayAll=false);
     };
     var error = function(){
         errorFunc('failed loading search results')();
     };
     api(data,success,error);
+    return false;
+}
+function submitsearch(){
+    fastsearch();
+    $('#searchresults').find('ul').append('<li>More search results</li>');
     return false;
 }
 
@@ -300,14 +332,14 @@ addAllToPlaylist = function(){
     });
 };
 
-registermp3s = function(parent){
+registermp3s = function(parent,addPlayAll=true){
     "use strict";
     var foundMp3 = $(parent).find(".mp3file").click(
         function(){
             addSong( $(this).attr("path"), $(this).attr("title") );
         }
     ).html();
-    if(foundMp3){
+    if(foundMp3 && addPlayAll){
         $(parent).prepend('<a class="addAllToPlaylist" href="javascript:;">add All to Playlist</a>');
         $(parent).children('.addAllToPlaylist').click(
             addAllToPlaylist

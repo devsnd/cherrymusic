@@ -98,11 +98,11 @@ class CherryModel:
             musicentries.append(MusicEntry(path="No playable media files found.", repr=""))
         return musicentries
 
-    def search(self, term):
+    def search(self, term, isFastSearch=False):
         user = cherrypy.session.get('username', None)
         if user:
             log.d(user+' searched for "'+term+'"')
-        results = self.cache.searchfor(term, maxresults=cherry.config.search.maxresults.int)
+        results = self.cache.searchfor(term, maxresults=cherry.config.search.maxresults.int,isFastSearch=isFastSearch)
         results = sorted(results,key=resultorder.ResultOrder(term),reverse=True)
         results = results[:min(len(results), cherry.config.search.maxresults.int)]
         ret = []

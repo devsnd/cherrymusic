@@ -71,6 +71,7 @@ class HTTPHandler(object):
         
         self.handlers = {
             'search' : self.api_search,
+            'fastsearch' : self.api_fastsearch,
             'rememberplaylist' : self.api_rememberplaylist,
             'saveplaylist' : self.api_saveplaylist,
             'loadplaylist': self.api_loadplaylist,
@@ -171,10 +172,13 @@ class HTTPHandler(object):
                 return 'Error rendering dir [action: "' + action + '", value: "' + value + '"]'
     api.exposed = True
     
-    def api_search(self, value):
+    def api_search(self, value, isFastSearch=False):
         if not value.strip():
             return self.jsonrenderer.render([MusicEntry(path="if you're looking for nothing, you'll be getting nothing",repr="")])
-        return self.jsonrenderer.render(self.model.search(value.strip()))
+        return self.jsonrenderer.render(self.model.search(value.strip(),isFastSearch))
+        
+    def api_fastsearch(self, value):
+        return self.api_search(value,True)
         
     def api_rememberplaylist(self, value):
         pl = json.loads(value)

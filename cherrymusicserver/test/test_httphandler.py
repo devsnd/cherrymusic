@@ -50,7 +50,7 @@ class TestHTTPHandler(unittest.TestCase):
         pass
         
     def test_api_search(self):
-        self.http.api('search','asd')
+        self.http.api(action='search',value='asd')
        
 """    def test_api_search(self, value):
         self.http.api('search',
@@ -147,8 +147,11 @@ class TestHTTPHandler(unittest.TestCase):
 class MockModel:
     def __init__(self):
         pass
-    def search(self,value):
-        return [MusicEntry('mock result','mock result')]
+    def search(self,value,isFastSearch=False):
+        if isFastSearch:
+            return [MusicEntry('fast mock result','fast mock result')]
+        else:
+            return [MusicEntry('mock result','mock result')]
 
 if __name__ == "__main__":
     unittest.main()
