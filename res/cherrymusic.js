@@ -132,7 +132,7 @@ function configCompletionHandler(){
 /***
 SEARCH
 ***/
-function fastsearch(append=false){
+function fastsearch(append){
     "use strict";
     var data = {
         'action' : 'fastsearch',
@@ -156,7 +156,7 @@ function fastsearch(append=false){
     api(data,success,error);
     return false;
 }
-function search(append=false){
+function search(append){
     "use strict";
     var data = {
         'action' : 'search',
