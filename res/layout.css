@@ -142,6 +142,14 @@ div#dialog{
 #searchform{
 	
 }
+.slowsearch{
+	background-image: url("loading_small.gif");
+    background-position: 50% center;
+    background-repeat: no-repeat;
+    height: 70px;
+    text-align: center;
+	font-size: 12px;
+}
 
 #searchform input{
 	width: 200px;

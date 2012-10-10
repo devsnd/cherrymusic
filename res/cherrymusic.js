@@ -147,7 +147,8 @@ function fastsearch(append=false){
         registerlistdirs($('#searchresults').find('ul'));
         registercompactlistdirs($('#searchresults').find('ul'));
         registermp3s($('#searchresults').find('ul'));
-        search(true);
+        //search(true);
+        $('#searchresults').find('ul').append('<li class="slowsearch">loading more search results...</li>');
     };
     var error = function(){
         errorFunc('failed loading fast-search results')();
@@ -170,6 +171,7 @@ function search(append=false){
         registerlistdirs($('#searchresults').find('ul'));
         registercompactlistdirs($('#searchresults').find('ul'));
         registermp3s($('#searchresults').find('ul'),addPlayAll=false);
+        $('#searchresults').find('ul li.slowsearch').remove();
     };
     var error = function(){
         errorFunc('failed loading search results')();
@@ -179,7 +181,6 @@ function search(append=false){
 }
 function submitsearch(){
     fastsearch();
-    $('#searchresults').find('ul').append('<li>More search results</li>');
     return false;
 }
 
