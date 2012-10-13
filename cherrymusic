@@ -29,7 +29,14 @@
 #
 
 import cherrymusicserver
+import argparse
+
+parser = argparse.ArgumentParser(description='''CherryMusic Server
+Version '''+cherrymusicserver.VERSION)
+
+parser.add_argument('--update', help='update the media database')
+args = parser.parse_args()
 
 if __name__ == "__main__":
-    cherrymusicserver.CherryMusic()
+    cherrymusicserver.CherryMusic(update=args.update)
     

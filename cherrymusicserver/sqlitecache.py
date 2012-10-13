@@ -43,8 +43,8 @@ from cherrymusicserver.progress import ProgressTree, ProgressReporter
 
 scanreportinterval = 1
 AUTOSAVEINTERVAL = 100
-debug = False
-performanceTest = False
+debug = True
+performanceTest = True
 keepInRam = False
 
 NORMAL_FILE_SEARCH_LIMIT = 250
@@ -141,13 +141,13 @@ class SQLiteCache(object):
         fileIdLimit = FAST_FILE_SEARCH_LIMIT if isFastSearch else NORMAL_FILE_SEARCH_LIMIT;
         resultlist = []
         for term in terms:
-            query = '''SELECT search.frowid FROM dictionary JOIN search ON search.drowid = dictionary.rowid WHERE dictionary.word = ?'''
+            query = '''SELECT search.frowid FROM dictionary JOIN search ON search.drowid = dictionary.rowid WHERE dictionary.word LIKE ?'''
             limit = ' LIMIT 0, '+str(fileIdLimit) #TODO add maximum db results as configuration parameter
             log.d('Search term: ' + term)
             sql = query + limit
             if performanceTest:
                 log.d('Query used: ' + sql)
-            self.db.execute(sql, (term,))
+            self.db.execute(sql, (term+'%',))
             resultlist += self.db.fetchall()
 
         return resultlist

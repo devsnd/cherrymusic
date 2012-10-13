@@ -30,6 +30,8 @@
 
 import unittest
 
+import json
+
 from cherrymusicserver import httphandler
 from cherrymusicserver import configuration
 from cherrymusicserver.cherrymodel import MusicEntry
@@ -37,8 +39,31 @@ from cherrymusicserver.cherrymodel import MusicEntry
 from cherrymusicserver import log
 
     
+class MockModel:
+    def __init__(self):
+        pass
+    def search(self,value,isFastSearch=False):
+        if isFastSearch:
+            return [MusicEntry('fast mock result','fast mock result')]
+        else:
+            return [MusicEntry('mock result','mock result')]
+    def motd(self):
+        return "motd"
+            
+class CherryPyMock:
+    def __init__(self):
+        self.session = {'admin': false}
+
+class MockPlaylistDB:
+    def __init__(self):
+        pass
+        
+    def getName(self, val, userid):
+        return str(val)+str(userid)
+    
 class TestHTTPHandler(unittest.TestCase):
     def setUp(self):
+        self.playlistdb = MockPlaylistDB()
         self.http = httphandler.HTTPHandler(configuration.from_defaults(),MockModel())
         for apicall, func in self.http.handlers.items():
             try:
@@ -51,107 +76,63 @@ class TestHTTPHandler(unittest.TestCase):
         
     def test_api_search(self):
         self.http.api(action='search',value='asd')
+        
+    def test_api_fastsearch(self):
+        res = self.http.api(action='fastsearch',value='asd')
        
-"""    def test_api_search(self, value):
-        self.http.api('search',
-        if not value.strip():
-            return self.jsonrenderer.render([MusicEntry(path="if you're looking for nothing, you'll be getting nothing",repr="")])
-        return self.jsonrenderer.render(self.model.search(value.strip()))
+    def test_api_rememberplaylist(self):
+        pass #relies on cherrypy session
         
-    def api_rememberplaylist(self, value):
-        pl = json.loads(value)
-        cherrypy.session['playlist'] = pl['playlist']
-        
-    def api_saveplaylist(self, value):
-        pl = json.loads(value)
-        return self.playlistdb.savePlaylist(
-            userid=self.getUserId(),
-            public=1 if pl['public'] else 0,
-            playlist=pl['playlist'],
-            playlisttitle=pl['playlistname']);
+    def test_api_saveplaylist(self):
+        pass #needs to be tested in playlistdb
             
-    def api_deleteplaylist(self, value):
-        return self.playlistdb.deletePlaylist(value, self.getUserId())
+    def test_api_deleteplaylist(self):
+        pass #needs to be tested in playlistdb
             
-    def api_loadplaylist(self,value):
-        return  self.jsonrenderer.render(self.playlistdb.loadPlaylist(
-                            playlistid=value,
-                            userid=self.getUserId()
-                ));
+    def test_api_loadplaylist(self):
+        pass #needs to be tested in playlistdb
                 
-    def api_getmotd(self,value):
-        return self.model.motd()
+    def test_api_getmotd(self):
+        self.http.api(action='getmotd')
         
-    def api_restoreplaylist(self,value):
-        return json.dumps(cherrypy.session.get('playlist', []))
+    def test_api_restoreplaylist(self):
+        pass #relies on cherrypy session
+        #self.http.api(action='restoreplaylist')
         
-    def api_getplayables(self,value):
-        return json.dumps(cherry.config.media.playable.list)
+    def test_api_getplayables(self):
+        p = self.http.api(action='getplayables')
+        self.assertEqual(p, json.dumps(self.http.config.media.playable.str.split(' ')))
         
-    def api_getuserlist(self,value):
-        if cherrypy.session['admin']:
-            return json.dumps(self.userdb.getUserList())
-        else:
-            return {'id':'-1', 'username':'nobody', 'admin':0}
+    def test_api_getuserlist(self):
+        pass #relies on cherrypy session
     
-    def api_adduser(self, value):
-        if cherrypy.session['admin']:
-            new = json.loads(value)
-            return self.userdb.addUser(new['username'], new['password'], new['isadmin'])
-        else:
-            return "You didn't think that would work, did you?"
+    def test_api_adduser(self):
+        pass #relies on cherrypy session
 
-    def api_showplaylists(self,value):
-        playlists = self.playlistdb.showPlaylists(self.getUserId())
-        #translate userids to usernames:
-        for pl in playlists:
-            pl['username']=self.userdb.getNameById(pl['userid'])
-        return json.dumps(playlists);
+    def test_api_showplaylists(self):
+        pass #needs to be tested in playlist tests
         
-    def api_logout(self,value):
-        cherrypy.lib.sessions.expire()
+    def test_api_logout(self):
+        pass #relies on cherrypy session
         
-    def api_downloadpls(self,value):
-        dlval = json.loads(value)
-        pls = self.playlistdb.createPLS(dlval['plid'],self.getUserId(),dlval['addr'])
-        name = self.playlistdb.getName(value,self.getUserId())
-        if pls and name:
-            return self.serve_string_as_file(pls,name+'.pls')
+    def test_api_downloadpls(self):
+        pass #untestable
             
-    def api_downloadm3u(self,value):
-        dlval = json.loads(value)
-        pls = self.playlistdb.createM3U(dlval['plid'],self.getUserId(),dlval['addr'])
-        name = self.playlistdb.getName(value,self.getUserId())
-        if pls and name:
-            return self.serve_string_as_file(pls,name+'.m3u')       
+    def test_api_downloadm3u(self):
+        pass #untestable
             
-    def api_getsonginfo(self,value):
-        #TODO yet another dirty hack. removing the /serve thing is a mess.
-        abspath = os.path.join(cherry.config.media.basedir.str,unquote(value)[7:])
-        return json.dumps(metainfo.getSongInfo(abspath).dict())
+    def test_api_getsonginfo(self):
+        pass #relies on config.media.basedir
         
-    def api_getencoders(self, value):
-        return json.dumps(audiotranscode.getEncoders())
+    def test_api_getencoders(self):
+        pass #relies on audiotranscode
         
-    def api_getdecoders(self, value):
-        return json.dumps(audiotranscode.getDecoders())
+    def test_api_getdecoders(self):
+        pass #relies on audiotranscode
     
-    def api_transcodingenabled(self,value):
-        return json.dumps(cherry.config.media.transcode.bool)
-    
-    def serve_string_as_file(self,string,filename):
-        cherrypy.response.headers["Content-Type"] = "application/x-download"
-        cherrypy.response.headers["Content-Disposition"] = 'attachment; filename="'+filename+'"'
-        return codecs.encode(string,"UTF-8")"""
+    def test_api_transcodingenabled(self):
+        self.assertEqual(self.http.api(action='transcodingenabled'),'false')
 
-class MockModel:
-    def __init__(self):
-        pass
-    def search(self,value,isFastSearch=False):
-        if isFastSearch:
-            return [MusicEntry('fast mock result','fast mock result')]
-        else:
-            return [MusicEntry('mock result','mock result')]
 
 if __name__ == "__main__":
     unittest.main()

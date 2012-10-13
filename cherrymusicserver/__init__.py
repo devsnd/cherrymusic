@@ -45,7 +45,7 @@ VERSION = "0.2"
 
 class CherryMusic:
 
-    def __init__(self):
+    def __init__(self,update=False):
         if not util.configurationFileExists():
             configuration.write_to_file(configuration.from_defaults(), util.configurationFile())
             self.printWelcomeAndExit()
@@ -54,7 +54,7 @@ class CherryMusic:
         self.cherrymodel = cherrymodel.CherryModel(self.db)
         self.httphandler = httphandler.HTTPHandler(config, self.cherrymodel)
         self.server()
-        if '--update' in sys.argv or self.db.isEmpty():
+        if update or self.db.isEmpty():
             self.db.full_update()
 
     def _init_config(self):
