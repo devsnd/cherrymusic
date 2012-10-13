@@ -43,8 +43,8 @@ from cherrymusicserver.progress import ProgressTree, ProgressReporter
 
 scanreportinterval = 1
 AUTOSAVEINTERVAL = 100
-debug = True
-performanceTest = True
+debug = False
+performanceTest = False
 keepInRam = False
 
 NORMAL_FILE_SEARCH_LIMIT = 250
