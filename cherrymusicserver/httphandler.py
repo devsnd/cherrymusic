@@ -126,11 +126,19 @@ class HTTPHandler(object):
         if firstrun:
                 return self.firstrunpage
         else:
-            if cherrypy.session.get('username', None):
+            if cherrypy.session.get('username', None) or self.autoLoginEnabled():
                 return self.mainpage
             else:
                 return self.loginpage
     index.exposed = True
+    
+    def autoLoginEnabled(self):
+        if cherrypy.request.remote.ip == '127.0.0.1' and cherry.config.server.localhost_auto_login.bool:
+            cherrypy.session['username'] = self.userdb.getNameById(1)
+            cherrypy.session['userid'] = 1
+            cherrypy.session['admin'] = True
+            return True
+        return False
 
     def session_auth(self, username, password):
         user = self.userdb.auth(username, password)

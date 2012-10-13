@@ -108,6 +108,13 @@ def from_defaults():
                                     same computer it is running on
                                     '''
 
+    c.server.localhost_auto_login = 'False'
+    c.server.localhost_auto_login._desc = '''
+                                    When localhost_auto_login is set to "True", the server will
+                                    not ask for credentials when using it locally. The user will
+                                    be automatically logged in as admin.
+                                    '''
+
     c.server.enable_ssl = 'False'
     c.server.enable_ssl._desc = '''
                                 The following options allow you to use cherrymusic with
