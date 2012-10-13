@@ -334,11 +334,13 @@
             //only works for one changed element at the moment
             var self = this;
             var plitems = 0;
-            $.each($(this.cssSelector.playlist+" li"), function(i,v){
-                self.playlist[plitems].domPos = parseInt($(this).attr('pos'));
-                plitems++;
+            $(this.cssSelector.playlist+" li").each(function(i,v){
+                self.playlist[i].domPos = parseInt($(this).attr('pos'));
             });
             this.playlist.sort(function(a,b){return a.domPos-b.domPos});
+            for(var i=0; i<this.playlist.length; i++){
+                this.playlist[i].position = i;
+            }
             
             self._refresh(true);
         },

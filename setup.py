@@ -1,5 +1,6 @@
 from distutils.core import setup
 import os
+import cherrymusicserver
 
 def listFilesRec(crawlpath, installpath):
     filesperfolder = []
@@ -12,7 +13,7 @@ def listFilesRec(crawlpath, installpath):
 
 setup( 
     name = "CherryMusic",
-    version = "0.2",
+    version = cherrymusicserver.VERSION,
     description="an mp3 server for your browser",
     long_description="""CherryMusic is a music streaming
     server based in cherrypy and jPlayer. You can search
@@ -24,7 +25,7 @@ setup(
     url = "http://www.fomori.org/cherrymusic/",
     license = 'GPL',
     install_requires=["CherryPy >= 3.2.2"],
-    packages = ['cherrymusicserver','cherrymusicserver.test','audioread'],
+    packages = ['cherrymusicserver','cherrymusicserver.test','audioread','audiotranscode'],
     #startup script
     scripts = ['cherrymusic'],
     #data required by the declared packages
