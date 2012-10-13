@@ -41,7 +41,7 @@ class ResultOrder:
         self.searchwords = searchword.lower().split(' ')
         self.perfectMatchBias = 100
         self.partialPerfectMatchBias = 20
-        self.startsWithMatchBias = 1
+        self.startsWithMatchBias = 10
         self.folderBonus = 5
     def __call__(self,file):
         fullpath = file.lower()
