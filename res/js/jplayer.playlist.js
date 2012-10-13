@@ -422,6 +422,7 @@
 			if(0 <= index && index < this.playlist.length) {
 				this.current = index;
 				this._highlight(index);
+                this.playlist[this.current].wasPlayed = true;
 				$(this.cssSelector.jPlayer).jPlayer("setMedia", this.playlist[this.current]);
 			} else {
 				this.current = 0;

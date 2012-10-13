@@ -655,12 +655,13 @@ function restorePlaylistAndRememberPeriodically(){
 }
 
 function removePlayedFromPlaylist(){
-    if(mediaPlaylist.current != 0){
-        if(!mediaPlaylist.removing){
-            mediaPlaylist.remove(0);
+    for(var i=0; i<mediaPlaylist.playlist.length; i++){
+        if(mediaPlaylist.playlist[i].wasPlayed){
+            mediaPlaylist.playlist.splice(i,1);
+            i--;
         }
-        window.setTimeout(removePlayedFromPlaylist,50);
     }
+    mediaPlaylist._refresh(false);
 }
 
 var lastPlaylistHeight = 0;
