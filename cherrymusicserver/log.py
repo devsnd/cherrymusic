@@ -48,9 +48,16 @@ CONFIG = {
                                    "from %(org_filename)s,line %(org_lineno)d"
                                    "\n\t%(message)s"}
                 },
+ "filters": {
+             "block-high-priority":
+                {
+                    '()': lambda: lambda rep: 0 if rep.levelno >= WARN else 1,
+                },
+             },
  "handlers": {"console": {
                    "class": "logging.StreamHandler",
                    "formatter": "briefest",
+                   "filters": ["block-high-priority"],
                    "level": "DEBUG",
                    "stream": "ext://sys.stdout"},
               "console_priority": {
