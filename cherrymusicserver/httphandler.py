@@ -157,7 +157,7 @@ class HTTPHandler(object):
     def trans(self, *args):
         if cherry.config.media.transcode and len(args):
             newformat = args[-1][4:] #get.format
-            path = '/'.join(args[:-1])
+            path = os.path.sep.join(args[:-1])
             fullpath = os.path.join(cherry.config.media.basedir.str, path)
             cherrypy.response.headers["Content-Type"] = audiotranscode.getMimeType(newformat)
             return audiotranscode.getTranscoded(fullpath, newformat, usetmpfile=True)
