@@ -31,10 +31,10 @@
 import cherrymusicserver
 import argparse
 
-parser = argparse.ArgumentParser(description='''CherryMusic Server
+parser = argparse.ArgumentParser(prog="CherryMusic", description='''CherryMusic Server
 Version '''+cherrymusicserver.VERSION)
 
-parser.add_argument('--update', help='update the media database')
+parser.add_argument('--update',dest='update',action='store_true', help='update the media database')
 args = parser.parse_args()
 
 if __name__ == "__main__":

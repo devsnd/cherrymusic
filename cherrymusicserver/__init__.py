@@ -53,9 +53,9 @@ class CherryMusic:
         self.db = sqlitecache.SQLiteCache(util.databaseFilePath('cherry.cache.db'))
         self.cherrymodel = cherrymodel.CherryModel(self.db)
         self.httphandler = httphandler.HTTPHandler(config, self.cherrymodel)
-        self.server()
         if update or self.db.isEmpty():
             self.db.full_update()
+        self.server()
 
     def _init_config(self):
         global config
