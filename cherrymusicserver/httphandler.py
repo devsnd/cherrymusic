@@ -159,8 +159,8 @@ class HTTPHandler(object):
             newformat = args[-1][4:] #get.format
             path = '/'.join(args[:-1])
             fullpath = os.path.join(cherry.config.media.basedir.str, path)
-            cherrypy.response.headers["Content-Type"] = transcode.getMimeType(newformat)
-            return transcode.getTranscoded(fullpath, newformat, usetmpfile=True)
+            cherrypy.response.headers["Content-Type"] = audiotranscode.getMimeType(newformat)
+            return audiotranscode.getTranscoded(fullpath, newformat, usetmpfile=True)
     trans.exposed = True
     trans._cp_config = {'response.stream': True}
 
