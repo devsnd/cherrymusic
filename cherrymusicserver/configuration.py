@@ -154,7 +154,7 @@ def from_configparser(filepath):
     for section_name, section in cfgp.items():
         dic[section_name] = dict([i for i in section.items()])
         
-    #check if defaults contain new key
+    #check config file has missing keys
     containedNewKey = False
     defaults = from_defaults()
     for prop in sorted(defaults.list, key=lambda p: p[0]):
@@ -164,19 +164,10 @@ def from_configparser(filepath):
             else:
                 section, subkey = ('', fullname)
             if not section in dic:
-                log.w('section %s not in configuration, adding.' % (section))
-                dic[section] = {}
-                containedNewKey = True
-            if subkey and not subkey in dic[section]:
-                log.w('Section Subkey "%s" not in configuration, adding.' % (fullname))
-                dic[section][subkey] = value
-                containedNewKey = True   
-    newcfg = Configuration(dic=dic)
-    if containedNewKey:
-        log.i('''Writing new configuration parameters to config file.
-Please check if those parameters are as you want them to be.''')
-        write_to_file(newcfg,filepath)
-    return newcfg
+                log.i('Section %s not in configuration. Using default values for whole section.' % (section))
+            elif subkey and not subkey in dic[section]:
+                log.i('Missing key "%s" in configuration. Using default value.' % (fullname))
+    return Configuration(dic=dic)
 
 
 def write_to_file(cfg, filepath):
