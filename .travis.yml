@@ -12,12 +12,14 @@ install: "pip install cherrypy --use-mirrors"
 
 # prepare test run: install locally
 before_script:
-  - python setup.py sdist --keep-temp
+  - python setup.py -q sdist --keep-temp
   - cd `ls | grep CherryMusic`
-  - python setup.py install
+  - python setup.py -q install
+  - INSTALLDIR=/home/travis/virtualenv/python3.2/lib/python3.2/site-packages
   
 # command to run tests
-script: python setup.py -v test -q --test-suite cherrymusicserver.test
+script:  python -m unittest discover --failfast -s ${INSTALLDIR}/cherrymusicserver/test -t ${INSTALLDIR}
+#setup.py -v test -q --test-suite cherrymusicserver.test
 
 branches:
   # whitelist
