@@ -9,6 +9,13 @@ python:
   - "3.2"
 # command to install dependencies
 install: "pip install cherrypy --use-mirrors"
+
+# prepare test run: install locally
+before-script:
+  - python setup.py sdist --keep-temp
+  - cd `ls | grep CherryMusic`
+  - python setup.py install
+  
 # command to run tests
 script: python setup.py -v test -q --test-suite cherrymusicserver.test
 
