@@ -18,10 +18,10 @@ before_script:
   - INSTALLDIR=/home/travis/virtualenv/python3.2/lib/python3.2/site-packages
   - cd $INSTALLDIR
   - unzip `ls | grep CherryMusic`
+  - ls
   
 # command to run tests
-script:  ls $INSTALLDIR
-#python -m unittest discover --failfast -s ${INSTALLDIR}/cherrymusicserver/test -t ${INSTALLDIR}
+script:  python -m unittest discover --failfast -s ./cherrymusicserver/test -t .
 #setup.py -v test -q --test-suite cherrymusicserver.test
 
 branches:
