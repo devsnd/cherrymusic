@@ -56,47 +56,54 @@ class CherryModel:
         #sort alphabetically (case insensitive)
         sortedfiles = sorted(files,
                             key=lambda x : util.filename(x).upper() )
-        if not fullpath == '':
+        if fullpath:
             #sort directories up
             sortedfiles = sorted(sortedfiles,
                                 key=lambda x : os.path.isfile(os.path.join(fullpath,x)))
         return sortedfiles
-
+        
     def listdir(self,dirpath,filterstr=''):
         absdirpath = self.abspath(dirpath)
         allfilesindir = os.listdir(absdirpath)
 
         #remove all files not inside the filter
         if not filterstr == '':
-            filterstr = filterstr.upper()
-            allfilesindir = list(filter(lambda x : x.upper().startswith(filterstr), allfilesindir))
+            filterByStart = StartsWithCaseInsensitive(filterstr)
+            allfilesindir = list(filter(filterByStart, allfilesindir))
+
+        musicentries = []
 
         compactlisting = len(allfilesindir) > cherry.config.browser.maxshowfiles.int
-        sortedfiles = self.sortFiles(allfilesindir, absdirpath)
-
-        filterlength = len(filterstr)+1
-        currentletter = '/' #impossible first character
-        musicentries = []
-        for dir in sortedfiles:
-            subpath = os.path.join(absdirpath,dir)
-            if compactlisting:
+        if compactlisting:
+            filterlength = len(filterstr)+1
+            currentletter = '/' #impossible first character
+            sortedfiles = self.sortFiles(allfilesindir)
+            for dir in sortedfiles:
                 if dir.upper().startswith(currentletter.upper()) and not len(currentletter)<filterlength:
                     continue
                 else:
                     currentletter = dir[:filterlength]
-                    musicentries.append(MusicEntry(self.strippath(absdirpath),repr=currentletter,compact=True))
-
-
-            else:
-                if os.path.isfile(subpath):
-                    if self.isplayable(subpath):
-                        musicentries.append(MusicEntry(self.strippath(subpath)))
-
-                else:
-                    musicentries.append(MusicEntry(self.strippath(subpath),dir=True))
+                    #if the filter equals the foldername
+                    if len(currentletter) == len(filterstr):
+                        subpath = os.path.join(absdirpath,dir)
+                        self.addMusicEntry(subpath, musicentries)
+                    else:
+                        musicentries.append(MusicEntry(self.strippath(absdirpath),repr=currentletter,compact=True))
+        else:
+            sortedfiles = self.sortFiles(allfilesindir, absdirpath)
+            for dir in sortedfiles:
+                subpath = os.path.join(absdirpath,dir)
+                self.addMusicEntry(subpath, musicentries)
         if musicentries == []:
             musicentries.append(MusicEntry(path="No playable media files found.", repr=""))
         return musicentries
+    
+    def addMusicEntry(self,fullpath, list):
+        if os.path.isfile(fullpath):
+            if self.isplayable(fullpath):
+                list.append(MusicEntry(self.strippath(fullpath)))
+        else:
+            list.append(MusicEntry(self.strippath(fullpath),dir=True))
 
     def search(self, term, isFastSearch=False):
         user = cherrypy.session.get('username', None)
@@ -186,3 +193,10 @@ class MusicEntry:
         self.compact = compact
         self.dir = dir
         self.repr = repr
+        
+class StartsWithCaseInsensitive:
+    def __init__(self,startswith):
+        self.startswith = startswith.upper()
+        
+    def __call__(self,string):
+        return string.upper().startswith(self.startswith)
