@@ -2,11 +2,6 @@ from distutils.core import setup
 import os
 import cherrymusicserver
 
-try:
-    import setuptools   # for python 3, this is provided by distribute: http://pypi.python.org/pypi/distribute
-except ImportError:
-    setuptools = None   # t'is ok, but `setup.py test` won't work
-
 def listFilesRec(crawlpath, installpath):
     filesperfolder = []
     for r,d,f in os.walk(crawlpath):
