@@ -17,6 +17,7 @@ branches:
   only:
     - master
     - devel
+    - ci-experimental
 
 notifications:
   email:
