@@ -10,7 +10,7 @@ python:
 # command to install dependencies
 install: "pip install cherrypy --use-mirrors"
 # command to run tests
-script: ./runtests
+script: python setup.py -v test --test-suite cherrymusicserver.test
 
 branches:
   # whitelist
