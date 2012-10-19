@@ -21,7 +21,8 @@ before_script:
   - ls
   
 # command to run tests
-script:  python -m unittest discover --failfast -s ./cherrymusicserver/test -t .
+script:  ls $INSTALLDIR
+#python -m unittest discover --failfast -s ./cherrymusicserver/test -t .
 #setup.py -v test -q --test-suite cherrymusicserver.test
 
 branches:
