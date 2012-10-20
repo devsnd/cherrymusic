@@ -16,10 +16,10 @@ before_script:
   - cd `ls | grep CherryMusic`
   - python setup.py -q install
   - INSTALLDIR=/home/travis/virtualenv/python3.2/lib/python3.2/site-packages
+  - cd $INSTALLDIR
   
 # command to run tests
-script:  ls $INSTALLDIR
-#python -m unittest discover --failfast -s ./cherrymusicserver/test -t .
+script:  python -m unittest discover --failfast -s ./cherrymusicserver/test -t .
 #setup.py -v test -q --test-suite cherrymusicserver.test
 
 branches:
