@@ -89,6 +89,7 @@ class HTTPHandler(object):
             'getencoders' : self.api_getencoders,
             'getdecoders' : self.api_getdecoders,
             'transcodingenabled': self.api_transcodingenabled,
+            'updatedb' : self.api_updatedb,
         }
 
     def issecure(self, url):
@@ -268,6 +269,10 @@ class HTTPHandler(object):
     
     def api_transcodingenabled(self,value):
         return json.dumps(cherry.config.media.transcode.bool)
+        
+    def api_updatedb(self,value):
+        self.model.updateLibrary()
+        return 'success'
     
     def serve_string_as_file(self,string,filename):
         cherrypy.response.headers["Content-Type"] = "application/x-download"

@@ -353,6 +353,10 @@ registermp3s = function(parent,addPlayAll){
     }
 };
 
+updateLibrary = function(){
+    api('updatedb')
+}
+
 /***
 JPLAYER FUNCTIONS
 ***/

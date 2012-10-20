@@ -105,6 +105,10 @@ class CherryModel:
         else:
             list.append(MusicEntry(self.strippath(fullpath),dir=True))
 
+    def updateLibrary(self):
+        self.cache.full_update()
+        return True
+
     def search(self, term, isFastSearch=False):
         user = cherrypy.session.get('username', None)
         if user:
