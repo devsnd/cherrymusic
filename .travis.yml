@@ -16,9 +16,6 @@ before_script:
   - cd `ls | grep CherryMusic`
   - python setup.py -q install
   - INSTALLDIR=/home/travis/virtualenv/python3.2/lib/python3.2/site-packages
-  - cd $INSTALLDIR
-  - unzip `ls | grep CherryMusic`
-  - ls
   
 # command to run tests
 script:  ls $INSTALLDIR
