@@ -32,6 +32,14 @@ import os
 import sys
 import cherrypy
 
+"""patch cherrypy crashing on startup because of double checking
+for loopback interface, see: 
+https://bitbucket.org/cherrypy/cherrypy/issue/1100/cherrypy-322-gives-engine-error-when
+"""
+def fake_wait_for_occupied_port(host, port):
+    return
+cherrypy.process.servers.wait_for_occupied_port = fake_wait_for_occupied_port
+
 from cherrymusicserver import configuration
 from cherrymusicserver import configdb
 from cherrymusicserver import sqlitecache
