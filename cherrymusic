@@ -35,8 +35,9 @@ parser = argparse.ArgumentParser(description='''CherryMusic Server
 Version '''+cherrymusicserver.VERSION)
 
 parser.add_argument('--update',dest='update',action='store_true', help='update the media database')
+parser.add_argument('--newconfig',dest='newconfig',action='store_true', help='creates a new config file in your home directory, e.g. ~/.cherrymusic/config.new')
 args = parser.parse_args()
 
 if __name__ == "__main__":
-    cherrymusicserver.CherryMusic(update=args.update)
+    cherrymusicserver.CherryMusic(update=args.update,createNewConfig=args.newconfig)
     

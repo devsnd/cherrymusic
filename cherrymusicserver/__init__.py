@@ -53,7 +53,13 @@ VERSION = "0.2"
 
 class CherryMusic:
 
-    def __init__(self,update=False):
+    def __init__(self,update=False, createNewConfig=False):
+        if createNewConfig:
+            newconfigpath = util.configurationFile()+'.new'
+            configuration.write_to_file(configuration.from_defaults(), newconfigpath)
+            log.i('''New configuration file was written to: 
+'''+newconfigpath)
+            exit(0)
         if not util.configurationFileExists():
             configuration.write_to_file(configuration.from_defaults(), util.configurationFile())
             self.printWelcomeAndExit()
