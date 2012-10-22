@@ -8,7 +8,7 @@
 # distribute, sublicense, and/or sell copies of the Software, and to
 # permit persons to whom the Software is furnished to do so, subject to
 # the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
 
@@ -28,7 +28,7 @@ def _load_framework(name):
 _coreaudio = _load_framework('AudioToolbox')
 _corefoundation = _load_framework('CoreFoundation')
 
-# Convert CFStrings to C strings. 
+# Convert CFStrings to C strings.
 _corefoundation.CFStringGetCStringPtr.restype = ctypes.c_char_p
 _corefoundation.CFStringGetCStringPtr.argtypes = [ctypes.c_void_p, ctypes.c_int]
 
@@ -133,7 +133,7 @@ class CFURL(CFObject):
             0, filename, len(filename), False
         )
         super(CFURL, self).__init__(url)
-    
+
     def __str__(self):
         cfstr = _corefoundation.CFURLGetString(self._obj)
         out = _corefoundation.CFStringGetCStringPtr(cfstr, 0)
@@ -300,7 +300,7 @@ class ExtAudioFile(object):
             check(_coreaudio.ExtAudioFileRead(
                 self._obj, ctypes.byref(frames), ctypes.byref(buflist)
             ))
-            
+
             assert buflist.mNumberBuffers == 1
             size = buflist.mBuffers[0].mDataByteSize
             if not size:
@@ -337,8 +337,9 @@ class ExtAudioFile(object):
 
 if __name__ == '__main__':
     with ExtAudioFile(sys.argv[1]) as f:
-        print 'Channels:', f.channels
-        print 'Sample rate:', f.samplerate
-        print 'Duration:', f.duration
+        print('Channels:', f.channels)
+        print('Sample rate:', f.samplerate)
+        print('Duration:', f.duration)
         for blob in f:
-            print len(blob),
+            print(len(blob),)
+        print()
