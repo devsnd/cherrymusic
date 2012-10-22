@@ -27,6 +27,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
+
+# pylint: disable=W0611
 import logging
 import logging.config
 import inspect
@@ -39,6 +41,7 @@ LOGLEVEL = "INFO"
 
 CONFIG = {
 "version": 1,
+"incremental": False,
 "formatters": {
                "briefest": {"format": "[%(asctime)s] %(message)s",
                          "datefmt": "%y%m%d-%H:%M"},
@@ -71,16 +74,20 @@ CONFIG = {
                     "level": "ERROR",
                     "filename": os.path.join(os.path.expanduser('~'), '.cherrymusic', 'error.log'),
                     "encoding": "utf-8",
-                    "delay": True,},
+                    "delay": True, },
               },
  "loggers": {"test": {
                       "level": "CRITICAL",
                       "propagate": False,
                       "handlers": ["console", ]
-                      }
+                      },
+             "cherrypy.error": {
+                                'level': WARN,
+                                }
              },
  "root": {"level": LOGLEVEL,
-          "handlers": ["console", "console_priority", "logfile_error"]}}
+          "handlers": ["console", "console_priority", "logfile_error"]}
+}
 
 logging.config.dictConfig(CONFIG)
 
@@ -145,7 +152,6 @@ x = exception
 def _get_logger():
     '''find out the caller's module name and get or create a corresponding
     logger. if caller has no module, return root logger.'''
-    global __istest
     caller_frm = inspect.stack()[2]
     orgpath = caller_frm[1]
     orgfile = os.path.basename(orgpath)
