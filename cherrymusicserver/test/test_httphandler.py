@@ -29,8 +29,9 @@
 #
 
 import unittest
-
 import json
+
+import cherrymusicserver as cherry
 
 from cherrymusicserver import httphandler
 from cherrymusicserver import configuration
@@ -38,7 +39,7 @@ from cherrymusicserver.cherrymodel import MusicEntry
 
 from cherrymusicserver import log
 
-    
+
 class MockModel:
     def __init__(self):
         pass
@@ -49,22 +50,23 @@ class MockModel:
             return [MusicEntry('mock result','mock result')]
     def motd(self):
         return "motd"
-            
+
 class CherryPyMock:
     def __init__(self):
-        self.session = {'admin': false}
+        self.session = {'admin': False}
 
 class MockPlaylistDB:
     def __init__(self):
         pass
-        
+
     def getName(self, val, userid):
         return str(val)+str(userid)
-    
+
 class TestHTTPHandler(unittest.TestCase):
     def setUp(self):
         self.playlistdb = MockPlaylistDB()
-        self.http = httphandler.HTTPHandler(configuration.from_defaults(),MockModel())
+        cherry.config = configuration.from_defaults()
+        self.http = httphandler.HTTPHandler(cherry.config,MockModel())
         for apicall, func in self.http.handlers.items():
             try:
                 getattr(self,'test_'+func.__name__)
@@ -73,63 +75,63 @@ class TestHTTPHandler(unittest.TestCase):
 
     def tearDown(self):
         pass
-        
+
     def test_api_search(self):
         self.http.api(action='search',value='asd')
-        
+
     def test_api_fastsearch(self):
         res = self.http.api(action='fastsearch',value='asd')
-       
+
     def test_api_rememberplaylist(self):
         pass #relies on cherrypy session
-        
+
     def test_api_saveplaylist(self):
         pass #needs to be tested in playlistdb
-            
+
     def test_api_deleteplaylist(self):
         pass #needs to be tested in playlistdb
-            
+
     def test_api_loadplaylist(self):
         pass #needs to be tested in playlistdb
-                
+
     def test_api_getmotd(self):
         self.http.api(action='getmotd')
-        
+
     def test_api_restoreplaylist(self):
         pass #relies on cherrypy session
         #self.http.api(action='restoreplaylist')
-        
+
     def test_api_getplayables(self):
         p = self.http.api(action='getplayables')
         self.assertEqual(p, json.dumps(self.http.config.media.playable.str.split(' ')))
-        
+
     def test_api_getuserlist(self):
         pass #relies on cherrypy session
-    
+
     def test_api_adduser(self):
         pass #relies on cherrypy session
 
     def test_api_showplaylists(self):
         pass #needs to be tested in playlist tests
-        
+
     def test_api_logout(self):
         pass #relies on cherrypy session
-        
+
     def test_api_downloadpls(self):
         pass #untestable
-            
+
     def test_api_downloadm3u(self):
         pass #untestable
-            
+
     def test_api_getsonginfo(self):
         pass #relies on config.media.basedir
-        
+
     def test_api_getencoders(self):
         pass #relies on audiotranscode
-        
+
     def test_api_getdecoders(self):
         pass #relies on audiotranscode
-    
+
     def test_api_transcodingenabled(self):
         self.assertEqual(self.http.api(action='transcodingenabled'),'false')
 
