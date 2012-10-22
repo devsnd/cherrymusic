@@ -69,7 +69,7 @@ CONFIG = {
                     "class" : "logging.FileHandler",
                     "formatter": "full",
                     "level": "ERROR",
-                    "filename": "error.log",
+                    "filename": os.path.join(os.path.expanduser('~'), '.cherrymusic', 'error.log'),
                     "encoding": "utf-8",
                     "delay": True,},
               },
