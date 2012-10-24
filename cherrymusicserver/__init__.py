@@ -49,7 +49,7 @@ from cherrymusicserver import util
 from cherrymusicserver import log
 
 config = None
-VERSION = "0.2"
+VERSION = "0.21"
 
 class CherryMusic:
 
