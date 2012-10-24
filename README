@@ -1,17 +1,16 @@
 CherryMusic
 ===========
 
-cherrymusic is a standalone music server based on CherryPy and jPlayer. It is intended to be an 
-alternative to edna.
+cherrymusic is a standalone music server based on CherryPy and jPlayer. 
+It is intended to be an alternative to edna.
 
 Current Features:
 
   - browse and stream your music inside the browser (locally or remote)
   - search your music
   - completely AJAX based (no page reloads on click, super fast)
-  - create and save playlists
+  - create and share playlists
   - multiple user authentication
-  - saving and sharing playlists
   - HTTPS support
 
 Upcoming features:
@@ -53,6 +52,13 @@ Side Notes
 ----------
 
 By default it uses HTML5 for music playback and supports flash as fallback. 
+
+Known Issues
+------------
+
+An active flash blocker can interfere with the web frontend. 
+If you have trouble with things like track selection or playback, try whitelisting
+the server in your browser's flash blocker / plugin manager.
 
 Requirements
 ------------
