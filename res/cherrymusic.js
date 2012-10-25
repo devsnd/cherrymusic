@@ -361,8 +361,12 @@ updateLibrary = function(){
 JPLAYER FUNCTIONS
 ***/
 function setAvailableJPlayerFormats(){
-    for(var i=0; i<availableEncoders.length; i++){
-        availablejPlayerFormats.push(ext2jPlayerFormat(availableEncoders[i]));
+    if(availableEncoders.length == 0){
+        availablejPlayerFormats.push(ext2jPlayerFormat('mp3'));
+    } else {
+        for(var i=0; i<availableEncoders.length; i++){
+            availablejPlayerFormats.push(ext2jPlayerFormat(availableEncoders[i]));
+        }
     }
     sortFormatPreferrencePerBrowser();
 }
