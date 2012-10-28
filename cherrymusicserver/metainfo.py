@@ -30,10 +30,15 @@
 
 from cherrymusicserver import log
 
+#set to True if any metainfo lib is available
+metainfo_support = False
+supported_file_formats = ('mp3')
+
 #check for meta info libraries
 try:
     import stagger
     has_stagger = True
+    metainfo_support = True
 except ImportError:
     log.w('''python library "stagger" not found!
 -There will be no ID-tag support!''')
@@ -48,7 +53,7 @@ except ImportError:
     has_audioread = False
     
 class Metainfo():
-    def __init__(self, artist, album, title, track, length):
+    def __init__(self, artist='-', album='-', title='-', track='-', length=0):
         self.artist = artist
         self.album = album
         self.title = title
@@ -62,6 +67,15 @@ class Metainfo():
         'track': self.track,
         'length': self.length
         }
+    def getWordSet(self):
+        words = []
+        if self.artist != '-':
+            words.append(self.artist)
+        if self.album != '-':
+            words.append(self.album)
+        if self.title != '-':
+            words.append(self.title)
+        return words
 #
 # Mock implementation for faild import (might be handy if
 # multiple libs are used to determine metainfos)
@@ -77,23 +91,29 @@ class MockTag():
         self.track = '-'
        
 def getSongInfo(filepath):
-    if has_stagger:
-        try:
-            tag = stagger.read_tag(filepath)
-        except Exception:
+<<<<<<< Updated upstream
+    if filepath.endswith(supported_file_formats):
+=======
+    if filepath.lower().endswith(supported_file_formats):
+>>>>>>> Stashed changes
+        if has_stagger:
+            try:
+                tag = stagger.read_tag(filepath)
+            except Exception:
+                tag = MockTag()
+        else:
             tag = MockTag()
-    else:
-        tag = MockTag()
-            
-    if has_audioread:
-        try:
-            with audioread.audio_open(filepath) as f:
-                audiolength = f.duration
-        except Exception:
-            log.e('audioread failed!')
+                
+        if has_audioread:
+            try:
+                with audioread.audio_open(filepath) as f:
+                    audiolength = f.duration
+            except Exception:
+                log.e('audioread failed!')
+                audiolength = 0
+        else:
             audiolength = 0
-    else:
-        audiolength = 0
-    return Metainfo(tag.artist, tag.album, tag.title, tag.track, audiolength)
+        return Metainfo(tag.artist, tag.album, tag.title, tag.track, audiolength)
+    return Metainfo()
 
     

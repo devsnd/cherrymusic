@@ -67,6 +67,11 @@ def from_defaults():
                                 This requires you to have the appropriate codecs installed.
                                 Please note that transcoding will significantly increase the stress on the CPU!
                                 """
+    c.media.index_metainfo = False
+    c.media.index_metainfo._desc = """INDEX_METAINFO enables the indexing of audiofiles based on ID3 or similar
+                                meta-data embedded in the audiofiles. Depending on the collection of media files,
+                                this can lead to a better searchability, but also slows down the indexing process
+                                significantly."""
 
     c._set('search.maxresults', 20, warn_on_create=False)
     c.search.maxresults._desc = """

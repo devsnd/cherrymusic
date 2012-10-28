@@ -192,7 +192,7 @@ class AddFilesToDatabaseTest(unittest.TestCase):
         filename = 'abc ÖÄUßé.wurst_-_blablabla.nochmal.wurst'
         words = sqlitecache.SQLiteCache.searchterms(filename)
 
-        ids = self.Cache.add_to_dictionary_table(filename)
+        ids = self.Cache.add_to_dictionary_table(words)
 
         wordset = set(words)
         self.assertTrue(len(wordset) < len(words), "there must be duplicate words in the test")
@@ -201,7 +201,7 @@ class AddFilesToDatabaseTest(unittest.TestCase):
         for word in wordset:
             cursor = self.Cache.conn.execute('SELECT rowid FROM dictionary WHERE word=?', (word,))
             res = cursor.fetchall()
-            self.assertTrue(len(res) == 1, "there must be exactly one matching row per word")
+            self.assertTrue(len(res) == 1, "there must be exactly one matching row per word but there are %s "%str(len(res)))
             self.assertTrue(res[0][0] in idset, "the wordid must be returned by the function")
             idset.remove(res[0][0])   # make sure no other tested word can use that id to pass
         self.assertTrue(len(idset) == 0, "there must not be more ids than unique words")
@@ -247,6 +247,8 @@ class FileTest(unittest.TestCase):
                  os.path.join('firstdir', 'firstlevelfile'),
                  os.path.join('firstdir', 'seconddir', ''),
                  os.path.join('firstdir', 'seconddir', 'secondlevelfile'),
+                 os.path.join('firstdir', 'thirddir', ''),
+                 os.path.join('firstdir', 'thirddir', 'second_secondlevel_file'),
                  os.path.join('nonASCIItest', ''),
                  os.path.join('nonASCIItest', 'öäßÖÄÉ'),
                  )
@@ -386,6 +388,8 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
         fob = self.fileobjects['root_dir/first_dir/first_file']
         removeTestfile(fob)
         beforecount = self.db_count('files')
+        
+        self.assertFalse(beforecount == 0, 'There must be more than 0 files to conduct this test')
 
         self.Cache.full_update()
 

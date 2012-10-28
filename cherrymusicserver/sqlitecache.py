@@ -39,6 +39,7 @@ from time import time
 import cherrymusicserver as cherry
 from cherrymusicserver import log
 from cherrymusicserver import util
+from cherrymusicserver import metainfo
 from cherrymusicserver.progress import ProgressTree, ProgressReporter
 
 scanreportinterval = 1
@@ -211,11 +212,20 @@ class SQLiteCache(object):
             filerowid = parent
         return os.path.dirname(path)
 
-    def register_file_with_db(self, fileobj):
+    def register_file_with_db(self, fullpath, fileobj):
         """add data in File object to relevant tables in media database"""
         try:
             self.add_to_file_table(fileobj)
-            word_ids = self.add_to_dictionary_table(fileobj.name)
+            words = SQLiteCache.searchterms(fileobj.name)
+            if cherry.config.media.index_metainfo.bool and metainfo.metainfo_support:
+                metainfoobj = metainfo.getSongInfo(os.path.join(cherry.config.media.basedir.str,fileobj.relpath))
+                for metaword in metainfoobj.getWordSet():
+                    words += SQLiteCache.searchterms(metaword)
+<<<<<<< Updated upstream
+            word_ids = self.add_to_dictionary_table(words)              
+=======
+            word_ids = self.add_to_dictionary_table(words)
+>>>>>>> Stashed changes
             self.add_to_search_table(fileobj.uid, word_ids)
         except UnicodeEncodeError as e:
             log.e("wrong encoding for filename '%s' (%s)", fileobj.relpath, e.__class__.__name__)
@@ -228,9 +238,13 @@ class SQLiteCache(object):
         return [rowid]
 
 
-    def add_to_dictionary_table(self, filename):
+    def add_to_dictionary_table(self, words):
+<<<<<<< Updated upstream
+        
+=======
+>>>>>>> Stashed changes
         word_ids = []
-        for word in set(SQLiteCache.searchterms(filename)):
+        for word in set(words):
             wordrowid = self.conn.execute('''SELECT rowid FROM dictionary WHERE word = ? LIMIT 0,1''', (word,)).fetchone()
             if wordrowid is None:
                 wordrowid = self.conn.execute('''INSERT INTO dictionary VALUES (?)''', (word,)).lastrowid
@@ -432,7 +446,7 @@ class SQLiteCache(object):
                         if infs.isdir != indb.isdir:
                             progress.name = '[±] ' + progress.name
                             deld += self.remove_recursive(indb, progress)
-                            self.register_file_with_db(infs)
+                            self.register_file_with_db(fullpath,infs)
                             adds_without_commit = 1
                         else:
                             progress.name = '[=] ' + progress.name
@@ -442,7 +456,7 @@ class SQLiteCache(object):
                         adds_without_commit = 0
                         continue    # progress ticked by remove; don't tick again
                     elif infs:
-                        self.register_file_with_db(item.infs)
+                        self.register_file_with_db(fullpath,item.infs)
                         adds_without_commit += 1
                         progress.name = '[+] ' + progress.name
                     if adds_without_commit == AUTOSAVEINTERVAL:
