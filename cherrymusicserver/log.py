@@ -33,63 +33,55 @@ import logging
 import logging.config
 import inspect
 import os
+import sys
 
 from logging import NOTSET, DEBUG, INFO, WARN, WARNING, ERROR, CRITICAL, FATAL
 
 
 LOGLEVEL = "INFO"
 
-CONFIG = {
-"version": 1,
-"incremental": False,
-"formatters": {
-               "briefest": {"format": "[%(asctime)s] %(message)s",
-                         "datefmt": "%y%m%d-%H:%M"},
-               "brief": {"format": "[%(asctime)s] %(levelname)-8s: %(message)s",
-                         "datefmt": "%y%m%d-%H:%M"},
-                "full": {"format": "%(asctime)s %(name)-20s %(levelname)-8s\n\t"
-                                   "from %(org_filename)s,line %(org_lineno)d"
-                                   "\n\t%(message)s"}
-                },
- "filters": {
-             "block-high-priority":
-                {
-                    '()': lambda: lambda rep: 0 if rep.levelno >= WARN else 1,
-                },
-             },
- "handlers": {"console": {
-                   "class": "logging.StreamHandler",
-                   "formatter": "briefest",
-                   "filters": ["block-high-priority"],
-                   "level": "DEBUG",
-                   "stream": "ext://sys.stdout"},
-              "console_priority": {
-                   "class": "logging.StreamHandler",
-                   "formatter": "brief",
-                   "level": "WARNING",
-                   "stream": "ext://sys.stderr"},
-              "logfile_error": {
-                    "class" : "logging.FileHandler",
-                    "formatter": "full",
-                    "level": "ERROR",
-                    "filename": os.path.join(os.path.expanduser('~'), '.cherrymusic', 'error.log'),
-                    "encoding": "utf-8",
-                    "delay": True, },
-              },
- "loggers": {"test": {
-                      "level": "CRITICAL",
-                      "propagate": False,
-                      "handlers": ["console", ]
-                      },
-             "cherrypy.error": {
-                                'level': WARN,
-                                }
-             },
- "root": {"level": LOGLEVEL,
-          "handlers": ["console", "console_priority", "logfile_error"]}
-}
 
-logging.config.dictConfig(CONFIG)
+
+class LowPass(logging.Filter):
+    def __init__(self, cutoff):
+        self.cutoff = cutoff
+
+    def filter(self, record):
+        return 1 if record.levelno < self.cutoff else 0
+
+
+formatter_briefest = logging.Formatter(fmt='[%(asctime)s] %(message)s', datefmt='%y%m%d-%H:%M')
+formatter_brief = logging.Formatter(fmt='[[%(asctime)s] %(levelname)-8s: %(message)s', datefmt='%y%m%d-%H:%M')
+formatter_full = logging.Formatter(fmt='%(levelname)-8s %(asctime)s : %(name)-20s : from %(org_filename)s, line %(org_lineno)d\n\t%(message)s\n')
+
+handler_console = logging.StreamHandler(stream=sys.stdout)
+handler_console.formatter = formatter_briefest
+handler_console.level = DEBUG
+handler_console.addFilter(LowPass(WARNING))
+
+handler_console_priority = logging.StreamHandler(stream=sys.stderr)
+handler_console_priority.formatter = formatter_brief
+handler_console_priority.level = WARNING
+
+handler_file_error = logging.FileHandler(os.path.join(os.path.expanduser('~'), '.cherrymusic', 'error.log'), mode='a', delay=True)
+handler_file_error.formatter = formatter_full
+handler_file_error.level = ERROR
+
+logging.root.setLevel(LOGLEVEL)
+logging.root.addHandler(handler_console)
+logging.root.addHandler(handler_console_priority)
+logging.root.addHandler(handler_file_error)
+
+testlogger = logging.getLogger('test')
+testlogger.setLevel(CRITICAL)
+testlogger.addHandler(handler_console)
+testlogger.addHandler(handler_console_priority)
+testlogger.propagate = False
+
+logging.getLogger('cherrypy.error').setLevel(WARNING)
+
+
+
 
 def debug(msg, *args, **kwargs):
     '''logs a message with severity DEBUG on the caller's module logger.
