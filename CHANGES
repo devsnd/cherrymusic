@@ -2,22 +2,43 @@
 Changelog
 ---------
 
+0.21.1 (2012-10-26)
+
+ - IMPROVEMENT: updates run smoother, better progress report (server startup doesn't trigger update anymore)
+ - IMPROVEMENT: playlists remembered in session retain track order
+ - FEATURE: updates are triggered using the --update switch
+ - FEATURE: --newconfig switch creates a new config file (config.new) in the home dir
+ - FEATURE: show playtime of tracks and of playlist (requires ffmpeg)
+ - FEATURE: unfinished search terms also yield results
+ - IMPROVEMENT: search result weight algorithm takes partial matches into account
+ - FEATURE: auto-login on localhost
+ - EXPERIMENTAL: live transcoding of flac, ogg, mp3
+ - FIX: cherrypy not shutting down cleanly
+ - FIX: being able to create duplicate playlist names
+ - FEATURE: Made playlists deletable
+ - FEATURE: Added "update database" button in admin panel
+ - FEATURE: Added "remove played tracks" button
+ - FIX: browser showing compact entries multiple times
+ - FIX: bug that prevents listening to music when no codec is installed on host
+ - FEATURE: exporting playlists as PLS or M3U (take this, edna!)
+ - + MANY MORE...
+
 0.2 (2012-09-18)
 
- - https encryption support
- - option to listen only on localhost
- - config and databases now reside in the user's home directory
- - savable playlists
- - added GPL license
- - salted user passwords
- - admin user can be created inside web-interface on first start
- - playlists are periodically saved in the session, so they're
+ - FEATURE: https encryption support
+ - FEATURE: option to listen only on localhost
+ - FIX: config and databases now reside in the user's home directory
+ - FEATURE: savable playlists
+ - FIX: added GPL license
+ - FEATURE: salted user passwords
+ - FEATURE: admin user can be created inside web-interface on first start
+ - FEATURE: playlists are periodically saved in the session, so they're
    not lost when browser or tabs are closed etc.
- - theming support
- - configurable server port 
- - admin panel for creating new users
- - welcome screen for CLI and web-interface
+ - FEATURE: theming support
+ - FEATURE: configurable server port 
+ - FEATURE: admin panel for creating new users
+ - FEATURE: welcome screen for CLI and web-interface
 
 0.1 (2012-08-16)
 
-Initial Release
+ - Initial Release
