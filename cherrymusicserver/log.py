@@ -98,7 +98,7 @@ def info(msg, *args, **kwargs):
 def warn(msg, *args, **kwargs):
     '''logs a message with severity WARN on the caller's module logger.
     uses the root logger if caller has no module.'''
-    _get_logger().warn(msg, *args, **kwargs)
+    _get_logger().warning(msg, *args, **kwargs)
 
 
 def error(msg, *args, **kwargs):
