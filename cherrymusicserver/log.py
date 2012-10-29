@@ -38,7 +38,7 @@ import sys
 from logging import NOTSET, DEBUG, INFO, WARN, WARNING, ERROR, CRITICAL, FATAL
 
 
-LOGLEVEL = "INFO"
+LOGLEVEL = INFO
 
 
 
