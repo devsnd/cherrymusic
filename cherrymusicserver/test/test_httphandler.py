@@ -141,7 +141,7 @@ class TestHTTPHandler(unittest.TestCase):
         self.assertEqual(self.http.api(action='transcodingenabled'),'false')
         
     def test_api_updatedb(self):
-        self.assertRaisesRegexp(MockAction, 'updateLibrary', self.http.api, action='updatedb')
+        self.assertRaisesRegex(MockAction, 'updateLibrary', self.http.api, action='updatedb')
 
 
 if __name__ == "__main__":
