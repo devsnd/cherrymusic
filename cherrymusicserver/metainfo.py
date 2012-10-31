@@ -51,7 +51,7 @@ except ImportError:
     log.w('''python library "audioread" not found!
 -Audio file length can't be determined without it!''')
     has_audioread = False
-    
+
 class Metainfo():
     def __init__(self, artist='-', album='-', title='-', track='-', length=0):
         self.artist = artist
@@ -82,20 +82,16 @@ class Metainfo():
 #
 
 #stagger
-        
+
 class MockTag():
     def __init__(self):
         self.artist = '-'
         self.album = '-'
         self.title = '-'
         self.track = '-'
-       
+
 def getSongInfo(filepath):
-<<<<<<< Updated upstream
-    if filepath.endswith(supported_file_formats):
-=======
     if filepath.lower().endswith(supported_file_formats):
->>>>>>> Stashed changes
         if has_stagger:
             try:
                 tag = stagger.read_tag(filepath)
@@ -103,7 +99,7 @@ def getSongInfo(filepath):
                 tag = MockTag()
         else:
             tag = MockTag()
-                
+
         if has_audioread:
             try:
                 with audioread.audio_open(filepath) as f:
@@ -116,4 +112,4 @@ def getSongInfo(filepath):
         return Metainfo(tag.artist, tag.album, tag.title, tag.track, audiolength)
     return Metainfo()
 
-    
+

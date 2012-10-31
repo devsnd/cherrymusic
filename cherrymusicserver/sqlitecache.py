@@ -212,20 +212,16 @@ class SQLiteCache(object):
             filerowid = parent
         return os.path.dirname(path)
 
-    def register_file_with_db(self, fullpath, fileobj):
+    def register_file_with_db(self, fileobj):
         """add data in File object to relevant tables in media database"""
         try:
             self.add_to_file_table(fileobj)
             words = SQLiteCache.searchterms(fileobj.name)
             if cherry.config.media.index_metainfo.bool and metainfo.metainfo_support:
-                metainfoobj = metainfo.getSongInfo(os.path.join(cherry.config.media.basedir.str,fileobj.relpath))
+                metainfoobj = metainfo.getSongInfo(fileobj.fullpath)
                 for metaword in metainfoobj.getWordSet():
                     words += SQLiteCache.searchterms(metaword)
-<<<<<<< Updated upstream
-            word_ids = self.add_to_dictionary_table(words)              
-=======
             word_ids = self.add_to_dictionary_table(words)
->>>>>>> Stashed changes
             self.add_to_search_table(fileobj.uid, word_ids)
         except UnicodeEncodeError as e:
             log.e("wrong encoding for filename '%s' (%s)", fileobj.relpath, e.__class__.__name__)
@@ -239,10 +235,6 @@ class SQLiteCache(object):
 
 
     def add_to_dictionary_table(self, words):
-<<<<<<< Updated upstream
-        
-=======
->>>>>>> Stashed changes
         word_ids = []
         for word in set(words):
             wordrowid = self.conn.execute('''SELECT rowid FROM dictionary WHERE word = ? LIMIT 0,1''', (word,)).fetchone()
@@ -293,7 +285,7 @@ class SQLiteCache(object):
 
 
     def remove_file(self, fileobj):
-        '''removes a file entry from the db, which means removing: 
+        '''removes a file entry from the db, which means removing:
             - all search references,
             - all dictionary words which were orphaned by this,
             - the reference in the files table.'''
@@ -342,7 +334,7 @@ class SQLiteCache(object):
 
 
     def db_recursive_filelister(self, fileobj, factory=None):
-        """generator: enumerates fileobj and children listed in the db as File 
+        """generator: enumerates fileobj and children listed in the db as File
         objects. each item is returned before children are fetched from db.
         this means that fileobj gets bounced back as the first return value."""
         if factory is None:
@@ -446,7 +438,7 @@ class SQLiteCache(object):
                         if infs.isdir != indb.isdir:
                             progress.name = '[±] ' + progress.name
                             deld += self.remove_recursive(indb, progress)
-                            self.register_file_with_db(fullpath,infs)
+                            self.register_file_with_db(infs)
                             adds_without_commit = 1
                         else:
                             progress.name = '[=] ' + progress.name
@@ -456,7 +448,7 @@ class SQLiteCache(object):
                         adds_without_commit = 0
                         continue    # progress ticked by remove; don't tick again
                     elif infs:
-                        self.register_file_with_db(fullpath,item.infs)
+                        self.register_file_with_db(item.infs)
                         adds_without_commit += 1
                         progress.name = '[+] ' + progress.name
                     if adds_without_commit == AUTOSAVEINTERVAL:
@@ -475,29 +467,29 @@ class SQLiteCache(object):
 
     def enumerate_fs_with_db(self, startpath, itemfactory=None):
         '''
-        Starting at `startpath`, enumerates path items containing representations 
-        for each path as it exists in the filesystem and the database, 
+        Starting at `startpath`, enumerates path items containing representations
+        for each path as it exists in the filesystem and the database,
         respectively.
-        
+
         `startpath` and `basedir` need to be absolute paths, with `startpath`
         being a subtree of `basedir`. However, no checks are being promised to
         enforce the latter requirement.
-        
+
         Iteration is depth-first, but each path is returned before its children
         are determined, to enable recursive corrective action like deleting a
         whole directory from the database at once. Accordingly, the first item
         to be returned will represent `startpath`. This item is guaranteed to be
         returned, even if `startpath` does not exist in filesystem and database;
         all other items will have at least one existing representation.
-        
+
         `basedir`, should it happen to equal `startpath`, will be returned as an
         item. It is up to the caller to properly deal with it.
-        
+
         Each item has the following attributes: `infs`, a File object
         representing the path in the filesystem; `indb`, a File object
         representing the path in the database; and `parent`, the parent item.
-        All three can be None, signifying non-existence. 
-        
+        All three can be None, signifying non-existence.
+
         It is possible to customize item creation by providing an `itemfactory`.
         The argument must be a callable with the following parameter signature:
             itemfactory(infs, indb, parent [, optional arguments])
@@ -538,7 +530,7 @@ class SQLiteCache(object):
         '''Finds an absolute path in the file database. If found, returns
         a File object matching the database record; otherwise, returns None.
         Paths matching a media basedir are a special case: these will yield a
-        File object with an invalid record id matching the one listed by its 
+        File object with an invalid record id matching the one listed by its
         children.'''
         assert os.path.isabs(fullpath)
         basedir = cherry.config.media.basedir.str
@@ -651,7 +643,7 @@ class File():
         return os.path.islink(self.fullpath)
 
     def children(self, sort=True, reverse=True):
-        '''If self.isdir and self.exists, return an iterable of fileobjects 
+        '''If self.isdir and self.exists, return an iterable of fileobjects
         corresponding to its direct content (non-recursive).
         Otherwise, log a warning and return ().
         '''
