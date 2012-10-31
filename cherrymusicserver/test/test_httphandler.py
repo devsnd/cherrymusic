@@ -39,6 +39,8 @@ from cherrymusicserver.cherrymodel import MusicEntry
 
 from cherrymusicserver import log
 
+class MockAction(Exception):
+    pass
 
 class MockModel:
     def __init__(self):
@@ -50,6 +52,9 @@ class MockModel:
             return [MusicEntry('mock result','mock result')]
     def motd(self):
         return "motd"
+    def updateLibrary(self):
+        raise MockAction('updateLibrary')
+        
 
 class CherryPyMock:
     def __init__(self):
@@ -134,6 +139,9 @@ class TestHTTPHandler(unittest.TestCase):
 
     def test_api_transcodingenabled(self):
         self.assertEqual(self.http.api(action='transcodingenabled'),'false')
+        
+    def test_api_updatedb(self):
+        self.assertRaisesRegexp(MockAction, 'updateLibrary', self.http.api(action='updatedb'))
 
 
 if __name__ == "__main__":
