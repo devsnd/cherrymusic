@@ -51,7 +51,7 @@ class LowPass(logging.Filter):
 
 
 formatter_briefest = logging.Formatter(fmt='[%(asctime)s] %(message)s', datefmt='%y%m%d-%H:%M')
-formatter_brief = logging.Formatter(fmt='[[%(asctime)s] %(levelname)-8s: %(message)s', datefmt='%y%m%d-%H:%M')
+formatter_brief = logging.Formatter(fmt='[%(asctime)s] %(levelname)-8s: %(message)s', datefmt='%y%m%d-%H:%M')
 formatter_full = logging.Formatter(fmt='%(levelname)-8s %(asctime)s : %(name)-20s : from %(org_filename)s, line %(org_lineno)d\n\t%(message)s\n')
 
 handler_console = logging.StreamHandler(stream=sys.stdout)
