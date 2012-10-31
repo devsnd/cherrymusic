@@ -31,6 +31,8 @@
 import os
 import re
 
+from collections import MutableMapping, OrderedDict
+
 from cherrymusicserver import log
 from cherrymusicserver import util
 
@@ -38,7 +40,7 @@ from cherrymusicserver import util
 def from_defaults():
     '''load default configuration. must work if path to standard config file is unknown.'''
     c = Configuration()
-    
+
     mediabasedir = os.path.join(os.path.expanduser('~'), 'Music')
     c._set('media.basedir', mediabasedir, warn_on_create=False)
     c.media.basedir._desc = """
@@ -83,7 +85,7 @@ def from_defaults():
                                 """
 
 
-    c._set('look.theme','zeropointtwo', warn_on_create=False)
+    c._set('look.theme', 'zeropointtwo', warn_on_create=False)
     c.look.theme._desc = """
                         Available themes are: "zeropointtwo", "hax1337".
                         To create your own theme, you can simply copy the theme
@@ -91,7 +93,7 @@ def from_defaults():
                         your will. Then you can set theme=yournewtheme
                         """
 
-    c._set('browser.maxshowfiles','100',False)
+    c._set('browser.maxshowfiles', '100', False)
     c.browser.maxshowfiles._desc = '''
                                     MAXSHOWFILES specifies how many files and folders should
                                     be shown at the same time. E.g. if you open a folder
@@ -100,7 +102,7 @@ def from_defaults():
                                     100 is a good value, as a cd can have up to 99 tracks.
                                     '''
 
-    c._set('server.port','8080',False)
+    c._set('server.port', '8080', False)
     c.server.port._desc = 'The port the server will listen to.'
 
 
@@ -209,7 +211,19 @@ def write_to_file(cfg, filepath):
             printf('%s = %s' % (subkey, value))
 
 
-class Property(object):
+def from_dict(d):
+    if not isinstance(d, dict):
+        raise TypeError("'d' must be a dict, is: %s %s" % (type(d), repr(d)))
+    root = Configuration()
+    for key, value in d.items():
+        root[key] = value
+    return root
+
+
+class ConfigError(Exception):
+    pass
+
+class Key(object):
 
     _name_leadchars = 'a-zA-Z'
     _name_nonleadchars = '0-9_'
@@ -228,14 +242,14 @@ class Property(object):
                                 re.VERBOSE)
 
     __reserved_objects = [int, bool, float, complex, str, bytes, list, set, tuple, dict]
-    __reserved_names = ['name', 'fullname', 'value', 'parent', 'reserved']
+    __reserved_names = ['name', 'value', 'valtype', 'desc', 'readonly', 'hidden', 'validity', ]
 
     @classmethod
     def reserved(cls):
         try:
-            return Configuration.__reserved
+            return cls.__reserved
         except AttributeError:
-            res = [Configuration._normalize(o.__name__) for o in cls.__reserved_objects]
+            res = [cls._normalize(o.__name__) for o in cls.__reserved_objects]
             res += cls.__reserved_names
             cls.__reserved = res
             return res
@@ -243,14 +257,14 @@ class Property(object):
     @classmethod
     def _validate_localkey(cls, key):
         if not (key and type(key) == str and cls._name_patn.match(key)):
-            raise KeyError("invalid property name: '%s': a name must be a non-empty string, only contain the characters '%s' and not begin with '%s'"
+            raise ConfigError("invalid property name: '%s': a name must be a non-empty string, only contain the characters '%s' and not begin with '%s'"
                            % (key, cls._namechars, cls._name_nonleadchars))
         cls._validate_no_keyword(key)
 
     @classmethod
     def _validate_complexkey(cls, key):
         if not (key and type(key) == type('') and cls._qual_name_patn.match(key)):
-            raise KeyError("invalid property name: '%s': names must be non-empty strings, only consist of the characters: '%s' and be separated by a '%s'"
+            raise ConfigError("invalid property name: '%s': names must be non-empty strings, only consist of the characters: '%s' and be separated by a '%s'"
                            % (key, cls._namechars, cls._namesep))
         cls._validate_no_keyword(key)
 
@@ -258,37 +272,90 @@ class Property(object):
     def _validate_no_keyword(cls, key):
         reserved = cls.reserved()
         if cls._normalize(key) in reserved:
-            raise KeyError("invalid name: '%s' is in reserved words: %s" % (key, str(reserved)))
+            raise ConfigError("invalid name: '%s' is in reserved words: %s" % (key, str(reserved)))
 
     @classmethod
     def _normalize(cls, key):
         return key.lower()
 
-    def __init__(self, name, value=None, parent=None, allow_empty_name=False, desc=None):
+    def __init__(self, name):
+        if name is None:
+            name = ''
+        elif name:
+            self._validate_complexkey(name)
+        self._fullname = name
+
+    def __repr__(self):
+        return self._fullname
+
+    __str__ = __repr__
+
+    def __len__(self):
+        return len(self._fullname)
+
+    def __add__(self, name):
+        if isinstance(name, Key):
+            name = name._fullname
+        if self._fullname and name:
+            return Key(self._namesep.join((self._fullname, name)))
+        return Key(name + self._fullname)
+
+    @property
+    def str(self):
+        return self.__str__()
+
+    @property
+    def normstr(self):
+        return self._normalize(self._fullname)
+
+    @property
+    def split(self):
+        head, _, tail = self._fullname.partition(self._namesep)
+        return Key(head), Key(tail)
+
+    @property
+    def head(self):
+        return self.split[0]
+
+    @property
+    def tail(self):
+        return self.split[1]
+
+    @property
+    def last(self):
         try:
-            self. __class__._validate_localkey(name)
-        except KeyError as e:
-            if not allow_empty_name or name:
-                raise e
+            return Key(self._fullname.split(self._namesep)[-1])
+        except IndexError:
+            raise ConfigError('key is empty')
+
+
+
+class Property(object):
+
+    DEFAULTS = dict.fromkeys(('name', 'value', 'valtype', 'readonly', 'hidden', 'validity', 'desc'))
+
+    def __init__(self, name, value=None, valtype=None, readonly=None, hidden=None, validity=None, desc=None):
+        if not name:
+            raise ValueError("'name' must not be None or empty")
+        Key(name)
         self._name = name
-        self._value = value
-        self._parent = parent
-        self.__desc = desc if not desc is None else ''
+        self._type = valtype
+        self._value = None
         self._converter = ValueConverter(value)
+        self.validity = validity
+        self.readonly = readonly
+        self.hidden = hidden
+        self.value = value
+        self.desc = desc
 
-    def __setattr__(self, name, value):
-        Property._validate_no_keyword(name)
-        super().__setattr__(name, value)
-
-    def __getattr__(self, name):
-        if name.startswith('_'):
-            return super().__getattribute__(name)
-        if (self._converter._knows(name)):
-            return self._converter[name]
-        raise AttributeError(self.__class__.__name__ + ' object has no attribute ' + name)
 
     def __getitem__(self, name):
-        return self.__getattr__(name)
+        return self.__getattribute__(name)
+
+    def __setitem__(self, name, value):
+        if name not in Key.reserved():
+            raise ConfigError("can't set item '%s': item does not exist" % name)
+        self.__setattr__(name, value)
 
     def __bool__(self):
         return self.bool
@@ -300,7 +367,7 @@ class Property(object):
         return self.float
 
     def __repr__(self):
-        return str((self.fullname, self.value, self._desc))
+        return str((self.name, self.value, self.desc))
 
     def __str__(self):
         return self.str
@@ -310,89 +377,154 @@ class Property(object):
         return self._name
 
     @property
-    def fullname(self):
-        return self._getfullname()
-
-    def _getfullname(self, accu=''):
-        if accu:
-            if self.name:
-                accu = self.name + Property._namesep + accu
-        else:
-            accu = self.name
-        if not self.parent is None:
-            return self.parent._getfullname(accu)
-        return accu
+    def valtype(self):
+        return self._type
 
     @property
-    def value(self):
-        return self._value
+    def dict(self):
+        d = {}
+        for key in self.DEFAULTS:
+            actual = self[key]
+            if actual:
+                d[key] = actual
+        return d
 
     @property
-    def parent(self):
-        return self._parent
+    def list(self):
+        return self._converter['list']
+
+    @property
+    def int(self):
+        return self._converter['int']
+
+    @property
+    def float(self):
+        return self._converter['float']
+
+    @property
+    def bool(self):
+        return self._converter['bool']
+
+    @property
+    def str(self):
+        return self._converter['str']
 
     @util.Property
-    def _desc():
+    def value():
+        def fget(self):
+            return self._converter[self.type] if self.valtype else self._value
+
+        def fset(self, value):
+            if self.readonly:
+                raise ConfigError('cannot change value: %s is readonly' % self.name)
+            if not (value is None or self._value is None or isinstance(value, type(self._value))):
+                raise TypeError()
+            if not self._isvalid(value):
+                raise ValueError('cannot set value of %s: %s is invalid' % (self.name, value))
+            self._value = value
+            self._converter.value = value
+
+        return locals()
+
+    @util.Property
+    def desc():
         def fget(self):
             return self.__desc
 
         def fset(self, desc):
-            self.__desc = desc
+            self.__desc = '' if desc is None else desc
+
+        def fdel(self):
+            self.__desc = ''
 
         return locals()
+
+    def _isvalid(self, value):
+        return True     #TODO
 
 
 class Configuration(Property):
 
-    @classmethod
-    def _make_property(cls, name, value, parent):
-        assert not (name is None or parent is None), "name and parent must not be None"
-        log.d('make property %s: %s', name, value)
-        Configuration._validate_localkey(name)
-        if isinstance(value, dict):
-            return Configuration(name=name, dic=value, parent=parent)
-        return Property(name, value, parent)
+
+    def __init__(self, name=None, parent=None):
+        assert name or not parent
+        super().__init__(name if name else 'root')
+        self._name = name
+        self._parent = parent
+        self._properties = OrderedDict()
 
 
-    def __init__(self, name=None, dic=None, parent=None, tmp=False):
-        super().__init__(name or '', {}, parent, allow_empty_name=parent is None)
-        self._tmp = tmp
-        self._properties = self._value
-        self._converter._transformers['dict'] = lambda v: self.__to_dict()
-        self._converter._transformers['list'] = lambda v: self.__to_list(sort=True)
-        if not (dic is None or isinstance(dic, dict)):
-            raise ValueError("'dic' parameter must be None or a dict")
-        if dic:
-            for name, val in dic.items():
-                Configuration._validate_complexkey(name)
-                self._set(name, val, warn_on_create=False)
-
-
-    def __to_dict(self):
-        view = {}
+    @property
+    def dict(self):
+        view = {} if self._isroot() else super().dict
+        if 'name' in view:
+            del view['name']
         for prop in self._properties.values():
-            if isinstance(prop, Configuration):
-                value = prop.__to_dict()
+            dic = prop.dict
+            if len(dic) == 1 and 'value' in dic:
+                value = dic['value']
             else:
-                value = prop.value
-            view[prop.name] = value
-        return view# if not self._name else {self._name: view}
-
-
-    def __to_list(self, sort=True):
-
-        def sort_if_needed(tuples):
-            sortkey = lambda t: t.name
-            return tuples if not sort else sorted(tuples, key=sortkey, reverse=True)
-
-        view = []
-        properties = sort_if_needed(self._properties.values())
-        for p in properties:
-            if isinstance(p, Configuration):
-                view += p.__to_list()
-            else:
-                view.append((p.fullname, p.value, p._desc))
+                value = dic
+            view[Key(prop.name).last.str] = value
         return view
+
+
+    @property
+    def list(self, sort=True):
+        view = []
+        if (self._value is not None) or self.desc:
+            view.append((self.name, self.value, self.desc))
+        for p in self._properties.values():
+            view += p.list
+        return view
+
+
+    @property
+    def name(self):
+        return self._key.str
+
+
+    @property
+    def _key(self):
+        return self._getfullkey()
+
+    def _getfullkey(self, accu=''):
+        accu = Key(self._name) + accu
+        if self._parent is None:
+            return accu
+        return self._parent._getfullkey(accu)
+
+
+    @util.Property
+    def readonly():
+        def fget(self):
+            if self._readonly is None and not self._isroot():
+                return self._parent.readonly
+            return self._readonly
+
+        def fset(self, value):
+            self._readonly = True if value else False
+
+        def fdel(self):
+            self._readonly = None
+
+        return locals()
+
+
+    @util.Property
+    def hidden():
+        def fget(self):
+            if self._hidden is None and not self._isroot():
+                return self._parent.hidden
+            return self._hidden
+
+        def fset(self, value):
+            self._hidden = True if value else False
+
+        def fdel(self):
+            self._hidden = None
+
+        return locals()
 
 
     def __bool__(self):
@@ -401,103 +533,97 @@ class Configuration(Property):
 
     def __repr__(self):
         name = self.name
-        if self._istemp():
-            name = "(temp:%s)" % name
-        elif self._isroot():
+        if self._isroot():
             name = "(root)"
         return '[%s %s]' % (self.__class__.__name__, name)
 
 
     def __getitem__(self, name):
-        Configuration._validate_complexkey(name)
-        return self._get(name)
+        try:
+            return self._get(Key(name))
+        except ConfigError:
+            return super().__getitem__(name)
 
 
     def __setitem__(self, name, value):
-        Configuration._validate_complexkey(name)
-        return self._set(name, value)
+        try:
+            return self._set(Key(name), value)
+        except ConfigError:
+            return super().__setitem__(name, value)
 
 
     def __delitem__(self, name):
-        Configuration._validate_complexkey(name)
-        self._del(name)
+        self._del(Key(name))
 
 
     def __getattr__(self, name):
-        if name.startswith('_'):
+        if name.startswith('_') or name in Key.reserved():
             return super().__getattribute__(name)
-        if name in Property.reserved():
-            return super(Configuration, self).__getattr__(name)
-        Configuration._validate_localkey(name)
-        return self._get_local(name)
+        return self._get_local(Key(name))
 
 
     def __setattr__(self, name, value):
-        if name.startswith('_'):
-            return super(Property, self).__setattr__(name, value)
-        Configuration._validate_localkey(name)
-        self._set_local(name, value)
+        if name.startswith('_') or name in Key.reserved():
+            return super().__setattr__(name, value)
+        self._set_local(Key(name), value)
 
 
     def __delattr__(self, name):
-        if name.startswith('_'):
-            return super(Property, self).__delattr__(name)
-        Configuration._validate_localkey(name)
-        self._del_local(name)
-
-
-    def _istemp(self):
-        return self._tmp
+        if name.startswith('_') or name in Key.reserved():
+            return super().__delattr__(name)
+        self._del_local(Key(name))
 
 
     def _isroot(self):
-        return self.parent is None
+        return self._parent is None
 
 
-    def _splitkey(self, key):
-        parts = key.partition(Configuration._namesep)
-        return (parts[0], parts[2])
+    def _create_child(self, name):
+        child = Configuration(name, parent=self)
+        self._properties[Key(name).normstr] = child
+        return child
 
 
-    def _get(self, name):
-        head, tail = self._splitkey(name)
-        if tail:
-            subconf = self._get_local(head)
-            return subconf._get(tail)
-        return self._get_local(head)
+    def _merge(self, other):
+        if isinstance(other, Configuration) or isinstance(other, Property):
+            other = other.dict
+        if not isinstance(other, dict):
+            self.value = other
+        else:
+            for key, value in other.items():
+                self[key] = value
+
+
+    def _get(self, key):
+        head, tail = key.split
+        local = self._get_local(head)
+        return local[tail.str] if tail else local
 
 
     def _get_local(self, key, warn_on_create=True):
         try:
-            value = self._properties[Configuration._normalize(key)]
+            value = self._properties[key.last.normstr]
             return value
         except KeyError:
-            tmpcfg = Configuration(name=key, parent=self, tmp=True)
-            if warn_on_create:
-                log.w('config key not found, creating empty property: %s', tmpcfg.fullname)
-            else:
-                log.d('set config: %s', tmpcfg.fullname)
-            return tmpcfg
+            return self._create_child(key.last.str)
 
 
-    def _set(self, name, value, warn_on_create=True):
-        head, tail = self._splitkey(name)
+    def _set(self, key, value, warn_on_create=True):
+        head, tail = key.split
         if tail:
-            return self._get_local(head, warn_on_create)._set(tail, value)
-        return self._set_local(name, value)
+            local = self._get_local(head)
+            local[tail.str] = value
+        else:
+            self._set_local(head, value)
 
 
     def _set_local(self, key, value):
-        if not isinstance(value, Configuration):
-            value = Configuration._make_property(key, value, parent=self)
-        if key:
-            self._properties[Configuration._normalize(key)] = value
-        if self._istemp():
-            self._untemp()
+        local = self._get_local(key)
+        local._merge(value)
 
 
-    def _del(self, name):
-        head, tail = self._splitkey(name)
+    def _del(self, key):
+        head, tail = key.split
         if tail:
             self._get_local(head)._del(tail)
         self._del_local(head)
@@ -505,19 +631,9 @@ class Configuration(Property):
 
     def _del_local(self, key):
         try:
-            del self._properties[Configuration._normalize(key)]
+            del self._properties[key.last.normstr]
         except KeyError:
-            log.w('trying to delete non-existent property %s%s%s', self.fullname, self._namesep, key)
-
-
-    def _untemp(self):
-        if not self._isroot():
-            self.parent._set_local(self.name, self)
-            self._tmp = self.parent._tmp
-            if self._tmp:
-                log.w('config not set: %s', self)
-            else:
-                log.d('temp config %s attached to %s', self, self.parent.name)
+            log.w('trying to delete non-existent property %s%s', (self._getfullkey() + key.last).str)
 
 
 def transformer(name):
@@ -526,7 +642,6 @@ def transformer(name):
             return func(*args, **kwargs)
         return type(name, (object,), {'__new__': transformer_wrapper})
     return transformer_decorator
-
 
 class TransformError(Exception):
 
@@ -652,22 +767,16 @@ class ValueConverter(object):
                                                     ]}
 
     def __init__(self, val):
-        self._val = val
-        self._transformers = dict()
+        self.value = val
 
-    def __getattr__(self, tname):
-        return self.__getitem__(tname)
 
     def __getitem__(self, tname):
-        if tname in self._transformers.keys():
-            t = self._transformers[tname]
-        else:
-            t = self.__class__.__transformers[tname]
+        t = self.__transformers[tname]
         try:
-            return t(self._val)
+            return t(self.value)
         except TransformError as e:
             log.w('%s; returning default value of %s', e.msg, str(e.suggested_default))
             return e.suggested_default
 
-    def _knows(self, name):
-        return name in self._transformers.keys() or name in self.__class__.__transformers.keys()
+    def __contains__(self, name):
+        return name in self.__transformers.keys()

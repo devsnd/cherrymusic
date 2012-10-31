@@ -30,7 +30,8 @@
 
 import unittest
 
-from cherrymusicserver.configuration import Property, Configuration
+from cherrymusicserver import configuration
+from cherrymusicserver.configuration import Key, Property, Configuration, ConfigError
 
 from cherrymusicserver import log
 log.setTest()
@@ -46,45 +47,41 @@ class TestProperty(unittest.TestCase):
 
 
     def test_there_are_reserved_words(self):
-        self.assertTrue(len(Property.reserved()) > 0)
+        self.assertTrue(len(Key.reserved()) > 0)
 
 
     def test_reserved_attributes_cannot_be_set(self):
-        p = Property('test', 1)
-        self.assertTrue('int' in Property.reserved(), "precondition")
+        p = Property('test', value=1)
+        self.assertTrue('int' in Key.reserved(), "precondition")
 
-        with self.assertRaises(KeyError):
+        with self.assertRaises(AttributeError):
             p.int = 9
 
 
     def test_nonreserved_attributes_can_be_set(self):
         p = Property('test', 1)
-        self.assertFalse('scattermonkey' in Property.reserved(), "precondition")
+        self.assertFalse('scattermonkey' in Key.reserved(), "precondition")
 
         p.scattermonkey = 9
 
 
     def test_name_must_not_be_reserved(self):
-        self.assertTrue('int' in Property.reserved(), "precondition")
-        self.assertRaises(KeyError, Property, name='int')
-
-
-    def test_name_must_not_contain_separator(self):
-        self.assertRaises(KeyError, Property, name='Q.Q')
+        self.assertTrue('int' in Key.reserved(), "precondition")
+        self.assertRaises(ConfigError, Property, name='int')
 
 
     def test_name_must_not_be_none_or_empty(self):
-        self.assertRaises(KeyError, Property, name=None)
-        self.assertRaises(KeyError, Property, name='')
+        self.assertRaises(ValueError, Property, name=None)
+        self.assertRaises(ValueError, Property, name='')
 
 
     def test_fullname_contains_parent_names(self):
-        a = Property('a', None)
-        b = Property('b', None, parent=a)
-        c = Property('c', None, parent=b)
+        a = Property('a')
+        b = Property('a.b')
+        c = Property('a.b.c')
 
-        self.assertEqual('a.b.c', c.fullname, 'property.fullname must start with parent names')
-        self.assertEqual('a', a.fullname, 'when property without parent, there must be no separator in fullname')
+        self.assertEqual('a.b.c', c.name, 'property.name must start with parent names')
+        self.assertEqual('a', a.name, 'when property without parent, there must be no separator in name')
 
 
     def test_str_must_equal_value_str(self):
@@ -178,27 +175,35 @@ class TestConfiguration(unittest.TestCase):
         self.assertEqual('testname', Configuration('testname').name)
 
 
+    def test_dictinit(self):
+        d = {'A' : {'b': 1}}
+
+        cfg = configuration.from_dict(d)
+
+        self.assertDictEqual(d, cfg.dict)
+
+
     def test_list(self):
         '''list transformer must return a list of Property tuples'''
         c = Configuration()
-        c.a = '1'
-        c.a._desc = 'a.1'
+        c.A = '1'
+        c.a.desc = 'a.1'
         c.b.x = '2'
-        c.b.x._desc = 'b.x.2'
+        c.b.x.desc = 'b.x.2'
 
         l = c.list
 
         self.assertTrue(len(l) == 2,
-                        'list must contain exactly 2 Property tuples')
-        self.assertTrue(('a', '1', 'a.1') in l, '')
-        self.assertTrue(('b.x', '2', 'b.x.2') in l, '')
+                        'list must contain exactly 2 Property tuples, but is %s' % l)
+        self.assertTrue(('A', '1', 'a.1') in l, l)
+        self.assertTrue(('b.x', '2', 'b.x.2') in l, l)
 
 
     def test_dir(self):
         '''dict transformer must return a dict conforming to a dict that might
         have been used for initialization'''
         d = {'a':1, 'b':2}
-        c = Configuration(dic=d)
+        c = configuration.from_dict(d)
 
         self.assertDictEqual(d, c.dict, '')
 
