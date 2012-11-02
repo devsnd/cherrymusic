@@ -30,27 +30,37 @@
 
 import unittest
 
-import audiotranscode
+import audiotranscode as transcode
 
 from cherrymusicserver import log
 log.setTest()
     
 class TestTranscode(unittest.TestCase):
+
     def setUp(self):
         pass
 
     def tearDown(self):
         pass
-    
-    def mp3ToMp3(self):
+
+
+    @unittest.skipIf('mp3' not in transcode.Encoders.keys(),
+                     'skip if missing optional dependency would cause an error')
+    def test_mp3ToMp3(self):
         for data in transcode.getTranscoded('test.mp3','mp3',usetmpfile=False):
             continue
-        
-    def mp3ToOgg(self):
+
+
+    @unittest.skipIf('ogg' not in transcode.Encoders.keys(),
+                     'skip if missing optional dependency would cause an error')
+    def test_mp3ToOgg(self):
         for data in transcode.getTranscoded('test.mp3','ogg',usetmpfile=False):
             continue
-            
-    def mp3ToAac(self):
+
+
+    @unittest.skipIf('aac' not in transcode.Encoders.keys(),
+                     'skip if missing optional dependency would cause an error')
+    def test_mp3ToAac(self):
         for data in transcode.getTranscoded('test.mp3','aac',usetmpfile=False):
             continue
 

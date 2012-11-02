@@ -38,7 +38,7 @@ import sys
 from logging import NOTSET, DEBUG, INFO, WARN, WARNING, ERROR, CRITICAL, FATAL
 
 
-LOGLEVEL = "INFO"
+LOGLEVEL = INFO
 
 
 
@@ -51,7 +51,7 @@ class LowPass(logging.Filter):
 
 
 formatter_briefest = logging.Formatter(fmt='[%(asctime)s] %(message)s', datefmt='%y%m%d-%H:%M')
-formatter_brief = logging.Formatter(fmt='[[%(asctime)s] %(levelname)-8s: %(message)s', datefmt='%y%m%d-%H:%M')
+formatter_brief = logging.Formatter(fmt='[%(asctime)s] %(levelname)-8s: %(message)s', datefmt='%y%m%d-%H:%M')
 formatter_full = logging.Formatter(fmt='%(levelname)-8s %(asctime)s : %(name)-20s : from %(org_filename)s, line %(org_lineno)d\n\t%(message)s\n')
 
 handler_console = logging.StreamHandler(stream=sys.stdout)
@@ -98,7 +98,7 @@ def info(msg, *args, **kwargs):
 def warn(msg, *args, **kwargs):
     '''logs a message with severity WARN on the caller's module logger.
     uses the root logger if caller has no module.'''
-    _get_logger().warn(msg, *args, **kwargs)
+    _get_logger().warning(msg, *args, **kwargs)
 
 
 def error(msg, *args, **kwargs):
