@@ -768,6 +768,9 @@ function initTabs() {
         if('#browser' === this.hash){
             loadBrowserIfEmpty();
         }
+        if('#search' === this.hash){
+            $('#searchform .searchinput').focus();
+        }
         $('div.tabs ul.tabNavigation a').removeClass('selected');
         $(this).addClass('selected');
         return false;
