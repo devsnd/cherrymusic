@@ -151,9 +151,17 @@ def from_configparser(filepath):
     cfgp = ConfigParser()
     cfgp.read(filepath)
     dic = {}
-    for section_name, section in cfgp.items():
-        dic[section_name] = dict([i for i in section.items()])
-        
+    try:
+        for section_name, section in cfgp.items():
+            dic[section_name] = dict([i for i in section.items()])
+    except TypeError:
+        #workaround for python3.1, can be dropped when debian is ready..
+        for section_name in cfgp.sections():
+            dic[section_name] = {}
+            for name, value in cfgp.items(section_name):
+                 dic[section_name][name] = value
+        #workaround end
+                     
     #check config file has missing keys
     containedNewKey = False
     defaults = from_defaults()
