@@ -54,6 +54,7 @@ class MockModel:
         return "motd"
     def updateLibrary(self):
         raise MockAction('updateLibrary')
+        #nothing
 
 class CherryPyMock:
     def __init__(self):
@@ -135,7 +136,7 @@ class TestHTTPHandler(unittest.TestCase):
 
     def test_api_getdecoders(self):
         pass #relies on audiotranscode
-        
+
     def test_api_transcodingenabled(self):
         self.assertEqual(self.http.api(action='transcodingenabled'),'false')
         
