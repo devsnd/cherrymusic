@@ -195,8 +195,9 @@
 			if(instant && !$.isFunction(instant)) {
 				$(this.cssSelector.playlist + " ul").empty();
 				$.each(this.playlist, function(i,v) {
-                    self.playlist[i].position = i;
 					$(self.cssSelector.playlist + " ul").append(self._createListItem(self.playlist[i]));
+                    var litem = $(self.cssSelector.playlist + " ul li:last");
+                    litem.attr('name', litem.index());
 				});
 				this._updateControls();
 			} else {
@@ -207,7 +208,8 @@
 					$(this).empty();
 					
 					$.each(self.playlist, function(i,v) {
-						$this.append(self._createListItem(self.playlist[i]));
+						var litem = $(self.cssSelector.playlist + " ul li:last");
+                        litem.attr('name', litem.index());
 					});
 					self._updateControls();
 					if($.isFunction(instant)) {
@@ -248,12 +250,12 @@
 			var self = this;
 
 			// Wrap the <li> contents in a <div>
-			var listItem = "<li pos='"+media.position+"'><div>";
+			var listItem = "<li><div>";
 
 			// Create Playtime
-		if(media.duration){
-			listItem += "<span href='javascript:;' class='" + this.options.playlistOptions.playtimeClass + "'>"+self._formatTime(media.duration)+"</span>";
-		}
+            if(media.duration){
+                listItem += "<span href='javascript:;' class='" + this.options.playlistOptions.playtimeClass + "'>"+self._formatTime(media.duration)+"</span>";
+            }
 			// Create remove control
 			listItem += "<a href='javascript:;' class='" + this.options.playlistOptions.removeItemClass + "'>&times;</a>";
 
@@ -330,27 +332,13 @@
 				$(this.cssSelector.title + " li").html(this.playlist[index].title + (this.playlist[index].artist ? " <span class='jp-artist'>by " + this.playlist[index].artist + "</span>" : ""));
 			}
 		},
-        _reorderByDomElements : function(){
-            //only works for one changed element at the moment
-            var self = this;
-            var plitems = 0;
-            $(this.cssSelector.playlist+" li").each(function(i,v){
-                self.playlist[i].domPos = parseInt($(this).attr('pos'));
-            });
-            this.playlist.sort(function(a,b){return a.domPos-b.domPos});
-            for(var i=0; i<this.playlist.length; i++){
-                this.playlist[i].position = i;
-            }
-            
-            self._refresh(true);
-        },
 		setPlaylist: function(playlist) {
 			this._initPlaylist(playlist);
 			this._init();
 		},
 		add: function(media, playNow) {
-            media.position = this.playlist.length;
 			$(this.cssSelector.playlist + " ul").append(this._createListItem(media)).find("li:last-child").hide().slideDown(this.options.playlistOptions.addTime);
+            
 			this._updateControls();
 			this.original.push(media);
 			this.playlist.push(media); // Both array elements share the same object pointer. Comforms with _initPlaylist(p) system.
@@ -497,6 +485,22 @@
 					$(this).slideDown(self.options.playlistOptions.shuffleTime);
 				});
 			}
-		}
+		},
+        scan: function() {
+            var self = this;
+            var isAdjusted = false;
+
+            var replace = [];
+            $.each($(this.cssSelector.playlist + " ul li"), function(index, value) {
+                replace[index] = self.original[$(value).attr('name')];
+                if(!isAdjusted && self.current === parseInt($(value).attr('name'), 10)) {
+                    self.current = index;
+                    isAdjusted = true;
+                }
+                $(value).attr('name', index);
+            });
+            this.original = replace;
+            this._originalPlaylist();
+        }
 	};
 })(jQuery);

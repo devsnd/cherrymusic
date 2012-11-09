@@ -195,6 +195,7 @@ class HTTPHandler(object):
         
     def api_rememberplaylist(self, value):
         pl = json.loads(value)
+        print(pl)
         cherrypy.session['playlist'] = pl['playlist']
         
     def api_saveplaylist(self, value):
@@ -218,7 +219,9 @@ class HTTPHandler(object):
         return self.model.motd()
         
     def api_restoreplaylist(self,value):
-        return json.dumps(cherrypy.session.get('playlist', []))
+        session_playlist = cherrypy.session.get('playlist', [])
+        session_playlist = list(filter(lambda x : x != None, session_playlist))
+        return json.dumps(session_playlist)
         
     def api_getplayables(self,value):
         return json.dumps(cherry.config.media.playable.list)

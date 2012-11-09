@@ -871,7 +871,7 @@ $(document).ready(function(){
     $('#searchform .searchinput').focus();
     $(playlistSelector+" ul").sortable({
         update: function(e,ui){
-            mediaPlaylist._reorderByDomElements();
+            mediaPlaylist.scan();
             }
         });
 	$(playlistSelector+" ul").disableSelection();
