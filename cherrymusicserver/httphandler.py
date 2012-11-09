@@ -90,6 +90,7 @@ class HTTPHandler(object):
             'getdecoders' : self.api_getdecoders,
             'transcodingenabled': self.api_transcodingenabled,
             'updatedb' : self.api_updatedb,
+            'getconfiguration' : self.api_getconfiguration,
         }
 
     def issecure(self, url):
@@ -165,7 +166,10 @@ class HTTPHandler(object):
     trans.exposed = True
     trans._cp_config = {'response.stream': True}
 
-    def api(self, action='', value='', filter=''):
+    def api(self, *args, **kwargs):
+        action = args[0] if args else ''
+        value=kwargs.get('value','')
+        filter=kwargs.get('filter','')
         if action in self.handlers:
             return self.handlers[action](value)
         #todo: clean this mess:
@@ -273,6 +277,20 @@ class HTTPHandler(object):
     def api_updatedb(self,value):
         self.model.updateLibrary()
         return 'success'
+    
+    def api_getconfiguration(self, value):
+        clientconfigkeys = {
+            'getencoders' : audiotranscode.getEncoders(),
+            'getdecoders' : audiotranscode.getDecoders(),
+            'transcodingenabled' : cherry.config.media.transcode.bool,
+            'getplayables' : cherry.config.media.playable.list
+        }
+        retval = {}
+        for configkey in json.loads(value):
+            if configkey in clientconfigkeys:
+                retval[configkey] = clientconfigkeys[configkey]
+        return json.dumps(retval)
+            
     
     def serve_string_as_file(self,string,filename):
         cherrypy.response.headers["Content-Type"] = "application/x-download"

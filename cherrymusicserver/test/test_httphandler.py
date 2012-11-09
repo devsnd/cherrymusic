@@ -82,10 +82,10 @@ class TestHTTPHandler(unittest.TestCase):
         pass
 
     def test_api_search(self):
-        self.http.api(action='search',value='asd')
+        self.http.api('search',value='asd')
 
     def test_api_fastsearch(self):
-        res = self.http.api(action='fastsearch',value='asd')
+        res = self.http.api('fastsearch',value='asd')
 
     def test_api_rememberplaylist(self):
         pass #relies on cherrypy session
@@ -100,14 +100,14 @@ class TestHTTPHandler(unittest.TestCase):
         pass #needs to be tested in playlistdb
 
     def test_api_getmotd(self):
-        self.http.api(action='getmotd')
+        self.http.api('getmotd')
 
     def test_api_restoreplaylist(self):
         pass #relies on cherrypy session
         #self.http.api(action='restoreplaylist')
 
     def test_api_getplayables(self):
-        p = self.http.api(action='getplayables')
+        p = self.http.api('getplayables')
         self.assertEqual(p, json.dumps(self.http.config.media.playable.str.split(' ')))
 
     def test_api_getuserlist(self):
@@ -138,10 +138,10 @@ class TestHTTPHandler(unittest.TestCase):
         pass #relies on audiotranscode
 
     def test_api_transcodingenabled(self):
-        self.assertEqual(self.http.api(action='transcodingenabled'),'false')
+        self.assertEqual(self.http.api('transcodingenabled'),'false')
         
     def test_api_updatedb(self):
-        self.assertRaisesRegex(MockAction, 'updateLibrary', self.http.api, action='updatedb')
+        self.assertRaisesRegex(MockAction, 'updateLibrary', self.http.api, 'updatedb')
 
 
 if __name__ == "__main__":

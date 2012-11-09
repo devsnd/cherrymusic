@@ -52,16 +52,23 @@ function api(data_or_action, successfunc, errorfunc, background){
         completefunc = function(){$('div#progressscreen').fadeOut('fast')};
     }
     var senddata;
+    var apiaction;
     if(typeof data_or_action === "string"){
-        senddata = {"action" : data_or_action};
+        apiaction = data_or_action;
+        senddata = {};
     } else {
-        senddata = data_or_action;
+        apiaction = data_or_action['action'];
+        senddata = {"value" :  data_or_action['value'] };
     }
     if(!background){
         $('div#progressscreen').fadeIn('fast');
     }
+    var urlaction = '/api';
+    if(apiaction){
+        urlaction += '/'+apiaction;
+    }    
     $.ajax({      
-        url: '/api',
+        url: urlaction,
         context: $(this),
         type: 'POST',
         data: senddata,
@@ -88,45 +95,23 @@ CONFIGURATION LOADER
 *******************/
 function loadConfig(){
     "use strict";
+    var configoptions = ['getplayables','getencoders','getdecoders','transcodingenabled'];
+    var data = {
+        'action' : 'getconfiguration',
+        'value' : JSON.stringify(configoptions),
+    };
     var success = function(data){
-        playableExtensions = jQuery.parseJSON(data);
-        configCompletionHandler();
-    };
-    var error = errorFunc('Failed loading configuration for playable extensions!');
-    api('getplayables',success,error, true);
-    
-    success = function(data){
-        availableEncoders = jQuery.parseJSON(data);
-        configCompletionHandler();
-    };
-    error = errorFunc('Failed loading configuration for available Encoders!');
-    api('getencoders',success,error, true);
-    
-    success = function(data){
-        availableDecoders = jQuery.parseJSON(data);
-        configCompletionHandler();
-    };
-    error = errorFunc('Failed loading configuration for available Decoders!');
-    api('getdecoders',success,error, true);
-    
-    success = function(data){
-        transcodingEnabled = jQuery.parseJSON(data);
-        configCompletionHandler();
-    };
-    error = errorFunc('Failed loading configuration value "transcodingenabled"!');
-    api('transcodingenabled',success,error, true);
-}
-
-function configCompletionHandler(){
-    if( playableExtensions != undefined &&
-        availableEncoders != undefined &&
-        availableDecoders != undefined &&
-        transcodingEnabled != undefined
-    ){
+        var dictatedClientConfig = jQuery.parseJSON(data);
+        availableEncoders = dictatedClientConfig.getencoders;
+        availableDecoders = dictatedClientConfig.getdecoders;
+        playableExtensions = dictatedClientConfig.getplayables;
+        transcodingEnabled = dictatedClientConfig.transcodingenabled;
         for(var i=0; i<executeAfterConfigLoaded.length; i++){
             executeAfterConfigLoaded[i]();
         }
-    }
+    };
+    var error = errorFunc("could not fetch client configuration");
+    api(data,success,error,true);
 }
 
 /***
@@ -286,7 +271,7 @@ listdirclick = function(mode){
         }
 };
 compactlistdirclick = function(){
-    "use strict";
+    "use strict";s
     var directory = $(this).attr("dir");
     var filter = $(this).attr("filter");
     //alert(directory);
