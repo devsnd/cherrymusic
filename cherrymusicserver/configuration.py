@@ -67,6 +67,12 @@ def from_defaults():
                                 This requires you to have the appropriate codecs installed.
                                 Please note that transcoding will significantly increase the stress on the CPU!
                                 """
+    c.media.fetch_album_art = False
+    c.media.fetch_album_art = """
+                                Tries to fetch the album cover from various locations in the web.
+                                They will be shown next to folders that qualify as a possible
+                                album.
+                                """
 
     c._set('search.maxresults', 20, warn_on_create=False)
     c.search.maxresults._desc = """

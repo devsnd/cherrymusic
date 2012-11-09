@@ -31,6 +31,7 @@ var availableEncoders = undefined;
 var availablejPlayerFormats = [];
 var availableDecoders = undefined;
 var transcodingEnabled = undefined;
+var fetchAlbumArt = undefined;
 var REMEMBER_PLAYLIST_INTERVAL = 3000;
 
 var playlistSelector = '.jp-playlist';
@@ -96,7 +97,7 @@ CONFIGURATION LOADER
 *******************/
 function loadConfig(){
     "use strict";
-    var configoptions = ['getplayables','getencoders','getdecoders','transcodingenabled'];
+    var configoptions = ['getplayables','getencoders','getdecoders','transcodingenabled','fetchalbumart'];
     var data = {
         'action' : 'getconfiguration',
         'value' : JSON.stringify(configoptions),
@@ -107,6 +108,7 @@ function loadConfig(){
         availableDecoders = dictatedClientConfig.getdecoders;
         playableExtensions = dictatedClientConfig.getplayables;
         transcodingEnabled = dictatedClientConfig.transcodingenabled;
+        fetchAlbumArt = dictatedClientConfig.fetchalbumart;
         for(var i=0; i<executeAfterConfigLoaded.length; i++){
             executeAfterConfigLoaded[i]();
         }
@@ -201,7 +203,12 @@ function renderList(l){
 }
 function renderDir(label,urlpath,dirpath){
     "use strict";
-    return '<a dir="'+dirpath+'" href="javascript:;" class="listdir">'+dirpath+'</a>';
+    var rendereddir = '<a dir="'+dirpath+'" href="javascript:;" class="listdir">';
+    if(fetchAlbumArt && dirpath.indexOf('/')>0){
+        var searchterms = encodeURIComponent(JSON.stringify({'directory' : dirpath}))
+        rendereddir += '<img src="/api/fetchalbumart/'+searchterms+'" width="80" height="80" />';
+    }
+    return rendereddir+dirpath+'</a>';
 }
 function renderFile(label,urlpath,dirpath){
     "use strict";

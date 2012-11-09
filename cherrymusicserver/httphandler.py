@@ -44,6 +44,7 @@ from cherrymusicserver import renderjson
 from cherrymusicserver import userdb
 from cherrymusicserver import playlistdb
 from cherrymusicserver import log
+from cherrymusicserver import albumartfetcher
 from cherrymusicserver.cherrymodel import MusicEntry
 from cherrymusicserver.util import databaseFilePath, readRes
 import cherrymusicserver as cherry
@@ -93,6 +94,7 @@ class HTTPHandler(object):
             'getconfiguration' : self.api_getconfiguration,
             'compactlistdir' : self.api_compactlistdir,
             'listdir' : self.api_listdir,
+            'fetchalbumart' : self.api_fetchalbumart,
         }
 
     def issecure(self, url):
@@ -171,13 +173,27 @@ class HTTPHandler(object):
     def api(self, *args, **kwargs):
         action = args[0] if args else ''
         value=kwargs.get('value','')
+        if not value and len(args)>1:
+            value = unquote(args[1])
         #filter_str=kwargs.get('filter','')
         if action in self.handlers:
             return self.handlers[action](value)
         else:
             return "Error: no such action."
-               
     api.exposed = True
+
+    def api_fetchalbumart(self, value):
+        if cherry.config.media.fetch_album_art.bool:
+            params = json.loads(value)
+            directory = params['directory']
+            album = os.path.basename(directory)
+            artist = os.path.basename(os.path.dirname(directory))
+            fetcher = albumartfetcher.AlbumArtFetcher()
+            header, data = fetcher.fetch(artist+' '+album)
+            cherrypy.response.headers["Content-Type"] = header['Content-Type']
+            cherrypy.response.headers["Content-Length"] = header['Content-Length']
+            length,data = fetcher.fetch(artist+' '+album)
+            return data
     
     def api_compactlistdir(self, value):
         params = json.loads(value)
@@ -300,7 +316,8 @@ class HTTPHandler(object):
             'getencoders' : audiotranscode.getEncoders(),
             'getdecoders' : audiotranscode.getDecoders(),
             'transcodingenabled' : cherry.config.media.transcode.bool,
-            'getplayables' : cherry.config.media.playable.list
+            'getplayables' : cherry.config.media.playable.list,
+            'fetchalbumart' : cherry.config.media.fetch_album_art.bool,
         }
         retval = {}
         for configkey in json.loads(value):
