@@ -59,6 +59,7 @@ function api(data_or_action, successfunc, errorfunc, background){
     } else {
         apiaction = data_or_action['action'];
         senddata = {"value" :  data_or_action['value'] };
+        
     }
     if(!background){
         $('div#progressscreen').fadeIn('fast');
@@ -257,7 +258,7 @@ listdirclick = function(mode){
             //$('div#progressscreen').fadeIn('fast');
             var data = {
                 'action' : 'listdir',
-                'value' : directory
+                'value' : JSON.stringify({ 'directory' : directory })
             };
             var currdir = this;
             var success = function(data){
@@ -271,7 +272,7 @@ listdirclick = function(mode){
         }
 };
 compactlistdirclick = function(){
-    "use strict";s
+    "use strict";
     var directory = $(this).attr("dir");
     var filter = $(this).attr("filter");
     //alert(directory);
@@ -284,8 +285,8 @@ compactlistdirclick = function(){
     } else {
         var data = {
             'action' : 'compactlistdir',
-            'value' : directory,
-            'filter' : filter
+            'value' : JSON.stringify({ 'directory' : directory,
+                        'filter' : filter })
         };
         var currdir = this;
         var success = function(data){

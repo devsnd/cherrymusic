@@ -91,6 +91,8 @@ class HTTPHandler(object):
             'transcodingenabled': self.api_transcodingenabled,
             'updatedb' : self.api_updatedb,
             'getconfiguration' : self.api_getconfiguration,
+            'compactlistdir' : self.api_compactlistdir,
+            'listdir' : self.api_listdir,
         }
 
     def issecure(self, url):
@@ -169,21 +171,34 @@ class HTTPHandler(object):
     def api(self, *args, **kwargs):
         action = args[0] if args else ''
         value=kwargs.get('value','')
-        filter=kwargs.get('filter','')
+        #filter_str=kwargs.get('filter','')
         if action in self.handlers:
             return self.handlers[action](value)
-        #todo: clean this mess:
         else:
-            dirtorender = value
-            dirtorenderabspath = os.path.join(cherry.config.media.basedir.str, value)
-            if os.path.isdir(dirtorenderabspath):
-                if action == 'compactlistdir':
-                    return self.jsonrenderer.render(self.model.listdir(dirtorender, filter))
-                else: #if action=='listdir':
-                    return self.jsonrenderer.render(self.model.listdir(dirtorender))
-            else:
-                return 'Error rendering dir [action: "' + action + '", value: "' + value + '"]'
+            return "Error: no such action."
+               
     api.exposed = True
+    
+    def api_compactlistdir(self, value):
+        params = json.loads(value)
+        dirtorender = params['directory']
+        dirtorenderabspath = os.path.join(cherry.config.media.basedir.str, dirtorender)
+        if os.path.isdir(dirtorenderabspath):
+            return self.jsonrenderer.render(self.model.listdir(dirtorender, params['filter']))
+        else:
+            return "Error rendering getting results. Request doesn't lead to a directory"
+    
+    def api_listdir(self,value):
+        if value:
+            params = json.loads(value)
+            dirtorender = params['directory']
+        else:
+            dirtorender = ''
+        dirtorenderabspath = os.path.join(cherry.config.media.basedir.str, dirtorender)
+        if os.path.isdir(dirtorenderabspath):            
+            return self.jsonrenderer.render(self.model.listdir(dirtorender))
+        else:
+            return "Error rendering getting results. Request doesn't lead to a directory"
     
     def api_search(self, value, isFastSearch=False):
         if not value.strip():
@@ -195,7 +210,6 @@ class HTTPHandler(object):
         
     def api_rememberplaylist(self, value):
         pl = json.loads(value)
-        print(pl)
         cherrypy.session['playlist'] = pl['playlist']
         
     def api_saveplaylist(self, value):
