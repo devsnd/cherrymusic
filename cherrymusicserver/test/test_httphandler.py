@@ -54,7 +54,6 @@ class MockModel:
         return "motd"
     def updateLibrary(self):
         raise MockAction('updateLibrary')
-        #nothing
 
 class CherryPyMock:
     def __init__(self):
