@@ -40,7 +40,19 @@ from logging import NOTSET, DEBUG, INFO, WARN, WARNING, ERROR, CRITICAL, FATAL
 
 LOGLEVEL = INFO
 
-
+class RelocateLoggingCall(logging.Filter):
+    '''using this module's logging methods puts some misleading values into
+    standard log record attributes, especially pertaining to the origin of
+    the logging call. this filter corrects them with the help of
+    extended attributes added by _get_logger()'''
+    def filter(self, record):
+        has_org = lambda seq: False if not seq else True if seq[0].startswith('org_') else has_org(seq[1:])
+        if has_org(dir(record)):
+            record.lineno = record.org_lineno
+            record.funcName = record.org_funcName
+            record.pathname = record.org_pathname
+        return 1
+relocator = RelocateLoggingCall()
 
 class LowPass(logging.Filter):
     def __init__(self, cutoff):
@@ -52,20 +64,23 @@ class LowPass(logging.Filter):
 
 formatter_briefest = logging.Formatter(fmt='[%(asctime)s] %(message)s', datefmt='%y%m%d-%H:%M')
 formatter_brief = logging.Formatter(fmt='[%(asctime)s] %(levelname)-8s: %(message)s', datefmt='%y%m%d-%H:%M')
-formatter_full = logging.Formatter(fmt='%(levelname)-8s %(asctime)s : %(name)-20s : from %(org_filename)s, line %(org_lineno)d\n\t%(message)s\n')
+formatter_full = logging.Formatter(fmt=('-'*80)+ '\n%(levelname)-8s [%(asctime)s] : %(name)-20s : from line (%(lineno)d) at\n\t%(pathname)s\n\t--\n\t%(message)s\n')
 
 handler_console = logging.StreamHandler(stream=sys.stdout)
 handler_console.formatter = formatter_briefest
 handler_console.level = DEBUG
 handler_console.addFilter(LowPass(WARNING))
+handler_console.addFilter(relocator)
 
 handler_console_priority = logging.StreamHandler(stream=sys.stderr)
 handler_console_priority.formatter = formatter_brief
 handler_console_priority.level = WARNING
+handler_console_priority.addFilter(relocator)
 
 handler_file_error = logging.FileHandler(os.path.join(os.path.expanduser('~'), '.cherrymusic', 'error.log'), mode='a', delay=True)
 handler_file_error.formatter = formatter_full
 handler_file_error.level = ERROR
+handler_file_error.addFilter(relocator)
 
 logging.root.setLevel(LOGLEVEL)
 logging.root.addHandler(handler_console)
@@ -144,21 +159,20 @@ x = exception
 def _get_logger():
     '''find out the caller's module name and get or create a corresponding
     logger. if caller has no module, return root logger.'''
+    if __istest:
+        return testlogger
     caller_frm = inspect.stack()[2]
+    caller_mod = inspect.getmodule(caller_frm[0])
+    name = None if caller_mod is None else caller_mod.__name__
     orgpath = caller_frm[1]
     orgfile = os.path.basename(orgpath)
     caller_info = {
                     'org_filename': orgfile,
                     'org_lineno': caller_frm[2],
                     'org_funcName': caller_frm[3],
-                    'org_module': os.path.splitext(orgfile)[0],
+                    #'org_module': name if name else os.path.splitext(orgfile)[0],
                     'org_pathname': orgpath,
                    }
-    caller_mod = inspect.getmodule(caller_frm[0])
-    if __istest:
-        name = 'test'
-    else:
-        name = None if caller_mod is None else caller_mod.__name__
     logger = logging.LoggerAdapter(logging.getLogger(name), caller_info)
     return logger
 
