@@ -4,6 +4,7 @@ import urllib.request
 import urllib.parse
 import codecs
 import re
+from unidecode import unidecode
 from cherrymusicserver import log
 
 class AlbumArtFetcher:
@@ -13,7 +14,7 @@ class AlbumArtFetcher:
         
     def fetch(self, searchterms):
         if self.method == 'amazon':
-            searchterms = re.sub('[^a-z\s]','',searchterms.lower())
+            searchterms = unidecode(searchterms)
             return self.fetchAmazon(searchterms)
         else:
             log.e('unknown method: %s'%self.method)
@@ -51,4 +52,4 @@ class AlbumArtFetcher:
         else:
             if urlonly:
                 return ''
-            return 0,''
+            return None,''

@@ -199,12 +199,16 @@ class HTTPHandler(object):
             directory = params['directory']
             album = os.path.basename(directory)
             artist = os.path.basename(os.path.dirname(directory))
+            keywords = artist+' '+album
+            log.i("Fetching album art for keywords '%s'" % keywords)
             fetcher = albumartfetcher.AlbumArtFetcher()
-            header, data = fetcher.fetch(artist+' '+album)
-            cherrypy.response.headers["Content-Type"] = header['Content-Type']
-            cherrypy.response.headers["Content-Length"] = header['Content-Length']
-            length,data = fetcher.fetch(artist+' '+album)
-            return data
+            header, data = fetcher.fetch(keywords)
+            if header:
+                cherrypy.response.headers["Content-Type"] = header['Content-Type']
+                cherrypy.response.headers["Content-Length"] = header['Content-Length']
+                return data
+            cherrypy.response.headers["Content-Length"] = 0
+            return ''
     
     def api_compactlistdir(self, value):
         params = json.loads(value)
