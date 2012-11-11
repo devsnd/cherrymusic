@@ -97,6 +97,16 @@ class HTTPHandler(object):
             'fetchalbumart' : self.api_fetchalbumart,
         }
 
+    def lock_session(fn):
+        """decotator function for all api calls, that use the session,
+        since tools.sessions.locking is now set to 'explicit', which
+        means, that the session lock has to be acquired manually."""
+        def wrapper(*args, **kwargs):
+            cherrypy.session.acquire_lock()
+            ret = fn(*args, **kwargs)
+            cherrypy.session.release_lock()
+        return wrapper
+
     def issecure(self, url):
         return parse.urlparse(url).scheme == 'https'
 
@@ -105,8 +115,8 @@ class HTTPHandler(object):
         ip = u[:u.index(':')]
         return 'https://' + ip + ':' + cherry.config.server.ssl_port.str
 
-    def index(self, action='', value='', filter='', login=None, username=None, password=None):
 
+    def index(self, action='', value='', filter='', login=None, username=None, password=None):
         if cherry.config.server.enable_ssl.bool and not self.issecure(cherrypy.url()):
             log.d('Not secure, redirecting...')
             raise cherrypy.HTTPRedirect(self.getSecureUrl(cherrypy.url()), 302)
@@ -151,7 +161,7 @@ class HTTPHandler(object):
         cherrypy.session['username'] = user.name
         cherrypy.session['userid'] = user.uid
         cherrypy.session['admin'] = user.isadmin
-        
+    
     def getUserId(self):
         try:
             return cherrypy.session['userid']
@@ -183,6 +193,7 @@ class HTTPHandler(object):
     api.exposed = True
 
     def api_fetchalbumart(self, value):
+        cherrypy.session.release_lock()
         if cherry.config.media.fetch_album_art.bool:
             params = json.loads(value)
             directory = params['directory']
@@ -223,11 +234,11 @@ class HTTPHandler(object):
         
     def api_fastsearch(self, value):
         return self.api_search(value,True)
-        
+    
     def api_rememberplaylist(self, value):
         pl = json.loads(value)
         cherrypy.session['playlist'] = pl['playlist']
-        
+
     def api_saveplaylist(self, value):
         pl = json.loads(value)
         return self.playlistdb.savePlaylist(
@@ -247,7 +258,7 @@ class HTTPHandler(object):
                 
     def api_getmotd(self,value):
         return self.model.motd()
-        
+    
     def api_restoreplaylist(self,value):
         session_playlist = cherrypy.session.get('playlist', [])
         session_playlist = list(filter(lambda x : x != None, session_playlist))
@@ -255,7 +266,7 @@ class HTTPHandler(object):
         
     def api_getplayables(self,value):
         return json.dumps(cherry.config.media.playable.list)
-        
+    
     def api_getuserlist(self,value):
         if cherrypy.session['admin']:
             return json.dumps(self.userdb.getUserList())
@@ -275,7 +286,7 @@ class HTTPHandler(object):
         for pl in playlists:
             pl['username']=self.userdb.getNameById(pl['userid'])
         return json.dumps(playlists);
-        
+    
     def api_logout(self,value):
         cherrypy.lib.sessions.expire()
         

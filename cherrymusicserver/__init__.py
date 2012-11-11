@@ -125,7 +125,7 @@ Have fun!
             redirecter = cherrypy._cpserver.Server()
             redirecter.socket_port = config.server.port.int
             redirecter._socket_host = socket_host
-            redirecter.thread_pool = 30
+            redirecter.thread_pool = 10
             redirecter.subscribe()
         else:
             cherrypy.config.update({
@@ -135,7 +135,8 @@ Have fun!
         cherrypy.config.update({
             'log.error_file': os.path.join(os.path.expanduser('~'), '.cherrymusic', 'server.log'),
             'environment': 'production',
-            "server.socket_host": socket_host,
+            'server.socket_host': socket_host,
+            'server.thread_pool' : 30,
             'tools.sessions.on' : True,
             })
 
