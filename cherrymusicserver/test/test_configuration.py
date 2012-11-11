@@ -36,6 +36,36 @@ from cherrymusicserver.configuration import Key, Property, Configuration, Config
 from cherrymusicserver import log
 log.setTest()
 
+
+class TestKey(unittest.TestCase):
+
+    def testAdd(self):
+        self.assertEquals('', (Key() + Key()).str)
+        self.assertEquals('', (Key() + None).str)
+        self.assertEquals('string', (Key() + 'string').str)
+        self.assertEquals('a.b', (Key('a') + Key('b')).str)
+
+    def testRightAdd(self):
+        self.assertEqual('a.b', ('a' + Key('b')).str)
+
+    def testAssignAdd(self):
+        key = Key('a')
+
+        with self.assertRaises(NotImplementedError):
+            key += 'b'
+
+        self.assertEqual('a', key.str)
+
+
+    def testEqualsAndHash(self):
+        key_ab = Key('a.b')
+        key_Ab = Key('A.b')
+
+        self.assertEquals(key_ab, key_Ab)
+        self.assertEquals(key_ab, Key('A') + Key('B'))
+        self.assertEquals(hash(key_ab), hash(key_Ab))
+
+
 class TestProperty(unittest.TestCase):
 
     def setUp(self):
@@ -47,12 +77,12 @@ class TestProperty(unittest.TestCase):
 
 
     def test_there_are_reserved_words(self):
-        self.assertTrue(len(Key.reserved()) > 0)
+        self.assertTrue(len(Property._reserved()) > 0)
 
 
     def test_reserved_attributes_cannot_be_set(self):
         p = Property('test', value=1)
-        self.assertTrue('int' in Key.reserved(), "precondition")
+        self.assertTrue('int' in Property._reserved(), "precondition")
 
         with self.assertRaises(AttributeError):
             p.int = 9
@@ -60,13 +90,23 @@ class TestProperty(unittest.TestCase):
 
     def test_nonreserved_attributes_can_be_set(self):
         p = Property('test', 1)
-        self.assertFalse('scattermonkey' in Key.reserved(), "precondition")
+        self.assertFalse('scattermonkey' in Property._reserved(), "precondition")
 
         p.scattermonkey = 9
 
 
+    def test_all_public_attributes_names_are_reserved(self):
+        public_attributes = set([n for n in dir(Property('test')) if not n.startswith('_')])
+
+        unreserved = public_attributes - set(Property._reserved())
+
+        self.assertTrue(len(unreserved) == 0,
+                        '''all public attributes of Configuraion objects must be reserved.
+                        unreserved: %s''' % (unreserved,))
+
+
     def test_name_must_not_be_reserved(self):
-        self.assertTrue('int' in Key.reserved(), "precondition")
+        self.assertTrue('int' in Property._reserved(), "precondition")
         self.assertRaises(ConfigError, Property, name='int')
 
 
@@ -75,7 +115,7 @@ class TestProperty(unittest.TestCase):
         self.assertRaises(ValueError, Property, name='')
 
 
-    def test_fullname_contains_parent_names(self):
+    def test_name_contains_parent_names(self):
         a = Property('a')
         b = Property('a.b')
         c = Property('a.b.c')
@@ -84,8 +124,14 @@ class TestProperty(unittest.TestCase):
         self.assertEqual('a', a.name, 'when property without parent, there must be no separator in name')
 
 
-    def test_str_must_equal_value_str(self):
-        self.assertEqual(str(99), str(Property('test', 99)))
+    def test_readonly_locks_value_and_description(self):
+        p = Property('p')
+        p.readonly = True
+
+        with self.assertRaises(ConfigError):
+            p.value = True
+        with self.assertRaises(ConfigError):
+            p.desc = "Lala"
 
 
     def test_bool_must_equal_value_bool(self):
@@ -174,15 +220,8 @@ class TestConfiguration(unittest.TestCase):
     def test_name_must_be_consistent_with_init(self):
         self.assertEqual('testname', Configuration('testname').name)
 
-
-    def test_dictinit(self):
-        d = {'A' : {'b': 1}}
-
-        cfg = configuration.from_dict(d)
-
-        self.assertDictEqual(d, cfg.dict)
-
-
+    #TODO replace with proper test for confuration.to_list
+    @unittest.skip
     def test_list(self):
         '''list transformer must return a list of Property tuples'''
         c = Configuration()
@@ -199,6 +238,8 @@ class TestConfiguration(unittest.TestCase):
         self.assertTrue(('b.x', '2', 'b.x.2') in l, l)
 
 
+    #TODO replace with proper test for confuration.to_dict
+    @unittest.skip
     def test_dir(self):
         '''dict transformer must return a dict conforming to a dict that might
         have been used for initialization'''
@@ -206,6 +247,46 @@ class TestConfiguration(unittest.TestCase):
         c = configuration.from_dict(d)
 
         self.assertDictEqual(d, c.dict, '')
+
+
+    def test_all_public_attributes_names_are_reserved(self):
+        public_attributes = set([n for n in dir(Configuration()) if not n.startswith('_')])
+
+        unreserved = public_attributes - set(Property._reserved())
+
+        self.assertTrue(len(unreserved) == 0,
+                        '''all public attributes of Configuraion objects must be reserved.
+                        unreserved: %s''' % (unreserved,))
+
+
+    def test_delete_deletes_only_one_element(self):
+        cfg = configuration.from_dict({'a' : {
+                                              'x': 11,
+                                              },
+                                       'b' : 3,
+                                       })
+
+        del cfg['a.x']
+
+        self.assertEqual(2, len(cfg))
+        self.assertTrue('a' in cfg)
+        self.assertTrue('b' in cfg)
+        self.assertFalse('a.x' in cfg)
+
+
+    def test_assignment(self):
+        initdict = {
+            'a': {
+                  'x':11,
+                  },
+            'b': 3,
+            }
+        cfg = configuration.from_dict(initdict)
+
+        cfg.a = 2
+        self.assertEquals(2, cfg.a.value)
+
+        cfg.p = Property('x', value=7, valtype='int', readonly=True, hidden=True, validity=r'\d+', desc='integer')
 
 
 if __name__ == "__main__":

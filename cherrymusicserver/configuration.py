@@ -31,7 +31,7 @@
 import os
 import re
 
-from collections import MutableMapping, OrderedDict
+from collections import OrderedDict
 
 from cherrymusicserver import log
 from cherrymusicserver import util
@@ -167,9 +167,9 @@ def from_configparser(filepath):
         for section_name in cfgp.sections():
             dic[section_name] = {}
             for name, value in cfgp.items(section_name):
-                 dic[section_name][name] = value
+                dic[section_name][name] = value
         #workaround end
-                     
+
     #check config file has missing keys
     containedNewKey = False
     defaults = from_defaults()
@@ -219,9 +219,43 @@ def from_dict(d):
         root[key] = value
     return root
 
+def to_list(cfg):
+    if not isinstance(cfg, Configuration):
+        raise TypeError('type(cfg) is not a Property: %s' % (type(cfg),))
+    l = [_property_to_tuple(p) for p in cfg._recursive_properties() if p.value or p.desc]
+    return l
+
+def to_dict(cfg):
+    if not isinstance(cfg, Configuration):
+        raise TypeError('type(cfg) is not a Property: %s' % (type(cfg),))
+    d = {} if cfg._isroot() else _property_to_dict(cfg)
+    for p in cfg._properties.values():
+        child_dict = to_dict(p)
+        del child_dict['name']
+        d[p._key.last.str] = child_dict['value'] if ['value'] == list(child_dict.keys()) else child_dict
+    return d
+
+
+def _property_to_tuple(prop):
+    return (prop.name, prop.value, prop.desc)
+
+def _property_to_dict(prop):
+    d = {}
+    for key in prop._DEFAULT_ATTRIBUTES:
+        actual = prop[key]
+        if actual:
+            d[key] = actual
+    return d
+
+
 
 class ConfigError(Exception):
     pass
+
+
+class ConfigKeyError(ConfigError):
+    pass
+
 
 class Key(object):
 
@@ -241,46 +275,29 @@ class Key(object):
                                    'sep': '[' + _namesep + ']'},
                                 re.VERBOSE)
 
-    __reserved_objects = [int, bool, float, complex, str, bytes, list, set, tuple, dict]
-    __reserved_names = ['name', 'value', 'valtype', 'desc', 'readonly', 'hidden', 'validity', ]
-
-    @classmethod
-    def reserved(cls):
-        try:
-            return cls.__reserved
-        except AttributeError:
-            res = [cls._normalize(o.__name__) for o in cls.__reserved_objects]
-            res += cls.__reserved_names
-            cls.__reserved = res
-            return res
-
     @classmethod
     def _validate_localkey(cls, key):
         if not (key and type(key) == str and cls._name_patn.match(key)):
-            raise ConfigError("invalid property name: '%s': a name must be a non-empty string, only contain the characters '%s' and not begin with '%s'"
+            raise ConfigKeyError("invalid key name: '%s': a name must only contain the characters '%s' and not begin with '%s'"
                            % (key, cls._namechars, cls._name_nonleadchars))
-        cls._validate_no_keyword(key)
 
     @classmethod
     def _validate_complexkey(cls, key):
         if not (key and type(key) == type('') and cls._qual_name_patn.match(key)):
-            raise ConfigError("invalid property name: '%s': names must be non-empty strings, only consist of the characters: '%s' and be separated by a '%s'"
-                           % (key, cls._namechars, cls._namesep))
-        cls._validate_no_keyword(key)
-
-    @classmethod
-    def _validate_no_keyword(cls, key):
-        reserved = cls.reserved()
-        if cls._normalize(key) in reserved:
-            raise ConfigError("invalid name: '%s' is in reserved words: %s" % (key, str(reserved)))
+            raise ConfigKeyError("invalid key name: '%s': names must only consist of the characters: '%s', not begin with '%s' and be separated by a '%s'"
+                           % (key, cls._namechars, cls._name_nonleadchars, cls._namesep))
 
     @classmethod
     def _normalize(cls, key):
         return key.lower()
 
-    def __init__(self, name):
-        if name is None:
+    def __init__(self, name=''):
+        if isinstance(name, Key):
+            name = name._fullname
+        elif name is None:
             name = ''
+        elif not isinstance(name, str):
+            raise TypeError("'name' must be str, is %s (%s)" % (name.__class__.__name__, name))
         elif name:
             self._validate_complexkey(name)
         self._fullname = name
@@ -290,15 +307,30 @@ class Key(object):
 
     __str__ = __repr__
 
-    def __len__(self):
-        return len(self._fullname)
+    def __bool__(self):
+        return bool(self._fullname.replace(self._namesep, ''))
 
-    def __add__(self, name):
-        if isinstance(name, Key):
-            name = name._fullname
-        if self._fullname and name:
-            return Key(self._namesep.join((self._fullname, name)))
-        return Key(name + self._fullname)
+    def __len__(self):
+        return self._fullname.count(self._namesep) + 1 if self else 0
+
+    def __add__(self, key):
+        if not isinstance(key, Key):
+            key = Key(key)
+        if self and key:
+            return Key(self._namesep.join((self._fullname, key._fullname)))
+        return Key(key._fullname + self._fullname)
+
+    def __radd__(self, name):
+        return Key(name).__add__(self)
+
+    def __iadd__(self, name):
+        raise NotImplementedError(self.__class__.__name__ + ' is immutable')
+
+    def __eq__(self, other):
+        return self.normstr == other.normstr
+
+    def __hash__(self):
+        return hash(self.normstr)
 
     @property
     def str(self):
@@ -322,40 +354,77 @@ class Key(object):
         return self.split[1]
 
     @property
+    def first(self):
+        return Key(self._fullname.rpartition(self._namesep)[0])
+
+    @property
     def last(self):
-        try:
-            return Key(self._fullname.split(self._namesep)[-1])
-        except IndexError:
-            raise ConfigError('key is empty')
+        return Key(self._fullname.rpartition(self._namesep)[2])
 
 
 
 class Property(object):
 
-    DEFAULTS = dict.fromkeys(('name', 'value', 'valtype', 'readonly', 'hidden', 'validity', 'desc'))
+
+    # default values for Property attributes
+    _DEFAULT_ATTRIBUTES = dict.fromkeys(('name', 'value', 'valtype', 'readonly', 'hidden', 'validity', 'desc'))
+
+
+    __reserved_objects = [int, bool, float, complex, str, bytes, list, set, tuple, dict]
+    __reserved_names = ['name', 'value', 'valtype', 'desc', 'readonly', 'hidden', 'validity', ]
+
+
+    @classmethod
+    def _reserved(cls):
+        try:
+            return cls.__reserved
+        except AttributeError:
+            res = [Key(o.__name__).normstr for o in cls.__reserved_objects]
+            res += cls.__reserved_names
+            cls.__reserved = res
+            return res
+
+
+    @classmethod
+    def _validate_no_keyword(cls, key):
+        reserved = cls._reserved()
+        head = key.head
+        while head:
+            if key.normstr in reserved:
+                raise ConfigKeyError("invalid key name: '%s' contains reserved word: %s" % (key, str(reserved)))
+            head = head.tail.head
 
     def __init__(self, name, value=None, valtype=None, readonly=None, hidden=None, validity=None, desc=None):
         if not name:
             raise ValueError("'name' must not be None or empty")
-        Key(name)
+        self._validate_no_keyword(Key(name))
         self._name = name
         self._type = valtype
         self._value = None
         self._converter = ValueConverter(value)
+        self.readonly = None
         self.validity = validity
-        self.readonly = readonly
-        self.hidden = hidden
         self.value = value
         self.desc = desc
+        self.readonly = readonly
+        self.hidden = hidden
 
 
     def __getitem__(self, name):
-        return self.__getattribute__(name)
+        try:
+            return self.__getattribute__(name)
+        except AttributeError:
+            raise KeyError("'%s' object has no key '%s'" % (self.__class__.__name__, name))
 
     def __setitem__(self, name, value):
-        if name not in Key.reserved():
-            raise ConfigError("can't set item '%s': item does not exist" % name)
+        if name not in self._reserved():
+            raise KeyError("'%s' object has no key '%s'" % (self.__class__.__name__, name))
         self.__setattr__(name, value)
+
+    def __delitem__(self, name):
+        if name not in self._reserved():
+            raise KeyError("'%s' object has no key '%s'" % (self.__class__.__name__, name))
+        self.__delattr__(name)
 
     def __bool__(self):
         return self.bool
@@ -367,10 +436,12 @@ class Property(object):
         return self.float
 
     def __repr__(self):
-        return str((self.name, self.value, self.desc))
+        return str(_property_to_dict(self))
+#        return str((self.name, self.value, self.desc))
 
     def __str__(self):
-        return self.str
+        return '%s = %s' % (self.name, self.value)
+#        return self.str
 
     @property
     def name(self):
@@ -379,15 +450,6 @@ class Property(object):
     @property
     def valtype(self):
         return self._type
-
-    @property
-    def dict(self):
-        d = {}
-        for key in self.DEFAULTS:
-            actual = self[key]
-            if actual:
-                d[key] = actual
-        return d
 
     @property
     def list(self):
@@ -410,9 +472,9 @@ class Property(object):
         return self._converter['str']
 
     @util.Property
-    def value():
+    def value(): #@NoSelf
         def fget(self):
-            return self._converter[self.type] if self.valtype else self._value
+            return self._converter[self.valtype] if self.valtype else self._value
 
         def fset(self, value):
             if self.readonly:
@@ -427,11 +489,13 @@ class Property(object):
         return locals()
 
     @util.Property
-    def desc():
+    def desc(): #@NoSelf
         def fget(self):
             return self.__desc
 
         def fset(self, desc):
+            if self.readonly:
+                raise ConfigError('cannot change description: %s is readonly' % self.name)
             self.__desc = '' if desc is None else desc
 
         def fdel(self):
@@ -447,36 +511,10 @@ class Configuration(Property):
 
 
     def __init__(self, name=None, parent=None):
-        assert name or not parent
-        super().__init__(name if name else 'root')
+        super().__init__(name if parent is not None else 'root')
         self._name = name
         self._parent = parent
         self._properties = OrderedDict()
-
-
-    @property
-    def dict(self):
-        view = {} if self._isroot() else super().dict
-        if 'name' in view:
-            del view['name']
-        for prop in self._properties.values():
-            dic = prop.dict
-            if len(dic) == 1 and 'value' in dic:
-                value = dic['value']
-            else:
-                value = dic
-            view[Key(prop.name).last.str] = value
-        return view
-
-
-    @property
-    def list(self, sort=True):
-        view = []
-        if (self._value is not None) or self.desc:
-            view.append((self.name, self.value, self.desc))
-        for p in self._properties.values():
-            view += p.list
-        return view
 
 
     @property
@@ -496,7 +534,7 @@ class Configuration(Property):
 
 
     @util.Property
-    def readonly():
+    def readonly(): #@NoSelf
         def fget(self):
             if self._readonly is None and not self._isroot():
                 return self._parent.readonly
@@ -512,7 +550,7 @@ class Configuration(Property):
 
 
     @util.Property
-    def hidden():
+    def hidden(): #@NoSelf
         def fget(self):
             if self._hidden is None and not self._isroot():
                 return self._parent.hidden
@@ -526,50 +564,76 @@ class Configuration(Property):
 
         return locals()
 
+    def __len__(self):
+        l = sum((len(p) for p in self._properties.values()))
+        return l + len(self._properties)
+
+    def __iter__(self):
+        return (p.name for p in self._recursive_properties())
+
+    def __contains__(self, name):
+        try:
+            key = Key(name)
+        except ConfigKeyError:
+            return False
+        return key.normstr in (p._key.normstr for p in self._recursive_properties())
 
     def __bool__(self):
         return bool(self._properties)
 
+    def _recursive_properties(self):
+        stack = list(reversed(list(self._properties.values())))
+        while stack:
+            p = stack.pop()
+            yield p
+            stack += list(reversed(list(p._properties.values())))
 
     def __repr__(self):
-        name = self.name
-        if self._isroot():
-            name = "(root)"
-        return '[%s %s]' % (self.__class__.__name__, name)
+        return repr(to_dict(self))
 
+    def __str__(self):
+        return '%(class)s %(name)s %(val)s (%(propno)d properties)' % {
+                                                            'class' : self.__class__.__name__,
+                                                            'name' : '[root]' if self._isroot() else self.name,
+                                                            'val' : '= ' + str(self.value) if self.value is not None else '',
+                                                            'propno' : len(self),
+                                                            }
 
     def __getitem__(self, name):
         try:
             return self._get(Key(name))
-        except ConfigError:
+        except ConfigKeyError: #TODO what is that for? Key.reserved()?
             return super().__getitem__(name)
 
 
     def __setitem__(self, name, value):
         try:
             return self._set(Key(name), value)
-        except ConfigError:
+        except ConfigKeyError:
             return super().__setitem__(name, value)
 
 
     def __delitem__(self, name):
-        self._del(Key(name))
+        try:
+            self._del(Key(name))
+        except ConfigKeyError:
+            return super().__delitem__(name)
 
 
     def __getattr__(self, name):
-        if name.startswith('_') or name in Key.reserved():
+        if name.startswith('_') or name in self._reserved():
             return super().__getattribute__(name)
         return self._get_local(Key(name))
 
 
     def __setattr__(self, name, value):
-        if name.startswith('_') or name in Key.reserved():
+        if name.startswith('_') or name in self._reserved():
             return super().__setattr__(name, value)
         self._set_local(Key(name), value)
 
 
     def __delattr__(self, name):
-        if name.startswith('_') or name in Key.reserved():
+        if name.startswith('_') or name in self._reserved():
             return super().__delattr__(name)
         self._del_local(Key(name))
 
@@ -585,13 +649,22 @@ class Configuration(Property):
 
 
     def _merge(self, other):
-        if isinstance(other, Configuration) or isinstance(other, Property):
-            other = other.dict
-        if not isinstance(other, dict):
+        if isinstance(other, Configuration):
+            other = to_dict(other)
+        elif isinstance(other, Property):
+            other = _property_to_dict(other)
+        elif not isinstance(other, dict):
             self.value = other
-        else:
-            for key, value in other.items():
-                self[key] = value
+            return
+        othername = other.pop('name', self.name)
+        other.pop('valtype', None)
+        other.pop('readonly', None)
+        other.pop('hidden', None)
+        if Key(othername) != self._key:
+            log.e('trying to merge %s into %s: wrong name. skipping.', othername, self.name)
+            return
+        for key, value in other.items():
+            self[key] = value
 
 
     def _get(self, key):
@@ -625,15 +698,18 @@ class Configuration(Property):
     def _del(self, key):
         head, tail = key.split
         if tail:
-            self._get_local(head)._del(tail)
-        self._del_local(head)
+            del self._get_local(head)[tail.str]
+        else:
+            self._del_local(head)
 
 
     def _del_local(self, key):
         try:
             del self._properties[key.last.normstr]
         except KeyError:
-            log.w('trying to delete non-existent property %s%s', (self._getfullkey() + key.last).str)
+            self._validate_no_keyword(key)
+            log.w('trying to delete non-existent property %s', (self._getfullkey() + key.last).str)
+
 
 
 def transformer(name):
