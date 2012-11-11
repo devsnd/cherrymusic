@@ -14,6 +14,16 @@ class AlbumArtFetcher:
                 'url' : "http://www.amazon.com/s/ref=sr_nr_i_0?rh=k:",
                 'regex' : '<img  src="([^"]*)" class="productImage"'
             },
+            'music.ovi.com' : {
+                'url' : 'http://music.ovi.com/gb/en/pc/Search/?display=detail&text=',
+                'regex': 'class="prod-sm"><img src="([^"]*)"',
+                #improve image quality:
+                'urltransformer' : lambda x : x[:x.rindex('/')]+'/?w=200&q=100',
+            },                
+            'bestbuy.com':{
+                'url' : 'http://www.bestbuy.com/site/searchpage.jsp?_dyncharset=ISO-8859-1&id=pcat17071&type=page&ks=960&sc=Global&cp=1&sp=&qp=crootcategoryid%23%23-1%23%23-1~~q6a616d657320626c616b65206a616d657320626c616b65~~nccat02001%23%230%23%23e&list=y&usc=All+Categories&nrp=15&iht=n&st=',
+                'regex' : '<img itemprop="image" class="thumb" src="([^"]*)"'
+            },
             'buy.com' : {
                 'url' : "http://www.buy.com/sr/srajax.aspx?from=2&qu=",
                 'regex' : ' class="productImageLink"><img src="([^"]*)"'
@@ -47,13 +57,17 @@ class AlbumArtFetcher:
     def fetchAlbumArt(self, method, searchterm, urlonly=False):
         urlkeywords = urllib.parse.quote(searchterm)
         url = method['url']+urlkeywords
+        print(url)
         html = self.retrieveWebpage(url)   
         matches = re.findall(method['regex'],html)
         if matches:
             if urlonly:
                 return matches[0]
             else:
-                return self.downloadImage(matches[0])
+                imgurl = matches[0]
+                if 'urltransformer' in method:
+                    imgurl = method['urltransformer'](imgurl)
+                return self.downloadImage(imgurl)
         else:
             if urlonly:
                 return ''
