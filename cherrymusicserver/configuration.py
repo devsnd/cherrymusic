@@ -41,9 +41,8 @@ def from_defaults():
     '''load default configuration. must work if path to standard config file is unknown.'''
     c = Configuration()
 
-    mediabasedir = os.path.join(os.path.expanduser('~'), 'Music')
-    c._set('media.basedir', mediabasedir, warn_on_create=False)
-    c.media.basedir._desc = """
+    c.media.basedir = os.path.join(os.path.expanduser('~'), 'Music')
+    c.media.basedir.desc = """
                             BASEDIR specifies where the media that should be
                             served is located. It must be the absolute path, e.g.
                             BASEDIR=/absolute/path/to/media.
@@ -57,27 +56,27 @@ def from_defaults():
                             """
 
     c.media.playable = 'mp3 m4a m4v ogv oga wav webm'
-    c.media.playable._desc = """
+    c.media.playable.desc = """
                                 PLAYABLE is a space-separated list of media file
                                 extensions that can be played by jPlayer.
                                 """
 
     c.media.transcode = False
-    c.media.transcode._desc = """
+    c.media.transcode.desc = """
                                 TRANSCODE (experimental!) enables automatic live transcoding 
                                 of the media to be able to listen to every format on every device.
                                 This requires you to have the appropriate codecs installed.
                                 Please note that transcoding will significantly increase the stress on the CPU!
                                 """
     c.media.fetch_album_art = False
-    c.media.fetch_album_art = """
+    c.media.fetch_album_art.desc = """
                                 Tries to fetch the album cover from various locations in the web.
                                 They will be shown next to folders that qualify as a possible
                                 album.
                                 """
 
-    c._set('search.maxresults', 20, warn_on_create=False)
-    c.search.maxresults._desc = """
+    c.search.maxresults = 20
+    c.search.maxresults.desc = """
                                 MAXRESULTS sets the maximum amount of search results
                                 to be displayed. If MAXRESULTS is set to a higher value,
                                 the search will take longer, but will also be more accurate.
@@ -85,16 +84,16 @@ def from_defaults():
                                 """
 
 
-    c._set('look.theme', 'zeropointtwo', warn_on_create=False)
-    c.look.theme._desc = """
+    c.look.theme = 'zeropointtwo'
+    c.look.theme.desc = """
                         Available themes are: "zeropointtwo", "hax1337".
                         To create your own theme, you can simply copy the theme
                         to ~/.cherrymusic/themes/yournewtheme and modify it to
                         your will. Then you can set theme=yournewtheme
                         """
 
-    c._set('browser.maxshowfiles', '100', False)
-    c.browser.maxshowfiles._desc = '''
+    c.browser.maxshowfiles = 100
+    c.browser.maxshowfiles.desc = '''
                                     MAXSHOWFILES specifies how many files and folders should
                                     be shown at the same time. E.g. if you open a folder
                                     with more than MAXSHOWFILES, the files will be grouped 
@@ -102,37 +101,37 @@ def from_defaults():
                                     100 is a good value, as a cd can have up to 99 tracks.
                                     '''
 
-    c._set('server.port', '8080', False)
-    c.server.port._desc = 'The port the server will listen to.'
+    c.server.port = 8080
+    c.server.port.desc = 'The port the server will listen to.'
 
 
     c.server.logfile = 'site.log'
-    c.server.logfile._desc = 'the logfile in which server errors will be logged'
+    c.server.logfile.desc = 'the logfile in which server errors will be logged'
 
-    c.server.localhost_only = 'False'
-    c.server.localhost_only._desc = '''
+    c.server.localhost_only = False
+    c.server.localhost_only.desc = '''
                                     when localhost_only is set to true, the server will not
                                     be visible in the network and only play music on the
                                     same computer it is running on
                                     '''
 
-    c.server.localhost_auto_login = 'False'
-    c.server.localhost_auto_login._desc = '''
+    c.server.localhost_auto_login = False
+    c.server.localhost_auto_login.desc = '''
                                     When localhost_auto_login is set to "True", the server will
                                     not ask for credentials when using it locally. The user will
                                     be automatically logged in as admin.
                                     '''
 
-    c.server.enable_ssl = 'False'
-    c.server.enable_ssl._desc = '''
+    c.server.enable_ssl = False
+    c.server.enable_ssl.desc = '''
                                 The following options allow you to use cherrymusic with
                                 https encryption. You must have "pyOpenSSL" installed to
                                 be able to use it. If enable_ssl is set to False, all other
                                 ssl options will be ommited.
                                 '''
 
-    c.server.ssl_port = '8443'
-    c.server.ssl_port._desc = '''
+    c.server.ssl_port = 8443
+    c.server.ssl_port.desc = '''
                                 The port that will listen to SSL encrypted requests. If
                                 use_ssl is set to True, all unencrypted HTTP requests
                                 will be redirected to this port.
