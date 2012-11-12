@@ -509,7 +509,7 @@ class Property(object):
         def fset(self, desc):
             if self.readonly:
                 raise ConfigError('cannot change description: %s is readonly' % self.name)
-            self.__desc = '' if desc is None else desc
+            self.__desc = '\n'.join(util.phrase_to_lines('' if desc is None else desc))
 
         def fdel(self):
             self.__desc = ''
