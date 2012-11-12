@@ -365,7 +365,7 @@ class Key(object):
 class Property(object):
 
 
-    # default values for Property attributes
+    # names and default values for Property attributes
     _DEFAULT_ATTRIBUTES = dict.fromkeys(('name', 'value', 'valtype', 'readonly', 'hidden', 'validity', 'desc'))
 
 
@@ -393,6 +393,7 @@ class Property(object):
                 raise ConfigKeyError("invalid key name: '%s' contains reserved word: %s" % (key, str(reserved)))
             head = head.tail.head
 
+
     def __init__(self, name, value=None, valtype=None, readonly=None, hidden=None, validity=None, desc=None):
         if not name:
             raise ValueError("'name' must not be None or empty")
@@ -415,36 +416,43 @@ class Property(object):
         except AttributeError:
             raise KeyError("'%s' object has no key '%s'" % (self.__class__.__name__, name))
 
+
     def __setitem__(self, name, value):
         if name not in self._reserved():
             raise KeyError("'%s' object has no key '%s'" % (self.__class__.__name__, name))
         self.__setattr__(name, value)
+
 
     def __delitem__(self, name):
         if name not in self._reserved():
             raise KeyError("'%s' object has no key '%s'" % (self.__class__.__name__, name))
         self.__delattr__(name)
 
+
     def __bool__(self):
         return self.bool
+
 
     def __int__(self):
         return self.int
 
+
     def __float__(self):
         return self.float
 
+
     def __repr__(self):
         return str(_property_to_dict(self))
-#        return str((self.name, self.value, self.desc))
+
 
     def __str__(self):
         return '%s = %s' % (self.name, self.value)
-#        return self.str
+
 
     @property
     def name(self):
         return self._name
+
 
     @property
     def valtype(self):
@@ -454,21 +462,26 @@ class Property(object):
     def list(self):
         return self._converter['list']
 
+
     @property
     def int(self):
         return self._converter['int']
+
 
     @property
     def float(self):
         return self._converter['float']
 
+
     @property
     def bool(self):
         return self._converter['bool']
 
+
     @property
     def str(self):
         return self._converter['str']
+
 
     @util.Property
     def value(): #@NoSelf
@@ -486,6 +499,7 @@ class Property(object):
             self._converter.value = value
 
         return locals()
+
 
     @util.Property
     def desc(): #@NoSelf
@@ -514,6 +528,14 @@ class Configuration(Property):
         self._name = name
         self._parent = parent
         self._properties = OrderedDict()
+
+
+    def _recursive_properties(self):
+        stack = list(reversed(list(self._properties.values())))
+        while stack:
+            p = stack.pop()
+            yield p
+            stack += list(reversed(list(p._properties.values())))
 
 
     @property
@@ -563,12 +585,15 @@ class Configuration(Property):
 
         return locals()
 
+
     def __len__(self):
         l = sum((len(p) for p in self._properties.values()))
         return l + len(self._properties)
 
+
     def __iter__(self):
         return (p.name for p in self._recursive_properties())
+
 
     def __contains__(self, name):
         try:
@@ -577,26 +602,22 @@ class Configuration(Property):
             return False
         return key.normstr in (p._key.normstr for p in self._recursive_properties())
 
+
     def __bool__(self):
         return bool(self._properties)
 
-    def _recursive_properties(self):
-        stack = list(reversed(list(self._properties.values())))
-        while stack:
-            p = stack.pop()
-            yield p
-            stack += list(reversed(list(p._properties.values())))
 
     def __repr__(self):
         return repr(to_dict(self))
 
+
     def __str__(self):
         return '%(class)s %(name)s %(val)s (%(propno)d properties)' % {
-                                                            'class' : self.__class__.__name__,
-                                                            'name' : '[root]' if self._isroot() else self.name,
-                                                            'val' : '= ' + str(self.value) if self.value is not None else '',
-                                                            'propno' : len(self),
-                                                            }
+                    'class' : self.__class__.__name__,
+                    'name' : '[root]' if self._isroot() else self.name,
+                    'val' : '' if self.value is None else '= ' + str(self.value),
+                    'propno' : len(self),
+                }
 
     def __getitem__(self, name):
         try:
@@ -672,7 +693,7 @@ class Configuration(Property):
         return local[tail.str] if tail else local
 
 
-    def _get_local(self, key, warn_on_create=True):
+    def _get_local(self, key):
         try:
             value = self._properties[key.last.normstr]
             return value
@@ -680,7 +701,7 @@ class Configuration(Property):
             return self._create_child(key.last.str)
 
 
-    def _set(self, key, value, warn_on_create=True):
+    def _set(self, key, value):
         head, tail = key.split
         if tail:
             local = self._get_local(head)
@@ -750,6 +771,7 @@ class TransformError(Exception):
         return self._cause
 
 
+
 @transformer(name='bool')
 def _to_bool_transformer(val=None):
     if isinstance(val, (bool, int, float, complex, list, set, dict, tuple)):
@@ -767,6 +789,7 @@ def _to_bool_transformer(val=None):
             raise TransformError('bool', val, default=False)
 
 
+
 @transformer('list')
 def _to_list_transformer(val=None):
     if isinstance(val, str):
@@ -776,6 +799,7 @@ def _to_list_transformer(val=None):
         return list(val)
     else:
         raise TransformError('list', val, default=[])
+
 
 @transformer('int')
 def _to_int_transformer(val=None):
@@ -852,6 +876,7 @@ class ValueConverter(object):
         except TransformError as e:
             log.w('%s; returning default value of %s', e.msg, str(e.suggested_default))
             return e.suggested_default
+
 
     def __contains__(self, name):
         return name in self.__transformers.keys()
