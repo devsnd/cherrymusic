@@ -731,13 +731,18 @@ class Configuration(Property):
             log.w('trying to delete non-existent property %s', (self._getfullkey() + key.last).str)
 
 
-
+Transformers = {}
 def transformer(name):
+    global Transformers # hell yeah!
+
     def transformer_decorator(func):
         def transformer_wrapper(self, *args, **kwargs):
             return func(*args, **kwargs)
-        return type(name, (object,), {'__new__': transformer_wrapper})
+        ttype = type(name, (object,), {'__new__':transformer_wrapper})
+        Transformers[name] = ttype
+        return ttype
     return transformer_decorator
+
 
 class TransformError(Exception):
 
