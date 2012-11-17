@@ -36,8 +36,8 @@ cherrymusic needs the module cherrypy to run. You should install it
 using the package manager of your OS. Alternatively cherrymusic can
 install it for you inside the folder in which cherrymusic resides.""")
     if input("(i)stall cherrypy / (q)uit and install cherrpy manually? [i/q]") == 'i':
-        from cherrymusicserver import util
-        util.DependencyInstaller()
+        import cmbootstrap
+        cmbootstrap.DependencyInstaller()
     else:
         raise
 
