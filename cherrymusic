@@ -28,6 +28,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
+try:
+    import cherrypy
+except ImportError:
+    print("""
+cherrymusic needs the module cherrypy to run. You should install it
+using the package manager of your OS. Alternatively cherrymusic can
+install it for you inside the folder in which cherrymusic resides.""")
+    if input("(i)stall cherrypy / (q)uit and install cherrpy manually? [i/q]") == 'i':
+        from cherrymusicserver import util
+        util.DependencyInstaller()
+    else:
+        raise
+
 import cherrymusicserver
 try:
 	import argparse
@@ -47,12 +60,8 @@ Version '''+cherrymusicserver.VERSION)
 
 parser.add_argument('--update',dest='update',action='store_true', help='update the media database')
 parser.add_argument('--newconfig',dest='newconfig',action='store_true', help='creates a new config file in your home directory, e.g. ~/.cherrymusic/config.new')
-parser.add_argument('--install-dependencies',dest='installdependencies',action='store_true', help='downloads and installs all needed dependencies for cherrymusic inside folder in which cherrymusic resides')
 args = parser.parse_args()
 
-if args.installdependencies:
-    from cherrymusicserver import util
-    util.DependencyInstaller()
-elif __name__ == "__main__":
+if __name__ == "__main__":
     cherrymusicserver.CherryMusic(update=args.update,createNewConfig=args.newconfig)
     
