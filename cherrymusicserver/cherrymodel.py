@@ -37,6 +37,7 @@ import cherrypy
 
 import cherrymusicserver as cherry
 from cherrymusicserver import util
+from cherrymusicserver.util import Performance
 from cherrymusicserver import resultorder
 from cherrymusicserver import log
 
@@ -117,8 +118,9 @@ class CherryModel:
         if isFastSearch:
             maxresults = 5
         results = self.cache.searchfor(term, maxresults=cherry.config.search.maxresults.int,isFastSearch=isFastSearch)
-        results = sorted(results,key=resultorder.ResultOrder(term),reverse=True)
-        results = results[:min(len(results), maxresults)]
+        with Performance('sorting DB results using ResultOrder'):
+            results = sorted(results,key=resultorder.ResultOrder(term),reverse=True)
+            results = results[:min(len(results), maxresults)]
         ret = []
         for file in results:
             strippedpath = self.strippath(file)

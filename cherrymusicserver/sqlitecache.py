@@ -39,12 +39,12 @@ from time import time
 import cherrymusicserver as cherry
 from cherrymusicserver import log
 from cherrymusicserver import util
+from cherrymusicserver.util import Performance
 from cherrymusicserver.progress import ProgressTree, ProgressReporter
 
 scanreportinterval = 1
 AUTOSAVEINTERVAL = 100
 debug = False
-performanceTest = False
 keepInRam = False
 
 NORMAL_FILE_SEARCH_LIMIT = 250
@@ -145,7 +145,7 @@ class SQLiteCache(object):
             limit = ' LIMIT 0, '+str(fileIdLimit) #TODO add maximum db results as configuration parameter
             log.d('Search term: ' + term)
             sql = query + limit
-            if performanceTest:
+            if debug:
                 log.d('Query used: ' + sql)
             self.db.execute(sql, (term+'%',))
             resultlist += self.db.fetchall()
@@ -153,52 +153,48 @@ class SQLiteCache(object):
         return resultlist
 
     def searchfor(self, value, maxresults=10, isFastSearch=False):
-        starttime = time()
-        self.db = self.conn.cursor()
-        terms = SQLiteCache.searchterms(value)
-        if debug:
-            log.d('searchterms')
-            log.d(terms)
-        results = []
-        resultfileids = {}
+        with Performance('searching for a maximum of %s files' % str(NORMAL_FILE_SEARCH_LIMIT)):
+            self.db = self.conn.cursor()
+            terms = SQLiteCache.searchterms(value)
+            if debug:
+                log.d('searchterms')
+                log.d(terms)
+            results = []
+            resultfileids = {}
+            
+            with Performance('file id fetching'):
+                fileids = self.fetchFileIds(terms,isFastSearch)
 
-        log.d('querying terms: ' + str(terms))
-        perf()
-        fileids = self.fetchFileIds(terms,isFastSearch)
-        perf('file id fetching')
-
-        if debug:
-            log.d('fileids')
-            log.d(fileids)
-        for fileid in fileids:
-            if fileid in resultfileids:
-                resultfileids[fileid] += 1
-            else:
-                resultfileids[fileid] = 1
-
-        if debug:
-            log.d('all file ids')
-            log.d(resultfileids)
-        #sort items by occurences and only return maxresults
-        sortedresults = sorted(resultfileids.items(), key=itemgetter(1), reverse=True)
-        #sortedresults = sortedresults[:min(len(resultfileids),maxresults)]
-        if debug:
-            log.d('sortedresults')
-            log.d(sortedresults)
-        bestresults = list(map(itemgetter(0), sortedresults))
-        if debug:
-            log.d('bestresults')
-            log.d(bestresults)
-        perf()
-        for fileidtuple in bestresults:
-            results.append(self.fullpath(fileidtuple[0]))
-        perf('querying fullpaths')
-        if debug:
-            log.d('resulting paths')
-            log.d(results)
-        if performanceTest:
-            log.d('overall search took ' + str(time() - starttime) + 's')
-        return results
+            if debug:
+                log.d('fileids')
+                log.d(fileids)
+            for fileid in fileids:
+                if fileid in resultfileids:
+                    resultfileids[fileid] += 1
+                else:
+                    resultfileids[fileid] = 1
+            if debug:
+                log.d('all file ids')
+                log.d(resultfileids)
+            #sort items by occurences and only return maxresults
+            sortedresults = sorted(resultfileids.items(), key=itemgetter(1), reverse=True)
+            #sortedresults = sortedresults[:min(len(resultfileids),maxresults)]
+            if debug:
+                log.d('sortedresults')
+                log.d(sortedresults)
+            bestresults = list(map(itemgetter(0), sortedresults))
+            if debug:
+                log.d('bestresults')
+                log.d(bestresults)
+            
+            with Performance('querying fullpaths'):
+                for fileidtuple in bestresults:
+                    results.append(self.fullpath(fileidtuple[0]))
+            
+            if debug:
+                log.d('resulting paths')
+                log.d(results)
+            return results
 
     def fullpath(self, filerowid):
         path = ''
@@ -547,12 +543,6 @@ class SQLiteCache(object):
         return file
 
 
-def perf(text=None):
-    global __perftime
-    if text == None:
-        __perftime = time()
-    else:
-        log.d(text + ' took ' + str(time() - __perftime) + 's to execute')
 
 
 class File():

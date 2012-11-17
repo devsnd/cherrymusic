@@ -33,6 +33,8 @@ import sys
 from cherrymusicserver import log
 from time import time
 
+PERFORMANCE_TEST = True
+
 def configurationFile():
     return os.path.join(getConfigPath(), 'config')
 
@@ -176,3 +178,18 @@ class MovingAverage(object):
             raise tpe
         self._values.append(val)
         return self._avg
+        
+class Performance:
+    def __init__(self, text):
+        self.text = text
+        
+    def __enter__(self):
+        global PERFORMANCE_TEST
+        if PERFORMANCE_TEST:
+            self.time = time()
+
+    def __exit__(self, type, value, traceback):
+        global PERFORMANCE_TEST
+        if PERFORMANCE_TEST:
+            duration = int((time() - self.time)*1000)
+            log.w('%s took %d ms to execute' % (self.text,duration))
