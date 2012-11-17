@@ -180,6 +180,7 @@ class MovingAverage(object):
         return self._avg
         
 class Performance:
+    indentation = 0
     def __init__(self, text):
         self.text = text
         
@@ -187,9 +188,12 @@ class Performance:
         global PERFORMANCE_TEST
         if PERFORMANCE_TEST:
             self.time = time()
+            Performance.indentation += 1
+            log.w('|   '*(Performance.indentation-1) + '/ˉˉ'+ self.text)
 
     def __exit__(self, type, value, traceback):
         global PERFORMANCE_TEST
         if PERFORMANCE_TEST:
-            duration = int((time() - self.time)*1000)
-            log.w('%s took %d ms to execute' % (self.text,duration))
+            duration = (time() - self.time)*1000
+            log.w('|   '*(Performance.indentation-1) + '\__ %g ms' % (duration,))
+            Performance.indentation -= 1

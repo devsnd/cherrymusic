@@ -235,9 +235,10 @@ class HTTPHandler(object):
     def api_search(self, value, isFastSearch=False):
         if not value.strip():
             return self.jsonrenderer.render([MusicEntry(path="if you're looking for nothing, you'll be getting nothing",repr="")])
-        searchresults = self.model.search(value.strip(),isFastSearch)
-        with Performance('rendering search results as json'):
-            return self.jsonrenderer.render(searchresults)
+        with Performance('processing whole search request'):
+            searchresults = self.model.search(value.strip(),isFastSearch)
+            with Performance('rendering search results as json'):
+                return self.jsonrenderer.render(searchresults)
         
     def api_fastsearch(self, value):
         return self.api_search(value,True)

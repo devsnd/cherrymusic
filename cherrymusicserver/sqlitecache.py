@@ -113,8 +113,6 @@ class SQLiteCache(object):
     def __create_indexes(self):
         self.conn.execute('CREATE INDEX IF NOT EXISTS idx_files_parent'
                           ' ON files(parent)')
-        self.conn.execute('CREATE INDEX IF NOT EXISTS idx_files_parent'
-                          ' ON files(rowid)')
         self.conn.execute('CREATE INDEX IF NOT EXISTS idx_dictionary'
                           ' ON dictionary(word)')
         self.conn.execute('CREATE INDEX IF NOT EXISTS idx_search'
@@ -143,13 +141,14 @@ class SQLiteCache(object):
     def fetchFileIds(self, terms, isFastSearch=False):
         fileIdLimit = FAST_FILE_SEARCH_LIMIT if isFastSearch else NORMAL_FILE_SEARCH_LIMIT;
         resultlist = []
-        for term in terms:
+        for term in terms:           
             query = '''SELECT search.frowid FROM dictionary JOIN search ON search.drowid = dictionary.rowid WHERE dictionary.word LIKE ?'''
             limit = ' LIMIT 0, '+str(fileIdLimit) #TODO add maximum db results as configuration parameter
             log.d('Search term: ' + term)
             sql = query + limit
             if debug:
                 log.d('Query used: ' + sql)
+            #print(self.conn.execute('EXPLAIN QUERY PLAN '+sql, (term+'%',)).fetchall())
             self.db.execute(sql, (term+'%',))
             resultlist += self.db.fetchall()
 
@@ -203,6 +202,7 @@ class SQLiteCache(object):
         path = ''
         parent = None
         while(not parent == -1):
+            #print(self.conn.execute('''EXPLAIN QUERY PLAN SELECT parent, filename, filetype FROM files WHERE rowid=? LIMIT 0,1''', (filerowid,)).fetchall())
             cursor = self.conn.cursor()
             cursor.execute('''SELECT parent, filename, filetype FROM files WHERE rowid=? LIMIT 0,1''', (filerowid,))
             parent, filename, fileext = cursor.fetchone()
