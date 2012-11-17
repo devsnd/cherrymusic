@@ -67,10 +67,11 @@ class SQLiteCache(object):
         if setupDB:
             log.i('Creating tables...')
             self.__create_tables()
-            log.i('Creating index for dictionary and search tables... ')
-            self.__create_indexes()
             log.i('done.')
             log.i('Connected to Database. (' + DBFILENAME + ')')
+        log.i('Creating indices for dictionary and search tables (if necessary)... ')
+        self.__create_indexes()
+        
         #I don't care about journaling!
         self.conn.execute('PRAGMA synchronous = OFF')
         self.conn.execute('PRAGMA journal_mode = MEMORY')
@@ -112,6 +113,8 @@ class SQLiteCache(object):
     def __create_indexes(self):
         self.conn.execute('CREATE INDEX IF NOT EXISTS idx_files_parent'
                           ' ON files(parent)')
+        self.conn.execute('CREATE INDEX IF NOT EXISTS idx_files_parent'
+                          ' ON files(rowid)')
         self.conn.execute('CREATE INDEX IF NOT EXISTS idx_dictionary'
                           ' ON dictionary(word)')
         self.conn.execute('CREATE INDEX IF NOT EXISTS idx_search'
