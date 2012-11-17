@@ -216,16 +216,17 @@ class DependencyInstaller:
             urlhandler = urllib.request.urlopen(urllib.request.Request(DependencyInstaller.cherrypyurl))
             f.write(urlhandler.read())
         log.i('Extracting %s ' % cherrypytempfile)
-        with tarfile.open(cherrypytempfile,'r:gz') as tarc:
-            if os.path.exists(cherrypytempdir):
-                log.w("Directory %s already exists." % cherrypytempdir)
-                if 'y' == input('Do you want to delete its contents and proceed? [y/n]'):
-                    shutil.rmtree(cherrypytempdir)
-                else:
-                    log.e("Cannot install cherrypy.")
-                    exit(1)
-            os.mkdir(cherrypytempdir)
-            tarc.extractall(cherrypytempdir)
+        tarc = tarfile.open(cherrypytempfile,'r:gz')
+        if os.path.exists(cherrypytempdir):
+            log.w("Directory %s already exists." % cherrypytempdir)
+            if 'y' == input('Do you want to delete its contents and proceed? [y/n]'):
+                shutil.rmtree(cherrypytempdir)
+            else:
+                log.e("Cannot install cherrypy.")
+                exit(1)
+        os.mkdir(cherrypytempdir)
+        tarc.extractall(cherrypytempdir)
+        tarc.close()
         cherrymusicfolder = os.path.dirname(os.path.dirname(__file__))
         log.i('Copying cherrypy module inside cherrymusic folder (%s)...' % cherrymusicfolder)
         moduledir = os.path.join(cherrypytempdir,DependencyInstaller.cherrypysubfolder)
