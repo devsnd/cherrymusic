@@ -47,8 +47,12 @@ Version '''+cherrymusicserver.VERSION)
 
 parser.add_argument('--update',dest='update',action='store_true', help='update the media database')
 parser.add_argument('--newconfig',dest='newconfig',action='store_true', help='creates a new config file in your home directory, e.g. ~/.cherrymusic/config.new')
+parser.add_argument('--install-dependencies',dest='installdependencies',action='store_true', help='downloads and installs all needed dependencies for cherrymusic inside folder in which cherrymusic resides')
 args = parser.parse_args()
 
-if __name__ == "__main__":
+if args.installdependencies:
+    from cherrymusicserver import util
+    util.DependencyInstaller()
+elif __name__ == "__main__":
     cherrymusicserver.CherryMusic(update=args.update,createNewConfig=args.newconfig)
     
