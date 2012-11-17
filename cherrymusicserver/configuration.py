@@ -120,6 +120,13 @@ def from_defaults():
                                     not ask for credentials when using it locally. The user will
                                     be automatically logged in as admin.
                                     '''
+                                    
+    c.server.permit_remote_admin_login = True
+    c.server.permit_remote_admin_login._desc = '''
+                                    When permit_remote_admin_login is set to "False", admin users
+                                    may only log in from the computer cherrymusic is currently
+                                    running on. This can improve security.
+                                    '''
 
     c.server.enable_ssl = 'False'
     c.server.enable_ssl._desc = '''

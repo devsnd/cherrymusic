@@ -159,6 +159,8 @@ class HTTPHandler(object):
 
     def session_auth(self, username, password):
         user = self.userdb.auth(username, password)
+        if user.isadmin and not cherry.config.server.permit_remote_admin_login and not cherrypy.request.remote.ip == '127.0.0.1':
+            user = self.userdb.User.nobody()
         cherrypy.session['username'] = user.name
         cherrypy.session['userid'] = user.uid
         cherrypy.session['admin'] = user.isadmin
