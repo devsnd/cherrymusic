@@ -38,20 +38,20 @@ from cherrymusicserver import util
 def from_defaults():
     '''load default configuration. must work if path to standard config file is unknown.'''
     c = Configuration()
-    
+
     mediabasedir = os.path.join(os.path.expanduser('~'), 'Music')
     c._set('media.basedir', mediabasedir, warn_on_create=False)
     c.media.basedir._desc = """
                             BASEDIR specifies where the media that should be
                             served is located. It must be the absolute path, e.g.
                             BASEDIR=/absolute/path/to/media.
-                            
+
                             Links: If your operating system supports them,
                             you can use symlinks directly in BASEDIR. Links to
                             directories which contain BASEDIR will be ignored,
                             just like all links not directly in, but in sublevels
                             of BASEDIR. This is to guard against the adverse
-                            effects of link cycles. 
+                            effects of link cycles.
                             """
 
     c.media.playable = 'mp3 m4a m4v ogv oga wav webm'
@@ -62,13 +62,13 @@ def from_defaults():
 
     c.media.transcode = False
     c.media.transcode._desc = """
-                                TRANSCODE (experimental!) enables automatic live transcoding 
+                                TRANSCODE (experimental!) enables automatic live transcoding
                                 of the media to be able to listen to every format on every device.
                                 This requires you to have the appropriate codecs installed.
                                 Please note that transcoding will significantly increase the stress on the CPU!
                                 """
     c.media.fetch_album_art = False
-    c.media.fetch_album_art = """
+    c.media.fetch_album_art._desc = """
                                 Tries to fetch the album cover from various locations in the web.
                                 They will be shown next to folders that qualify as a possible
                                 album.
@@ -79,7 +79,7 @@ def from_defaults():
                                 MAXRESULTS sets the maximum amount of search results
                                 to be displayed. If MAXRESULTS is set to a higher value,
                                 the search will take longer, but will also be more accurate.
-                            
+
                                 """
 
 
@@ -95,7 +95,7 @@ def from_defaults():
     c.browser.maxshowfiles._desc = '''
                                     MAXSHOWFILES specifies how many files and folders should
                                     be shown at the same time. E.g. if you open a folder
-                                    with more than MAXSHOWFILES, the files will be grouped 
+                                    with more than MAXSHOWFILES, the files will be grouped
                                     according to the first letter in their name.
                                     100 is a good value, as a cd can have up to 99 tracks.
                                     '''
@@ -120,7 +120,7 @@ def from_defaults():
                                     not ask for credentials when using it locally. The user will
                                     be automatically logged in as admin.
                                     '''
-                                    
+
     c.server.permit_remote_admin_login = True
     c.server.permit_remote_admin_login._desc = '''
                                     When permit_remote_admin_login is set to "False", admin users
@@ -174,7 +174,7 @@ def from_configparser(filepath):
             for name, value in cfgp.items(section_name):
                  dic[section_name][name] = value
         #workaround end
-                     
+
     #check config file has missing keys
     containedNewKey = False
     defaults = from_defaults()
