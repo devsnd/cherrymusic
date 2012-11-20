@@ -70,7 +70,7 @@ def init():
             log.i("Decoder '{}' for format '{}' was found.".format(v[0],k))
     for dec in unavailDec:
         Decoders.pop(dec[0])
-        log.i("Decoder '{}' not found. Will not be able to encode {} streams".format(dec[1],dec[0]))
+        log.i("Decoder '{}' not found. Will not be able to decode {} streams".format(dec[1],dec[0]))
     
 def programAvailable(name):
     try:

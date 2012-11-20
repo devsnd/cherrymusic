@@ -28,16 +28,31 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
+import cmbootstrap
+
 try:
     import cherrypy
 except ImportError:
     print("""
-cherrymusic needs the module cherrypy to run. You should install it
+cherrymusic needs the module "cherrypy" to run. You should install it
 using the package manager of your OS. Alternatively cherrymusic can
-install it for you inside the folder in which cherrymusic resides.""")
-    if input("(i)stall cherrypy / (q)uit and install cherrpy manually? [i/q]") == 'i':
-        import cmbootstrap
-        cmbootstrap.DependencyInstaller()
+download it for you and put it in the folder in which cherrymusic resides.""")
+    if input("(d)ownload cherrypy / (q)uit and install cherrpy manually? [i/q]") == 'd':
+        inst = cmbootstrap.DependencyInstaller()
+        try:
+            install_stagger = False
+            import stagger
+        except ImportError:
+            print("""
+You seem to be missing the optional module "stagger", an ID3-tag
+library. You should install it using the package manager of your OS.
+Alternatively cherrymusic can download it for you and put it in the
+folder in which cherrymusic resides.""")
+            install_stagger = bool(input("(d)ownload stagger / (s)kip download of stagger [d/s]") == 'd')
+        inst.install_cherrypy()
+        if install_stagger:
+            inst.install_stagger()
+        print('Successfully installed cherrymusic dependencies! You can now start cherrymusic.')
     else:
         raise
 
@@ -60,7 +75,11 @@ Version '''+cherrymusicserver.VERSION)
 
 parser.add_argument('--update',dest='update',action='store_true', help='update the media database')
 parser.add_argument('--newconfig',dest='newconfig',action='store_true', help='creates a new config file in your home directory, e.g. ~/.cherrymusic/config.new')
+parser.add_argument('--download-stagger',dest='downloadstagger',action='store_true', help='downloads the python module "stagger", an ID3-tag library, so that your music can be index more precisely.')
 args = parser.parse_args()
+
+if args.downloadstagger:
+    cmbootstrap.DependencyInstaller().install_stagger()
 
 if __name__ == "__main__":
     cherrymusicserver.CherryMusic(update=args.update,createNewConfig=args.newconfig)
