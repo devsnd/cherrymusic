@@ -90,7 +90,7 @@ def getSongInfo(filepath):
             with audioread.audio_open(filepath) as f:
                 audiolength = f.duration
         except Exception:
-            log.e('audioread failed!')
+            log.e('audioread failed! (%s)', filepath)
             audiolength = 0
     else:
         audiolength = 0
