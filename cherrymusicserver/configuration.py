@@ -851,8 +851,11 @@ class PropertySet(MutableSet):
         return len(self.__properties)
 
     def __contains__(self, item):
-        key = item._key if isinstance(item, Property) else Key(item)
-        return key in self.__properties
+        try:
+            key = item._key if isinstance(item, Property) else Key(item)
+            return key in self.__properties
+        except (TypeError, ConfigKeyError):
+            return False
 
     def __iter__(self):
         return (p for p in self.__properties.values())
