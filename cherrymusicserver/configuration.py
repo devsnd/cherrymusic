@@ -31,7 +31,7 @@
 import os
 import re
 
-from collections import OrderedDict, namedtuple
+from collections import MutableSet, OrderedDict, namedtuple
 
 from cherrymusicserver import log as logging
 from cherrymusicserver import util
@@ -213,8 +213,8 @@ def to_list(cfg):
     if not isinstance(cfg, Property):
         raise TypeError('type(cfg) is not a Property: %s' % (type(cfg),))
     if not isinstance(cfg, Configuration):  # cfg is a plain Property
-        return [_property_to_tuple(cfg)]
-    l = [_property_to_tuple(p) for p in cfg._recursive_properties() if p.value or p.desc]
+        return [property_to_tuple(cfg)]
+    l = [property_to_tuple(p) for p in cfg._recursive_properties() if p.value or p.desc]
     return l
 
 
@@ -240,7 +240,9 @@ def to_dict(cfg):
     return d
 
 
-def _property_to_tuple(prop):
+def property_to_tuple(prop):
+    '''Transforms a Property into a namedtuple containing all attributes in
+    the order expected by the Property constructor.'''
     args = [prop[a] for a in Property._attributes()]
     return _PropTuple(*args)
 
@@ -784,7 +786,7 @@ class Property(object):
 
 
     def __copy(self):
-        return Property(*_property_to_tuple(self))
+        return Property(*property_to_tuple(self))
 
     def __become(self, other):
         self._key = other._key or self._key
@@ -827,6 +829,76 @@ class Property(object):
             self.__become(other)
 
 _PropTuple = namedtuple('PropertyTuple', ' '.join(Property._attributes()))
+
+
+class PropertySet(MutableSet):
+    '''A simple set implementation to keep properties.
+    
+    Additional methods get(), modify() and replace(). Operations that need
+    only the property name also accept Keys and strings as arguments.
+    
+    The set cares only for the Property names, not their other attributes. This
+    is especially significant for comparison with other sets and membership
+    tests. The only exception to this is the modify method which accesses the
+    Property interface and is thus dependent on the state of the modified
+    Property.
+    '''
+
+    def __init__(self):
+        self.__properties = {}
+
+    def __len__(self):
+        return len(self.__properties)
+
+    def __contains__(self, item):
+        key = item._key if isinstance(item, Property) else Key(item)
+        return key in self.__properties
+
+    def __iter__(self):
+        return (p for p in self.__properties.values())
+
+    def __repr__(self):
+        return "PropertySet(%s)" % (', '.join((str(p) for p in self.__properties.values())),)
+
+    def add(self, property):                                #@ReservedAssignment
+        self.__check_type(property)
+        if property._key not in self.__properties:
+            self.__properties[property._key] = property
+
+    def discard(self, item):
+        key = item._key if isinstance(item, Property) else Key(item)
+        try:
+            del self.__properties[key]
+        except:
+            pass
+
+    def replace(self, property):                            #@ReservedAssignment
+        '''Short for discard, followed by add.'''
+        self.__check_type(property)
+        self.discard(property)
+        self.add(property)
+
+    def modify(self, property):                             #@ReservedAssignment
+        '''Modify a property to adopt the non-default attributes of the argument.
+        
+        Will check for readonly, type and validity. If the property doesn't
+        exist, it will be added.
+        '''
+        self.__check_type(property)
+        try:
+            self.get(property.name)._update(property)
+        except KeyError:
+            self.add(property)
+
+    def get(self, item):
+        '''Get a property by name or raise a KeyError.'''
+        key = item._key if isinstance(item, Property) else Key(item)
+        return self.__properties[key]
+
+    def __check_type(self, item):
+        if not isinstance(item, Property):
+            raise TypeError("'item' must be a Property (%s is a %s)" %
+                            (item, type(item).__name__))
 
 
 class Configuration(Property):
