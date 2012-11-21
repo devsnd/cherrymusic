@@ -446,7 +446,9 @@ addSong = function(path,title){
     pulseTab('jplayer');
     var success = function(data){
         var metainfo = $.parseJSON(data)
-        track.duration = metainfo.length
+        if (metainfo.length) {
+            track.duration = metainfo.length;
+        }
         mediaPlaylist._refresh(true);
     }
     api({action:'getsonginfo',
