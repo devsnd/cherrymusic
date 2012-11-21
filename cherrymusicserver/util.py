@@ -157,6 +157,7 @@ def Property(func):
 
 
 from collections import deque
+import math
 class MovingAverage(object):
     def __init__(self, size=15, fill=0):
         assert size > 0
@@ -168,6 +169,34 @@ class MovingAverage(object):
     def avg(self):
         return self._avg
 
+    @property
+    def min(self):
+        return min(self._values)
+
+    @property
+    def max(self):
+        return max(self._values)
+
+    @property
+    def median(self):
+        sort = sorted(self._values)
+        mid = self._size // 2
+        median = sort[mid]
+        if self._size % 2:
+            return median
+        return (median + sort[mid - 1]) / 2
+
+    @property
+    def variance(self):
+        diff = []
+        mean = self.avg
+        [diff.append((x - mean) * (x - mean)) for x in self._values]
+        return sum(diff) / len(diff)
+
+    @property
+    def stddev(self):
+        return math.sqrt(self.variance)
+
     def feed(self, val):
         '''insert a new value and get back the new average'''
         old = self._values.popleft()
@@ -178,22 +207,22 @@ class MovingAverage(object):
             raise tpe
         self._values.append(val)
         return self._avg
-        
+
 class Performance:
     indentation = 0
     def __init__(self, text):
         self.text = text
-        
+
     def __enter__(self):
         global PERFORMANCE_TEST
         if PERFORMANCE_TEST:
             self.time = time()
             Performance.indentation += 1
-            log.w('|   '*(Performance.indentation-1) + '/ˉˉ'+ self.text)
+            log.w('|   ' * (Performance.indentation - 1) + '/ˉˉ' + self.text)
 
     def __exit__(self, type, value, traceback):
         global PERFORMANCE_TEST
         if PERFORMANCE_TEST:
-            duration = (time() - self.time)*1000
-            log.w('|   '*(Performance.indentation-1) + '\__ %g ms' % (duration,))
+            duration = (time() - self.time) * 1000
+            log.w('|   ' * (Performance.indentation - 1) + '\__ %g ms' % (duration,))
             Performance.indentation -= 1
