@@ -122,18 +122,24 @@ class CherryModel:
             results = sorted(results,key=resultorder.ResultOrder(term),reverse=True)
             results = results[:min(len(results), maxresults)]
         ret = []
-        for file in results:
-            strippedpath = self.strippath(file)
-            #let only playable files appear in the search results
-            playable = self.isplayable(strippedpath)
-            isfile = os.path.isfile(os.path.join(cherry.config.media.basedir.str, file))
-            if isfile and not playable:
-                continue
+        with Performance('checking and classifying results:'):
+            for file in results:
+                strippedpath = self.strippath(file)
+                #let only playable files appear in the search results
+                playable = self.isplayable(strippedpath)
+                fullpath = os.path.join(cherry.config.media.basedir.str, file)
 
-            if isfile:
-                ret.append(MusicEntry(strippedpath))
-            else:
-                ret.append(MusicEntry(strippedpath,dir=True))
+                if not os.path.exists(fullpath):
+                    log.w('search found inexistent file: %r', file)
+
+                isfile = os.path.isfile(fullpath)
+                if isfile and not playable:
+                    continue
+
+                if isfile:
+                    ret.append(MusicEntry(strippedpath))
+                else:
+                    ret.append(MusicEntry(strippedpath, dir=True))
 
         return ret
 
