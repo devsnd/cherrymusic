@@ -191,7 +191,7 @@ class SQLiteCache(object):
                 log.d('bestresults')
                 log.d(bestresults)
             #capping bestresults, because there can be more fileids than maxresults
-            bestresults = bestresults[:min(len(bestresults),maxresults)]
+            bestresults = bestresults[:min(len(bestresults),NORMAL_FILE_SEARCH_LIMIT)]
             
             with Performance('querying fullpaths for %s fileIds'%len(bestresults)):
                 for fileidtuple in bestresults:
