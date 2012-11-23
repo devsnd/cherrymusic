@@ -129,7 +129,7 @@ def from_defaults():
                                     '''
                                     
     c.server.keep_session_in_ram = False
-    c.server.permit_remote_admin_login._desc = '''
+    c.server.keep_session_in_ram._desc = '''
                                     Will keep the user sessions in RAM instead of a file in the
                                     configuration directory. This means, that any unsaved
                                     playlists will be lost when the server is restarted.
