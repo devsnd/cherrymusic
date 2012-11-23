@@ -190,7 +190,7 @@ class SQLiteCache(object):
                 log.d('bestresults')
                 log.d(bestresults)
             
-            with Performance('querying fullpaths'):
+            with Performance('querying fullpaths for %s fileIds'%len(bestresults)):
                 for fileidtuple in bestresults:
                     results.append(self.fullpath(fileidtuple[0]))
             
