@@ -138,13 +138,13 @@ class SQLiteCache(object):
         return list(map(str.lower, words))
 
 
-    def fetchFileIds(self, terms, isFastSearch=False):
+    def fetchFileIds(self, terms, maxFileIds, isFastSearch=False):
         fileIdLimit = FAST_FILE_SEARCH_LIMIT if isFastSearch else NORMAL_FILE_SEARCH_LIMIT;
         resultlist = []
         
         query = '''SELECT search.frowid FROM dictionary JOIN search ON search.drowid = dictionary.rowid WHERE '''
         orterms = ' OR '.join([' dictionary.word LIKE ? ']*len(terms))           
-        limit = ' LIMIT 0, '+str(fileIdLimit*len(terms)) #TODO add maximum db results as configuration parameter
+        limit = ' LIMIT 0, '+str(maxFileIds) #TODO add maximum db results as configuration parameter
         #log.d('Search term: ' + term)
         sql = query + orterms + limit
         if debug:
@@ -165,8 +165,9 @@ class SQLiteCache(object):
             results = []
             resultfileids = {}
             
+            maxFileIds = NORMAL_FILE_SEARCH_LIMIT
             with Performance('file id fetching'):
-                fileids = self.fetchFileIds(terms,isFastSearch)
+                fileids = self.fetchFileIds(terms, maxFileIds, isFastSearch)
 
             if debug:
                 log.d('fileids')
