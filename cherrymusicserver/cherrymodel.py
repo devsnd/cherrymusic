@@ -122,9 +122,8 @@ class CherryModel:
         ret = []
         with Performance('checking and classifying results:'):
             with concurrent.futures.ProcessPoolExecutor() as executor:
-                ret = executor.map(createMusicEntryByFilePath, results)
-                print(ret)
-            ret = list(itertools.chain.from_iterable(ret))
+                for result in executor.map(createMusicEntryByFilePath, results):
+                    ret += result
         return ret
 
     def motd(self):
