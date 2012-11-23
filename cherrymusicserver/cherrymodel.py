@@ -33,6 +33,8 @@ will delegate different calls between other classes.
 
 import os
 from random import choice
+import concurrent.futures
+import itertools
 import cherrypy
 
 import cherrymusicserver as cherry
@@ -47,11 +49,6 @@ class CherryModel:
 
     def abspath(self,path):
         return os.path.join(cherry.config.media.basedir.str, path)
-
-    def strippath(self,path):
-        if path.startswith(cherry.config.media.basedir.str):
-            return path[len(cherry.config.media.basedir.str) + 1:]
-        return path
 
     def sortFiles(self,files,fullpath=''):
         #sort alphabetically (case insensitive)
@@ -68,14 +65,15 @@ class CherryModel:
         allfilesindir = os.listdir(absdirpath)
 
         #remove all files not inside the filter
-        if not filterstr == '':
+        if filterstr:
             filterByStart = StartsWithCaseInsensitive(filterstr)
             allfilesindir = list(filter(filterByStart, allfilesindir))
-
+        
         musicentries = []
 
         compactlisting = len(allfilesindir) > cherry.config.browser.maxshowfiles.int
         if compactlisting:
+            filterstr=os.path.commonprefix(list(map(str.upper,allfilesindir)))
             filterlength = len(filterstr)+1
             currentletter = '/' #impossible first character
             sortedfiles = self.sortFiles(allfilesindir)
@@ -89,7 +87,7 @@ class CherryModel:
                         subpath = os.path.join(absdirpath,dir)
                         self.addMusicEntry(subpath, musicentries)
                     else:
-                        musicentries.append(MusicEntry(self.strippath(absdirpath),repr=currentletter,compact=True))
+                        musicentries.append(MusicEntry(strippath(absdirpath),repr=currentletter,compact=True))
         else:
             sortedfiles = self.sortFiles(allfilesindir, absdirpath)
             for dir in sortedfiles:
@@ -101,10 +99,10 @@ class CherryModel:
     
     def addMusicEntry(self,fullpath, list):
         if os.path.isfile(fullpath):
-            if self.isplayable(fullpath):
-                list.append(MusicEntry(self.strippath(fullpath)))
+            if isplayable(fullpath):
+                list.append(MusicEntry(strippath(fullpath)))
         else:
-            list.append(MusicEntry(self.strippath(fullpath),dir=True))
+            list.append(MusicEntry(strippath(fullpath),dir=True))
 
     def updateLibrary(self):
         self.cache.full_update()
@@ -123,32 +121,11 @@ class CherryModel:
             results = results[:min(len(results), maxresults)]
         ret = []
         with Performance('checking and classifying results:'):
-            for file in results:
-                strippedpath = self.strippath(file)
-                #let only playable files appear in the search results
-                playable = self.isplayable(strippedpath)
-                fullpath = os.path.join(cherry.config.media.basedir.str, file)
-
-                if not os.path.exists(fullpath):
-                    log.w('search found inexistent file: %r', file)
-                    continue
-
-                isfile = os.path.isfile(fullpath)
-                if isfile and not playable:
-                    continue
-
-                if isfile:
-                    ret.append(MusicEntry(strippedpath))
-                else:
-                    ret.append(MusicEntry(strippedpath, dir=True))
-
+            with concurrent.futures.ProcessPoolExecutor() as executor:
+                ret = executor.map(createMusicEntryByFilePath, results)
+                print(ret)
+            ret = list(itertools.chain.from_iterable(ret))
         return ret
-
-    def isplayable(self, filename):
-        '''checks to see if there's no extension or if the extension is in
-        the configured 'playable' list'''
-        ext = os.path.splitext(filename)[1]
-        return not ext or ext[1:].lower() in cherry.config.media.playable.list
 
     def motd(self):
         artist = [  'Hendrix',
@@ -199,6 +176,36 @@ class CherryModel:
             if '{revartist}' in oneliner:
                 oneliner=oneliner.replace('{revartist}',a.lower()[::-1])
         return oneliner
+
+def createMusicEntryByFilePath(file):
+    strippedpath = strippath(file)
+    #let only playable files appear in the search results
+    playable = isplayable(strippedpath)
+    fullpath = os.path.join(cherry.config.media.basedir.str, file)
+
+    if not os.path.exists(fullpath):
+        log.w('search found inexistent file: %r', file)
+        return []
+
+    isfile = os.path.isfile(fullpath)
+    if isfile and not playable:
+        return []
+
+    if isfile:
+        return [MusicEntry(strippedpath)]
+    else:
+        return [MusicEntry(strippedpath, dir=True)]
+
+def isplayable(filename):
+    '''checks to see if there's no extension or if the extension is in
+    the configured 'playable' list'''
+    ext = os.path.splitext(filename)[1]
+    return not ext or ext[1:].lower() in cherry.config.media.playable.list
+
+def strippath(path):
+    if path.startswith(cherry.config.media.basedir.str):
+        return path[len(cherry.config.media.basedir.str) + 1:]
+    return path
 
 class MusicEntry:
     def __init__(self, path, compact=False, dir=False, repr=None):
