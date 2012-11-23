@@ -650,9 +650,10 @@ function restorePlaylistAndRememberPeriodically(){
     var success = function(data){
             mediaPlaylist.playlist = $.parseJSON(data);
             mediaPlaylist._refresh(true);
+            window.setInterval("rememberPlaylistPeriodically()",REMEMBER_PLAYLIST_INTERVAL );
     };
     api('restoreplaylist',success,errorFunc('error restoring playlist'));
-        window.setInterval("rememberPlaylistPeriodically()",REMEMBER_PLAYLIST_INTERVAL );
+        
 }
 
 function removePlayedFromPlaylist(){

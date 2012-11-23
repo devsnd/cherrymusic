@@ -127,6 +127,13 @@ def from_defaults():
                                     may only log in from the computer cherrymusic is currently
                                     running on. This can improve security.
                                     '''
+                                    
+    c.server.keep_session_in_ram = False
+    c.server.permit_remote_admin_login._desc = '''
+                                    Will keep the user sessions in RAM instead of a file in the
+                                    configuration directory. This means, that any unsaved
+                                    playlists will be lost when the server is restarted.
+                                    '''
 
     c.server.enable_ssl = 'False'
     c.server.enable_ssl._desc = '''

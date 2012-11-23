@@ -137,8 +137,19 @@ Have fun!
             'environment': 'production',
             'server.socket_host': socket_host,
             'server.thread_pool' : 30,
-            'tools.sessions.on' : True,
+            'tools.sessions.on' : True,            
+            'tools.sessions.timeout' : 60*24,
             })
+            
+        if not config.server.keep_session_in_ram:
+            sessiondir = os.path.join(os.path.expanduser('~'), '.cherrymusic', 'sessions')
+            if not os.path.exists(sessiondir):
+                os.mkdir(sessiondir)
+            cherrypy.config.update({
+                'tools.sessions.storage_type' : "file",
+                'tools.sessions.storage_path' : sessiondir,
+                })
+            
 
         cherrypy.tree.mount(self.httphandler, '/',
             config={
