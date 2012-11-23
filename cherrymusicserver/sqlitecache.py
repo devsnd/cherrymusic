@@ -156,16 +156,16 @@ class SQLiteCache(object):
         return resultlist
 
     def searchfor(self, value, maxresults=10, isFastSearch=False):
-        with Performance('searching for a maximum of %s files' % str(NORMAL_FILE_SEARCH_LIMIT)):
+        terms = SQLiteCache.searchterms(value)
+        with Performance('searching for a maximum of %s files' % str(NORMAL_FILE_SEARCH_LIMIT*len(terms))):
             self.db = self.conn.cursor()
-            terms = SQLiteCache.searchterms(value)
             if debug:
                 log.d('searchterms')
                 log.d(terms)
             results = []
             resultfileids = {}
             
-            maxFileIds = NORMAL_FILE_SEARCH_LIMIT
+            maxFileIds = NORMAL_FILE_SEARCH_LIMIT*len(terms)
             with Performance('file id fetching'):
                 fileids = self.fetchFileIds(terms, maxFileIds, isFastSearch)
 
