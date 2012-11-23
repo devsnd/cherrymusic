@@ -83,6 +83,7 @@ class HTTPHandler(object):
             'getplayables' : self.api_getplayables,
             'getuserlist' : self.api_getuserlist,
             'adduser' : self.api_adduser,
+            'userdelete' : self.api_userdelete,
             'showplaylists' : self.api_showplaylists,
             'logout' : self.api_logout,
             'downloadpls' : self.api_downloadpls,
@@ -281,7 +282,7 @@ class HTTPHandler(object):
         if cherrypy.session['admin']:
             return json.dumps(self.userdb.getUserList())
         else:
-            return {'id':'-1', 'username':'nobody', 'admin':0}
+            return json.dumps([])
     
     def api_adduser(self, value):
         if cherrypy.session['admin']:
@@ -289,6 +290,14 @@ class HTTPHandler(object):
             return self.userdb.addUser(new['username'], new['password'], new['isadmin'])
         else:
             return "You didn't think that would work, did you?"
+
+    def api_userdelete(self, value):
+        params = json.loads(value)
+        if cherrypy.session['admin'] and cherrypy.session['userid'] != params['userid']:
+            return 'success' if self.userdb.deleteUser(params['userid']) else 'failed'
+        else:
+            return "You didn't think that would work, did you?"
+
 
     def api_showplaylists(self,value):
         playlists = self.playlistdb.showPlaylists(self.getUserId())

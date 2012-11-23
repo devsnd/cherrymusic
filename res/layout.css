@@ -282,6 +282,10 @@ ADMIN PANEL
 #adminpanelwrapper{
 	padding: 0 10px;
 }
+#adminuserlist li{
+	border-bottom: 1px solid black;
+    line-height: 30px;	
+}
 
 
 /****************

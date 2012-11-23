@@ -62,6 +62,18 @@ class UserDB:
         msg = 'added user: ' + user.name
         log.d(msg)
         return msg
+        
+    def isDeletable(self, userid):
+        #cant delete 1st admin
+        if not userid == 1:
+            return True
+        return False
+        
+    def deleteUser(self, userid):
+        if self.isDeletable(userid):
+            self.conn.execute('''DELETE FROM users WHERE rowid = ?''', (userid,))
+            return True
+        return False
 
     def auth(self, username, password):
         '''try to authenticate the given username and password. on success,
@@ -86,7 +98,7 @@ class UserDB:
         cur.execute('''SELECT rowid, username, admin FROM users''')
         ret = []
         for uid, user, admin in cur.fetchall():
-            ret.append({'id':uid, 'username':user, 'admin':admin})
+            ret.append({'id':uid, 'username':user, 'admin':admin,'deletable':self.isDeletable(uid)})
         return ret
 
     def getUserCount(self):

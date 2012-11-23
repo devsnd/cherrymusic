@@ -717,7 +717,11 @@ function updateUserList(){
             } else {
                 htmllist += '<li>';
             }
-            htmllist += e.id+' - '+e.username+'</li>';
+            var delbutton = '';
+            if(e.deletable){
+                delbutton = '<a class="button" href="javascript:;" onclick="userDelete('+e.id+')">delete</a>';
+            }
+            htmllist += e.id+' - '+e.username+delbutton+'</li>';
         });
         $('#adminuserlist').html(htmllist);
     };
@@ -741,6 +745,17 @@ function addNewUser(){
         updateUserList();
     };
     api(data,success,errorFunc('failed to add new user'));
+}
+
+function userDelete(userid){
+    var data = {'action':'userdelete',
+                'value' : JSON.stringify({
+                    'userid':userid
+                })};
+    var success = function(data){
+        updateUserList();
+    };
+    api(data,success,errorFunc('failed delete user'));
 }
 
 /***
