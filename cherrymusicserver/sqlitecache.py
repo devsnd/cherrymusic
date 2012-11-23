@@ -135,22 +135,23 @@ class SQLiteCache(object):
     @classmethod
     def searchterms(cls, searchterm):
         words = re.findall('(\w+)', searchterm.replace('_', ' '))
-        return list(map(lambda x:x.lower(), words))
+        return list(map(str.lower, words))
 
 
     def fetchFileIds(self, terms, isFastSearch=False):
         fileIdLimit = FAST_FILE_SEARCH_LIMIT if isFastSearch else NORMAL_FILE_SEARCH_LIMIT;
         resultlist = []
-        for term in terms:           
-            query = '''SELECT search.frowid FROM dictionary JOIN search ON search.drowid = dictionary.rowid WHERE dictionary.word LIKE ?'''
-            limit = ' LIMIT 0, '+str(fileIdLimit) #TODO add maximum db results as configuration parameter
-            log.d('Search term: ' + term)
-            sql = query + limit
-            if debug:
-                log.d('Query used: ' + sql)
-            #print(self.conn.execute('EXPLAIN QUERY PLAN '+sql, (term+'%',)).fetchall())
-            self.db.execute(sql, (term+'%',))
-            resultlist += self.db.fetchall()
+        
+        query = '''SELECT search.frowid FROM dictionary JOIN search ON search.drowid = dictionary.rowid WHERE '''
+        orterms = ' OR '.join([' dictionary.word LIKE ? ']*len(terms))           
+        limit = ' LIMIT 0, '+str(fileIdLimit*len(terms)) #TODO add maximum db results as configuration parameter
+        #log.d('Search term: ' + term)
+        sql = query + orterms + limit
+        if debug:
+            log.d('Query used: ' + sql)
+        #print(self.conn.execute('EXPLAIN QUERY PLAN '+sql, (term+'%',)).fetchall())
+        self.db.execute(sql, tuple(map(lambda x: x+'%', terms)))
+        resultlist += self.db.fetchall()
 
         return resultlist
 
