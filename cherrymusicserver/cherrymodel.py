@@ -131,6 +131,7 @@ class CherryModel:
 
                 if not os.path.exists(fullpath):
                     log.w('search found inexistent file: %r', file)
+                    continue
 
                 isfile = os.path.isfile(fullpath)
                 if isfile and not playable:
