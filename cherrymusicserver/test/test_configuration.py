@@ -438,6 +438,26 @@ class TestConfiguration(unittest.TestCase):
         self.assertEqual(('b.f', 'defined second, alphabetically first', '', '', None, None, ''), l[2])
 
 
+    def test_from_list(self):
+
+        self.assertEqual(Configuration(), configuration.from_list([]))
+        self.assertEqual(Configuration('a'), configuration.from_list([('a',), ('b',)], name='a'))
+        self.assertEqual(Configuration(), configuration.from_list([('a',), ('b',)], name='a', rename=''))
+
+        with self.assertRaises(ValueError):
+            configuration.from_list([('a',), ('b',)], name='c')
+
+        with self.assertRaises(configuration.ConfigKeyError):
+            configuration.from_list([], rename='contains.bad.name')
+
+        with configuration.create('nyah') as cfg:
+            cfg.a.b = Property('nyah.a.b', 1, 'int', '\d', True, True, 'description')
+
+        self.assertEqual(cfg, configuration.from_list(configuration.to_list(cfg), name='nyah'))
+
+
+
+
     def test_dir(self):
         '''dict transformer must return a dict conforming to a dict that might
         have been used for initialization'''

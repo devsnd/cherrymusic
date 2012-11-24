@@ -198,6 +198,26 @@ def write_to_file(cfg, filepath):
             printf('%s = %s' % (subkey, value))
 
 
+def from_list(l, name='', rename=None):
+    '''Turn a list of tuples into a Configuration. Tuple elements must be the
+    constructor arguments in their proper order.
+    
+    name: if given, return the corresponding sub-configuration
+    rename: if given, change the name of the returned configuration to this value
+    '''
+    with create() as cfg:
+        for proptuple in l:
+            if Key(proptuple[0]).normstr.startswith(Key(name).normstr):
+                cfg += Property(*proptuple)
+    if name and name not in cfg:
+        raise ValueError("name not found (%r)" % name)
+    wanted = cfg._detach(name) if name else cfg
+    if rename is not None:
+        wanted._rename(rename)
+    return wanted
+
+
+
 def from_dict(d):
     '''Parse a dict into a configuration. Keys matching the names of Property
     attributes will be treated as such, other will be taken to refer to
@@ -1292,6 +1312,22 @@ class Configuration(Property):
                 logging.warning('trying to delete property from within itself: %s', self.name)
             else:
                 logging.warning('trying to delete non-existent property %s', (self._key + key.last).str)
+
+
+    def _rename(self, newname):
+        if not self._isroot:
+            raise ConfigError('cannot rename %r: is not a root Configuration' % self.name)
+        key = Key(newname)
+        self._validate_no_keyword(key)
+        self.__key = key
+
+
+    def _detach(self, name):
+        self._validate_no_keyword(Key(name))
+        child = self[name]
+        del self[name]
+        child._parent = None
+        return child
 
 
 Transformers = {}
