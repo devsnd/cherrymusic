@@ -821,8 +821,7 @@ class Property(object):
     def __copy(self):
         return Property(*property_to_tuple(self))
 
-    def __become(self, other):
-        self._key = other._key or self._key
+    def __become_like(self, other):
         self._type = other._type or self._type
         self._validity = other._validity or self._validity
         self.desc = other.desc or self.desc
@@ -855,11 +854,11 @@ class Property(object):
 
         target = self.__copy()  # ensure atomicity
         try:
-            target.__become(other)
+            target.__become_like(other)
         except Exception as e:
             raise ConfigError('cannot change %s %r: %s' % (self.__class__.__name__, self.name, e))
         else:
-            self.__become(other)
+            self.__become_like(other)
 
 _PropTuple = namedtuple('PropertyTuple', ' '.join(Property._attributes()))
 
