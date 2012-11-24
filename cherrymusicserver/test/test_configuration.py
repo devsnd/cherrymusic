@@ -423,11 +423,11 @@ class TestConfiguration(unittest.TestCase):
     def test_list(self):
         '''list transformer must return a list of Property tuples'''
 
-        c = Configuration()
-        c.A = '1'
-        c.a.desc = 'a.1'
-        c.b.x = Property('b.x', 2, 'int', '\d+', True, True, 'b.x.2')
-        c.b.f = 'defined second, alphabetically first'
+        with configuration.create() as c:
+            c.A = '1'
+            c.a.desc = 'a.1'
+            c.b.x = Property('b.x', 2, 'int', '\d+', True, True, 'b.x.2')
+            c.b.f = 'defined second, alphabetically first'
 
         l = configuration.to_list(c)
 
@@ -451,12 +451,12 @@ class TestConfiguration(unittest.TestCase):
                                  'd': {'e': 55},
                                  }}
 
-        c = Configuration()
-        c.a = 1
-        c.b = 2
-        c.c = Configuration('c', 3, type='int', validity='\d+', hidden=True)
-        c.c.d.e = 55
-        c.c.readonly = True
+        with configuration.create() as c:
+            c.a = 1
+            c.b = 2
+            c.c = Configuration('c', 3, type='int', validity='\d+', hidden=True)
+            c.c.d.e = 55
+            c.c.readonly = True
 
         self.assertDictEqual(d, configuration.to_dict(c))
 
@@ -469,7 +469,6 @@ class TestConfiguration(unittest.TestCase):
         self.assertEqual(True, cfg.c.readonly)
         self.assertEqual(True, cfg.c.hidden)
         self.assertEqual('\d+', cfg.c.validity)
-        self.assertEqual(None, cfg.d.value)
         self.assertEqual(55, cfg.c.d.e.value)
 
 
@@ -496,107 +495,117 @@ class TestConfiguration(unittest.TestCase):
 
 
     def test_mapping_contains_len_and_iter(self):
-        cfg = Configuration()
+        with configuration.create() as cfg:
+            # contains
+            self.assertFalse(None in cfg)
+            self.assertFalse('' in cfg)
+            self.assertFalse('a' in cfg)
 
-        # contains
-        self.assertFalse(None in cfg)
-        self.assertFalse('' in cfg)
-        self.assertFalse('a' in cfg)
+            cfg['a'] = 'something'
+            self.assertTrue('a' in cfg)
 
-        cfg['a'] = 'something'
-        self.assertTrue('a' in cfg)
+            cfg['b']['c'] = 'something'
+            self.assertTrue('b' in cfg)
+            self.assertTrue('b.c' in cfg)
 
-        cfg['b']['c'] = 'something'
-        self.assertTrue('b' in cfg)
-        self.assertTrue('b.c' in cfg)
+            # iter
+            self.assertEqual(['a', 'b', 'b.c'], [k for k in cfg])
 
-        # iter
-        self.assertEqual(['a', 'b', 'b.c'], [k for k in cfg])
-
-        # len
-        self.assertEqual(3, len(cfg))
-        self.assertEqual(0, len(Configuration()))
+            # len
+            self.assertEqual(3, len(cfg))
+            self.assertEqual(0, len(Configuration()))
 
 
     def test_basic_access(self):
-        cfg = Configuration()
+        with configuration.create() as cfg:
+            cfg['a'] = 11
+            self.assertEqual(11, cfg['a'].value,
+                             'one-level get and set')
 
-        cfg['a'] = 11
-        self.assertEqual(11, cfg['a'].value,
-                         'one-level get and set')
+            cfg['a']['b'] = 13
+            self.assertEqual(13, cfg['a']['b'].value,
+                             'multi-level get and set')
 
-        cfg['a']['b'] = 13
-        self.assertEqual(13, cfg['a']['b'].value,
-                         'multi-level get and set')
+            cfg['a']['x']['c'] = 17
+            self.assertEqual(17, cfg['a']['x']['c'].value,
+                             'can set subkey of non-existant key')
+            self.assertTrue('a.x' in cfg,
+                             'accessing a key creates it')
 
-        cfg['a']['x']['c'] = 17
-        self.assertEqual(17, cfg['a']['x']['c'].value,
-                         'can set subkey of non-existant key')
-        self.assertTrue('a.x' in cfg,
-                         'accessing a key creates it')
+            cfg['x']
+            self.assertTrue('x' in cfg,
+                            'accessing a key creates it, even without any assignment happening')
 
-        cfg['x']
-        self.assertTrue('x' in cfg,
-                        'accessing a key creates it, even without any assignment happening')
+            del cfg['x']
+            self.assertFalse('x' in cfg,
+                             'deleting a key removes it')
 
-        del cfg['x']
-        self.assertFalse('x' in cfg,
-                         'deleting a key removes it')
-
-        del cfg['a']
-        self.assertEqual(0, len(cfg),
-                         'deleting a key must also delete all subkeys')
+            del cfg['a']
+            self.assertEqual(0, len(cfg),
+                             'deleting a key must also delete all subkeys')
 
 
     def test_simplified_multi_access(self):
-        cfg = Configuration()
+        with configuration.create() as cfg:
 
-        cfg['a.b'] = 11
-        self.assertEqual(11, cfg['a']['b'].value,
-                         'multilevel set')
-        self.assertEqual(11, cfg['a.b'].value,
-                         'multilevel get')
-        self.assertEqual(11, cfg['a.b.value'],
-                         'multilevel get down to Property attribute')
+            cfg['a.b'] = 11
+            self.assertEqual(11, cfg['a']['b'].value,
+                             'multilevel set')
+            self.assertEqual(11, cfg['a.b'].value,
+                             'multilevel get')
+            self.assertEqual(11, cfg['a.b.value'],
+                             'multilevel get down to Property attribute')
 
-        cfg['c.value'] = 'mrx'
-        self.assertEqual('mrx', cfg['c'].value,
-                         'multilevel set, down to Property attribute')
+            cfg['c.value'] = 'mrx'
+            self.assertEqual('mrx', cfg['c'].value,
+                             'multilevel set, down to Property attribute')
 
-        del cfg['c.desc']
-        self.assertFalse(cfg['c'].desc,
-                         'multilevel del, down to Property attribute')
+            del cfg['c.desc']
+            self.assertFalse(cfg['c'].desc,
+                             'multilevel del, down to Property attribute')
 
-        del cfg['a.b']
-        self.assertEqual(['a', 'c'], [k for k in cfg],
-                         'multilevel del')
+            del cfg['a.b']
+            self.assertEqual(['a', 'c'], [k for k in cfg],
+                             'multilevel del')
 
 
     def test_attribute_access(self):
+        with configuration.create() as cfg:
+            cfg.a = 11
+            self.assertEqual(11, cfg['a'].value,
+                             'set via attribute')
+            self.assertEqual(11, cfg.a.value,
+                             'get via attribute')
+
+            cfg.b.c.value = 19
+            self.assertEqual(19, cfg.b.c.value,
+                             'multilevel get and set via attribute')
+            self.assertEqual(None, cfg.b.value,
+                             'yes, b got created, too')
+
+            del cfg.b.c
+            self.assertFalse('b.c' in cfg,
+                             'multilevel del')
+
+
+    def test_errors_for_undefined_keys(self):
         cfg = Configuration()
 
-        cfg.a = 11
-        self.assertEqual(11, cfg['a'].value,
-                         'set via attribute')
-        self.assertEqual(11, cfg.a.value,
-                         'get via attribute')
-
-        cfg.b.c.value = 19
-        self.assertEqual(19, cfg.b.c.value,
-                         'multilevel get and set via attribute')
-        self.assertEqual(None, cfg.b.value,
-                         'yes, b got created, too')
-
-        del cfg.b.c
-        self.assertFalse('b.c' in cfg,
-                         'multilevel del')
+        with self.assertRaises(KeyError):
+            cfg['a']
+        with self.assertRaises(AttributeError):
+            cfg.a
+        with self.assertRaises(AttributeError):
+            cfg.a = 9
+        with self.assertRaises(AttributeError):
+            cfg.b.desc = 'schweinebacke'
 
 
     def test_hidden_and_readonly_parent_overrules_child(self):
-        parent = Configuration()
 
-        parent.child
-        parent.child.subchild
+        with configuration.create() as parent:
+            parent.child
+            parent.child.subchild
 
         self.assertFalse(parent.hidden)
         self.assertFalse(parent.readonly)
@@ -615,69 +624,69 @@ class TestConfiguration(unittest.TestCase):
 
     def test_merge(self):
 
-        c = Configuration()
-        d = Configuration('d', 5, 'int', readonly=True, hidden=True, validity='\d+', desc='bla')
+        with configuration.create() as c:
+            d = Configuration('d', 5, 'int', readonly=True, hidden=True, validity='\d+', desc='bla')
 
-        c.d = d
-        self.assertEqual('d', c.d.name)
-        self.assertEqual(5, c.d.value)
-        self.assertEqual('int', c.d.type)
-        self.assertEqual(True, c.d.readonly)
-        self.assertEqual(True, c.d.hidden)
-        self.assertEqual('\d+', c.d.validity)
-        self.assertEqual('bla', c.d.desc)
+            c.d = d
+            self.assertEqual('d', c.d.name)
+            self.assertEqual(5, c.d.value)
+            self.assertEqual('int', c.d.type)
+            self.assertEqual(True, c.d.readonly)
+            self.assertEqual(True, c.d.hidden)
+            self.assertEqual('\d+', c.d.validity)
+            self.assertEqual('bla', c.d.desc)
 
-        c.e.readonly = True
-        with self.assertRaises(ConfigError):
-            c.e = 11
+            c.e.readonly = True
+            with self.assertRaises(ConfigError):
+                c.e = 11
 
-        c.v = 11
-        self.assertEqual(11, c.v.value)
+            c.v = 11
+            self.assertEqual(11, c.v.value)
 
-        c.v.f = Property('v.f', 5, 'int', readonly=True, hidden=True, validity='\d+', desc='bla')
-        self.assertEqual('v.f', c.v.f.name)
-        self.assertEqual(5, c.v.f.value)
-        self.assertEqual('int', c.v.f.type)
-        self.assertEqual(True, c.v.f.readonly)
-        self.assertEqual(True, c.v.f.hidden)
-        self.assertEqual('\d+', c.v.f.validity)
-        self.assertEqual('bla', c.v.f.desc)
+            c.v.f = Property('v.f', 5, 'int', readonly=True, hidden=True, validity='\d+', desc='bla')
+            self.assertEqual('v.f', c.v.f.name)
+            self.assertEqual(5, c.v.f.value)
+            self.assertEqual('int', c.v.f.type)
+            self.assertEqual(True, c.v.f.readonly)
+            self.assertEqual(True, c.v.f.hidden)
+            self.assertEqual('\d+', c.v.f.validity)
+            self.assertEqual('bla', c.v.f.desc)
 
-        with self.assertRaises(ConfigError):
-            c.x = Property('NOT.X')
+            with self.assertRaises(ConfigError):
+                c.x = Property('NOT.X')
 
         'merging is atomic'
-        c = Configuration()
-        e = Property('e', 0, type='int')
-        c.e = e
+        with configuration.create() as c:
+            e = Property('e', 0, type='int')
+            c.e = e
         with self.assertRaises(ConfigError):
             c.e = Property('e', 'a', validity='a', hidden=True, readonly=True, desc='bla')
         self.assertEqual(e, c.e)
 
     def test_add(self):
 
-        ONE = Configuration()
-        ONE.a = 11
-        ONE.b.c = Property('b.c', 13, 'int', '\d+', False, False, 'blabla')
-        ONE.ron = Property('ron', readonly=True)
+        with configuration.create() as ONE:
+            ONE.a = 11
+            ONE.b.c = Property('b.c', 13, 'int', '\d+', False, False, 'blabla')
+            ONE.ron = Property('ron', readonly=True)
 
-        TWO = Configuration()
-        TWO.b = 13
-        TWO.b.c = 17
+        with configuration.create() as TWO:
+            TWO.b = 13
+            TWO.b.c = 17
 
-        THREE = Configuration()
-        THREE.ron = 45
+        with configuration.create() as THREE:
+            THREE.ron = 45
 
-        ONE_TWO = Configuration()
-        ONE_TWO.a = 11
-        ONE_TWO.b = 13
-        ONE_TWO.b.c = Property('b.c', 17, 'int', '\d+', desc='blabla')
-        ONE_TWO.ron = Property('ron', readonly=True)
+        with configuration.create() as ONE_TWO:
+            ONE_TWO.a = 11
+            ONE_TWO.b = 13
+            ONE_TWO.b.c = Property('b.c', 17, 'int', '\d+', desc='blabla')
+            ONE_TWO.ron = Property('ron', readonly=True)
 
-        TWO_THREE = Configuration()
-        TWO_THREE.b = 13
-        TWO_THREE.b.c = 17
-        TWO_THREE.ron = 45
+        with configuration.create() as TWO_THREE:
+            TWO_THREE.b = 13
+            TWO_THREE.b.c = 17
+            TWO_THREE.ron = 45
 
         _assertConfigEqual(ONE_TWO, ONE + TWO)
 

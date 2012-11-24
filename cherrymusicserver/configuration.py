@@ -39,106 +39,106 @@ from cherrymusicserver import util
 
 def from_defaults():
     '''load default configuration. must work if path to standard config file is unknown.'''
-    c = Configuration()
+    with create() as c:
 
-    c.media.basedir = os.path.join(os.path.expanduser('~'), 'Music')
-    c.media.basedir.desc = """
-                            BASEDIR specifies where the media that should be
-                            served is located. It must be the absolute path, e.g.
-                            BASEDIR=/absolute/path/to/media.
-                            
-                            Links: If your operating system supports them,
-                            you can use symlinks directly in BASEDIR. Links to
-                            directories which contain BASEDIR will be ignored,
-                            just like all links not directly in, but in sublevels
-                            of BASEDIR. This is to guard against the adverse
-                            effects of link cycles. 
+        c.media.basedir = os.path.join(os.path.expanduser('~'), 'Music')
+        c.media.basedir.desc = """
+                                BASEDIR specifies where the media that should be
+                                served is located. It must be the absolute path, e.g.
+                                BASEDIR=/absolute/path/to/media.
+                                
+                                Links: If your operating system supports them,
+                                you can use symlinks directly in BASEDIR. Links to
+                                directories which contain BASEDIR will be ignored,
+                                just like all links not directly in, but in sublevels
+                                of BASEDIR. This is to guard against the adverse
+                                effects of link cycles. 
+                                """
+
+        c.media.playable = 'mp3 m4a m4v ogv oga wav webm'
+        c.media.playable.desc = """
+                                    PLAYABLE is a space-separated list of media file
+                                    extensions that can be played by jPlayer.
+                                    """
+
+        c.media.transcode = False
+        c.media.transcode.desc = """
+                                    TRANSCODE (experimental!) enables automatic live transcoding 
+                                    of the media to be able to listen to every format on every device.
+                                    This requires you to have the appropriate codecs installed.
+                                    Please note that transcoding will significantly increase the stress on the CPU!
+                                    """
+        c.media.fetch_album_art = False
+        c.media.fetch_album_art.desc = """
+                                    Tries to fetch the album cover from various locations in the web.
+                                    They will be shown next to folders that qualify as a possible
+                                    album.
+                                    """
+
+        c.search.maxresults = 20
+        c.search.maxresults.desc = """
+                                    MAXRESULTS sets the maximum amount of search results
+                                    to be displayed. If MAXRESULTS is set to a higher value,
+                                    the search will take longer, but will also be more accurate.
+                                
+                                    """
+
+
+        c.look.theme = 'zeropointtwo'
+        c.look.theme.desc = """
+                            Available themes are: "zeropointtwo", "hax1337".
+                            To create your own theme, you can simply copy the theme
+                            to ~/.cherrymusic/themes/yournewtheme and modify it to
+                            your will. Then you can set theme=yournewtheme
                             """
 
-    c.media.playable = 'mp3 m4a m4v ogv oga wav webm'
-    c.media.playable.desc = """
-                                PLAYABLE is a space-separated list of media file
-                                extensions that can be played by jPlayer.
-                                """
+        c.browser.maxshowfiles = 100
+        c.browser.maxshowfiles.desc = '''
+                                        MAXSHOWFILES specifies how many files and folders should
+                                        be shown at the same time. E.g. if you open a folder
+                                        with more than MAXSHOWFILES, the files will be grouped 
+                                        according to the first letter in their name.
+                                        100 is a good value, as a cd can have up to 99 tracks.
+                                        '''
 
-    c.media.transcode = False
-    c.media.transcode.desc = """
-                                TRANSCODE (experimental!) enables automatic live transcoding 
-                                of the media to be able to listen to every format on every device.
-                                This requires you to have the appropriate codecs installed.
-                                Please note that transcoding will significantly increase the stress on the CPU!
-                                """
-    c.media.fetch_album_art = False
-    c.media.fetch_album_art.desc = """
-                                Tries to fetch the album cover from various locations in the web.
-                                They will be shown next to folders that qualify as a possible
-                                album.
-                                """
-
-    c.search.maxresults = 20
-    c.search.maxresults.desc = """
-                                MAXRESULTS sets the maximum amount of search results
-                                to be displayed. If MAXRESULTS is set to a higher value,
-                                the search will take longer, but will also be more accurate.
-                            
-                                """
+        c.server.port = 8080
+        c.server.port.desc = 'The port the server will listen to.'
 
 
-    c.look.theme = 'zeropointtwo'
-    c.look.theme.desc = """
-                        Available themes are: "zeropointtwo", "hax1337".
-                        To create your own theme, you can simply copy the theme
-                        to ~/.cherrymusic/themes/yournewtheme and modify it to
-                        your will. Then you can set theme=yournewtheme
-                        """
+    #    c.server.logfile = 'site.log'
+    #    c.server.logfile.desc = 'the logfile in which server errors will be logged'
 
-    c.browser.maxshowfiles = 100
-    c.browser.maxshowfiles.desc = '''
-                                    MAXSHOWFILES specifies how many files and folders should
-                                    be shown at the same time. E.g. if you open a folder
-                                    with more than MAXSHOWFILES, the files will be grouped 
-                                    according to the first letter in their name.
-                                    100 is a good value, as a cd can have up to 99 tracks.
+        c.server.localhost_only = False
+        c.server.localhost_only.desc = '''
+                                        when localhost_only is set to true, the server will not
+                                        be visible in the network and only play music on the
+                                        same computer it is running on
+                                        '''
+
+        c.server.localhost_auto_login = False
+        c.server.localhost_auto_login.desc = '''
+                                        When localhost_auto_login is set to "True", the server will
+                                        not ask for credentials when using it locally. The user will
+                                        be automatically logged in as admin.
+                                        '''
+
+        c.server.enable_ssl = False
+        c.server.enable_ssl.desc = '''
+                                    The following options allow you to use cherrymusic with
+                                    https encryption. You must have "pyOpenSSL" installed to
+                                    be able to use it. If enable_ssl is set to False, all other
+                                    ssl options will be ommited.
                                     '''
 
-    c.server.port = 8080
-    c.server.port.desc = 'The port the server will listen to.'
-
-
-#    c.server.logfile = 'site.log'
-#    c.server.logfile.desc = 'the logfile in which server errors will be logged'
-
-    c.server.localhost_only = False
-    c.server.localhost_only.desc = '''
-                                    when localhost_only is set to true, the server will not
-                                    be visible in the network and only play music on the
-                                    same computer it is running on
+        c.server.ssl_port = 8443
+        c.server.ssl_port.desc = '''
+                                    The port that will listen to SSL encrypted requests. If
+                                    use_ssl is set to True, all unencrypted HTTP requests
+                                    will be redirected to this port.
                                     '''
 
-    c.server.localhost_auto_login = False
-    c.server.localhost_auto_login.desc = '''
-                                    When localhost_auto_login is set to "True", the server will
-                                    not ask for credentials when using it locally. The user will
-                                    be automatically logged in as admin.
-                                    '''
-
-    c.server.enable_ssl = False
-    c.server.enable_ssl.desc = '''
-                                The following options allow you to use cherrymusic with
-                                https encryption. You must have "pyOpenSSL" installed to
-                                be able to use it. If enable_ssl is set to False, all other
-                                ssl options will be ommited.
-                                '''
-
-    c.server.ssl_port = 8443
-    c.server.ssl_port.desc = '''
-                                The port that will listen to SSL encrypted requests. If
-                                use_ssl is set to True, all unencrypted HTTP requests
-                                will be redirected to this port.
-                                '''
-
-    c.server.ssl_certificate = 'certs/server.crt'
-    c.server.ssl_private_key = 'certs/server.key'
+        c.server.ssl_certificate = 'certs/server.crt'
+        c.server.ssl_private_key = 'certs/server.key'
 
     return c
 
@@ -260,15 +260,15 @@ def _config_from_dict(d, name=None, parent=None):
     if not isinstance(d, dict):
         raise TypeError("'d' must be a dict, is: %s %r" % (type(d), d))
     name = d.get('name', name)
-    cfg = Configuration(name=name, parent=parent)
-    cfg._update(_property_from_dict(d))
-    ron = cfg._readonly
-    cfg._readonly = None
-    for subname, value in (i for i in d.items() if i[0] not in Property._reserved()):
-        if isinstance(value, dict):
-            value = _config_from_dict(value, name=subname, parent=cfg)
-        cfg[subname]._update(value)
-    cfg._readonly = ron
+    with create(name=name, parent=parent) as cfg:
+        cfg._update(_property_from_dict(d))
+        ron = cfg._readonly
+        cfg._readonly = None
+        for subname, value in (i for i in d.items() if i[0] not in Property._reserved()):
+            if isinstance(value, dict):
+                value = _config_from_dict(value, name=subname, parent=cfg)
+            cfg[subname]._update(value)
+        cfg._readonly = ron
     return cfg
 
 
@@ -282,6 +282,39 @@ def _property_from_dict(dic):
         return Property(**kwargs)
     except ValueError:
         raise ConfigError(dic)
+
+
+class create(object):
+    '''context manager that allows creating new Configurations. There will be no
+    Errors raised when trying to access unknown Properties.'''
+    def __init__(self, name=None, value=None, type=None, validity=None, readonly=None, hidden=None, desc=None, parent=None):
+        self.cfg = Configuration(name, value, type, validity, readonly, hidden, desc, parent)
+
+    def __enter__(self):
+        self.cfg._create_mode = True
+        return self.cfg
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.cfg._create_mode = False
+        return False
+
+
+class modify(object):
+    '''context manager that allows modifying Configurations. There will be no
+    Errors raised when trying to access unknown Properties. This does not override
+    type, validation or readonly checks.'''
+    def __init__(self, cfg):
+        if not isinstance(cfg, Configuration):
+            raise TypeError('%s needs to be a Configuration' % cfg)
+        self.cfg = cfg
+
+    def __enter__(self):
+        self.cfg._create_mode = True
+        return self.cfg
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.cfg._create_mode = False
+        return False
 
 
 class ConfigError(Exception):
@@ -1000,6 +1033,7 @@ class Configuration(Property):
         self._key = ('' if parent is None else parent._key) + Key(name)
         self._parent = parent
         self._properties = OrderedDict()
+        self._create = False
 
 
     def _recursive_properties(self):
@@ -1007,6 +1041,25 @@ class Configuration(Property):
             yield p
             for sub in p._recursive_properties():
                 yield sub
+
+    @util.Property
+    def _create_mode():     #@NoSelf
+        def fget(self):
+            try:
+                if self._isroot:
+                    return self._create
+                return self._create or self._parent._create_mode
+            except AttributeError:
+                return None
+
+        def fset(self, value):
+            self._create = True if value else False
+
+        def fdel(self):
+            self._create = False
+
+        return locals()
+
 
 
     @property
@@ -1081,9 +1134,9 @@ class Configuration(Property):
 
 
     def __add__(self, other):
-        merged = Configuration()
-        merged += self
-        merged += other
+        with create() as merged:
+            merged += self
+            merged += other
         return merged[self.name]
 
 
@@ -1126,13 +1179,19 @@ class Configuration(Property):
     def __getattr__(self, name):
         if name.startswith('_') or name in self._reserved():
             return super().__getattribute__(name)
-        return self._get_local(Key(name))
+        try:
+            return self._get_local(Key(name))
+        except KeyError:
+            raise AttributeError(name)
 
 
     def __setattr__(self, name, value):
         if name.startswith('_') or name in self._reserved():
             return super().__setattr__(name, value)
-        self._set_local(Key(name), value)
+        try:
+            self._set_local(Key(name), value)
+        except KeyError:
+            raise AttributeError(name)
 
 
     def __delattr__(self, name):
@@ -1168,7 +1227,11 @@ class Configuration(Property):
         try:
             return self._properties[key]
         except KeyError:
-            return self._properties.setdefault(key, Configuration(key.str, parent=self))
+            if key.normstr in self._reserved():
+                raise ConfigKeyError(key.str)
+            if self._create_mode:
+                return self._properties.setdefault(key, Configuration(key.str, parent=self))
+            raise
 
 
     def _set(self, key, value):
