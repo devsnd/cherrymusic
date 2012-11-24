@@ -57,20 +57,20 @@ def init():
         if not programAvailable(v[0]):
             unavailEnc.append((k,v[0]))
         else:
-            log.i("Encoder '{}' for format '{}' was found.".format(v[0],k))
+            log.d("Encoder '{}' for format '{}' was found.".format(v[0],k))
     for enc in unavailEnc:
         Encoders.pop(enc[0])
-        log.i("Encoder '{}' not found. Will not be able to encode {} streams".format(enc[1], enc[0]))
+        log.d("Encoder '{}' not found. Will not be able to encode {} streams".format(enc[1], enc[0]))
     
     unavailDec = []
     for k,v in Decoders.items():
         if not programAvailable(v[0]):
             unavailDec.append((k,v[0]))
         else:
-            log.i("Decoder '{}' for format '{}' was found.".format(v[0],k))
+            log.d("Decoder '{}' for format '{}' was found.".format(v[0],k))
     for dec in unavailDec:
         Decoders.pop(dec[0])
-        log.i("Decoder '{}' not found. Will not be able to decode {} streams".format(dec[1],dec[0]))
+        log.d("Decoder '{}' not found. Will not be able to decode {} streams".format(dec[1],dec[0]))
     
 def programAvailable(name):
     try:
