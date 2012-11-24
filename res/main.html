@@ -40,6 +40,7 @@
 <script type="text/javascript" src="res/js/json2.min.js"></script>
 <script type="text/javascript" src="res/js/jquery.jplayer.js"></script>
 <script type="text/javascript" src="res/js/jplayer.playlist.js"></script>
+<script type="text/javascript" src="res/js/jquery.jplayer.inspector.js"></script>
 <script type="text/javascript" src="res/js/mustache-0.7.0.js"></script>
 <script type="text/javascript" src="res/js/jquery-color.js"></script>
 <script type="text/javascript" src="res/js/jquery-ui-1.8.23.custom.min.js"></script>
@@ -70,6 +71,11 @@
                 <a href="javascript:;" onclick="logout()">logout</a>
             </div>
             <div id="adminpanel" style="display: none;">
+                <br>
+                <a href="javascript:;" onclick="$('#jplayer_inspector').jPlayerInspector({jPlayer:$('#jquery_jplayer_1')});" class="button">
+                Enable JPlayer Inspector
+                </a>
+                <br>
                 <br>
                 <a href="javascript:;" onclick="updateLibrary()" class="button">
                 Update Music Library (may take some time!)
@@ -186,5 +192,6 @@
     <!-- BROWSER TAB END -->
 </div>
 <!-- TABS END -->
+<div id="jplayer_inspector"></div>
 </body>
 </html>
