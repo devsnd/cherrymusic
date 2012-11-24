@@ -236,25 +236,25 @@ class TestProperty(unittest.TestCase):
         ## without type  ##
 
         '''without value set, any crap can be assigned'''
-        no_type = Property('no.type')
+        no_type = Property('no_type')
         crap = object()
         no_type.value = crap
         self.assertEqual(crap, no_type.value)
 
         '''with transformable-type value set, new value will be transformed or not accepted'''
-        no_type = Property('no.type', 0)
+        no_type = Property('no_type', 0)
         no_type.value = 3.14
         self.assertEqual(3, no_type.value)
         with self.assertRaises(TypeError):
             no_type.value = 'not an int'
 
         '''with non-transformable-type value set, can assign value of same type'''
-        no_type = Property('no.type', object())
+        no_type = Property('no_type', object())
         no_type.value = 3.14
         self.assertEqual(3.14, no_type.value)
 
         '''with non-transformable-type  value set, can't assign different type'''
-        no_type = Property('no.type', type(object))
+        no_type = Property('no_type', type(object))
         with self.assertRaises(TypeError):
             no_type.value = 3.14
 

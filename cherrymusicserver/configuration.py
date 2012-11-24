@@ -385,6 +385,12 @@ class Key(object):
     def __len__(self):
         return self._fullname.count(self._namesep) + 1 if self else 0
 
+    def __iter__(self):
+        key = self
+        while key.head:
+            yield key.head
+            key = key.tail
+
     def __add__(self, key):
         if not isinstance(key, Key):
             key = Key(key)
@@ -565,11 +571,9 @@ class Property(object):
     @classmethod
     def _validate_no_keyword(cls, key):
         reserved = cls._reserved()
-        head = key.head
-        while head:
-            if key.normstr in reserved:
+        for part in key:
+            if part.normstr in reserved:
                 raise ConfigKeyError("invalid key name: '%s' contains reserved word: %s" % (key, str(reserved)))
-            head = head.tail.head
 
 
     def __init__(self, name, value=None, type=None, validity=None, readonly=None, hidden=None, desc=None): #@ReservedAssignment
