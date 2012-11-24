@@ -293,9 +293,10 @@ JPlayer Additions
 ****************/
 .cm-songtitle{
 	font-size: 12px;
-    left: 166px;
     position: absolute;
-    top: 10px;
+    text-align: center;
+    top: 24px;
+    width: 100%;
 }
 .jp-playlist-playtime{
 	float: right;
@@ -307,7 +308,39 @@ JPlayer Additions
 	font-weight: 900;
 }
 
+.jp-center-progress-bar{
+    margin: 0 auto;
+    padding: 10px 10px 0 10px;
+    height: 6px;
+}
+.jp-progress{
+    position: relative !important;
+    left: 0 !important;
+    width: 100% !important;
+    top: 0px !important;
+}
+.jp-time-holder{
+    left: 0 !important;
+    width: 100% !important;
+    position: relative !important;
+    top: 0px !important;
+}
 
+.jp-mute{
+    margin-left: 10px !important;
+}
+.jp-volume-bar {
+    left: 183px !important;
+    top: 53px !important;
+}
+.jp-toggles {
+    left: 183px !important;
+    top: 62px !important;
+}
+
+.jp-controls{
+    width: 250px !important;
+}
 
 
 
