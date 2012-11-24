@@ -657,7 +657,7 @@ class TestConfiguration(unittest.TestCase):
 
         'merging is atomic'
         with configuration.create() as c:
-            e = Property('e', 0, type='int')
+            e = Configuration('e', 0, type='int')
             c.e = e
         with self.assertRaises(ConfigError):
             c.e = Property('e', 'a', validity='a', hidden=True, readonly=True, desc='bla')
@@ -701,6 +701,29 @@ class TestConfiguration(unittest.TestCase):
         with self.assertRaises(ConfigError):
             ONE + THREE
 
+
+    def test_equal(self):
+
+        self.assertEqual(Configuration(), Configuration())
+        self.assertNotEqual(Configuration(), None)
+
+        self.assertNotEqual(Configuration(), Configuration('a_name'))
+        self.assertNotEqual(Configuration(), Configuration(value=1))
+        self.assertNotEqual(Configuration(), Configuration(type='int'))
+        self.assertNotEqual(Configuration(), Configuration(validity='.*'))
+        self.assertNotEqual(Configuration(), Configuration(readonly=True))
+        self.assertNotEqual(Configuration(), Configuration(hidden=True))
+        self.assertNotEqual(Configuration(), Configuration(desc='to rule them all'))
+
+        with configuration.create() as c:
+            c.a = 13
+
+        self.assertNotEqual(Configuration(), c)
+
+        with configuration.modify(c):
+            c.d.e = Property('d.e', 1, type='int', validity='1', hidden=True, desc='ONE')
+
+        self.assertEqual(c, c + c)
 
     def test_file_functions(self):
         import tempfile

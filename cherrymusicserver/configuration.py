@@ -649,6 +649,8 @@ class Property(object):
                        }
 
     def __eq__(self, other):
+        if not isinstance(other, Property):
+            return False
         if self._key != other._key:
             return False
         if self.type != other.type:
@@ -1102,6 +1104,20 @@ class Configuration(Property):
             self._hidden = None
 
         return locals()
+
+    def __eq__(self, other):
+        if not isinstance(other, Configuration):
+            return False
+        if not super().__eq__(other):
+            return False
+        if not len(self) == len(other):
+            return False
+        for child in self._properties.values():
+            if not child._key in other:
+                return False
+            if not child.__eq__(other[child._key.last]):
+                return False
+        return True
 
 
     def __len__(self):
