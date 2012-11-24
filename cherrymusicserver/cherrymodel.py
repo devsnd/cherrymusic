@@ -33,7 +33,11 @@ will delegate different calls between other classes.
 
 import os
 from random import choice
-import concurrent.futures
+try:
+    import concurrent.futures
+    MULTITHREADED = True
+except ImportError:
+    MULTITHREADED = False
 import itertools
 import cherrypy
 
@@ -121,8 +125,12 @@ class CherryModel:
             results = results[:min(len(results), maxresults)]
         ret = []
         with Performance('checking and classifying results:'):
-            with concurrent.futures.ProcessPoolExecutor() as executor:
-                for result in executor.map(createMusicEntryByFilePath, results):
+            if MULTITHREADED:
+                with concurrent.futures.ProcessPoolExecutor() as executor:
+                    for result in executor.map(createMusicEntryByFilePath, results):
+                        ret += result
+            else:
+                for result in map(createMusicEntryByFilePath, results):
                     ret += result
         return ret
 
