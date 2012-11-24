@@ -208,6 +208,7 @@
 					$(this).empty();
 					
 					$.each(self.playlist, function(i,v) {
+                        $this.append(self._createListItem(self.playlist[i]));
 						var litem = $(self.cssSelector.playlist + " ul li:last");
                         litem.attr('name', litem.index());
 					});
