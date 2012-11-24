@@ -582,7 +582,7 @@ class Property(object):
         TypeError         if value is of the wrong type
         ValueError        if value is invalid
         '''
-        self._key = Key(name)
+        self.__key = Key(name)
         self._validate_no_keyword(self._key)
         self._type = type if type in Transformers else ''
         self.readonly = None
@@ -594,6 +594,9 @@ class Property(object):
         self.readonly = readonly
         self.hidden = hidden
 
+    @property
+    def _key(self):
+        return self.__key
 
     def __getitem__(self, name):
         try:
@@ -1030,12 +1033,18 @@ class Configuration(Property):
     def __init__(self, name=None,
                  value=None, type=None, validity=None, readonly=None, hidden=None, desc=None, #@ReservedAssignment
                  parent=None):
-        super().__init__(name, value, type, validity, readonly, hidden, desc)
-        self._key = ('' if parent is None else parent._key) + Key(name)
+        self.__key = Key(name)
         self._parent = parent
+        super().__init__(name, value, type, validity, readonly, hidden, desc)
         self._properties = OrderedDict()
         self._create = False
 
+    @property
+    def _key(self):
+        key = self.__key
+        if self._parent is not None:
+            key = self._parent._key + key
+        return key
 
     def _recursive_properties(self):
         for p in self._properties.values():
