@@ -40,10 +40,10 @@ log.setTest()
 class TestKey(unittest.TestCase):
 
     def testAdd(self):
-        self.assertEquals('', (Key() + Key()).str)
-        self.assertEquals('', (Key() + None).str)
-        self.assertEquals('string', (Key() + 'string').str)
-        self.assertEquals('a.b', (Key('a') + Key('b')).str)
+        self.assertEqual('', (Key() + Key()).str)
+        self.assertEqual('', (Key() + None).str)
+        self.assertEqual('string', (Key() + 'string').str)
+        self.assertEqual('a.b', (Key('a') + Key('b')).str)
 
     def testRightAdd(self):
         self.assertEqual('a.b', ('a' + Key('b')).str)
@@ -61,9 +61,9 @@ class TestKey(unittest.TestCase):
         key_ab = Key('a.b')
         key_Ab = Key('A.b')
 
-        self.assertEquals(key_ab, key_Ab)
-        self.assertEquals(key_ab, Key('A') + Key('B'))
-        self.assertEquals(hash(key_ab), hash(key_Ab))
+        self.assertEqual(key_ab, key_Ab)
+        self.assertEqual(key_ab, Key('A') + Key('B'))
+        self.assertEqual(hash(key_ab), hash(key_Ab))
 
 
 class TestProperty(unittest.TestCase):
@@ -595,17 +595,22 @@ class TestConfiguration(unittest.TestCase):
     def test_hidden_and_readonly_parent_overrules_child(self):
         parent = Configuration()
 
+        parent.child
+        parent.child.subchild
+
         self.assertFalse(parent.hidden)
         self.assertFalse(parent.readonly)
-
-        parent.child
         self.assertFalse(parent.child.hidden)
         self.assertFalse(parent.child.readonly)
+        self.assertFalse(parent.child.subchild.hidden)
+        self.assertFalse(parent.child.subchild.readonly)
 
         parent.hidden = True
         parent.readonly = True
         self.assertTrue(parent.child.hidden)
         self.assertTrue(parent.child.readonly)
+        self.assertTrue(parent.child.subchild.hidden)
+        self.assertTrue(parent.child.subchild.readonly)
 
 
     def test_merge(self):

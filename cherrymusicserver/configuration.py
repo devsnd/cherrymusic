@@ -1018,9 +1018,9 @@ class Configuration(Property):
     def readonly(): #@NoSelf
         def fget(self):
             try:
-                if self._isroot():
+                if self._isroot:
                     return self._readonly
-                return self._readonly or self._parent._readonly
+                return self._readonly or self._parent.readonly
             except AttributeError:
                 return None
 
@@ -1037,9 +1037,9 @@ class Configuration(Property):
     def hidden(): #@NoSelf
         def fget(self):
             try:
-                if self._isroot():
+                if self._isroot:
                     return self._hidden
-                return self._hidden or self._parent._hidden
+                return self._hidden or self._parent.hidden
             except AttributeError:
                 return None
 
@@ -1140,7 +1140,7 @@ class Configuration(Property):
             return super().__delattr__(name)
         self._del_local(Key(name))
 
-
+    @property
     def _isroot(self):
         return self._parent is None
 
