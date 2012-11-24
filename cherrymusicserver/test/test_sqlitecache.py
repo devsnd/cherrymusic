@@ -295,7 +295,7 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
 
     def setupConfig(self):
         cherry.config = configuration.from_defaults()
-        with configuration.modify(cherry.config) as cfg:
+        with configuration.extend(cherry.config) as cfg:
             cfg.media.basedir = self.testdir
             cfg.search.autoupdate = 'True'
 
@@ -568,7 +568,7 @@ class UpdateTest(unittest.TestCase):
 
     def setupConfig(self):
         cherry.config = configuration.from_defaults()
-        with configuration.modify(cherry.config) as config:
+        with configuration.extend(cherry.config) as config:
             config.media.basedir = self.testdir
             config.search.autoupdate = 'True'
 

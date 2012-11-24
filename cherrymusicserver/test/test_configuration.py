@@ -720,7 +720,7 @@ class TestConfiguration(unittest.TestCase):
 
         self.assertNotEqual(Configuration(), c)
 
-        with configuration.modify(c):
+        with configuration.extend(c):
             c.d.e = Property('d.e', 1, type='int', validity='1', hidden=True, desc='ONE')
 
         self.assertEqual(c, c + c)

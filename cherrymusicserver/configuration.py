@@ -299,7 +299,7 @@ class create(object):
         return False
 
 
-class modify(object):
+class extend(object):
     '''context manager that allows modifying Configurations. There will be no
     Errors raised when trying to access unknown Properties. This does not override
     type, validation or readonly checks.'''
