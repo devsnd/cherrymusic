@@ -105,14 +105,11 @@ def from_defaults():
         c.server.port.desc = 'The port the server will listen to.'
 
 
-    #    c.server.logfile = 'site.log'
-    #    c.server.logfile.desc = 'the logfile in which server errors will be logged'
-
         c.server.localhost_only = False
         c.server.localhost_only.desc = '''
                                         when localhost_only is set to true, the server will not
                                         be visible in the network and only play music on the
-                                        same computer it is running on
+                                        same computer it is running on.
                                         '''
 
         c.server.localhost_auto_login = False
@@ -120,6 +117,20 @@ def from_defaults():
                                         When localhost_auto_login is set to "True", the server will
                                         not ask for credentials when using it locally. The user will
                                         be automatically logged in as admin.
+                                        '''
+
+        c.server.permit_remote_admin_login = True
+        c.server.permit_remote_admin_login.desc = '''
+                                        When permit_remote_admin_login is set to "False", admin users
+                                        may only log in from the computer cherrymusic is currently
+                                        running on. This can improve security.
+                                        '''
+
+        c.server.keep_session_in_ram = False
+        c.server.keep_session_in_ram.desc = '''
+                                        Will keep the user sessions in RAM instead of a file in the
+                                        configuration directory. This means, that any unsaved
+                                        playlists will be lost when the server is restarted.
                                         '''
 
         c.server.enable_ssl = False
