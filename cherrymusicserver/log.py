@@ -155,6 +155,8 @@ c = critical
 ex = exception
 x = exception
 
+warning = warn
+
 
 def _get_logger():
     '''find out the caller's module name and get or create a corresponding

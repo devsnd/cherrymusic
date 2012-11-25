@@ -31,9 +31,7 @@
 import os
 import sqlite3
 
-import cherrymusicserver.configuration
-
-from cherrymusicserver.configuration import Configuration
+from cherrymusicserver.configuration import Configuration, Property
 from cherrymusicserver import configuration
 from cherrymusicserver import log
 
@@ -46,8 +44,18 @@ class ConfigDB(object):
 
         if setupDB:
             log.i('Creating config db table...')
-            self.conn.execute('CREATE TABLE config (key text UNIQUE, value text, desc text)')
-            self.conn.execute('CREATE INDEX idx_config ON config(key)');
+            self.conn.execute(
+                              'CREATE TABLE config ('
+                              'key text UNIQUE, '
+                              'value text, '
+                              'type text, '
+                              'validity text, '
+                              'readonly int, '
+                              'hidden int, '
+                              'desc text'
+                              ')'
+                              )
+            self.conn.execute('CREATE INDEX idx_config ON config(key)')
             log.i('done.')
             log.i('Initializing config db with default configuration...')
             self.reset_to_default()
@@ -55,19 +63,14 @@ class ConfigDB(object):
             log.i('Connected to Database. (' + CONFIGDBFILE + ')')
 
     def load(self):
-        cursor = self.conn.execute('SELECT * FROM config')
-        dic = {}
-        descriptions = {}
-        while True:
-            row = cursor.fetchone()
-            if row is None:
-                break
-            key, value, desc = row
-            dic[key] = value
-            descriptions[key] = desc
-        cfg = Configuration(dic=dic)
-        for key, desc in descriptions.items():
-            cfg[key]._desc = desc
+        cursor = self.conn.execute('SELECT key, value, type, validity, readonly, hidden, desc'
+                                   ' FROM config')
+        with configuration.create() as cfg:
+            while True:
+                row = cursor.fetchone()
+                if row is None:
+                    break
+                cfg += Property(*row)
         return cfg
 
     def save(self, cfg, clear=False):
@@ -82,13 +85,15 @@ class ConfigDB(object):
         """updates config database from cfg. entries in cfg overwrite existing keys or are created new.
         existing entries not in cfg remain untouched."""
         if cfg:
-            for key, value, desc in cfg.list:
-                foundid = self.conn.execute('SELECT rowid FROM config WHERE key=?', (key,)).fetchone()
+            for prop in configuration.to_list(cfg):
+                foundid = self.conn.execute('SELECT rowid FROM config'
+                                            ' WHERE key=?', (prop.name,)
+                                            ).fetchone()
                 if foundid is None:
-                    self.conn.execute('INSERT INTO config (key, value, desc) VALUES (?,?,?)', (key, value, desc))
+                    self._insert_property(prop)
                 else:
                     foundid = foundid[0]
-                    self.conn.execute('UPDATE config SET key=?, value=?, desc=? WHERE rowid=?', (key, value, desc, foundid))
+                    self._update_property(foundid, prop)
             self.conn.commit()
 
     def reset_to_default(self):
@@ -97,6 +102,17 @@ class ConfigDB(object):
 
     def _dump(self, cfg):
         if cfg:
-            for key, value, desc in cfg.list:
-                self.conn.execute('INSERT INTO config (key, value, desc) VALUES (?,?,?)', (key, value, desc))
+            for proptuple in configuration.to_list(cfg):
+                self._insert_property(proptuple)
             self.conn.commit()
+
+    def _insert_property(self, prop):
+        self.conn.execute('INSERT INTO config'
+                          ' (key, value, type, validity, readonly, hidden, desc) '
+                          'VALUES (?,?,?,?,?,?,?)', prop)
+
+    def _update_property(self, pid, prop):
+        args = prop + (pid,)
+        self.conn.execute('UPDATE config SET'
+                          ' key=?, value=?, type=?, validity=?, readonly=?, hidden=?, desc=?'
+                          ' WHERE rowid=?', args)

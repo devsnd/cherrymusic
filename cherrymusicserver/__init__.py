@@ -53,12 +53,12 @@ VERSION = "0.21"
 
 class CherryMusic:
 
-    def __init__(self,update=False, createNewConfig=False):
+    def __init__(self, update=False, createNewConfig=False):
         if createNewConfig:
-            newconfigpath = util.configurationFile()+'.new'
+            newconfigpath = util.configurationFile() + '.new'
             configuration.write_to_file(configuration.from_defaults(), newconfigpath)
             log.i('''New configuration file was written to: 
-'''+newconfigpath)
+''' + newconfigpath)
             exit(0)
         if not util.configurationFileExists():
             configuration.write_to_file(configuration.from_defaults(), util.configurationFile())
@@ -80,6 +80,34 @@ class CherryMusic:
         cdb.update(filecfg)
         log.i('loading configuration from database')
         config = cdb.load()
+        self._check_for_config_updates(filecfg)
+
+    def _check_for_config_updates(self, known_config):
+        new = []
+        deprecated = []
+        default = configuration.from_defaults()
+
+        for property in configuration.to_list(default):     #@ReservedAssignment
+            if property.name not in known_config and not property.hidden:
+                new.append(property.name)
+        for property in configuration.to_list(known_config): #@ReservedAssignment
+            if property.name not in default:
+                deprecated.append(property.name)
+
+        if new:
+            log.i('''New configuration options available: 
+                        %s
+                    Using default values for now.''',
+                  '\n\t\t\t'.join(new))
+        if deprecated:
+            log.i('''The following configuration options are not used anymore: 
+                        %s''',
+                  '\n\t\t\t'.join(deprecated))
+        if new or deprecated:
+            log.i('''
+                  Start with --newconfig to generate a new default config file next to your current one.
+                  ''',
+            )
 
     def printWelcomeAndExit(self):
         print("""
@@ -175,7 +203,7 @@ Have fun!
                 },
         })
         log.i('Starting server on port %s ...' % config.server.port)
-        
+
         cherrypy.lib.caching.expires(0) #disable expiry caching
         cherrypy.engine.start()
         cherrypy.engine.block()
