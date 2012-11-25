@@ -1070,6 +1070,19 @@ class Configuration(Property):
             key = self._parent._key + key
         return key
 
+    def _key_as_seen_from(self, origin):
+        if None is origin:
+            return self._key
+        if self is origin:
+            return Key()
+        if self._parent is None:
+            raise ValueError('%s is no parent of %s' % (origin, self))
+        try:
+            return self._parent._key_as_seen_from(origin) + self.__key
+        except ValueError:
+            raise ValueError("%s is no parent of %s" % (origin, self))
+
+
     def _recursive_properties(self):
         for p in self._properties.values():
             yield p
@@ -1160,7 +1173,7 @@ class Configuration(Property):
 
     def __iter__(self):
         props = self._recursive_properties()
-        return (p._key.tail.str if self.name else p.name for p in props)
+        return (p._key_as_seen_from(self).str if self.name else p.name for p in props)
 
 
     def __contains__(self, name):
