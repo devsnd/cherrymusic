@@ -1159,7 +1159,7 @@ class Configuration(Property):
         if not len(self) == len(other):
             return False
         for child in self._properties.values():
-            if not child._key in other:
+            if not child._key.last in other:
                 return False
             if not child.__eq__(other[child._key.last]):
                 return False
@@ -1173,17 +1173,16 @@ class Configuration(Property):
 
     def __iter__(self):
         props = self._recursive_properties()
-        return (p._key_as_seen_from(self).str if self.name else p.name for p in props)
+        return (p._key_as_seen_from(self).str for p in props)
 
 
     def __contains__(self, name):
-        if isinstance(name, Property):
-            name = name.name
         try:
             key = Key(name)
         except ConfigKeyError:
             return False
-        return key in (p._key for p in self._recursive_properties())
+        props = self._recursive_properties()
+        return key.normstr in (p._key_as_seen_from(self).normstr for p in props)
 
 
     def __iadd__(self, other):

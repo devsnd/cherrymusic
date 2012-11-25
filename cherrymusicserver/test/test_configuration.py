@@ -535,6 +535,20 @@ class TestConfiguration(unittest.TestCase):
             self.assertEqual(3, len(cfg))
             self.assertEqual(0, len(Configuration()))
 
+        # named configurations
+        with configuration.create('foo.bar') as foocfg:
+            foocfg.a.b.c = 23
+
+        self.assertTrue('a' in foocfg)
+        self.assertTrue('A' in foocfg)
+        self.assertTrue('a.b' in foocfg)
+        self.assertTrue('a.b.c' in foocfg)
+        self.assertFalse('foo' in foocfg)
+        self.assertFalse('foo.bar' in foocfg)
+        self.assertFalse('foo.bar.a' in foocfg)
+
+        self.assertEqual(['a', 'a.b', 'a.b.c'], [k for k in foocfg])
+
 
     def test_basic_access(self):
         with configuration.create() as cfg:
