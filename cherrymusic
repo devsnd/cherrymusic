@@ -37,7 +37,7 @@ except ImportError:
 cherrymusic needs the module "cherrypy" to run. You should install it
 using the package manager of your OS. Alternatively cherrymusic can
 download it for you and put it in the folder in which cherrymusic resides.""")
-    if input("(d)ownload cherrypy / (q)uit and install cherrpy manually? [i/q]") == 'd':
+    if input("(d)ownload cherrypy / (q)uit and install cherrpy manually? [d/q]") == 'd':
         inst = cmbootstrap.DependencyInstaller()
         try:
             install_stagger = False
