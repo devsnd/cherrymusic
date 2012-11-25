@@ -65,12 +65,12 @@ class ConfigDB(object):
     def load(self):
         cursor = self.conn.execute('SELECT key, value, type, validity, readonly, hidden, desc'
                                    ' FROM config')
-        cfg = Configuration()
-        while True:
-            row = cursor.fetchone()
-            if row is None:
-                break
-            cfg += Property(*row)
+        with configuration.create() as cfg:
+            while True:
+                row = cursor.fetchone()
+                if row is None:
+                    break
+                cfg += Property(*row)
         return cfg
 
     def save(self, cfg, clear=False):
