@@ -226,3 +226,42 @@ class Performance:
             duration = (time() - self.time) * 1000
             log.w('|   ' * (Performance.indentation - 1) + '\__ %g ms' % (duration,))
             Performance.indentation -= 1
+
+def time2text(sec):
+    abssec = abs(sec)
+    mins = abssec/60
+    hours = mins/60
+    days = hours/24
+    weeks = days/7
+    months = days/30
+    years = months/12
+    if abssec > 30:
+        if int(years) != 0:
+            t = str(int(years))+' years'            
+        elif int(month) != 0:
+            t = str(int(months))+' months'
+        elif int(weeks) != 0:
+            t = str(int(weeks))+' weeks'
+        elif int(days) != 0:
+            t = str(int(days))+' days'
+        elif int(hours) != 0:
+            if int(hours) == 1:
+                t = 'an hour'
+            else:
+                t = str(int(hours))+' hours'
+        elif hours > 0.45:
+            t = 'half an hour'
+        elif int(minutes) != 0:
+            if int(minutes) == 1:
+                t = 'a minute'
+            else:
+                t = str(int(minutes))+' minutes'
+        else:
+            t = 'a few seconds'
+        if sec > 0:
+            t = t+' ago'
+        else:
+            t = 'in '+t
+    else:
+        t = 'just now'
+    return t
