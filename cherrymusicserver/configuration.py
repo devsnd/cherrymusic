@@ -318,7 +318,7 @@ def _property_from_dict(dic):
 class create(object):
     '''context manager that allows creating new Configurations. There will be no
     Errors raised when trying to access unknown Properties.'''
-    def __init__(self, name=None, value=None, type=None, validity=None, readonly=None, hidden=None, desc=None, parent=None):
+    def __init__(self, name=None, value=None, type=None, validity=None, readonly=None, hidden=None, desc=None, parent=None): #@ReservedAssignment
         self.cfg = Configuration(name, value, type, validity, readonly, hidden, desc, parent)
 
     def __enter__(self):
@@ -619,7 +619,7 @@ class Property(object):
         '''
         self.__key = Key(name)
         self._validate_no_keyword(self._key)
-        self._type = type if type in Transformers else ''
+        self._type = self._get_valid_type(type)
         self.readonly = None
         self._value = None
         self._validity = validity
@@ -794,40 +794,42 @@ class Property(object):
         return locals()
 
 
-    def _validate(self, value):
+    def _validate(self, value, validity=None):
+        if validity is None:
+            validity = self.validity
+        if not validity:
+            return value
         if self.type != 'list':
-            return self._validate_single_value(value)
+            return self._validate_single_value(value, validity)
         else:
             if value is not None:
                 try:
                     for v in Transformers['list'](value):
-                        self._validate_single_value(v)
+                        self._validate_single_value(v, validity)
                 except TransformError:
                     raise ValueError('value cannot be transformed to list: %s' % value)
             return value
 
 
-    def _validate_single_value(self, value):
-        if not self.validity:
-            return value
-
+    def _validate_single_value(self, value, validity):
         testvalue = '' if value is None else str(value).strip()
-
-        testexpr = self.validity
+        testexpr = validity
         testexpr = testexpr.strip().lstrip('^').rstrip('$').strip()
         testexpr = '^' + testexpr + '$' if testexpr else ''
 
         if not re.match(testexpr, testvalue):
             raise ValueError("invalid value (%r): doesn't match validity requirement %r"
                              " (testexpr=%r, teststring=%r)"
-                             % (value, self.validity, testexpr, testvalue))
+                             % (value, validity, testexpr, testvalue))
 
         return value.strip() if isinstance(value, str) else value
 
 
-    def _to_type(self, value):
-        if self.type and self.type in Transformers:
-            value = self._transform(value)
+    def _to_type(self, value, _type=None):
+        if _type is None:
+            _type = self.type
+        if _type and _type in Transformers:
+            value = self._transform(value, _type)
         else:
             value = self._match_existing_type(value)
         return value
@@ -841,8 +843,7 @@ class Property(object):
         return value
 
 
-    def _transform(self, value, typename=None):
-        typename = typename or self.type
+    def _transform(self, value, typename):
         try:
             return Transformers[typename](value)
         except (TransformError, KeyError) as e:
@@ -851,10 +852,11 @@ class Property(object):
                     return e.suggested_default
             elif isinstance(e, KeyError):
                 e = 'no transformer for type %s' % e
-            raise TypeError("invalid value (%(val)r): is not of required type (%(target)s) and cannot be transformed"
+            raise TypeError("invalid value (%(val)r): is not of required type (%(target)r) and cannot be transformed: %(e)s"
                             % {
                                'val': value,
                                'target': typename,
+                               'e': e,
                                })
 
 
@@ -899,6 +901,17 @@ class Property(object):
             raise ConfigError('cannot change %s %r: %s' % (self.__class__.__name__, self.name, e))
         else:
             self.__become_like(other)
+
+    def _get_valid_type(self, value):
+        if value in self._potential_transform_targets():
+            value = value.__name__
+        elif value is None:
+            value = ''
+        elif not isinstance(value, str):
+            raise TypeError("'type' must be None, a str or one of %s" % self._potential_transform_targets())
+        if value not in Transformers:
+            value = ''
+        return value
 
 _PropTuple = namedtuple('PropertyTuple', ' '.join(Property._attributes()))
 
@@ -1123,6 +1136,42 @@ class Configuration(Property):
     @property
     def name(self):
         return self._key.str
+
+    @util.Property
+    def validity():     #@NoSelf
+        def fget(self):
+            return super().validity
+
+        def fset(self, newval):
+            if self._create_mode:
+                self._validate(self.value, '' if newval is None else newval)
+                self._validity = newval
+            else:
+                raise AttributeError("can't set attribute")
+
+        def fdel(self):
+            fset(self, None)
+
+        return locals()
+
+
+    @util.Property
+    def type():     #@NoSelf
+        def fget(self):
+            return super().type
+
+        def fset(self, newval):
+            if self._create_mode:
+                _type = self._get_valid_type(newval)
+                self._to_type(self.value, _type)
+                self._type = _type
+            else:
+                raise AttributeError("can't set attribute")
+
+        def fdel(self):
+            fset(self, None)
+
+        return locals()
 
 
     @util.Property

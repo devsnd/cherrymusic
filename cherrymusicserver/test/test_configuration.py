@@ -194,6 +194,9 @@ class TestProperty(unittest.TestCase):
 
     def test_typechecks_and_type_effects(self):
 
+        self.assertEqual(-23.42, Property('test', "-23.42", type=float).value,
+                         'builtin types can be used as type argument')
+
         ### CONSTRUCTOR
 
         self.assertEqual(11, Property('test', 11).value,
