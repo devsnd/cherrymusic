@@ -75,7 +75,7 @@ Version '''+cherrymusicserver.VERSION)
 
 parser.add_argument('--update',dest='update',action='store_true', help='update the media database')
 parser.add_argument('--newconfig',dest='newconfig',action='store_true', help='creates a new config file in your home directory, e.g. ~/.cherrymusic/config.new')
-parser.add_argument('--download-stagger',dest='downloadstagger',action='store_true', help='downloads the python module "stagger", an ID3-tag library, so that your music can be index more precisely. (should only be used when not installed using a package manager!)')
+parser.add_argument('--download-stagger',dest='downloadstagger',action='store_true', help='downloads the python module "stagger", an ID3-tag library, so that your music can be indexed more precisely. (should only be used when not installed using a package manager!)')
 args = parser.parse_args()
 
 if args.downloadstagger:
