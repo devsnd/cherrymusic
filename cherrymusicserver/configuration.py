@@ -245,7 +245,7 @@ def to_list(cfg):
         raise TypeError('type(cfg) is not a Property: %s' % (type(cfg),))
     if not isinstance(cfg, Configuration):  # cfg is a plain Property
         return [property_to_tuple(cfg)]
-    l = [property_to_tuple(p) for p in cfg._recursive_properties() if p.value or p.desc]
+    l = [property_to_tuple(p) for p in cfg._recursive_properties() if p.value != None or p.desc]
     return l
 
 
