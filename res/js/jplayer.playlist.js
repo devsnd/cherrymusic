@@ -422,7 +422,7 @@
 			if(0 <= index && index < this.playlist.length) {
 				this.current = index;
 				this._highlight(index);
-                this.playlist[this.current].wasPlayed = true;
+                this.playlist[this.current].wasPlayed += 1;
 				$(this.cssSelector.jPlayer).jPlayer("setMedia", this.playlist[this.current]);
 			} else {
 				this.current = 0;
@@ -443,58 +443,44 @@
 			$(this.cssSelector.jPlayer).jPlayer("pause");
 		},
 		next: function() {
-			var index = (this.current + 1 < this.playlist.length) ? this.current + 1 : 0;
-
-			if(this.loop) {
-				// See if we need to shuffle before looping to start, and only shuffle if more than 1 item.
-				if(index === 0 && this.shuffled && this.options.playlistOptions.shuffleOnLoop && this.playlist.length > 1) {
-					this.shuffle(true, true); // playNow
-				} else {
+            if(this.shuffled){
+                playRandomTrack();
+            } else {
+                var index = (this.current + 1 < this.playlist.length) ? this.current + 1 : 0;
+                // The index will be zero if it just looped round
+				if(this.loop || index > 0) {
 					this.play(index);
 				}
-			} else {
-				// The index will be zero if it just looped round
-				if(index > 0) {
-					this.play(index);
-				}
-			}
+            }
 		},
+        playRandomTrack: function(){
+            var weighted = [];
+            for(var i=0; i<this.playlist.length; i++){
+                if( typeof this.playlist[i].wasPlayed === 'undefined' ){
+                    this.playlist.wasPlayed[i] = 0;
+                }
+                weighted.push([i,this.playlist[i].wasPlayed]);
+            }
+            weighted.sort(function(a,b){
+                return a[1]-b[1]
+            });
+            //pick from top half of least played tracks
+            var index = weighted[parseInt(Math.random()*this.playlist.length/2)][0];
+            this.play(index);  
+        },
 		previous: function() {
-			var index = (this.current - 1 >= 0) ? this.current - 1 : this.playlist.length - 1;
-
-			if(this.loop && this.options.playlistOptions.loopOnPrevious || index < this.playlist.length - 1) {
-				this.play(index);
-			}
+            if(this.shuffled){
+                playRandomTrack();
+            } else {
+                var index = (this.current - 1 >= 0) ? this.current - 1 : this.playlist.length - 1;
+                if(this.loop && this.options.playlistOptions.loopOnPrevious || index < this.playlist.length - 1) {
+                    this.play(index);
+                }
+            }
 		},
 		shuffle: function(shuffled, playNow) {
-			var self = this;
-
-			if(shuffled === undefined) {
-				shuffled = !this.shuffled;
-			}
-
-			if(shuffled || shuffled !== this.shuffled) {
-
-				$(this.cssSelector.playlist + " ul").slideUp(this.options.playlistOptions.shuffleTime, function() {
-					self.shuffled = shuffled;
-					if(shuffled) {
-						self.playlist.sort(function() {
-							return 0.5 - Math.random();
-						});
-					} else {
-						self._originalPlaylist();
-					}
-					self._refresh(true); // Instant
-
-					if(playNow || !$(self.cssSelector.jPlayer).data("jPlayer").status.paused) {
-						self.play(0);
-					} else {
-						self.select(0);
-					}
-
-					$(this).slideDown(self.options.playlistOptions.shuffleTime);
-				});
-			}
+			this.shuffled = !this.shuffled;
+            this._updateControls();
 		},
         scan: function() {
             var self = this;

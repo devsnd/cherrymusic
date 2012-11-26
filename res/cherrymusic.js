@@ -506,6 +506,7 @@ addSong = function(path,title){
     var ext = getFileTypeByExt(path);
     var track = {
         title: title,
+        wasPlayed : 0,
     }
     //add natively supported path
     track[ext2jPlayerFormat(ext)] = path;
@@ -739,7 +740,7 @@ function restorePlaylistAndRememberPeriodically(){
 
 function removePlayedFromPlaylist(){
     for(var i=0; i<mediaPlaylist.playlist.length; i++){
-        if(mediaPlaylist.playlist[i].wasPlayed){
+        if(mediaPlaylist.playlist[i].wasPlayed>0){
             mediaPlaylist.playlist.splice(i,1);
             i--;
         }
