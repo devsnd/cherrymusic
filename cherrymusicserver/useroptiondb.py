@@ -31,93 +31,109 @@
 import sqlite3
 import os
 import re
+import json
 
 from cherrymusicserver import log
+from cherrymusicserver import configuration as cfg
 
 class UserOptionDB:
     
     def __init__(self, USEROPTIONDBFILE):
-        self.defaults = {
-            'keyboard_shortcuts' : {
-                #possible types are: list, str, int
-                'type' : list,
-                'value': ['PREV:z','PLAY:x','PAUSE:c','STOP:v','NEXT:b','SEARCH:s'], #winamp like defaults
-                'validation' : '[A-Z]:.*', #re.match performed on value/each value in list
-                'readonly' : False,
-                'hidden' : False,
-            }
-        }
+        """user configuration:
+            hidden values can not be set by the user in the options,
+            but might be subject of bing set automatically, e.g. the
+            heartbeat.
+        """
+        with cfg.create() as c:
+            c.keyboard_shortcuts = cfg.Property(
+                name='keyboard_shortcuts',
+                validity='[A-Z]+:.*',
+                type='list',
+                #winamp like defaults
+                value = ['PREV:z','PLAY:x','PAUSE:c','STOP:v','NEXT:b','SEARCH:s'],
+                readonly = False,
+                hidden = False
+            )
+            
+            #UNIX TIME (1.1.1970 = never)
+            c.last_time_online = cfg.Property(
+                value=0,
+                name='last_time_online',
+                validity='\\d+',
+                type='int',
+                readonly = False,
+                hidden = True
+            )
+            
+        self.DEFAULTS = c
         
         setupDB = not os.path.isfile(USEROPTIONDBFILE) or os.path.getsize(USEROPTIONDBFILE) == 0
         self.conn = sqlite3.connect(USEROPTIONDBFILE, check_same_thread=False)
 
         if setupDB:
             log.i('Creating user options db table...')
-            self.conn.execute('CREATE TABLE option (userid id UNIQUE, name text, type text, value text)')
-            #TODO: create INDEXES?
+            self.conn.execute('CREATE TABLE option (userid int, name text, value text)')
+            self.conn.execute('CREATE INDEX IF NOT EXISTS idx_userid_name ON option(userid, name)')
             log.i('done.')
             log.i('Connected to Database. (' + USEROPTIONDBFILE + ')')
 
-    def getOption(self, userid, optionname):
-        if optionname in self.defaults:
-            opt = self.__getOptionFromDB(userid,optionname)
-            if opt:
-                return opt
-            return self.defaults[optionname]
-        return None
-    
-    def setOption(self, userid, optionname, value):
-        isSane, reason = self.__isSaneOption(optionname, value)
-        if isSane:
-            if self.defaults[optionname].get('readonly',False):
-                log.e('user with id %s tried to set readonly option %s!' % (userid, optionname))
-                return False
-                
-            if self.__getOptionFromDB(userid,optionname):
-                self.__updateOptionInDB(userid, optionname, value)
-                return True
+    def getOptionFromMany(self, key, userids):
+        result = {}
+        for userid in userids:
+            val = self.useroptiondb.conn.execute('''SELECT value FROM option WHERE  userid = ? AND name = ?''',(userid, key,)).fetchone()
+            if val:
+                result[userid] = val
             else:
-                self.__setOptionInDB(userid, optionname, value)
-                return True
-        else:
-            if reason == 'unknown option':
-                log.e('user with id %s tried to set unknown option %s!' % (userid, optionname))
-            elif reason == 'invalid value':
-                log.e('user with id %s tried to set option %s to invalid value!' % (userid, optionname))
-            elif reason == 'invalid type':
-                log.e('user with id %s tried to set option %s with invalid type!' % (userid, optionname))
-            return False
-            
-    def __isSaneOption(self, optionname, value):
-        if not optionname in self.defaults:
-            return False, 'unknown option'
-        if type(value) != self.defaults[optionname]['type']:
-            return False, 'invalid type'
-        if type(value) == list:
-            for e in value:
-                if not re.match(self.defaults['validation'],value):
-                    return False, 'invalid value'
-        else:
-            if not re.match(self.defaults['validation'],value):
-                return False, 'invalid value'
-        return True
-    
-    def __updateOptionInDB(self, userid, optionname, value):
-        self.conn.execute('''UPDATE option SET value=? WHERE userid=? AND name=?''',
-            (value, userid, optioname))
-    
-    def __setOptionInDB(self, userid, optionname, value):
-        self.conn.execute('''
-        INSERT INTO option
-        (userid, name, value)
-        VALUES (?,?,?)''',
-        (userid, optionname, value))
+                result[userid] = self.DEFAULTS[key]['value']
+        return result
 
-    def __getOptionFromDB(self, userid, optionname):
-        res = self.conn.execute('''SELECT value FROM option 
-        WHERE userid = ? AND name = ?''',(userid, optionname))
-        if res:
-            return res[0]
-        return None
+    def forUser(self, userid):
+        return UserOptionDB.UserOptionProxy(self, userid)
         
+    class UserOptionProxy:
+        def __init__(self, useroptiondb, userid):
+            self.useroptiondb = useroptiondb
+            self.userid = userid
+
+        def getChangableOptions(self):
+            optlist = []
+            opts = self.getOptions()
+            for c in opts:
+                if not opts[c]._hidden:
+                   optlist.append((opts[c]['name'], opts[c]['value']))
+            return optlist
+                    
+        
+        def getOptions(self):
+            results =  self.useroptiondb.conn.execute('''SELECT name, value FROM option WHERE userid = ?''',(self.userid,)).fetchall()
+            decoded = []
+            for a in results:
+                decoded.append((a[0],json.loads(a[1])))
+            c = cfg.from_list(decoded)
+            c = self.useroptiondb.DEFAULTS + c
+            return c
+        
+        def getOptionValue(self, key):
+            return self.getOptions()[key]['value']
+        
+        def setOption(self, key, value):
+            opts = self.getOptions()
+            opts[key]['value'] = value
+            self.setOptions(opts)
+        
+        def setOptions(self, c):
+            for k in cfg.to_list(c):
+                value = json.dumps(k[1])
+                key = k[0]
+                sel =  self.useroptiondb.conn.execute('''SELECT name, value FROM option WHERE userid = ? AND name = ?''',
+                    (self.userid, key)).fetchone()
+                if sel:
+                    self.useroptiondb.conn.execute('''UPDATE option SET value = ? WHERE userid = ? AND name = ?''',
+                        (value, self.userid, key))
+                else:
+                    self.useroptiondb.conn.execute('''INSERT INTO option (userid, name, value) VALUES (?,?,?)''',
+                        (self.userid, key, value))
+            self.useroptiondb.conn.commit()
+            
     
+            

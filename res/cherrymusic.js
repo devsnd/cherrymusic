@@ -33,6 +33,7 @@ var availableDecoders = undefined;
 var transcodingEnabled = undefined;
 var fetchAlbumArt = undefined;
 var REMEMBER_PLAYLIST_INTERVAL = 3000;
+var HEARTBEAT_INTERVAL_MS = 30*1000;
 
 var playlistSelector = '.jp-playlist';
 
@@ -387,24 +388,101 @@ function sortFormatPreferrencePerBrowser(){
 }
 
 function initJPlayer(){
-    if (typeof mediaPlaylist === 'undefined') {
-	mediaPlaylist = new jPlayerPlaylist({
-        jPlayer: "#jquery_jplayer_1",
-        cssSelectorAncestor: "#jp_container_1"
-	}, [], {
-		playlistOptions: {
-			enableRemoveControls: true,
-            playlistSelector: playlistSelector,
-		},
-        swfPath: "res/js",
-		solution: "flash, html",
-		preload: 'metadata',
-        supplied: availablejPlayerFormats.join(),
-        wmode: "window",
-        errorAlerts: false
+    var jPlayerSelector = "#jquery_jplayer_1";
+    if (typeof jPlayerInstance === 'undefined'){
+        // Instance jPlayer
+		$(jPlayerSelector).jPlayer({
+            swfPath: "res/js",
+            solution: "flash, html",
+            preload: 'metadata',
+            supplied: availablejPlayerFormats.join(),
+            wmode: "window",
+            errorAlerts: false
+        });
+        //initialize all playlists, that were created before jPlayer
+        $(jPlayerSelector).bind($.jPlayer.event.ready, function(event) {
+           for(var i=0; i<mediaPlaylists.length; i++){
+               mediaPlaylists[i]._init();
+           }
+           jPlayerInstanceReady = true;
         });
     }
+    if (typeof mediaPlaylists === 'undefined') {
+        mediaPlaylists = [];
+        playingPlaylist = 0;
+        editingPlaylist = 0;
+    }
 }
+
+function getEditingPlaylist(){
+    return mediaPlaylists[editingPlaylist];
+}
+
+function getPlayingPlaylist(){
+    return mediaPlaylists[playingPlaylist];
+}
+
+function newPlaylist(playlist,notclosable){
+    notclosable = notclosable && true;
+    playlist = playlist || [];
+    var playlistSelector = createNewPlaylistContainer(notclosable);
+    var jppl = new jPlayerPlaylist({
+            jPlayer: "#jquery_jplayer_1",
+            cssSelectorAncestor: "#jp_container_1"
+        },
+        playlist,
+        {   playlistOptions: {
+                enableRemoveControls: true,
+                playlistSelector: playlistSelector
+            }
+		}
+    );
+    mediaPlaylists.push(jppl);
+    if(typeof jPlayerInstanceReady !== 'undefined'){
+        jppl._init();
+    }
+    $(playlistSelector+" ul").sortable({
+        update: function(e,ui){
+            mediaPlaylist.scan();
+            }
+        });
+	$(playlistSelector+" ul").disableSelection();
+    return jppl;
+}
+
+/* PLAYLIST CREATION AND MANAGEMENT */
+var playlistContainerParent = '#playlistContainerParent';
+var playlistChooser = '#playlistChooser';
+function createNewPlaylistContainer(notclosable){
+    //add stuff
+    if($(playlistContainerParent+' div').length==0){
+        var next = 0;
+    } else {
+        var next = parseInt($(playlistContainerParent+'>div:last').attr('n'))+1;
+    }
+    var id = 'playlist-'+next;
+    $(playlistContainerParent).append(
+        '<div n="'+next+'" class="playlist-container jp-playlist" id="'+id+'"><ul><li></li></ul></div>'
+    );
+    
+    var closer = '<a href="#" onclick="closePlaylist('+id+')">&times;</a>'
+    if(notclosable){
+        var closer = '';
+    }
+    $(playlistChooser+' ul').append(
+        '<li id="'+id+'-tab" class="smalltab"><a href="#" onclick="showPlaylist(\''+id+'\')">new playlist '+next+'</a>'+closer+'</li>'
+    )
+    return '#'+id;
+}
+function showPlaylist(playlistid){
+    $(playlistContainerParent+'>div').hide();
+    $('#'+playlistid).show();
+    $(playlistChooser+' ul li').removeClass('active');
+    $('#'+playlistid+'-tab').addClass('active');
+    editingPlaylist = parseInt($('#'+playlistid).attr('n'));
+}
+
+/* PLAYLIST CREATION AND MANAGEMENT END*/
 
 ext2jPlayerFormat = function(ext){
     switch(ext){
@@ -442,21 +520,21 @@ addSong = function(path,title){
         }
     }
     
-    mediaPlaylist.add(track);
+    getEditingPlaylist().add(track);
     pulseTab('jplayer');
     var success = function(data){
         var metainfo = $.parseJSON(data)
         if (metainfo.length) {
             track.duration = metainfo.length;
         }
-        mediaPlaylist._refresh(true);
+        getEditingPlaylist()._refresh(true);
     }
     api({action:'getsonginfo',
         value: path}, success, errorFunc('error getting song metainfo'), true);
 };
 clearPlaylist = function(){
     "use strict";
-    mediaPlaylist.remove();
+    getEditingPlaylist().remove();
 };
 /**********
 TRANSCODING
@@ -500,7 +578,7 @@ function savePlaylist(playlistname,ispublic){
     "use strict";
     var data = { 'action':'saveplaylist',
                 'value':JSON.stringify({
-                            'playlist':mediaPlaylist.playlist,
+                            'playlist':getEditingPlaylist().playlist,
                             'public':ispublic,
                             'playlistname':playlistname
                         })
@@ -632,15 +710,15 @@ function loadPlaylist(playlistid){
 var lastPlaylist;
 function rememberPlaylistPeriodically(){
     "use strict";
-    if (mediaPlaylist.playlist && lastPlaylist !== JSON.stringify(mediaPlaylist.playlist)){
+    if (getEditingPlaylist().playlist && lastPlaylist !== JSON.stringify(getEditingPlaylist().playlist)){
         /* save playlist in session */
         var data = {'action':'rememberplaylist',
                     'value':JSON.stringify(
-                        {'playlist':mediaPlaylist.playlist}
+                        {'playlist':getEditingPlaylist().playlist}
                     )};
         var error = errorFunc('cannot rememebering playlist: failed to connect to server.');
         var success = function(){
-            lastPlaylist = JSON.stringify(mediaPlaylist.playlist)
+            lastPlaylist = JSON.stringify(getEditingPlaylist().playlist)
         }
         api(data, success, error, true);
     }
@@ -650,8 +728,7 @@ function restorePlaylistAndRememberPeriodically(){
     "use strict";
     /*restore playlist from session*/
     var success = function(data){
-            mediaPlaylist.playlist = $.parseJSON(data);
-            mediaPlaylist._refresh(true);
+            newPlaylist($.parseJSON(data))._refresh(true);
             window.setInterval("rememberPlaylistPeriodically()",REMEMBER_PLAYLIST_INTERVAL );
     };
     api('restoreplaylist',success,errorFunc('error restoring playlist'));
@@ -688,8 +765,8 @@ function logout(){
 }
 
 function displayCurrentSong(){
-    if(mediaPlaylist && mediaPlaylist.playlist && mediaPlaylist.current && mediaPlaylist.playlist.length>0){
-        $('.cm-songtitle').html(mediaPlaylist.playlist[mediaPlaylist.current].title);
+    if(mediaPlaylists && getPlayingPlaylist().playlist && getPlayingPlaylist().current && getPlayingPlaylist().playlist.length>0){
+        $('.cm-songtitle').html(getPlayingPlaylist().playlist[getPlayingPlaylist().current].title);
     } else {
         $('.cm-songtitle').html('');
     }
@@ -711,7 +788,12 @@ function updateUserList(){
     "use strict";
     var success = function(data){
         var htmllist = "";
+        var time = unixtime();
         $.each($.parseJSON(data),function(i,e){
+            var reltime = time - e.last_time_online;
+            var fuzzytime = time2text(reltime);
+            var isonline = reltime < HEARTBEAT_INTERVAL_MS/500;
+            var onlinetag = isonline ? '<span class="online-light"></span>' : '<span class="offline-light"></span>';
             if(e.admin){
                 htmllist += '<li class="admin">';
             } else {
@@ -721,7 +803,7 @@ function updateUserList(){
             if(e.deletable){
                 delbutton = '<a class="button" href="javascript:;" onclick="userDelete('+e.id+')">delete</a>';
             }
-            htmllist += e.id+' - '+e.username+delbutton+'</li>';
+            htmllist += onlinetag+e.id+' - '+e.username+delbutton+' last seen: '+fuzzytime+'</li>';
         });
         $('#adminuserlist').html(htmllist);
     };
@@ -878,6 +960,51 @@ function viewport() {
     return { width : e[ a+'Width' ] , height : e[ a+'Height' ] }
 }
 
+/*****
+ * UTIL
+ * ***/
+function unixtime(){
+    var d = new Date;
+    return parseInt(d.getTime() / 1000);
+}
+
+function time2text(sec){
+    var abssec = Math.abs(sec);
+    var minutes = parseInt(abssec/60);
+    var hours = parseInt(minutes/60)
+    var days = parseInt(hours/24);
+    var weeks = parseInt(days/7);
+    var months = parseInt(days/30);
+    var years = parseInt(months/12);
+    var t='';
+    if(abssec < 30){
+        return 'just now'
+    } else {
+        if(years != 0){
+            years+' years';
+            if(years > 20){
+                return 'never';
+            }
+        } else if(months != 0){
+            t = months+' months';
+        } else if(weeks != 0){
+            t = weeks+' weeks';
+        } else if(days != 0){
+            t = days+' days';
+        } else if(hours != 0){
+            t = hours == 1 ? 'an hour' : hours+' hours';
+        } else if(minutes != 0){
+            t = minutes > 25 ? 'half an hour' : minutes+' minutes';
+            if (minutes == 1){
+                t = 'a minute';
+            }
+        } else {
+            t = 'a few seconds'
+        }
+        return sec > 0 ? t+' ago' : 'in '+t;
+    }
+}
+
 /***
 ON DOCUMENT READY... STEADY... GO!
 ***/
@@ -887,9 +1014,9 @@ $(document).ready(function(){
     fetchMessageOfTheDay();
     $('#searchfield .bigbutton').click(submitsearch);
     $('.hideplaylisttab').hide();
-    executeAfterConfigLoaded.push(restorePlaylistAndRememberPeriodically);
     executeAfterConfigLoaded.push(setAvailableJPlayerFormats);
     executeAfterConfigLoaded.push(initJPlayer);
+    executeAfterConfigLoaded.push(restorePlaylistAndRememberPeriodically);
     loadConfig();
     //register top level directories
 	registerlistdirs($("html").get());
@@ -898,10 +1025,6 @@ $(document).ready(function(){
     window.setInterval("displayCurrentSong()", 1000);
     window.setInterval("resizePlaylistSlowly()",2000);
     $('#searchform .searchinput').focus();
-    $(playlistSelector+" ul").sortable({
-        update: function(e,ui){
-            mediaPlaylist.scan();
-            }
-        });
-	$(playlistSelector+" ul").disableSelection();
+    window.setInterval("api('heartbeat',false,false,true)",HEARTBEAT_INTERVAL_MS);
+    
 });

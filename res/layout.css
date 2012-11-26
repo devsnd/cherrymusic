@@ -25,6 +25,27 @@
 #
 */
 
+/******
+GENERAL
+******/
+.active{
+	background-color: #cc0000 !important;
+}
+.online-light{
+    background-color: #00ff00;
+    border: 1px solid #334433;
+    width: 5px;
+    height: 5px;
+    display: inline-block;
+}
+.offline-light{
+    background-color: #ff0000;
+    border: 1px solid #443333;
+    width: 5px;
+    height: 5px;
+    display: inline-block;
+}
+
 /*****
 TABS
 *****/

@@ -21,6 +21,7 @@
 	jPlayerPlaylist = function(cssSelector, playlist, options) {
 		var self = this;
 
+        this.active = false;
 		this.current = 0;
 		this.loop = false; // Flag used with the jPlayer repeat event
 		this.shuffled = false;
@@ -55,13 +56,16 @@
 		};
 
 		// Create a ready event handler to initialize the playlist
-		$(this.cssSelector.jPlayer).bind($.jPlayer.event.ready, function(event) {
+        // is now handled by cherrymusic
+		/*$(this.cssSelector.jPlayer).bind($.jPlayer.event.ready, function(event) {
 			self._init();
-		});
+		});*/
 
 		// Create an ended event handler to move to the next item
 		$(this.cssSelector.jPlayer).bind($.jPlayer.event.ended, function(event) {
-			self.next();
+            if(self.active){
+                self.next();
+            }
 		});
 
 		// Create a play event handler to pause other instances
@@ -80,23 +84,27 @@
 
 		// Create click handlers for the extra buttons that do playlist functions.
 		$(this.cssSelector.previous).click(function() {
-			self.previous();
-			$(this).blur();
-			return false;
+            if(self.active){
+                self.previous();
+                $(this).blur();
+                return false;
+            }
 		});
 
 		$(this.cssSelector.next).click(function() {
-			self.next();
-			$(this).blur();
-			return false;
+            if(self.active){
+                self.next();
+                $(this).blur();
+                return false;
+            }
 		});
 
 		$(this.cssSelector.shuffle).click(function() {
-			self.shuffle(true);
-			return false;
+                self.shuffle(true);
+                return false;
 		});
 		$(this.cssSelector.shuffleOff).click(function() {
-			self.shuffle(false);
+            self.shuffle(false);
 			return false;
 		}).hide();
 
@@ -111,8 +119,7 @@
 		// Create .live() handlers for the playlist items along with the free media and remove controls.
 		this._createItemHandlers();
 
-		// Instance jPlayer
-		$(this.cssSelector.jPlayer).jPlayer(this.options);
+		
 	};
 
 	jPlayerPlaylist.prototype = {
@@ -358,7 +365,9 @@
 			if(index === undefined) {
 				this._initPlaylist([]);
 				this._refresh(function() {
-					$(self.cssSelector.jPlayer).jPlayer("clearMedia");
+                    if(self.active){
+                        $(self.cssSelector.jPlayer).jPlayer("clearMedia");
+                    }
 				});
 				return true;
 			} else {

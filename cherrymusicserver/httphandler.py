@@ -50,6 +50,8 @@ from cherrymusicserver.util import databaseFilePath, readRes
 import cherrymusicserver as cherry
 import cherrymusicserver.metainfo as metainfo
 from cherrymusicserver.util import Performance
+from cherrymusicserver import useroptiondb
+import time
 
 from urllib import parse
 
@@ -59,6 +61,7 @@ class HTTPHandler(object):
     def __init__(self, config, model):
         self.model = model
         self.config = config
+        self.useroptions = useroptiondb.UserOptionDB(databaseFilePath('useroptions.db'))
         self.jsonrenderer = renderjson.JSON()
         
         template_main = 'res/main.html'
@@ -97,6 +100,8 @@ class HTTPHandler(object):
             'compactlistdir' : self.api_compactlistdir,
             'listdir' : self.api_listdir,
             'fetchalbumart' : self.api_fetchalbumart,
+            'heartbeat' : self.api_heartbeat,
+            'getuseroptions' : self.api_getuseroptions,
         }
 
     def lock_session(fn):
@@ -194,7 +199,17 @@ class HTTPHandler(object):
             return self.handlers[action](value)
         else:
             return "Error: no such action."
+        self.api_getuseroptions(None)
     api.exposed = True
+
+    def api_getuseroptions(self, value):
+        uo = self.useroptions.forUser(self.getUserId())
+        uco = uo.getChangableOptions()
+        return json.dumps(uco)
+        
+    def api_heartbeat(self, value):
+        uo = self.useroptions.forUser(self.getUserId())
+        uo.setOption('last_time_online', int(time.time()))
 
     def api_fetchalbumart(self, value):
         cherrypy.session.release_lock()
@@ -280,7 +295,10 @@ class HTTPHandler(object):
     
     def api_getuserlist(self,value):
         if cherrypy.session['admin']:
-            return json.dumps(self.userdb.getUserList())
+            userlist = self.userdb.getUserList()
+            for user in userlist:
+                user['last_time_online'] = self.useroptions.forUser(user['id']).getOptionValue('last_time_online')
+            return json.dumps(userlist)
         else:
             return json.dumps([])
     
