@@ -768,7 +768,7 @@ function logout(){
 }
 
 function displayCurrentSong(){
-    if(mediaPlaylists && getPlayingPlaylist().playlist && getPlayingPlaylist().current && getPlayingPlaylist().playlist.length>0){
+    if(mediaPlaylists && getPlayingPlaylist().playlist && typeof getPlayingPlaylist().current !== 'undefined' && getPlayingPlaylist().playlist.length>0){
         $('.cm-songtitle').html(getPlayingPlaylist().playlist[getPlayingPlaylist().current].title);
     } else {
         $('.cm-songtitle').html('');
