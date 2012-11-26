@@ -27,7 +27,7 @@ setup(
     install_requires=["CherryPy >= 3.2.2"],
     packages = ['cherrymusicserver','cherrymusicserver.test','audioread','audiotranscode','unidecode','cmbootstrap'],
     #startup script
-    scripts = ['cherrymusic'],
+    scripts = ['cherrymusic','cherrymusicd'],
     #data required by the declared packages
     data_files=listFilesRec('res','share/cherrymusic')+listFilesRec('themes','share/cherrymusic')
 )
