@@ -728,7 +728,9 @@ function restorePlaylistAndRememberPeriodically(){
     "use strict";
     /*restore playlist from session*/
     var success = function(data){
-            newPlaylist($.parseJSON(data))._refresh(true);
+            var pl = newPlaylist($.parseJSON(data));
+            pl._refresh(true);
+            pl.active = true;
             window.setInterval("rememberPlaylistPeriodically()",REMEMBER_PLAYLIST_INTERVAL );
     };
     api('restoreplaylist',success,errorFunc('error restoring playlist'));
