@@ -41,7 +41,6 @@ def fake_wait_for_occupied_port(host, port):
 cherrypy.process.servers.wait_for_occupied_port = fake_wait_for_occupied_port
 
 from cherrymusicserver import configuration
-from cherrymusicserver import configdb
 from cherrymusicserver import sqlitecache
 from cherrymusicserver import cherrymodel
 from cherrymusicserver import httphandler
@@ -73,13 +72,11 @@ class CherryMusic:
 
     def _init_config(self):
         global config
-        cdb = configdb.ConfigDB(util.databaseFilePath('config.db'))
+        defaultcfg = configuration.from_defaults()
         configFilePath = util.configurationFile()
-        log.i('updating config db from %s', configFilePath)
+        log.i('loading configuration from %s', configFilePath)
         filecfg = configuration.from_configparser(configFilePath)
-        cdb.update(filecfg)
-        log.i('loading configuration from database')
-        config = cdb.load()
+        config = defaultcfg + filecfg
         self._check_for_config_updates(filecfg)
 
     def _check_for_config_updates(self, known_config):
@@ -165,10 +162,10 @@ Have fun!
             'environment': 'production',
             'server.socket_host': socket_host,
             'server.thread_pool' : 30,
-            'tools.sessions.on' : True,            
-            'tools.sessions.timeout' : 60*24,
+            'tools.sessions.on' : True,
+            'tools.sessions.timeout' : 60 * 24,
             })
-            
+
         if not config.server.keep_session_in_ram:
             sessiondir = os.path.join(os.path.expanduser('~'), '.cherrymusic', 'sessions')
             if not os.path.exists(sessiondir):
@@ -177,7 +174,7 @@ Have fun!
                 'tools.sessions.storage_type' : "file",
                 'tools.sessions.storage_path' : sessiondir,
                 })
-            
+
 
         cherrypy.tree.mount(self.httphandler, '/',
             config={
