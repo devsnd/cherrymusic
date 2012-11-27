@@ -438,6 +438,7 @@ class SQLiteCache(object):
                             self.register_file_with_db(infs)
                             adds_without_commit = 1
                         else:
+                            infs.uid = indb.uid
                             progress.name = '[=] ' + progress.name
                     elif indb:
                         progress.name = '[-] ' + progress.name

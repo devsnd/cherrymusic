@@ -631,18 +631,26 @@ class UpdateTest(unittest.TestCase):
             expected_files.remove(item.indb.relpath)
         self.assertEqual(0, len(expected_files))
 
+    def test_new_file_in_known_dir(self):
+        newfile = os.path.join('root_dir', 'second_file')
+        setupTestfiles(self.testdir, (newfile,))
 
-    @unittest.skipIf(True, "facilitates quick manual testruns")
-    def test_update(self):
-        log.level(log.DEBUG)
-        self.clearCache()
-        cherry.config.media.basedir = '/home/til/Music'
         self.Cache.full_update()
-        cherry.config.media.basedir = '/media/audio/+audiobooks/'# Audiobooks'
-        self.Cache.full_update()
-        cherry.config.media.basedir = '/home/til/Music'
-        self.Cache.full_update()
-        log.level(log.CRITICAL)
+
+        self.assertNotEqual(None, self.Cache.db_lookup(getAbsPath(os.path.join(self.testdir, newfile))),
+                            'file must have been added correctly to the database')
+
+#    @unittest.skipIf(True, "facilitates quick manual testruns")
+#    def test_update(self):
+#        log.level(log.DEBUG)
+#        self.clearCache()
+#        cherry.config.media.basedir = '/home/til/Music'
+#        self.Cache.full_update()
+#        cherry.config.media.basedir = '/media/audio/+audiobooks/'# Audiobooks'
+#        self.Cache.full_update()
+#        cherry.config.media.basedir = '/home/til/Music'
+#        self.Cache.full_update()
+#        log.level(log.CRITICAL)
 
 
 if __name__ == "__main__":
