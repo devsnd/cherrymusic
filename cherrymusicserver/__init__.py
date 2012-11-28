@@ -31,6 +31,7 @@
 import os
 import sys
 import cherrypy
+import threading
 
 """patch cherrypy crashing on startup because of double checking
 for loopback interface, see: 
@@ -66,13 +67,21 @@ class CherryMusic:
         self.db = sqlitecache.SQLiteCache(util.databaseFilePath('cherry.cache.db'))
         self.cherrymodel = cherrymodel.CherryModel(self.db)
         self.httphandler = httphandler.HTTPHandler(config, self.cherrymodel)
-        if self.db.isEmpty():
-            self.db.full_update()
-        elif update:
-            self.db.partial_update(*update)
-        elif update is not None:
-            self.db.full_update()
+        CherryMusic.UpdateThread(self.db,update).start()
         self.server()
+        
+    class UpdateThread(threading.Thread):
+        def __init__(self, db, update):
+            threading.Thread.__init__(self)
+            self.db = db
+            self.update = update
+        def run(self):
+            if self.db.isEmpty():
+                self.db.full_update()
+            elif self.update:
+                self.db.partial_update(*self.update)
+            elif self.update is not None:
+                self.db.full_update()
 
     def _init_config(self):
         global config
