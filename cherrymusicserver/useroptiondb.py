@@ -45,16 +45,17 @@ class UserOptionDB:
             heartbeat.
         """
         with cfg.create() as c:
-            c.keyboard_shortcuts = cfg.Property(
-                name='keyboard_shortcuts',
-                validity='[A-Z]+:.*',
-                type='list',
-                #winamp like defaults
-                value = ['PREV:z','PLAY:x','PAUSE:c','STOP:v','NEXT:b','SEARCH:s'],
-                readonly = False,
-                hidden = False
-            )
-            
+            """with cfg.create('keyboard_shortcuts') as kbs:
+                kbs.prev = cfg.Configuration(value='z',validity='\w')
+                kbs.play = cfg.Configuration(value='z',validity='\w')
+                kbs.pause = cfg.Configuration(value='z',validity='\w')
+                kbs.stop = cfg.Configuration(value='z',validity='\w')
+                kbs.next = cfg.Configuration(value='z',validity='\w')
+                kbs.search = cfg.Configuration(value='z',validity='\w')
+                kbs.hidden = False,
+                kbs.readonly = False,
+                c.keyboard_shortcuts = kbs
+            """
             #UNIX TIME (1.1.1970 = never)
             c.last_time_online = cfg.Property(
                 value=0,
@@ -65,7 +66,7 @@ class UserOptionDB:
                 hidden = True
             )
             
-        self.DEFAULTS = c
+            self.DEFAULTS = c
         
         setupDB = not os.path.isfile(USEROPTIONDBFILE) or os.path.getsize(USEROPTIONDBFILE) == 0
         self.conn = sqlite3.connect(USEROPTIONDBFILE, check_same_thread=False)

@@ -41,9 +41,6 @@ var executeAfterConfigLoaded = []
 
 function api(data_or_action, successfunc, errorfunc, background){
     "use strict";
-    if(!errorfunc){
-        errorfunc = errorFunc();
-    }
     if(!successfunc){
         successfunc = function(){};
     }
@@ -62,6 +59,9 @@ function api(data_or_action, successfunc, errorfunc, background){
         apiaction = data_or_action['action'];
         senddata = {"value" :  data_or_action['value'] };
         
+    }
+    if(!errorfunc){
+        errorfunc = errorFunc('calling API function "'+apiaction+'"');
     }
     if(!background){
         $('div#progressscreen').fadeIn('fast');
@@ -83,15 +83,9 @@ function api(data_or_action, successfunc, errorfunc, background){
 
 function errorFunc(msg){
     "use strict";
-    if(msg){
-        return function(){
-            window.alert('ERROR: '+msg+" :'(");
-        };
-    } else {
-        return function(){
-            window.alert("I'm sorry, but this is an error message...\n\nIt indicates an error... *sigh*\nSorry, it's just... my whole purpose of existance is to give bad news.\nIt's frustrating.\nWould you mind just clicking 'ok' and leave me alone?");
-        };
-    }
+    return function(){
+        $('#errormessage').html('ERROR: '+msg+" :'(");
+    };
 }
 /*******************
 CONFIGURATION LOADER
@@ -325,25 +319,32 @@ registercompactlistdirs = function(parent){
 addAllToPlaylist = function(){
     "use strict";
     $(this).siblings('li').find('.mp3file').each(function(){
-        addSong( $(this).attr("path"), $(this).attr("title") );
+        playlistManager.addSong( $(this).attr("path"), $(this).attr("title") );
     });
 };
 
-registermp3s = function(parent,addPlayAll){
+registermp3s = function(parent,mode){
     "use strict";
-    if(addPlayAll === undefined){
-        addPlayAll = true;
+    if(typeof mode === 'undefined'){
+        mode = 'addPlayAll'
     }
     var foundMp3 = $(parent).find(".mp3file").click(
         function(){
-            addSong( $(this).attr("path"), $(this).attr("title") );
+            playlistManager.addSong( $(this).attr("path"), $(this).attr("title") );
         }
     ).html();
-    if(foundMp3 && addPlayAll){
-        $(parent).prepend('<a class="addAllToPlaylist" href="javascript:;">add All to Playlist</a>');
-        $(parent).children('.addAllToPlaylist').click(
-            addAllToPlaylist
-        );
+    if(foundMp3){
+        if('addPlayAll' == mode){
+            $(parent).prepend('<a class="addAllToPlaylist" href="javascript:;">add All to Playlist</a>');
+            $(parent).children('.addAllToPlaylist').click(
+                addAllToPlaylist
+            );
+        } else if('loadPlaylist' == mode){
+            $(parent).prepend('<a class="addAllToPlaylist" href="javascript:;">load Playlist</a>');
+            $(parent).children('.addAllToPlaylist').click(
+                addAllToPlaylist
+            );
+        }
     }
 };
 
@@ -387,100 +388,10 @@ function sortFormatPreferrencePerBrowser(){
     }
 }
 
-function initJPlayer(){
-    var jPlayerSelector = "#jquery_jplayer_1";
-    if (typeof jPlayerInstance === 'undefined'){
-        // Instance jPlayer
-		$(jPlayerSelector).jPlayer({
-            swfPath: "res/js",
-            solution: "flash, html",
-            preload: 'metadata',
-            supplied: availablejPlayerFormats.join(),
-            wmode: "window",
-            errorAlerts: false
-        });
-        //initialize all playlists, that were created before jPlayer
-        $(jPlayerSelector).bind($.jPlayer.event.ready, function(event) {
-           for(var i=0; i<mediaPlaylists.length; i++){
-               mediaPlaylists[i]._init();
-           }
-           jPlayerInstanceReady = true;
-        });
-    }
-    if (typeof mediaPlaylists === 'undefined') {
-        mediaPlaylists = [];
-        playingPlaylist = 0;
-        editingPlaylist = 0;
-    }
-}
 
-function getEditingPlaylist(){
-    return mediaPlaylists[editingPlaylist];
-}
 
-function getPlayingPlaylist(){
-    return mediaPlaylists[playingPlaylist];
-}
 
-function newPlaylist(playlist,notclosable){
-    notclosable = notclosable && true;
-    playlist = playlist || [];
-    var playlistSelector = createNewPlaylistContainer(notclosable);
-    var jppl = new jPlayerPlaylist({
-            jPlayer: "#jquery_jplayer_1",
-            cssSelectorAncestor: "#jp_container_1"
-        },
-        playlist,
-        {   playlistOptions: {
-                enableRemoveControls: true,
-                playlistSelector: playlistSelector
-            }
-		}
-    );
-    mediaPlaylists.push(jppl);
-    if(typeof jPlayerInstanceReady !== 'undefined'){
-        jppl._init();
-    }
-    $(playlistSelector+" ul").sortable({
-        update: function(e,ui){
-            mediaPlaylist.scan();
-            }
-        });
-	$(playlistSelector+" ul").disableSelection();
-    return jppl;
-}
 
-/* PLAYLIST CREATION AND MANAGEMENT */
-var playlistContainerParent = '#playlistContainerParent';
-var playlistChooser = '#playlistChooser';
-function createNewPlaylistContainer(notclosable){
-    //add stuff
-    if($(playlistContainerParent+' div').length==0){
-        var next = 0;
-    } else {
-        var next = parseInt($(playlistContainerParent+'>div:last').attr('n'))+1;
-    }
-    var id = 'playlist-'+next;
-    $(playlistContainerParent).append(
-        '<div n="'+next+'" class="playlist-container jp-playlist" id="'+id+'"><ul><li></li></ul></div>'
-    );
-    
-    var closer = '<a href="#" onclick="closePlaylist('+id+')">&times;</a>'
-    if(notclosable){
-        var closer = '';
-    }
-    $(playlistChooser+' ul').append(
-        '<li id="'+id+'-tab" class="smalltab"><a href="#" onclick="showPlaylist(\''+id+'\')">new playlist '+next+'</a>'+closer+'</li>'
-    )
-    return '#'+id;
-}
-function showPlaylist(playlistid){
-    $(playlistContainerParent+'>div').hide();
-    $('#'+playlistid).show();
-    $(playlistChooser+' ul li').removeClass('active');
-    $('#'+playlistid+'-tab').addClass('active');
-    editingPlaylist = parseInt($('#'+playlistid).attr('n'));
-}
 
 /* PLAYLIST CREATION AND MANAGEMENT END*/
 
@@ -501,42 +412,7 @@ ext2jPlayerFormat = function(ext){
     }
 }
 
-addSong = function(path,title){
-    "use strict";
-    var ext = getFileTypeByExt(path);
-    var track = {
-        title: title,
-        wasPlayed : 0,
-    }
-    //add natively supported path
-    track[ext2jPlayerFormat(ext)] = path;
-    
-    if(transcodingEnabled){
-        //add transcoded paths
-        for(var i=0; i<availableEncoders.length; i++){
-            var enc = availableEncoders[i];
-            if(enc !== ext){
-                track[ext2jPlayerFormat(enc)] = getTranscodePath(path,enc);
-            }
-        }
-    }
-    
-    getEditingPlaylist().add(track);
-    pulseTab('jplayer');
-    var success = function(data){
-        var metainfo = $.parseJSON(data)
-        if (metainfo.length) {
-            track.duration = metainfo.length;
-        }
-        getEditingPlaylist()._refresh(true);
-    }
-    api({action:'getsonginfo',
-        value: path}, success, errorFunc('error getting song metainfo'), true);
-};
-clearPlaylist = function(){
-    "use strict";
-    getEditingPlaylist().remove();
-};
+
 /**********
 TRANSCODING
 **********/
@@ -552,39 +428,46 @@ function getTranscodePath(filepath, format){
 /******************
 PLAYLIST MANAGEMENT
 ******************/
-function showPlaylistSaveDialog(){
+function showPlaylistSaveDialog(plid){
     "use strict";
     $('#dialog').html(
     ['<p>Please enter a Name for this Playlist:</p>',
     '<input type="text" id="playlisttitle" />',
     'public:<input type="checkbox" checked="checked" id="playlistpublic" />',
-    '<a class="button" href="javascript:;" onclick="savePlaylistAndHideDialog()">Save</a>',
+    '<a class="button" href="javascript:;" onclick="savePlaylistAndHideDialog('+plid+')">Save</a>',
     '<a class="button" href="javascript:;" onclick="$(\'#dialog\').fadeOut(\'fast\')">Close</a>'].join(''));
 
     $('#dialog input').val('');
     $('#dialog').fadeIn('fast');
 }
 
-function savePlaylistAndHideDialog(){
+function savePlaylistAndHideDialog(plid){
     "use strict";
     var name = $('#playlisttitle').val();
     var pub = $('#playlistpublic').attr('checked')?true:false;
     if(name.trim() !== ''){
-        savePlaylist(name,pub);
+        savePlaylist(plid,name,pub);
         $('#dialog').fadeOut('fast');
     }
 }
 
-function savePlaylist(playlistname,ispublic){
+function savePlaylist(plid,playlistname,ispublic){
     "use strict";
     var data = { 'action':'saveplaylist',
                 'value':JSON.stringify({
-                            'playlist':getEditingPlaylist().playlist,
+                            'playlist':playlistManager.getPlaylistById(plid).jplayerplaylist.playlist,
                             'public':ispublic,
                             'playlistname':playlistname
                         })
                 };
-    api(data,false,errorFunc('error saving playlist'));
+    var success = function(){
+        playlistManager.getPlaylistById(plid).name = playlistname;
+        playlistManager.getPlaylistById(plid).public = ispublic;
+        playlistManager.getPlaylistById(plid).saved = true;
+        playlistManager.refresh();
+        playlistManager.showPlaylist(plid);
+    }
+    api(data,success,errorFunc('error saving playlist'));
 }
 function getAddrPort(){
     m = (window.location+"").match(/https?:\/\/(.+?):?(\d+).*/);
@@ -698,8 +581,6 @@ function loadPlaylist(playlistid){
             $(pldomid).hide();
             $(pldomid).append(parseAndRender(data));
             $(pldomid).slideDown('slow');
-            registerlistdirs($(pldomid).find('ul'));
-            registercompactlistdirs($(pldomid).find('ul'));
             registermp3s($(pldomid).find('ul'));
         };
         api(data,success,errorFunc('error loading external playlist'))
@@ -708,45 +589,7 @@ function loadPlaylist(playlistid){
     }
 }
 
-var lastPlaylist;
-function rememberPlaylistPeriodically(){
-    "use strict";
-    if (getEditingPlaylist().playlist && lastPlaylist !== JSON.stringify(getEditingPlaylist().playlist)){
-        /* save playlist in session */
-        var data = {'action':'rememberplaylist',
-                    'value':JSON.stringify(
-                        {'playlist':getEditingPlaylist().playlist}
-                    )};
-        var error = errorFunc('cannot rememebering playlist: failed to connect to server.');
-        var success = function(){
-            lastPlaylist = JSON.stringify(getEditingPlaylist().playlist)
-        }
-        api(data, success, error, true);
-    }
-}
 
-function restorePlaylistAndRememberPeriodically(){
-    "use strict";
-    /*restore playlist from session*/
-    var success = function(data){
-            var pl = newPlaylist($.parseJSON(data));
-            pl._refresh(true);
-            pl.active = true;
-            window.setInterval("rememberPlaylistPeriodically()",REMEMBER_PLAYLIST_INTERVAL );
-    };
-    api('restoreplaylist',success,errorFunc('error restoring playlist'));
-        
-}
-
-function removePlayedFromPlaylist(){
-    for(var i=0; i<mediaPlaylist.playlist.length; i++){
-        if(mediaPlaylist.playlist[i].wasPlayed>0){
-            mediaPlaylist.playlist.splice(i,1);
-            i--;
-        }
-    }
-    mediaPlaylist._refresh(false);
-}
 
 var lastPlaylistHeight = 0;
 function resizePlaylistSlowly(){
@@ -767,13 +610,7 @@ function logout(){
     api('logout',success);
 }
 
-function displayCurrentSong(){
-    if(mediaPlaylists && getPlayingPlaylist().playlist && typeof getPlayingPlaylist().current !== 'undefined' && getPlayingPlaylist().playlist.length>0){
-        $('.cm-songtitle').html(getPlayingPlaylist().playlist[getPlayingPlaylist().current].title);
-    } else {
-        $('.cm-songtitle').html('');
-    }
-}
+
 /***
 ADMIN PANEL
 ***/
@@ -857,7 +694,7 @@ function fetchMessageOfTheDay(){
 /**
 TAB FUNCTIONALITY
 **/
-function showTab(tabid){
+/*function showTab(tabid){
     "use strict";
     $('div.tabs '+tabid).show();
 }
@@ -887,22 +724,25 @@ function initTabs() {
         return false;
     });
     saveOriginalTabColor();
-}
+}*/
 
 function loadBrowserIfEmpty(){
     "use strict";
     if('' === $('#browser').html().trim()){
-        var data = { 'action' : 'listdir' };
-        var success = function(data){
-            $('#browser').html(parseAndRender(data));
-            registerlistdirs($('#browser').find('ul'));
-            registercompactlistdirs($('#browser').find('ul'));
-            registermp3s($('#browser').find('ul'));
-        };
-        api(data,success,errorFunc('failed to load file browser'));
+        loadBrowser();
     }
 }
 
+function loadBrowser(){
+    var data = { 'action' : 'listdir' };
+    var success = function(data){
+        $('#searchresults').html(parseAndRender(data));
+        registerlistdirs($('#searchresults').find('ul'));
+        registercompactlistdirs($('#searchresults').find('ul'));
+        registermp3s($('#searchresults').find('ul'));
+    };
+    api(data,success,errorFunc('failed to load file browser'));
+}
 origcolor = '#000000';
 function saveOriginalTabColor(){
     "use strict";
@@ -1008,26 +848,33 @@ function time2text(sec){
     }
 }
 
+function showPlaylistBrowser(){
+    playlistManager.hideAll();
+    showPlaylists();
+    $('#addPlaylist ul li').addClass('active');
+    $('#playlistBrowser').show();
+}
 /***
 ON DOCUMENT READY... STEADY... GO!
 ***/
+var playlistManager;
 $(document).ready(function(){
     "use strict";
-    initTabs();
+    //initTabs();
+    $('#playlistBrowser').hide();
     fetchMessageOfTheDay();
     $('#searchfield .bigbutton').click(submitsearch);
     $('.hideplaylisttab').hide();
     executeAfterConfigLoaded.push(setAvailableJPlayerFormats);
-    executeAfterConfigLoaded.push(initJPlayer);
-    executeAfterConfigLoaded.push(restorePlaylistAndRememberPeriodically);
+    executeAfterConfigLoaded.push(function(){ playlistManager = new PlaylistManager() });
+    //executeAfterConfigLoaded.push(restorePlaylistAndRememberPeriodically);
     loadConfig();
     //register top level directories
 	registerlistdirs($("html").get());
 	registercompactlistdirs($("html").get());
 	$('div#progressscreen').fadeOut('slow');
-    window.setInterval("displayCurrentSong()", 1000);
+    //window.setInterval("displayCurrentSong()", 1000);
     window.setInterval("resizePlaylistSlowly()",2000);
     $('#searchform .searchinput').focus();
-    window.setInterval("api('heartbeat',false,false,true)",HEARTBEAT_INTERVAL_MS);
-    
+    window.setInterval("api('heartbeat',false,errorFunc('connection to server lost'),true)",HEARTBEAT_INTERVAL_MS);
 });

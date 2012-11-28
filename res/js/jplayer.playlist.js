@@ -19,9 +19,8 @@
 (function($, undefined) {
 
 	jPlayerPlaylist = function(cssSelector, playlist, options) {
+        "use strict";
 		var self = this;
-
-        this.active = false;
 		this.current = 0;
 		this.loop = false; // Flag used with the jPlayer repeat event
 		this.shuffled = false;
@@ -36,38 +35,38 @@
 		this._initPlaylist(playlist); // Copies playlist to this.original. Then mirrors this.original to this.playlist. Creating two arrays, where the element pointers match. (Enables pointer comparison.)
 
 		// Setup the css selectors for the extra interface items used by the playlist.
-		this.cssSelector.title = this.cssSelector.cssSelectorAncestor + " .jp-title"; // Note that the text is written to the decendant li node.
-		if(this.options.playlistOptions.playlistSelector) {
-			this.cssSelector.playlist = this.options.playlistOptions.playlistSelector;
+		this.cssSelector.title = this.cssSelectorJPlayerControls + " .jp-title"; // Note that the text is written to the decendant li node.
+		if(typeof options.playlistOptions.playlistSelector !== 'undefined') {
+			this.cssSelector.playlist = options.playlistOptions.playlistSelector;
 		} else {
-			this.cssSelector.playlist = this.cssSelector.cssSelectorAncestor + " .jp-playlist";
+			this.cssSelector.playlist = " .jp-playlist";
 		}
-		this.cssSelector.next = this.cssSelector.cssSelectorAncestor + " .jp-next";
-		this.cssSelector.previous = this.cssSelector.cssSelectorAncestor + " .jp-previous";
-		this.cssSelector.shuffle = this.cssSelector.cssSelectorAncestor + " .jp-shuffle";
-		this.cssSelector.shuffleOff = this.cssSelector.cssSelectorAncestor + " .jp-shuffle-off";
+		this.cssSelector.next = this.cssSelectorJPlayerControls + " .jp-next";
+		this.cssSelector.previous = this.cssSelectorJPlayerControls + " .jp-previous";
+		this.cssSelector.shuffle = this.cssSelectorJPlayerControls + " .jp-shuffle";
+		this.cssSelector.shuffleOff = this.cssSelectorJPlayerControls + " .jp-shuffle-off";
 
 		// Override the cssSelectorAncestor given in options
-		this.options.cssSelectorAncestor = this.cssSelector.cssSelectorAncestor;
+		this.options.cssSelectorAncestor = this.cssSelectorJPlayerControls;
 
 		// Override the default repeat event handler
 		this.options.repeat = function(event) {
 			self.loop = event.jPlayer.options.loop;
 		};
 
+        
+        self._init();
+        
 		// Create a ready event handler to initialize the playlist
         // is now handled by cherrymusic
 		/*$(this.cssSelector.jPlayer).bind($.jPlayer.event.ready, function(event) {
-			self._init();
+			
 		});*/
 
 		// Create an ended event handler to move to the next item
-		$(this.cssSelector.jPlayer).bind($.jPlayer.event.ended, function(event) {
-            if(self.active){
-                self.next();
-            }
-		});
-
+        /*
+		
+        */
 		// Create a play event handler to pause other instances
 		$(this.cssSelector.jPlayer).bind($.jPlayer.event.play, function(event) {
 			$(this).jPlayer("pauseOthers");
@@ -81,32 +80,6 @@
 				$(self.cssSelector.title).hide();
 			}
 		});
-
-		// Create click handlers for the extra buttons that do playlist functions.
-		$(this.cssSelector.previous).click(function() {
-            if(self.active){
-                self.previous();
-                $(this).blur();
-                return false;
-            }
-		});
-
-		$(this.cssSelector.next).click(function() {
-            if(self.active){
-                self.next();
-                $(this).blur();
-                return false;
-            }
-		});
-
-		$(this.cssSelector.shuffle).click(function() {
-                self.shuffle(true);
-                return false;
-		});
-		$(this.cssSelector.shuffleOff).click(function() {
-            self.shuffle(false);
-			return false;
-		}).hide();
 
 		// Put the title in its initial display state
 		if(!this.options.fullScreen) {
@@ -123,6 +96,17 @@
 	};
 
 	jPlayerPlaylist.prototype = {
+        invoke_previous : function() {
+            this.previous();
+            $(this).blur();
+            return false;
+        },
+        invoke_next : function() {
+            window.console.log('pressed next button');
+            this.next();
+            $(this).blur();
+            return false;
+        },
 		_cssSelector: { // static object, instanced in constructor
 			jPlayer: "#jquery_jplayer_1",
 			cssSelectorAncestor: "#jp_container_1"
@@ -198,39 +182,45 @@
 			 *	function -> use animation timings and excute function at half way point.
 			 */
 			var self = this;
-
-			if(instant && !$.isFunction(instant)) {
-				$(this.cssSelector.playlist + " ul").empty();
-				$.each(this.playlist, function(i,v) {
-					$(self.cssSelector.playlist + " ul").append(self._createListItem(self.playlist[i]));
+            
+         
+            if(instant && !$.isFunction(instant)) {
+                $(this.cssSelector.playlist + " ul").empty();
+                $.each(this.playlist, function(i,v) {
+                    $(self.cssSelector.playlist + " ul").append(self._createListItem(self.playlist[i]));
                     var litem = $(self.cssSelector.playlist + " ul li:last");
                     litem.attr('name', litem.index());
-				});
-				this._updateControls();
-			} else {
-				var displayTime = $(this.cssSelector.playlist + " ul").children().length ? this.options.playlistOptions.displayTime : 0;
+                });
+                this._updateControls();
+            } else {
+                var displayTime = $(this.cssSelector.playlist + " ul").children().length ? this.options.playlistOptions.displayTime : 0;
 
-				$(this.cssSelector.playlist + " ul").slideUp(displayTime, function() {
-					var $this = $(this);
-					$(this).empty();
-					
-					$.each(self.playlist, function(i,v) {
+                $(this.cssSelector.playlist + " ul").slideUp(displayTime, function() {
+                    var $this = $(this);
+                    $(this).empty();
+                    
+                    $.each(self.playlist, function(i,v) {
                         $this.append(self._createListItem(self.playlist[i]));
-						var litem = $(self.cssSelector.playlist + " ul li:last");
+                        var litem = $(self.cssSelector.playlist + " ul li:last");
                         litem.attr('name', litem.index());
-					});
-					self._updateControls();
-					if($.isFunction(instant)) {
-						instant();
-					}
-					if(self.playlist.length) {
-						$(this).slideDown(self.options.playlistOptions.displayTime);
-					} else {
-						$(this).show();
-					}
-				});
-			}
+                    });
+                    self._updateControls();
+                    if($.isFunction(instant)) {
+                        instant();
+                    }
+                    if(self.playlist.length) {
+                        $(this).slideDown(self.options.playlistOptions.displayTime);
+                    } else {
+                        $(this).show();
+                    }
+                    if(self.playlist.length<1) {
+                        $(self.cssSelector.playlist + " ul").append('<li>It is empty. You should add something.</li>');
+                        $(self.cssSelector.playlist + " ul li").hide().slideDown()
+                    }
+                });
+            }
             this._updatePlaytime();
+           
 		},
         _updatePlaytime: function(){
             var self = this;
@@ -241,9 +231,9 @@
 			}
 		    });
 		    if(playtimeSum){
-                $(self.cssSelector.playlist+"-playtime-sum").html("<div><span href='javascript:;'>"+self._formatTime(playtimeSum)+"</span></div>");
+                $(self.cssSelector.playlist+' .jp-playlist-playtime-sum').html("<div><span href='javascript:;'>"+self._formatTime(playtimeSum)+"</span></div>");
 		    } else {
-                $(self.cssSelector.playlist+"-playtime-sum").html("");
+                $(self.cssSelector.playlist+' .jp-playlist-playtime-sum').html("");
             }  
         },
 		_formatTime: function(secs) {
@@ -294,6 +284,7 @@
 			var self = this;
 			// Create .live() handlers for the playlist items
 			$(this.cssSelector.playlist + " a." + this.options.playlistOptions.itemClass).die("click").live("click", function() {
+                self.options.playlistOptions.playlistController.makeThisPlayingPlaylist();
 				var index = $(this).parent().parent().index();
 				if(self.current !== index) {
 					self.play(index);
@@ -429,6 +420,9 @@
 			}
 		},
 		play: function(index) {
+            if(typeof index === 'undefined'){
+                index = this.current;
+            }
 			index = (index < 0) ? this.original.length + index : index; // Negative index relates to end of array.
 			if(0 <= index && index < this.playlist.length) {
 				if(this.playlist.length) {
@@ -442,7 +436,10 @@
 		pause: function() {
 			$(this.cssSelector.jPlayer).jPlayer("pause");
 		},
-		next: function() {
+		stop: function() {
+			$(this.cssSelector.jPlayer).jPlayer("stop");
+		},
+        next: function() {
             if(this.shuffled){
                 playRandomTrack();
             } else {

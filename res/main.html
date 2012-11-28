@@ -45,6 +45,7 @@
 <script type="text/javascript" src="res/js/mustache-0.7.0.js"></script>
 <script type="text/javascript" src="res/js/jquery-color.js"></script>
 <script type="text/javascript" src="res/js/jquery-ui-1.8.23.custom.min.js"></script>
+<script type="text/javascript" src="res/playlistmanager.js"></script>
 <script type="text/javascript" src="res/cherrymusic.js"></script>
 </head>
 <body>
@@ -61,143 +62,138 @@
 </div>
 <!-- PLAYLIST SAVE DIALOG OVERLAY END -->
 <!-- JPLAYER START -->
-<div id="mediawrapper">
-	<div id="mediaplayer">
-    <!-- ADMIN PANEL START -->
-        <div id="adminpanelwrapper">
-            <div class="smalltab">
-                <a href="javascript:;" onclick="toggleAdminPanel()">admin</a>
-            </div>
-            <div class="smalltab floatright">
-                <a href="javascript:;" onclick="logout()">logout</a>
-            </div>
-            <div id="adminpanel" style="display: none;">
-                <br>
-                <a href="javascript:;" onclick="$('#jplayer_inspector').jPlayerInspector({jPlayer:$('#jquery_jplayer_1')});" class="button">
-                Enable JPlayer Inspector
-                </a>
-                <br>
-                <br>
-                <a href="javascript:;" onclick="updateLibrary()" class="button">
-                Update Music Library (may take some time!)
-                </a>
-                <br>
-                <br>
-                Create new user:<br>
-                Username:<input type="text" id="newusername" /><br>
-                Password:<input type="password" id="newpassword" />
-                is Admin:<input type="checkbox" id="newisadmin" />
-                <a href="javascript:;" onclick="addNewUser()" class="button">Add User</a><br>
-                <ul id="adminuserlist">
-                </ul>
-                
-            </div>
-        </div>
-    <!-- ADMIN PANEL END -->
-	<div id="jquery_jplayer_1" class="jp-jplayer"></div>
-        <div id="jp_container_1" class="jp-audio">
-            <div class="jp-type-playlist">
-                <div class="jp-gui jp-interface">
-                    <div class="jp-center-progress-bar">
-                        <div class="jp-progress">
-                            <div class="jp-seek-bar">
-                                    <div class="jp-play-bar"></div>
-                            </div>
-                        </div>
-                        <div class="jp-time-holder">
-                            <div class="jp-current-time"></div>
-                            <div class="jp-duration"></div>
-                        </div>
+        <div id="mediawrapper">
+            <div id="mediaplayer">
+            <!-- ADMIN PANEL START -->
+                <div id="adminpanelwrapper">
+                    <div class="smalltab">
+                        <a href="javascript:;" onclick="toggleAdminPanel()">admin</a>
                     </div>
-                    
-                    <ul class="jp-controls">
-                        <li><a href="javascript:;" class="jp-previous" tabindex="1">previous</a></li>
-                        <li><a href="javascript:;" class="jp-play" tabindex="1">play</a></li>
-                        <li><a href="javascript:;" class="jp-pause" tabindex="1">pause</a></li>
-                        <li><a href="javascript:;" class="jp-next" tabindex="1">next</a></li>
-                        <li><a href="javascript:;" class="jp-stop" tabindex="1">stop</a></li>
-                        <li><a href="javascript:;" class="jp-mute" tabindex="1" title="mute">mute</a></li>
-                        <li><a href="javascript:;" class="jp-unmute" tabindex="1" title="unmute">unmute</a></li>
-                        <li><a href="javascript:;" class="jp-volume-max" tabindex="1" title="max volume">max volume</a></li>
-                    </ul>
-                    <div class="cm-songtitle"></div>
-                    <div class="cm-playlistplaytime"></div>
-                    
-                    <div class="jp-volume-bar">
-                        <div class="jp-volume-bar-value"></div>
+                    <div class="smalltab floatright">
+                        <a href="javascript:;" onclick="logout()">logout</a>
                     </div>
-                    
-                    <ul class="jp-toggles">
-                        <li><a href="javascript:;" class="jp-shuffle" tabindex="1" title="shuffle">shuffle</a></li>
-                        <li><a href="javascript:;" class="jp-shuffle-off" tabindex="1" title="shuffle off">shuffle off</a></li>
-                        <li><a href="javascript:;" class="jp-repeat" tabindex="1" title="repeat">repeat</a></li>
-                        <li><a href="javascript:;" class="jp-repeat-off" tabindex="1" title="repeat off">repeat off</a></li>
-                    </ul>
+                    <div id="adminpanel" style="display: none;">
+                        <br>
+                        <a href="javascript:;" onclick="$('#jplayer_inspector').jPlayerInspector({jPlayer:$('#jquery_jplayer_1')});" class="button">
+                        Enable JPlayer Inspector
+                        </a>
+                        <br>
+                        <br>
+                        <a href="javascript:;" onclick="updateLibrary()" class="button">
+                        Update Music Library (may take some time!)
+                        </a>
+                        <br>
+                        <br>
+                        Create new user:<br>
+                        Username:<input type="text" id="newusername" /><br>
+                        Password:<input type="password" id="newpassword" />
+                        is Admin:<input type="checkbox" id="newisadmin" />
+                        <a href="javascript:;" onclick="addNewUser()" class="button">Add User</a><br>
+                        <ul id="adminuserlist">
+                        </ul>
+                        
+                    </div>
                 </div>
-                <!-- <div class="jp-no-solution">
-                        <span>Update Required</span>
-                        To play the media you will need to either update your browser to a recent version or update your <a href="http://get.adobe.com/flashplayer/" target="_blank">Flash p$
-                </div> -->
+            <!-- ADMIN PANEL END -->
+            <div id="jquery_jplayer_1" class="jp-jplayer"></div>
+                <div id="jp_ancestor" class="jp-audio">
+                    <div class="jp-type-playlist">
+                        <div class="jp-gui jp-interface">
+                            <div class="jp-center-progress-bar">
+                                <div class="jp-progress">
+                                    <div class="jp-seek-bar">
+                                            <div class="jp-play-bar"></div>
+                                    </div>
+                                </div>
+                                <div class="jp-time-holder">
+                                    <div class="jp-current-time"></div>
+                                    <div class="jp-duration"></div>
+                                </div>
+                            </div>
+                            
+                            <ul class="jp-controls">
+                                <li><a href="javascript:;" class="jp-previous" tabindex="1">previous</a></li>
+                                <li><a href="javascript:;" class="jp-play" tabindex="1">play</a></li>
+                                <li><a href="javascript:;" class="jp-pause" tabindex="1">pause</a></li>
+                                <li><a href="javascript:;" class="jp-next" tabindex="1">next</a></li>
+                                <li><a href="javascript:;" class="jp-stop" tabindex="1">stop</a></li>
+                                <li><a href="javascript:;" class="jp-mute" tabindex="1" title="mute">mute</a></li>
+                                <li><a href="javascript:;" class="jp-unmute" tabindex="1" title="unmute">unmute</a></li>
+                                <li><a href="javascript:;" class="jp-volume-max" tabindex="1" title="max volume">max volume</a></li>
+                            </ul>
+                            <div class="cm-songtitle"></div>
+                            <div class="cm-playlistplaytime"></div>
+                            
+                            <div class="jp-volume-bar">
+                                <div class="jp-volume-bar-value"></div>
+                            </div>
+                            
+                            <ul class="jp-toggles">
+                                <li><a href="javascript:;" class="jp-shuffle" tabindex="1" title="shuffle">shuffle</a></li>
+                                <li><a href="javascript:;" class="jp-shuffle-off" tabindex="1" title="shuffle off">shuffle off</a></li>
+                                <li><a href="javascript:;" class="jp-repeat" tabindex="1" title="repeat">repeat</a></li>
+                                <li><a href="javascript:;" class="jp-repeat-off" tabindex="1" title="repeat off">repeat off</a></li>
+                            </ul>
+                        </div>
+                        <!-- <div class="jp-no-solution">
+                                <span>Update Required</span>
+                                To play the media you will need to either update your browser to a recent version or update your <a href="http://get.adobe.com/flashplayer/" target="_blank">Flash p$
+                        </div> -->
+                    </div>
+                </div>
             </div>
-        </div>
 	</div>
-	</div>
-<!-- JPLAYER END -->
+    <!-- JPLAYER END -->
+<a id="errormessage" href="#" title="click to dismiss" onclick="$(this).html('')"></a>
 <!-- TABS START -->
 <div class="tabs">
-<ul class="tabNavigation">
+<!--<ul class="tabNavigation">
     <li><a class="search" href="#search">Search</a></li>
     <li><a class="jplayer" href="#jplayer">Playlist</a></li>
-    <li><a class="browser" href="#browser">Browser</a></li>
-</ul>
-    <!--SEARCH TAB START -->
-    <div id="search">
-        <div id="searchfield">
-            <span id="oneliner"></span>
-            <form id="searchform" onsubmit="return submitsearch()">
-            <input class="searchinput" type="text" />
-            <div class="bigbutton">search</div>
-            </form>
-        </div>
-        <div id="searchresults"></div>
-    </div>
-    <!--SEARCH TAB END -->
-    <!-- PLAYLIST TAB START -->
-    <div id="jplayer">
-        <div class="smalltab floatright">
-            <a href="javascript:;" onclick="clearPlaylist()">Clear Playlist</a>
-        </div>
-        <div class="smalltab floatright">
-            <a href="javascript:;" onclick="removePlayedFromPlaylist()">Remove played tracks</a>
-        </div>
-        <div class="smalltab">
-            <a href="javascript:;" onclick="showPlaylistSaveDialog()">Save Playlist</a>
-        </div>
-        <div class="smalltab showplayliststab">
-            <a href="javascript:;" onclick="showPlaylists()">Show more Playlists</a>
-        </div>
-        <div class="smalltab hideplayliststab" style="display: none">
-            <a href="javascript:;" onclick="hidePlaylists()">Hide other playlists</a>
-        </div>
-        <div class="available-playlists" style="display: none">
-        </div>
-        <div id="jp-playlist-wrapper">
-            <div class="jp-playlist">
-                    <ul>
-                            <li></li>
-                    </ul>
+</ul>-->
+    <div>
+        <!--SEARCH TAB START -->
+        <div id="search">
+            <div id="searchfield">
+                <span id="oneliner"></span>
+                <form id="searchform" onsubmit="return submitsearch()">
+                <input class="searchinput" type="text" />
+                <div class="bigbutton">search</div>
+                <a class="helptext" href="#" onclick="loadBrowser()">browse instead</a>
+                </form>
             </div>
-            <div class="jp-playlist-playtime-sum">
+            <div id="searchresults"></div>
+        </div>
+        <!--SEARCH TAB END -->
+    </div>
+    <div>
+        <!-- PLAYLIST TAB START -->
+        <div id="jplayer">
+        
+            
+            <!--<div class="smalltab floatright">
+                <a href="javascript:;" onclick="clearPlaylist()">Clear Playlist</a>
+            </div>
+            <div class="smalltab floatright">
+                <a href="javascript:;" onclick="removePlayedFromPlaylist()">Remove played tracks</a>
+            </div>
+            -->
+            
+            <div id="over-playlist-tabs">
+                <div id="playlistChooser"><ul></ul></div>
+                <div id="addPlaylist"><ul><li class="bigtab"><a href="#" onclick="showPlaylistBrowser()">+</a></li></ul></div>
+            </div>
+            <div id="playlistCommands"></div>
+            <div id="playlistContainerParent"></div>
+            <div id="playlistBrowser">
+                <a href="#" class="button center" style="width:150px" onclick="playlistManager.newPlaylist()">create new playlist</a>
+                <span class="center helptext" style="width: 100px">or load a playlist from the list below</span>
+                <div class="available-playlists" style="display: none">
+                </div>        
             </div>
         </div>
-        <div id="playlistChooser"><ul><li class="smalltab"><a href="#" onclick="newPlaylist()">+</a></li></ul></div>
-        <div id="playlistContainerParent"></div>
+        <!-- PLAYLIST TAB END -->
     </div>
-    <!-- PLAYLIST TAB END -->
-    <!-- BROWSER TAB START -->
-    <div id="browser">
-    </div>
-    <!-- BROWSER TAB END -->
 </div>
 <!-- TABS END -->
 <div id="jplayer_inspector"></div>
