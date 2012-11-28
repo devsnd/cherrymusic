@@ -37,6 +37,9 @@ Getting Started
       and copy the `cherrypy` subfolder it contains 
       into the `cherrymusic` folder you created.
 
+      cherrymusic will offer to do this for you if it cannot
+      find an installed CherryPy to use. 
+
 3. Now simply run the main script using python 3; it will prompt you for anything else.
 
         $ python cherrymusic
