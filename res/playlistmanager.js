@@ -184,12 +184,12 @@ PlaylistManager.prototype = {
             cmds.append('<a class="button floatright" onclick="playlistManager.clearQueue()">clear queue</a>');
             cmds.append('<a class="button floatleft" onclick="playlistManager.newPlaylistFromQueue()">save as playlist</a>');
         } else {
-            cmds.append('<span class="floatleft">owner '+pl.owner+'</span>');
+            /*cmds.append('<span class="floatleft">owner '+pl.owner+'</span>');
             if(!pl.public){
                 cmds.append('<span class="floatleft">status: <a class="button" title="make public">private</a></span>');
             } else {
                 cmds.append('<span class="floatleft">status: <a class="button" title="make private">public</a></span>');
-            }
+            }*/
         }
         
     },
