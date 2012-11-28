@@ -170,7 +170,7 @@ Have fun!
             'tools.sessions.timeout' : 60 * 24,
             })
 
-        if not config.server.keep_session_in_ram:
+        if not config.server.keep_session_in_ram.bool:
             sessiondir = os.path.join(os.path.expanduser('~'), '.cherrymusic', 'sessions')
             if not os.path.exists(sessiondir):
                 os.mkdir(sessiondir)
