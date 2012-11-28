@@ -71,7 +71,7 @@ class SQLiteCache(object):
             log.i('Connected to Database. (' + DBFILENAME + ')')
         log.i('Creating indices for dictionary and search tables (if necessary)... ')
         self.__create_indexes()
-        
+
         #I don't care about journaling!
         self.conn.execute('PRAGMA synchronous = OFF')
         self.conn.execute('PRAGMA journal_mode = MEMORY')
@@ -141,31 +141,31 @@ class SQLiteCache(object):
     def fetchFileIds(self, terms, maxFileIds, isFastSearch=False):
         fileIdLimit = FAST_FILE_SEARCH_LIMIT if isFastSearch else NORMAL_FILE_SEARCH_LIMIT;
         resultlist = []
-        
+
         query = '''SELECT search.frowid FROM dictionary JOIN search ON search.drowid = dictionary.rowid WHERE '''
-        orterms = ' OR '.join([' dictionary.word LIKE ? ']*len(terms))           
-        limit = ' LIMIT 0, '+str(maxFileIds) #TODO add maximum db results as configuration parameter
+        orterms = ' OR '.join([' dictionary.word LIKE ? '] * len(terms))
+        limit = ' LIMIT 0, ' + str(maxFileIds) #TODO add maximum db results as configuration parameter
         #log.d('Search term: ' + term)
         sql = query + orterms + limit
         if debug:
             log.d('Query used: ' + sql)
         #print(self.conn.execute('EXPLAIN QUERY PLAN '+sql, (term+'%',)).fetchall())
-        self.db.execute(sql, tuple(map(lambda x: x+'%', terms)))
+        self.db.execute(sql, tuple(map(lambda x: x + '%', terms)))
         resultlist += self.db.fetchall()
 
         return resultlist
 
     def searchfor(self, value, maxresults=10, isFastSearch=False):
         terms = SQLiteCache.searchterms(value)
-        with Performance('searching for a maximum of %s files' % str(NORMAL_FILE_SEARCH_LIMIT*len(terms))):
+        with Performance('searching for a maximum of %s files' % str(NORMAL_FILE_SEARCH_LIMIT * len(terms))):
             self.db = self.conn.cursor()
             if debug:
                 log.d('searchterms')
                 log.d(terms)
             results = []
             resultfileids = {}
-            
-            maxFileIds = NORMAL_FILE_SEARCH_LIMIT*len(terms)
+
+            maxFileIds = NORMAL_FILE_SEARCH_LIMIT * len(terms)
             with Performance('file id fetching'):
                 fileids = self.fetchFileIds(terms, maxFileIds, isFastSearch)
 
@@ -191,12 +191,12 @@ class SQLiteCache(object):
                 log.d('bestresults')
                 log.d(bestresults)
             #capping bestresults, because there can be more fileids than maxresults
-            bestresults = bestresults[:min(len(bestresults),NORMAL_FILE_SEARCH_LIMIT)]
-            
-            with Performance('querying fullpaths for %s fileIds'%len(bestresults)):
+            bestresults = bestresults[:min(len(bestresults), NORMAL_FILE_SEARCH_LIMIT)]
+
+            with Performance('querying fullpaths for %s fileIds' % len(bestresults)):
                 for fileidtuple in bestresults:
                     results.append(self.fullpath(fileidtuple[0]))
-            
+
             if debug:
                 log.d('resulting paths')
                 log.d(results)
@@ -374,6 +374,11 @@ class SQLiteCache(object):
             raise AssertionError("basedir doesn't exist: %s" % basedir)
         if not os.path.isdir(basedir):
             raise AssertionError("basedir is not a directory: %s" % basedir)
+        basedir = os.path.normcase(basedir)
+        if len(basedir) > 1:
+            basedir = basedir.rstrip(os.path.sep)
+        cherry.config.media.basedir = basedir
+        log.i('media base directory: %r' % basedir)
 
 
     @util.timed
@@ -405,6 +410,25 @@ class SQLiteCache(object):
             log.i('update run finished!')
 
 
+    def partial_update(self, path, *paths):
+        basedir = cherry.config.media.basedir.str
+        paths = (path,) + paths
+        log.i('updating paths: %s' % (paths,))
+        for path in paths:
+            abspath = path if os.path.isabs(path) else os.path.join(os.getcwd(), path)
+            normpath = os.path.normpath(os.path.normcase(abspath))
+            if not normpath.startswith(basedir):
+                log.e('path is not in basedir. skipping %r.%s' %
+                      (path, '' if path == normpath else ' (=%r)' % normpath))
+                continue
+            log.i('updating %r...' % normpath)
+            try:
+                self.update_db_recursive(normpath, skipfirst=False)
+            except:
+                log.e('update incomplete.')
+        log.i('done updating paths.')
+
+
     def update_db_recursive(self, fullpath, skipfirst=False):
         '''recursively update the media database for a path in basedir'''
 
@@ -412,7 +436,7 @@ class SQLiteCache(object):
         Item = namedtuple('Item', 'infs indb parent progress')
         def factory(fs, db, parent):
             fileobj = fs if fs is not None else db
-            name = fileobj.relpath or fileobj.fullpath if fileobj else None
+            name = fileobj.relpath or fileobj.fullpath if fileobj else '<path not found in filesystem or database>'
             if parent is None:
                 progress = ProgressTree(name=name)
                 maxlen = lambda s: util.trim_to_maxlen(50, s)
@@ -449,6 +473,8 @@ class SQLiteCache(object):
                         self.register_file_with_db(item.infs)
                         adds_without_commit += 1
                         progress.name = '[+] ' + progress.name
+                    else:
+                        progress.name = '[?] ' + progress.name
                     if adds_without_commit == AUTOSAVEINTERVAL:
                         self.conn.commit()
                         add += adds_without_commit
@@ -495,6 +521,7 @@ class SQLiteCache(object):
         '''
         from collections import OrderedDict
         basedir = cherry.config.media.basedir.str
+        startpath = os.path.normcase(startpath).rstrip(os.path.sep)
         Item = itemfactory
         if Item is None:
             from collections import namedtuple
@@ -502,8 +529,20 @@ class SQLiteCache(object):
         assert os.path.isabs(startpath), 'argument must be an abolute path: "%s"' % startpath
         assert startpath.startswith(basedir), 'argument must be a path in basedir (%s): "%s"' % (basedir, startpath)
 
-        fsobj = File(startpath) if os.path.exists(startpath) else None
-        dbobj = self.db_lookup(startpath)
+        if not os.path.exists(startpath):
+            fsobj = None
+        elif startpath == basedir:
+            fsobj = File(basedir)
+        elif startpath > basedir:
+            pathparent, pathbase = os.path.split(startpath)
+            fsparent = self.db_find_file_by_path(pathparent, create=True)
+            assert fsparent is not None, 'parent path not in database: %r' % pathparent
+            fsobj = File(pathbase, fsparent)
+            del pathparent, pathbase, fsparent
+        else:
+            assert False, "shouldn't get here! (argument path not in basedir)"
+
+        dbobj = self.db_find_file_by_path(startpath)
         stack = deque()
         stack.append(Item(fsobj, dbobj, None))
         while stack:
@@ -524,20 +563,23 @@ class SQLiteCache(object):
             del dbchildren
 
 
-    def db_lookup(self, fullpath):
+    def db_find_file_by_path(self, fullpath, create=False):
         '''Finds an absolute path in the file database. If found, returns
         a File object matching the database record; otherwise, returns None.
         Paths matching a media basedir are a special case: these will yield a
         File object with an invalid record id matching the one listed by its 
-        children.'''
+        children.
+        '''
         assert os.path.isabs(fullpath)
         basedir = cherry.config.media.basedir.str
         if not fullpath.startswith(basedir):
             return None
+
         relpath = fullpath[len(basedir):].strip(os.path.sep)
         root = File(basedir, isdir=True, uid= -1)
         if not relpath:
             return root
+
         file = root
         for part in relpath.split(os.path.sep):
             found = False
@@ -547,10 +589,13 @@ class SQLiteCache(object):
                     file = child
                     break
             if not found:
-                return None
+                if create:
+                    file = File(part, parent=file)
+                    log.i('creating database entry for %r', file.relpath)
+                    self.register_file_with_db(file)
+                else:
+                    return None
         return file
-
-
 
 
 class File():

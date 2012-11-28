@@ -81,9 +81,9 @@ def tearDownModule():
     os.chdir(oldwd)
     shutil.rmtree(tmpdir, ignore_errors=False, onerror=None)
 
-def getAbsPath(relpath):
+def getAbsPath(*relpath):
     'returns the absolute path for a path relative to the global testdir'
-    return os.path.join(tmpdir, relpath)
+    return os.path.join(tmpdir, *relpath)
 
 
 def setupTestfile(testfile):
@@ -637,8 +637,55 @@ class UpdateTest(unittest.TestCase):
 
         self.Cache.full_update()
 
-        self.assertNotEqual(None, self.Cache.db_lookup(getAbsPath(os.path.join(self.testdir, newfile))),
+        self.assertNotEqual(None, self.Cache.db_find_file_by_path(getAbsPath(self.testdir, newfile)),
                             'file must have been added correctly to the database')
+
+    def test_partial_update(self):
+
+        newfiles = (
+                      os.path.join('root_dir', 'sub_dir', ''),
+                      os.path.join('root_dir', 'sub_dir', 'a_file'),
+                      os.path.join('root_dir', 'sub_dir', 'another_file'),
+                      )
+        setupTestfiles(self.testdir, newfiles)
+        path_to = lambda x: getAbsPath(self.testdir, x)
+
+        msg = 'after updating newpath, all paths in newpath must be in database'
+        self.Cache.partial_update(path_to(newfiles[0]))
+        self.assertNotEqual(None, self.Cache.db_find_file_by_path(path_to(newfiles[0])), msg)
+        self.assertNotEqual(None, self.Cache.db_find_file_by_path(path_to(newfiles[1])), msg)
+        self.assertNotEqual(None, self.Cache.db_find_file_by_path(path_to(newfiles[2])), msg)
+
+        msg = 'after updating samepath, all paths in samepath must be in database'
+        self.Cache.partial_update(path_to(newfiles[0]))
+        self.assertNotEqual(None, self.Cache.db_find_file_by_path(path_to(newfiles[0])), msg)
+        self.assertNotEqual(None, self.Cache.db_find_file_by_path(path_to(newfiles[1])), msg)
+        self.assertNotEqual(None, self.Cache.db_find_file_by_path(path_to(newfiles[2])), msg)
+
+        removeTestfiles(self.testdir, newfiles)
+
+        msg = 'after updating removedpath, all paths in reomevpath must be gone from database'
+        self.Cache.partial_update(path_to(newfiles[0]))
+        self.assertEqual(None, self.Cache.db_find_file_by_path(path_to(newfiles[0])), msg)
+        self.assertEqual(None, self.Cache.db_find_file_by_path(path_to(newfiles[1])), msg)
+        self.assertEqual(None, self.Cache.db_find_file_by_path(path_to(newfiles[2])), msg)
+
+        setupTestfiles(self.testdir, newfiles)
+
+        msg = 'after updating newpath/subpath, only newpath and subpath must be in database, not othersubpath'
+        self.Cache.partial_update(path_to(newfiles[1]))
+        self.assertNotEqual(None, self.Cache.db_find_file_by_path(path_to(newfiles[0])), msg)
+        self.assertNotEqual(None, self.Cache.db_find_file_by_path(path_to(newfiles[1])), msg)
+        self.assertEqual(None, self.Cache.db_find_file_by_path(path_to(newfiles[2])), msg)
+
+        removeTestfiles(self.testdir, newfiles)
+
+        msg = 'after updating removedpath/subpath, subpath most be gone from database, removedpath must still be there'
+        self.Cache.partial_update(path_to(newfiles[1]))
+        self.assertNotEqual(None, self.Cache.db_find_file_by_path(path_to(newfiles[0])), msg)
+        self.assertEqual(None, self.Cache.db_find_file_by_path(path_to(newfiles[1])), msg)
+        self.assertEqual(None, self.Cache.db_find_file_by_path(path_to(newfiles[2])), msg)
+
 
 #    @unittest.skipIf(True, "facilitates quick manual testruns")
 #    def test_update(self):

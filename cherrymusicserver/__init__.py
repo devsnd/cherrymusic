@@ -52,7 +52,7 @@ VERSION = "0.21"
 
 class CherryMusic:
 
-    def __init__(self, update=False, createNewConfig=False):
+    def __init__(self, update=None, createNewConfig=False):
         if createNewConfig:
             newconfigpath = util.configurationFile() + '.new'
             configuration.write_to_file(configuration.from_defaults(), newconfigpath)
@@ -66,7 +66,11 @@ class CherryMusic:
         self.db = sqlitecache.SQLiteCache(util.databaseFilePath('cherry.cache.db'))
         self.cherrymodel = cherrymodel.CherryModel(self.db)
         self.httphandler = httphandler.HTTPHandler(config, self.cherrymodel)
-        if update or self.db.isEmpty():
+        if self.db.isEmpty():
+            self.db.full_update()
+        elif update:
+            self.db.partial_update(*update)
+        elif update is not None:
             self.db.full_update()
         self.server()
 
