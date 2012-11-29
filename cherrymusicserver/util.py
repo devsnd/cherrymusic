@@ -71,7 +71,7 @@ def getResourcePath(path):
     if not os.path.exists(respath):
         log.w("Couldn't find " + respath + ". Trying local install path.")
         #otherwise check local install
-        resourceprefix = '.'
+        resourceprefix = os.path.dirname(os.path.dirname(__file__))
         respath = os.path.join(resourceprefix, path)
     if not os.path.exists(respath):
         log.w("Couldn't find " + respath + ". Trying home dir.")
