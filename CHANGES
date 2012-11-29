@@ -14,6 +14,8 @@ Changelog
             directory names overlap more than one lettter
  - FEATURE: Added dependency installer, so that cherrymusic can be run on
             any system without any preinstalled dependencies
+ - FEATURE: see online users in the admin panel
+ - FEATURE: delete users
  - IMPROVEMENT: shuffle uses algorithm to play possibly unplayed tracks first
  - IMPROVEMENT: Configuration interface overfaul. new or deprecated
                 options are now listed on startup
