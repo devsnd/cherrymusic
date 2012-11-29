@@ -17,15 +17,15 @@ Upcoming features:
 
   - searching ID3 tags
 
+    
+
 Getting Started
 ---------------
 
 1. [We're on github](https://github.com/devsnd/cherrymusic). Checkout or download the cherry music sources, e.g.:
 
-        $ mkdir cherrymusic
-        $ git clone git://github.com/devsnd/cherrymusic.git ./cherrymusic
-        $ cd cherrymusic
-
+        $ git clone git://github.com/devsnd/cherrymusic.git
+    
 2. To use cherrymusic you need [CherryPy](http://www.cherrypy.org). There are two options:
 
 [download]: http://download.cherrypy.org/cherrypy/3.2.2/
