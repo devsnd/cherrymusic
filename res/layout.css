@@ -49,9 +49,6 @@ GENERAL
 /*****
 TABS
 *****/
-#over-playlist-tabs>div, #over-playlist-tabs>div ul{
-    display: inline;
-}
 .tabs{
 	width: 100%;
 }
@@ -63,8 +60,8 @@ TABS
 	/*fixed centering*/
 	left: 50%;
 	position: fixed;
-	width: 220px;
-	margin-left: -110px; /* minus half the width */
+	width: 320px;
+	margin-left: -160px; /* minus half the width */
 
 	border-radius: 4px;
 }
@@ -92,18 +89,6 @@ TABS
 .smalltab a{
 	text-decoration: none;
 }
-.bigtab{
-	display: inline;
-	padding: 4px 8px 0;
-	margin-right: 4px;
-	border-radius: 5px 5px 0 0;
-	font-size: 16px;
-    background-color: #888888;
-}
-.bigtab a{
-	text-decoration: none;
-    color: #fff;
-}
 .floatright{
 	float: right;
 }
@@ -128,22 +113,8 @@ div#dialog{
     top: 40%;
     width: 300px;
 }
-#errormessage{
-    background-color: #FF3333;
-    color: #FFFFFF;
-    display: block;
-    font-weight: 900;
-    line-height: 150%;
-    text-align: center;
-    text-decoration: none;
-}
 .tabs > div{
-	float: left;
-    padding-top: 20px;
-    width: 50%;
-}
-.tabs > div > div{
-    padding: 0 10px;
+	padding-top: 50px;
 }
 
 #searchfield{
@@ -222,25 +193,16 @@ div#dialog{
 .jp-playlist ul li{
 	
 }
-#jp_ancestor{
+#jp_container_1{
 	width: 100%;
 }
 
 ul{
 	list-style-type: none;
 	margin: 0;
-    padding: 0;
+	padding: 0 0 0 20px;
 }
 ul li{
-}
-.center{
-    display: block;
-    margin: 0 auto;
-    text-align: center;
-}
-
-#searchresults ul{
-	padding: 0 0 0 20px;
 }
 /***********
 FILE LISTING
@@ -277,13 +239,6 @@ li.fileinlist a{
 	margin: 5px 0;
     padding: 10px;
 	text-decoration: none;
-}
-
-.available-playlists {
-  background-color: #333333;
-  border-radius: 10px 10px 10px 10px;
-  margin: 10px;
-  padding: 10px;
 }
 
 .available-playlists ul, .available-playlists ul li{
@@ -338,17 +293,6 @@ div.container{
     text-align: center;
 	height: 20px;
 	margin-top: 2px;
-}
-#playlistCommands{
-    height: 58px;
-    background-color: #DDDDDD;
-}
-#playlistBrowser{
-    background-color: #AAAAAA;
-    padding: 10px 0;
-}
-.available-playlists{
-    
 }
 /**********
 ADMIN PANEL
