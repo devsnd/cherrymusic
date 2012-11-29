@@ -2,6 +2,27 @@
 Changelog
 ---------
 
+0.22.0 (2012-11-29)
+
+ - FEATURE: drag'n'drop sortable playlist
+ - FEATURE: partial updates. cherrymusic --update /path/to/changed/directory
+ - FEATURE: python 3.1 downward compability for debian users 
+ - FEATURE: cherrymusic tries to automatically fetch album covers
+ - FEATURE: new layout for mobile devices
+ - FEATURE: --update switch now runs in background, immediate server start
+ - FEATURE: compactly listed folder paths are now autocompleted if listed
+            directory names overlap more than one lettter
+ - FEATURE: Added dependency installer, so that cherrymusic can be run on
+            any system without any preinstalled dependencies
+ - IMPROVEMENT: shuffle uses algorithm to play possibly unplayed tracks first
+ - IMPROVEMENT: Configuration interface overfaul. new or deprecated
+                options are now listed on startup
+ - IMPROVEMENT: search speed
+ - FIXED: removed configdb, proved to be unnecessary
+ - FIXED: jPlayer doesn't play mp3s when no codecs installed on server
+ - EXPERIMENTAL: cherrymusic can be started as a daemon using cherrymusicd
+ - UPDATE: jPlayer updated to version 2.2.0
+
 0.21.1 (2012-10-26)
 
  - IMPROVEMENT: updates run smoother, better progress report (server startup doesn't trigger update anymore)
@@ -23,7 +44,7 @@ Changelog
  - FEATURE: exporting playlists as PLS or M3U (take this, edna!)
  - + MANY MORE...
 
-0.2 (2012-09-18)
+0.2.0 (2012-09-18)
 
  - FEATURE: https encryption support
  - FEATURE: option to listen only on localhost
@@ -39,6 +60,6 @@ Changelog
  - FEATURE: admin panel for creating new users
  - FEATURE: welcome screen for CLI and web-interface
 
-0.1 (2012-08-16)
+0.1.0 (2012-08-16)
 
  - Initial Release
