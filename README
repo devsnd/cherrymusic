@@ -63,6 +63,16 @@ An active flash blocker can interfere with the web frontend.
 If you have trouble with things like track selection or playback, try whitelisting
 the server in your browser's flash blocker / plugin manager.
 
+On Windows:
+
+FileNotFoundError: [WinError 2] The system cannot find the file specified: 'C:\\Documents and Settings\\username\\.cherrymusic\
+\sessions\\session-622d41384b5f877a840ba5dfe38408dc4853e8f4.lock'
+This error can be circumvented by setting the
+
+        keep_session_in_ram = True
+
+in the configuration file (C:\Documents and Settings\username\.cherrymusic\config)
+
 Requirements
 ------------
 * [Python 3](http://python.org/download/releases/)
