@@ -41,9 +41,6 @@ var executeAfterConfigLoaded = []
 
 function api(data_or_action, successfunc, errorfunc, background){
     "use strict";
-    if(!errorfunc){
-        errorfunc = errorFunc();
-    }
     if(!successfunc){
         successfunc = function(){};
     }
@@ -62,6 +59,9 @@ function api(data_or_action, successfunc, errorfunc, background){
         apiaction = data_or_action['action'];
         senddata = {"value" :  data_or_action['value'] };
         
+    }
+    if(!errorfunc){
+        errorfunc = errorFunc("failed to complete API request '"+apiaction+"'");
     }
     if(!background){
         $('div#progressscreen').fadeIn('fast');
