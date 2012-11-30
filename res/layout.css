@@ -361,6 +361,7 @@ JPlayer Additions
 
 .jp-controls{
     width: 250px !important;
+    position: absolute;
 }
 
 
