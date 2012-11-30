@@ -1,4 +1,3 @@
-
 Changelog
 ---------
 
@@ -6,18 +5,18 @@ Changelog
 
  - FEATURE: drag'n'drop sortable playlist
  - FEATURE: partial updates. cherrymusic --update /path/to/changed/directory
- - FEATURE: python 3.1 downward compability for debian users 
+ - FEATURE: python 3.1 downward compatibility for debian users 
  - FEATURE: cherrymusic tries to automatically fetch album covers
  - FEATURE: new layout for mobile devices
  - FEATURE: --update switch now runs in background, immediate server start
  - FEATURE: compactly listed folder paths are now autocompleted if listed
-            directory names overlap more than one lettter
+            directory names overlap for more than one letter
  - FEATURE: Added dependency installer, so that cherrymusic can be run on
             any system without any preinstalled dependencies
  - FEATURE: see online users in the admin panel
  - FEATURE: delete users
  - IMPROVEMENT: shuffle uses algorithm to play possibly unplayed tracks first
- - IMPROVEMENT: Configuration interface overfaul. new or deprecated
+ - IMPROVEMENT: Configuration interface overhaul. new or deprecated
                 options are now listed on startup
  - IMPROVEMENT: search speed
  - FIXED: removed configdb, proved to be unnecessary
