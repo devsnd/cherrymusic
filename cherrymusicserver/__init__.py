@@ -211,6 +211,10 @@ Have fun!
                     'tools.encode.encoding' : 'utf-8',
                     'tools.caching.on' : False,
                 },
+                '/favicon.ico':{
+                    'tools.staticfile.on' : True,
+                    'tools.staticfile.filename' : resourcedir+'/favicon.ico',
+                }
         })
         log.i('Starting server on port %s ...' % config.server.port)
 
