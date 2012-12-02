@@ -66,7 +66,7 @@ function api(data_or_action, successfunc, errorfunc, background){
     if(!background){
         $('div#progressscreen').fadeIn('fast');
     }
-    var urlaction = '/api';
+    var urlaction = window.location.protocol+'//'+document.location.host+'/api';
     if(apiaction){
         urlaction += '/'+apiaction;
     }    
@@ -1008,6 +1008,13 @@ function time2text(sec){
     }
 }
 
+function handleURLCommands(){
+    if(document.location.search !== ''){
+        $('#searchfield input').val(document.location.search.split('=')[1])
+        search();
+    }
+}
+
 /***
 ON DOCUMENT READY... STEADY... GO!
 ***/
@@ -1020,6 +1027,7 @@ $(document).ready(function(){
     executeAfterConfigLoaded.push(setAvailableJPlayerFormats);
     executeAfterConfigLoaded.push(initJPlayer);
     executeAfterConfigLoaded.push(restorePlaylistAndRememberPeriodically);
+    executeAfterConfigLoaded.push(handleURLCommands);
     loadConfig();
     //register top level directories
 	registerlistdirs($("html").get());

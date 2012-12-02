@@ -150,6 +150,15 @@ def from_defaults():
 
         c.server.ssl_certificate = 'certs/server.crt'
         c.server.ssl_private_key = 'certs/server.key'
+        
+        c.server.dyndns_address = ''
+        c.server.dyndns_address.desc = '''
+                                    ex: server.dyndns_address = http://example.dyndns.com/cm
+                                    If you have set up a dyndns/no-ip/etc, you can insert the
+                                    address that points to cherrymusic here. This will enable
+                                    you to use extra features like the opensearch plugin for 
+                                    your browser, even when your ip changes frequently.
+                                    '''
 
     return c
 

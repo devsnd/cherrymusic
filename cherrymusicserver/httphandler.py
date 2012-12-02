@@ -108,37 +108,44 @@ class HTTPHandler(object):
     def issecure(self, url):
         return parse.urlparse(url).scheme == 'https'
 
-    def getSecureUrl(self, url):
-        u = parse.urlparse(url).netloc
-        ip = u[:u.index(':')]
-        return 'https://' + ip + ':' + cherry.config.server.ssl_port.str
-
-
-    def index(self, action='', value='', filter='', login=None, username=None, password=None):
+    def getBaseUrl(self, redirect_unencrypted=False):
+        ipAndPort = parse.urlparse(cherrypy.url()).netloc
         if cherry.config.server.enable_ssl.bool and not self.issecure(cherrypy.url()):
             log.d('Not secure, redirecting...')
-            raise cherrypy.HTTPRedirect(self.getSecureUrl(cherrypy.url()), 302)
-
+            ip = ipAndPort[:u.ipAndPort(':')]
+            url = 'https://' + ip + ':' + cherry.config.server.ssl_port.str
+            if redirect_unencrypted:
+                raise cherrypy.HTTPRedirect(url, 302)
+        else:
+            url = 'http://' + ipAndPort
+        return url
+        
+    def index(self, *args, **kwargs):
+        self.getBaseUrl(redirect_unencrypted=True)          
         firstrun = 0 == self.userdb.getUserCount();
         if debug:
             #reload pages everytime in debig mode
             self.mainpage = readRes('res/main.html')
             self.loginpage = readRes('res/login.html')
             self.firstrunpage = readRes('res/firstrun.html')
-        if login == 'login':
-            self.session_auth(username, password)
-            if cherrypy.session['username']:
-                log.i('user ' + cherrypy.session['username'] + ' just logged in.')
-        elif login == 'create admin user':
-            if firstrun:
-                if username.strip() and password.strip():
-                    self.userdb.addUser(username, password, True)
-                    self.session_auth(username, password)
-                    return self.mainpage
-            else:
-                return "No, you can't."
+        if 'login' in kwargs:
+            username = kwargs.get('username','')
+            password = kwargs.get('password','')
+            login_action = kwargs.get('login','')
+            if login_action == 'login':
+                self.session_auth(username, password)
+                if cherrypy.session['username']:
+                    log.i('user ' + cherrypy.session['username'] + ' just logged in.')
+            elif login_action == 'create admin user':
+                if firstrun:
+                    if username.strip() and password.strip():
+                        self.userdb.addUser(username, password, True)
+                        self.session_auth(username, password)
+                        return self.mainpage
+                else:
+                    return "No, you can't."
         if firstrun:
-                return self.firstrunpage
+            return self.firstrunpage
         else:
             if self.isAuthorized():
                 return self.mainpage
@@ -175,7 +182,7 @@ class HTTPHandler(object):
             
     def trans(self, *args):
         if not self.isAuthorized():
-            raise cherrypy.HTTPRedirect('http://'+parse.urlparse(cherrypy.url()).netloc, 302)
+            raise cherrypy.HTTPRedirect(self.getBaseUrl(), 302)
         if cherry.config.media.transcode and len(args):
             newformat = args[-1][4:] #get.format
             path = os.path.sep.join(args[:-1])
@@ -187,11 +194,11 @@ class HTTPHandler(object):
 
     def api(self, *args, **kwargs):
         if not self.isAuthorized():
-            raise cherrypy.HTTPRedirect('http://'+parse.urlparse(cherrypy.url()).netloc, 302)
+            raise cherrypy.HTTPRedirect(self.getBaseUrl(), 302)
         action = args[0] if args else ''
         value=kwargs.get('value','')
         if not value and len(args)>1:
-            value = map(unquote,args[1:len(args)])
+            value = list(map(unquote,args[1:len(args)]))
             if len(value) == 1:
                 value = value[0]
         #filter_str=kwargs.get('filter','')
@@ -203,13 +210,17 @@ class HTTPHandler(object):
     api.exposed = True
 
     def api_opensearchdescription(self, value):
+        if cherry.config.server.dyndns_address.str.strip():
+            url = cherry.config.server.dyndns_address.str
+        else:
+            url = self.getBaseUrl()
         return """<?xml version="1.0" encoding="UTF-8"?>
 <OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
  <ShortName>CherryMusic</ShortName>
  <Description>open source streaming server</Description>
  <Tags>cherrymusic open source streaming server python mp3 jplayer</Tags>
- <Url type="text/html" template="{} {{searchTerms}}"/>
-</OpenSearchDescription>""".format(cherrypy.url())
+ <Url type="text/html" template="{}/?search={{searchTerms}}"/>
+</OpenSearchDescription>""".format(url)
 
     def api_getuseroptions(self, value):
         uo = self.useroptions.forUser(self.getUserId())
