@@ -82,17 +82,25 @@ class TestHTTPHandler(unittest.TestCase):
         pass
 
     def test_api_search(self):
-        self.http.api('search',value='asd')
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'search')
 
     def test_api_fastsearch(self):
-        res = self.http.api('fastsearch',value='asd')
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'search')
 
     def test_api_rememberplaylist(self):
-        pass #relies on cherrypy session
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'rememberplaylist')
 
     def test_api_saveplaylist(self):
-        pass #needs to be tested in playlistdb
-
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'saveplaylist')
+        
     def test_api_deleteplaylist(self):
         pass #needs to be tested in playlistdb
 
@@ -100,48 +108,115 @@ class TestHTTPHandler(unittest.TestCase):
         pass #needs to be tested in playlistdb
 
     def test_api_getmotd(self):
-        self.http.api('getmotd')
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'getmotd')
 
     def test_api_restoreplaylist(self):
-        pass #relies on cherrypy session
-        #self.http.api(action='restoreplaylist')
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'restoreplaylist')
 
     def test_api_getplayables(self):
-        p = self.http.api('getplayables')
-        self.assertEqual(p, json.dumps(self.http.config.media.playable.str.split(' ')))
-
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'getplayables')
+        
     def test_api_getuserlist(self):
-        pass #relies on cherrypy session
-
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'getuserlist')
+        
     def test_api_adduser(self):
-        pass #relies on cherrypy session
-
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'adduser')
+        
     def test_api_showplaylists(self):
-        pass #needs to be tested in playlist tests
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'showplaylists')
 
     def test_api_logout(self):
-        pass #relies on cherrypy session
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'logout')
 
     def test_api_downloadpls(self):
-        pass #untestable
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'downloadpls')
 
     def test_api_downloadm3u(self):
-        pass #untestable
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'downloadm3u')
 
     def test_api_getsonginfo(self):
-        pass #relies on config.media.basedir
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'getsonginfo')
 
     def test_api_getencoders(self):
-        pass #relies on audiotranscode
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'getencoders')
 
     def test_api_getdecoders(self):
-        pass #relies on audiotranscode
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'getdecoders')
 
     def test_api_transcodingenabled(self):
-        self.assertEqual(self.http.api('transcodingenabled'),'false')
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'transcodingenabled')
         
     def test_api_updatedb(self):
-        self.assertRaisesRegex(MockAction, 'updateLibrary', self.http.api, 'updatedb')
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'updatedb')
+        
+    def test_api_compactlistdir(self):
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'compactlistdir')
+        
+    def test_api_getconfiguration(self):
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'getconfiguration')
+        
+    def test_api_getuseroptions(self):
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'getuseroptions')
+        
+    def test_api_userdelete(self):
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'userdelete')
+        
+    def test_api_opensearchdescription(self):
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'opensearchdescription')
+        
+    def test_api_heartbeat(self):
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'heartbeat')
+        
+    def test_api_fetchalbumart(self):
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'fetchalbumart')
+        
+    def test_api_listdir(self):
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'listdir')
+
 
 
 if __name__ == "__main__":

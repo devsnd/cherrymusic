@@ -102,17 +102,8 @@ class HTTPHandler(object):
             'fetchalbumart' : self.api_fetchalbumart,
             'heartbeat' : self.api_heartbeat,
             'getuseroptions' : self.api_getuseroptions,
+            'opensearchdescription' : self.api_opensearchdescription,
         }
-
-    def lock_session(fn):
-        """decotator function for all api calls, that use the session,
-        since tools.sessions.locking is now set to 'explicit', which
-        means, that the session lock has to be acquired manually."""
-        def wrapper(*args, **kwargs):
-            cherrypy.session.acquire_lock()
-            ret = fn(*args, **kwargs)
-            cherrypy.session.release_lock()
-        return wrapper
 
     def issecure(self, url):
         return parse.urlparse(url).scheme == 'https'
@@ -149,11 +140,14 @@ class HTTPHandler(object):
         if firstrun:
                 return self.firstrunpage
         else:
-            if cherrypy.session.get('username', None) or self.autoLoginEnabled():
+            if self.isAuthorized():
                 return self.mainpage
             else:
                 return self.loginpage
     index.exposed = True
+    
+    def isAuthorized(self):
+        return cherrypy.session.get('username', None) or self.autoLoginEnabled()
     
     def autoLoginEnabled(self):
         if cherrypy.request.remote.ip == '127.0.0.1' and cherry.config.server.localhost_auto_login.bool:
@@ -180,6 +174,8 @@ class HTTPHandler(object):
             return ''
             
     def trans(self, *args):
+        if not self.isAuthorized():
+            raise cherrypy.HTTPRedirect('http://'+parse.urlparse(cherrypy.url()).netloc, 302)
         if cherry.config.media.transcode and len(args):
             newformat = args[-1][4:] #get.format
             path = os.path.sep.join(args[:-1])
@@ -190,10 +186,14 @@ class HTTPHandler(object):
     trans._cp_config = {'response.stream': True}
 
     def api(self, *args, **kwargs):
+        if not self.isAuthorized():
+            raise cherrypy.HTTPRedirect('http://'+parse.urlparse(cherrypy.url()).netloc, 302)
         action = args[0] if args else ''
         value=kwargs.get('value','')
         if not value and len(args)>1:
-            value = unquote(args[1])
+            value = map(unquote,args[1:len(args)])
+            if len(value) == 1:
+                value = value[0]
         #filter_str=kwargs.get('filter','')
         if action in self.handlers:
             return self.handlers[action](value)
@@ -201,6 +201,15 @@ class HTTPHandler(object):
             return "Error: no such action."
         self.api_getuseroptions(None)
     api.exposed = True
+
+    def api_opensearchdescription(self, value):
+        return """<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+ <ShortName>CherryMusic</ShortName>
+ <Description>open source streaming server</Description>
+ <Tags>cherrymusic open source streaming server python mp3 jplayer</Tags>
+ <Url type="text/html" template="{} {{searchTerms}}"/>
+</OpenSearchDescription>""".format(cherrypy.url())
 
     def api_getuseroptions(self, value):
         uo = self.useroptions.forUser(self.getUserId())

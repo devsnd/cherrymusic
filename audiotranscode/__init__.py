@@ -90,7 +90,7 @@ def decode(filepath):
     except OSError:
         log.w("Cannot decode {}, no decoder available, trying fallback decoder!".format(filepath))
         try:
-            return subprocess.Popen(Decoders[filetype(filepath)]+[filepath], stdout=subprocess.PIPE)#, stderr=devnull)
+            return subprocess.Popen(Decoders[filetype(filepath)]+[filepath], stdout=subprocess.PIPE, stderr=devnull)
         except OSError:
             log.w("Fallback failed, cannot decode {}!".format(filepath))
             raise
@@ -102,7 +102,7 @@ def encode(newformat, fromdecoder):
             enc[enc.index('BITRATE_OGG')] = str(BITRATE_OGG)
         if 'BITRATE_MP3' in enc:
             enc[enc.index('BITRATE_MP3')] = str(BITRATE_MP3)
-        return subprocess.Popen(enc, stdin=fromdecoder.stdout, stdout=subprocess.PIPE)#, stderr=devnull)
+        return subprocess.Popen(enc, stdin=fromdecoder.stdout, stdout=subprocess.PIPE, stderr=devnull)
     except OSError:
         log.w("Cannot encode to {}, no encoder available!")
         raise
@@ -121,25 +121,28 @@ def transcode(filepath, newformat):
             if not data:
                 break               
             yield data
-                    
     except OSError:
         log.w("Transcode of file '{}' to format '{}' failed!".format(filepath,newformat))
+    finally:
+        encoder.terminate()
+        fromdecoder.terminate()
         
 def getTranscoded(filepath, newformat, usetmpfile=False):
     needsTranscoding = True
     if usetmpfile:
         tmpfilepath = cache.createCacheFile(filepath,newformat)
         if cache.exists(filepath,newformat):
-            yield open(tmpfilepath,'rb').read()
+            with open(tmpfilepath,'rb') as f:
+                yield f.read()
         else:
-            tmpfilew = open(tmpfilepath,'wb')
-            tmpfiler = open(tmpfilepath,'rb')
-            for data in transcode(filepath,newformat):
-                tmpfilew.write(data)
-                #return as soon as enough data available
-                if tmpfilew.tell()>tmpfiler.tell()+STREAM_BUFFER:
-                    yield tmpfiler.read(STREAM_BUFFER) 
-            yield tmpfiler.read() #return rest of file (encoding done)
+            with open(tmpfilepath,'wb') as tmpfilew:
+                with open(tmpfilepath,'rb') as tmpfiler:
+                    for data in transcode(filepath,newformat):
+                        tmpfilew.write(data)
+                        #return as soon as enough data available
+                        if tmpfilew.tell()>tmpfiler.tell()+STREAM_BUFFER:
+                            yield tmpfiler.read(STREAM_BUFFER) 
+                    yield tmpfiler.read() #return rest of file (encoding done)
 
     else:
         for data in transcode(filepath,newformat):
