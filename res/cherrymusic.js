@@ -1010,7 +1010,7 @@ function time2text(sec){
 
 function handleURLCommands(){
     if(document.location.search !== ''){
-        $('#searchfield input').val(document.location.search.split('=')[1])
+        $('#searchfield input').val(decodeURIComponent(document.location.search.split('=')[1]))
         search();
     }
 }
