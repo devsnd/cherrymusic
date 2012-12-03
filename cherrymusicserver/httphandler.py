@@ -112,7 +112,7 @@ class HTTPHandler(object):
         ipAndPort = parse.urlparse(cherrypy.url()).netloc
         if cherry.config.server.enable_ssl.bool and not self.issecure(cherrypy.url()):
             log.d('Not secure, redirecting...')
-            ip = ipAndPort[:u.ipAndPort(':')]
+            ip = ipAndPort[:ipAndPort.rindex(':')]
             url = 'https://' + ip + ':' + cherry.config.server.ssl_port.str
             if redirect_unencrypted:
                 raise cherrypy.HTTPRedirect(url, 302)
