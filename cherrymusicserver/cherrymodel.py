@@ -121,18 +121,20 @@ class CherryModel:
             maxresults = 5
         results = self.cache.searchfor(term, maxresults=cherry.config.search.maxresults.int,isFastSearch=isFastSearch)
         with Performance('sorting DB results using ResultOrder'):
-            results = sorted(results,key=resultorder.ResultOrder(term),reverse=True)
+            results = sorted(results,key=resultorder.ResultOrder(term, lambda x: x.path),reverse=True)
             results = results[:min(len(results), maxresults)]
-        ret = []
+
         with Performance('checking and classifying results:'):
-            if MULTITHREADED:
+            """if MULTITHREADED:
                 with concurrent.futures.ProcessPoolExecutor() as executor:
                     for result in executor.map(createMusicEntryByFilePath, results):
                         ret += result
             else:
                 for result in map(createMusicEntryByFilePath, results):
                     ret += result
-        return ret
+            """
+            results = list(filter(isValidMediaFile, results))
+        return results
 
     def motd(self):
         artist = [  'Hendrix',
@@ -183,8 +185,17 @@ class CherryModel:
             if '{revartist}' in oneliner:
                 oneliner=oneliner.replace('{revartist}',a.lower()[::-1])
         return oneliner
+        
+def isValidMediaFile(file):
+    file.path = strippath(file.path)
+    #let only playable files appear in the search results
+    if not isplayable(file.path) and not file.dir:
+        return False
+    return True
+    
 
 def createMusicEntryByFilePath(file):
+    """DEPRECATED, files are checked using isValidMediaFile(MusicEntry) now"""
     strippedpath = strippath(file)
     #let only playable files appear in the search results
     playable = isplayable(strippedpath)
@@ -220,6 +231,8 @@ class MusicEntry:
         self.compact = compact
         self.dir = dir
         self.repr = repr
+    def __repr__(self):
+        return "<MusicEntry path:%s, dir:%s>"%(self.path,self.dir)
         
 class StartsWithCaseInsensitive:
     def __init__(self,startswith):

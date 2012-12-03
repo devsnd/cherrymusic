@@ -229,8 +229,9 @@ class AddFilesToDatabaseTest(unittest.TestCase):
         for filename in testnames:
             self.Cache.register_file_with_db(TestFile(filename))
 
-
         found = self.Cache.searchfor('SUCHMICH', 100)
+        #map musicentries to string
+        found = list(map(lambda x : x.path, found))
         for filename in testnames:
             self.assertTrue(filename in found, "all added files must be findable by cache search")
 

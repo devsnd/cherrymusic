@@ -39,6 +39,7 @@ from time import time
 import cherrymusicserver as cherry
 from cherrymusicserver import log
 from cherrymusicserver import util
+from cherrymusicserver.cherrymodel import MusicEntry
 from cherrymusicserver.util import Performance
 from cherrymusicserver.progress import ProgressTree, ProgressReporter
 
@@ -195,14 +196,30 @@ class SQLiteCache(object):
 
             with Performance('querying fullpaths for %s fileIds' % len(bestresults)):
                 for fileidtuple in bestresults:
-                    results.append(self.fullpath(fileidtuple[0]))
+                    results.append(self.musicEntryFromFileId(fileidtuple[0]))
 
             if debug:
                 log.d('resulting paths')
                 log.d(results)
             return results
 
+    def musicEntryFromFileId(self, filerowid):
+        path = ''
+        parent = None
+        isdirectory = None
+        while(not parent == -1):
+            #print(self.conn.execute('''EXPLAIN QUERY PLAN SELECT parent, filename, filetype FROM files WHERE rowid=? LIMIT 0,1''', (filerowid,)).fetchall())
+            cursor = self.conn.cursor()
+            cursor.execute('''SELECT parent, filename, filetype, isdir FROM files WHERE rowid=? LIMIT 0,1''', (filerowid,))
+            parent, filename, fileext, isdir = cursor.fetchone()
+            if isdirectory == None:
+                isdirectory = bool(isdir)
+            path = os.path.join(filename + fileext, path)
+            filerowid = parent
+        return MusicEntry(os.path.dirname(path), dir=isdirectory)
+
     def fullpath(self, filerowid):
+        """DEPRECATED, musicEntryFromFileId is used instead"""
         path = ''
         parent = None
         while(not parent == -1):

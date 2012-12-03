@@ -36,14 +36,16 @@ from cherrymusicserver import util
 import os
 
 class ResultOrder:
-    def __init__(self, searchword):
+    def __init__(self, searchword, accessmethod):
+        self.accessmethod = accessmethod
         self.fullsearchterm = searchword.lower()
         self.searchwords = searchword.lower().split(' ')
         self.perfectMatchBias = 100
         self.partialPerfectMatchBias = 20
         self.startsWithMatchBias = 10
         self.folderBonus = 5
-    def __call__(self,file):
+    def __call__(self,element):
+        file = self.accessmethod(element)
         fullpath = file.lower()
         file = util.filename(file).lower()
         bias = 0
