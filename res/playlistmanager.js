@@ -207,9 +207,9 @@ PlaylistManager.prototype = {
             if(pl.id == this.playingPlaylist){
                 isplaying += '&#9654;';
             }
-            pltabs += '"><span><a  onclick="playlistManager.showPlaylist('+pl.id+')">'+isplaying+' '+pl.name+'</a>';
+            pltabs += '"><span><a href="#" onclick="playlistManager.showPlaylist('+pl.id+')">'+isplaying+' '+pl.name+'</a>';
             if(pl.closable){
-                pltabs += '<a  onclick="playlistManager.closePlaylist('+pl.id+')">&times;</a>';
+                pltabs += '<a href="#" onclick="playlistManager.closePlaylist('+pl.id+')">&times;</a>';
             }
             pltabs += '<span></li>';
         }

@@ -924,6 +924,7 @@ function time2text(sec){
 function showPlaylistBrowser(){
     playlistManager.hideAll();
     $('#playlistCommands').html("");
+    setEditingPlaylist(0);
     showPlaylists();
     $('#addPlaylist ul li').addClass('active');
     $('#playlistBrowser').show();
