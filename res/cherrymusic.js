@@ -407,12 +407,13 @@ registermp3s = function(parent,mode){
     ).html();
     if(foundMp3){
         if('addPlayAll' == mode){
-            $(parent).prepend('<a class="addAllToPlaylist" href="javascript:;">add All to Playlist</a>');
+            var playlistname = playlistManager.getEditingPlaylist().name
+            $(parent).prepend('<a class="addAllToPlaylist" href="javascript:;">add all to <span class="plmgr-editingplaylist-name">' + playlistname + '</span></a>');
             $(parent).children('.addAllToPlaylist').click(
                 addAllToPlaylist
             );
         } else if('loadPlaylist' == mode){
-            $(parent).prepend('<a class="addAllToPlaylist" href="javascript:;">load Playlist</a>');
+            $(parent).prepend('<a class="addAllToPlaylist" href="javascript:;">load playlist</a>');
             $(parent).children('.addAllToPlaylist').click(
                 addAllToPlaylist
             );
@@ -653,7 +654,7 @@ function loadPlaylist(playlistid){
             $(pldomid).hide();
             $(pldomid).append(parseAndRender(data));
             $(pldomid).slideDown('slow');
-            registermp3s($(pldomid).find('ul'));
+            registermp3s($(pldomid).find('ul')/*, 'loadPlaylist'*/);
         };
         api(data,success,errorFunc('error loading external playlist'))
     } else {
@@ -922,6 +923,7 @@ function time2text(sec){
 
 function showPlaylistBrowser(){
     playlistManager.hideAll();
+    $('#playlistCommands').html("");
     showPlaylists();
     $('#addPlaylist ul li').addClass('active');
     $('#playlistBrowser').show();

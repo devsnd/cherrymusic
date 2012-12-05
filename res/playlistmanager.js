@@ -248,11 +248,11 @@ PlaylistManager.prototype = {
         if(showpl.length<1){
             //$(this.cssSelectorPlaylistContainerParent+'>div:first').show();    
             //$(this.cssSelectorPlaylistChooser+' ul li:first').addClass('active');
-            this.editingPlaylist = this.managedPlaylists[0].id;
+            this.setEditingPlaylist(this.managedPlaylists[0].id);
         } else {
             showpl.show();
             //$('#'+this.tabid2htmlid(playlistid)).addClass('active');
-            this.editingPlaylist = playlistid;
+            this.setEditingPlaylist(playlistid);
         }
         this.refreshTabs();
         this.refreshCommands();
@@ -260,7 +260,7 @@ PlaylistManager.prototype = {
     hideAll : function(){
         $(this.cssSelectorPlaylistContainerParent+'>div').hide();
         $(this.cssSelectorPlaylistChooser+' ul li').removeClass('active');
-        this.editingPlaylist = 0;
+        this.setEditingPlaylist(0);
     },
     getPlaylistById : function(plid){
         for(var i=0; i<this.managedPlaylists.length; i++){
@@ -293,7 +293,7 @@ PlaylistManager.prototype = {
             if(this.managedPlaylists[i].id == plid){
                 this.managedPlaylists.splice(i,1);
                 var otherId = this.managedPlaylists[i<this.managedPlaylists.length?i:0].id;
-                this.editingPlaylist = otherId;
+                this.setEditingPlaylist(otherId);
                 this.playingPlaylist = otherId;
                 break;
             }
@@ -302,6 +302,18 @@ PlaylistManager.prototype = {
     },
     clearQueue : function(){
       this.managedPlaylists[0].jplayerplaylist.remove();  
+    },
+    setEditingPlaylist : function (plid){
+        var plist = this.getPlaylistById(plid); 
+        var plname = '';
+        if (typeof plist !== 'undefined') {
+            this.editingPlaylist = plid;
+            plname = plist.name;
+        } else {
+            this.editingPlaylist = 0;
+            plname = 'new playlist';
+        }
+        $('.plmgr-editingplaylist-name').html(plname);
     },
     setPlayingPlaylist : function (plid){
         this.playingPlaylist = plid;
@@ -394,7 +406,7 @@ PlaylistManager.prototype = {
             } else {
                 var pl = self._createPlaylist([],false,false,'self','queue','Queue',true);
                 self.playingPlaylist = pl.id;
-                self.editingPlaylist = pl.id;
+                self.setEditingPlaylist(pl.id);
                 self.showPlaylist(pl.id);
             }
             window.console.log('remembering playlists periodically');
