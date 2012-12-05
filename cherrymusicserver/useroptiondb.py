@@ -45,15 +45,18 @@ class UserOptionDB:
             heartbeat.
         """
         with cfg.create() as c:
-            c.keyboard_shortcuts = cfg.Property(
-                name='keyboard_shortcuts',
-                validity='[A-Z]+:.*',
-                type='list',
-                #winamp like defaults
-                value = ['PREV:z','PLAY:x','PAUSE:c','STOP:v','NEXT:b','SEARCH:s'],
-                readonly = False,
-                hidden = False
-            )
+            with cfg.create('keyboard_shortcuts') as kbs:
+                kbs.prev = cfg.Configuration(value='y',validity='\w')
+                kbs.play = cfg.Configuration(value='x',validity='\w')
+                kbs.pause = cfg.Configuration(value='c',validity='\w')
+                kbs.stop = cfg.Configuration(value='v',validity='\w')
+                kbs.next = cfg.Configuration(value='b',validity='\w')
+                kbs.search = cfg.Configuration(value='s',validity='\w')
+                kbs.hidden = False
+                kbs.readonly = False
+                c.keyboard_shortcuts = kbs
+                
+            c.use_old_gui = cfg.Configuration(value=False, readonly=False, hidden=False)
             
             #UNIX TIME (1.1.1970 = never)
             c.last_time_online = cfg.Property(
@@ -65,7 +68,7 @@ class UserOptionDB:
                 hidden = True
             )
             
-        self.DEFAULTS = c
+            self.DEFAULTS = c
         
         setupDB = not os.path.isfile(USEROPTIONDBFILE) or os.path.getsize(USEROPTIONDBFILE) == 0
         self.conn = sqlite3.connect(USEROPTIONDBFILE, check_same_thread=False)
@@ -98,10 +101,11 @@ class UserOptionDB:
         def getChangableOptions(self):
             optlist = []
             opts = self.getOptions()
-            for c in opts:
-                if not opts[c]._hidden:
-                   optlist.append((opts[c]['name'], opts[c]['value']))
-            return optlist
+            with cfg.create() as nothidden_opts:
+                for c in self.useroptiondb.DEFAULTS:
+                    if not opts[c]._hidden:
+                        nothidden_opts[c] = opts[c]
+                return cfg.to_dict(nothidden_opts)
                     
         
         def getOptions(self):

@@ -103,6 +103,7 @@ class HTTPHandler(object):
             'heartbeat' : self.api_heartbeat,
             'getuseroptions' : self.api_getuseroptions,
             'opensearchdescription' : self.api_opensearchdescription,
+            'setuseroption' : self.api_setuseroption,
         }
 
     def issecure(self, url):
@@ -230,6 +231,12 @@ class HTTPHandler(object):
     def api_heartbeat(self, value):
         uo = self.useroptions.forUser(self.getUserId())
         uo.setOption('last_time_online', int(time.time()))
+        
+    def api_setuseroption(self, value):
+        params = json.loads(value)
+        uo = self.useroptions.forUser(self.getUserId())
+        uo.setOption(params["optionkey"], params["optionval"])
+        return "success"
 
     def api_fetchalbumart(self, value):
         cherrypy.session.release_lock()
@@ -282,8 +289,7 @@ class HTTPHandler(object):
         return self.api_search(value,True)
     
     def api_rememberplaylist(self, value):
-        pl = json.loads(value)
-        cherrypy.session['playlist'] = pl['playlist']
+        cherrypy.session['playlist'] = value
 
     def api_saveplaylist(self, value):
         pl = json.loads(value)
@@ -306,9 +312,9 @@ class HTTPHandler(object):
         return self.model.motd()
     
     def api_restoreplaylist(self,value):
-        session_playlist = cherrypy.session.get('playlist', [])
-        session_playlist = list(filter(lambda x : x != None, session_playlist))
-        return json.dumps(session_playlist)
+        session_playlist = cherrypy.session.get('playlist', '[]')
+        #session_playlist = list(filter(lambda x : x != None, session_playlist))
+        return session_playlist
         
     def api_getplayables(self,value):
         return json.dumps(cherry.config.media.playable.list)

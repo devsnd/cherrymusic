@@ -28,8 +28,35 @@
 /******
 GENERAL
 ******/
+
+.tabs > div{
+	float: left;
+    padding-top: 20px;
+    width: 50%;
+}
+.tabs > div > div{
+    padding: 0 10px;
+}
+.tabNavigation{
+    display: none;
+}
+
+@media only screen and (max-width: 720px) {
+    .tabs > div{
+        width: 100%;
+    }
+    .tabNavigation{
+        display: block;
+    }
+    #mediaplayer{
+        padding-top: 0px !important;
+    }
+}
+
+
 .active{
-	background-color: #cc0000 !important;
+	background-color: #F02E75 !important;
+    border-color: #ffffff;
 }
 .online-light{
     background-color: #00ff00;
@@ -45,32 +72,59 @@ GENERAL
     height: 5px;
     display: inline-block;
 }
+.black{
+    color: #000000;
+}
 
+/***********
+ * USER OPTIONS
+ * *********/
+ #useroptions{
+    display: none;
+    height: 100%;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: 10000;
+}
+#useroptions > div{
+    background-color: #FFFFFF;
+    border: 1px solid black;
+    height: 90%;
+    margin: 2% auto;
+    width: 90%;
+}
 /*****
 TABS
 *****/
 .tabs{
 	width: 100%;
 }
-.tabs .tabNavigation{
+.tabNavigation{
 	height: 45px;
 	margin: 0 auto;
 	padding: 0;
+    top: 100px;
 	
 	/*fixed centering*/
 	left: 50%;
-	position: fixed;
-	width: 320px;
-	margin-left: -160px; /* minus half the width */
+	position: relative;
+	width: 220px;
+	margin-left: -110px; /* minus half the width */
 
-	border-radius: 4px;
+
 }
-.tabs .tabNavigation li{
+.tabNavigation li{
+    
 	display: inline;
 	float: left;
 	padding: 5px;
 }
-.tabs .tabNavigation li a{
+.tabNavigation li a{
+    background-color: #F02E75;
 	text-decoration: none;
 	padding: 8px;
 	border-radius: 4px;
@@ -78,6 +132,10 @@ TABS
 	display: block;
 	text-align: center;
     width: 80px;
+    color: #ffffff;
+}
+#over-playlist-tabs{
+    width: 100%;
 }
 .smalltab{
 	display: inline;
@@ -88,6 +146,25 @@ TABS
 }
 .smalltab a{
 	text-decoration: none;
+}
+.bigtab{
+	display: inline;
+	margin-right: -1px;
+	border-radius: 5px 5px 0 0;
+	font-size: 16px;
+    background-color: #888888;
+    float: left;
+    border-top: 1px solid #444444;
+    border-left: 1px solid #444444;
+    border-right: 1px solid #444444;
+}
+.bigtab a{
+	text-decoration: none;
+    color: #fff;
+    padding: 4px 8px 0;
+    line-height: 200%;
+}
+.bigtab span{
 }
 .floatright{
 	float: right;
@@ -113,8 +190,14 @@ div#dialog{
     top: 40%;
     width: 300px;
 }
-.tabs > div{
-	padding-top: 50px;
+#errormessage{
+    background-color: #FF3333;
+    color: #FFFFFF;
+    display: block;
+    font-weight: 900;
+    line-height: 150%;
+    text-align: center;
+    text-decoration: none;
 }
 
 #searchfield{
@@ -193,16 +276,25 @@ div#dialog{
 .jp-playlist ul li{
 	
 }
-#jp_container_1{
+#jp_ancestor{
 	width: 100%;
 }
 
 ul{
 	list-style-type: none;
 	margin: 0;
-	padding: 0 0 0 20px;
+    padding: 0;
 }
 ul li{
+}
+.center{
+    display: block;
+    margin: 0 auto;
+    text-align: center;
+}
+
+#searchresults ul{
+	padding: 0 0 0 20px;
 }
 /***********
 FILE LISTING
@@ -239,6 +331,13 @@ li.fileinlist a{
 	margin: 5px 0;
     padding: 10px;
 	text-decoration: none;
+}
+
+.available-playlists {
+  background-color: #333333;
+  border-radius: 10px 10px 10px 10px;
+  margin: 10px;
+  padding: 10px;
 }
 
 .available-playlists ul, .available-playlists ul li{
@@ -293,6 +392,21 @@ div.container{
     text-align: center;
 	height: 20px;
 	margin-top: 2px;
+}
+#playlistCommands{
+    height: 58px;
+    background-color: #DDDDDD;
+    width: 100%;
+    float: left;
+}
+#playlistBrowser{
+    background-color: #AAAAAA;
+    padding: 10px 0;
+    float: left;
+    width: 100%;
+}
+.available-playlists{
+    
 }
 /**********
 ADMIN PANEL
