@@ -175,23 +175,23 @@ PlaylistManager.prototype = {
         var cmds =$(this.cssSelectorPlaylistCommands);
         cmds.empty();
         var pl = this.getEditingPlaylist();
-        
-        if(!pl.saved){
-            cmds.append('<a class="button" onclick="showPlaylistSaveDialog('+pl.id+')">save</a>');
-        }
-        if(pl.reason_open == 'queue'){
-            cmds.append('<a class="button floatright">remove played tracks</a>');
-            cmds.append('<a class="button floatright" onclick="playlistManager.clearQueue()">clear queue</a>');
-            cmds.append('<a class="button floatleft" onclick="playlistManager.newPlaylistFromQueue()">save as playlist</a>');
-        } else {
-            /*cmds.append('<span class="floatleft">owner '+pl.owner+'</span>');
-            if(!pl.public){
-                cmds.append('<span class="floatleft">status: <a class="button" title="make public">private</a></span>');
+        if(pl){
+            if(!pl.saved){
+                cmds.append('<a class="button" onclick="showPlaylistSaveDialog('+pl.id+')">save</a>');
+            }
+            if(pl.reason_open == 'queue'){
+                cmds.append('<a class="button floatright">remove played tracks</a>');
+                cmds.append('<a class="button floatright" onclick="playlistManager.clearQueue()">clear queue</a>');
+                cmds.append('<a class="button floatleft" onclick="playlistManager.newPlaylistFromQueue()">save as playlist</a>');
             } else {
-                cmds.append('<span class="floatleft">status: <a class="button" title="make private">public</a></span>');
-            }*/
+                /*cmds.append('<span class="floatleft">owner '+pl.owner+'</span>');
+                if(!pl.public){
+                    cmds.append('<span class="floatleft">status: <a class="button" title="make public">private</a></span>');
+                } else {
+                    cmds.append('<span class="floatleft">status: <a class="button" title="make private">public</a></span>');
+                }*/
+            }
         }
-        
     },
     refreshTabs : function(){
         "use strict";
@@ -274,7 +274,6 @@ PlaylistManager.prototype = {
         if(typeof pl !== 'undefined'){
             return pl;
         }
-        return this.managedPlaylists[0];
     },
     getPlayingPlaylist : function (){
         for(var i=0; i<this.managedPlaylists.length; i++){
