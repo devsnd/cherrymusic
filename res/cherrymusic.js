@@ -62,7 +62,10 @@ function api(data_or_action, successfunc, errorfunc, background){
         
     }
     if(!errorfunc){
-        errorfunc = errorFunc('calling API function "'+apiaction+'"');
+        errorfunc = function(){
+            errorFunc('calling API function "'+apiaction+'"')();
+            $('div#progressscreen').fadeOut('fast');
+        }
     }
     if(!background){
         $('div#progressscreen').fadeIn('fast');
@@ -435,13 +438,15 @@ registermp3s = function(parent,mode){
         }
     ).html();
     if(foundMp3){
-        if('addPlayAll' == mode){
-            var playlistname = playlistManager.getEditingPlaylist().name
+        var editplaylist = playlistManager.getEditingPlaylist();
+        window.console.log(typeof editplaylist);
+        if(typeof editplaylist !== 'undefined'){
+            var playlistname  = editplaylist.name;
             $(parent).prepend('<a class="addAllToPlaylist" href="javascript:;">add all to <span class="plmgr-editingplaylist-name">' + playlistname + '</span></a>');
             $(parent).children('.addAllToPlaylist').click(
                 addAllToPlaylist
             );
-        } else if('loadPlaylist' == mode){
+        } else {
             $(parent).prepend('<a class="addAllToPlaylist" href="javascript:;">load playlist</a>');
             $(parent).children('.addAllToPlaylist').click(
                 addAllToPlaylist
