@@ -246,14 +246,12 @@ PlaylistManager.prototype = {
         this.hideAll();
         $('#addPlaylist ul li').removeClass('active');
         if(showpl.length<1){
-            //$(this.cssSelectorPlaylistContainerParent+'>div:first').show();    
-            //$(this.cssSelectorPlaylistChooser+' ul li:first').addClass('active');
             this.setEditingPlaylist(this.managedPlaylists[0].id);
+            showpl = $('#'+this.plid2htmlid(this.getEditingPlaylist().id));
         } else {
-            showpl.show();
-            //$('#'+this.tabid2htmlid(playlistid)).addClass('active');
             this.setEditingPlaylist(playlistid);
         }
+        showpl.show();
         this.refreshTabs();
         this.refreshCommands();
     },
@@ -408,6 +406,7 @@ PlaylistManager.prototype = {
                 self.setEditingPlaylist(pl.id);
                 self.showPlaylist(pl.id);
             }
+            self.refresh();
             window.console.log('remembering playlists periodically');
             window.setInterval("playlistManager.rememberPlaylist()",REMEMBER_PLAYLIST_INTERVAL );
             
