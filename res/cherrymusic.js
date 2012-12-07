@@ -195,7 +195,9 @@ OptionRenderer.prototype = {
 function reloadStylesheets() {
     var queryString = '?reload=' + new Date().getTime();
     $('link[rel="stylesheet"]').each(function () {
-        this.href = this.href.replace(/\?.*|$/, queryString);
+        if(this.href.indexOf('api/customcss.css') != -1){
+            this.href = this.href.replace(/\?.*|$/, queryString); 
+        }
     });
 }
 /***
