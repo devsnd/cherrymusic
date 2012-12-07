@@ -447,14 +447,12 @@ class SQLiteCache(object):
         log.i('updating paths: %s' % (paths,))
         for path in paths:
             abspath = path if os.path.isabs(path) else os.path.join(os.getcwd(), path)
-            normpath = os.path.normpath(os.path.normcase(abspath))
-            if not normpath.startswith(basedir):
-                log.e('path is not in basedir. skipping %r.%s' %
-                      (path, '' if path == normpath else ' (=%r)' % normpath))
+            if not abspath.startswith(basedir):
+                log.e('path is not in basedir. skipping %s' % abspath)
                 continue
-            log.i('updating %r...' % normpath)
+            log.i('updating %r...' % abspath)
             try:
-                self.update_db_recursive(normpath, skipfirst=False)
+                self.update_db_recursive(abspath, skipfirst=False)
             except:
                 log.e('update incomplete.')
         log.i('done updating paths.')
