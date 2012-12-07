@@ -84,7 +84,7 @@ class SQLiteCache(object):
     
     def load_db_to_memory(self):
         if self.file_db_in_memory():
-            self.file_db_mem = MemoryDB(DBFILENAME, 'files')
+            self.file_db_mem = MemoryDB(self.DBFILENAME, 'files')
             self.file_db_mem.db.execute('CREATE INDEX IF NOT EXISTS idx_files_parent'
                           ' ON files(parent)')
 
