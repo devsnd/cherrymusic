@@ -80,7 +80,7 @@ class SQLiteCache(object):
         self.load_db_to_memory()
     
     def file_db_in_memory(self):
-        return not self.DBFILENAME == ':memory:' and cherry.config.search.load_file_db_into_memory
+        return not self.DBFILENAME == ':memory:' and cherry.config.search.load_file_db_into_memory.bool
     
     def load_db_to_memory(self):
         if self.file_db_in_memory():
