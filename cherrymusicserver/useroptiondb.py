@@ -60,6 +60,7 @@ class UserOptionDB:
             
             with cfg.create('custom_theme') as theme:
                 theme.primary_color = cfg.Configuration(value='#F02E75',validity='#[0-9a-fA-F]{6}', hidden=False, readonly=False)
+                theme.white_on_black = cfg.Configuration(value=False, hidden=False, readonly=False)
                 c.custom_theme = theme
             
             #UNIX TIME (1.1.1970 = never)

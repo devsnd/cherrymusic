@@ -130,6 +130,9 @@ function loadAndShowUserOptions(){
 function OptionRenderer(cssselector){
     this.cssselector = cssselector;
     this.pretty = {
+        'custom_theme' : 'Custom colors and style',
+        'custom_theme.primary_color' : 'Primary color',
+        'custom_theme.white_on_black' : 'Use white fonts on dark background',
         'keyboard_shortcuts' : 'keyboard shortcuts (not working yet)',
         'keyboard_shortcuts.stop' : 'Stop',
         'keyboard_shortcuts.prev' : 'previous track',
@@ -173,19 +176,29 @@ OptionRenderer.prototype = {
         } else {
             var label = self.pretty[optionkey];
         }
+
+        var success = 'false'; //use default handlers
+        var error = 'false';
+        if(optionkey.indexOf('custom_theme') != -1){
+            success = 'reloadStylesheets';
+            error = 'function(){}';
+        }
             
         switch(typeof optionval){
             case "string":
                 var onkeyup = [   'api({action:\'setuseroption\', value:JSON.stringify({',
                     '\'optionkey\':$(this).attr(\'name\') ,',
                     '\'optionval\':$(this).val()',
-                    '}) },reloadStylesheets,function(){})' ].join(" ");
+                    '}) },'+success+','+error+')' ].join(" ");
                 $('#useroptions .content').append(label+'<input onkeyup="'+onkeyup+'" name="'+optionkey+'" value="'+optionval+'"/><br>');
                 break;
             case "boolean":
                 var checked = optionval? 'checked="checked"' : '';
-                var onchange = 'onchange="api({action:\'setuseroption\', value:JSON.stringify({\'optionkey\':\''+optionkey+'\',\'optionval\':$(this).attr(\'checked\')==\'checked\'})})"';
-                $('#useroptions .content').append(label+'<input '+checked+' '+onchange+' type="checkbox" name="'+optionkey+'" value="true"></input><br>');
+                var onchange = ['api({action:\'setuseroption\', value:JSON.stringify({',
+                    '\'optionkey\':\''+optionkey+'\' ,',
+                    '\'optionval\':$(this).attr(\'checked\')==\'checked\'',
+                    '}) },'+success+','+error+')' ].join(" ");
+                $('#useroptions .content').append(label+'<input '+checked+' onchange="'+onchange+'" type="checkbox" name="'+optionkey+'" value="true"></input><br>');
                 break;
             default:
                 window.console.log("unknown option value "+optionkey+':'+optionval);

@@ -214,35 +214,71 @@ class HTTPHandler(object):
     def api_customcss(self, value):
         cherrypy.response.headers["Content-Type"] = 'text/css'
         opts = self.useroptions.forUser(self.getUserId()).getOptions()
-        return """
-.active{{
-    background-color: {primary} !important;
-}}
-.button{{
-    background-color: {primary} !important;
-    border-color: {primary_bright} {primary_dark} {primary_dark} {primary_bright} !important;
-}}
-.button:hover{{
-    background-color: {primary_dark} !important;
-    border-color:{primary_dark} {primary_bright} {primary_bright} {primary_dark} !important;
-}}
-.bigbutton{{
-    background-color: {primary} !important;
-    border-color: {primary_bright} {primary_dark} {primary_dark} {primary_bright} !important;
-}}
-.bigbutton:hover{{
-    background-color: {primary_dark} !important;
-    border-color:{primary_dark} {primary_bright} {primary_bright} {primary_dark} !important;
-}}
-.smalltab{{
-    background-color: {primary} !important;
-}}
+        style = """
+            .active{{
+                background-color: {primary} !important;
+            }}
+            .button{{
+                background-color: {primary} !important;
+                border-color: {primary_bright} {primary_dark} {primary_dark} {primary_bright} !important;
+            }}
+            .button:hover{{
+                background-color: {primary_dark} !important;
+                border-color:{primary_dark} {primary_bright} {primary_bright} {primary_dark} !important;
+            }}
+            .bigbutton{{
+                background-color: {primary} !important;
+                border-color: {primary_bright} {primary_dark} {primary_dark} {primary_bright} !important;
+            }}
+            .bigbutton:hover{{
+                background-color: {primary_dark} !important;
+                border-color:{primary_dark} {primary_bright} {primary_bright} {primary_dark} !important;
+            }}
+            .smalltab{{
+                background-color: {primary} !important;
+            }}
         """.format( primary = opts.custom_theme.primary_color.value,
                     primary_dark = self.brightness(opts.custom_theme.primary_color.value,-40),
                     primary_bright = self.brightness(opts.custom_theme.primary_color.value,70),
                     #background = opts.custom_theme.background_color.value,
                     #text = invert(opts.custom_theme.background_color.value)
                     )
+        if opts.custom_theme.white_on_black.bool:
+            style += """
+            html{
+                background-color: #000000 !important;
+            }
+            #mediaplayer{
+                background-color: #000000 !important;
+            }
+            .black{
+                color: #ffffff !important;
+            }
+            .listdir, .compactlistdir, .fileinlist{
+                background-color: #222222;
+                color: #ffffff;
+            }
+            li.fileinlist {
+                background-color: #424242 !important;
+            }
+            li.fileinlist a {
+                color: #AFAFAF !important;
+            }
+            .compactlistdir {
+                background-color: #005500 !important;
+            }
+            div.jp-playlist a {
+                color: #FFFFFF !important;
+            }
+            div.jp-title, div.jp-playlist {
+                background-color: #444444 !important;
+            }
+            #playlistCommands {
+                background-color: #444444;
+            }
+            """
+        return style
+        
     def invert(self,htmlcolor):
         r,g,b = self.html2rgb(htmlcolor)
         return '#'+self.rgb2hex(255-r,255-b,255-b)
