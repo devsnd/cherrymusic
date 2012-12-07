@@ -25,57 +25,6 @@
 #
 */
 
-/******
-GENERAL
-******/
-
-.tabs > div{
-	float: left;
-    padding-top: 20px;
-    width: 50%;
-}
-.tabs > div > div{
-    padding: 0 10px;
-}
-.tabNavigation{
-    display: none;
-}
-
-@media only screen and (max-width: 720px) {
-    .tabs > div{
-        width: 100%;
-    }
-    .tabNavigation{
-        display: block;
-    }
-    #mediaplayer{
-        padding-top: 0px !important;
-    }
-}
-
-
-.active{
-	background-color: #F02E75 !important;
-    border-color: #ffffff;
-}
-.online-light{
-    background-color: #00ff00;
-    border: 1px solid #334433;
-    width: 5px;
-    height: 5px;
-    display: inline-block;
-}
-.offline-light{
-    background-color: #ff0000;
-    border: 1px solid #443333;
-    width: 5px;
-    height: 5px;
-    display: inline-block;
-}
-.black{
-    color: #000000;
-}
-
 /***********
  * USER OPTIONS
  * *********/
@@ -480,3 +429,53 @@ JPlayer Additions
 
 
 
+/******
+GENERAL
+******/
+
+.tabs > div{
+	float: left;
+    padding-top: 20px;
+    width: 50%;
+}
+.tabs > div > div{
+    padding: 0 10px;
+}
+.tabNavigation{
+    display: none;
+}
+
+@media only screen and (max-width: 720px) {
+    .tabs > div{
+        width: 100%;
+    }
+    .tabNavigation{
+        display: block;
+    }
+    #mediaplayer{
+        padding-top: 0px !important;
+    }
+}
+
+
+.active{
+	background-color: #F02E75;
+    border-color: #ffffff;
+}
+.online-light{
+    background-color: #00ff00;
+    border: 1px solid #334433;
+    width: 5px;
+    height: 5px;
+    display: inline-block;
+}
+.offline-light{
+    background-color: #ff0000;
+    border: 1px solid #443333;
+    width: 5px;
+    height: 5px;
+    display: inline-block;
+}
+.black{
+    color: #000000;
+}

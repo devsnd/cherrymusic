@@ -144,7 +144,11 @@ OptionRenderer.prototype = {
     render : function(optiondict){
         var self = this;
         $.each(optiondict, function(optionkey, optionval) {
-            $(self.cssselector).append('<h2>'+self.pretty[optionkey]+'</h2>');
+            if(typeof self.pretty[optionkey] === 'undefined'){
+                $(self.cssselector).append('<h2>'+optionkey+'</h2>');
+            } else {
+                $(self.cssselector).append('<h2>'+self.pretty[optionkey]+'</h2>');
+            }
             self.renderOption(optionkey, optionval);
         });
     },
@@ -172,7 +176,11 @@ OptionRenderer.prototype = {
             
         switch(typeof optionval){
             case "string":
-                $('#useroptions .content').append(label+'<input name="'+optionkey+'" value="'+optionval+'"/><br>');
+                var onkeyup = [   'api({action:\'setuseroption\', value:JSON.stringify({',
+                    '\'optionkey\':$(this).attr(\'name\') ,',
+                    '\'optionval\':$(this).val()',
+                    '}) },reloadStylesheets)' ].join(" ");
+                $('#useroptions .content').append(label+'<input onkeyup="'+onkeyup+'" name="'+optionkey+'" value="'+optionval+'"/><br>');
                 break;
             case "boolean":
                 var checked = optionval? 'checked="checked"' : '';
@@ -183,6 +191,12 @@ OptionRenderer.prototype = {
                 window.console.log("unknown option value "+optionkey+':'+optionval);
         }
     },
+}
+function reloadStylesheets() {
+    var queryString = '?reload=' + new Date().getTime();
+    $('link[rel="stylesheet"]').each(function () {
+        this.href = this.href.replace(/\?.*|$/, queryString);
+    });
 }
 /***
 SEARCH

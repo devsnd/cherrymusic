@@ -104,6 +104,7 @@ class HTTPHandler(object):
             'getuseroptions' : self.api_getuseroptions,
             'opensearchdescription' : self.api_opensearchdescription,
             'setuseroption' : self.api_setuseroption,
+            'customcss.css' : self.api_customcss,
         }
 
     def issecure(self, url):
@@ -209,6 +210,60 @@ class HTTPHandler(object):
             return "Error: no such action."
         self.api_getuseroptions(None)
     api.exposed = True
+    
+    def api_customcss(self, value):
+        cherrypy.response.headers["Content-Type"] = 'text/css'
+        opts = self.useroptions.forUser(self.getUserId()).getOptions()
+        return """
+.active{{
+    background-color: {primary} !important;
+}}
+.button{{
+    background-color: {primary} !important;
+    border-color: {primary_bright} {primary_dark} {primary_dark} {primary_bright} !important;
+}}
+.button:hover{{
+    background-color: {primary_dark} !important;
+    border-color:{primary_dark} {primary_bright} {primary_bright} {primary_dark} !important;
+}}
+.bigbutton{{
+    background-color: {primary} !important;
+    border-color: {primary_bright} {primary_dark} {primary_dark} {primary_bright} !important;
+}}
+.bigbutton:hover{{
+    background-color: {primary_dark} !important;
+    border-color:{primary_dark} {primary_bright} {primary_bright} {primary_dark} !important;
+}}
+.smalltab{{
+    background-color: {primary} !important;
+}}
+        """.format( primary = opts.custom_theme.primary_color.value,
+                    primary_dark = self.brightness(opts.custom_theme.primary_color.value,-40),
+                    primary_bright = self.brightness(opts.custom_theme.primary_color.value,70),
+                    #background = opts.custom_theme.background_color.value,
+                    #text = invert(opts.custom_theme.background_color.value)
+                    )
+    def invert(self,htmlcolor):
+        r,g,b = self.html2rgb(htmlcolor)
+        return '#'+self.rgb2hex(255-r,255-b,255-b)
+        
+    
+    def brightness(self, htmlcolor, brightness):
+        r,g,b = self.html2rgb(htmlcolor)
+        r = min(max(r+brightness,0),255)
+        g = min(max(g+brightness,0),255)        
+        b = min(max(b+brightness,0),255)
+        return '#'+self.rgb2hex(r,g,b)
+    
+    def html2rgb(self,htmlcolor):
+        return int(htmlcolor[1:3],16),int(htmlcolor[3:5],16),int(htmlcolor[5:7],16)
+    
+    def rgb2hex(self,r,g,b):
+        r = hex(r)[2:].zfill(2)
+        g = hex(g)[2:].zfill(2)
+        b = hex(b)[2:].zfill(2)
+        return r+g+b
+        
 
     def api_opensearchdescription(self, value):
         if cherry.config.server.dyndns_address.str.strip():

@@ -52,11 +52,15 @@ class UserOptionDB:
                 kbs.stop = cfg.Configuration(value='v',validity='\w')
                 kbs.next = cfg.Configuration(value='b',validity='\w')
                 kbs.search = cfg.Configuration(value='s',validity='\w')
-                kbs.hidden = False
+                kbs.hidden = True
                 kbs.readonly = False
                 c.keyboard_shortcuts = kbs
                 
-            c.use_old_gui = cfg.Configuration(value=False, readonly=False, hidden=False)
+            c.use_old_gui = cfg.Configuration(value=False, readonly=False, hidden=True)
+            
+            with cfg.create('custom_theme') as theme:
+                theme.primary_color = cfg.Configuration(value='#F02E75',validity='#[0-9a-fA-F]{6}', hidden=False, readonly=False)
+                c.custom_theme = theme
             
             #UNIX TIME (1.1.1970 = never)
             c.last_time_online = cfg.Property(
