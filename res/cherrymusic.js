@@ -179,7 +179,7 @@ OptionRenderer.prototype = {
                 var onkeyup = [   'api({action:\'setuseroption\', value:JSON.stringify({',
                     '\'optionkey\':$(this).attr(\'name\') ,',
                     '\'optionval\':$(this).val()',
-                    '}) },reloadStylesheets)' ].join(" ");
+                    '}) },reloadStylesheets,function(){})' ].join(" ");
                 $('#useroptions .content').append(label+'<input onkeyup="'+onkeyup+'" name="'+optionkey+'" value="'+optionval+'"/><br>');
                 break;
             case "boolean":
