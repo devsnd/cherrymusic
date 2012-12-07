@@ -83,7 +83,7 @@ def from_defaults():
                                 
                                     """
                                     
-        c.search.load_file_db_into_memory = True
+        c.search.load_file_db_into_memory = False
         c.search.load_file_db_into_memory.desc = """
                                     This will load parts of the database into memory for improved
                                     performance. This option should only be used on systems with
