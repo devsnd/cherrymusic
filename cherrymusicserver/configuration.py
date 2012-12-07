@@ -143,8 +143,7 @@ def from_defaults():
         c.server.enable_ssl = False
         c.server.enable_ssl.desc = '''
                                     The following options allow you to use cherrymusic with
-                                    https encryption. You must have "pyOpenSSL" installed to
-                                    be able to use it. If enable_ssl is set to False, all other
+                                    https encryption. If enable_ssl is set to False, all other
                                     ssl options will be ommited.
                                     '''
 
