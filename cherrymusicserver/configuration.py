@@ -82,8 +82,15 @@ def from_defaults():
                                     the search will take longer, but will also be more accurate.
                                 
                                     """
-
-
+                                    
+        c.search.load_file_db_into_memory = True
+        c.search.load_file_db_into_memory.desc = """
+                                    This will load parts of the database into memory for improved
+                                    performance. This option should only be used on systems with
+                                    sufficient memory, because it will hurt the performance otherwise.
+                                
+                                    """
+        
         c.look.theme = 'zeropointtwo'
         c.look.theme.desc = """
                             Available themes are: "zeropointtwo", "hax1337".

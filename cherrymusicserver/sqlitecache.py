@@ -57,6 +57,7 @@ if debug:
 class SQLiteCache(object):
     def __init__(self, DBFILENAME):
         self.validate_basedir()
+        self.DBFILENAME = DBFILENAME
         setupDB = not os.path.isfile(DBFILENAME) or os.path.getsize(DBFILENAME) == 0
         setupDB |= DBFILENAME == ':memory:' #always rescan when using ram db.
         log.i('Starting database... ')
@@ -76,7 +77,16 @@ class SQLiteCache(object):
         #I don't care about journaling!
         self.conn.execute('PRAGMA synchronous = OFF')
         self.conn.execute('PRAGMA journal_mode = MEMORY')
-
+        self.load_db_to_memory()
+    
+    def file_db_in_memory(self):
+        return not self.DBFILENAME == ':memory:' and cherry.config.search.load_file_db_into_memory
+    
+    def load_db_to_memory(self):
+        if self.file_db_in_memory():
+            self.file_db_mem = MemoryDB(DBFILENAME, 'files')
+            self.file_db_mem.db.execute('CREATE INDEX IF NOT EXISTS idx_files_parent'
+                          ' ON files(parent)')
 
     def __table_exists(self, name):
         return bool(self.conn.execute('SELECT name FROM sqlite_master'
@@ -204,12 +214,16 @@ class SQLiteCache(object):
             return results
 
     def musicEntryFromFileId(self, filerowid):
+        if self.file_db_in_memory():
+            db = self.file_db_mem.db
+        else:
+            db = self.conn
         path = ''
         parent = None
         isdirectory = None
         while(not parent == -1):
             #print(self.conn.execute('''EXPLAIN QUERY PLAN SELECT parent, filename, filetype FROM files WHERE rowid=? LIMIT 0,1''', (filerowid,)).fetchall())
-            cursor = self.conn.cursor()
+            cursor = db.cursor()
             cursor.execute('''SELECT parent, filename, filetype, isdir FROM files WHERE rowid=? LIMIT 0,1''', (filerowid,))
             parent, filename, fileext, isdir = cursor.fetchone()
             if isdirectory == None:
@@ -504,6 +518,7 @@ class SQLiteCache(object):
         finally:
             add += adds_without_commit
             log.i('items added %d, removed %d', add, deld)
+            load_db_to_memory(self)
 
 
     def enumerate_fs_with_db(self, startpath, itemfactory=None):
@@ -737,3 +752,20 @@ class File():
                           " safely handle them otherwise. Skipping.")
                     continue
             yield f
+
+class MemoryDB:
+    def __init__(self, db_file, table_to_dump):
+        log.i("Loading files database into memory...")
+        self.db = sqlite3.connect(':memory:', check_same_thread=False)    
+        cu = self.db.cursor()
+        cu.execute("attach database '" + db_file + "' as attached_db")
+        cu.execute("select sql from attached_db.sqlite_master "
+                   "where type='table' and name='" + table_to_dump + "'")
+        sql_create_table = cu.fetchone()[0]
+        cu.execute(sql_create_table);
+        cu.execute("insert into " + table_to_dump +
+                   " select * from attached_db." + table_to_dump)
+        self.db.commit()
+        cu.execute("detach database attached_db")
+        
+
