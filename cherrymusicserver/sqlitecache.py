@@ -453,8 +453,8 @@ class SQLiteCache(object):
             log.i('updating %r...' % abspath)
             try:
                 self.update_db_recursive(abspath, skipfirst=False)
-            except:
-                log.e('update incomplete.')
+            except Exception as exception:
+                log.e('update incomplete: %r', exception)
         log.i('done updating paths.')
 
 
@@ -516,7 +516,7 @@ class SQLiteCache(object):
         finally:
             add += adds_without_commit
             log.i('items added %d, removed %d', add, deld)
-            load_db_to_memory(self)
+            self.load_db_to_memory()
 
 
     def enumerate_fs_with_db(self, startpath, itemfactory=None):
