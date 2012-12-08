@@ -446,7 +446,8 @@ class SQLiteCache(object):
         paths = (path,) + paths
         log.i('updating paths: %s' % (paths,))
         for path in paths:
-            abspath = path if os.path.isabs(path) else os.path.join(os.getcwd(), path)
+            path = os.path.normcase(path)
+            abspath = path if os.path.isabs(path) else os.path.join(basedir, path)
             if not abspath.startswith(basedir):
                 log.e('path is not in basedir. skipping %s' % abspath)
                 continue
