@@ -56,13 +56,12 @@ TABS
 	height: 45px;
 	margin: 0 auto;
 	padding: 0;
-    top: 100px;
 	
 	/*fixed centering*/
 	left: 50%;
 	position: relative;
-	width: 220px;
-	margin-left: -110px; /* minus half the width */
+	width: 200px;
+	margin-left: -100px; /* minus half the width */
 
 
 }
@@ -70,18 +69,23 @@ TABS
     
 	display: inline;
 	float: left;
-	padding: 5px;
+	padding-left: 2px;
 }
 .tabNavigation li a{
     background-color: #F02E75;
 	text-decoration: none;
 	padding: 8px;
-	border-radius: 4px;
 	font-weight: 900;
 	display: block;
 	text-align: center;
     width: 80px;
     color: #ffffff;
+}
+.tabNavigation li:first-child a{
+    border-radius: 0 0 0px 15px;
+}
+.tabNavigation li:last-child a{
+    border-radius: 0 0 15px 0px;
 }
 #over-playlist-tabs{
     width: 100%;
@@ -448,12 +452,38 @@ GENERAL
 @media only screen and (max-width: 720px) {
     .tabs > div{
         width: 100%;
+        padding: 0;
     }
     .tabNavigation{
         display: block;
+        position: fixed;
+        top: 0;
+    }
+    #mediawrapper{
+        margin: 40px 0 0 0;
     }
     #mediaplayer{
         padding-top: 0px !important;
+        position: relative;
+    }
+    #jplayer{
+        display: none;
+    }
+    #search{
+        display: none;
+    }
+    /* increase playlist entry height for thumb navigation */
+    div.jp-playlist a{
+        display: inline-block;
+        line-height: 200%;
+    }
+}
+@media only screen and (min-width: 720px) {
+    #jplayer{
+        display: inherit !important;
+    }
+    #search{
+        display: inherit !important;
     }
 }
 

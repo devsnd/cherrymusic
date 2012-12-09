@@ -162,11 +162,13 @@ PlaylistManager.prototype = {
             $(this.cssSelector.shuffle).click(function() {
                 self.shuffleToggle();
                 self.refreshShuffle();
+                $(this).blur();
                 return false;
             });
             $(this.cssSelector.shuffleOff).click(function() {
                 self.shuffleToggle();
                 self.refreshShuffle();
+                $(this).blur();
                 return false;
             });
             
@@ -396,7 +398,7 @@ PlaylistManager.prototype = {
         }
         
         this.getEditingPlaylist().jplayerplaylist.add(track);
-        pulseTab('jplayer');
+        pulse('.tabNavigation li a.jplayer');
         var success = function(data){
             var metainfo = $.parseJSON(data)
             if (metainfo.length) {

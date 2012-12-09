@@ -863,22 +863,20 @@ function loadBrowser(){
     };
     api(data,success,errorFunc('failed to load file browser'));
 }
-origcolor = '#000000';
-function saveOriginalTabColor(){
+var origcolors = {};
+function pulse(selector){
     "use strict";
-    origcolor = $('div.tabs ul.tabNavigation .jplayer').css('background-color');
-}
-
-function pulseTab(tabname){
-    "use strict";
-    var elem = $('div.tabs ul.tabNavigation .'+tabname);
+    var elem = $(selector);
+    if(typeof origcolors[selector] === 'undefined'){
+        origcolors[selector] = elem.css('background-color');
+    }
     elem.stop(true, true);
-    elem.animate({backgroundColor: '#ffffff'},100);
-    elem.animate({backgroundColor: origcolor},100);
-    elem.animate({backgroundColor: '#ffffff'},100);
-    elem.animate({backgroundColor: origcolor},100);
-    elem.animate({backgroundColor: '#ffffff'},100);
-    elem.animate({backgroundColor: origcolor},100);
+    elem.animate({backgroundColor: '#ffffff'+' !important'},100);
+    elem.animate({backgroundColor: origcolors[selector]+' !important'},100);
+    elem.animate({backgroundColor: '#ffffff'+' !important'},100);
+    elem.animate({backgroundColor: origcolors[selector]+' !important'},100);
+    elem.animate({backgroundColor: '#ffffff'+' !important'},100);
+    elem.animate({backgroundColor: origcolors[selector]+' !important'},100);
 }
 
 /***
@@ -921,6 +919,15 @@ function viewport() {
         e = document.documentElement || document.body;
     }
     return { width : e[ a+'Width' ] , height : e[ a+'Height' ] }
+}
+
+function mobileShowSearch(){
+    $('#search').css('display','inherit');
+    $('#jplayer').css('display','none');
+}
+function mobileShowPlaylists(){
+    $('#jplayer').css('display','inherit');
+    $('#search').css('display','none');
 }
 
 /*****
@@ -999,4 +1006,15 @@ $(document).ready(function(){
     window.setInterval("resizePlaylistSlowly()",2000);
     $('#searchform .searchinput').focus();
     window.setInterval("api('heartbeat',false,errorFunc('connection to server lost'),true)",HEARTBEAT_INTERVAL_MS);
+    $('a.search').click(function(){
+        mobileShowSearch();
+        $(this).blur();
+        return false;
+    });
+    $('a.jplayer').click( function(){
+        mobileShowPlaylists()
+        $(this).blur();
+        return false;
+    });
+    mobileShowSearch();
 });
