@@ -309,6 +309,8 @@ PlaylistManager.prototype = {
     newPlaylistFromQueue : function(){
         var pl = this.newPlaylist(this.managedPlaylists[0].jplayerplaylist.playlist);
         showPlaylistSaveDialog(pl.id);
+        $(this).blur();
+        return false;
     },
     closePlaylist : function(plid){
         for(var i=0; i<this.managedPlaylists.length; i++){
@@ -321,9 +323,13 @@ PlaylistManager.prototype = {
             }
         }        
         this.refresh();
+        $(this).blur();
+        return false;
     },
     clearQueue : function(){
       this.managedPlaylists[0].jplayerplaylist.remove();  
+      $(this).blur();
+      return false;
     },
     setEditingPlaylist : function (plid){
         var plist = this.getPlaylistById(plid); 
@@ -380,6 +386,7 @@ PlaylistManager.prototype = {
     clearPlaylist : function(){
         "use strict";
         getEditingPlaylist().remove();
+        return false;
     },
     displayCurrentSong : function (){
         var jPlaylist = this.getPlayingPlaylist().jplayerplaylist;

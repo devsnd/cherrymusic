@@ -425,7 +425,14 @@ addAllToPlaylist = function(){
     $(this).siblings('li').find('.mp3file').each(function(){
         playlistManager.addSong( $(this).attr("path"), $(this).attr("title") );
     });
+    $(this).blur();
+    return false;
 };
+addThisTrackToPlaylist = function(){
+    playlistManager.addSong( $(this).attr("path"), $(this).attr("title") );
+    $(this).blur();
+    return false;
+}
 
 registermp3s = function(parent,mode){
     "use strict";
@@ -433,9 +440,7 @@ registermp3s = function(parent,mode){
         mode = 'addPlayAll'
     }
     var foundMp3 = $(parent).find(".mp3file").click(
-        function(){
-            playlistManager.addSong( $(this).attr("path"), $(this).attr("title") );
-        }
+        addThisTrackToPlaylist
     ).html();
     if(foundMp3){
         var editplaylist = playlistManager.getEditingPlaylist();
