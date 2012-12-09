@@ -224,10 +224,14 @@ class SQLiteCache(object):
         parent = None
         parentid = -1
         for path in pathlist:
-            f = File(path,parent=parent)
-            parentid = self.db.execute('''SELECT rowid FROM files WHERE
+            f = File(path,parent=parent, isdir=True)
+            result = self.db.execute('''SELECT rowid FROM files WHERE
             parent = ? AND filename = ? AND filetype = ? LIMIT 0,1''',
-            (parentid, f.name, f.ext)).fetchone()[0]
+            (parentid, f.name, f.ext)).fetchone()
+            if result is None:
+                log.e('media cache cannot listdir %r: item not in database: %r', path, (f.name + f.ext, parentid))
+                return []
+            parentid = result[0]
             parent = f
         res = self.db.execute('''SELECT filename, filetype FROM files WHERE parent = ?''',(parentid,))
         return list(map(lambda x: x[0]+x[1], res))
