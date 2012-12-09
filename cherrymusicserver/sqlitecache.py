@@ -225,11 +225,9 @@ class SQLiteCache(object):
         parentid = -1
         for path in pathlist:
             f = File(path,parent=parent)
-            wheretup = (parentid, f.name, f.ext)
-            print(wheretup)
             parentid = self.db.execute('''SELECT rowid FROM files WHERE
             parent = ? AND filename = ? AND filetype = ? LIMIT 0,1''',
-            wheretup).fetchone()[0]
+            (parentid, f.name, f.ext)).fetchone()[0]
             parent = f
         res = self.db.execute('''SELECT filename, filetype FROM files WHERE parent = ?''',(parentid,))
         return list(map(lambda x: x[0]+x[1], res))
