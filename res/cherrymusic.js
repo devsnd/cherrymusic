@@ -88,8 +88,16 @@ function api(data_or_action, successfunc, errorfunc, background){
 function errorFunc(msg){
     "use strict";
     return function(){
-        $('#errormessage').html('ERROR: '+msg+" :'(");
+        displayError(msg);
     };
+}
+function displayError(msg){
+    $('#errormessage').html(msg);
+}
+function removeError(msg){
+    if($('#errormessage').html() == msg){
+        $('#errormessage').html('');
+    }
 }
 /*******************
 CONFIGURATION LOADER

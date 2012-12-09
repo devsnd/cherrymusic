@@ -100,6 +100,7 @@ PlaylistManager = function(){
     this.cssSelector = {}
     this.lastRememberedPlaylist = '';
     this.nrOfCreatedPlaylists = 0;
+    this.flashBlockCheckIntervalId;
     
     this.cssSelector.next = this.cssSelectorJPlayerControls + " .jp-next";
     this.cssSelector.previous = this.cssSelectorJPlayerControls + " .jp-previous";
@@ -109,6 +110,7 @@ PlaylistManager = function(){
 
     $(this.cssSelectorjPlayer).bind($.jPlayer.event.ready, function(event) {
         self.restorePlaylists();
+        window.setInterval('playlistManager.displayCurrentSong()',1000);        
 	});    
     this.initJPlayer();
 }
@@ -170,8 +172,30 @@ PlaylistManager.prototype = {
             
             /* Set initial UI State */
             self.refreshShuffle();
-            window.setInterval('playlistManager.displayCurrentSong()',1000);
+            this.flashBlockCheckIntervalId = window.setInterval("playlistManager.checkFlashBlock()", 200);
         }
+    },
+    checkFlashBlock : function(){
+        $('#jquery_jplayer_1 object').css('z-index', '10000');
+        $('#jquery_jplayer_1 object').css('position', 'absolute');
+        $('#jquery_jplayer_1 div').css('z-index', '10000');
+        $('#jquery_jplayer_1 div').css('position', 'absolute');
+        $('#jquery_jplayer_1 div').css('background-color', '#fff');
+        this.flashSize('100%','80px');
+        //detect firefox flashblock:
+        if(typeof $('#jquery_jplayer_1 div').attr('dataattribute') !== 'undefined'){
+            errorFunc('Flashblock is enabled. Please click on the flash symbol on top of the player to activate flash.')();
+        } else {
+            window.clearInterval(this.flashBlockCheckIntervalId);
+            removeError('Flashblock is enabled. Please click on the flash symbol on top of the player to activate flash.');
+        }
+
+    },
+    flashSize : function(w, h){
+        $('#jquery_jplayer_1 object').css('width', w);
+        $('#jquery_jplayer_1 object').css('height', h);
+        $('#jquery_jplayer_1 div').css('width', w);
+        $('#jquery_jplayer_1 div').css('height', h);
     },
     shuffleToggle : function(){
       this.shuffled = !this.shuffled;
@@ -389,7 +413,11 @@ PlaylistManager.prototype = {
         return false;
     },
     displayCurrentSong : function (){
-        var jPlaylist = this.getPlayingPlaylist().jplayerplaylist;
+        var pl = this.getPlayingPlaylist();
+        if(typeof pl === 'undefined'){
+            return;
+        }
+        var jPlaylist = pl.jplayerplaylist;
         if(jPlaylist.playlist && typeof jPlaylist.current !== 'undefined' && jPlaylist.playlist.length>0){
             $('.cm-songtitle').html(jPlaylist.playlist[jPlaylist.current].title);
             return
