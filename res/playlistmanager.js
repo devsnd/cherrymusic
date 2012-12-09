@@ -97,8 +97,11 @@ PlaylistManager = function(){
     this.lastRememberedPlaylist = '';
     
     $(this.cssSelectorjPlayer).bind($.jPlayer.event.ready, function(event) {
-			self.restorePlaylists();
+        self.restorePlaylists();
 	});
+    $(this.cssSelectorjPlayer).bind($.jPlayer.event.ended, function(event) {
+        self.getPlayingPlaylist().jplayerplaylist.next();
+    });
     this.initJPlayer();
 }
 

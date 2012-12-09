@@ -62,11 +62,11 @@
 		});*/
 
 		// Create an ended event handler to move to the next item
-		$(this.cssSelector.jPlayer).bind($.jPlayer.event.ended, function(event) {
+		/*$(this.cssSelector.jPlayer).bind($.jPlayer.event.ended, function(event) {
             if(self.active){
                 self.next();
             }
-		});
+		});*/
 
 		// Create a play event handler to pause other instances
 		$(this.cssSelector.jPlayer).bind($.jPlayer.event.play, function(event) {
