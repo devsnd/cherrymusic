@@ -295,6 +295,7 @@
 			var self = this;
 			// Create .live() handlers for the playlist items
 			$(this.cssSelector.playlist + " a." + this.options.playlistOptions.itemClass).die("click").live("click", function() {
+                $(self.options.playlistOptions.playlistSelector).trigger('requestPlay', [self.options.playlistOptions.playlistSelector]);
 				var index = $(this).parent().parent().index();
 				if(self.current !== index) {
 					self.play(index);

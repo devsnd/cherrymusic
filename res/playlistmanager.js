@@ -39,7 +39,11 @@ ManagedPlaylist.prototype = {
                 }
             });
         $(playlistSelector+" ul").disableSelection();
-        window.setInterval('playlistManager.displayCurrentSong()',1000);
+        
+        //event handler for clicked tracks in jplayer playlist
+        $(this.playlistSelector).bind('requestPlay', function(event,playlistSelector) {
+            self.playlistManager.setPlayingPlaylist(self.playlistManager.htmlid2plid(playlistSelector));
+        });        
     },
     createNewPlaylistContainer : function(){
         var playlistContainerParent = this.playlistManager.cssSelectorPlaylistContainerParent;
@@ -95,36 +99,17 @@ PlaylistManager = function(){
     this.shuffled = false;
     this.cssSelector = {}
     this.lastRememberedPlaylist = '';
+    this.nrOfCreatedPlaylists = 0;
     
     this.cssSelector.next = this.cssSelectorJPlayerControls + " .jp-next";
     this.cssSelector.previous = this.cssSelectorJPlayerControls + " .jp-previous";
     this.cssSelector.shuffle = this.cssSelectorJPlayerControls + " .jp-shuffle";
     this.cssSelector.shuffleOff = this.cssSelectorJPlayerControls + " .jp-shuffle-off";
     
-    /* JPLAYER EVENT BINDINGS */
+
     $(this.cssSelectorjPlayer).bind($.jPlayer.event.ready, function(event) {
         self.restorePlaylists();
-	});
-    $(this.cssSelectorjPlayer).bind($.jPlayer.event.ended, function(event) {
-        if(self.shuffled){
-           self.getPlayingPlaylist().jplayerplaylist.playRandomTrack();
-        } else {
-            self.getPlayingPlaylist().jplayerplaylist.next();
-        }
-    });
-    
-    /* JPLAYER CONTROLS BINDINGS */
-    $(this.cssSelector.previous).click(function() {
-        self.getPlayingPlaylist().jplayerplaylist.previous();
-        $(this).blur();
-        return false;
-    });
-
-    $(this.cssSelector.next).click(function() {
-        self.getPlayingPlaylist().jplayerplaylist.next();
-        $(this).blur();
-        return false;
-    });
+	});    
     this.initJPlayer();
 }
 
@@ -148,33 +133,44 @@ PlaylistManager.prototype = {
             this.cssSelector.shuffle = this.cssSelectorJPlayerControls + " .jp-shuffle";
             this.cssSelector.shuffleOff = this.cssSelectorJPlayerControls + " .jp-shuffle-off";
 
-            $(self.cssSelectorjPlayer).bind($.jPlayer.event.ended, function(event) {
-                self.getPlayingPlaylist().jplayerplaylist.invoke_next();
+            /* JPLAYER EVENT BINDINGS */
+            $(this.cssSelectorjPlayer).bind($.jPlayer.event.ended, function(event) {
+                if(self.shuffled){
+                   self.getPlayingPlaylist().jplayerplaylist.playRandomTrack();
+                   return false;
+                } else {
+                    self.getPlayingPlaylist().jplayerplaylist.next();
+                    return false;
+                }
             });
-            // Create click handlers for the extra buttons that do playlist functions.
+            
+            /* JPLAYER CONTROLS BINDINGS */
             $(this.cssSelector.previous).click(function() {
-                return self.getPlayingPlaylist().jplayerplaylist.invoke_previous();
+                self.getPlayingPlaylist().jplayerplaylist.previous();
+                $(this).blur();
+                return false;
             });
 
             $(this.cssSelector.next).click(function() {
-                if(this.shuffled){
-                    self.getPlayingPlaylist().jplayerplaylist.playRandomTrack();
-                    return false;
-                } else {
-                    self.getPlayingPlaylist().jplayerplaylist.invoke_next();
-                    return false;
-                }
+                self.getPlayingPlaylist().jplayerplaylist.next();
+                $(this).blur();
+                return false;
             });
 
             $(this.cssSelector.shuffle).click(function() {
                 self.shuffleToggle();
+                self.refreshShuffle();
                 return false;
             });
             $(this.cssSelector.shuffleOff).click(function() {
                 self.shuffleToggle();
+                self.refreshShuffle();
                 return false;
             });
+            
+            /* Set initial UI State */
             self.refreshShuffle();
+            window.setInterval('playlistManager.displayCurrentSong()',1000);
         }
     },
     shuffleToggle : function(){
@@ -206,7 +202,7 @@ PlaylistManager.prototype = {
                 cmds.append('<a class="button" onclick="showPlaylistSaveDialog('+pl.id+')">save</a>');
             }
             if(pl.reason_open == 'queue'){
-                cmds.append('<a class="button floatright">remove played tracks</a>');
+                cmds.append('<a class="button floatright" onclick="playlistManager.removePlayedFromPlaylist()" >remove played tracks</a>');
                 cmds.append('<a class="button floatright" onclick="playlistManager.clearQueue()">clear queue</a>');
                 cmds.append('<a class="button floatleft" onclick="playlistManager.newPlaylistFromQueue()">save as playlist</a>');
             } else {
@@ -247,6 +243,9 @@ PlaylistManager.prototype = {
     },
     plid2htmlid : function(id){
         return 'pl-'+id;
+    },
+    htmlid2plid : function(htmlid){
+        return parseInt(htmlid.slice(4,htmlid.length))
     },
     refreshPlaylists : function(){
         var self = this;
@@ -450,7 +449,8 @@ PlaylistManager.prototype = {
         var a = new Date();
         var timemillis = a.getTime();
         if(typeof name === 'undefined'){
-            name = a.getDate()+'-'+a.getMonth()+'-'+a.getFullYear()+' '+a.getHours()+':'+a.getMinutes()+':'+a.getSeconds();
+            this.nrOfCreatedPlaylists++;
+            name = 'playlist '+this.nrOfCreatedPlaylists;
         }
         if(typeof saved === 'undefined'){
             saved = false;
@@ -479,7 +479,7 @@ PlaylistManager.prototype = {
         return newpl;
     },
     removePlayedFromPlaylist : function (){
-        var mediaPlaylist = getEditingPlaylist().playlist
+        var mediaPlaylist = this.getEditingPlaylist().jplayerplaylist;
         for(var i=0; i<mediaPlaylist.playlist.length; i++){
             if(mediaPlaylist.playlist[i].wasPlayed>0){
                 mediaPlaylist.playlist.splice(i,1);
