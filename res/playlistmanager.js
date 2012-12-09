@@ -96,11 +96,34 @@ PlaylistManager = function(){
     this.cssSelector = {}
     this.lastRememberedPlaylist = '';
     
+    this.cssSelector.next = this.cssSelectorJPlayerControls + " .jp-next";
+    this.cssSelector.previous = this.cssSelectorJPlayerControls + " .jp-previous";
+    this.cssSelector.shuffle = this.cssSelectorJPlayerControls + " .jp-shuffle";
+    this.cssSelector.shuffleOff = this.cssSelectorJPlayerControls + " .jp-shuffle-off";
+    
+    /* JPLAYER EVENT BINDINGS */
     $(this.cssSelectorjPlayer).bind($.jPlayer.event.ready, function(event) {
         self.restorePlaylists();
 	});
     $(this.cssSelectorjPlayer).bind($.jPlayer.event.ended, function(event) {
+        if(self.shuffled){
+           self.getPlayingPlaylist().jplayerplaylist.playRandomTrack();
+        } else {
+            self.getPlayingPlaylist().jplayerplaylist.next();
+        }
+    });
+    
+    /* JPLAYER CONTROLS BINDINGS */
+    $(this.cssSelector.previous).click(function() {
+        self.getPlayingPlaylist().jplayerplaylist.previous();
+        $(this).blur();
+        return false;
+    });
+
+    $(this.cssSelector.next).click(function() {
         self.getPlayingPlaylist().jplayerplaylist.next();
+        $(this).blur();
+        return false;
     });
     this.initJPlayer();
 }
