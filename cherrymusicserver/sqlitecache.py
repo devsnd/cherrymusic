@@ -212,6 +212,28 @@ class SQLiteCache(object):
                 log.d('resulting paths')
                 log.d(results)
             return results
+            
+    def listdir(self, path):
+        pathlist = []
+        head, tail = os.path.split(path)
+        while head:
+            pathlist.append(tail)
+            head, tail = os.path.split(head)
+        pathlist.append(tail)
+        pathlist = list(reversed(pathlist))
+        parent = None
+        parentid = -1
+        for path in pathlist:
+            f = File(path,parent=parent)
+            wheretup = (parentid, f.name, f.ext)
+            print(wheretup)
+            parentid = self.db.execute('''SELECT rowid FROM files WHERE
+            parent = ? AND filename = ? AND filetype = ? LIMIT 0,1''',
+            wheretup).fetchone()[0]
+            parent = f
+        res = self.db.execute('''SELECT filename, filetype FROM files WHERE parent = ?''',(parentid,))
+        return list(map(lambda x: x[0]+x[1], res))
+            
 
     def musicEntryFromFileId(self, filerowid):
         if self.file_db_in_memory():

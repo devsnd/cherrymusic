@@ -66,7 +66,10 @@ class CherryModel:
         
     def listdir(self,dirpath,filterstr=''):
         absdirpath = self.abspath(dirpath)
-        allfilesindir = os.listdir(absdirpath)
+        if cherry.config.search.pure_database_lookup.bool:
+            allfilesindir = self.cache.listdir(dirpath)
+        else:
+            allfilesindir = os.listdir(absdirpath)
 
         #remove all files not inside the filter
         if filterstr:

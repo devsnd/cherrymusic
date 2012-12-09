@@ -90,6 +90,11 @@ def from_defaults():
                                     sufficient memory, because it will hurt the performance otherwise.
                                 
                                     """
+        c.search.pure_database_lookup = False
+        c.search.pure_database_lookup.desc = """ This will option will use the database instead of 
+                                            the filesystem for folders which are opened in the search
+                                            This might be useful when storing the media files on a external
+                                            harddrive or a slow network connection."""
         
         c.look.theme = 'zeropointtwo'
         c.look.theme.desc = """
