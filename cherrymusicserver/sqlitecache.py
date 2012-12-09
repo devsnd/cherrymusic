@@ -78,10 +78,10 @@ class SQLiteCache(object):
         self.conn.execute('PRAGMA synchronous = OFF')
         self.conn.execute('PRAGMA journal_mode = MEMORY')
         self.load_db_to_memory()
-    
+
     def file_db_in_memory(self):
         return not self.DBFILENAME == ':memory:' and cherry.config.search.load_file_db_into_memory.bool
-    
+
     def load_db_to_memory(self):
         if self.file_db_in_memory():
             self.file_db_mem = MemoryDB(self.DBFILENAME, 'files')
@@ -313,7 +313,7 @@ class SQLiteCache(object):
 
 
     def remove_file(self, fileobj):
-        '''removes a file entry from the db, which means removing: 
+        '''removes a file entry from the db, which means removing:
             - all search references,
             - all dictionary words which were orphaned by this,
             - the reference in the files table.'''
@@ -362,7 +362,7 @@ class SQLiteCache(object):
 
 
     def db_recursive_filelister(self, fileobj, factory=None):
-        """generator: enumerates fileobj and children listed in the db as File 
+        """generator: enumerates fileobj and children listed in the db as File
         objects. each item is returned before children are fetched from db.
         this means that fileobj gets bounced back as the first return value."""
         if factory is None:
@@ -446,15 +446,16 @@ class SQLiteCache(object):
         paths = (path,) + paths
         log.i('updating paths: %s' % (paths,))
         for path in paths:
-            abspath = path if os.path.isabs(path) else os.path.join(os.getcwd(), path)
+            path = os.path.normcase(path)
+            abspath = path if os.path.isabs(path) else os.path.join(basedir, path)
             if not abspath.startswith(basedir):
                 log.e('path is not in basedir. skipping %s' % abspath)
                 continue
             log.i('updating %r...' % abspath)
             try:
                 self.update_db_recursive(abspath, skipfirst=False)
-            except:
-                log.e('update incomplete.')
+            except Exception as exception:
+                log.e('update incomplete: %r', exception)
         log.i('done updating paths.')
 
 
@@ -516,34 +517,34 @@ class SQLiteCache(object):
         finally:
             add += adds_without_commit
             log.i('items added %d, removed %d', add, deld)
-            load_db_to_memory(self)
+            self.load_db_to_memory()
 
 
     def enumerate_fs_with_db(self, startpath, itemfactory=None):
         '''
-        Starting at `startpath`, enumerates path items containing representations 
-        for each path as it exists in the filesystem and the database, 
+        Starting at `startpath`, enumerates path items containing representations
+        for each path as it exists in the filesystem and the database,
         respectively.
-        
+
         `startpath` and `basedir` need to be absolute paths, with `startpath`
         being a subtree of `basedir`. However, no checks are being promised to
         enforce the latter requirement.
-        
+
         Iteration is depth-first, but each path is returned before its children
         are determined, to enable recursive corrective action like deleting a
         whole directory from the database at once. Accordingly, the first item
         to be returned will represent `startpath`. This item is guaranteed to be
         returned, even if `startpath` does not exist in filesystem and database;
         all other items will have at least one existing representation.
-        
+
         `basedir`, should it happen to equal `startpath`, will be returned as an
         item. It is up to the caller to properly deal with it.
-        
+
         Each item has the following attributes: `infs`, a File object
         representing the path in the filesystem; `indb`, a File object
         representing the path in the database; and `parent`, the parent item.
-        All three can be None, signifying non-existence. 
-        
+        All three can be None, signifying non-existence.
+
         It is possible to customize item creation by providing an `itemfactory`.
         The argument must be a callable with the following parameter signature:
             itemfactory(infs, indb, parent [, optional arguments])
@@ -597,7 +598,7 @@ class SQLiteCache(object):
         '''Finds an absolute path in the file database. If found, returns
         a File object matching the database record; otherwise, returns None.
         Paths matching a media basedir are a special case: these will yield a
-        File object with an invalid record id matching the one listed by its 
+        File object with an invalid record id matching the one listed by its
         children.
         '''
         assert os.path.isabs(fullpath)
@@ -710,7 +711,7 @@ class File():
         return os.path.islink(self.fullpath)
 
     def children(self, sort=True, reverse=True):
-        '''If self.isdir and self.exists, return an iterable of fileobjects 
+        '''If self.isdir and self.exists, return an iterable of fileobjects
         corresponding to its direct content (non-recursive).
         Otherwise, log a warning and return ().
         '''
@@ -754,7 +755,7 @@ class File():
 class MemoryDB:
     def __init__(self, db_file, table_to_dump):
         log.i("Loading files database into memory...")
-        self.db = sqlite3.connect(':memory:', check_same_thread=False)    
+        self.db = sqlite3.connect(':memory:', check_same_thread=False)
         cu = self.db.cursor()
         cu.execute("attach database '" + db_file + "' as attached_db")
         cu.execute("select sql from attached_db.sqlite_master "
@@ -765,5 +766,5 @@ class MemoryDB:
                    " select * from attached_db." + table_to_dump)
         self.db.commit()
         cu.execute("detach database attached_db")
-        
+
 
