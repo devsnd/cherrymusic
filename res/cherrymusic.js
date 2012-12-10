@@ -452,19 +452,20 @@ registermp3s = function(parent,mode){
     ).html();
     if(foundMp3){
         var editplaylist = playlistManager.getEditingPlaylist();
-        window.console.log(typeof editplaylist);
-        if(typeof editplaylist !== 'undefined'){
-            var playlistname  = editplaylist.name;
-            $(parent).prepend('<a class="addAllToPlaylist" href="javascript:;">add all to <span class="plmgr-editingplaylist-name">' + playlistname + '</span></a>');
-            $(parent).children('.addAllToPlaylist').click(
-                addAllToPlaylist
-            );
-        } else {
-            $(parent).prepend('<a class="addAllToPlaylist" href="javascript:;">load playlist</a>');
-            $(parent).children('.addAllToPlaylist').click(
-                addAllToPlaylist
-            );
+        switch(mode) {
+            case 'loadPlaylist':
+                $(parent).prepend('<a class="addAllToPlaylist" href="javascript:;">load playlist</a>');
+                 break;
+            case 'addPlayAll':
+                var playlistname  = typeof editplaylist === 'undefined' ? 'new playlist' : editplaylist.name;
+                $(parent).prepend('<a class="addAllToPlaylist" href="javascript:;">add all to <span class="plsmgr-editingplaylist-name">' + playlistname + '</span></a>');
+                break;
+            default:
+                break;
         }
+        $(parent).children('.addAllToPlaylist').click(
+            addAllToPlaylist
+        );
     }
 };
 
@@ -701,7 +702,7 @@ function loadPlaylist(playlistid){
             $(pldomid).hide();
             $(pldomid).append(parseAndRender(data));
             $(pldomid).slideDown('slow');
-            registermp3s($(pldomid).find('ul')/*, 'loadPlaylist'*/);
+            registermp3s($(pldomid).find('ul'), 'loadPlaylist');
         };
         api(data,success,errorFunc('error loading external playlist'))
     } else {

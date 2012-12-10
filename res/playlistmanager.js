@@ -367,7 +367,7 @@ PlaylistManager.prototype = {
             this.editingPlaylist = 0;
             plname = 'new playlist';
         }
-        $('.plmgr-editingplaylist-name').html(plname);
+        $('.plsmgr-editingplaylist-name').html(plname);
     },
     setPlayingPlaylist : function (plid){
         this.playingPlaylist = plid;
