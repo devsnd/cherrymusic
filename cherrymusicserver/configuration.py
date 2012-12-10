@@ -89,12 +89,7 @@ def from_defaults():
                                     performance. This option should only be used on systems with
                                     sufficient memory, because it will hurt the performance otherwise.
                                     """
-        c.search.pure_database_lookup = False
-        c.search.pure_database_lookup.desc = """ This will option will use the database instead of 
-                                            the filesystem for folders which are opened in the search
-                                            This might be useful when storing the media files on a external
-                                            harddrive or a slow network connection."""
-        
+
         c.look.theme = 'zeropointtwo'
         c.look.theme.desc = """
                             Available themes are: "zeropointtwo", "hax1337".
@@ -111,6 +106,13 @@ def from_defaults():
                                         according to the first letter in their name.
                                         100 is a good value, as a cd can have up to 99 tracks.
                                         '''
+
+        c.browser.pure_database_lookup = False
+        c.browser.pure_database_lookup.desc = """
+                                            Only use the media database, never the filesystem, for content
+                                            lookups in browser and search. Useful if the media files reside
+                                            on an external hard drive or behind a slow network connection.
+                                            """
 
         c.server.port = 8080
         c.server.port.desc = 'The port the server will listen to.'

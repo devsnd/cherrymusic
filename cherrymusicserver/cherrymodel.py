@@ -66,7 +66,7 @@ class CherryModel:
 
     def listdir(self,dirpath,filterstr=''):
         absdirpath = self.abspath(dirpath)
-        if cherry.config.search.pure_database_lookup.bool:
+        if cherry.config.browser.pure_database_lookup.bool:
             allfilesindir = self.cache.listdir(dirpath)
         else:
             allfilesindir = os.listdir(absdirpath)
