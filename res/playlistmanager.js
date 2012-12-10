@@ -10,8 +10,8 @@ var ManagedPlaylist = function(playlistManager, playlist, options){
     this.owner = options.owner;
     this.saved = options.saved;
     //can be 'recommendation', 'ownwill', 'queue'
-    this.reason_open = options.reason_open; 
-    
+    this.reason_open = options.reason_open;
+
     this.jplayerplaylist;
     this._init(playlist)
 }
@@ -32,18 +32,18 @@ ManagedPlaylist.prototype = {
             }
         );
         self.jplayerplaylist._init();
-        
+
         $(playlistSelector+" ul").sortable({
             update: function(e,ui){
                 mediaPlaylist.scan();
                 }
             });
         $(playlistSelector+" ul").disableSelection();
-        
+
         //event handler for clicked tracks in jplayer playlist
         $(this.playlistSelector).bind('requestPlay', function(event,playlistSelector) {
             self.playlistManager.setPlayingPlaylist(self.playlistManager.htmlid2plid(playlistSelector));
-        });        
+        });
     },
     createNewPlaylistContainer : function(){
         var playlistContainerParent = this.playlistManager.cssSelectorPlaylistContainerParent;
@@ -101,17 +101,17 @@ PlaylistManager = function(){
     this.lastRememberedPlaylist = '';
     this.nrOfCreatedPlaylists = 0;
     this.flashBlockCheckIntervalId;
-    
+
     this.cssSelector.next = this.cssSelectorJPlayerControls + " .jp-next";
     this.cssSelector.previous = this.cssSelectorJPlayerControls + " .jp-previous";
     this.cssSelector.shuffle = this.cssSelectorJPlayerControls + " .jp-shuffle";
     this.cssSelector.shuffleOff = this.cssSelectorJPlayerControls + " .jp-shuffle-off";
-    
+
 
     $(this.cssSelectorjPlayer).bind($.jPlayer.event.ready, function(event) {
         self.restorePlaylists();
-        window.setInterval('playlistManager.displayCurrentSong()',1000);        
-	});    
+        window.setInterval('playlistManager.displayCurrentSong()',1000);
+	});
     this.initJPlayer();
 }
 
@@ -145,7 +145,7 @@ PlaylistManager.prototype = {
                     return false;
                 }
             });
-            
+
             /* JPLAYER CONTROLS BINDINGS */
             $(this.cssSelector.previous).click(function() {
                 self.getPlayingPlaylist().jplayerplaylist.previous();
@@ -171,7 +171,7 @@ PlaylistManager.prototype = {
                 $(this).blur();
                 return false;
             });
-            
+
             /* Set initial UI State */
             self.refreshShuffle();
             this.flashBlockCheckIntervalId = window.setInterval("playlistManager.checkFlashBlock()", 200);
@@ -285,9 +285,9 @@ PlaylistManager.prototype = {
             if($.inArray($(this).attr('id'), validHTMLIds)<0){
                 $(this).remove();
                 window.console.log('removing');
-            }            
+            }
         });
-        
+
         $(this.cssSelectorPlaylistContainerParent)
     },
     showPlaylist : function(playlistid){
@@ -347,18 +347,18 @@ PlaylistManager.prototype = {
                 this.playingPlaylist = otherId;
                 break;
             }
-        }        
+        }
         this.refresh();
         $(this).blur();
         return false;
     },
     clearQueue : function(){
-      this.managedPlaylists[0].jplayerplaylist.remove();  
+      this.managedPlaylists[0].jplayerplaylist.remove();
       $(this).blur();
       return false;
     },
     setEditingPlaylist : function (plid){
-        var plist = this.getPlaylistById(plid); 
+        var plist = this.getPlaylistById(plid);
         var plname = '';
         if (typeof plist !== 'undefined') {
             this.editingPlaylist = plid;
@@ -386,7 +386,7 @@ PlaylistManager.prototype = {
         }
         //add natively supported path
         track[ext2jPlayerFormat(ext)] = path;
-        
+
         if(transcodingEnabled){
             //add transcoded paths
             for(var i=0; i<availableEncoders.length; i++){
@@ -396,7 +396,7 @@ PlaylistManager.prototype = {
                 }
             }
         }
-        
+
         this.getEditingPlaylist().jplayerplaylist.add(track);
         pulse('.tabNavigation li a.jplayer');
         var success = function(data){
@@ -427,9 +427,9 @@ PlaylistManager.prototype = {
         $('.cm-songtitle').html('');
     },
     rememberPlaylist : function(){
-        "use strict";  
+        "use strict";
         var self = this;
-        var canonicalPlaylists = []  
+        var canonicalPlaylists = []
         for(var i=0; i<this.managedPlaylists.length; i++){
             var cano = this.managedPlaylists[i].getCanonicalPlaylist();
             if(cano.playlist.length){
@@ -471,7 +471,7 @@ PlaylistManager.prototype = {
             self.refresh();
             window.console.log('remembering playlists periodically');
             window.setInterval("playlistManager.rememberPlaylist()",REMEMBER_PLAYLIST_INTERVAL );
-            
+
                 /*
                 var pl = newPlaylist();
                 pl._refresh(true);
