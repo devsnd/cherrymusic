@@ -46,13 +46,13 @@ def from_defaults():
                                 BASEDIR specifies where the media that should be
                                 served is located. It must be the absolute path, e.g.
                                 BASEDIR=/absolute/path/to/media.
-                                
+
                                 Links: If your operating system supports them,
                                 you can use symlinks directly in BASEDIR. Links to
                                 directories which contain BASEDIR will be ignored,
                                 just like all links not directly in, but in sublevels
                                 of BASEDIR. This is to guard against the adverse
-                                effects of link cycles. 
+                                effects of link cycles.
                                 """
 
         c.media.playable = 'mp3 m4a m4v ogv oga wav webm'
@@ -63,7 +63,7 @@ def from_defaults():
 
         c.media.transcode = False
         c.media.transcode.desc = """
-                                    TRANSCODE (experimental!) enables automatic live transcoding 
+                                    TRANSCODE (experimental!) enables automatic live transcoding
                                     of the media to be able to listen to every format on every device.
                                     This requires you to have the appropriate codecs installed.
                                     Please note that transcoding will significantly increase the stress on the CPU!
@@ -80,15 +80,14 @@ def from_defaults():
                                     MAXRESULTS sets the maximum amount of search results
                                     to be displayed. If MAXRESULTS is set to a higher value,
                                     the search will take longer, but will also be more accurate.
-                                
+
                                     """
-                                    
+
         c.search.load_file_db_into_memory = False
         c.search.load_file_db_into_memory.desc = """
                                     This will load parts of the database into memory for improved
                                     performance. This option should only be used on systems with
                                     sufficient memory, because it will hurt the performance otherwise.
-                                
                                     """
         c.search.pure_database_lookup = False
         c.search.pure_database_lookup.desc = """ This will option will use the database instead of 
@@ -108,7 +107,7 @@ def from_defaults():
         c.browser.maxshowfiles.desc = '''
                                         MAXSHOWFILES specifies how many files and folders should
                                         be shown at the same time. E.g. if you open a folder
-                                        with more than MAXSHOWFILES, the files will be grouped 
+                                        with more than MAXSHOWFILES, the files will be grouped
                                         according to the first letter in their name.
                                         100 is a good value, as a cd can have up to 99 tracks.
                                         '''
@@ -161,13 +160,13 @@ def from_defaults():
 
         c.server.ssl_certificate = 'certs/server.crt'
         c.server.ssl_private_key = 'certs/server.key'
-        
+
         c.server.dyndns_address = ''
         c.server.dyndns_address.desc = '''
                                     ex: server.dyndns_address = http://example.dyndns.com/cm
                                     If you have set up a dyndns/no-ip/etc, you can insert the
                                     address that points to cherrymusic here. This will enable
-                                    you to use extra features like the opensearch plugin for 
+                                    you to use extra features like the opensearch plugin for
                                     your browser, even when your ip changes frequently.
                                     '''
 
@@ -232,7 +231,7 @@ def write_to_file(cfg, filepath):
 def from_list(l, name='', rename=None):
     '''Turn a list of tuples into a Configuration. Tuple elements must be the
     constructor arguments in their proper order.
-    
+
     name: if given, return the corresponding sub-configuration
     rename: if given, change the name of the returned configuration to this value
     '''
@@ -273,7 +272,7 @@ def to_dict(cfg):
     '''Turn a configuration into a dict, with keys for its attributes and
     sub-configurations. Sub-configurations will be included as nested dicts.
     Passing a single Property as argument will return a one-level dict containing
-    its attributes. Attributes that have default values or that and can be 
+    its attributes. Attributes that have default values or that and can be
     deduced in another way might not be included.'''
     if not isinstance(cfg, Property):
         raise TypeError('type(cfg) is not a Property: %s' % (type(cfg),))
@@ -502,93 +501,93 @@ class Property(object):
     '''
     A named value, with some extra attributes. Attributes can also be accessed
     through the [] operator.
-    
-    
+
+
     Attributes
     ----------
-    
+
     **name** (final)
-    
+
     Naming rules follow those of the Key class, except that the names of
     Property attributes and of some builtin classes cannot be used. Check
     Property._reserved() to see which.
-    
+
     **value**
-    
+
     The value of this Property. Setting it is subject to type and validation
     checks as detailed below. A value of *None* is considered not set.
-    
+
     **type** (final)
-    
+
     A Property can have a "type", which is a string name; however, if one of the
     "known" types is used (see Transformers), it will be used to check and
     autoconvert any value that is being set, with Exceptions raised on mismatch.
-    
+
     If no type is set, or if the type is unknown, only values of the same type
     as the current value will be excepted. If there is no value set (= None),
     anything can be set as new value.
-    
+
     Assigning *None* will always work from a type perspective, but might still
     fail validation checks.
-    
+
     **validity** (final)
-    
+
     A 'validity' string can be used as a further method to control which values
     can be set. That string, if non-empty, is taken as a regular expression that
     must match the whole str(ingified) value for the value to be legal. ('^' and
     '$' are implied to enclose the validity string.)
-    
+
     Whitespace will be stripped from validity string and test value before
     matching. *None* is evaluated as the empty string ''.
-    
+
     If the type is given as 'list', the value will be converted to a list, and
     the validity string applied to each of its parts.
-    
+
     **readonly**
-    
+
     If True, the 'readonly' attribute prevents the changing of value or
     description. A value of *None* is taken to mean this attribute is not set,
     and serves as a non-True default value.
-    
+
     **hidden**
-    
+
     The interpretation of the 'hidden' flag is up to the user of the class.  A
     value of *None* is taken to mean this attribute is not set, and serves as a
     non-True default value.
-    
+
     **desc**
-    
+
     The description is meant to be a string attribute for explanation and
     documentation. The class may collapse whitespace and redistribute line-
     breaks, but will not otherwise touch this attribute.
-    
-    
+
+
     Conversion views on value
     -------------------------
-    
+
     There are couple of additional attributes that will yield the value
     converted to the appropriate type. These are:
-    
-    - int 
+
+    - int
     - float
     - bool
     - str
     - list
-    
+
     If conversion fails, a default value will be returned that most closely
     coincides with the concept of "no", "nothing", or "empty" in the respective
     type.
-    
+
     Since the introduction of the *type* attribute has enabled the auto-
     conversion of a Property's value, these additional attributes have become
     less useful. They might be abandoned in the future.
-    
-    
+
+
     Standard functions
     ------------------
-    
+
     **bool()**
-    
+
     In a boolean context, a Property is considered True only if it has a *value*
     different from *None*, or if any of its other attributes have been set. This
     does not include *name*, which never influences the boolean interpretation.
@@ -631,7 +630,7 @@ class Property(object):
         ''''
         type' and 'validity' apply at once, i.e. value will be checked before set.
         see doc comment of the class for information about the arguments.
-        
+
         Exceptions raised:
         ConfigKeyError    if name violates naming restrictions
         TypeError         if value is of the wrong type
@@ -773,7 +772,7 @@ class Property(object):
     def value(): #@NoSelf
         doc = '''Setting this value is subject to type and validation checks. Deletion
         is equal to setting it to None.
-        
+
         Exceptions that can be raised:
         ConfigError    if this Property is readonly
         TypeError      if the new value does not match the needed type
@@ -898,8 +897,8 @@ class Property(object):
         Here's a secret way to change all attributes after construction.
         Pass in another Property of the same name (or with an empty name),
         and all its non-default attributes will be used to overwrite those
-        of this Property. 
-        
+        of this Property.
+
         Type-checking and validation of the value will
         take place after resolving the new type and validity of the Property;
         so changing any of those attributes without the other must be done
@@ -938,10 +937,10 @@ _PropTuple = namedtuple('PropertyTuple', ' '.join(Property._attributes()))
 
 class PropertySet(MutableSet):
     '''A simple set implementation to keep properties.
-    
+
     Additional methods get(), modify() and replace(). Operations that need
     only the property name also accept Keys and strings as arguments.
-    
+
     The set cares only for the Property names, not their other attributes. This
     is especially significant for comparison with other sets and membership
     tests. The only exception to this is the modify method which accesses the
@@ -988,7 +987,7 @@ class PropertySet(MutableSet):
 
     def modify(self, property):                             #@ReservedAssignment
         '''Modify a property to adopt the non-default attributes of the argument.
-        
+
         Will check for readonly, type and validity. If the property doesn't
         exist, it will be added.
         '''
@@ -1012,88 +1011,88 @@ class PropertySet(MutableSet):
 class Configuration(Property):
     '''
     A configuration is a *Property* that can have configurations as its children.
-    
+
     After construction, the name of a Configuration always includes that of its parent.
 
-    
+
     Accessing children
-    
+
         cfg[childname]
         cfg[child.subchild.etc]
 
         cfg.childname
         cfg.child.subchild.etc
-        
+
         cfg[''] == cfg
-    
+
     For non-existing children, **accessing means creating** an empty default,
     which might not stay around after a pure read. (Behavior might change.)
-    
-    
+
+
     Assigning to children
-    
-        cfg.a = something  
-        cfg['a'] = something 
-        
+
+        cfg.a = something
+        cfg['a'] = something
+
     If `something` is a Property, its non-default attributes will overwrite
     those of the target. If it is also a *Configuration*, the same principle
     will be applied to their children. If it is neither, `something` will be
     assigned to the value of the target.
-    
-    
+
+
     Requirements to merge:
-    
-    - the Property to be merged has the same name as the target Property, 
-    - or an empty name, 
+
+    - the Property to be merged has the same name as the target Property,
+    - or an empty name,
     - and the target property is not readonly.
-    
+
     If a merge fails, a *ConfigError* will be raised, leaving the merge target
     unchanged. However, if a recursive merge fails in the middle, it will simply
     abort, without further cleanup.
-    
-    
+
+
     Merging at root level::
-        
+
         cfgA += propB
         cfgMerged = cfgA + propB
-    
+
     is equal to::
-        
+
         cfgA[propB.name] = propB
-    
+
     Note that in many cases::
-    
+
          cfgA + cfgB != cfgB + cfgA
-    
-    
+
+
     iteration
     ---------
-    
+
     Iterating over a configuration will yield the names of all its sub-
     configurations, recursively, with the leading name of the parent removed. It
     can be seen as a sequence of all the keys the [] operator will accept,
     except for special ones that refer to the configuration itself or its
     Property attributes.
-    
+
     length
     ------
-    
+
     The length of a configuration equals the number of its subconfigurations,
     *recursively*. It is the number of items an iteration will yield.
-    
+
     operator in
     -----------
-    
+
     ``a in cfgA`` is True if ``a`` is the *full* name of one of ``cfgA``'s sub-
     properties. Therefore, it coincides only with the names in an iteration of
     ``cfgA``, if ``cfgA`` happens to have an empty name.
-    
+
     **WARNING:** This behavior is inconsistent with general expectations and
     might change in the future.
-    
+
     implicit conversion to bool
     ---------------------------
-    
+
     In a boolean context, a Conversion is considered True only if its *Property*
     nature is True or if it has sub-properties.
     '''

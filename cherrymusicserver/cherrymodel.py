@@ -63,7 +63,7 @@ class CherryModel:
             sortedfiles = sorted(sortedfiles,
                                 key=lambda x : os.path.isfile(os.path.join(fullpath,x)))
         return sortedfiles
-        
+
     def listdir(self,dirpath,filterstr=''):
         absdirpath = self.abspath(dirpath)
         if cherry.config.search.pure_database_lookup.bool:
@@ -75,7 +75,7 @@ class CherryModel:
         if filterstr:
             filterByStart = StartsWithCaseInsensitive(filterstr)
             allfilesindir = list(filter(filterByStart, allfilesindir))
-        
+
         musicentries = []
 
         compactlisting = len(allfilesindir) > cherry.config.browser.maxshowfiles.int
@@ -103,7 +103,7 @@ class CherryModel:
         if musicentries == []:
             musicentries.append(MusicEntry(path="No playable media files found.", repr=""))
         return musicentries
-    
+
     def addMusicEntry(self,fullpath, list):
         if os.path.isfile(fullpath):
             if isplayable(fullpath):
@@ -188,14 +188,14 @@ class CherryModel:
             if '{revartist}' in oneliner:
                 oneliner=oneliner.replace('{revartist}',a.lower()[::-1])
         return oneliner
-        
+
 def isValidMediaFile(file):
     file.path = strippath(file.path)
     #let only playable files appear in the search results
     if not isplayable(file.path) and not file.dir:
         return False
     return True
-    
+
 
 def createMusicEntryByFilePath(file):
     """DEPRECATED, files are checked using isValidMediaFile(MusicEntry) now"""
@@ -236,10 +236,10 @@ class MusicEntry:
         self.repr = repr
     def __repr__(self):
         return "<MusicEntry path:%s, dir:%s>"%(self.path,self.dir)
-        
+
 class StartsWithCaseInsensitive:
     def __init__(self,startswith):
         self.startswith = startswith.upper()
-        
+
     def __call__(self,string):
         return string.upper().startswith(self.startswith)
