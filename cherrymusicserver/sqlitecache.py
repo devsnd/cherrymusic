@@ -214,27 +214,13 @@ class SQLiteCache(object):
             return results
 
     def listdir(self, path):
-        pathlist = []
-        head, tail = os.path.split(path)
-        while head:
-            pathlist.append(tail)
-            head, tail = os.path.split(head)
-        pathlist.append(tail)
-        pathlist = list(reversed(pathlist))
-        parent = None
-        parentid = -1
-        for path in pathlist:
-            f = File(path,parent=parent, isdir=True)
-            result = self.db.execute('''SELECT rowid FROM files WHERE
-            parent = ? AND filename = ? AND filetype = ? LIMIT 0,1''',
-            (parentid, f.name, f.ext)).fetchone()
-            if result is None:
-                log.e('media cache cannot listdir %r: item not in database: %r', path, (f.name + f.ext, parentid))
-                return []
-            parentid = result[0]
-            parent = f
-        res = self.db.execute('''SELECT filename, filetype FROM files WHERE parent = ?''',(parentid,))
-        return list(map(lambda x: x[0]+x[1], res))
+        basedir = cherry.config.media.basedir.str
+        targetpath = os.path.join(basedir, path)
+        targetdir = self.db_find_file_by_path(targetpath)
+        if targetdir is None:
+                        log.e('media cache cannot listdir %r: path not in database', path)
+                        return []
+        return list(map(lambda f: f.basename, self.fetch_child_files(targetdir)))
 
 
     def musicEntryFromFileId(self, filerowid):
