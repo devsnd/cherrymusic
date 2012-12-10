@@ -1,6 +1,7 @@
 
 /* PLAYLIST CREATION AND MANAGEMENT */
 
+
 var ManagedPlaylist = function(playlistManager, playlist, options){
     this.playlistManager = playlistManager;
     this.id = options.id;
@@ -18,7 +19,7 @@ var ManagedPlaylist = function(playlistManager, playlist, options){
 ManagedPlaylist.prototype = {
     _init : function(playlist){
         var self = this;
-        this.playlistSelector = self.createNewPlaylistContainer();
+        this.playlistSelector = self._createNewPlaylistContainer();
         self.jplayerplaylist = new jPlayerPlaylist({
                 jPlayer: this.playlistManager.cssSelectorjPlayer,
                 cssSelectorAncestor: this.playlistManager.cssSelectorJPlayerControls
@@ -45,7 +46,7 @@ ManagedPlaylist.prototype = {
             self.playlistManager.setPlayingPlaylist(self.playlistManager.htmlid2plid(playlistSelector));
         });
     },
-    createNewPlaylistContainer : function(){
+    _createNewPlaylistContainer : function(){
         var playlistContainerParent = this.playlistManager.cssSelectorPlaylistContainerParent;
         var id = this.playlistManager.plid2htmlid(this.id);
         $(playlistContainerParent).append(
@@ -81,9 +82,47 @@ ManagedPlaylist.prototype = {
     },
     makeThisPlayingPlaylist : function(){
         this.playlistManager.setPlayingPlaylist(this.id);
+    },
+    addTrack : function(track) {
+        this.jplayerplaylist.add(track);
     }
 }
 
+var NewplaylistProxy =  function(playlistManager) {
+    this.playlistManager = playlistManager;
+    this.id = 0;
+    this.name = "new playlist";
+    this.closable = false;
+    this.public = true;
+    this.owner = 'me';
+    this.saved = true;
+    //can be 'recommendation', 'ownwill', 'queue'
+    this.reason_open = 'newplaylist_proxy';
+
+    this.jplayerplaylist;
+
+    this.getCanonicalPlaylist = function(){
+        return {
+            'playlist' : [],
+            'name' : this.name,
+            'closable' : this.closable,
+            'public' : this.public,
+            'owner' : this.owner,
+            'saved' : this.saved,
+            'reason_open' : this.reason_open,
+        };
+    };
+    this.makeThisPlayingPlaylist = function(){
+        var newpl = this.playlistManager.newPlaylist();
+        newpl.makeThisPlayingPlaylist();
+    };
+    this.addTrack = function(track) {
+        var newpl = this.playlistManager.newPlaylist();
+        this.playlistManager.setEditingPlaylist(newpl.id);
+        newpl.jplayerplaylist.add(track);
+    };
+
+};
 
 PlaylistManager = function(){
     "use strict";
@@ -93,6 +132,7 @@ PlaylistManager = function(){
     this.cssSelectorPlaylistCommands = '#playlistCommands';
     this.cssSelectorJPlayerControls = '#jp_ancestor';
     this.cssSelectorjPlayer = "#jquery_jplayer_1";
+    this.newplaylistProxy = new NewplaylistProxy(this);
     this.managedPlaylists = [] //hold instances of ManagedPlaylist
     this.playingPlaylist = 0;
     this.editingPlaylist = 0;
@@ -312,6 +352,9 @@ PlaylistManager.prototype = {
         this.setEditingPlaylist(0);
     },
     getPlaylistById : function(plid){
+        if (plid === 0) {
+            return this.newplaylistProxy;
+        }
         for(var i=0; i<this.managedPlaylists.length; i++){
             if(this.managedPlaylists[i].id == plid){
                 return this.managedPlaylists[i];
@@ -365,7 +408,7 @@ PlaylistManager.prototype = {
             plname = plist.name;
         } else {
             this.editingPlaylist = 0;
-            plname = 'new playlist';
+            plname = 'unknown playlist'
         }
         $('.plsmgr-editingplaylist-name').html(plname);
     },
@@ -375,9 +418,6 @@ PlaylistManager.prototype = {
     },
     addSong : function(path,title){
         "use strict";
-        if(this.editingPlaylist === 0){
-            this.newPlaylist();
-        }
         var self = this;
         var ext = getFileTypeByExt(path);
         var track = {
@@ -397,7 +437,7 @@ PlaylistManager.prototype = {
             }
         }
 
-        this.getEditingPlaylist().jplayerplaylist.add(track);
+        this.getEditingPlaylist().addTrack(track);
         pulse('.tabNavigation li a.jplayer');
         var success = function(data){
             var metainfo = $.parseJSON(data)

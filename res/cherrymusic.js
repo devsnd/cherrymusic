@@ -457,7 +457,7 @@ registermp3s = function(parent,mode){
                 $(parent).prepend('<a class="addAllToPlaylist" href="javascript:;">load playlist</a>');
                  break;
             case 'addPlayAll':
-                var playlistname  = typeof editplaylist === 'undefined' ? 'new playlist' : editplaylist.name;
+                var playlistname  = typeof editplaylist === 'undefined' ? 'undefined playlist' : editplaylist.name;
                 $(parent).prepend('<a class="addAllToPlaylist" href="javascript:;">add all to <span class="plsmgr-editingplaylist-name">' + playlistname + '</span></a>');
                 break;
             default:
