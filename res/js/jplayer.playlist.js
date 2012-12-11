@@ -413,6 +413,8 @@
 							}
                             self._updatePlaytime();
 							self.removing = false;
+                            //make sure all "name" attributes are correctly numbered
+                            self._refresh(true);
 						});
 					}
 					return true;

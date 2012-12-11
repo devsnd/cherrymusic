@@ -36,9 +36,9 @@ ManagedPlaylist.prototype = {
 
         $(playlistSelector+" ul").sortable({
             update: function(e,ui){
-                mediaPlaylist.scan();
-                }
-            });
+                self.jplayerplaylist.scan();
+            }
+        });
         $(playlistSelector+" ul").disableSelection();
 
         //event handler for clicked tracks in jplayer playlist
