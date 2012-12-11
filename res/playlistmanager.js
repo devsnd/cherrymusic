@@ -94,10 +94,11 @@ ManagedPlaylist.prototype = {
     getRemainingTracks : function(){
         if(playlistManager.shuffled){
             var n = this._getMostPlayedTrack();
-            return remainingTracks = this.jplayerplaylist.playlist.filter(function(elem,idx,arr){
-                return elem.wasPlayed > n;
+            var remainingTracks = this.jplayerplaylist.playlist.filter(function(elem,idx,arr){
+                return elem.wasPlayed < n;
             });
-            
+            remainingTracks.push(this.jplayerplaylist.playlist[this.jplayerplaylist.current]);
+            return remainingTracks
         } else {
             return this.jplayerplaylist.playlist.slice(this.jplayerplaylist.current);
         }
