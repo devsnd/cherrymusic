@@ -420,6 +420,9 @@ JPlayer Additions
 .jp-mute{
     margin-left: 10px !important;
 }
+.jp-unmute{
+    margin-left: 10px !important;
+}
 .jp-volume-bar {
     left: 183px !important;
     top: 53px !important;
