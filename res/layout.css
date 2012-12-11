@@ -361,6 +361,9 @@ div.container{
 .available-playlists{
     
 }
+.playlist-progress{
+    padding: 10px 2px 0;
+}
 /**********
 ADMIN PANEL
 **********/

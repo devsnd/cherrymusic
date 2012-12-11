@@ -178,6 +178,11 @@
 			});
 		},
 		_initPlaylist: function(playlist) {
+            for(var i=0; i<playlist.length; i++){
+                if(typeof playlist[i].wasPlayed === 'undefined'){
+                    playlist[i].wasPlayed = 0;
+                }
+            }
 			this.current = 0;
 			this.shuffled = false;
 			this.removing = false;

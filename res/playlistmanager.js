@@ -80,6 +80,37 @@ ManagedPlaylist.prototype = {
             'reason_open' : this.reason_open,
         };
     },
+    getPlayTimeSec : function(playlist){
+        var durationsec = 0;
+        for(var i=0; i<playlist.length; i++){
+            if(typeof playlist[i].duration !== 'undefined'){
+                durationsec += playlist[i].duration;
+            } else {
+                return;
+            }
+        }
+        return durationsec;
+    },
+    getRemainingTracks : function(){
+        if(playlistManager.shuffled){
+            var n = this._getMostPlayedTrack();
+            return remainingTracks = this.jplayerplaylist.playlist.filter(function(elem,idx,arr){
+                return elem.wasPlayed > n;
+            });
+            
+        } else {
+            return this.jplayerplaylist.playlist.slice(this.jplayerplaylist.current);
+        }
+    },
+    _getMostPlayedTrack : function(){
+        var wasplayermost = 0;
+        for(var i=0; i<this.jplayerplaylist.playlist.length; i++){
+            if(this.jplayerplaylist.playlist[i].wasPlayed > wasplayermost){
+                wasplayermost = this.jplayerplaylist.playlist[i].wasPlayed;
+            }
+        } 
+        return wasplayermost;
+    },
     makeThisPlayingPlaylist : function(){
         this.playlistManager.setPlayingPlaylist(this.id);
     },
@@ -88,41 +119,32 @@ ManagedPlaylist.prototype = {
     }
 }
 
-var NewplaylistProxy =  function(playlistManager) {
-    this.playlistManager = playlistManager;
-    this.id = 0;
-    this.name = "new playlist";
-    this.closable = false;
-    this.public = true;
-    this.owner = 'me';
-    this.saved = true;
-    //can be 'recommendation', 'ownwill', 'queue'
-    this.reason_open = 'newplaylist_proxy';
-
-    this.jplayerplaylist;
-
-    this.getCanonicalPlaylist = function(){
-        return {
-            'playlist' : [],
-            'name' : this.name,
-            'closable' : this.closable,
-            'public' : this.public,
-            'owner' : this.owner,
-            'saved' : this.saved,
-            'reason_open' : this.reason_open,
-        };
-    };
-    this.makeThisPlayingPlaylist = function(){
+var NewplaylistProxy = function(playlistManager){
+    options = {};
+    //override options
+    options.id = 0;
+    options.name = "new playlist";
+    options.closable = false;
+    options.public = true;
+    options.owner = 'me';
+    options.saved = true;
+    options.reason_open = 'newplaylist_proxy';
+    
+    //create original object
+    var actual = new ManagedPlaylist(playlistManager, [], options);
+    
+    //override methods
+    actual.makeThisPlayingPlaylist = function(){
         var newpl = this.playlistManager.newPlaylist();
         newpl.makeThisPlayingPlaylist();
     };
-    this.addTrack = function(track) {
+    actual.addTrack = function(track) {
         var newpl = this.playlistManager.newPlaylist();
         this.playlistManager.setEditingPlaylist(newpl.id);
         newpl.jplayerplaylist.add(track);
     };
-
-};
+    return actual;
+}
 
 PlaylistManager = function(){
     "use strict";
@@ -151,6 +173,9 @@ PlaylistManager = function(){
     $(this.cssSelectorjPlayer).bind($.jPlayer.event.ready, function(event) {
         self.restorePlaylists();
         window.setInterval('playlistManager.displayCurrentSong()',1000);
+        //used to update remaining playlist time:
+        // should be triggered by jplayer time update event in the future.
+        window.setInterval('playlistManager.refreshCommands()',1000);
 	});
     this.initJPlayer();
 }
@@ -262,12 +287,12 @@ PlaylistManager.prototype = {
     refreshCommands : function(){
         var cmds =$(this.cssSelectorPlaylistCommands);
         cmds.empty();
-        var pl = this.getEditingPlaylist();
-        if(pl){
-            if(!pl.saved){
-                cmds.append('<a class="button" onclick="showPlaylistSaveDialog('+pl.id+')">save</a>');
+        var epl = this.getEditingPlaylist();
+        if(typeof epl !== 'undefined'){
+            if(!epl.saved){
+                cmds.append('<a class="button" onclick="showPlaylistSaveDialog('+epl.id+')">save</a>');
             }
-            if(pl.reason_open == 'queue'){
+            if(epl.reason_open == 'queue'){
                 cmds.append('<a class="button floatright" onclick="playlistManager.removePlayedFromPlaylist()" >remove played tracks</a>');
                 cmds.append('<a class="button floatright" onclick="playlistManager.clearQueue()">clear queue</a>');
                 cmds.append('<a class="button floatleft" onclick="playlistManager.newPlaylistFromQueue()">save as playlist</a>');
@@ -279,6 +304,22 @@ PlaylistManager.prototype = {
                     cmds.append('<span class="floatleft">status: <a class="button" title="make private">public</a></span>');
                 }*/
             }
+
+            var remaintracks = epl.getRemainingTracks();
+            var remaintimesec = epl.getPlayTimeSec(remaintracks);
+            var completetimesec = epl.getPlayTimeSec(epl.jplayerplaylist.playlist);
+            if(epl.id === this.getPlayingPlaylist().id){
+                remaintimesec -= $(this.cssSelectorjPlayer).data("jPlayer").status.currentTime;
+            }
+            if(typeof remaintimesec !== 'undefined' && typeof completetimesec !== 'undefined' ){
+                var proc = remaintimesec/completetimesec;
+                var remaindisplay = '<div>'+epl.jplayerplaylist._formatTime(remaintimesec)+' remaining</div>';
+            } else {
+                var proc = remaintracks.length/epl.jplayerplaylist.playlist.length;
+                var remaindisplay = '<div>'+remaintracks.length+' remaining tracks</div>';
+            }
+            var progressbar = '<div style="background-color: #ffffff;"><div style="width: '+parseInt(100-proc*100)+'%; height: 3px;" class="active"></div>';
+            cmds.append('<div class="playlist-progress">'+remaindisplay+progressbar+'</div>');
         }
     },
     refreshTabs : function(){
