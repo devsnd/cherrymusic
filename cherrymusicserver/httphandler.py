@@ -29,7 +29,7 @@
 #
 
 """This class provides the api to talk to the client.
-It will then call the cherrymodel, to get the 
+It will then call the cherrymodel, to get the
 requested information"""
 
 import os #shouldn't have to list any folder in the future!
@@ -63,17 +63,17 @@ class HTTPHandler(object):
         self.config = config
         self.useroptions = useroptiondb.UserOptionDB(databaseFilePath('useroptions.db'))
         self.jsonrenderer = renderjson.JSON()
-        
+
         template_main = 'res/main.html'
         template_login = 'res/login.html'
         template_firstrun = 'res/firstrun.html'
-        
+
         self.mainpage = readRes(template_main)
         self.loginpage = readRes(template_login)
         self.firstrunpage = readRes(template_firstrun)
         self.userdb = userdb.UserDB(databaseFilePath('user.db'))
         self.playlistdb = playlistdb.PlaylistDB(databaseFilePath('playlist.db'))
-        
+
         self.handlers = {
             'search' : self.api_search,
             'fastsearch' : self.api_fastsearch,
@@ -121,9 +121,9 @@ class HTTPHandler(object):
         else:
             url = 'http://' + ipAndPort
         return url
-        
+
     def index(self, *args, **kwargs):
-        self.getBaseUrl(redirect_unencrypted=True)          
+        self.getBaseUrl(redirect_unencrypted=True)
         firstrun = 0 == self.userdb.getUserCount();
         if debug:
             #reload pages everytime in debig mode
@@ -154,10 +154,10 @@ class HTTPHandler(object):
             else:
                 return self.loginpage
     index.exposed = True
-    
+
     def isAuthorized(self):
         return cherrypy.session.get('username', None) or self.autoLoginEnabled()
-    
+
     def autoLoginEnabled(self):
         if cherrypy.request.remote.ip == '127.0.0.1' and cherry.config.server.localhost_auto_login.bool:
             cherrypy.session['username'] = self.userdb.getNameById(1)
@@ -173,7 +173,7 @@ class HTTPHandler(object):
         cherrypy.session['username'] = user.name
         cherrypy.session['userid'] = user.uid
         cherrypy.session['admin'] = user.isadmin
-    
+
     def getUserId(self):
         try:
             return cherrypy.session['userid']
@@ -181,7 +181,7 @@ class HTTPHandler(object):
             cherrypy.lib.sessions.expire()
             cherrypy.HTTPRedirect(cherrypy.url(), 303)
             return ''
-            
+
     def trans(self, *args):
         if not self.isAuthorized():
             raise cherrypy.HTTPRedirect(self.getBaseUrl(), 302)
@@ -210,7 +210,7 @@ class HTTPHandler(object):
             return "Error: no such action."
         self.api_getuseroptions(None)
     api.exposed = True
-    
+
     def api_customcss(self, value):
         cherrypy.response.headers["Content-Type"] = 'text/css'
         opts = self.useroptions.forUser(self.getUserId()).getOptions()
@@ -278,28 +278,28 @@ class HTTPHandler(object):
             }
             """
         return style
-        
+
     def invert(self,htmlcolor):
         r,g,b = self.html2rgb(htmlcolor)
         return '#'+self.rgb2hex(255-r,255-b,255-b)
-        
-    
+
+
     def brightness(self, htmlcolor, brightness):
         r,g,b = self.html2rgb(htmlcolor)
         r = min(max(r+brightness,0),255)
-        g = min(max(g+brightness,0),255)        
+        g = min(max(g+brightness,0),255)
         b = min(max(b+brightness,0),255)
         return '#'+self.rgb2hex(r,g,b)
-    
+
     def html2rgb(self,htmlcolor):
         return int(htmlcolor[1:3],16),int(htmlcolor[3:5],16),int(htmlcolor[5:7],16)
-    
+
     def rgb2hex(self,r,g,b):
         r = hex(r)[2:].zfill(2)
         g = hex(g)[2:].zfill(2)
         b = hex(b)[2:].zfill(2)
         return r+g+b
-        
+
 
     def api_opensearchdescription(self, value):
         if cherry.config.server.dyndns_address.str.strip():
@@ -318,11 +318,11 @@ class HTTPHandler(object):
         uo = self.useroptions.forUser(self.getUserId())
         uco = uo.getChangableOptions()
         return json.dumps(uco)
-        
+
     def api_heartbeat(self, value):
         uo = self.useroptions.forUser(self.getUserId())
         uo.setOption('last_time_online', int(time.time()))
-        
+
     def api_setuseroption(self, value):
         params = json.loads(value)
         uo = self.useroptions.forUser(self.getUserId())
@@ -346,7 +346,7 @@ class HTTPHandler(object):
                 return data
             cherrypy.response.headers["Content-Length"] = 0
             return ''
-    
+
     def api_compactlistdir(self, value):
         params = json.loads(value)
         dirtorender = params['directory']
@@ -363,7 +363,7 @@ class HTTPHandler(object):
         else:
             dirtorender = ''
         dirtorenderabspath = os.path.join(cherry.config.media.basedir.str, dirtorender)
-        if os.path.isdir(dirtorenderabspath):            
+        if os.path.isdir(dirtorenderabspath):
             return self.jsonrenderer.render(self.model.listdir(dirtorender))
         else:
             return "Error rendering getting results. Request doesn't lead to a directory"
@@ -375,10 +375,10 @@ class HTTPHandler(object):
             searchresults = self.model.search(value.strip(),isFastSearch)
             with Performance('rendering search results as json'):
                 return self.jsonrenderer.render(searchresults)
-        
+
     def api_fastsearch(self, value):
         return self.api_search(value,True)
-    
+
     def api_rememberplaylist(self, value):
         cherrypy.session['playlist'] = value
 
@@ -389,27 +389,27 @@ class HTTPHandler(object):
             public=1 if pl['public'] else 0,
             playlist=pl['playlist'],
             playlisttitle=pl['playlistname']);
-            
+
     def api_deleteplaylist(self, value):
         return self.playlistdb.deletePlaylist(value, self.getUserId())
-            
+
     def api_loadplaylist(self,value):
         return  self.jsonrenderer.render(self.playlistdb.loadPlaylist(
                             playlistid=value,
                             userid=self.getUserId()
                 ));
-                
+
     def api_getmotd(self,value):
         return self.model.motd()
-    
+
     def api_restoreplaylist(self,value):
         session_playlist = cherrypy.session.get('playlist', '[]')
         #session_playlist = list(filter(lambda x : x != None, session_playlist))
         return session_playlist
-        
+
     def api_getplayables(self,value):
         return json.dumps(cherry.config.media.playable.list)
-    
+
     def api_getuserlist(self,value):
         if cherrypy.session['admin']:
             userlist = self.userdb.getUserList()
@@ -418,7 +418,7 @@ class HTTPHandler(object):
             return json.dumps(userlist)
         else:
             return json.dumps([])
-    
+
     def api_adduser(self, value):
         if cherrypy.session['admin']:
             new = json.loads(value)
@@ -440,42 +440,42 @@ class HTTPHandler(object):
         for pl in playlists:
             pl['username']=self.userdb.getNameById(pl['userid'])
         return json.dumps(playlists);
-    
+
     def api_logout(self,value):
         cherrypy.lib.sessions.expire()
-        
+
     def api_downloadpls(self,value):
         dlval = json.loads(value)
         pls = self.playlistdb.createPLS(dlval['plid'],self.getUserId(),dlval['addr'])
         name = self.playlistdb.getName(value,self.getUserId())
         if pls and name:
             return self.serve_string_as_file(pls,name+'.pls')
-            
+
     def api_downloadm3u(self,value):
         dlval = json.loads(value)
         pls = self.playlistdb.createM3U(dlval['plid'],self.getUserId(),dlval['addr'])
         name = self.playlistdb.getName(value,self.getUserId())
         if pls and name:
-            return self.serve_string_as_file(pls,name+'.m3u')       
-            
+            return self.serve_string_as_file(pls,name+'.m3u')
+
     def api_getsonginfo(self,value):
         #TODO yet another dirty hack. removing the /serve thing is a mess.
         abspath = os.path.join(cherry.config.media.basedir.str,unquote(value)[7:])
         return json.dumps(metainfo.getSongInfo(abspath).dict())
-        
+
     def api_getencoders(self, value):
         return json.dumps(audiotranscode.getEncoders())
-        
+
     def api_getdecoders(self, value):
         return json.dumps(audiotranscode.getDecoders())
-    
+
     def api_transcodingenabled(self,value):
         return json.dumps(cherry.config.media.transcode.bool)
-        
+
     def api_updatedb(self,value):
         self.model.updateLibrary()
         return 'success'
-    
+
     def api_getconfiguration(self, value):
         clientconfigkeys = {
             'getencoders' : audiotranscode.getEncoders(),
@@ -489,8 +489,8 @@ class HTTPHandler(object):
             if configkey in clientconfigkeys:
                 retval[configkey] = clientconfigkeys[configkey]
         return json.dumps(retval)
-            
-    
+
+
     def serve_string_as_file(self,string,filename):
         cherrypy.response.headers["Content-Type"] = "application/x-download"
         cherrypy.response.headers["Content-Disposition"] = 'attachment; filename="'+filename+'"'
