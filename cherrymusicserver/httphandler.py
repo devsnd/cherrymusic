@@ -354,8 +354,8 @@ class HTTPHandler(object):
         if os.path.isdir(dirtorenderabspath):
             return self.jsonrenderer.render(self.model.listdir(dirtorender, params['filter']))
         else:
-            return "Error rendering getting results. Request doesn't lead to a directory"
-    
+            return '"Error rendering getting results. Request doesn\'t lead to a directory"'
+
     def api_listdir(self,value):
         if value:
             params = json.loads(value)
@@ -366,8 +366,8 @@ class HTTPHandler(object):
         if os.path.isdir(dirtorenderabspath):
             return self.jsonrenderer.render(self.model.listdir(dirtorender))
         else:
-            return "Error rendering getting results. Request doesn't lead to a directory"
-    
+            return '"Error rendering getting results. Request doesn\'t lead to a directory"'
+
     def api_search(self, value, isFastSearch=False):
         if not value.strip():
             return self.jsonrenderer.render([MusicEntry(path="if you're looking for nothing, you'll be getting nothing",repr="")])
