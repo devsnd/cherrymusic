@@ -428,9 +428,9 @@ registercompactlistdirs = function(parent){
     );
 };
 
-addAllToPlaylist = function(){
+addAllToPlaylist = function($source){
     "use strict";
-    $(this).siblings('li').find('.mp3file').each(function(){
+    $source.siblings('li').find('.mp3file').each(function(){
         playlistManager.addSong( $(this).attr("path"), $(this).attr("title") );
     });
     $(this).blur();
@@ -442,7 +442,7 @@ addThisTrackToPlaylist = function(){
     return false;
 }
 
-registermp3s = function(parent,mode){
+registermp3s = function(parent,mode, playlistlabel){
     "use strict";
     if(typeof mode === 'undefined'){
         mode = 'addPlayAll'
@@ -455,17 +455,21 @@ registermp3s = function(parent,mode){
         switch(mode) {
             case 'loadPlaylist':
                 $(parent).prepend('<a class="addAllToPlaylist" href="javascript:;">load playlist</a>');
+                $(parent).children('.addAllToPlaylist').click( function() {
+                    playlistManager.newPlaylist([], playlistlabel);
+                    addAllToPlaylist($(this));
+                });
                  break;
             case 'addPlayAll':
                 var playlistname  = typeof editplaylist === 'undefined' ? 'undefined playlist' : editplaylist.name;
                 $(parent).prepend('<a class="addAllToPlaylist" href="javascript:;">add all to <span class="plsmgr-editingplaylist-name">' + playlistname + '</span></a>');
+                $(parent).children('.addAllToPlaylist').click( function() {
+                    addAllToPlaylist($(this));
+                });
                 break;
             default:
                 break;
         }
-        $(parent).children('.addAllToPlaylist').click(
-            addAllToPlaylist
-        );
     }
 };
 
@@ -626,7 +630,7 @@ function showPlaylists(){
                     ['<li id="playlist{{playlistid}}">',
                     '<div class="remoteplaylist">',
                         '<div class="playlisttitle">',
-                            '<a href="javascript:;" onclick="loadPlaylist({{playlistid}})">',
+                            '<a href="javascript:;" onclick="loadPlaylist({{playlistid}}, \'{{playlistlabel}}\')">',
                             '{{playlistlabel}}',
                             '</a>',
                         '</div>',
@@ -691,7 +695,7 @@ function hidePlaylists(){
     $('.hideplayliststab').slideUp('fast');
     $('.available-playlists').slideUp();
 }
-function loadPlaylist(playlistid){
+function loadPlaylist(playlistid, playlistlabel){
     "use strict";
     var pldomid = "#playlist"+playlistid+' .playlistcontent';
     
@@ -702,7 +706,7 @@ function loadPlaylist(playlistid){
             $(pldomid).hide();
             $(pldomid).append(parseAndRender(data));
             $(pldomid).slideDown('slow');
-            registermp3s($(pldomid).find('ul'), 'loadPlaylist');
+            registermp3s($(pldomid).find('ul'), 'loadPlaylist', playlistlabel);
         };
         api(data,success,errorFunc('error loading external playlist'))
     } else {
