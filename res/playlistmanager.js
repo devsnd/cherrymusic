@@ -366,11 +366,11 @@ PlaylistManager.prototype = {
             window.console.log($(this).attr('id'));
             if($.inArray($(this).attr('id'), validHTMLIds)<0){
                 $(this).remove();
-                window.console.log('removing');
+                window.console.log('removing invalid playlist from ui');
             }
         });
 
-        $(this.cssSelectorPlaylistContainerParent)
+        this.showPlaylist(this.getEditingPlaylist().id);
     },
     showPlaylist : function(playlistid){
         $('#playlistBrowser').hide();
