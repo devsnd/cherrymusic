@@ -591,9 +591,9 @@ PlaylistManager.prototype = {
         this.refresh();
         return newpl;
     },
-    newPlaylist : function(playlist){
+    newPlaylist : function(playlist, name){
         playlist = playlist || [];
-        var newpl = this._createPlaylist(playlist,true,true,'me','ownwill');
+        var newpl = this._createPlaylist(playlist,true,true,'me','ownwill', name);
         this.showPlaylist(newpl.id);
         return newpl;
     },
