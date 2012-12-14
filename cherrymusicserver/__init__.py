@@ -88,7 +88,7 @@ class CherryMusic:
         global config
         defaultcfg = configuration.from_defaults()
         configFilePath = util.configurationFile()
-        log.i('loading configuration from %s', configFilePath)
+        log.d('loading configuration from %s', configFilePath)
         filecfg = configuration.from_configparser(configFilePath)
         config = defaultcfg + filecfg
         self._check_for_config_updates(filecfg)
@@ -115,8 +115,7 @@ class CherryMusic:
                         %s''',
                   '\n\t\t\t'.join(deprecated))
         if new or deprecated:
-            log.i('''
-                  Start with --newconfig to generate a new default config file next to your current one.
+            log.i('''Start with --newconfig to generate a new default config file next to your current one.
                   ''',
             )
 
@@ -217,7 +216,7 @@ Have fun!
                     'tools.staticfile.filename' : resourcedir+'/favicon.ico',
                 }
         })
-        log.i('Starting server on port %s ...' % config.server.port)
+        log.i('Starting server on port %s ...' % config.server.port.str)
 
         cherrypy.lib.caching.expires(0) #disable expiry caching
         cherrypy.engine.start()

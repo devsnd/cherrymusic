@@ -91,9 +91,11 @@ class TableDescriptor:
             #remove columns from db when not in template
             for columnname in dbtablelayout.keys():
                 if columnname not in self.columns:
-                    log.i('Dropping column %s from table %s' % (columnname, self.tablename))
-                    sqlconn.execute("""ALTER TABLE ? DROP COLUMN ?""",(self.tablename, columnname))
-                    updatedTable = True
+                    #can't do this in sqlite...
+                    #log.i('Dropping column %s from table %s' % (columnname, self.tablename))
+                    #sqlconn.execute("""ALTER TABLE %s DROP COLUMN %s"""%(self.tablename, columnname))
+                    #updatedTable = True
+                    pass
                 else:
                     log.d('Column %s in table %s exists and needs no change' % (columnname, self.tablename))
             #add new columns to db when not in db
@@ -507,7 +509,7 @@ class SQLiteCache(object):
         if len(basedir) > 1:
             basedir = basedir.rstrip(os.path.sep)
         cherry.config.media.basedir = basedir
-        log.i('media base directory: %r' % basedir)
+        log.d('media base directory: %r' % basedir)
 
 
     @util.timed
