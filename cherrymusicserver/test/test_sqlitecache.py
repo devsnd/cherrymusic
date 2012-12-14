@@ -152,6 +152,8 @@ class AddFilesToDatabaseTest(unittest.TestCase):
         setupTestfiles(self.testdir, ())
         self.setupConfig()
         self.Cache = sqlitecache.SQLiteCache(':memory:')
+        self.Cache.create_and_alter_tables()
+        self.Cache.full_update()
 
 
     def tearDown(self):
@@ -170,16 +172,21 @@ class AddFilesToDatabaseTest(unittest.TestCase):
 
         self.assertTrue(file.uid >= 0, "file must have valid rowid")
 
-        res = self.Cache.conn.execute('SELECT * from files WHERE rowid=?', (file.uid,)).fetchall()
+        cols = ', '.join(self.Cache.filestable.columns.keys())
+        res = self.Cache.conn.execute('SELECT %s from files WHERE rowid=?'%cols, (file.uid,)).fetchall()
 
         self.assertTrue(1 == len(res), "expect exactly one file with that uid")
-        self.assertTrue(4 == len(res[0]), "expect exactly four colums stored per file")
+        self.assertTrue(len(self.Cache.filestable.columns) == len(res[0]), "expect exactly %s colums stored per file, got %s" % (len(self.Cache.filestable.columns),len(res[0])))
 
-        parentid, fname, fext, isdir = res[0]
-        self.assertTrue(parent.uid == parentid, "correct parent id must be saved")
-        self.assertTrue('filename' == fname, "filename must be saved without extension")
-        self.assertTrue('.extension' == fext, "extension must be saved with leading .")
-        self.assertFalse(isdir, 'isdir must not be set in files table')
+        resdict = {}
+        i=0
+        for k in self.Cache.filestable.columns.keys():
+            resdict[k] = res[0][i]
+            i+=1
+        self.assertTrue(parent.uid == resdict['parent'], "correct parent id must be saved")
+        self.assertTrue('filename' == resdict['filename'], "filename must be saved without extension")
+        self.assertTrue('.extension' == resdict['filetype'], "extension must be saved with leading .")
+        self.assertFalse(resdict['isdir'], 'isdir must not be set in files table')
 
         isdir = self.Cache.conn.execute('SELECT isdir from files WHERE rowid=?', (parent.uid,)).fetchone()[0]
         self.assertTrue(isdir, "isdir must be saved correctly")
@@ -328,7 +335,8 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
         setupTestfiles(self.testdir, self.testfiles)
         self.setupConfig()
         self.Cache = sqlitecache.SQLiteCache(':memory:')
-        self.Cache.full_update()
+        if self.Cache.create_and_alter_tables():
+            self.Cache.full_update()
         self.setupFileObjects()
         assert self.fileobjects[''].fullpath == os.path.abspath(self.testdir), \
                 'precondition: test rootdir has correct fullpath'
@@ -465,6 +473,7 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
         self.Cache = sqlitecache.SQLiteCache(':memory:')
         self.Cache.conn.close()
         self.Cache.conn = BoobyTrap(':memory:')
+        self.Cache.create_and_alter_tables()
         self.Cache.full_update()
 
         removelist = self.get_fileobjects_for('root_dir')
@@ -509,6 +518,7 @@ class SymlinkTest(unittest.TestCase):
         setupTestfiles(self.testdir, self.testfiles)
         cherry.config.media.basedir = self.testdir
         self.Cache = sqlitecache.SQLiteCache(':memory:')
+        self.Cache.create_and_alter_tables()
 
     def tearDown(self):
         removeTestfiles(self.testdir, self.testfiles)
@@ -575,6 +585,7 @@ class UpdateTest(unittest.TestCase):
 
     def setupCache(self):
         self.Cache = sqlitecache.SQLiteCache(':memory:')
+        self.Cache.create_and_alter_tables()
         self.Cache.full_update()
 
     def clearCache(self):

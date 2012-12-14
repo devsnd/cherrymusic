@@ -53,6 +53,73 @@ FAST_FILE_SEARCH_LIMIT = 20
 
 if debug:
     log.level(log.DEBUG)
+    
+class TableColumn:
+    def __init__(self, name, datatype, attributes=''):
+        self.name = name
+        self.datatype = self.checkdatatype(datatype)
+        self.attributes = attributes
+        
+    def sql(self):
+        return ' '.join(["'"+self.name+"'",self.datatype,self.attributes])
+        
+    def checkdatatype(self,datatype):
+        if datatype in ['int','text']:
+            return datatype
+        else:
+            raise TypeError("column cannot have datatype: %s"%datatype)
+        
+
+class TableDescriptor:
+    def __init__(self, tablename, columns):
+        self.tablename = tablename
+        self.columns = {}
+        self.indexes = []
+        for column in columns:
+            if not type(column) == TableColumn:
+                raise TypeError("column must be of type TableColumn")
+            self.columns[column.name] = column
+        
+    def createOrAlterTable(self, sqlconn):
+        updatedTable = False
+        #table exists?
+        if sqlconn.execute("""SELECT name FROM sqlite_master
+            WHERE type='table' AND name=? """,(self.tablename,)).fetchall():
+            dbtablelayout = sqlconn.execute("""PRAGMA table_info('%s')""" % self.tablename).fetchall()
+            #map dict to column name
+            dbtablelayout = dict((col[1],col) for col in dbtablelayout)
+            #remove columns from db when not in template
+            for columnname in dbtablelayout.keys():
+                if columnname not in self.columns:
+                    log.i('Dropping column %s from table %s' % (columnname, self.tablename))
+                    sqlconn.execute("""ALTER TABLE ? DROP COLUMN ?""",(self.tablename, columnname))
+                    updatedTable = True
+                else:
+                    log.d('Column %s in table %s exists and needs no change' % (columnname, self.tablename))
+            #add new columns to db when not in db
+            for templatecolumnname, templatecolumn in self.columns.items():
+                if templatecolumnname not in dbtablelayout.keys():
+                    log.i('Adding column %s to table %s' % (templatecolumnname, self.tablename))
+                    sqlconn.execute("""ALTER TABLE %s ADD COLUMN %s""" % (self.tablename, templatecolumn.sql()))      
+                    updatedTable = True
+                else:
+                    log.d('Column %s in table %s exists and needs no change' % (templatecolumnname, self.tablename))
+            #TODO add checks for DEFAULT value and NOT NULL
+        else:
+            log.i('Creating table %s' % self.tablename)
+            sqlconn.execute("""CREATE TABLE %s (%s)""" % (self.tablename, ', '.join(map(lambda x: x.sql(), self.columns.values())) ) )
+            updatedTable = True
+        return updatedTable
+    
+    def createIndex(self, sqlconn, columns):
+        for c in columns:
+            if not c in self.columns:
+                raise IndexError('column %s does not exist in table %s, cannot create index!' % (c, self.tablename))
+        existing_indexes = map(itemgetter(0), sqlconn.execute("""SELECT name FROM sqlite_master WHERE type='index' ORDER BY name""").fetchall())
+        indexname = '_'.join(['idx',self.tablename,'_'.join(columns)])
+        if not indexname in existing_indexes:
+            log.i('Creating index %s' % indexname)
+            sqlconn.execute('CREATE INDEX IF NOT EXISTS %s ON %s(%s)'%(indexname,self.tablename,', '.join(columns)))
 
 class SQLiteCache(object):
     def __init__(self, DBFILENAME):
@@ -60,25 +127,29 @@ class SQLiteCache(object):
         self.DBFILENAME = DBFILENAME
         setupDB = not os.path.isfile(DBFILENAME) or os.path.getsize(DBFILENAME) == 0
         setupDB |= DBFILENAME == ':memory:' #always rescan when using ram db.
-        log.i('Starting database... ')
+        
+        self.filestable = TableDescriptor('files',[
+            TableColumn('parent','int','NOT NULL'),
+            TableColumn('filename','text','NOT NULL'),
+            TableColumn('filetype','text'),
+            TableColumn('isdir','int','NOT NULL'),
+        ])
+        self.dictionarytable = TableDescriptor('dictionary',[
+            TableColumn('word', 'text', 'NOT NULL')])
+            
+        self.searchtable = TableDescriptor('search',[
+            TableColumn('drowid', 'int', 'NOT NULL'),
+            TableColumn('frowid', 'int', 'NOT NULL')])
 
         self.conn = sqlite3.connect(DBFILENAME, check_same_thread=False)
         self.db = self.conn.cursor()
         self.rootDir = cherry.config.media.basedir.str
 
-        if setupDB:
-            log.i('Creating tables...')
-            self.__create_tables()
-            log.i('done.')
-            log.i('Connected to Database. (' + DBFILENAME + ')')
-        log.i('Creating indices for dictionary and search tables (if necessary)... ')
-        self.__create_indexes()
-
         #I don't care about journaling!
         self.conn.execute('PRAGMA synchronous = OFF')
         self.conn.execute('PRAGMA journal_mode = MEMORY')
         self.load_db_to_memory()
-
+        
     def file_db_in_memory(self):
         return not self.DBFILENAME == ':memory:' and cherry.config.search.load_file_db_into_memory.bool
 
@@ -101,8 +172,23 @@ class SQLiteCache(object):
         res = self.conn.execute(query).fetchall()
         return not bool(res)
 
+    def create_and_alter_tables(self, suppressWarning=False):
+        tableChanged = False
+        tableChanged |= self.filestable.createOrAlterTable(self.conn)       
+        tableChanged |= self.dictionarytable.createOrAlterTable(self.conn)
+        tableChanged |= self.searchtable.createOrAlterTable(self.conn)
+        
+        if tableChanged and not suppressWarning:
+            log.w('The database layout has changed, please run "cherrymusic --update" to make sure everthing is up to date.')
+        return tableChanged
+            
+    def __create_index_if_non_exist(self):
+        self.filestable.createIndex(self.conn,['parent'])
+        self.dictionarytable.createIndex(self.conn,['word'])
+        self.searchtable.createIndex(self.conn,['drowid','frowid'])
 
     def __create_tables(self):
+        """DEPRECATED, has been replaced by create_and_alter_tables"""
         self.__drop_tables()
         self.conn.execute('CREATE TABLE files ('
                           ' parent int NOT NULL,'
@@ -122,6 +208,7 @@ class SQLiteCache(object):
 
 
     def __create_indexes(self):
+        """DEPRECATED, has been replaced by __create_index_if_non_exist"""
         self.conn.execute('CREATE INDEX IF NOT EXISTS idx_files_parent'
                           ' ON files(parent)')
         self.conn.execute('CREATE INDEX IF NOT EXISTS idx_dictionary'
@@ -140,6 +227,7 @@ class SQLiteCache(object):
 
 
     def isEmpty(self):
+        """DEPRECATED create_and_alter_tables returns changes in DB"""
         return self.__table_is_empty('files')
 
 
@@ -266,7 +354,7 @@ class SQLiteCache(object):
 
 
     def add_to_file_table(self, fileobj):
-        cursor = self.conn.execute('INSERT INTO files VALUES (?,?,?,?)', (fileobj.parent.uid if fileobj.parent else -1, fileobj.name, fileobj.ext, 1 if fileobj.isdir else 0))
+        cursor = self.conn.execute('INSERT INTO files (parent, filename, filetype, isdir) VALUES (?,?,?,?)', (fileobj.parent.uid if fileobj.parent else -1, fileobj.name, fileobj.ext, 1 if fileobj.isdir else 0))
         rowid = cursor.lastrowid
         fileobj.uid = rowid
         return [rowid]
@@ -277,7 +365,7 @@ class SQLiteCache(object):
         for word in set(SQLiteCache.searchterms(filename)):
             wordrowid = self.conn.execute('''SELECT rowid FROM dictionary WHERE word = ? LIMIT 0,1''', (word,)).fetchone()
             if wordrowid is None:
-                wordrowid = self.conn.execute('''INSERT INTO dictionary VALUES (?)''', (word,)).lastrowid
+                wordrowid = self.conn.execute('''INSERT INTO dictionary (word) VALUES (?)''', (word,)).lastrowid
             else:
                 wordrowid = wordrowid[0]
             word_ids.append(wordrowid)
@@ -285,7 +373,7 @@ class SQLiteCache(object):
 
 
     def add_to_search_table(self, file_id, word_id_seq):
-        self.conn.executemany('INSERT INTO search VALUES (?,?)',
+        self.conn.executemany('INSERT INTO search (drowid, frowid) VALUES (?,?)',
                               ((wid, file_id) for wid in word_id_seq))
 
 
@@ -428,27 +516,14 @@ class SQLiteCache(object):
         necesary changes.'''
 
         log.i('running full update...')
-        firstupdate = False
-        if not self.__table_exists('files'):
-            firstupdate = True
-            self.__create_tables()
-        elif self.__table_is_empty('files'):
-            firstupdate = True
-        if firstupdate:
-            log.d('firstupdate: running without indexes')
-            self.__drop_indexes()
 
         try:
             self.update_db_recursive(cherry.config.media.basedir.str, skipfirst=True)
         except:
             log.e('error during media update. database update incomplete.')
-        else:
-            log.i('media database update complete.')
         finally:
-            if firstupdate:
-                log.i('creating indexes')
-                self.__create_indexes()
-            log.i('update run finished!')
+            self.__create_index_if_non_exist()
+            log.i('media database update complete.')
 
 
     def partial_update(self, path, *paths):

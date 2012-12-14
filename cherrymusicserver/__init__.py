@@ -74,9 +74,10 @@ class CherryMusic:
         def __init__(self, db, update):
             threading.Thread.__init__(self)
             self.db = db
-            self.update = update
+            self.update = update #command line switch
         def run(self):
-            if self.db.isEmpty():
+            dbLayoutChangesOrCreation = self.db.create_and_alter_tables()
+            if dbLayoutChangesOrCreation:
                 self.db.full_update()
             elif self.update:
                 self.db.partial_update(*self.update)
