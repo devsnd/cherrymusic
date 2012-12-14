@@ -53,7 +53,7 @@ VERSION = "0.22.0"
 
 class CherryMusic:
 
-    def __init__(self, update=None, createNewConfig=False):
+    def __init__(self, update=None, createNewConfig=False, dropfiledb=False):
         if createNewConfig:
             newconfigpath = util.configurationFile() + '.new'
             configuration.write_to_file(configuration.from_defaults(), newconfigpath)
@@ -67,15 +67,18 @@ class CherryMusic:
         self.db = sqlitecache.SQLiteCache(util.databaseFilePath('cherry.cache.db'))
         self.cherrymodel = cherrymodel.CherryModel(self.db)
         self.httphandler = httphandler.HTTPHandler(config, self.cherrymodel)
-        CherryMusic.UpdateThread(self.db,update).start()
+        CherryMusic.UpdateThread(self.db,update,dropfiledb).start()
         self.server()
         
     class UpdateThread(threading.Thread):
-        def __init__(self, db, update):
+        def __init__(self, db, update,dropfiledb):
             threading.Thread.__init__(self)
             self.db = db
+            self.dropfiledb = dropfiledb
             self.update = update #command line switch
         def run(self):
+            if self.dropfiledb:
+                self.db.drop_tables()
             dbLayoutChangesOrCreation = self.db.create_and_alter_tables()
             if dbLayoutChangesOrCreation:
                 self.db.full_update()

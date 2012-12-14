@@ -203,7 +203,7 @@ class SQLiteCache(object):
                           ' frowid int NOT NULL)')
 
 
-    def __drop_tables(self):
+    def drop_tables(self):
         self.conn.execute('DROP TABLE IF EXISTS files')
         self.conn.execute('DROP TABLE IF EXISTS dictionary')
         self.conn.execute('DROP TABLE IF EXISTS search')
