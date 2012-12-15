@@ -309,14 +309,14 @@ PlaylistManager.prototype = {
         cmds.empty();
         var epl = this.getEditingPlaylist();
         if(typeof epl !== 'undefined'){
-            if(!epl.saved){
-                cmds.append('<a class="button" onclick="showPlaylistSaveDialog('+epl.id+')">save</a>');
-            }
             if(epl.reason_open == 'queue'){
                 cmds.append('<a class="button floatright" onclick="playlistManager.removePlayedFromPlaylist()" >remove played tracks</a>');
                 cmds.append('<a class="button floatright" onclick="playlistManager.clearQueue()">clear queue</a>');
                 cmds.append('<a class="button floatleft" onclick="playlistManager.newPlaylistFromQueue()">save as playlist</a>');
             } else {
+                if(!epl.saved){
+                    cmds.append('<a class="button" onclick="showPlaylistSaveDialog('+epl.id+')">save</a>');
+                }
                 /*cmds.append('<span class="floatleft">owner '+pl.owner+'</span>');
                 if(!pl.public){
                     cmds.append('<span class="floatleft">status: <a class="button" title="make public">private</a></span>');
