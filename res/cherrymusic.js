@@ -59,7 +59,7 @@ function api(data_or_action, successfunc, errorfunc, background){
     } else {
         apiaction = data_or_action['action'];
         senddata = {"value" :  data_or_action['value'] };
-        
+
     }
     if(!errorfunc){
         errorfunc = function(){
@@ -73,8 +73,8 @@ function api(data_or_action, successfunc, errorfunc, background){
     var urlaction = '/api';
     if(apiaction){
         urlaction += '/'+apiaction;
-    }    
-    $.ajax({      
+    }
+    $.ajax({
         url: urlaction,
         context: $(this),
         type: 'POST',
@@ -127,7 +127,7 @@ function loadConfig(){
 /************
  * USER OPTIONS
  * **********/
- 
+
 function loadAndShowUserOptions(){
         var success = function(data){
             $('#useroptions .content').html('');
@@ -178,7 +178,7 @@ OptionRenderer.prototype = {
             $.each(optionval, function(suboptionkey, suboptionval) {
                 self.renderOption(suboptionkey, suboptionval, optionkey+'.');
             });
-        }   
+        }
     },
     renderOptionField : function(optionkey, optionval){
         var self = this;
@@ -194,7 +194,7 @@ OptionRenderer.prototype = {
             success = 'reloadStylesheets';
             error = 'function(){}';
         }
-            
+
         switch(typeof optionval){
             case "string":
                 var onkeyup = [   'api({action:\'setuseroption\', value:JSON.stringify({',
@@ -220,7 +220,7 @@ function reloadStylesheets() {
     var queryString = '?reload=' + new Date().getTime();
     $('link[rel="stylesheet"]').each(function () {
         if(this.href.indexOf('api/customcss.css') != -1){
-            this.href = this.href.replace(/\?.*|$/, queryString); 
+            this.href = this.href.replace(/\?.*|$/, queryString);
         }
     });
 }
@@ -237,7 +237,7 @@ function fastsearch(append){
         if(append){
             $('#searchresults').append(parseAndRender(data));
         } else {
-            $('#searchresults').html(parseAndRender(data)); 
+            $('#searchresults').html(parseAndRender(data));
         }
         registerlistdirs($('#searchresults').find('ul'));
         registercompactlistdirs($('#searchresults').find('ul'));
@@ -290,7 +290,7 @@ function parseAndRender(data){
 function renderList(l){
     "use strict";
     var html = "";
-    $.each(l, function(i, e) { 
+    $.each(l, function(i, e) {
         switch(e.type){
             case 'file':
                 html += listify(renderFile(e.label,e.urlpath,e.path),'class="fileinlist"');
@@ -326,8 +326,8 @@ function renderFile(label,urlpath,dirpath){
                 alabel: label,
                 ahref : 'javascript:;',
                 acssclass : 'mp3file',
-                apath : urlpath,     
-                afullpathlabel : fullpathlabel,            
+                apath : urlpath,
+                afullpathlabel : fullpathlabel,
             });//+'<a class="floatright" href="javascript:;">&uarr;DIR</a>';
     } else {
         return '<span>'+fullpathlabel+label+'</span>';
@@ -414,7 +414,7 @@ compactlistdirclick = function(){
     }
 
 };
-registerlistdirs = function(parent){ 
+registerlistdirs = function(parent){
     "use strict";
     $(parent).find("a.listdir").click(
         listdirclick
@@ -523,16 +523,16 @@ function sortFormatPreferrencePerBrowser(){
 ext2jPlayerFormat = function(ext){
     switch(ext){
         case "mp3": return "mp3";
-        
-        case "ogg": 
+
+        case "ogg":
         case "oga": return "oga";
-        
-        case "m4a": 
+
+        case "m4a":
         case "mp4":
         case "aac": return "m4a";
-        
+
         case "wav": return "wav";
-        
+
         case "weba": return "webma";
     }
 }
@@ -547,7 +547,7 @@ function getTranscodePath(filepath, format){
     var match = filepath.match(/\/serve(.*)$/);
     if(match){
         return "/trans"+match[1]+"/get."+format;
-    }        
+    }
 }
 
 /******************
@@ -595,7 +595,7 @@ function savePlaylist(plid,playlistname,ispublic){
     var success = function(){
         playlistManager.getPlaylistById(plid).name = playlistname;
         playlistManager.getPlaylistById(plid).public = ispublic;
-        playlistManager.getPlaylistById(plid).saved = true;       
+        playlistManager.getPlaylistById(plid).saved = true;
         playlistManager.refresh();
         playlistManager.showPlaylist(plid);
     }
@@ -677,9 +677,9 @@ function showPlaylists(){
             $('.showplayliststab').slideUp('fast');
             $('.available-playlists').slideDown();
         };
-    
+
     var error = errorFunc('error loading external playlists');
-    
+
     api('showplaylists',success,error);
 }
 
@@ -705,7 +705,7 @@ function hidePlaylists(){
 function loadPlaylist(playlistid, playlistlabel){
     "use strict";
     var pldomid = "#playlist"+playlistid+' .playlistcontent';
-    
+
     if('' === $(pldomid).html().trim()){
         var data = {'action':'loadplaylist',
                     'value': playlistid };

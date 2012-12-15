@@ -12,7 +12,7 @@ var ManagedPlaylist = function(playlistManager, playlist, options){
     this.saved = options.saved;
     //can be 'recommendation', 'ownwill', 'queue'
     this.reason_open = options.reason_open;
-    
+
     this.jplayerplaylist;
     this._init(playlist)
 }
@@ -128,7 +128,7 @@ ManagedPlaylist.prototype = {
             if(this.jplayerplaylist.playlist[i].wasPlayed > wasplayermost){
                 wasplayermost = this.jplayerplaylist.playlist[i].wasPlayed;
             }
-        } 
+        }
         return wasplayermost;
     },
     makeThisPlayingPlaylist : function(){
@@ -149,10 +149,10 @@ var NewplaylistProxy = function(playlistManager){
     options.owner = 'me';
     options.saved = true;
     options.reason_open = 'newplaylist_proxy';
-    
+
     //create original object
     var actual = new ManagedPlaylist(playlistManager, [], options);
-    
+
     //override methods
     actual.makeThisPlayingPlaylist = function(){
         var newpl = this.playlistManager.newPlaylist();
