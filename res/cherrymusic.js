@@ -428,10 +428,10 @@ registercompactlistdirs = function(parent){
     );
 };
 
-addAllToPlaylist = function($source){
+addAllToPlaylist = function($source, plid){
     "use strict";
     $source.siblings('li').find('.mp3file').each(function(){
-        playlistManager.addSong( $(this).attr("path"), $(this).attr("title") );
+        playlistManager.addSong( $(this).attr("path"), $(this).attr("title"), plid );
     });
     $(this).blur();
     return false;
@@ -456,8 +456,10 @@ registermp3s = function(parent,mode, playlistlabel){
             case 'loadPlaylist':
                 $(parent).prepend('<a class="addAllToPlaylist" href="javascript:;">load playlist</a>');
                 $(parent).children('.addAllToPlaylist').click( function() {
-                    playlistManager.newPlaylist([], playlistlabel);
-                    addAllToPlaylist($(this));
+                    var pl = playlistManager.newPlaylistNoShow([], playlistlabel);
+                    addAllToPlaylist($(this), pl.id);
+                    pl.saved = true;
+                    playlistManager.showPlaylist(pl.id);
                 });
                  break;
             case 'addPlayAll':

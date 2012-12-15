@@ -479,7 +479,7 @@ PlaylistManager.prototype = {
         this.playingPlaylist = plid;
         this.refreshTabs();
     },
-    addSong : function(path,title){
+    addSong : function(path,title, plid){
         "use strict";
         var self = this;
         var ext = getFileTypeByExt(path);
@@ -500,7 +500,15 @@ PlaylistManager.prototype = {
             }
         }
 
-        this.getEditingPlaylist().addTrack(track);
+        var playlist;
+        if (plid) {
+            playlist = this.getPlaylistById(plid);
+        }
+        if (typeof playlist == 'undefined') {
+            playlist = this.getEditingPlaylist();
+        }
+
+        playlist.addTrack(track);
         pulse('.tabNavigation li a.jplayer');
         var success = function(data){
             var metainfo = $.parseJSON(data)
@@ -613,9 +621,13 @@ PlaylistManager.prototype = {
         return newpl;
     },
     newPlaylist : function(playlist, name){
-        playlist = playlist || [];
-        var newpl = this._createPlaylist(playlist,true,true,'me','ownwill', name);
+        var newpl = this.newPlaylistNoShow(playlist, name);
         this.showPlaylist(newpl.id);
+        return newpl;
+    },
+    newPlaylistNoShow : function(playlist, name){
+        playlist = playlist || [];
+        var newpl = this._createPlaylist(playlist,true,true,'me','ownwill', name, true);
         return newpl;
     },
     removePlayedFromPlaylist : function (){
