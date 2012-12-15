@@ -61,6 +61,7 @@ ManagedPlaylist.prototype = {
     setSaved : function(issaved){
         this.saved = issaved;
         this.playlistManager.refreshCommands();
+        this.playlistManager.refreshTabs();
     },
     wasSaved : function(){
         return this.saved;
@@ -357,7 +358,11 @@ PlaylistManager.prototype = {
             if(pl.id == this.playingPlaylist){
                 isplaying += '&#9654;';
             }
-            pltabs += '"><span><a href="#" onclick="playlistManager.showPlaylist('+pl.id+')">'+isplaying+' '+pl.name+'</a>';
+            var isunsaved = '';
+            if(!pl.saved && pl.reason_open !== 'queue'){
+                isunsaved += ' <em>(unsaved)</em>';
+            }
+            pltabs += '"><span><a href="#" onclick="playlistManager.showPlaylist('+pl.id+')">'+isplaying+' '+pl.name+ isunsaved +'</a>';
             if(pl.closable){
                 pltabs += '<a href="#" onclick="playlistManager.closePlaylist('+pl.id+')">&times;</a>';
             }
