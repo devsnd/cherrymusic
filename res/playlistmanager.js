@@ -543,7 +543,7 @@ PlaylistManager.prototype = {
         var canonicalPlaylists = []
         for(var i=0; i<this.managedPlaylists.length; i++){
             var cano = this.managedPlaylists[i].getCanonicalPlaylist();
-            if(cano.playlist.length){
+            if(cano.playlist.length || cano.reason_open == 'queue'){
                 canonicalPlaylists.push(cano);
             }
         }
@@ -572,6 +572,7 @@ PlaylistManager.prototype = {
                     var pl = playlistsToRestore[i];
                     var newpl = self._createPlaylist(pl.playlist,pl.closable,pl.public,pl.owner,pl.reason_open,pl.name,pl.saved);
                 }
+                self.setPlayingPlaylist(self.getPlayingPlaylist().id);
                 self.showPlaylist();
             } else {
                 var pl = self._createPlaylist([],false,false,'self','queue','Queue',true);
