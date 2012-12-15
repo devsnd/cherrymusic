@@ -552,7 +552,7 @@ PlaylistManager.prototype = {
             // save playlist in session
             var data = {'action':'rememberplaylist',
                         'value': newToRememberPlaylist}
-            var error = errorFunc('cannot rememebering playlist: failed to connect to server.');
+            var error = errorFunc('cannot remember playlist: failed to connect to server.');
             var success = function(){
                 self.lastRememberedPlaylist = newToRememberPlaylist;
             }
