@@ -564,6 +564,13 @@ function showPlaylistSaveDialog(plid){
     $('#dialog input').val('');
     $('#dialog').fadeIn('fast');
     $('#playlisttitle').focus();
+    $('#playlisttitle').bind('keyup',function(e){
+        if(e.which === 13) { //enter
+            savePlaylistAndHideDialog(plid);
+        } else if(e.which === 27){ //escape
+            $('#dialog').fadeOut('fast');
+        }
+     });
 }
 
 function savePlaylistAndHideDialog(plid){
