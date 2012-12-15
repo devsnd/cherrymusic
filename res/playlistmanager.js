@@ -12,7 +12,7 @@ var ManagedPlaylist = function(playlistManager, playlist, options){
     this.saved = options.saved;
     //can be 'recommendation', 'ownwill', 'queue'
     this.reason_open = options.reason_open;
-
+    
     this.jplayerplaylist;
     this._init(playlist)
 }
@@ -45,6 +45,25 @@ ManagedPlaylist.prototype = {
         $(this.playlistSelector).bind('requestPlay', function(event,playlistSelector) {
             self.playlistManager.setPlayingPlaylist(self.playlistManager.htmlid2plid(playlistSelector));
         });
+        //event handler for clicked "x" for tracks in jplayer playlist
+        $(this.playlistSelector).bind('removedItem', function(event,playlistSelector) {
+            self.setSaved(false);
+        });
+        //event handler when items are sorted usin drag n drop
+        $(this.playlistSelector).bind('sortedItems', function(event,playlistSelector) {
+            self.setSaved(false);
+        });
+        //event handler when items are sorted usin drag n drop
+        $(this.playlistSelector).bind('addedItem', function(event,playlistSelector) {
+            self.setSaved(false);
+        });
+    },
+    setSaved : function(issaved){
+        this.saved = issaved;
+        this.playlistManager.refreshCommands();
+    },
+    wasSaved : function(){
+        return this.saved;
     },
     _createNewPlaylistContainer : function(){
         var playlistContainerParent = this.playlistManager.cssSelectorPlaylistContainerParent;
@@ -325,6 +344,7 @@ PlaylistManager.prototype = {
     },
     refreshTabs : function(){
         "use strict";
+        window.console.log('refreshTabs');
         var self = this;
         var pltabs = '';
         for(var i=0; i<this.managedPlaylists.length; i++){
@@ -356,6 +376,7 @@ PlaylistManager.prototype = {
         return parseInt(htmlid.slice(4,htmlid.length))
     },
     refreshPlaylists : function(){
+        window.console.log('refreshPlaylists');
         var self = this;
         var validHTMLIds = [];
         for(var i=0; i<this.managedPlaylists.length; i++){

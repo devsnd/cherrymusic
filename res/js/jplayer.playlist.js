@@ -352,6 +352,7 @@
 			this._init();
 		},
 		add: function(media, playNow) {
+            var self = this;
 			$(this.cssSelector.playlist + " ul").append(this._createListItem(media)).find("li:last-child").hide().slideDown(this.options.playlistOptions.addTime);
             
 			this._updateControls();
@@ -365,10 +366,11 @@
 					this.select(0);
 				}
 			}
+            $(self.options.playlistOptions.playlistSelector).trigger('addedItem', [self.options.playlistOptions.playlistSelector]);
 		},
 		remove: function(index) {
 			var self = this;
-
+            $(self.options.playlistOptions.playlistSelector).trigger('removedItem', [self.options.playlistOptions.playlistSelector]);
 			if(index === undefined) {
 				this._initPlaylist([]);
 				this._refresh(function() {
@@ -506,6 +508,7 @@
             });
             this.original = replace;
             this._originalPlaylist();
+            $(self.options.playlistOptions.playlistSelector).trigger('sortedItems', [self.options.playlistOptions.playlistSelector]);
         }
 	};
 })(jQuery);

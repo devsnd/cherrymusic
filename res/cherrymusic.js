@@ -445,7 +445,7 @@ addThisTrackToPlaylist = function(){
 registermp3s = function(parent,mode, playlistlabel){
     "use strict";
     if(typeof mode === 'undefined'){
-        mode = 'addPlayAll'
+        mode = 'addPlayAll';
     }
     var foundMp3 = $(parent).find(".mp3file").click(
         addThisTrackToPlaylist
@@ -471,7 +471,7 @@ registermp3s = function(parent,mode, playlistlabel){
                 break;
         }
     }
-};
+}
 
 updateLibrary = function(){
     api('updatedb')
@@ -561,9 +561,9 @@ function showPlaylistSaveDialog(plid){
     'public:<input type="checkbox" checked="checked" id="playlistpublic" />',
     '<a class="button" href="javascript:;" onclick="savePlaylistAndHideDialog('+plid+')">Save</a>',
     '<a class="button" href="javascript:;" onclick="$(\'#dialog\').fadeOut(\'fast\')">Close</a>'].join(''));
-
     $('#dialog input').val('');
     $('#dialog').fadeIn('fast');
+    $('#playlisttitle').focus();
 }
 
 function savePlaylistAndHideDialog(plid){
@@ -588,7 +588,7 @@ function savePlaylist(plid,playlistname,ispublic){
     var success = function(){
         playlistManager.getPlaylistById(plid).name = playlistname;
         playlistManager.getPlaylistById(plid).public = ispublic;
-        playlistManager.getPlaylistById(plid).saved = true;
+        playlistManager.getPlaylistById(plid).saved = true;       
         playlistManager.refresh();
         playlistManager.showPlaylist(plid);
     }
