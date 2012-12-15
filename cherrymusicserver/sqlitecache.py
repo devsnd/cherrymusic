@@ -31,6 +31,7 @@
 import os
 import re
 import sqlite3
+import traceback
 
 from collections import deque
 from operator import itemgetter
@@ -137,7 +138,9 @@ class SQLiteCache(object):
             TableColumn('isdir','int','NOT NULL'),
         ])
         self.dictionarytable = TableDescriptor('dictionary',[
-            TableColumn('word', 'text', 'NOT NULL')])
+            TableColumn('word', 'text', 'NOT NULL'),
+            TableColumn('occurences', 'int', 'NOT NULL DEFAULT 1'),
+            ])
             
         self.searchtable = TableDescriptor('search',[
             TableColumn('drowid', 'int', 'NOT NULL'),
@@ -525,6 +528,7 @@ class SQLiteCache(object):
             log.e('error during media update. database update incomplete.')
         finally:
             self.__create_index_if_non_exist()
+            self.update_word_occurences()
             log.i('media database update complete.')
 
 
@@ -544,6 +548,7 @@ class SQLiteCache(object):
                 self.update_db_recursive(normpath, skipfirst=False)
             except Exception as exception:
                 log.e('update incomplete: %r', exception)
+        self.update_word_occurences()
         log.i('done updating paths.')
 
 
@@ -601,12 +606,18 @@ class SQLiteCache(object):
         except Exception as exc:
             log.e("error while updating media: %s %s", exc.__class__.__name__, exc)
             log.e("rollback to previous commit.")
+            traceback.print_exc()
             raise exc
         finally:
             add += adds_without_commit
             log.i('items added %d, removed %d', add, deld)
             self.load_db_to_memory()
 
+    def update_word_occurences(self):
+        log.i('updating word occurences...')
+        self.conn.execute('''UPDATE dictionary SET occurences = (
+                select count(*) from search WHERE search.drowid = dictionary.rowid
+            )''')
 
     def enumerate_fs_with_db(self, startpath, itemfactory=None):
         '''
