@@ -403,9 +403,8 @@ JPlayer Additions
 }
 
 .jp-center-progress-bar{
-    margin: 0 auto;
-    padding: 10px 10px 0 10px;
-    height: 6px;
+    margin: 5px 10px 0;
+    height: 14px;
 }
 .jp-progress{
     position: relative !important;
