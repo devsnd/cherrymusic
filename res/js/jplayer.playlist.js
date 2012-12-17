@@ -254,11 +254,15 @@
         },
 		_formatTime: function(secs) {
 			secs = Math.floor(secs);
+            var mins = Math.floor(secs/60);
+            var hours = Math.floor(mins/60);
+            
 			var s = secs%60;
 			if(s<10){ s='0'+s; }
-			var m = Math.floor(secs/60)%60;
+			var m = mins%60;
 			if(m<10){ m='0'+m; }
-			return m+':'+s;
+            var h = hours>0 ? hours+':' : '';
+			return h+m+':'+s;
 		},
 		_createListItem: function(media) {
 			var self = this;
