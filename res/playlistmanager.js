@@ -336,10 +336,12 @@ PlaylistManager.prototype = {
             }
             if(typeof remaintimesec !== 'undefined' && typeof completetimesec !== 'undefined' ){
                 var proc = remaintimesec/completetimesec;
-                var remaindisplay = '<div>'+epl.jplayerplaylist._formatTime(remaintimesec)+' remaining</div>';
+                var cssclass = remaintimesec < 300 ? ' class="red" ' : '';
+                var remaindisplay = '<div'+cssclass+'>'+epl.jplayerplaylist._formatTime(remaintimesec)+' remaining</div>';
             } else {
                 var proc = remaintracks.length/epl.jplayerplaylist.playlist.length;
-                var remaindisplay = '<div>'+remaintracks.length+' remaining tracks</div>';
+                var cssclass = remaintracks.length < 3 ? ' class="red" ' : '';
+                var remaindisplay = '<div'+cssclass+'>'+remaintracks.length+' remaining tracks</div>';
             }
             var progressbar = '<div style="background-color: #ffffff;"><div style="width: '+parseInt(100-proc*100)+'%; height: 3px;" class="active"></div>';
             cmdstr += '<div class="playlist-progress">'+remaindisplay+progressbar+'</div>';
