@@ -127,15 +127,23 @@ function loadConfig(){
 /************
  * USER OPTIONS
  * **********/
+ 
+function loadUserOptions(onSuccess){
+    var success = function(data){
+        userOptions = jQuery.parseJSON(data);
+        if(typeof onSuccess !== 'undefined'){
+            onSuccess();
+        }
+    }
+    api('getuseroptions',success);
+}
 
 function loadAndShowUserOptions(){
-        var success = function(data){
-            $('#useroptions .content').html('');
-            $('#useroptions').fadeIn();
-            optiondict = jQuery.parseJSON(data);
-            new OptionRenderer('#useroptions .content').render(optiondict);
-     }
-     api('getuseroptions',success);
+    loadUserOptions(function(){
+        $('#useroptions .content').html('');
+        $('#useroptions').fadeIn();
+        new OptionRenderer('#useroptions .content').render(userOptions);
+    });
 }
 
 function OptionRenderer(cssselector){
@@ -144,7 +152,7 @@ function OptionRenderer(cssselector){
         'custom_theme' : 'Custom colors and style',
         'custom_theme.primary_color' : 'Primary color',
         'custom_theme.white_on_black' : 'Use white fonts on dark background',
-        'keyboard_shortcuts' : 'keyboard shortcuts (not working yet)',
+        'keyboard_shortcuts' : 'keyboard shortcuts',
         'keyboard_shortcuts.stop' : 'Stop',
         'keyboard_shortcuts.prev' : 'previous track',
         'keyboard_shortcuts.search' : 'search',
@@ -197,6 +205,7 @@ OptionRenderer.prototype = {
 
         switch(typeof optionval){
             case "string":
+            case "number":
                 var onkeyup = [   'api({action:\'setuseroption\', value:JSON.stringify({',
                     '\'optionkey\':$(this).attr(\'name\') ,',
                     '\'optionval\':$(this).val()',
@@ -989,6 +998,41 @@ function time2text(sec){
     }
 }
 
+/*****************
+ * KEYBOARD SHORTCUTS
+ * ***************/
+function initKeyboardshortcuts(){
+    $(window.document).bind('keyup', keyboardShortcuts);
+}
+function keyboardShortcuts(e){
+    //we don't want to ruin all the nice standard shortcuts.
+    if (e.altKey) return;
+    if (e.shiftKey) return;
+    if (e.ctrlKey) return;
+    if (e.metaKey) return;
+    var focusedElement = $("*:focus");
+    var inputFieldFocused = focusedElement.length > 0;
+    if(inputFieldFocused){
+        if(e.which === 27){ //escape -> unfocus
+            focusedElement.blur();
+        }
+    } else {
+        var actions = { 'next' :    function(){playlistManager.cmd_next()},
+                        'pause' :   function(){playlistManager.cmd_pause()},
+                        'play' :    function(){playlistManager.cmd_play()},
+                        'prev' :    function(){playlistManager.cmd_previous()},
+                        'search' :  function(){$('#searchform input').focus().select()},
+                        'stop' :    function(){playlistManager.cmd_stop()},
+                        };
+        for(var action in actions){
+            if(e.which === userOptions.keyboard_shortcuts[action].value){
+                window.console.log('triggering: '+action);
+                actions[action]();
+            }
+        }
+    }
+}
+
 function showPlaylistBrowser(){
     playlistManager.hideAll();
     $('#playlistCommands').html("");
@@ -1012,6 +1056,7 @@ $(document).ready(function(){
     executeAfterConfigLoaded.push(function(){ playlistManager = new PlaylistManager() });
     //executeAfterConfigLoaded.push(restorePlaylistAndRememberPeriodically);
     loadConfig();
+    loadUserOptions(initKeyboardshortcuts);
     //register top level directories
 	registerlistdirs($("html").get());
 	registercompactlistdirs($("html").get());

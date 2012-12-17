@@ -46,13 +46,13 @@ class UserOptionDB:
         """
         with cfg.create() as c:
             with cfg.create('keyboard_shortcuts') as kbs:
-                kbs.prev = cfg.Configuration(value='y',validity='\w')
-                kbs.play = cfg.Configuration(value='x',validity='\w')
-                kbs.pause = cfg.Configuration(value='c',validity='\w')
-                kbs.stop = cfg.Configuration(value='v',validity='\w')
-                kbs.next = cfg.Configuration(value='b',validity='\w')
-                kbs.search = cfg.Configuration(value='s',validity='\w')
-                kbs.hidden = True
+                kbs.prev = cfg.Configuration(value=89,validity='\d\d?\d?')
+                kbs.play = cfg.Configuration(value=88,validity='\d\d?\d?')
+                kbs.pause = cfg.Configuration(value=67,validity='\d\d?\d?')
+                kbs.stop = cfg.Configuration(value=86,validity='\d\d?\d?')
+                kbs.next = cfg.Configuration(value=66,validity='\d\d?\d?')
+                kbs.search = cfg.Configuration(value=83,validity='\d\d?\d?')
+                kbs.hidden = False
                 kbs.readonly = False
                 c.keyboard_shortcuts = kbs
                 
@@ -119,7 +119,10 @@ class UserOptionDB:
             for a in results:
                 decoded.append((a[0],json.loads(a[1])))
             c = cfg.from_list(decoded)
-            c = self.useroptiondb.DEFAULTS + c
+            try:
+                c = self.useroptiondb.DEFAULTS + c
+            except cfg.ConfigError: #changed defaults might reset user options
+                return self.useroptiondb.DEFAULTS
             return c
         
         def getOptionValue(self, key):

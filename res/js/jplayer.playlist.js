@@ -82,33 +82,6 @@
 			}
 		});
 
-		// Create click handlers for the extra buttons that do playlist functions.
-		/*$(this.cssSelector.previous).click(function() {
-            if(self.active){
-                self.previous();
-                $(this).blur();
-                return false;
-            }
-		});
-
-		$(this.cssSelector.next).click(function() {
-            if(self.active){
-                self.next();
-                $(this).blur();
-                return false;
-            }
-		});
-        */
-
-		/*$(this.cssSelector.shuffle).click(function() {
-                self.shuffle(true);
-                return false;
-		});
-		$(this.cssSelector.shuffleOff).click(function() {
-            self.shuffle(false);
-			return false;
-		}).hide();*/
-
 		// Put the title in its initial display state
 		if(!this.options.fullScreen) {
 			$(this.cssSelector.title).hide();

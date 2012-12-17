@@ -234,13 +234,13 @@ PlaylistManager.prototype = {
 
             /* JPLAYER CONTROLS BINDINGS */
             $(this.cssSelector.previous).click(function() {
-                self.getPlayingPlaylist().jplayerplaylist.previous();
+                self.cmd_previous();
                 $(this).blur();
                 return false;
             });
 
             $(this.cssSelector.next).click(function() {
-                self.getPlayingPlaylist().jplayerplaylist.next();
+                self.cmd_next();
                 $(this).blur();
                 return false;
             });
@@ -262,6 +262,21 @@ PlaylistManager.prototype = {
             self.refreshShuffle();
             this.flashBlockCheckIntervalId = window.setInterval("playlistManager.checkFlashBlock()", 200);
         }
+    },
+    cmd_play : function(){
+        $(this.cssSelectorjPlayer).jPlayer("play");
+    },
+    cmd_pause : function(){
+        $(this.cssSelectorjPlayer).jPlayer("pause");
+    },
+    cmd_stop : function(){
+        $(this.cssSelectorjPlayer).jPlayer("stop");
+    },
+    cmd_previous : function(){
+        this.getPlayingPlaylist().jplayerplaylist.previous();
+    },
+    cmd_next : function(){
+        this.getPlayingPlaylist().jplayerplaylist.next();
     },
     checkFlashBlock : function(){
         $('#jquery_jplayer_1 object').css('z-index', '10000');
