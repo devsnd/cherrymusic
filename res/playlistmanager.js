@@ -310,13 +310,14 @@ PlaylistManager.prototype = {
         cmds.empty();
         var epl = this.getEditingPlaylist();
         if(typeof epl !== 'undefined'){
+            var cmdstr = '<div class="playlist-command-buttons">'
             if(epl.reason_open == 'queue'){
-                cmds.append('<a class="button floatright" onclick="playlistManager.removePlayedFromPlaylist()" >remove played tracks</a>');
-                cmds.append('<a class="button floatright" onclick="playlistManager.clearQueue()">clear queue</a>');
-                cmds.append('<a class="button floatleft" onclick="playlistManager.newPlaylistFromQueue()">save as playlist</a>');
+                cmdstr += '<a class="button floatright" onclick="playlistManager.removePlayedFromPlaylist()" >remove played tracks</a>';
+                cmdstr += '<a class="button floatright" onclick="playlistManager.clearQueue()">clear queue</a>';
+                cmdstr += '<a class="button floatleft" onclick="playlistManager.newPlaylistFromQueue()">save as playlist</a>';
             } else {
                 if(!epl.saved){
-                    cmds.append('<a class="button" onclick="showPlaylistSaveDialog('+epl.id+')">save</a>');
+                    cmdstr += '<a class="button" onclick="showPlaylistSaveDialog('+epl.id+')">save</a>';
                 }
                 /*cmds.append('<span class="floatleft">owner '+pl.owner+'</span>');
                 if(!pl.public){
@@ -325,7 +326,8 @@ PlaylistManager.prototype = {
                     cmds.append('<span class="floatleft">status: <a class="button" title="make private">public</a></span>');
                 }*/
             }
-
+            cmdstr += '</div>';
+            
             var remaintracks = epl.getRemainingTracks();
             var remaintimesec = epl.getPlayTimeSec(remaintracks);
             var completetimesec = epl.getPlayTimeSec(epl.jplayerplaylist.playlist);
@@ -340,7 +342,8 @@ PlaylistManager.prototype = {
                 var remaindisplay = '<div>'+remaintracks.length+' remaining tracks</div>';
             }
             var progressbar = '<div style="background-color: #ffffff;"><div style="width: '+parseInt(100-proc*100)+'%; height: 3px;" class="active"></div>';
-            cmds.append('<div class="playlist-progress">'+remaindisplay+progressbar+'</div>');
+            cmdstr += '<div class="playlist-progress">'+remaindisplay+progressbar+'</div>';
+            cmds.html(cmdstr);
         }
     },
     refreshTabs : function(){

@@ -364,6 +364,9 @@ div.container{
 .playlist-progress{
     padding: 10px 2px 0;
 }
+.playlist-command-buttons{
+    height: 20px;
+}
 /**********
 ADMIN PANEL
 **********/
