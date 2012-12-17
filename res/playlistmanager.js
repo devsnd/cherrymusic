@@ -197,6 +197,7 @@ PlaylistManager = function(){
         //used to update remaining playlist time:
         // should be triggered by jplayer time update event in the future.
         window.setInterval('playlistManager.refreshCommands()',1000);
+        flashSize('0px','0px',-10000);
 	});
     this.initJPlayer();
 }
@@ -279,12 +280,9 @@ PlaylistManager.prototype = {
         this.getPlayingPlaylist().jplayerplaylist.next();
     },
     checkFlashBlock : function(){
-        $('#jquery_jplayer_1 object').css('z-index', '10000');
-        $('#jquery_jplayer_1 object').css('position', 'absolute');
-        $('#jquery_jplayer_1 div').css('z-index', '10000');
-        $('#jquery_jplayer_1 div').css('position', 'absolute');
+        
         $('#jquery_jplayer_1 div').css('background-color', '#fff');
-        this.flashSize('100%','80px');
+        this.flashSize('100%','80px','10000');
         //detect firefox flashblock:
         if(typeof $('#jquery_jplayer_1 div').attr('dataattribute') !== 'undefined'){
             errorFunc('Flashblock is enabled. Please click on the flash symbol on top of the player to activate flash.')();
@@ -294,7 +292,11 @@ PlaylistManager.prototype = {
         }
 
     },
-    flashSize : function(w, h){
+    flashSize : function(w, h, zidx){
+        $('#jquery_jplayer_1 object').css('z-index', zidx);
+        $('#jquery_jplayer_1 object').css('position', 'absolute');
+        $('#jquery_jplayer_1 div').css('z-index', zidx);
+        $('#jquery_jplayer_1 div').css('position', 'absolute');
         $('#jquery_jplayer_1 object').css('width', w);
         $('#jquery_jplayer_1 object').css('height', h);
         $('#jquery_jplayer_1 div').css('width', w);
