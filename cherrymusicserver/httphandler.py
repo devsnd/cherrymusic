@@ -384,11 +384,15 @@ class HTTPHandler(object):
 
     def api_saveplaylist(self, value):
         pl = json.loads(value)
-        return self.playlistdb.savePlaylist(
+        res = self.playlistdb.savePlaylist(
             userid=self.getUserId(),
             public=1 if pl['public'] else 0,
             playlist=pl['playlist'],
             playlisttitle=pl['playlistname']);
+        if res == "success":
+            return res
+        else:
+             raise cherrypy.HTTPError(400, res)
 
     def api_deleteplaylist(self, value):
         return self.playlistdb.deletePlaylist(value, self.getUserId())

@@ -52,8 +52,7 @@ class PlaylistDB:
 
     def savePlaylist(self, userid, public, playlist, playlisttitle):
         if not len(playlist):
-            log.e('I will not create an empty playlist. sorry.')
-            return
+            return 'I will not create an empty playlist. sorry.'
         duplicatetitles = self.conn.execute("""SELECT * FROM playlists
             WHERE userid = ? AND title = ?""",(userid,playlisttitle)).fetchall()
         if not duplicatetitles:
