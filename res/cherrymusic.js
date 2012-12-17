@@ -1064,7 +1064,7 @@ $(document).ready(function(){
     //window.setInterval("displayCurrentSong()", 1000);
     window.setInterval("resizePlaylistSlowly()",2000);
     $('#searchform .searchinput').focus();
-    window.setInterval("api('heartbeat',false,errorFunc('connection to server lost'),true)",HEARTBEAT_INTERVAL_MS);
+    window.setInterval("api('heartbeat',function(){removeError('connection to server lost')},errorFunc('connection to server lost'),true)",HEARTBEAT_INTERVAL_MS);
     $('a.search').click(function(){
         mobileShowSearch();
         $(this).blur();
