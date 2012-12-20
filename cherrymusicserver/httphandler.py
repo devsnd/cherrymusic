@@ -351,10 +351,7 @@ class HTTPHandler(object):
         params = json.loads(value)
         dirtorender = params['directory']
         dirtorenderabspath = os.path.join(cherry.config.media.basedir.str, dirtorender)
-        if os.path.isdir(dirtorenderabspath):
-            return self.jsonrenderer.render(self.model.listdir(dirtorender, params['filter']))
-        else:
-            return '"Error rendering getting results. Request doesn\'t lead to a directory"'
+        return self.jsonrenderer.render(self.model.listdir(dirtorender, params['filter']))
 
     def api_listdir(self,value):
         if value:
@@ -363,10 +360,7 @@ class HTTPHandler(object):
         else:
             dirtorender = ''
         dirtorenderabspath = os.path.join(cherry.config.media.basedir.str, dirtorender)
-        if os.path.isdir(dirtorenderabspath):
-            return self.jsonrenderer.render(self.model.listdir(dirtorender))
-        else:
-            return '"Error rendering getting results. Request doesn\'t lead to a directory"'
+        return self.jsonrenderer.render(self.model.listdir(dirtorender))
 
     def api_search(self, value, isFastSearch=False):
         if not value.strip():

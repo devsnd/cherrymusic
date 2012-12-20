@@ -36,8 +36,7 @@ from cherrymusicserver import util
 import os
 
 class ResultOrder:
-    def __init__(self, searchword, accessmethod):
-        self.accessmethod = accessmethod
+    def __init__(self, searchword):
         self.fullsearchterm = searchword.lower()
         self.searchwords = searchword.lower().split(' ')
         self.perfectMatchBias = 100
@@ -45,7 +44,8 @@ class ResultOrder:
         self.startsWithMatchBias = 10
         self.folderBonus = 5
     def __call__(self,element):
-        file = self.accessmethod(element)
+        file = element.path
+        isdir = element.dir
         fullpath = file.lower()
         file = util.filename(file).lower()
         bias = 0
@@ -73,7 +73,7 @@ class ResultOrder:
         #partial perfect match?
         for searchword in self.searchwords:
             if file == searchword:
-                if os.path.isdir(fullpath):
+                if isdir:
                     bias += self.folderBonus
                 return bias+self.partialPerfectMatchBias
 

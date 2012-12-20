@@ -124,7 +124,7 @@ class CherryModel:
             maxresults = 5
         results = self.cache.searchfor(term, maxresults=cherry.config.search.maxresults.int,isFastSearch=isFastSearch)
         with Performance('sorting DB results using ResultOrder'):
-            results = sorted(results,key=resultorder.ResultOrder(term, lambda x: x.path),reverse=True)
+            results = sorted(results,key=resultorder.ResultOrder(term),reverse=True)
             results = results[:min(len(results), maxresults)]
 
         with Performance('checking and classifying results:'):
