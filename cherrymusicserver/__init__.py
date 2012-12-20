@@ -65,10 +65,13 @@ class CherryMusic:
             self.printWelcomeAndExit()
         self._init_config()
         self.db = sqlitecache.SQLiteCache(util.databaseFilePath('cherry.cache.db'))
-        self.cherrymodel = cherrymodel.CherryModel(self.db)
-        self.httphandler = httphandler.HTTPHandler(config, self.cherrymodel)
-        CherryMusic.UpdateThread(self.db,update,dropfiledb).start()
-        self.server()
+        
+        if not update == None or dropfiledb:
+            CherryMusic.UpdateThread(self.db,update,dropfiledb).start()
+        else:
+            self.cherrymodel = cherrymodel.CherryModel(self.db)
+            self.httphandler = httphandler.HTTPHandler(config, self.cherrymodel)
+            self.server()
         
     class UpdateThread(threading.Thread):
         def __init__(self, db, update,dropfiledb):
