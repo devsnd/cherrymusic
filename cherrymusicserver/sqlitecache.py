@@ -41,6 +41,7 @@ import cherrymusicserver as cherry
 from cherrymusicserver import log
 from cherrymusicserver import util
 from cherrymusicserver.cherrymodel import MusicEntry
+from cherrymusicserver.database import TableDescriptor, TableColumn
 from cherrymusicserver.util import Performance
 from cherrymusicserver.progress import ProgressTree, ProgressReporter
 
@@ -54,75 +55,8 @@ FAST_FILE_SEARCH_LIMIT = 20
 
 if debug:
     log.level(log.DEBUG)
-    
-class TableColumn:
-    def __init__(self, name, datatype, attributes=''):
-        self.name = name
-        self.datatype = self.checkdatatype(datatype)
-        self.attributes = attributes
-        
-    def sql(self):
-        return ' '.join(["'"+self.name+"'",self.datatype,self.attributes])
-        
-    def checkdatatype(self,datatype):
-        if datatype in ['int','text']:
-            return datatype
-        else:
-            raise TypeError("column cannot have datatype: %s"%datatype)
-        
 
-class TableDescriptor:
-    def __init__(self, tablename, columns):
-        self.tablename = tablename
-        self.columns = {}
-        self.indexes = []
-        for column in columns:
-            if not type(column) == TableColumn:
-                raise TypeError("column must be of type TableColumn")
-            self.columns[column.name] = column
-        
-    def createOrAlterTable(self, sqlconn):
-        updatedTable = False
-        #table exists?
-        if sqlconn.execute("""SELECT name FROM sqlite_master
-            WHERE type='table' AND name=? """,(self.tablename,)).fetchall():
-            dbtablelayout = sqlconn.execute("""PRAGMA table_info('%s')""" % self.tablename).fetchall()
-            #map dict to column name
-            dbtablelayout = dict((col[1],col) for col in dbtablelayout)
-            #remove columns from db when not in template
-            for columnname in dbtablelayout.keys():
-                if columnname not in self.columns:
-                    #can't do this in sqlite...
-                    #log.i('Dropping column %s from table %s' % (columnname, self.tablename))
-                    #sqlconn.execute("""ALTER TABLE %s DROP COLUMN %s"""%(self.tablename, columnname))
-                    #updatedTable = True
-                    pass
-                else:
-                    log.d('Column %s in table %s exists and needs no change' % (columnname, self.tablename))
-            #add new columns to db when not in db
-            for templatecolumnname, templatecolumn in self.columns.items():
-                if templatecolumnname not in dbtablelayout.keys():
-                    log.i('Adding column %s to table %s' % (templatecolumnname, self.tablename))
-                    sqlconn.execute("""ALTER TABLE %s ADD COLUMN %s""" % (self.tablename, templatecolumn.sql()))      
-                    updatedTable = True
-                else:
-                    log.d('Column %s in table %s exists and needs no change' % (templatecolumnname, self.tablename))
-            #TODO add checks for DEFAULT value and NOT NULL
-        else:
-            log.i('Creating table %s' % self.tablename)
-            sqlconn.execute("""CREATE TABLE %s (%s)""" % (self.tablename, ', '.join(map(lambda x: x.sql(), self.columns.values())) ) )
-            updatedTable = True
-        return updatedTable
-    
-    def createIndex(self, sqlconn, columns):
-        for c in columns:
-            if not c in self.columns:
-                raise IndexError('column %s does not exist in table %s, cannot create index!' % (c, self.tablename))
-        existing_indexes = map(itemgetter(0), sqlconn.execute("""SELECT name FROM sqlite_master WHERE type='index' ORDER BY name""").fetchall())
-        indexname = '_'.join(['idx',self.tablename,'_'.join(columns)])
-        if not indexname in existing_indexes:
-            log.i('Creating index %s' % indexname)
-            sqlconn.execute('CREATE INDEX IF NOT EXISTS %s ON %s(%s)'%(indexname,self.tablename,', '.join(columns)))
+
 
 class SQLiteCache(object):
     def __init__(self, DBFILENAME):
@@ -130,19 +64,19 @@ class SQLiteCache(object):
         self.DBFILENAME = DBFILENAME
         setupDB = not os.path.isfile(DBFILENAME) or os.path.getsize(DBFILENAME) == 0
         setupDB |= DBFILENAME == ':memory:' #always rescan when using ram db.
-        
-        self.filestable = TableDescriptor('files',[
-            TableColumn('parent','int','NOT NULL'),
-            TableColumn('filename','text','NOT NULL'),
-            TableColumn('filetype','text'),
-            TableColumn('isdir','int','NOT NULL'),
+
+        self.filestable = TableDescriptor('files', [
+            TableColumn('parent', 'int', 'NOT NULL'),
+            TableColumn('filename', 'text', 'NOT NULL'),
+            TableColumn('filetype', 'text'),
+            TableColumn('isdir', 'int', 'NOT NULL'),
         ])
-        self.dictionarytable = TableDescriptor('dictionary',[
+        self.dictionarytable = TableDescriptor('dictionary', [
             TableColumn('word', 'text', 'NOT NULL'),
             TableColumn('occurences', 'int', 'NOT NULL DEFAULT 1'),
             ])
-            
-        self.searchtable = TableDescriptor('search',[
+
+        self.searchtable = TableDescriptor('search', [
             TableColumn('drowid', 'int', 'NOT NULL'),
             TableColumn('frowid', 'int', 'NOT NULL')])
 
@@ -154,7 +88,7 @@ class SQLiteCache(object):
         self.conn.execute('PRAGMA synchronous = OFF')
         self.conn.execute('PRAGMA journal_mode = MEMORY')
         self.load_db_to_memory()
-        
+
     def file_db_in_memory(self):
         return not self.DBFILENAME == ':memory:' and cherry.config.search.load_file_db_into_memory.bool
 
@@ -179,18 +113,18 @@ class SQLiteCache(object):
 
     def create_and_alter_tables(self, suppressWarning=False):
         tableChanged = False
-        tableChanged |= self.filestable.createOrAlterTable(self.conn)       
+        tableChanged |= self.filestable.createOrAlterTable(self.conn)
         tableChanged |= self.dictionarytable.createOrAlterTable(self.conn)
         tableChanged |= self.searchtable.createOrAlterTable(self.conn)
-        
+
         if tableChanged and not suppressWarning:
             log.w('The database layout has changed, please run "cherrymusic --update" to make sure everthing is up to date.')
         return tableChanged
-            
+
     def __create_index_if_non_exist(self):
-        self.filestable.createIndex(self.conn,['parent'])
-        self.dictionarytable.createIndex(self.conn,['word'])
-        self.searchtable.createIndex(self.conn,['drowid','frowid'])
+        self.filestable.createIndex(self.conn, ['parent'])
+        self.dictionarytable.createIndex(self.conn, ['word'])
+        self.searchtable.createIndex(self.conn, ['drowid', 'frowid'])
 
     def __create_tables(self):
         """DEPRECATED, has been replaced by create_and_alter_tables"""
