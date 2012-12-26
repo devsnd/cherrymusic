@@ -28,9 +28,60 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
+import sqlite3
+import threading
+
+from contextlib import contextmanager
 from operator import itemgetter
 
 from cherrymusicserver import log
+
+
+class SQLDatabase:
+
+    def __init__(self, name):
+        if not name:
+            raise ValueError("illegal name %r: there must be a name" % name)
+        self.__name = name
+        self.__threadlocal = threading.local()
+        self.Connection = type(
+                               self.__class__.__name__ + '.Connection',
+                               (sqlite3.Connection,),
+                               {'close': self.__disconnect}
+                               )
+
+    def __repr__(self):
+        return '%s(%r)' % (self.__class__.__name__, self.__name)
+
+    def __connect(self):
+        try:
+            return self.__threadlocal.conn
+        except AttributeError:
+            self.__threadlocal.conn = sqlite3.connect(self.__name, factory=self.Connection)
+            log.d('thread %s connected to database %r', threading.current_thread(), self.__name)
+            return self.__threadlocal.conn
+
+    def __disconnect(self):
+        try:
+            conn = self.__threadlocal.conn
+            del self.__threadlocal.conn
+        except AttributeError:
+            pass
+        else:
+            super(conn.__class__, conn).close()
+            log.d('thread %s closed connection to database %r', threading.current_thread(), self.__name)
+
+    def get_cursor(self):
+        return self.__connect().cursor()
+
+    @contextmanager
+    def connection(self, mode=None):
+        '''contextmanager; provides a connection that will auto-commit
+        on clean exit and rollback on exception'''
+        con = self.__connect()
+        con.isolation_level = mode
+        with con:
+            yield con
 
 
 class TableColumn:
