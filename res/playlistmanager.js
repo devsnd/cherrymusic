@@ -352,6 +352,7 @@ PlaylistManager.prototype = {
                 remaintimesec -= $(this.cssSelectorjPlayer).data("jPlayer").status.currentTime;
             }
             if(typeof remaintimesec !== 'undefined' && typeof completetimesec !== 'undefined' ){
+                remaintimesec = remaintimesec < 0 ? 0 : remaintimesec;
                 var proc = remaintimesec/completetimesec;
                 var cssclass = remaintimesec < 300 ? ' class="red" ' : '';
                 var remaindisplay = '<div'+cssclass+'>'+epl.jplayerplaylist._formatTime(remaintimesec)+' remaining</div>';

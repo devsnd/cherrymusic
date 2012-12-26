@@ -111,7 +111,7 @@ def estimateSize(filepath, newformat):
     return 4*1024*1024
     
 def transcode(filepath, newformat):
-    log.e("""Transcoding file {}
+    log.i("""Transcoding file {}
 {} ---[{}]---> {}""".format(filepath,filetype(filepath),Encoders[newformat][0],newformat))
     try:
         fromdecoder = decode(filepath)
