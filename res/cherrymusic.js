@@ -33,6 +33,7 @@ var availableDecoders = undefined;
 var transcodingEnabled = undefined;
 var fetchAlbumArt = undefined;
 var userOptions = undefined;
+var isAdmin = undefined;
 var REMEMBER_PLAYLIST_INTERVAL = 3000;
 var HEARTBEAT_INTERVAL_MS = 30*1000;
 
@@ -116,8 +117,12 @@ function loadConfig(){
         playableExtensions = dictatedClientConfig.getplayables;
         transcodingEnabled = dictatedClientConfig.transcodingenabled;
         fetchAlbumArt = dictatedClientConfig.fetchalbumart;
+        isAdmin = dictatedClientConfig.isadmin;
         for(var i=0; i<executeAfterConfigLoaded.length; i++){
             executeAfterConfigLoaded[i]();
+        }
+        if(!isAdmin){
+            $('#toggle-admin-panel-button').hide();
         }
     };
     var error = errorFunc("could not fetch client configuration");

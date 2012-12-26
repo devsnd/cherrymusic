@@ -494,12 +494,9 @@ class HTTPHandler(object):
             'transcodingenabled' : cherry.config.media.transcode.bool,
             'getplayables' : cherry.config.media.playable.list,
             'fetchalbumart' : cherry.config.media.fetch_album_art.bool,
+            'isadmin' : cherrypy.session['admin'],
         }
-        retval = {}
-        for configkey in json.loads(value):
-            if configkey in clientconfigkeys:
-                retval[configkey] = clientconfigkeys[configkey]
-        return json.dumps(retval)
+        return json.dumps(clientconfigkeys)
 
 
     def serve_string_as_file(self,string,filename):
