@@ -30,6 +30,8 @@
 
 import os
 import sys
+import base64
+import codecs
 from cherrymusicserver import log
 from time import time
 
@@ -48,8 +50,14 @@ def databaseFilePath(filename):
     configpath = os.path.join(configdir, filename)
     return configpath
 
-def assureHomeFolderExists():
-    dirpath = os.path.join(os.path.expanduser('~'), '.cherrymusic', 'db')
+def base64encode(s):
+    return codecs.decode(base64.b64encode(codecs.encode(s,'UTF-8')),'UTF-8')
+    
+def base64decode(s):
+    return codecs.decode(base64.b64decode(s),'UTF-8')
+
+def assureHomeFolderExists(subfolder='db'):
+    dirpath = os.path.join(os.path.expanduser('~'), '.cherrymusic', subfolder)
     if not os.path.exists(dirpath):
         os.makedirs(dirpath)
 

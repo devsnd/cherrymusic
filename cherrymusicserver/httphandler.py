@@ -50,6 +50,7 @@ from cherrymusicserver.util import databaseFilePath, readRes
 import cherrymusicserver as cherry
 import cherrymusicserver.metainfo as metainfo
 from cherrymusicserver.util import Performance
+from cherrymusicserver import util
 from cherrymusicserver import useroptiondb
 import time
 
@@ -334,17 +335,29 @@ class HTTPHandler(object):
         if cherry.config.media.fetch_album_art.bool:
             params = json.loads(value)
             directory = params['directory']
-            album = os.path.basename(directory)
-            artist = os.path.basename(os.path.dirname(directory))
-            keywords = artist+' '+album
-            log.i("Fetching album art for keywords '%s'" % keywords)
-            fetcher = albumartfetcher.AlbumArtFetcher()
-            header, data = fetcher.fetch(keywords)
-            if header:
-                cherrypy.response.headers["Content-Type"] = header['Content-Type']
-                cherrypy.response.headers["Content-Length"] = header['Content-Length']
-                return data
-            cherrypy.response.headers["Content-Length"] = 0
+            
+            util.assureHomeFolderExists('albumart')
+            artpath = os.path.join(util.getConfigPath(),'albumart')
+            imgb64path = os.path.join(artpath,util.base64encode(directory))
+            
+            if os.path.exists(imgb64path):
+                cherrypy.response.headers["Content-Length"] = os.path.getsize(imgb64path)
+                with open(imgb64path,'rb') as f:
+                    return f.read()
+            else:
+                album = os.path.basename(directory)
+                artist = os.path.basename(os.path.dirname(directory))
+                keywords = artist+' '+album
+                log.i("Fetching album art for keywords '%s'" % keywords)
+                fetcher = albumartfetcher.AlbumArtFetcher()
+                header, data = fetcher.fetch(keywords)
+                if header:
+                    cherrypy.response.headers["Content-Type"] = header['Content-Type']
+                    cherrypy.response.headers["Content-Length"] = header['Content-Length']
+                    with open(imgb64path,'wb') as f:
+                        f.write(data)
+                    return data
+                cherrypy.response.headers["Content-Length"] = 0
             return ''
 
     def api_compactlistdir(self, value):
