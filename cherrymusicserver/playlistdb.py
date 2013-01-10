@@ -48,6 +48,7 @@ class PlaylistDB:
     def deletePlaylist(self, plid, userid):
         cursor = self.conn.cursor()
         cursor.execute("""DELETE FROM playlists WHERE rowid = ? and userid = ?""",(plid,userid))
+        cursor.execute("""DELETE FROM tracks WHERE playlistid = ?""",(plid,))
         self.conn.commit()
 
     def savePlaylist(self, userid, public, playlist, playlisttitle):
