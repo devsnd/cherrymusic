@@ -57,7 +57,7 @@ class PlaylistDB:
             WHERE userid = ? AND title = ?""",(userid,playlisttitle)).fetchall()
         if not duplicatetitles:
             cursor = self.conn.cursor()
-            cursor.execute("""INSERT INTO playlists 
+            cursor.execute("""INSERT INTO playlists
                 (title, userid, public) VALUES (?,?,?)""",
                 (playlisttitle, userid, 1 if public else 0))
             playlistid = cursor.lastrowid;
@@ -67,7 +67,7 @@ class PlaylistDB:
                 track = entry[0]
                 song = entry[1]
                 numberedplaylist.append((playlistid, track, song['mp3'], song['title']))
-            cursor.executemany("""INSERT INTO tracks (playlistid, track, url, title) 
+            cursor.executemany("""INSERT INTO tracks (playlistid, track, url, title)
                 VALUES (?,?,?,?)""", numberedplaylist)
             self.conn.commit()
             return "success"
@@ -76,7 +76,7 @@ class PlaylistDB:
 
     def loadPlaylist(self, playlistid, userid):
         cursor = self.conn.cursor()
-        cursor.execute("""SELECT rowid FROM playlists WHERE 
+        cursor.execute("""SELECT rowid FROM playlists WHERE
             rowid = ? AND (public = 1 OR userid = ?) LIMIT 0,1""",
             (playlistid, userid));
         result = cursor.fetchone()
@@ -99,7 +99,7 @@ class PlaylistDB:
             print(result)
             return result[0][1]
         return 'playlist'
-        
+
     def showPlaylists(self, userid):
         cur = self.conn.cursor()
         #change rowid to id to match api
@@ -107,7 +107,7 @@ class PlaylistDB:
             public = 1 OR userid = ?""", (userid,));
         res = cur.fetchall()
         return list(map(lambda x: {'plid':x[0], 'title':x[1], 'userid':x[2]}, res))
-        
+
     def createPLS(self,userid,plid, addrstr):
         pl = self.loadPlaylist(userid, plid)
         if pl:
@@ -126,11 +126,11 @@ class PlaylistDB:
     Length{idx}={length}
     '''.format(**trinfo)
             return plsstr
-        
+
     def createM3U(self,userid,plid,addrstr):
         pl = self.loadPlaylist(userid, plid)
         if pl:
             trackpaths = map(lambda x: addrstr+'/serve/'+x.path,pl)
             return '\n'.join(trackpaths)
-        
+
 
