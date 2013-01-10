@@ -812,6 +812,9 @@ function addNewUser(){
                     'isadmin':newisadmin
                 })};
     var success = function(data){
+        $('#newusername').val('');
+        $('#newpassword').val('');
+        $('#newisadmin').prop('checked', false);
         updateUserList();
     };
     api(data,success,errorFunc('failed to add new user'));
