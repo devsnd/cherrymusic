@@ -132,7 +132,7 @@ function loadConfig(){
 /************
  * USER OPTIONS
  * **********/
- 
+
 function loadUserOptions(onSuccess){
     var success = function(data){
         userOptions = jQuery.parseJSON(data);
@@ -801,7 +801,7 @@ function addNewUser(){
     "use strict";
     var newusername = $('#newusername').val();
     var newpassword = $('#newpassword').val();
-    var newisadmin = $('#chkSelect').attr('checked')?1:0;
+    var newisadmin = $('#newisadmin').attr('checked')?1:0;
     if(newusername.trim() === '' || newpassword.trim() === ''){
         return;
     }
