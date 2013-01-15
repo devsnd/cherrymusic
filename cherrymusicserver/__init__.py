@@ -159,7 +159,7 @@ Have fun!
             #if not available use default theme
             themedir = os.path.abspath(util.getResourcePath(os.path.join('themes', defaulttheme)))
 
-        if config.server.enable_ssl.bool:
+        if config.server.ssl_enabled.bool:
             cherrypy.config.update({
                 'server.ssl_certificate': config.server.ssl_certificate.str,
                 'server.ssl_private_key': config.server.ssl_private_key.str,

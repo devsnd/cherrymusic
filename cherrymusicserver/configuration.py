@@ -146,26 +146,26 @@ def from_defaults():
                                         playlists will be lost when the server is restarted.
                                         '''
 
-        c.server.enable_ssl = False
-        c.server.enable_ssl.desc = '''
+        c.server.ssl_enabled = False
+        c.server.ssl_enabled.desc = '''
                                     The following options allow you to use cherrymusic with
-                                    https encryption. If enable_ssl is set to False, all other
+                                    https encryption. If ssl_enabled is set to False, all other
                                     ssl options will be ommited.
                                     '''
 
         c.server.ssl_port = 8443
         c.server.ssl_port.desc = '''
                                     The port that will listen to SSL encrypted requests. If
-                                    use_ssl is set to True, all unencrypted HTTP requests
+                                    ssl_enabled is set to True, all unencrypted HTTP requests
                                     will be redirected to this port.
                                     '''
 
         c.server.ssl_certificate = 'certs/server.crt'
         c.server.ssl_private_key = 'certs/server.key'
 
-        c.server.dyndns_address = ''
-        c.server.dyndns_address.desc = '''
-                                    ex: server.dyndns_address = http://example.dyndns.com/cm
+        c.server.dynamic_dns_address = ''
+        c.server.dynamic_dns_address.desc = '''
+                                    ex: dynamic_dns_address = http://example.dyndns.com/cm
                                     If you have set up a dyndns/no-ip/etc, you can insert the
                                     address that points to cherrymusic here. This will enable
                                     you to use extra features like the opensearch plugin for

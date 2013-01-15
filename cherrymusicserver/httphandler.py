@@ -113,7 +113,7 @@ class HTTPHandler(object):
 
     def getBaseUrl(self, redirect_unencrypted=False):
         ipAndPort = parse.urlparse(cherrypy.url()).netloc
-        if cherry.config.server.enable_ssl.bool and not self.issecure(cherrypy.url()):
+        if cherry.config.server.ssl_enabled.bool and not self.issecure(cherrypy.url()):
             log.d('Not secure, redirecting...')
             ip = ipAndPort[:ipAndPort.rindex(':')]
             url = 'https://' + ip + ':' + cherry.config.server.ssl_port.str
@@ -303,8 +303,8 @@ class HTTPHandler(object):
 
 
     def api_opensearchdescription(self, value):
-        if cherry.config.server.dyndns_address.str.strip():
-            url = cherry.config.server.dyndns_address.str
+        if cherry.config.server.dynamic_dns_address.str.strip():
+            url = cherry.config.server.dynamic_dns_address.str
         else:
             url = self.getBaseUrl()
         return """<?xml version="1.0" encoding="UTF-8"?>
