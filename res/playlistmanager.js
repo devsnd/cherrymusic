@@ -329,12 +329,12 @@ PlaylistManager.prototype = {
         if(typeof epl !== 'undefined'){
             var cmdstr = '<div class="playlist-command-buttons">'
             if(epl.reason_open == 'queue'){
-                cmdstr += '<a class="button floatright" onclick="playlistManager.removePlayedFromPlaylist()" >remove played tracks</a>';
-                cmdstr += '<a class="button floatright" onclick="playlistManager.clearQueue()">clear queue</a>';
-                cmdstr += '<a class="button floatleft" onclick="playlistManager.newPlaylistFromQueue()">save as playlist</a>';
+                cmdstr += '<a class="button floatright" onclick="playlistManager.removePlayedFromPlaylist(); return false;" >remove played tracks</a>';
+                cmdstr += '<a class="button floatright" onclick="playlistManager.clearQueue(); return false;">clear queue</a>';
+                cmdstr += '<a class="button floatleft" onclick="playlistManager.newPlaylistFromQueue(); return false;">save as playlist</a>';
             } else {
                 if(!epl.saved){
-                    cmdstr += '<a class="button" onclick="showPlaylistSaveDialog('+epl.id+')">save</a>';
+                    cmdstr += '<a class="button" onclick="function(){showPlaylistSaveDialog('+epl.id+'); $(this).blur(); return false;}();">save</a>';
                 }
                 /*cmds.append('<span class="floatleft">owner '+pl.owner+'</span>');
                 if(!pl.public){
