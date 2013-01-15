@@ -198,6 +198,7 @@ PlaylistManager = function(){
         // should be triggered by jplayer time update event in the future.
         window.setInterval('playlistManager.refreshCommands()',1000);
         self.flashSize('0px','0px',-10000);
+        window.setTimeout("playlistManager.flashSize('0px','0px',-10000);",1000);
 	});
     this.initJPlayer();
 }
