@@ -25,6 +25,139 @@
 #
 */
 
+html,body{
+	font-family: Verdana, sans-serif;
+}
+
+
+.tabs .tabNavigation{
+	height: 45px;
+	background-color: #ffffff;
+}
+
+.tabs .tabNavigation li a{
+	background-color: #F02E75;
+	color: #ffffff;
+}
+
+.smalltab{
+	background-color: #F02E75;
+}
+.smalltab a{
+	color: #fff;
+}
+div#playlist-manager{
+#	position: fixed;
+#	float: right;
+#	margin: 300px;
+}
+
+div#progressscreen{
+	background-color: #eeeeee;
+	background-image:url(loader.gif);
+}
+div#dialog{
+	background-color: #DDFFDD;
+}
+
+#searchfield .oneliner{
+}
+.bigbutton{
+	font-size: 22px;
+	border-right: 4px solid #b10a49;
+	border-bottom: 4px solid #b10a49;
+	border-top: 4px solid #fd84b2;
+	border-left: 4px solid #fd84b2;
+	background-color: #F02E75;
+	border-radius: 8px;
+}
+
+.bigbutton:hover{
+	background-color: #b10a49;
+	border-right: 4px solid #fd84b2;
+	border-bottom: 4px solid #fd84b2;
+	border-top: 4px solid #b10a49;
+	border-left: 4px solid #b10a49;
+}
+.button{
+	border-right: 2px solid #b10a49;
+	border-bottom: 2px solid #b10a49;
+	border-top: 2px solid #fd84b2;
+	border-left: 2px solid #fd84b2;
+	background-color: #F02E75;
+}
+
+.button:hover{
+	background-color: #b10a49;
+	cursor: pointer;
+	color: #dddddd;
+}
+
+.listdir, .compactlistdir, .fileinlist{
+	background-color: #eeeeee;
+	color: #000000;
+}
+.listdir:hover{
+	background-color: #bbbbbb;
+}
+
+.compactlistdir{
+	background-color: #bbddbb;
+}
+.compactlistdir:hover{
+	background-color: #aaccaa;
+}
+
+li.fileinlist{
+	background-color: #fafafa;
+}
+
+li.fileinlist a{
+	color: #004260;
+}
+
+.mp3file:hover{
+	color: #ffffff;
+	background-color: #004260;
+}
+
+.fullpathlabel{
+	display: block;
+	font-size: 80%;
+}
+
+.helptext{
+	color: #444444;
+}
+.addAllToPlaylist{
+	background-color: #555555;
+	color: #ffffff;
+}
+.addAllToPlaylist:hover{
+	background-color: #aaaaaa;
+}
+
+.remoteplaylist{
+	background-color: #555555;
+	color: #ffffff;
+}
+.remoteplaylist:hover{
+	background-color: #aaaaaa;
+}
+
+/**********
+ADMIN PANEL
+**********/
+#adminpanel{
+	font-family: monospace;
+}
+#adminpanel ul li{
+	background-color: #33ff33;
+}
+#adminpanel ul li.admin{
+	background-color: #eeff33;
+}
+
 /***********
  * USER OPTIONS
  * *********/

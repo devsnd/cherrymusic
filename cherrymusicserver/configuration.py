@@ -90,14 +90,6 @@ def from_defaults():
                                     sufficient memory, because it will hurt the performance otherwise.
                                     """
 
-        c.look.theme = 'zeropointtwo'
-        c.look.theme.desc = """
-                            Available themes are: "zeropointtwo", "hax1337".
-                            To create your own theme, you can simply copy the theme
-                            to ~/.cherrymusic/themes/yournewtheme and modify it to
-                            your will. Then you can set theme=yournewtheme
-                            """
-
         c.browser.maxshowfiles = 100
         c.browser.maxshowfiles.desc = '''
                                         MAXSHOWFILES specifies how many files and folders should

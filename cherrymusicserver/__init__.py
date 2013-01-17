@@ -149,16 +149,6 @@ Have fun!
 
         resourcedir = os.path.abspath(util.getResourcePath('res'))
 
-        #check if theme is available in module
-        themename = config.look.theme.str
-        defaulttheme = 'zeropointtwo'
-        try:
-            #check source folder for themes
-            themedir = os.path.abspath(util.getResourcePath(os.path.join('themes', themename)))
-        except util.ResourceNotFound:
-            #if not available use default theme
-            themedir = os.path.abspath(util.getResourcePath(os.path.join('themes', defaulttheme)))
-
         if config.server.ssl_enabled.bool:
             cherrypy.config.update({
                 'server.ssl_certificate': config.server.ssl_certificate.str,
@@ -200,12 +190,6 @@ Have fun!
                 '/res': {
                     'tools.staticdir.on': True,
                     'tools.staticdir.dir': resourcedir,
-                    'tools.staticdir.index': 'index.html',
-                    'tools.caching.on' : False,
-                },
-                '/theme': {
-                    'tools.staticdir.on': True,
-                    'tools.staticdir.dir': themedir,
                     'tools.staticdir.index': 'index.html',
                     'tools.caching.on' : False,
                 },
