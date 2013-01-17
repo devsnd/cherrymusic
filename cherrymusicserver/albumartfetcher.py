@@ -82,29 +82,20 @@ class AlbumArtFetcher:
         @type path: string
         @return header, imagedata
         @rtype dict, bytestring"""
-        imglist = []
-        filetypes = ["*.jpg", "*.jpeg", "*.png"]
-        #get image files in directory
-        for type in filetypes:
-            searchpath = os.path.join(path, type)
-            imglist.extend(glob.glob(searchpath))
-        #check if images were found
-        if(len(imglist) > 0):
-            try:
-                #get data
-                file = open(imglist[0], "rb")
-                data = file.read()
-                #construct header
-                mimetype = ""
-                if(imglist[0][-3:] == ".png"):
-                    mimetype = "images/png"
-                else:
-                    mimetype = "images/jpeg"
-                header = {'Content-Type':mimetype, 'Content-Length':len(data)}
-                file.close()
-                return header, data
-            except IOError:
-                return None, ''
-                 
-        else:
-            return None,''
+
+        filetypes = (".jpg", ".jpeg", ".png")        
+        for file_in_dir in os.listdir(path):
+            if file_in_dir.lower().endswith(filetypes):            
+                try:
+                    imgpath = os.path.join(path,file_in_dir)
+                    with open(imgpath, "rb") as f:
+                        data = f.read()
+                        if(imgpath[-3:] == ".png"):
+                            mimetype = "images/png"
+                        else:
+                            mimetype = "images/jpeg"
+                        header = {'Content-Type':mimetype, 'Content-Length':len(data)}
+                        return header, data
+                except IOError:
+                    return None, ''                 
+        return None,''
