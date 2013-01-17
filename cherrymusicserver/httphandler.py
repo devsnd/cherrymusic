@@ -335,11 +335,20 @@ class HTTPHandler(object):
         if cherry.config.media.fetch_album_art.bool:
             params = json.loads(value)
             directory = params['directory']
+            fetcher = albumartfetcher.AlbumArtFetcher()
             
+            localpath = os.path.join(cherry.config.media.basedir.str, directory) 
+            header, data = fetcher.fetchLocal(localpath)
+
+            if header:
+                cherrypy.response.headers["Content-Type"] = header['Content-Type']
+                cherrypy.response.headers['Content-Length'] = header['Content-Length']
+                return data
+             
             util.assureHomeFolderExists('albumart')
             artpath = os.path.join(util.getConfigPath(),'albumart')
             imgb64path = os.path.join(artpath,util.base64encode(directory))
-            
+              
             if os.path.exists(imgb64path):
                 cherrypy.response.headers["Content-Length"] = os.path.getsize(imgb64path)
                 with open(imgb64path,'rb') as f:
@@ -349,7 +358,6 @@ class HTTPHandler(object):
                 artist = os.path.basename(os.path.dirname(directory))
                 keywords = artist+' '+album
                 log.i("Fetching album art for keywords '%s'" % keywords)
-                fetcher = albumartfetcher.AlbumArtFetcher()
                 header, data = fetcher.fetch(keywords)
                 if header:
                     cherrypy.response.headers["Content-Type"] = header['Content-Type']
