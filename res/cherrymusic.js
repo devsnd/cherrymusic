@@ -139,18 +139,61 @@ function loadUserOptions(onSuccess){
         if(typeof onSuccess !== 'undefined'){
             onSuccess();
         }
+        $('#custom_theme-primary_color').val(userOptions.custom_theme.primary_color.value);
+        $('#custom_theme-white_on_black').attr('checked',userOptions.custom_theme.white_on_black.value);
+        
+        $('#keyboard_shortcuts-next').val(String.fromCharCode(userOptions.keyboard_shortcuts.next.value));
+        $('#keyboard_shortcuts-prev').val(String.fromCharCode(userOptions.keyboard_shortcuts.prev.value));
+        $('#keyboard_shortcuts-stop').val(String.fromCharCode(userOptions.keyboard_shortcuts.stop.value));
+        $('#keyboard_shortcuts-play').val(String.fromCharCode(userOptions.keyboard_shortcuts.play.value));
+        $('#keyboard_shortcuts-pause').val(String.fromCharCode(userOptions.keyboard_shortcuts.pause.value));
+        $('#keyboard_shortcuts-search').val(String.fromCharCode(userOptions.keyboard_shortcuts.search.value));
     }
     api('getuseroptions',success);
 }
 
 function loadAndShowUserOptions(){
     loadUserOptions(function(){
-        $('#useroptions .content').html('');
         $('#useroptions').fadeIn();
-        new OptionRenderer('#useroptions .content').render(userOptions);
     });
 }
 
+var optionSetter = function(name,val,success,error){
+    api(    
+            {
+                action:'setuseroption',
+                value:JSON.stringify(
+                    {   
+                        'optionkey':name,
+                        'optionval':val
+                    }
+                )
+            },
+            function(){success(); loadUserOptions();},
+            error
+    )
+}
+keyboard_shortcut_setter = function(option, optionname){
+    $('#shortcut-changer span').html('Hit any key to set shortcut for<br><i>'+optionname+'</i><br>Press escape to cancel.');
+    $('#shortcut-changer').fadeIn('fast');
+    $('#shortcut-changer input').val('');
+    $('#shortcut-changer input').focus();
+    $('#shortcut-changer input').bind('keyup',function(e){
+        if (e.altKey) return;
+        if (e.shiftKey) return;
+        if (e.ctrlKey) return;
+        if (e.metaKey) return;
+        var keyboardsetterend = function(){
+            $('#shortcut-changer input').unbind('keyup');
+            $('#shortcut-changer').fadeOut('fast');
+        }
+        if(e.which !== 27){ //do not bind escape
+            optionSetter(option,e.which,keyboardsetterend,keyboardsetterend)();    
+        }
+        keyboardsetterend();
+    });
+}
+/*
 function OptionRenderer(cssselector){
     this.cssselector = cssselector;
     this.pretty = {
@@ -230,6 +273,8 @@ OptionRenderer.prototype = {
         }
     },
 }
+*/
+
 function reloadStylesheets() {
     var queryString = '?reload=' + new Date().getTime();
     $('link[rel="stylesheet"]').each(function () {
@@ -1010,7 +1055,14 @@ function time2text(sec){
  * KEYBOARD SHORTCUTS
  * ***************/
 function initKeyboardshortcuts(){
-    $(window.document).bind('keyup', keyboardShortcuts);
+    $(window.document).bind('keydown', keyboardShortcuts);
+    //disable space bar scrolling
+    $(document).keydown(function (e) {
+        var focusedElement = $("*:focus");
+        var inputFieldFocused = focusedElement.length > 0;
+        var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+        if (key === 32 && !inputFieldFocused) e.preventDefault();
+    });
 }
 function keyboardShortcuts(e){
     //we don't want to ruin all the nice standard shortcuts.
@@ -1025,18 +1077,22 @@ function keyboardShortcuts(e){
             focusedElement.blur();
         }
     } else {
-        var actions = { 'next' :    function(){playlistManager.cmd_next()},
-                        'pause' :   function(){playlistManager.cmd_pause()},
-                        'play' :    function(){playlistManager.cmd_play()},
-                        'prev' :    function(){playlistManager.cmd_previous()},
-                        'search' :  function(){$('#searchform input').focus().select()},
-                        'stop' :    function(){playlistManager.cmd_stop()},
+        var actions = { 'next' :    function(e){playlistManager.cmd_next()},
+                        'pause' :   function(e){playlistManager.cmd_pause()},
+                        'play' :    function(e){playlistManager.cmd_play()},
+                        'prev' :    function(e){playlistManager.cmd_previous()},
+                        'search' :  function(e){$('#searchform input').focus().select(); e.preventDefault();},
+                        'stop' :    function(e){playlistManager.cmd_stop()},
                         };
         for(var action in actions){
             if(e.which === userOptions.keyboard_shortcuts[action].value){
                 window.console.log('triggering: '+action);
-                actions[action]();
+                actions[action](e);
             }
+        }
+        if(e.which === 32){
+            window.console.log('triggering: pause');
+            actions['pause']();
         }
     }
 }

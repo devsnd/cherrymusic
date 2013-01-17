@@ -55,7 +55,72 @@
 <body>
 <!-- PROGRESS SCREEN OVERLAY START -->
 <div id="progressscreen"></div>
-<div id="useroptions"><div><div class="content"></div><a onclick="$('#useroptions').fadeOut()" class="button">close</a></div></div>
+<!-- USER OPTIONS -->
+<div id="useroptions">
+        <div>
+                <div class="content">
+                    <h2>Custom colors and style</h2>
+                        Use white fonts on dark background
+                        <input id="custom_theme-white_on_black" type="checkbox" value="true" name="custom_theme.white_on_black"
+                        onchange="api({action:'setuseroption', value:JSON.stringify({ 'optionkey':'custom_theme.white_on_black' , 'optionval':$(this).attr('checked')=='checked' }) },reloadStylesheets,function(){})"><br>
+                        
+                        Primary color
+                        <input id="custom_theme-primary_color" value="#F02E75"
+                        onkeyup="optionSetter('custom_theme.primary_color',$(this).val(),reloadStylesheets,function(){})();">
+                        <a class="button" onclick="optionSetter('custom_theme.primary_color','#F02E75',reloadStylesheets,function(){})();">reset</a><br>
+                    
+                    <h2>keyboard shortcuts</h2>
+                    
+                    <table>
+                        <tr>
+                            <td>next track</td>
+                            <td><input class="keyboard_key" disabled="disabled" id="keyboard_shortcuts-next" value="66" name="keyboard_shortcuts.next"></td>
+                            <td><a class="button" onclick="keyboard_shortcut_setter('keyboard_shortcuts.next','Next Track')">change</a></td>
+                        </tr>
+                        
+                        <tr>
+                            <td>stop</td>
+                            <td><input class="keyboard_key" disabled="disabled" id="keyboard_shortcuts-stop" value="86" name="keyboard_shortcuts.stop"></td>
+                            <td><a class="button" onclick="keyboard_shortcut_setter('keyboard_shortcuts.stop','Stop')">change</a></td>
+                        </tr>
+                        
+                        <tr>
+                            <td>previous track</td>
+                            <td><input class="keyboard_key" disabled="disabled" value="89"  id="keyboard_shortcuts-prev" name="keyboard_shortcuts.prev"></td>
+                            <td><a class="button" onclick="keyboard_shortcut_setter('keyboard_shortcuts.prev','Previous Track')">change</a></td>
+                        </tr>
+                        
+                        <tr>
+                            <td>pause</td>
+                            <td>
+                                <input class="keyboard_key" disabled="disabled" value="67"  id="keyboard_shortcuts-pause" name="keyboard_shortcuts.pause">
+                                <input class="keyboard_key_long" disabled="disabled" value="space">
+                            </td>
+                            <td><a class="button" onclick="keyboard_shortcut_setter('keyboard_shortcuts.pause','Pause')">change</a></td>
+                        </tr>
+                        
+                        <tr>
+                            <td>play</td>
+                            <td><input class="keyboard_key" disabled="disabled" value="88" id="keyboard_shortcuts-play" name="keyboard_shortcuts.play"></td>
+                            <td><a class="button" onclick="keyboard_shortcut_setter('keyboard_shortcuts.play','Play')">change</a></td>
+                        </tr>
+                        
+                        <tr>
+                            <td>search</td>
+                            <td><input class="keyboard_key" disabled="disabled" value="83"  id="keyboard_shortcuts-search" name="keyboard_shortcuts.search"></td>
+                            <td><a class="button" onclick="keyboard_shortcut_setter('keyboard_shortcuts.search','Use Search')">change</a></td>
+                        </tr>
+                    </table>
+                        <div id="shortcut-changer" style="display:none;">
+                            <span></span>
+                            <input value="" onkeyup="" />
+                        </div>
+                    
+                </div>
+                <a onclick="$('#useroptions').fadeOut()" class="button">close</a>
+        </div>
+</div>
+<!-- USER OPTIONS END-->
 <!-- PROGRESS SCREEN OVERLAY END -->
 <!-- PLAYLIST SAVE DIALOG OVERLAY START -->
 <div id="dialog" style="display: none">

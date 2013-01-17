@@ -269,7 +269,11 @@ PlaylistManager.prototype = {
         $(this.cssSelectorjPlayer).jPlayer("play");
     },
     cmd_pause : function(){
-        $(this.cssSelectorjPlayer).jPlayer("pause");
+        if($(this.cssSelectorjPlayer).data().jPlayer.status.paused){
+            $(this.cssSelectorjPlayer).jPlayer("play");
+        } else {
+            $(this.cssSelectorjPlayer).jPlayer("pause");
+        }
     },
     cmd_stop : function(){
         $(this.cssSelectorjPlayer).jPlayer("stop");
