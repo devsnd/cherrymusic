@@ -3,7 +3,6 @@
 import urllib.request
 import urllib.parse
 import os.path
-import glob
 import codecs
 import re
 from unidecode import unidecode
