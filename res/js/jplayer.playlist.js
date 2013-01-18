@@ -210,6 +210,7 @@
 				});
 			}
             this._updatePlaytime();
+            this._highlight(this.current);
 		},
         _updatePlaytime: function(){
             var self = this;
