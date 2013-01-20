@@ -35,7 +35,6 @@ import traceback
 
 from collections import deque
 from operator import itemgetter
-from time import time
 
 import cherrymusicserver as cherry
 from cherrymusicserver import log

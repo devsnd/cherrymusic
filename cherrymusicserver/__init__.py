@@ -29,7 +29,6 @@
 #
 
 import os
-import sys
 import cherrypy
 import threading
 
@@ -143,9 +142,6 @@ Have fun!
 
     def start(self):
         socket_host = "127.0.0.1" if config.server.localhost_only.bool else "0.0.0.0"
-        #deprecated
-        #error_file_path = os.path.join(os.path.dirname(__file__), config.server.logfile.str)
-        currentserverpath = os.path.abspath(os.path.dirname(__file__))
 
         resourcedir = os.path.abspath(util.getResourcePath('res'))
 

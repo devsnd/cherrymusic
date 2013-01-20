@@ -33,7 +33,6 @@ fetched from the database by some mystic-voodoo-
 hocuspocus heuristics"""
 
 from cherrymusicserver import util
-import os
 
 class ResultOrder:
     def __init__(self, searchword):

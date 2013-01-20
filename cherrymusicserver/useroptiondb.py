@@ -30,7 +30,6 @@
 
 import sqlite3
 import os
-import re
 import json
 
 from cherrymusicserver import log
@@ -104,7 +103,6 @@ class UserOptionDB:
             self.userid = userid
 
         def getChangableOptions(self):
-            optlist = []
             opts = self.getOptions()
             with cfg.create() as nothidden_opts:
                 for c in self.useroptiondb.DEFAULTS:

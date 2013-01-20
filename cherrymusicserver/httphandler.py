@@ -33,7 +33,6 @@ It will then call the cherrymodel, to get the
 requested information"""
 
 import os #shouldn't have to list any folder in the future!
-import sys
 import json
 import cherrypy
 import codecs
@@ -371,7 +370,6 @@ class HTTPHandler(object):
     def api_compactlistdir(self, value):
         params = json.loads(value)
         dirtorender = params['directory']
-        dirtorenderabspath = os.path.join(cherry.config.media.basedir.str, dirtorender)
         return self.jsonrenderer.render(self.model.listdir(dirtorender, params['filter']))
 
     def api_listdir(self,value):
@@ -380,7 +378,6 @@ class HTTPHandler(object):
             dirtorender = params['directory']
         else:
             dirtorender = ''
-        dirtorenderabspath = os.path.join(cherry.config.media.basedir.str, dirtorender)
         return self.jsonrenderer.render(self.model.listdir(dirtorender))
 
     def api_search(self, value, isFastSearch=False):

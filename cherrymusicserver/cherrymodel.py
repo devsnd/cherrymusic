@@ -38,7 +38,7 @@ try:
     MULTITHREADED = True
 except ImportError:
     MULTITHREADED = False
-import itertools
+
 import cherrypy
 
 import cherrymusicserver as cherry

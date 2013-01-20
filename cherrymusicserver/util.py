@@ -254,8 +254,8 @@ class Performance:
 
 def time2text(sec):
     abssec = abs(sec)
-    mins = abssec/60
-    hours = mins/60
+    minutes = abssec/60
+    hours = minutes/60
     days = hours/24
     weeks = days/7
     months = days/30
@@ -263,7 +263,7 @@ def time2text(sec):
     if abssec > 30:
         if int(years) != 0:
             t = str(int(years))+' years'            
-        elif int(month) != 0:
+        elif int(months) != 0:
             t = str(int(months))+' months'
         elif int(weeks) != 0:
             t = str(int(weeks))+' weeks'
