@@ -1105,6 +1105,12 @@ function showPlaylistBrowser(){
     $('#addPlaylist ul li').addClass('active');
     $('#playlistBrowser').show();
 }
+function sendHeartBeat(){
+    api('heartbeat',
+        function(){ removeError('connection to server lost')},
+        errorFunc('connection to server lost'),
+        true)
+}
 /***
 ON DOCUMENT READY... STEADY... GO!
 ***/
@@ -1128,7 +1134,8 @@ $(document).ready(function(){
     //window.setInterval("displayCurrentSong()", 1000);
     window.setInterval("resizePlaylistSlowly()",2000);
     $('#searchform .searchinput').focus();
-    window.setInterval("api('heartbeat',function(){removeError('connection to server lost')},errorFunc('connection to server lost'),true)",HEARTBEAT_INTERVAL_MS);
+    sendHeartBeat();
+    window.setInterval("sendHeartBeat()",HEARTBEAT_INTERVAL_MS);
     $('a.search').click(function(){
         mobileShowSearch();
         $(this).blur();
