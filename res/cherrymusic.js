@@ -174,7 +174,7 @@ var optionSetter = function(name,val,success,error){
     )
 }
 keyboard_shortcut_setter = function(option, optionname){
-    $('#shortcut-changer span').html('Hit any key to set shortcut for<br><i>'+optionname+'</i><br>Press escape to cancel.');
+    $('#shortcut-changer span').html('Hit any key to set shortcut for<br><b><i>'+optionname+'</i></b><br><br>Press <b>escape</b> or <b>space</b> to cancel.');
     $('#shortcut-changer').fadeIn('fast');
     $('#shortcut-changer input').val('');
     $('#shortcut-changer input').focus();
@@ -187,7 +187,7 @@ keyboard_shortcut_setter = function(option, optionname){
             $('#shortcut-changer input').unbind('keyup');
             $('#shortcut-changer').fadeOut('fast');
         }
-        if(e.which !== 27){ //do not bind escape
+        if(e.which !== 27 && e.which !== 32){ //do not bind escape
             optionSetter(option,e.which,keyboardsetterend,keyboardsetterend)();    
         }
         keyboardsetterend();
