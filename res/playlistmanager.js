@@ -294,6 +294,7 @@ PlaylistManager.prototype = {
             window.clearInterval(this.flashBlockCheckIntervalId);
             removeError('Flashblock is enabled. Please click on the flash symbol on top of the player to activate flash.');
             window.setTimeout("playlistManager.flashSize('0px','0px',-10000);",1000);
+            playlistManager.flashSize('0px','0px',-10000);
         }
 
     },
