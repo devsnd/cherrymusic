@@ -71,7 +71,7 @@ def from_defaults():
         c.media.fetch_album_art = False
         c.media.fetch_album_art.desc = """
                                     Tries to fetch the album cover from various locations in the web,
-                                    if no image is found locally. As a default the will be fetched from amazon.
+                                    if no image is found locally. By default it will be fetched from amazon.
                                     They will be shown next to folders that qualify as a possible
                                     album.
                                     """
