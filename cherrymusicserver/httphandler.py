@@ -444,6 +444,14 @@ class HTTPHandler(object):
             return self.userdb.addUser(new['username'], new['password'], new['isadmin'])
         else:
             return "You didn't think that would work, did you?"
+    
+    def api_userchangepassword(self, value):
+        user = json.loads(value)
+        isself = self.userdb.getNameById(pl['userid']) == user['username']
+        if isself or cherrypy.session['admin']:
+            return self.userdb.changePassword(user['username'],user['password'])
+        else:
+            return 'No no no. Can not change password. No.'
 
     def api_userdelete(self, value):
         params = json.loads(value)
