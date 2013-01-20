@@ -198,7 +198,6 @@ PlaylistManager = function(){
         // should be triggered by jplayer time update event in the future.
         window.setInterval('playlistManager.refreshCommands()',1000);
         self.flashSize('0px','0px',-10000);
-        window.setTimeout("playlistManager.flashSize('0px','0px',-10000);",1000);
 	});
     this.initJPlayer();
 }
@@ -294,6 +293,7 @@ PlaylistManager.prototype = {
         } else {
             window.clearInterval(this.flashBlockCheckIntervalId);
             removeError('Flashblock is enabled. Please click on the flash symbol on top of the player to activate flash.');
+            window.setTimeout("playlistManager.flashSize('0px','0px',-10000);",1000);
         }
 
     },
