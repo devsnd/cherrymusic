@@ -69,6 +69,16 @@ class UserDB:
             return True
         return False
         
+    def changePassword(self, username, newpassword):
+        if not newpassword.strip():
+            return "not a valid password"
+        else:
+            newuser = User.create(username, newpassword, False) #dummy user for salt
+            self.conn.execute('''
+            UPDATE users SET password = ?, salt = ? WHERE username = ?
+            ''', (newuser.password, newuser.salt, newuser.name) )
+            return "success"
+    
     def deleteUser(self, userid):
         if self.isDeletable(userid):
             self.conn.execute('''DELETE FROM users WHERE rowid = ?''', (userid,))

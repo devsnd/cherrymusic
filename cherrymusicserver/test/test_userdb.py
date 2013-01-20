@@ -71,6 +71,21 @@ class TestAuthenticate(unittest.TestCase):
 
         self.assertTupleEqual(userdb.User.nobody(), authuser,
                          'authentication failure must return invalid user')
+                         
+    def testChangePassword(self):
+        #create new user
+        self.users.addUser('newpwuser', 'password', False)
+        msg = self.users.changePassword('newpwuser', 'newpassword')
+        self.assertEqual(msg, "success")
+        
+        authuser = self.users.auth('newpwuser', 'password')
+        self.assertTupleEqual(userdb.User.nobody(), authuser,
+                         'authentication with old password after change must fail')
+        
+        authuser = self.users.auth('newpwuser', 'newpassword')
+        self.assertEqual('newpwuser', authuser.name,
+                         'authentication with new passowrd failed')
+        
 
 
 if __name__ == "__main__":
