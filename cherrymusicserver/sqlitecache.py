@@ -176,7 +176,6 @@ class SQLiteCache(object):
 
 
     def fetchFileIds(self, terms, maxFileIds, isFastSearch=False):
-        fileIdLimit = FAST_FILE_SEARCH_LIMIT if isFastSearch else NORMAL_FILE_SEARCH_LIMIT;
         resultlist = []
 
         query = '''SELECT search.frowid FROM dictionary JOIN search ON search.drowid = dictionary.rowid WHERE '''

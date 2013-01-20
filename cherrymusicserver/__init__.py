@@ -208,13 +208,6 @@ Have fun!
         cherrypy.engine.start()
         cherrypy.engine.block()
 
-    def pyopensslExists(self):
-        try:
-            import OpenSSL
-            return True
-        except ImportError:
-            return False
-
     def serverless(self):
         cherrypy.server.unsubscribe()
         self.start()
