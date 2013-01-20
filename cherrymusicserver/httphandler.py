@@ -331,19 +331,21 @@ class HTTPHandler(object):
 
     def api_fetchalbumart(self, value):
         cherrypy.session.release_lock()
-        if cherry.config.media.fetch_album_art.bool:
-            params = json.loads(value)
-            directory = params['directory']
-            fetcher = albumartfetcher.AlbumArtFetcher()
-            
-            localpath = os.path.join(cherry.config.media.basedir.str, directory) 
-            header, data = fetcher.fetchLocal(localpath)
+        
+        params = json.loads(value)
+        directory = params['directory']
+        fetcher = albumartfetcher.AlbumArtFetcher()
+        
+        localpath = os.path.join(cherry.config.media.basedir.str, directory) 
+        header, data = fetcher.fetchLocal(localpath)
 
-            if header:
-                cherrypy.response.headers["Content-Type"] = header['Content-Type']
-                cherrypy.response.headers['Content-Length'] = header['Content-Length']
-                return data
-             
+        if header:
+            cherrypy.response.headers["Content-Type"] = header['Content-Type']
+            cherrypy.response.headers['Content-Length'] = header['Content-Length']
+            return data
+                
+        if cherry.config.media.fetch_album_art.bool:
+            #try getting a cached album art image
             util.assureHomeFolderExists('albumart')
             artpath = os.path.join(util.getConfigPath(),'albumart')
             imgb64path = os.path.join(artpath,util.base64encode(directory))
@@ -353,6 +355,7 @@ class HTTPHandler(object):
                 with open(imgb64path,'rb') as f:
                     return f.read()
             else:
+                #fetch album art from online source
                 album = os.path.basename(directory)
                 artist = os.path.basename(os.path.dirname(directory))
                 keywords = artist+' '+album
