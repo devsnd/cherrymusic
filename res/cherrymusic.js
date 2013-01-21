@@ -178,20 +178,23 @@ keyboard_shortcut_setter = function(option, optionname){
     $('#shortcut-changer').fadeIn('fast');
     $('#shortcut-changer input').val('');
     $('#shortcut-changer input').focus();
-    $('#shortcut-changer input').bind('keyup',function(e){
+    var keydownhandler = function(e){
         if (e.altKey) return;
         if (e.shiftKey) return;
         if (e.ctrlKey) return;
         if (e.metaKey) return;
         var keyboardsetterend = function(){
-            $('#shortcut-changer input').unbind('keyup');
+            $('#shortcut-changer input').unbind('keyup',keydownhandler);
+            $('html').unbind('keyup',keydownhandler);
             $('#shortcut-changer').fadeOut('fast');
         }
-        if(e.which !== 27 && e.which !== 32){ //do not bind escape
+        if(e.which !== 27 && e.which !== 32){ //do not bind escape / space
             optionSetter(option,e.which,keyboardsetterend,keyboardsetterend)();    
         }
         keyboardsetterend();
-    });
+    }
+    $('#shortcut-changer input').bind('keyup',keydownhandler);
+    $('html').bind('keyup',keydownhandler);
 }
 /*
 function OptionRenderer(cssselector){
