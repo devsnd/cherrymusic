@@ -245,11 +245,11 @@ class SQLiteCache(object):
                 # would only become less, when searching for fileonly or dironly
                 with Performance('querying fullpaths for %s fileIds, files only' % len(bestresults)):
                     for fileidtuple in bestresults:
-                        results.append(self.musicEntryFromFileId(fileidtuple[0]))
-                results = filter(lambda f: f.dir == (mode == 'dironly'), results)
-                #now we can cap the results.
-                bestresults = bestresults[:min(len(bestresults), NORMAL_FILE_SEARCH_LIMIT)]
-
+                        musicentry = self.musicEntryFromFileId(fileidtuple[0])
+                        if musicentry.dir == (mode == 'dironly'):
+                            results.append(musicentry)
+                        if len(bestresults) >= NORMAL_FILE_SEARCH_LIMIT:
+                            break
             if debug:
                 log.d('resulting paths')
                 log.d(results)
