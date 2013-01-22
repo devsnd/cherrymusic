@@ -76,7 +76,6 @@ class HTTPHandler(object):
 
         self.handlers = {
             'search' : self.api_search,
-            'fastsearch' : self.api_fastsearch,
             'rememberplaylist' : self.api_rememberplaylist,
             'saveplaylist' : self.api_saveplaylist,
             'loadplaylist': self.api_loadplaylist,
@@ -383,16 +382,13 @@ class HTTPHandler(object):
             dirtorender = ''
         return self.jsonrenderer.render(self.model.listdir(dirtorender))
 
-    def api_search(self, value, isFastSearch=False):
+    def api_search(self, value):
         if not value.strip():
             return self.jsonrenderer.render([MusicEntry(path="if you're looking for nothing, you'll be getting nothing",repr="")])
         with Performance('processing whole search request'):
-            searchresults = self.model.search(value.strip(),isFastSearch)
+            searchresults = self.model.search(value.strip())
             with Performance('rendering search results as json'):
                 return self.jsonrenderer.render(searchresults)
-
-    def api_fastsearch(self, value):
-        return self.api_search(value,True)
 
     def api_rememberplaylist(self, value):
         cherrypy.session['playlist'] = value

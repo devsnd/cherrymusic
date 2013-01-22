@@ -109,17 +109,14 @@ class CherryModel:
         self.cache.full_update()
         return True
 
-    def search(self, term, isFastSearch=False):
+    def search(self, term):
         user = cherrypy.session.get('username', None)
         if user:
             log.d(user+' searched for "'+term+'"')
-        maxresults = cherry.config.search.maxresults.int
-        if isFastSearch:
-            maxresults = 5
-        results = self.cache.searchfor(term, maxresults=cherry.config.search.maxresults.int,isFastSearch=isFastSearch)
+        results = self.cache.searchfor(term, maxresults=cherry.config.search.maxresults.int)
         with Performance('sorting DB results using ResultOrder'):
             results = sorted(results,key=resultorder.ResultOrder(term),reverse=True)
-            results = results[:min(len(results), maxresults)]
+            results = results[:min(len(results), cherry.config.search.maxresults.int)]
 
         with Performance('checking and classifying results:'):
             results = list(filter(isValidMediaFile, results))
