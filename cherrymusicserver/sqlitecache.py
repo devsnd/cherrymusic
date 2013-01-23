@@ -196,9 +196,15 @@ class SQLiteCache(object):
         if value.startswith('!f '):
             mode = 'fileonly'
             value = value[3:]
+        elif value.endswith(' !f'):
+            mode = 'fileonly'
+            value = value[:3]
         elif value.startswith('!d '):
             mode = 'dironly'
             value = value[3:]
+        elif value.endswith(' !d'):
+            mode = 'dironly'
+            value = value[:3]
         terms = SQLiteCache.searchterms(value)
         with Performance('searching for a maximum of %s files' % str(NORMAL_FILE_SEARCH_LIMIT * len(terms))):
             self.db = self.conn.cursor()
