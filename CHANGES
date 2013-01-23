@@ -1,6 +1,37 @@
 Changelog
 ---------
 
+0.23.0 (2013-01-23)
+
+ - FEATURE: New 2 Column Layout (Search and Playlists side by side)
+ - FEATURE: Manage multiple playlists in tabs
+ - FEATURE: OpenSearch for adding cherrymusic to browser search bar
+ - FEATURE: user changeable colors for the interface
+ - FEATURE: responsive design for mobiles (switch between playlist and search view)
+ - FEATURE: display remaining time for playlists
+ - FEATURE: added --dropfiledb switch for reinitialization of file db
+ - FEATURE: local cover art is loaded automatically
+ - FEATURE: remotely fetched cover art is now cached in ~/.cherrymusic/albumart
+ - FEATURE: customizable keyboard shortcuts
+ - FEATURE: advanced search syntax: prefixes "!f" and "!d" only files or directories respectively
+ - CHANGE: --update only performs an update anb does not start the server anymore
+ - CHANGE: renaming of config options:
+        dyndns_address -> dynamic_dns_address
+        enable_ssl -> ssl_enabled
+ - FIXED: execution from another work dir lead to not finding local resources
+ - FIXED: fixed jerky control buttons in webkit browsers
+ - FIXED: API accessible when not authenticated
+ - FIXED: SSL not working due to wrong IP parsing
+ - FIXED: symlinks being resolved not correctly
+ - FIXED: flashblock taken into account, users can activate player on demand
+ - FIXED: playlist duration longer than one hour not properly displayed
+ - FIXED: admin tab not visible anymore for non-admin users
+ - FIXED: being able to create new admin users from the GUI
+ - FIXED current track not being highlighted after changing anything in playlist
+ - UPDATE: updated jQuery to version 1.8.3
+ - DEPRECATED: Themes aren't used anymore
+ + many more internal changes (dynamic db layout, decreased verbosity, etc.)
+
 0.22.0 (2012-11-29)
 
  - FEATURE: drag'n'drop sortable playlist
