@@ -141,7 +141,7 @@ function loadUserOptions(onSuccess){
         }
         $('#custom_theme-primary_color').val(userOptions.custom_theme.primary_color.value);
         $('#custom_theme-white_on_black').attr('checked',userOptions.custom_theme.white_on_black.value);
-        
+
         $('#keyboard_shortcuts-next').val(String.fromCharCode(userOptions.keyboard_shortcuts.next.value));
         $('#keyboard_shortcuts-prev').val(String.fromCharCode(userOptions.keyboard_shortcuts.prev.value));
         $('#keyboard_shortcuts-stop').val(String.fromCharCode(userOptions.keyboard_shortcuts.stop.value));
@@ -159,11 +159,11 @@ function loadAndShowUserOptions(){
 }
 
 var optionSetter = function(name,val,success,error){
-    api(    
+    api(
             {
                 action:'setuseroption',
                 value:JSON.stringify(
-                    {   
+                    {
                         'optionkey':name,
                         'optionval':val
                     }
@@ -189,7 +189,7 @@ keyboard_shortcut_setter = function(option, optionname){
             $('#shortcut-changer').fadeOut('fast');
         }
         if(e.which !== 27 && e.which !== 32){ //do not bind escape / space
-            optionSetter(option,e.which,keyboardsetterend,keyboardsetterend)();    
+            optionSetter(option,e.which,keyboardsetterend,keyboardsetterend)();
         }
         keyboardsetterend();
     }
@@ -712,12 +712,12 @@ function showPlaylists(){
 			            '<a href="javascript:;" class="button" onclick="confirmDeletePlaylist({{playlistid}})">x</a>',
             			'</div>',
                         '<div class="dlbutton">',
-                            '<a class="exportPLS button" href="/api?action=downloadpls&value={{dlval}}">',
+                            '<a class="exportPLS button" href="/api/downloadpls?value={{dlval}}">',
                             '&darr;&nbsp;PLS',
                             '</a>',
                         '</div>',
                         '<div class="dlbutton">',
-                            '<a class="exportM3U button" href="/api?action=downloadm3u&value={{dlval}}">',
+                            '<a class="exportM3U button" href="/api/downloadm3u?value={{dlval}}">',
                             '&darr;&nbsp;M3U',
                             '</a>',
                         '</div>',
