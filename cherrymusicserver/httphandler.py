@@ -329,7 +329,6 @@ class HTTPHandler(object):
         return "success"
 
     def api_fetchalbumart(self, value):
-        cherrypy.session.release_lock()
         
         params = json.loads(value)
         directory = params['directory']
@@ -342,7 +341,8 @@ class HTTPHandler(object):
             cherrypy.response.headers["Content-Type"] = header['Content-Type']
             cherrypy.response.headers['Content-Length'] = header['Content-Length']
             return data
-                
+
+               
         if cherry.config.media.fetch_album_art.bool:
             #try getting a cached album art image
             util.assureHomeFolderExists('albumart')
