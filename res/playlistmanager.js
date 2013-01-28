@@ -532,18 +532,38 @@ PlaylistManager.prototype = {
             title: title,
             wasPlayed : 0,
         }
-        //add natively supported path
-        track[ext2jPlayerFormat(ext)] = path;
-
-        if(transcodingEnabled){
-            //add transcoded paths
-            for(var i=0; i<availableEncoders.length; i++){
-                var enc = availableEncoders[i];
-                if(enc !== ext){
-                    track[ext2jPlayerFormat(enc)] = getTranscodePath(path,enc);
+        if(availablejPlayerFormats.indexOf(ext2jPlayerFormat(ext)) !== -1){
+            //add natively supported path
+            track[ext2jPlayerFormat(ext)] = path;
+        } else if(transcodingEnabled){
+            window.console.log('File is not natively supported by jPlayer. '+path);
+            window.console.log('Trying available transcoders.');
+            if(availableDecoders.indexOf(ext) !== -1){
+                var encoder = '';
+                //add transcoded paths
+                for(var i=0; i<availableEncoders.length; i++){
+                    var enc = availableEncoders[i];
+                    if(enc !== ext){
+                        encoder = enc;
+                        break;
+                    }
                 }
+                if(encoder.length !== 0){
+                    track[ext2jPlayerFormat(encoder)] = getTranscodePath(path,encoder);
+                    window.console.log('using live transcoding '+ext+' --> '+enc);
+                } else {
+                    window.console.log('no suitable encoder available! Try installing vorbis-tools or lame!');
+                    return;
+                }
+            } else {
+                window.console.log('missing decoder for filetype '+ext+'. track '+path+' can not be played.')
+                return;
             }
+        } else {
+            window.console.log("browser doesn't support filetype "+ext+'and transcoding is disabled. Transcoding can be enabled in the server configuration.');
+            return;
         }
+
 
         var playlist;
         if (plid) {
