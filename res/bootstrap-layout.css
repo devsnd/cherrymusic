@@ -237,8 +237,17 @@ body {
 
 /*OLD STUFF*/
 div#progressscreen{
-	background-color: #eeeeee;
-	background-image:url(loader.gif);
+    background-color: #EEEEEE;
+    background-image: url("loader.gif");
+    background-position: 48% center;
+    background-repeat: no-repeat;
+    height: 100%;
+    left: 0;
+    opacity: 0.4;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: 10000;
 }
 
 #searchresults ul{
