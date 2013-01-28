@@ -207,7 +207,6 @@ class HTTPHandler(object):
             return self.handlers[action](value)
         else:
             return "Error: no such action."
-        self.api_getuseroptions(None)
     api.exposed = True
 
     def api_customcss(self, value):
@@ -329,7 +328,7 @@ class HTTPHandler(object):
         return "success"
 
     def api_fetchalbumart(self, value):
-        
+        cherrypy.session.release_lock()
         params = json.loads(value)
         directory = params['directory']
         fetcher = albumartfetcher.AlbumArtFetcher()
