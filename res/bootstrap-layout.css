@@ -273,11 +273,13 @@ div#progressscreen{
 	background-color: #bbbbbb;
 }
 .listdir img{
+    background-image: url("/res/img/folder.png");
     border: 0 none;
     float: left;
+    height: 80px;
     margin-right: 10px;
     max-height: 80px;
-    width: auto;
+    width: 80px;
 }
 .listdir{
     height: 80px;

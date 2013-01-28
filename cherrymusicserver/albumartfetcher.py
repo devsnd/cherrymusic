@@ -111,7 +111,8 @@ class AlbumArtFetcher:
                 try:
                     imgpath = os.path.join(path,file_in_dir)
                     if os.path.getsize(imgpath) > self.MAX_IMAGE_SIZE_BYTES:
-                        return self.resize(imgpath,(self.IMAGE_SIZE,self.IMAGE_SIZE))
+                        header, data = self.resize(imgpath,(self.IMAGE_SIZE,self.IMAGE_SIZE))
+                        return header, data, True
                     else:
                         with open(imgpath, "rb") as f:
                             data = f.read()
@@ -120,7 +121,7 @@ class AlbumArtFetcher:
                             else:
                                 mimetype = "image/jpeg"
                             header = {'Content-Type':mimetype, 'Content-Length':len(data)}
-                            return header, data
+                            return header, data, False
                 except IOError:
-                    return None, ''
-        return None,''
+                    return None, '', False
+        return None,'', False

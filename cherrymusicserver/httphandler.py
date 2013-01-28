@@ -331,42 +331,53 @@ class HTTPHandler(object):
         cherrypy.session.release_lock()
         params = json.loads(value)
         directory = params['directory']
-        fetcher = albumartfetcher.AlbumArtFetcher()
         
-        localpath = os.path.join(cherry.config.media.basedir.str, directory) 
-        header, data = fetcher.fetchLocal(localpath)
+        #try getting a cached album art image
+        b64imgpath = self.albumartcache_path(directory)
+        img_data = self.albumartcache_load(b64imgpath)
+        if img_data:
+            cherrypy.response.headers["Content-Length"] = len(img_data)
+            return img_data
 
+        #try getting album art inside local folder
+        fetcher = albumartfetcher.AlbumArtFetcher()
+        localpath = os.path.join(cherry.config.media.basedir.str, directory) 
+        header, data, resized = fetcher.fetchLocal(localpath)
+            
         if header:
+            if resized:
+                #cache resized image for next time
+                self.albumartcache_save(b64imgpath,data)
             cherrypy.response.headers["Content-Type"] = header['Content-Type']
             cherrypy.response.headers['Content-Length'] = header['Content-Length']
             return data
+        elif cherry.config.media.fetch_album_art.bool:
+            #fetch album art from online source
+            album = os.path.basename(directory)
+            artist = os.path.basename(os.path.dirname(directory))
+            keywords = artist+' '+album
+            log.i("Fetching album art for keywords '%s'" % keywords)
+            header, data = fetcher.fetch(keywords)
+            if header:
+                cherrypy.response.headers["Content-Type"] = header['Content-Type']
+                cherrypy.response.headers["Content-Length"] = header['Content-Length']
+                albumartcache_save(imgb64path,data)
+                return data
+        cherrypy.HTTPRedirect("/res/img/folder.png", 302)
 
-               
-        if cherry.config.media.fetch_album_art.bool:
-            #try getting a cached album art image
-            util.assureHomeFolderExists('albumart')
-            artpath = os.path.join(util.getConfigPath(),'albumart')
-            imgb64path = os.path.join(artpath,util.base64encode(directory))
-              
-            if os.path.exists(imgb64path):
-                cherrypy.response.headers["Content-Length"] = os.path.getsize(imgb64path)
-                with open(imgb64path,'rb') as f:
-                    return f.read()
-            else:
-                #fetch album art from online source
-                album = os.path.basename(directory)
-                artist = os.path.basename(os.path.dirname(directory))
-                keywords = artist+' '+album
-                log.i("Fetching album art for keywords '%s'" % keywords)
-                header, data = fetcher.fetch(keywords)
-                if header:
-                    cherrypy.response.headers["Content-Type"] = header['Content-Type']
-                    cherrypy.response.headers["Content-Length"] = header['Content-Length']
-                    with open(imgb64path,'wb') as f:
-                        f.write(data)
-                    return data
-                cherrypy.response.headers["Content-Length"] = 0
-            return ''
+    def albumartcache_path(self, directory):
+        util.assureHomeFolderExists('albumart')
+        artpath = os.path.join(util.getConfigPath(),'albumart')
+        return os.path.join(artpath,util.base64encode(directory))
+    
+    def albumartcache_load(self, imgb64path):
+        if os.path.exists(imgb64path):
+            with open(imgb64path,'rb') as f:
+                return f.read()
+        
+    def albumartcache_save(self, path, data):
+        with open(path,'wb') as f:
+            f.write(data)
 
     def api_compactlistdir(self, value):
         params = json.loads(value)
