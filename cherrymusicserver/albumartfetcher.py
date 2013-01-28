@@ -5,11 +5,14 @@ import urllib.parse
 import os.path
 import codecs
 import re
+import subprocess
 from unidecode import unidecode
 from cherrymusicserver import log
 
 class AlbumArtFetcher:
     def __init__(self,method='amazon', timeout=10):
+        self.MAX_IMAGE_SIZE_BYTES = 100*1024
+        self.IMAGE_SIZE = 80
         self.methods = {
             'amazon' : {
                 'url' : "http://www.amazon.com/s/ref=sr_nr_i_0?rh=k:",
@@ -35,6 +38,26 @@ class AlbumArtFetcher:
             method = 'amazon'
         self.method = method
         self.timeout = timeout
+        self.imageMagickAvailable = self.programAvailable('convert')
+    
+    def programAvailable(self,name):
+        try:
+            with open(os.devnull,'w') as devnull:
+                subprocess.Popen([name],stdout=devnull, stderr=devnull)
+                return True
+        except OSError:
+            return False
+    
+    def resize(self,imagepath,size):
+        if self.imageMagickAvailable:
+            with open(os.devnull,'w') as devnull:
+                cmd = ['convert',imagepath,'-resize',str(size[0])+'x'+str(size[1]),'jpeg:-']
+                print(' '.join(cmd))
+                im = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                data = im.communicate()[0]
+                header = {'Content-Type':"image/jpeg", 'Content-Length':len(data)}
+                return header, data
+        return None,''
 
     def fetch(self, searchterms, urlonly=False):
         searchterms = unidecode(searchterms).lower()
@@ -58,7 +81,7 @@ class AlbumArtFetcher:
     def fetchAlbumArt(self, method, searchterm, urlonly=False):
         urlkeywords = urllib.parse.quote(searchterm)
         url = method['url']+urlkeywords
-        print(url)
+        #print(url)
         html = self.retrieveWebpage(url)
         matches = re.findall(method['regex'],html)
         if matches:
@@ -87,14 +110,17 @@ class AlbumArtFetcher:
             if file_in_dir.lower().endswith(filetypes):
                 try:
                     imgpath = os.path.join(path,file_in_dir)
-                    with open(imgpath, "rb") as f:
-                        data = f.read()
-                        if(imgpath[-3:] == ".png"):
-                            mimetype = "images/png"
-                        else:
-                            mimetype = "images/jpeg"
-                        header = {'Content-Type':mimetype, 'Content-Length':len(data)}
-                        return header, data
+                    if os.path.getsize(imgpath) > self.MAX_IMAGE_SIZE_BYTES:
+                        return self.resize(imgpath,(self.IMAGE_SIZE,self.IMAGE_SIZE))
+                    else:
+                        with open(imgpath, "rb") as f:
+                            data = f.read()
+                            if(imgpath[-3:] == ".png"):
+                                mimetype = "image/png"
+                            else:
+                                mimetype = "image/jpeg"
+                            header = {'Content-Type':mimetype, 'Content-Length':len(data)}
+                            return header, data
                 except IOError:
                     return None, ''
         return None,''
