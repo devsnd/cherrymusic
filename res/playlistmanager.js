@@ -335,12 +335,12 @@ PlaylistManager.prototype = {
         if(typeof epl !== 'undefined'){
             var cmdstr = '<div class="playlist-command-buttons">'
             if(epl.reason_open == 'queue'){
-                cmdstr += '<a class="button floatright" onclick="playlistManager.removePlayedFromPlaylist(); return false;" >remove played tracks</a>';
-                cmdstr += '<a class="button floatright" onclick="playlistManager.clearQueue(); return false;">clear queue</a>';
-                cmdstr += '<a class="button floatleft" onclick="playlistManager.newPlaylistFromQueue(); return false;">save as playlist</a>';
+                cmdstr += '<a class="btn btn-mini" onclick="playlistManager.newPlaylistFromQueue(); return false;">save as playlist</a>';
+                cmdstr += '<a class="btn btn-mini" style="float: right;" onclick="playlistManager.clearQueue(); return false;">clear</a>';
+                cmdstr += '<a class="btn btn-mini" style="float: right;" onclick="playlistManager.removePlayedFromPlaylist(); return false;" >remove played</a>';
             } else {
                 if(!epl.saved){
-                    cmdstr += '<a class="button" onclick="function(){showPlaylistSaveDialog('+epl.id+'); $(this).blur(); return false;}();">save</a>';
+                    cmdstr += '<a class="btn" onclick="function(){showPlaylistSaveDialog('+epl.id+'); $(this).blur(); return false;}();">save</a>';
                 }
                 /*cmds.append('<span class="floatleft">owner '+pl.owner+'</span>');
                 if(!pl.public){
@@ -357,17 +357,21 @@ PlaylistManager.prototype = {
             if(epl.id === this.getPlayingPlaylist().id){
                 remaintimesec -= $(this.cssSelectorjPlayer).data("jPlayer").status.currentTime;
             }
+            var littleTimeLeft = false;
             if(typeof remaintimesec !== 'undefined' && typeof completetimesec !== 'undefined' ){
                 remaintimesec = remaintimesec < 0 ? 0 : remaintimesec;
                 var proc = remaintimesec/completetimesec;
-                var cssclass = remaintimesec < 300 ? ' class="red" ' : '';
-                var remaindisplay = '<div'+cssclass+'>'+epl.jplayerplaylist._formatTime(remaintimesec)+' remaining</div>';
+                littleTimeLeft = remaintimesec < 300;
+                var cssclass = littleTimeLeft ? ' class="label label-important" ' : ' class="label" ';
+                var remaindisplay = '<span'+cssclass+'>'+epl.jplayerplaylist._formatTime(remaintimesec)+' remaining</span>';
             } else {
                 var proc = remaintracks.length/epl.jplayerplaylist.playlist.length;
-                var cssclass = remaintracks.length < 3 ? ' class="red" ' : '';
-                var remaindisplay = '<div'+cssclass+'>'+remaintracks.length+' remaining tracks</div>';
+                littleTimeLeft = remaintracks.length < 3;
+                var cssclass = littleTimeLeft ? ' class="label label-important" ' : ' class="label" ';
+                var remaindisplay = '<span'+cssclass+'>'+remaintracks.length+' remaining tracks</span>';
             }
-            var progressbar = '<div style="background-color: #ffffff;"><div style="width: '+parseInt(100-proc*100)+'%; height: 3px;" class="active"></div>';
+            var barWarning = littleTimeLeft ? 'bar-danger' : '';
+            var progressbar = '<div class="progress" style="height: 3px;"><div class="bar '+barWarning+'" style="width: '+parseInt(100-proc*100)+'%;"></div></div>';
             cmdstr += '<div class="playlist-progress">'+remaindisplay+progressbar+'</div>';
             cmds.html(cmdstr);
         }
@@ -379,24 +383,31 @@ PlaylistManager.prototype = {
         var pltabs = '';
         for(var i=0; i<this.managedPlaylists.length; i++){
             var pl = this.managedPlaylists[i];
-            pltabs += '<li id="'+this.tabid2htmlid(pl.id)+'" class="bigtab';
+            
+            var isactive = ''
             if(pl.id == this.editingPlaylist){
-                pltabs += ' active ';
+                isactive = ' class="active" ';
             }
+            pltabs += '<li '+isactive+' id="'+this.tabid2htmlid(pl.id)+'">';
+            
             var isplaying = '';
             if(pl.id == this.playingPlaylist){
                 isplaying += '&#9654;';
             }
+            
             var isunsaved = '';
             if(!pl.saved && pl.reason_open !== 'queue'){
                 isunsaved += ' <em>(unsaved)</em>';
             }
-            pltabs += '"><span><a href="#" onclick="playlistManager.showPlaylist('+pl.id+')">'+isplaying+' '+pl.name+ isunsaved +'</a>';
+            
+            
+            pltabs += '<a href="#" onclick="playlistManager.showPlaylist('+pl.id+')">'+isplaying+' '+pl.name+ isunsaved;
             if(pl.closable){
-                pltabs += '<a href="#" onclick="playlistManager.closePlaylist('+pl.id+')">&times;</a>';
+                pltabs += '<span class="pointer" href="#" onclick="playlistManager.closePlaylist('+pl.id+')">&times;</span>';
             }
-            pltabs += '<span></li>';
+            pltabs += '</a></li>';
         }
+        pltabs += '<li><a href="#" onclick="showPlaylistBrowser()"><b>+</b></a></li>';
         $(self.cssSelectorPlaylistChooser+' ul').empty()
         $(self.cssSelectorPlaylistChooser+' ul').append(pltabs);
     },

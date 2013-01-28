@@ -140,12 +140,12 @@ function loadUserOptions(onSuccess){
         $('#custom_theme-primary_color').val(userOptions.custom_theme.primary_color.value);
         $('#custom_theme-white_on_black').attr('checked',userOptions.custom_theme.white_on_black.value);
 
-        $('#keyboard_shortcuts-next').val(String.fromCharCode(userOptions.keyboard_shortcuts.next.value));
-        $('#keyboard_shortcuts-prev').val(String.fromCharCode(userOptions.keyboard_shortcuts.prev.value));
-        $('#keyboard_shortcuts-stop').val(String.fromCharCode(userOptions.keyboard_shortcuts.stop.value));
-        $('#keyboard_shortcuts-play').val(String.fromCharCode(userOptions.keyboard_shortcuts.play.value));
-        $('#keyboard_shortcuts-pause').val(String.fromCharCode(userOptions.keyboard_shortcuts.pause.value));
-        $('#keyboard_shortcuts-search').val(String.fromCharCode(userOptions.keyboard_shortcuts.search.value));
+        $('#keyboard_shortcuts-next').html(String.fromCharCode(userOptions.keyboard_shortcuts.next.value));
+        $('#keyboard_shortcuts-prev').html(String.fromCharCode(userOptions.keyboard_shortcuts.prev.value));
+        $('#keyboard_shortcuts-stop').html(String.fromCharCode(userOptions.keyboard_shortcuts.stop.value));
+        $('#keyboard_shortcuts-play').html(String.fromCharCode(userOptions.keyboard_shortcuts.play.value));
+        $('#keyboard_shortcuts-pause').html(String.fromCharCode(userOptions.keyboard_shortcuts.pause.value));
+        $('#keyboard_shortcuts-search').html(String.fromCharCode(userOptions.keyboard_shortcuts.search.value));
     }
     api('getuseroptions',success);
 }
@@ -375,7 +375,7 @@ function renderDir(label,urlpath,dirpath){
         var searchterms = encodeURIComponent(JSON.stringify({'directory' : dirpath}))
         rendereddir += '<img src="/api/fetchalbumart/'+searchterms+'" width="80" height="80" />';
     }
-    return rendereddir+dirpath+'</a>';
+    return rendereddir+'<div class="listdir-name-wrap"><span class="listdir-name">'+dirpath+'<span></div></a>';
 }
 function renderFile(label,urlpath,dirpath){
     "use strict";
@@ -704,18 +704,18 @@ function showPlaylists(){
                             '</a>',
                         '</div>',
                         '<div class="usernamelabel">',
-                            '<span style="background-color: {{usernamelabelcolor}}" >{{username}}</span>',
+                            '<span class="badge" style="background-color: {{usernamelabelcolor}}" >{{username}}</span>',
                         '</div>',
             			'<div class="deletebutton">',
-			            '<a href="javascript:;" class="button" onclick="confirmDeletePlaylist({{playlistid}})">x</a>',
+			            '<a href="javascript:;" class="btn btn-mini btn-danger" onclick="confirmDeletePlaylist({{playlistid}})">x</a>',
             			'</div>',
                         '<div class="dlbutton">',
-                            '<a class="exportPLS button" href="/api/downloadpls?value={{dlval}}">',
+                            '<a class="btn btn-mini" href="/api/downloadpls?value={{dlval}}">',
                             '&darr;&nbsp;PLS',
                             '</a>',
                         '</div>',
                         '<div class="dlbutton">',
-                            '<a class="exportM3U button" href="/api/downloadm3u?value={{dlval}}">',
+                            '<a class="btn btn-mini" href="/api/downloadm3u?value={{dlval}}">',
                             '&darr;&nbsp;M3U',
                             '</a>',
                         '</div>',
@@ -827,7 +827,6 @@ function updateUserList(){
             var reltime = time - e.last_time_online;
             var fuzzytime = time2text(reltime);
             var isonline = reltime < HEARTBEAT_INTERVAL_MS/500;
-            var onlinetag = isonline ? '<span class="online-light"></span>' : '<span class="offline-light"></span>';
             if(e.admin){
                 htmllist += '<li class="admin">';
             } else {
@@ -835,9 +834,16 @@ function updateUserList(){
             }
             var delbutton = '';
             if(e.deletable){
-                delbutton = '<a class="button" href="javascript:;" onclick="userDelete('+e.id+')">delete</a>';
+                delbutton = '<a class="btn btn-mini btn-danger" href="javascript:;" onclick="userDelete('+e.id+')">delete</a>';
             }
-            htmllist += onlinetag+e.id+' - '+e.username+delbutton+' last seen: '+fuzzytime+'</li>';
+            var onlinetag = isonline ? '<span class="badge badge-success">&#x2022;</span>' : '<span class="badge badge-important">&#x2022;</span>';
+            var usernamelabelstyle = ' style="background-color: '+userNameToColor(e.username)+';" ';
+            htmllist += '<div class="row-fluid">';
+                htmllist += '<div class="span1">'+onlinetag+'</div>';
+                htmllist += '<div class="span4"><span '+usernamelabelstyle+' class="label">'+e.username+'</span></div>';
+                htmllist += '<div class="span5"> last seen: '+fuzzytime+'</div>';
+                htmllist += '<div class="span2">'+delbutton+'</div>';
+            htmllist += '</div>';
         });
         $('#adminuserlist').html(htmllist);
     };
@@ -998,14 +1004,14 @@ function viewport() {
     return { width : e[ a+'Width' ] , height : e[ a+'Height' ] }
 }
 
-function mobileShowSearch(){
+/*function mobileShowSearch(){
     $('#search').css('display','inherit');
     $('#jplayer').css('display','none');
 }
 function mobileShowPlaylists(){
     $('#jplayer').css('display','inherit');
     $('#search').css('display','none');
-}
+}*/
 
 /*****
  * UTIL
@@ -1137,15 +1143,7 @@ $(document).ready(function(){
     $('#searchform .searchinput').focus();
     sendHeartBeat();
     window.setInterval("sendHeartBeat()",HEARTBEAT_INTERVAL_MS);
-    $('a.search').click(function(){
-        mobileShowSearch();
-        $(this).blur();
-        return false;
-    });
-    $('a.jplayer').click( function(){
-        mobileShowPlaylists()
-        $(this).blur();
-        return false;
-    });
-    mobileShowSearch();
+    $('#adminpanel').on('show', function (e) {
+        updateUserList();
+    })
 });

@@ -33,11 +33,13 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <link rel="icon" href="/res/favicon32.png" type="image/png">
-<meta content='width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;' name='viewport' />
-<link href="res/jplayer-theme/jplayer.css?nocache" rel="stylesheet" type="text/css" />
-<link href="res/layout.css?nocache" rel="stylesheet" type="text/css" />
-<link media="only screen and (max-device-width: 480px) and (min-device-width: 320px)" href="res/mobilelayout.css?nocache" type="text/css" rel="stylesheet" /> 
-<link href="api/customcss.css?nocache" rel="stylesheet" type="text/css" />
+<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+<!-- <link href="res/jplayer-theme/jplayer.css?nocache" rel="stylesheet" type="text/css" />-->
+<!-- <link href="res/layout.css?nocache" rel="stylesheet" type="text/css" /> -->
+<link href="res/bootstrap-layout.css?nocache" rel="stylesheet" type="text/css" />
+
+<!-- <link media="only screen and (max-device-width: 480px) and (min-device-width: 320px)" href="res/mobilelayout.css?nocache" type="text/css" rel="stylesheet" />  -->
+<!--<link href="api/customcss.css?nocache" rel="stylesheet" type="text/css" />-->
 <link rel="search" href="api/opensearchdescription" type="application/opensearchdescription+xml" title="CherryMusic" />
 <script type="text/javascript" src="res/js/jquery-1.8.3.min.js"></script>
 <script type="text/javascript" src="res/js/json2.min.js"></script>
@@ -46,80 +48,194 @@
 <script type="text/javascript" src="res/js/jquery.jplayer.inspector.js"></script>
 <script type="text/javascript" src="res/js/mustache-0.7.0.js"></script>
 <script type="text/javascript" src="res/js/jquery-color.js"></script>
-<script type="text/javascript" src="res/js/jquery-ui-1.8.23.custom.min.js"></script>
+<!-- ui sortable -->
+<script type="text/javascript" src="res/js/jquery-ui-1.10.0.custom.min.js"></script> 
 <script type="text/javascript" src="res/playlistmanager.js"></script>
 <script type="text/javascript" src="res/cherrymusic.js"></script>
+
+<!--bootstrap -->
+<link href="res/bootstrap/css/bootstrap.css" rel="stylesheet">
+<link href="res/bootstrap/css/bootstrap-modal.css" rel="stylesheet">
+<script src="res/bootstrap/js/bootstrap.min.js"></script>
+<script src="res/bootstrap/js/bootstrap-modal.js"></script>
+<script src="res/bootstrap/js/bootstrap-modalmanager.js"></script>
+<link href="res/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
+<script>
+    $(function(){
+        $('#adminpanel').on('shown', function(){
+            updateUserList();
+        });
+    });
+
+</script>
+<!--/bootstrap-->
 <title>CherryMusic</title>
 </head>
 <body>
+    
 <!-- PROGRESS SCREEN OVERLAY START -->
 <div id="progressscreen"></div>
-<!-- USER OPTIONS -->
-<div id="useroptions">
-        <div>
-                <div class="content">
-                    <h2>Custom colors and style</h2>
-                        Use white fonts on dark background
-                        <input id="custom_theme-white_on_black" type="checkbox" value="true" name="custom_theme.white_on_black"
-                        onchange="api({action:'setuseroption', value:JSON.stringify({ 'optionkey':'custom_theme.white_on_black' , 'optionval':$(this).attr('checked')=='checked' }) },reloadStylesheets,function(){})"><br>
-                        
-                        Primary color
-                        <input id="custom_theme-primary_color" value="#F02E75"
-                        onkeyup="optionSetter('custom_theme.primary_color',$(this).val(),reloadStylesheets,function(){})();">
-                        <a class="button" onclick="optionSetter('custom_theme.primary_color','#F02E75',reloadStylesheets,function(){})();">reset</a><br>
-                    
-                    <h2>keyboard shortcuts</h2>
-                    
-                    <table>
-                        <tr>
-                            <td>next track</td>
-                            <td><input class="keyboard_key" disabled="disabled" id="keyboard_shortcuts-next" value="66" name="keyboard_shortcuts.next"></td>
-                            <td><a class="button" onclick="keyboard_shortcut_setter('keyboard_shortcuts.next','Next Track')">change</a></td>
-                        </tr>
-                        
-                        <tr>
-                            <td>stop</td>
-                            <td><input class="keyboard_key" disabled="disabled" id="keyboard_shortcuts-stop" value="86" name="keyboard_shortcuts.stop"></td>
-                            <td><a class="button" onclick="keyboard_shortcut_setter('keyboard_shortcuts.stop','Stop')">change</a></td>
-                        </tr>
-                        
-                        <tr>
-                            <td>previous track</td>
-                            <td><input class="keyboard_key" disabled="disabled" value="89"  id="keyboard_shortcuts-prev" name="keyboard_shortcuts.prev"></td>
-                            <td><a class="button" onclick="keyboard_shortcut_setter('keyboard_shortcuts.prev','Previous Track')">change</a></td>
-                        </tr>
-                        
-                        <tr>
-                            <td>pause</td>
-                            <td>
-                                <input class="keyboard_key" disabled="disabled" value="67"  id="keyboard_shortcuts-pause" name="keyboard_shortcuts.pause">
-                                <input class="keyboard_key_long" disabled="disabled" value="space">
-                            </td>
-                            <td><a class="button" onclick="keyboard_shortcut_setter('keyboard_shortcuts.pause','Pause')">change</a></td>
-                        </tr>
-                        
-                        <tr>
-                            <td>play</td>
-                            <td><input class="keyboard_key" disabled="disabled" value="88" id="keyboard_shortcuts-play" name="keyboard_shortcuts.play"></td>
-                            <td><a class="button" onclick="keyboard_shortcut_setter('keyboard_shortcuts.play','Play')">change</a></td>
-                        </tr>
-                        
-                        <tr>
-                            <td>search</td>
-                            <td><input class="keyboard_key" disabled="disabled" value="83"  id="keyboard_shortcuts-search" name="keyboard_shortcuts.search"></td>
-                            <td><a class="button" onclick="keyboard_shortcut_setter('keyboard_shortcuts.search','Use Search')">change</a></td>
-                        </tr>
-                    </table>
-                        <div id="shortcut-changer" style="display:none;">
-                            <span></span>
-                            <input value="" onkeyup="" />
-                        </div>
-                    
-                </div>
-                <a onclick="$('#useroptions').fadeOut()" class="button">close</a>
+<!--ABOUT -->
+<div id="aboutModal" class="modal fade hide">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>About CherryMusic</h3>
+    </div>
+    <div class="modal-body">
+        <div class="content">
+            <img src="res/cherry_music_web_notext.png" style="float: right;"/>
+            <p>CherryMusic was created by <a href="http://github.com/devsnd">Tom Wallroth</a>
+            and is currently developed together with <a href="http://github.com/tilboerner">Tilman Börner</a>.</p>
+            <p>Visit the <a href="http://www.fomori.org/cherrymusic">CherryMusic website</a> or get the <a href="http://www.github.com/devsnd/cherrymusic">source-code directly from github</a></p>
+            <p>thanks to</p>
+            <ul>
+                <li><a href="www.cherrypy.org">The CherryPy team</a> for a great application server</li>
+                <li><a href="http://www.happyworm.com/">HappyWorm</a> for the HTML5 audio playback</li>
+                <li><a href="http://www.komponist-cmb.de">Christian Maximilian Blasius</a> for the logo!</li>
+                <li><a href="http://twitter.github.com/bootstrap/">Bootstrap</a> for the nice look'n'feel of the UI</li>
+                <li>6arms1leg for maintaining the package for Arch Linux</li>
+                <li>Adrian Sampson for <a href="https://github.com/sampsyo/audioread">audioread</a></li>
+            </ul>
+            CherryMusic © 2013     
         </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
+</div>
+<!-- ABOUT END -->
+<!-- USER OPTIONS -->
+<div id="userOptions" class="modal fade hide">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Options</h3>
+    </div>
+    <div class="modal-body">
+        <div class="content">
+            <!--<h2>Custom colors and style</h2>
+                Use white fonts on dark background
+                <input id="custom_theme-white_on_black" type="checkbox" value="true" name="custom_theme.white_on_black"
+                onchange="api({action:'setuseroption', value:JSON.stringify({ 'optionkey':'custom_theme.white_on_black' , 'optionval':$(this).attr('checked')=='checked' }) },reloadStylesheets,function(){})"><br>
+                
+                Primary color
+                <input id="custom_theme-primary_color" value="#F02E75"
+                onkeyup="optionSetter('custom_theme.primary_color',$(this).val(),reloadStylesheets,function(){})();">
+                <a class="button" onclick="optionSetter('custom_theme.primary_color','#F02E75',reloadStylesheets,function(){})();">reset</a><br>
+            -->
+            <h2>keyboard shortcuts</h2>
+            
+            <table>
+                <tr>
+                    <td>next track</td>
+                    <td><span class="label" id="keyboard_shortcuts-next" value="66" name="keyboard_shortcuts.next"></span></td>
+                    <td><a class="btn" onclick="keyboard_shortcut_setter('keyboard_shortcuts.next','Next Track')">change</a></td>
+                </tr>
+                
+                <tr>
+                    <td>stop</td>
+                    <td><span class="label"  id="keyboard_shortcuts-stop" value="86" name="keyboard_shortcuts.stop"></span></td>
+                    <td><a class="btn" onclick="keyboard_shortcut_setter('keyboard_shortcuts.stop','Stop')">change</a></td>
+                </tr>
+                
+                <tr>
+                    <td>previous track</td>
+                    <td><span class="label"  value="89"  id="keyboard_shortcuts-prev" name="keyboard_shortcuts.prev"></span></td>
+                    <td><a class="btn" onclick="keyboard_shortcut_setter('keyboard_shortcuts.prev','Previous Track')">change</a></td>
+                </tr>
+                
+                <tr>
+                    <td>pause</td>
+                    <td>
+                        <span class="label"  value="67"  id="keyboard_shortcuts-pause" name="keyboard_shortcuts.pause"></span>
+                        <span class="label"  value="space">space</span>
+                    </td>
+                    <td><a class="btn" onclick="keyboard_shortcut_setter('keyboard_shortcuts.pause','Pause')">change</a></td>
+                </tr>
+                
+                <tr>
+                    <td>play</td>
+                    <td><span class="label"  value="88" id="keyboard_shortcuts-play" name="keyboard_shortcuts.play"></span></td>
+                    <td><a class="btn" onclick="keyboard_shortcut_setter('keyboard_shortcuts.play','Play')">change</a></td>
+                </tr>
+                
+                <tr>
+                    <td>search</td>
+                    <td><span class="label" value="83"  id="keyboard_shortcuts-search" name="keyboard_shortcuts.search"></span></td>
+                    <td><a class="btn" onclick="keyboard_shortcut_setter('keyboard_shortcuts.search','Use Search')">change</a></td>
+                </tr>
+            </table>
+            <div id="shortcut-changer" style="display:none;">
+                <span></span>
+                <input value="" onkeyup="" />
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
 </div>
 <!-- USER OPTIONS END-->
+
+<!-- ADMIN PANEL START -->
+<div id="adminpanel" class="modal fade hide">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Options</h3>
+    </div>
+    <div class="modal-body">
+        <div class="content">
+            <h4>Create new user:</h4>  
+            <form class="form-horizontal">  
+                <fieldset>  
+                    <div class="control-group">  
+                        <label class="control-label" for="newusername">User Name</label>  
+                        <div class="controls">  
+                            <input type="text" class="input-xlarge" id="newusername">  
+                        </div>  
+                    </div>  
+                    <div class="control-group">  
+                        <label class="control-label" for="newpassword">Password</label>  
+                        <div class="controls">  
+                            <input type="text" class="input-xlarge" id="newpassword">  
+                        </div>  
+                    </div>  
+                    <div class="control-group">  
+                        <label class="control-label" for="newisadmin">Admin</label>  
+                        <div class="controls">  
+                            <input type="checkbox" id="newisadmin" value="option1">  
+                        </div>  
+                    </div>  
+                    <div class="form-actions">  
+                        <a href="javascript:;" onclick="addNewUser()" class="btn">Add User</a>
+                    </div>  
+                </fieldset>  
+            </form>  
+            <h4>User List:</h4>
+            <div class="row-fluid">
+                <ul id="adminuserlist">
+                </ul>
+            </div>
+            <h4>Advanced:</h4>
+            <div class="row-fluid">
+                <a class="btn" href="javascript:;" onclick="updateLibrary()" class="button">
+                Update Music Library (may take some time!)
+                </a>
+            </div>
+            <div class="row-fluid">
+                <a class="btn" href="javascript:;" onclick="$('#jplayer_inspector').jPlayerInspector({jPlayer:$('#jquery_jplayer_1')});" class="button">
+                Enable JPlayer Inspector
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
+</div>
+<!-- ADMIN PANEL END -->
+
+
+
 <!-- PROGRESS SCREEN OVERLAY END -->
 <!-- PLAYLIST SAVE DIALOG OVERLAY START -->
 <div id="dialog" style="display: none">
@@ -130,85 +246,62 @@
     <a href="javascript:;" onclick="$('#dialog').fadeOut('fast')">Close</a>
 </div>
 <!-- PLAYLIST SAVE DIALOG OVERLAY END -->
-<ul class="tabNavigation">
+<!-- <ul class="tabNavigation">
     <li><a class="search"  href="#search">Search</a></li>
     <li><a class="jplayer" href="#jplayer">Playlist</a></li>
-</ul>
+</ul> -->        
+
 <!-- JPLAYER START -->
+<div class="navbar navbar-fixed-top cm-navbar-player">
+<div class="navbar-inner">
+<div class="container-fluid">
+    <div class="row-fluid">
+    <div class="span12">
         <div id="mediawrapper">
             <div id="mediaplayer">
-            <!-- ADMIN PANEL START -->
-                <div id="adminpanelwrapper">
-                    <div class="smalltab" id="toggle-admin-panel-button">
-                        <a href="javascript:;" onclick="toggleAdminPanel()">admin</a>
-                    </div>
-                    <div class="smalltab">
-                        <a href="javascript:;" onclick="loadAndShowUserOptions()">options</a>
-                    </div>
-                    <div class="smalltab floatright">
-                        <a href="javascript:;" onclick="logout()">logout</a>
-                    </div>
-                    <div id="adminpanel" style="display: none;">
-                        <br>
-                        <a href="javascript:;" onclick="$('#jplayer_inspector').jPlayerInspector({jPlayer:$('#jquery_jplayer_1')});" class="button">
-                        Enable JPlayer Inspector
-                        </a>
-                        <br>
-                        <br>
-                        <a href="javascript:;" onclick="updateLibrary()" class="button">
-                        Update Music Library (may take some time!)
-                        </a>
-                        <br>
-                        <br>
-                        Create new user:<br>
-                        Username:<input type="text" id="newusername" /><br>
-                        Password:<input type="password" id="newpassword" />
-                        is Admin:<input type="checkbox" id="newisadmin" />
-                        <a href="javascript:;" onclick="addNewUser()" class="button">Add User</a><br>
-                        <ul id="adminuserlist">
-                        </ul>
-                        
-                    </div>
-                </div>
-            <!-- ADMIN PANEL END -->
+            
             <div id="jquery_jplayer_1" class="jp-jplayer"></div>
                 <div id="jp_ancestor" class="jp-audio">
                     <div class="jp-type-playlist">
                         <div class="jp-gui jp-interface">
-                            <div class="jp-center-progress-bar">
-                                <div class="jp-progress">
-                                    <div class="jp-seek-bar">
-                                            <div class="jp-play-bar"></div>
+                            <div class="jp-center-progress-bar pointer">
+                                <div class="jp-progress progress cm-seekbar">
+                                    <div class="jp-seek-bar jp-seek-bar bar bar-success">
+                                        <div class="jp-play-bar bar"></div>
                                     </div>
+                                    
                                 </div>
+                                
                                 <div class="jp-time-holder">
                                     <div class="jp-current-time"></div>
                                     <div class="jp-duration"></div>
                                 </div>
                             </div>
-                            
-                            <ul class="jp-controls">
-                                <li><a href="javascript:;" class="jp-previous" tabindex="1">previous</a></li>
-                                <li><a href="javascript:;" class="jp-play" tabindex="1">play</a></li>
-                                <li><a href="javascript:;" class="jp-pause" tabindex="1">pause</a></li>
-                                <li><a href="javascript:;" class="jp-next" tabindex="1">next</a></li>
-                                <li><a href="javascript:;" class="jp-stop" tabindex="1">stop</a></li>
-                                <li><a href="javascript:;" class="jp-mute" tabindex="1" title="mute">mute</a></li>
-                                <li><a href="javascript:;" class="jp-unmute" tabindex="1" title="unmute">unmute</a></li>
-                                <li><a href="javascript:;" class="jp-volume-max" tabindex="1" title="max volume">max volume</a></li>
-                            </ul>
                             <div class="cm-songtitle"></div>
+                            <ul class="jp-controls">
+                                <li><a href="javascript:;" class="jp-previous btn" tabindex="1"><i class="icon-step-backward"></i></a></li>
+                                <li><a href="javascript:;" class="jp-play  btn" tabindex="1"><i class="icon-play"></i></a></li>
+                                <li><a href="javascript:;" class="jp-pause btn" tabindex="1"><i class="icon-pause"></i></a></li>
+                                <li><a href="javascript:;" class="jp-next btn" tabindex="1"><i class="icon-step-forward"></i></a></li>
+                                <li><a href="javascript:;" class="jp-stop btn" tabindex="1"><i class="icon-stop"></i></a></li>
+                            </ul>
+                            <ul class="jp-volume-toggles">
+                                <li><a href="javascript:;" class="jp-mute btn" tabindex="1" title="mute"><i class="icon-volume-off"></i></a></li>
+                                <li><a href="javascript:;" class="jp-unmute btn" tabindex="1" title="unmute"><i class="icon-volume-up"></i></a></li>
+                                <li><a href="javascript:;" class="jp-volume-max btn" tabindex="1" title="max volume"><i class="icon-volume-up"></i></a></li>
+                            </ul>
+                            
                             <div class="cm-playlistplaytime"></div>
                             
-                            <div class="jp-volume-bar">
-                                <div class="jp-volume-bar-value"></div>
+                            <div class="jp-volume-bar progress pointer">
+                                <div class="jp-volume-bar-value bar"></div>
                             </div>
                             
                             <ul class="jp-toggles">
-                                <li><a href="javascript:;" class="jp-shuffle" tabindex="1" title="shuffle">shuffle</a></li>
-                                <li><a href="javascript:;" class="jp-shuffle-off" tabindex="1" title="shuffle off">shuffle off</a></li>
-                                <li><a href="javascript:;" class="jp-repeat" tabindex="1" title="repeat">repeat</a></li>
-                                <li><a href="javascript:;" class="jp-repeat-off" tabindex="1" title="repeat off">repeat off</a></li>
+                                <li><a href="javascript:;" class="jp-shuffle" tabindex="1" title="shuffle"><i class="icon-random"></i></a></li>
+                                <li><a href="javascript:;" class="jp-shuffle-off" tabindex="1" title="shuffle off"><i class="icon-arrow-right"></i></a></li>
+                                <li><a href="javascript:;" class="jp-repeat" tabindex="1" title="repeat"><i class="icon-retweet"></i></a></li>
+                                <li><a href="javascript:;" class="jp-repeat-off" tabindex="1" title="repeat off"><i class="icon-arrow-down"></i></a></li>
                             </ul>
                         </div>
                         <!-- <div class="jp-no-solution">
@@ -218,54 +311,82 @@
                     </div>
                 </div>
             </div>
-	</div>
-    <!-- JPLAYER END -->
-
-<a id="errormessage" href="#" title="click to dismiss" onclick="$(this).html('')"></a>
-<!-- TABS START -->
-<div class="tabs">
-    <div>
-        <!--SEARCH TAB START -->
-        <div id="search">
-            <div id="searchfield">
-                <span id="oneliner"></span>
-                <form id="searchform" onsubmit="return submitsearch()">
-                <input class="searchinput" type="text" />
-                <div class="bigbutton">search</div>
-                <a class="black" href="#" onclick="loadBrowser()">browse instead</a>
-                </form>
-            </div>
-            <div id="searchresults"></div>
         </div>
-        <!--SEARCH TAB END -->
     </div>
-    <div>
-        <!-- PLAYLIST TAB START -->
-        <div id="jplayer">
-        
-            
-            <!--<div class="smalltab floatright">
-                <a href="javascript:;" onclick="clearPlaylist()">Clear Playlist</a>
+    </div>
+</div>
+</div>
+</div>
+<!-- JPLAYER END -->
+
+<!-- UPPER NAVIGATION ELEMENTS -->
+<div class="navbar navbar-inverse">
+  <div class="navbar-inner">
+      <button data-target=".nav-collapse" data-toggle="collapse" class="btn btn-navbar" type="button">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a id="brandname" data-toggle="modal" role="button" href="#aboutModal" class="brand">Cherry&nbsp;&nbsp;Music</a>
+      <div class="nav-collapse collapse">
+        <ul class="nav">
+          <li><a href="#userOptions" role="button" data-toggle="modal">Options</a></li>
+          <li><a href="#adminpanel" role="button" data-toggle="modal">Admin</a></li>
+          <li><a href="javascript:;" onclick="logout()">Logout</a></li>
+        </ul>
+      </div>
+  </div>
+</div>
+<!-- END UPPER NAVIGATION ELEMENTS -->    
+
+<!-- <a id="errormessage" href="#" title="click to dismiss" onclick="$(this).html('')"></a> -->
+<!-- TABS START -->
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span6">
+            <!--SEARCH TAB START -->
+            <div id="search">
+                <div id="searchfield">
+                    <span id="oneliner"></span>
+                    <form id="searchform" onsubmit="return submitsearch()">
+                        <div class="input-append">
+                            <input class="searchinput" type="text" />
+                            <button class="btn btn-primary">Search</button>
+                        </div>
+                        <a class="btn btn-small" href="#" onclick="loadBrowser()">browse</a>               
+                    </form>
+                </div>
+                <div id="searchresults"></div>
             </div>
-            <div class="smalltab floatright">
-                <a href="javascript:;" onclick="removePlayedFromPlaylist()">Remove played tracks</a>
-            </div>
-            -->
-            
-            <div id="over-playlist-tabs">
-                <div id="playlistChooser"><ul></ul></div>
-                <div id="addPlaylist"><ul><li class="bigtab"><a href="#" onclick="showPlaylistBrowser()"><b>+</b></a></li></ul></div>
-            </div>
-            <div id="playlistCommands"></div>
-            <div id="playlistContainerParent"></div>
-            <div id="playlistBrowser">
-                <a href="#" class="button center" style="width:150px" onclick="playlistManager.newPlaylist()">create new playlist</a>
-                <span class="center helptext" style="width: 100px">or load a playlist from the list below</span>
-                <div class="available-playlists" style="display: none">
-                </div>        
-            </div>
+            <!--SEARCH TAB END -->
         </div>
-        <!-- PLAYLIST TAB END -->
+        <div class="span6">
+            <!-- PLAYLIST TAB START -->
+            <div id="jplayer">
+            
+                
+                <!--<div class="smalltab floatright">
+                    <a href="javascript:;" onclick="clearPlaylist()">Clear Playlist</a>
+                </div>
+                <div class="smalltab floatright">
+                    <a href="javascript:;" onclick="removePlayedFromPlaylist()">Remove played tracks</a>
+                </div>
+                -->
+                
+                <div id="over-playlist-tabs">
+                    <div id="playlistChooser"><ul class="nav nav-tabs"></ul></div>
+                </div>
+                <div id="playlistCommands"></div>
+                <div id="playlistContainerParent"></div>
+                <div id="playlistBrowser">
+                    <a href="#" class="btn" onclick="playlistManager.newPlaylist()">create new playlist</a><br>
+                    <span class="center helptext" style="width: 100px">or load a playlist from the list below</span>
+                    <div class="available-playlists" style="display: none">
+                    </div>        
+                </div>
+            </div>
+            <!-- PLAYLIST TAB END -->
+        </div>
     </div>
 </div>
 <!-- TABS END -->
