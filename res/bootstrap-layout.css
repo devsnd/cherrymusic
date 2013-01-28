@@ -236,6 +236,11 @@ body {
 }
 
 /*OLD STUFF*/
+div#progressscreen{
+	background-color: #eeeeee;
+	background-image:url(loader.gif);
+}
+
 #searchresults ul{
 	padding: 0 0 0 20px;
     list-style: none;
