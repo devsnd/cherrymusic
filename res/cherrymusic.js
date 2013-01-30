@@ -120,7 +120,7 @@ function loadConfig(){
             executeAfterConfigLoaded[i]();
         }
         if(!isAdmin){
-            $('#toggle-admin-panel-button').hide();
+            $('a[href="#adminpanel"]').hide();
         }
     };
     var error = errorFunc("could not fetch client configuration");
