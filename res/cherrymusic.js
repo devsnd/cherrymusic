@@ -26,6 +26,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 //
+
+var browser = detectBrowser();
+//see http://www.w3schools.com/html/html5_audio.asp for available formats per browser
+if(['msie','safari'].indexOf(browser) != -1){
+    var encoderPreferenceOrder = ['mp3','ogg'];
+} else {
+    var encoderPreferenceOrder = ['ogg','mp3'];
+}
+
 var playableExtensions = undefined;
 var availableEncoders = undefined;
 var availablejPlayerFormats = [];
@@ -546,38 +555,18 @@ function setAvailableJPlayerFormats(){
     if(availableEncoders.length == 0){
         availablejPlayerFormats.push(ext2jPlayerFormat('mp3'));
     } else {
+        availableEncoders = availableEncoders.sort(function(a,b){
+           var idxa = encoderPreferenceOrder.indexOf(a);
+           var idxb = encoderPreferenceOrder.indexOf(b);
+           idxa = idxa == -1 ? 1000 : idxa;
+           idxb = idxb == -1 ? 1000 : idxb;
+           return idxa-idxb;
+        });
         for(var i=0; i<availableEncoders.length; i++){
             availablejPlayerFormats.push(ext2jPlayerFormat(availableEncoders[i]));
         }
     }
-    sortFormatPreferrencePerBrowser();
 }
-
-function sortFormatPreferrencePerBrowser(){
-    var browser = detectBrowser();
-    //see http://www.w3schools.com/html/html5_audio.asp for available formats per browser
-    if(['msie','safari'].indexOf(browser) != -1){
-    //set preferred format for IE and safari to mp3
-        if(availableEncoders.indexOf('mp3') != -1){
-            //remove mp3
-            availableEncoders = availableEncoders.filter(function(i){return i!='mp3'});
-            //add mp3 as first playback format
-            availableEncoders.unshift('mp3');
-        }
-    } else {
-        //set to ogg for all te others
-        if(availableEncoders.indexOf('ogg') != -1){
-            //remove ogg
-            availableEncoders = availableEncoders.filter(function(i){return i!='ogg'});
-            //add ogg as first playback format
-            availableEncoders.unshift('ogg');
-        }
-    }
-}
-
-
-
-
 
 
 /* PLAYLIST CREATION AND MANAGEMENT END*/

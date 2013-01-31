@@ -54,6 +54,10 @@ body {
 }
 
 /* JPLAYER LAYOUT */
+#jquery_jplayer_1{
+    width: 0px !important;
+    height: 0px !important;
+}
 .jp-time-holder{
     left: 0;
     top: 10px;

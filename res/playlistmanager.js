@@ -205,12 +205,16 @@ PlaylistManager = function(){
 PlaylistManager.prototype = {
     initJPlayer : function(){
         "use strict";
+        
+        //hack to use flash AND HTML solution in every case
+        //https://github.com/happyworm/jPlayer/issues/136#issuecomment-12941923
+        availablejPlayerFormats.push("m4v");
         var self = this;
         if (typeof self.jPlayerInstance === 'undefined'){
             // Instance jPlayer
             self.jPlayerInstance = $(self.cssSelectorjPlayer).jPlayer({
                 swfPath: "res/js",
-                solution: "flash, html",
+                solution: "html, flash",
                 preload: 'metadata',
                 supplied: availablejPlayerFormats.join(),
                 wmode: "window",
@@ -532,36 +536,47 @@ PlaylistManager.prototype = {
             title: title,
             wasPlayed : 0,
         }
+        var formats = [];
         if(availablejPlayerFormats.indexOf(ext2jPlayerFormat(ext)) !== -1){
             //add natively supported path
             track[ext2jPlayerFormat(ext)] = path;
-        } else if(transcodingEnabled){
-            window.console.log('File is not natively supported by jPlayer. '+path);
-            window.console.log('Trying available transcoders.');
-            if(availableDecoders.indexOf(ext) !== -1){
-                var encoder = '';
-                //add transcoded paths
-                for(var i=0; i<availableEncoders.length; i++){
-                    var enc = availableEncoders[i];
-                    if(enc !== ext){
-                        encoder = enc;
-                        break;
-                    }
-                }
-                if(encoder.length !== 0){
-                    track[ext2jPlayerFormat(encoder)] = getTranscodePath(path,encoder);
-                    window.console.log('using live transcoding '+ext+' --> '+enc);
-                } else {
-                    window.console.log('no suitable encoder available! Try installing vorbis-tools or lame!');
-                    return;
-                }
-            } else {
-                window.console.log('missing decoder for filetype '+ext+'. track '+path+' can not be played.')
-                return;
-            }
-        } else {
+            formats.push(ext);
+            window.console.log('added native format '+ext);
+            //track.formatPreference = ext2jPlayerFormat(ext);
+        } else if(!transcodingEnabled){
+            //not natively supported and no transcoding
             window.console.log("browser doesn't support filetype "+ext+'and transcoding is disabled. Transcoding can be enabled in the server configuration.');
             return;
+        } else {
+            //try transcoding
+            window.console.log('Trying available transcoders.');
+            if(availableDecoders.indexOf(ext) === -1){
+                window.console.log('missing decoder for filetype '+ext+'. track '+path+' can not be transcoded.')
+                return;
+            } else {
+                //try to use preferred encoder
+                for(var i=0; i<encoderPreferenceOrder.length; i++){
+                    if(availableEncoders.indexOf(encoderPreferenceOrder[i]) !== -1){
+                        if(formats.indexOf(encoderPreferenceOrder[i]) == -1){
+                            formats.push(encoderPreferenceOrder[i]);
+                            track[ext2jPlayerFormat(encoderPreferenceOrder[i])] = getTranscodePath(path,encoderPreferenceOrder[i]);
+                            window.console.log('added live transcoding '+ext+' --> (preferred) '+encoderPreferenceOrder[i]);
+                        }
+                    }
+                }
+                //use any available encoder for compability                
+                for(var i=0; i<availableEncoders.length; i++){
+                    if(formats.indexOf(availableEncoders[i]) == -1){ //if not yet added
+                        formats.push(availableEncoders[i]);
+                        track[ext2jPlayerFormat(availableEncoders[i])] = getTranscodePath(path,availableEncoders[i]);
+                        window.console.log('added live transcoding '+ext+' --> '+availableEncoders[i]);
+                    }
+                }
+            }
+            if(formats.length == 0){
+                window.console.log('no suitable encoder available! Try installing vorbis-tools or lame!');
+                return;
+            }
         }
 
 
