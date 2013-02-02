@@ -194,19 +194,27 @@ class HTTPHandler(object):
     trans._cp_config = {'response.stream': True}
 
     def api(self, *args, **kwargs):
-        if not self.isAuthorized():
-            raise cherrypy.HTTPRedirect(self.getBaseUrl(), 302)
+        """calls the appropriate handler from the handlers
+        dict, if available. handlers having noauth set to
+        true do not need authentification to work.
+        """
+        #check action
         action = args[0] if args else ''
+        if not action in self.handlers:
+            return "Error: no such action."
+        #authorize if not explicitly deactivated
+        handler = self.handlers[action]
+        needsAuth = not ('noauth' in dir(handler) and handler.noauth)
+        if needsAuth and not self.isAuthorized():
+            raise cherrypy.HTTPRedirect(self.getBaseUrl(), 302)
+        #parse value (is list of arguments, but if the list has only
+        #one element, this element is directly passed to the handler)
         value=kwargs.get('value','')
         if not value and len(args)>1:
             value = list(map(unquote,args[1:len(args)]))
             if len(value) == 1:
                 value = value[0]
-        #filter_str=kwargs.get('filter','')
-        if action in self.handlers:
-            return self.handlers[action](value)
-        else:
-            return "Error: no such action."
+        return handler(value)
     api.exposed = True
 
     def api_customcss(self, value):
@@ -364,6 +372,7 @@ class HTTPHandler(object):
                 albumartcache_save(imgb64path,data)
                 return data
         cherrypy.HTTPRedirect("/res/img/folder.png", 302)
+    api_fetchalbumart.noauth = True
 
     def albumartcache_path(self, directory):
         util.assureHomeFolderExists('albumart')

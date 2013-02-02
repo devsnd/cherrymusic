@@ -210,7 +210,9 @@ class TestHTTPHandler(unittest.TestCase):
     def test_api_fetchalbumart(self):
         """when attribute error is raised, this means that cherrypy
         session is used to authenticate the http request."""
-        self.assertRaises(AttributeError, self.http.api, 'fetchalbumart')
+        if not self.http.handlers['fetchalbumart'].noauth:
+            self.assertRaises(AttributeError, self.http.api, 'fetchalbumart')
+            
         
     def test_api_listdir(self):
         """when attribute error is raised, this means that cherrypy
