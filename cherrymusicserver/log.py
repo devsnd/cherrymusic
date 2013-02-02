@@ -35,6 +35,8 @@ import inspect
 import os
 import sys
 
+from cherrymusicserver import pathprovider
+
 from logging import NOTSET, DEBUG, INFO, WARN, WARNING, ERROR, CRITICAL, FATAL
 
 
@@ -77,7 +79,7 @@ handler_console_priority.formatter = formatter_brief
 handler_console_priority.level = WARNING
 handler_console_priority.addFilter(relocator)
 
-handler_file_error = logging.FileHandler(os.path.join(os.path.expanduser('~'), '.cherrymusic', 'error.log'), mode='a', delay=True)
+handler_file_error = logging.FileHandler(os.path.join(pathprovider.getUserDataPath(), 'error.log'), mode='a', delay=True)
 handler_file_error.formatter = formatter_full
 handler_file_error.level = ERROR
 handler_file_error.addFilter(relocator)

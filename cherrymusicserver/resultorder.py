@@ -32,7 +32,7 @@
 fetched from the database by some mystic-voodoo-
 hocuspocus heuristics"""
 
-from cherrymusicserver import util
+from cherrymusicserver import pathprovider
 
 class ResultOrder:
     def __init__(self, searchword):
@@ -46,7 +46,7 @@ class ResultOrder:
         file = element.path
         isdir = element.dir
         fullpath = file.lower()
-        file = util.filename(file).lower()
+        file = pathprovider.filename(file).lower()
         bias = 0
 
 
@@ -68,7 +68,7 @@ class ResultOrder:
         if file == self.fullsearchterm or self.noThe(file) == self.fullsearchterm:
             return bias+self.perfectMatchBias
 
-        file = util.stripext(file)
+        file = pathprovider.stripext(file)
         #partial perfect match?
         for searchword in self.searchwords:
             if file == searchword:

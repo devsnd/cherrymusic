@@ -45,6 +45,7 @@ from cherrymusicserver import sqlitecache
 from cherrymusicserver import cherrymodel
 from cherrymusicserver import httphandler
 from cherrymusicserver import util
+from cherrymusicserver import pathprovider
 from cherrymusicserver import log
 
 config = None
@@ -59,11 +60,11 @@ class CherryMusic:
             log.i('''New configuration file was written to: 
 ''' + newconfigpath)
             exit(0)
-        if not util.configurationFileExists():
-            configuration.write_to_file(configuration.from_defaults(), util.configurationFile())
+        if not pathprovider.configurationFileExists():
+            configuration.write_to_file(configuration.from_defaults(), pathprovider.configurationFile())
             self.printWelcomeAndExit()
         self._init_config()
-        self.db = sqlitecache.SQLiteCache(util.databaseFilePath('cherry.cache.db'))
+        self.db = sqlitecache.SQLiteCache(pathprovider.databaseFilePath('cherry.cache.db'))
         
         if not update == None or dropfiledb:
             CherryMusic.UpdateThread(self.db,update,dropfiledb).start()
@@ -92,7 +93,7 @@ class CherryMusic:
     def _init_config(self):
         global config
         defaultcfg = configuration.from_defaults()
-        configFilePath = util.configurationFile()
+        configFilePath = pathprovider.configurationFile()
         log.d('loading configuration from %s', configFilePath)
         filecfg = configuration.from_configparser(configFilePath)
         config = defaultcfg + filecfg
@@ -132,7 +133,7 @@ Welcome to CherryMusic """ + VERSION + """!
 To get this party started, you need to edit the configuration file, which
 resides in your home directory:
 
-    """ + util.configurationFile() + """
+    """ + pathprovider.configurationFile() + """
 
 Then you can start the server and listen to whatever you like.
 Have fun!
@@ -143,7 +144,7 @@ Have fun!
     def start(self):
         socket_host = "127.0.0.1" if config.server.localhost_only.bool else "0.0.0.0"
 
-        resourcedir = os.path.abspath(util.getResourcePath('res'))
+        resourcedir = os.path.abspath(pathprovider.getResourcePath('res'))
 
         if config.server.ssl_enabled.bool:
             cherrypy.config.update({
@@ -163,7 +164,7 @@ Have fun!
             })
 
         cherrypy.config.update({
-            'log.error_file': os.path.join(os.path.expanduser('~'), '.cherrymusic', 'server.log'),
+            'log.error_file': os.path.join(pathprovider.getUserDataPath(), 'server.log'),
             'environment': 'production',
             'server.socket_host': socket_host,
             'server.thread_pool' : 30,
@@ -172,7 +173,7 @@ Have fun!
             })
 
         if not config.server.keep_session_in_ram.bool:
-            sessiondir = os.path.join(os.path.expanduser('~'), '.cherrymusic', 'sessions')
+            sessiondir = os.path.join(pathprovider.getUserDataPath(), 'sessions')
             if not os.path.exists(sessiondir):
                 os.mkdir(sessiondir)
             cherrypy.config.update({

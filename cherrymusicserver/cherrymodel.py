@@ -38,6 +38,7 @@ import audiotranscode
 
 import cherrymusicserver as cherry
 from cherrymusicserver import util
+from cherrymusicserver import pathprovider
 from cherrymusicserver.util import Performance
 from cherrymusicserver import resultorder
 from cherrymusicserver import log
@@ -57,7 +58,7 @@ class CherryModel:
     def sortFiles(self,files,fullpath=''):
         #sort alphabetically (case insensitive)
         sortedfiles = sorted(files,
-                            key=lambda x : util.filename(x).upper() )
+                            key=lambda x : pathprovider.filename(x).upper() )
         if fullpath:
             #sort directories up
             sortedfiles = sorted(sortedfiles,

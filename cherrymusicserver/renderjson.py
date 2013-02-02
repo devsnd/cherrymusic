@@ -36,7 +36,7 @@ to be served as json to the client.
 import json
 
 import cherrymusicserver as cherry
-from cherrymusicserver import util 
+from cherrymusicserver import util, pathprovider
 from urllib.parse import quote
 
 class JSON(object):
@@ -53,11 +53,11 @@ class JSON(object):
                 retlist.append({'type':'compact', 'urlpath':entry.path,'label':entry.repr})
             elif entry.dir:
                 #dir
-                simplename = util.filename(entry.path)
+                simplename = pathprovider.filename(entry.path)
                 retlist.append({'type':'dir', 'path':entry.path,'label':simplename})
             else:
                 #file
-                simplename = util.filename(entry.path)
+                simplename = pathprovider.filename(entry.path)
                 urlpath = quote('/serve/' + entry.path);
                 retlist.append({'type':'file',
                                 'urlpath':urlpath,

@@ -45,7 +45,7 @@ from cherrymusicserver import playlistdb
 from cherrymusicserver import log
 from cherrymusicserver import albumartfetcher
 from cherrymusicserver.cherrymodel import MusicEntry
-from cherrymusicserver.util import databaseFilePath, readRes
+from cherrymusicserver.pathprovider import databaseFilePath, readRes, albumArtFilePath
 import cherrymusicserver as cherry
 import cherrymusicserver.metainfo as metainfo
 from cherrymusicserver.util import Performance
@@ -341,7 +341,7 @@ class HTTPHandler(object):
         directory = params['directory']
         
         #try getting a cached album art image
-        b64imgpath = self.albumartcache_path(directory)
+        b64imgpath = albumArtFilePath(directory)
         img_data = self.albumartcache_load(b64imgpath)
         if img_data:
             cherrypy.response.headers["Content-Length"] = len(img_data)
@@ -373,11 +373,6 @@ class HTTPHandler(object):
                 return data
         cherrypy.HTTPRedirect("/res/img/folder.png", 302)
     api_fetchalbumart.noauth = True
-
-    def albumartcache_path(self, directory):
-        util.assureHomeFolderExists('albumart')
-        artpath = os.path.join(util.getConfigPath(),'albumart')
-        return os.path.join(artpath,util.base64encode(directory))
     
     def albumartcache_load(self, imgb64path):
         if os.path.exists(imgb64path):
