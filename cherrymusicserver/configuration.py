@@ -55,12 +55,6 @@ def from_defaults():
                                 effects of link cycles.
                                 """
 
-        c.media.playable = 'mp3 m4a m4v ogv oga wav webm'
-        c.media.playable.desc = """
-                                    PLAYABLE is a space-separated list of media file
-                                    extensions that can be played by jPlayer.
-                                    """
-
         c.media.transcode = False
         c.media.transcode.desc = """
                                     TRANSCODE (experimental!) enables automatic live transcoding

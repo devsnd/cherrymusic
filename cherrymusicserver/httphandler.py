@@ -523,7 +523,6 @@ class HTTPHandler(object):
             'getencoders' : audiotranscode.getEncoders(),
             'getdecoders' : audiotranscode.getDecoders(),
             'transcodingenabled' : cherry.config.media.transcode.bool,
-            'getplayables' : cherry.config.media.playable.list,
             'fetchalbumart' : cherry.config.media.fetch_album_art.bool,
             'isadmin' : cherrypy.session['admin'],
         }

@@ -34,6 +34,7 @@ will delegate different calls between other classes.
 import os
 from random import choice
 import cherrypy
+import audiotranscode
 
 import cherrymusicserver as cherry
 from cherrymusicserver import util
@@ -44,6 +45,11 @@ from cherrymusicserver import log
 class CherryModel:
     def __init__(self, cache):
         self.cache = cache
+        CherryModel.NATIVE_BROWSER_FORMATS = ['ogg','mp3']
+        CherryModel.supportedFormats = CherryModel.NATIVE_BROWSER_FORMATS[:]
+        if cherry.config.media.transcode:
+            CherryModel.supportedFormats += audiotranscode.getDecoders()
+            CherryModel.supportedFormats = list(set(CherryModel.supportedFormats))
 
     def abspath(self,path):
         return os.path.join(cherry.config.media.basedir.str, path)
@@ -204,7 +210,9 @@ def isplayable(filename):
     '''checks to see if there's no extension or if the extension is in
     the configured 'playable' list'''
     ext = os.path.splitext(filename)[1]
-    return not ext or ext[1:].lower() in cherry.config.media.playable.list
+    return ext and ext[1:].lower() in CherryModel.supportedFormats
+    
+        
 
 def strippath(path):
     if path.startswith(cherry.config.media.basedir.str):

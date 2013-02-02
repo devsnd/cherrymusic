@@ -35,7 +35,6 @@ if(['msie','safari'].indexOf(browser) != -1){
     var encoderPreferenceOrder = ['ogg','mp3'];
 }
 
-var playableExtensions = undefined;
 var availableEncoders = undefined;
 var availablejPlayerFormats = [];
 var availableDecoders = undefined;
@@ -118,16 +117,13 @@ CONFIGURATION LOADER
 *******************/
 function loadConfig(){
     "use strict";
-    var configoptions = ['getplayables','getencoders','getdecoders','transcodingenabled'];
     var data = {
         'action' : 'getconfiguration',
-        'value' : JSON.stringify(configoptions),
     };
     var success = function(data){
         var dictatedClientConfig = jQuery.parseJSON(data);
         availableEncoders = dictatedClientConfig.getencoders;
         availableDecoders = dictatedClientConfig.getdecoders;
-        playableExtensions = dictatedClientConfig.getplayables;
         transcodingEnabled = dictatedClientConfig.transcodingenabled;
         isAdmin = dictatedClientConfig.isadmin;
         for(var i=0; i<executeAfterConfigLoaded.length; i++){
@@ -137,7 +133,7 @@ function loadConfig(){
             $('a[href="#adminpanel"]').hide();
         }
     };
-    var error = errorFunc("could not fetch client configuration, CherryMusic will not work.");
+    var error = errorFunc("Could not fetch client configuration, CherryMusic will not work. Clearing the browser cache might help.");
     api(data,success,error,true);
 }
 
