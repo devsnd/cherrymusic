@@ -390,7 +390,7 @@ function renderDir(label,urlpath,dirpath){
 function renderFile(label,urlpath,dirpath){
     "use strict";
     var fullpathlabel = Mustache.render('<span class="fullpathlabel">{{fpdirpath}}</span>',{fpdirpath:dirpath});
-    if(isPlayableAudioFile(urlpath)){
+    //if(isPlayableAudioFile(urlpath)){
         return Mustache.render('<a title="{{atitle}}" href="{{ahref}}" class="{{acssclass}}" path="{{apath}}">{{{afullpathlabel}}} {{alabel}}</a>', {
                 atitle : label,
                 alabel: label,
@@ -399,9 +399,9 @@ function renderFile(label,urlpath,dirpath){
                 apath : urlpath,
                 afullpathlabel : fullpathlabel,
             });//+'<a class="floatright" href="javascript:;">&uarr;DIR</a>';
-    } else {
-        return '<span>'+fullpathlabel+label+'</span>';
-    }
+    //} else {
+    //    return '<span>'+fullpathlabel+label+'</span>';
+    //}
 }
 function renderCompact(label,filepath, filter){
     "use strict";
@@ -416,7 +416,7 @@ function ulistify(html){
     "use strict";
     return '<ul>'+html+'</ul>';
 }
-function isPlayableAudioFile(filePath){
+/*function isPlayableAudioFile(filePath){
     "use strict";
     for(var i=0; i<playableExtensions.length; i++){
         if(endsWith( filePath.toUpperCase(),
@@ -425,7 +425,7 @@ function isPlayableAudioFile(filePath){
         }
     }
     return false;
-}
+}*/
 /***
 INTERACTION
 ***/
