@@ -100,11 +100,16 @@ function errorFunc(msg){
         displayError(msg);
     };
 }
+
+function renderErrorMessage(msg){
+    return '<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error: </strong>'+msg+'</div>';
+}
+
 function displayError(msg){
-    $('#errormessage').html(msg);
+    $('#errormessage').html(renderErrorMessage(msg));
 }
 function removeError(msg){
-    if($('#errormessage').html() == msg){
+    if($('#errormessage').html() == renderErrorMessage(msg)){
         $('#errormessage').html('');
     }
 }
@@ -132,7 +137,7 @@ function loadConfig(){
             $('a[href="#adminpanel"]').hide();
         }
     };
-    var error = errorFunc("could not fetch client configuration");
+    var error = errorFunc("could not fetch client configuration, CherryMusic will not work.");
     api(data,success,error,true);
 }
 
