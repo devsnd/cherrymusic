@@ -337,11 +337,11 @@
 
 			if(playNow) {
 				this.play(this.playlist.length - 1);
-			}/* else {
+			} else {
 				if(this.original.length === 1) {
 					this.select(0);
 				}
-			}*/
+			}
             $(self.options.playlistOptions.playlistSelector).trigger('addedItem', [self.options.playlistOptions.playlistSelector]);
 		},
 		remove: function(index) {
