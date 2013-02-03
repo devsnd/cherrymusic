@@ -104,6 +104,7 @@ class HTTPHandler(object):
             'opensearchdescription' : self.api_opensearchdescription,
             'setuseroption' : self.api_setuseroption,
             'customcss.css' : self.api_customcss,
+            'changeplaylist' : self.api_changeplaylist,
         }
 
     def issecure(self, url):
@@ -427,6 +428,11 @@ class HTTPHandler(object):
                             playlistid=value,
                             userid=self.getUserId()
                 ));
+            
+    def api_changeplaylist(self, value):
+        params = json.loads(value)
+        if params['attribute'] == 'public' and type(params['value']) == bool and type(params['plid']) == int:
+            return self.playlistdb.setPublic(userid=self.getUserId(), plid=params['plid'], value=params['value'])
 
     def api_getmotd(self,value):
         return self.model.motd()
@@ -437,6 +443,7 @@ class HTTPHandler(object):
         return session_playlist
 
     def api_getplayables(self,value):
+        """DEPRECATED"""
         return json.dumps(cherry.config.media.playable.list)
 
     def api_getuserlist(self,value):
