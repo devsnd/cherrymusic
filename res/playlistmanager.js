@@ -136,7 +136,7 @@ ManagedPlaylist.prototype = {
         this.playlistManager.setPlayingPlaylist(this.id);
     },
     addTrack : function(track) {
-        this.jplayerplaylist.add(track);
+        this.jplayerplaylist.add(track,false);
     }
 }
 

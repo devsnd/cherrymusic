@@ -530,6 +530,8 @@ registermp3s = function(parent,mode, playlistlabel){
                     addAllToPlaylist($(this), pl.id);
                     pl.saved = true;
                     playlistManager.showPlaylist(pl.id);
+                    $(this).blur();
+                    return false;
                 });
                  break;
             case 'addPlayAll':
@@ -537,6 +539,8 @@ registermp3s = function(parent,mode, playlistlabel){
                 $(parent).prepend('<a class="addAllToPlaylist" href="javascript:;">add all to <span class="plsmgr-editingplaylist-name">' + playlistname + '</span></a>');
                 $(parent).children('.addAllToPlaylist').click( function() {
                     addAllToPlaylist($(this));
+                    $(this).blur();
+                    return false;
                 });
                 break;
             default:
