@@ -55,7 +55,7 @@ class CherryMusic:
 
     def __init__(self, update=None, createNewConfig=False, dropfiledb=False):
         if createNewConfig:
-            newconfigpath = util.configurationFile() + '.new'
+            newconfigpath = pathprovider.configurationFile() + '.new'
             configuration.write_to_file(configuration.from_defaults(), newconfigpath)
             log.i('''New configuration file was written to:
 ''' + newconfigpath)
