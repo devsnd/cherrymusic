@@ -451,9 +451,9 @@ class HTTPHandler(object):
             userlist = self.userdb.getUserList()
             for user in userlist:
                 user['last_time_online'] = self.useroptions.forUser(user['id']).getOptionValue('last_time_online')
-            return json.dumps(userlist)
+            return json.dumps({'time':int(time.time()),'userlist':userlist})
         else:
-            return json.dumps([])
+            return json.dumps({'time':0,'userlist':[]})
 
     def api_adduser(self, value):
         if cherrypy.session['admin']:

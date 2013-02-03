@@ -830,8 +830,9 @@ function updateUserList(){
     "use strict";
     var success = function(data){
         var htmllist = "";
-        var time = unixtime();
-        $.each($.parseJSON(data),function(i,e){
+        var response = $.parseJSON(data);
+        var time = response['time'];
+        $.each(response['userlist'],function(i,e){
             var reltime = time - e.last_time_online;
             var fuzzytime = time2text(reltime);
             var isonline = reltime < HEARTBEAT_INTERVAL_MS/500;
