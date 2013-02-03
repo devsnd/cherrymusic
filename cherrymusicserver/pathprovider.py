@@ -33,7 +33,14 @@ import sys
 import base64
 
 def getUserDataPath():
-    userdata = os.path.join(os.path.expanduser('~'), '.cherrymusic')
+    if sys.platform.startswith('linux'): #linux
+        userdata = os.path.join(os.environ['XDG_DATA_HOME'],'cherrymusic')
+    elif sys.platform.startswith('win'): # windows
+        userdata = os.path.join(os.environ['APPDATA'],'cherrymusic')
+    elif sys.platform.startswith('darwin'): # osx
+        userdata = os.path.join(os.path.expanduser('~'),'Application Support','cherrymusic')
+    else:
+        userdata = os.path.join(os.path.expanduser('~'), '.cherrymusic')
     assureFolderExists(userdata,['db','albumart','sessions'])
     return userdata
 
@@ -41,7 +48,14 @@ def getConfigPath():
     if len(sys.argv) > 2 and (sys.argv[1] == '-c' or sys.argv[1] == '--config-path') and os.path.exists(sys.argv[2]):
         return sys.argv[2]
     else:
-        configpath = os.path.join(os.path.expanduser('~'), '.cherrymusic')
+        if sys.platform.startswith('linux'): #linux
+            configpath = os.path.join(os.environ['XDG_CONFIG_HOME'], 'cherrymusic')
+        elif sys.platform.startswith('win'): #windows
+            configpath = os.path.join(os.environ['APPDATA'],'cherrymusic')
+        elif sys.platform.startswith('darwin'): #osx
+            configpath = os.path.join(os.path.expanduser('~'),'Application Support','cherrymusic')
+        else:
+            configpath = os.path.join(os.path.expanduser('~'), '.cherrymusic')
         assureFolderExists(configpath)
         return configpath
 
