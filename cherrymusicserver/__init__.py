@@ -33,7 +33,7 @@ import cherrypy
 import threading
 
 """patch cherrypy crashing on startup because of double checking
-for loopback interface, see: 
+for loopback interface, see:
 https://bitbucket.org/cherrypy/cherrypy/issue/1100/cherrypy-322-gives-engine-error-when
 """
 def fake_wait_for_occupied_port(host, port):
@@ -57,7 +57,7 @@ class CherryMusic:
         if createNewConfig:
             newconfigpath = util.configurationFile() + '.new'
             configuration.write_to_file(configuration.from_defaults(), newconfigpath)
-            log.i('''New configuration file was written to: 
+            log.i('''New configuration file was written to:
 ''' + newconfigpath)
             exit(0)
         if not pathprovider.configurationFileExists():
@@ -65,14 +65,14 @@ class CherryMusic:
             self.printWelcomeAndExit()
         self._init_config()
         self.db = sqlitecache.SQLiteCache(pathprovider.databaseFilePath('cherry.cache.db'))
-        
+
         if not update == None or dropfiledb:
             CherryMusic.UpdateThread(self.db,update,dropfiledb).start()
         else:
             self.cherrymodel = cherrymodel.CherryModel(self.db)
             self.httphandler = httphandler.HTTPHandler(config, self.cherrymodel)
             self.server()
-        
+
     class UpdateThread(threading.Thread):
         def __init__(self, db, update,dropfiledb):
             threading.Thread.__init__(self)
@@ -112,12 +112,12 @@ class CherryMusic:
                 deprecated.append(property.name)
 
         if new:
-            log.i('''New configuration options available: 
+            log.i('''New configuration options available:
                         %s
                     Using default values for now.''',
                   '\n\t\t\t'.join(new))
         if deprecated:
-            log.i('''The following configuration options are not used anymore: 
+            log.i('''The following configuration options are not used anymore:
                         %s''',
                   '\n\t\t\t'.join(deprecated))
         if new or deprecated:
