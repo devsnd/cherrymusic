@@ -498,10 +498,7 @@ PlaylistManager.prototype = {
         return this.managedPlaylists[0];
     },
     newPlaylistFromQueue : function(){
-        var pl = this.newPlaylist(this.managedPlaylists[0].jplayerplaylist.playlist);
-        showPlaylistSaveDialog(pl.id);
-        $(this).blur();
-        return false;
+        return this.newPlaylist(this.managedPlaylists[0].jplayerplaylist.playlist);
     },
     closePlaylist : function(plid){
         for(var i=0; i<this.managedPlaylists.length; i++){

@@ -609,33 +609,14 @@ function getTranscodePath(filepath, format){
 /******************
 PLAYLIST MANAGEMENT
 ******************/
-function showPlaylistSaveDialog(plid){
-    "use strict";
-    $('#dialog').html(
-    ['<p>Please enter a Name for this Playlist:</p>',
-    '<input type="text" id="playlisttitle" />',
-    'public:<input type="checkbox" checked="checked" id="playlistpublic" />',
-    '<a class="button" href="javascript:;" onclick="savePlaylistAndHideDialog('+plid+')">Save</a>',
-    '<a class="button" href="javascript:;" onclick="$(\'#dialog\').fadeOut(\'fast\')">Close</a>'].join(''));
-    $('#dialog input').val('');
-    $('#dialog').fadeIn('fast');
-    $('#playlisttitle').focus();
-    $('#playlisttitle').bind('keyup',function(e){
-        if(e.which === 13) { //enter
-            savePlaylistAndHideDialog(plid);
-        } else if(e.which === 27){ //escape
-            $('#dialog').fadeOut('fast');
-        }
-     });
-}
-
-function savePlaylistAndHideDialog(plid){
+function savePlaylistAndHideDialog(){
     "use strict";
     var name = $('#playlisttitle').val();
     var pub = $('#playlistpublic').attr('checked')?true:false;
     if(name.trim() !== ''){
-        savePlaylist(plid,name,pub);
-        $('#dialog').fadeOut('fast');
+        var pl = playlistManager.newPlaylistFromQueue();
+        savePlaylist(pl.id,name,pub);
+        $('#saveplaylistmodal').modal('hide');
     }
 }
 
@@ -1139,5 +1120,20 @@ $(document).ready(function(){
     window.setInterval("sendHeartBeat()",HEARTBEAT_INTERVAL_MS);
     $('#adminpanel').on('show', function (e) {
         updateUserList();
-    })
+    });
+    $('#saveplaylistmodal').on('shown',function(){
+        $('#playlisttitle').focus();
+        $('#playlisttitle').val('');
+        $('#playlistpublic').attr('checked', true);
+        $('#playlisttitle').bind('keyup',function(e){
+            if(e.which === 13) { //enter
+                savePlaylistAndHideDialog();
+            } else if(e.which === 27){ //escape
+                $('#saveplaylistmodal').modal('hide');
+            }
+        });
+    });
+    $('#saveplaylistmodal').on('hide', function(){
+        $('#playlisttitle').unbind('keyup');
+    });
 });

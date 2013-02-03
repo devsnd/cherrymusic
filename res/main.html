@@ -233,19 +233,47 @@
     </div>
 </div>
 <!-- ADMIN PANEL END -->
-
+<!-- SAVE PLAYLIST MODAL -->
+<div id="saveplaylistmodal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="saveplaylistmodalLabel" aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="saveplaylistmodalLabel">Save new playlist</h3>
+    </div>
+    <div class="modal-body">
+        <fieldset>  
+            <div class="control-group">  
+                <label class="control-label" for="playlisttitle">Playlist title</label>  
+                <div class="controls">  
+                    <input id="playlisttitle" type="text" class="input-xlarge">  
+                </div>  
+            </div>
+            <div class="control-group">  
+                <div class="controls">  
+                    <input id="playlistpublic" type="checkbox" class="input-xlarge">  visible for other users
+                </div>  
+            </div>
+        </fieldset>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">cancel</button>
+        <a href="#" class="btn btn-primary" onclick="savePlaylistAndHideDialog()">Save playlist</a>
+    </div>
+</div>
+<!-- SAVE PLAYLIST MODAL END -->
 
 
 <!-- PROGRESS SCREEN OVERLAY END -->
-<!-- PLAYLIST SAVE DIALOG OVERLAY START -->
-<div id="dialog" style="display: none">
+
+<!-- PLAYLIST SAVE DIALOG OVERLAY START 
+/*<div id="dialog" style="display: none">
     <p>Please enter a Name for this Playlist:</p>
     <input type="text" id="playlisttitle" />
     public:<input type="checkbox" checked="checked" id="playlistpublic" />
     <a href="javascript:;" onclick="savePlaylistAndHideDialog()">Save</a>
     <a href="javascript:;" onclick="$('#dialog').fadeOut('fast')">Close</a>
 </div>
-<!-- PLAYLIST SAVE DIALOG OVERLAY END -->
+PLAYLIST SAVE DIALOG OVERLAY END -->
+
 <!-- <ul class="tabNavigation">
     <li><a class="search"  href="#search">Search</a></li>
     <li><a class="jplayer" href="#jplayer">Playlist</a></li>
@@ -379,7 +407,7 @@
                 </div>
                 <div id="playlistCommands">
                     <div class="playlist-command-buttons row-fluid">
-                        <a class="hide pull-left new-playlist-from-queue btn btn-mini" onclick="playlistManager.newPlaylistFromQueue(); return false;">save as playlist</a>
+                        <a href="#saveplaylistmodal"  data-toggle="modal" class="hide pull-left new-playlist-from-queue btn btn-mini">save as playlist</a>
                         <a class="hide pull-right clear-playlist btn btn-mini" onclick="playlistManager.clearQueue(); return false;">clear</a>
                         <a class="hide pull-right remove-played-tracks btn btn-mini" onclick="playlistManager.removePlayedFromPlaylist(); return false;" >remove played</a>
                         <a class="hide pull-left save-current-playlist btn" onclick="">save</a>
