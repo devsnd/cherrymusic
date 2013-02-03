@@ -31,6 +31,7 @@
 import os
 import sys
 import base64
+import codecs
 
 def getUserDataPath():
     if sys.platform.startswith('linux'): #linux
