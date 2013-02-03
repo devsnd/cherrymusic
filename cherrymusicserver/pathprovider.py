@@ -35,8 +35,11 @@ import codecs
 
 def getUserDataPath():
     userdata = ''
-    if sys.platform.startswith('linux') and 'XDG_DATA_HOME' in os.environ: #linux
-        userdata = os.path.join(os.environ['XDG_DATA_HOME'],'cherrymusic')
+    if sys.platform.startswith('linux'):  # linux
+        if 'XDG_DATA_HOME' in os.environ:
+            userdata = os.path.join(os.environ['XDG_DATA_HOME'],'cherrymusic')
+        else:
+            userdata = os.path.join(os.path.expanduser('~'), '.local', 'share', 'cherrymusic')
     elif sys.platform.startswith('win'): # windows
         userdata = os.path.join(os.environ['APPDATA'],'cherrymusic')
     elif sys.platform.startswith('darwin'): # osx
@@ -52,8 +55,11 @@ def getConfigPath():
         return sys.argv[2]
     else:
         configpath = ''
-        if sys.platform.startswith('linux') and 'XDG_CONFIG_HOME' in os.environ: #linux
-            configpath = os.path.join(os.environ['XDG_CONFIG_HOME'], 'cherrymusic')
+        if sys.platform.startswith('linux'):  # linux
+            if 'XDG_CONFIG_HOME' in os.environ: 
+                configpath = os.path.join(os.environ['XDG_CONFIG_HOME'], 'cherrymusic')
+            else:
+                configpath = os.path.join(os.path.expanduser('~'), '.config', 'cherrymusic')
         elif sys.platform.startswith('win'): #windows
             configpath = os.path.join(os.environ['APPDATA'],'cherrymusic')
         elif sys.platform.startswith('darwin'): #osx
