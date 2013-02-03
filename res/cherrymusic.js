@@ -684,7 +684,7 @@ function showPlaylists(){
                             '<span class="badge" style="background-color: {{usernamelabelcolor}}" >{{username}}</span>',
                         '</div>',
             			'<div class="deletebutton">',
-			            '<a href="javascript:;" class="btn btn-mini btn-danger" onclick="confirmDeletePlaylist({{playlistid}})">x</a>',
+			            '<a href="javascript:;" class="btn btn-mini btn-danger" onclick="confirmDeletePlaylist({{playlistid}}, \'{{playlistlabel}}\')">x</a>',
             			'</div>',
                         '<div class="dlbutton">',
                             '<a class="btn btn-mini" href="/api/downloadpls?value={{dlval}}">',
@@ -722,17 +722,15 @@ function showPlaylists(){
     api('showplaylists',success,error);
 }
 
-function confirmDeletePlaylist(id){
-    $('#dialog').html(['<p>Do you really want to delete this precious playlist?</p>',
-    '<a class="button" href="javascript:;" onclick="deletePlaylistAndHideDialog('+id+')">Yes, get it out of my life</a>',
-    '<a class="button" href="javascript:;" onclick="$(\'#dialog\').fadeOut(\'fast\')">No, leave it as it is</a>'].join(''));
-    $('#dialog').fadeIn('fast');
-}
-
-function deletePlaylistAndHideDialog(id){
-    api({action:'deleteplaylist', value: id},false,errorFunc('error deleting playlist'));
-    $('#dialog').fadeOut('fast');
-    showPlaylists();
+function confirmDeletePlaylist(id,title){
+    $('#deletePlaylistConfirmButton').off();
+    $('#deletePlaylistConfirmButton').on('click', function(){
+        api({action:'deleteplaylist', value: id},false,errorFunc('error deleting playlist'));
+        $('#dialog').fadeOut('fast');
+        showPlaylists();
+    });
+    $('#deleteplaylistmodalLabel').html('Really delete Playlist "'+title+'"');
+    $('#deleteplaylistmodal').modal('show');
 }
 
 function hidePlaylists(){
