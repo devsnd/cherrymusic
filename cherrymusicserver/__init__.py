@@ -103,13 +103,14 @@ class CherryMusic:
         new = []
         deprecated = []
         default = configuration.from_defaults()
+        transform = lambda s: '[{0}]: {2}'.format(*(s.partition('.')))
 
         for property in configuration.to_list(default):     #@ReservedAssignment
             if property.name not in known_config and not property.hidden:
-                new.append(property.name)
+                new.append(transform(property.name))
         for property in configuration.to_list(known_config): #@ReservedAssignment
             if property.name not in default:
-                deprecated.append(property.name)
+                deprecated.append(transform(property.name))
 
         if new:
             log.i('''New configuration options available:
