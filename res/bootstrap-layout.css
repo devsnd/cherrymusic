@@ -36,6 +36,11 @@ body {
     font-size: 11px;
 }
 
+.bottom-corners{
+    border-bottom-right-radius:0 !important;
+    border-bottom-left-radius:0 !important; 
+}
+
 /* NAVBAR LAYOUT */
 
 #brandname{
