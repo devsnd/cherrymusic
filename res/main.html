@@ -377,7 +377,18 @@
                 <div id="over-playlist-tabs">
                     <div id="playlistChooser"><ul class="nav nav-tabs"></ul></div>
                 </div>
-                <div id="playlistCommands"></div>
+                <div id="playlistCommands">
+                    <div class="playlist-command-buttons row-fluid">
+                        <a class="hide pull-left new-playlist-from-queue btn btn-mini" onclick="playlistManager.newPlaylistFromQueue(); return false;">save as playlist</a>
+                        <a class="hide pull-right clear-playlist btn btn-mini" onclick="playlistManager.clearQueue(); return false;">clear</a>
+                        <a class="hide pull-right remove-played-tracks btn btn-mini" onclick="playlistManager.removePlayedFromPlaylist(); return false;" >remove played</a>
+                        <a class="hide pull-left save-current-playlist btn" onclick="">save</a>
+                    </div>
+                    <div class="playlist-progress row-fluid">
+                        <span class="remaining-tracks-or-time label"></span>
+                        <div class="playlist-progress-bar progress" style="height: 3px;"><div class="bar" style="width: '+parseInt(100-proc*100)+'%;"></div></div>
+                    </div>
+                </div>
                 <div id="playlistContainerParent"></div>
                 <div id="playlistBrowser">
                     <a href="#" class="btn" onclick="playlistManager.newPlaylist()">create new playlist</a><br>

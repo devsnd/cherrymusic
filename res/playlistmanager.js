@@ -333,51 +333,61 @@ PlaylistManager.prototype = {
         }
     },
     refreshCommands : function(){
-        var cmds =$(this.cssSelectorPlaylistCommands);
-        cmds.empty();
         var epl = this.getEditingPlaylist();
         if(typeof epl !== 'undefined'){
-            var cmdstr = '<div class="playlist-command-buttons">'
             if(epl.reason_open == 'queue'){
-                cmdstr += '<a class="btn btn-mini" onclick="playlistManager.newPlaylistFromQueue(); return false;">save as playlist</a>';
-                cmdstr += '<a class="btn btn-mini" style="float: right;" onclick="playlistManager.clearQueue(); return false;">clear</a>';
-                cmdstr += '<a class="btn btn-mini" style="float: right;" onclick="playlistManager.removePlayedFromPlaylist(); return false;" >remove played</a>';
+                $('.new-playlist-from-queue').show();
+                $('.clear-playlist').show();
+                $('.remove-played-tracks').show();
+                $('.save-current-playlist').hide();
             } else {
+                $('.new-playlist-from-queue').hide();
+                $('.clear-playlist').hide()
+                $('.remove-played-tracks').hide()
                 if(!epl.saved){
-                    cmdstr += '<a class="btn" onclick="function(){showPlaylistSaveDialog('+epl.id+'); $(this).blur(); return false;}();">save</a>';
-                }
-                /*cmds.append('<span class="floatleft">owner '+pl.owner+'</span>');
-                if(!pl.public){
-                    cmds.append('<span class="floatleft">status: <a class="button" title="make public">private</a></span>');
+                    $('.save-current-playlist').off(); //remove old handlers
+                    $('.save-current-playlist').on("click",function(){
+                        showPlaylistSaveDialog(epl.id);
+                        $(this).blur();
+                        return false;
+                    });
+                    $('.save-current-playlist').show();
                 } else {
-                    cmds.append('<span class="floatleft">status: <a class="button" title="make private">public</a></span>');
-                }*/
+                    $('.save-current-playlist').hide();
+                }
             }
-            cmdstr += '</div>';
             
             var remaintracks = epl.getRemainingTracks();
-            var remaintimesec = epl.getPlayTimeSec(remaintracks);
             var completetimesec = epl.getPlayTimeSec(epl.jplayerplaylist.playlist);
+            var remaintimesec = epl.getPlayTimeSec(remaintracks);
             if(epl.id === this.getPlayingPlaylist().id){
                 remaintimesec -= $(this.cssSelectorjPlayer).data("jPlayer").status.currentTime;
             }
+            remaintimesec = remaintimesec < 0 ? 0 : remaintimesec;
+            
             var littleTimeLeft = false;
+            var remainingStr = '';
+            var proc = 0;
             if(typeof remaintimesec !== 'undefined' && typeof completetimesec !== 'undefined' ){
-                remaintimesec = remaintimesec < 0 ? 0 : remaintimesec;
-                var proc = remaintimesec/completetimesec;
+                //if there is enough time info, show remaining time
+                proc = remaintimesec/completetimesec;
                 littleTimeLeft = remaintimesec < 300;
-                var cssclass = littleTimeLeft ? ' class="label label-important" ' : ' class="label" ';
-                var remaindisplay = '<span'+cssclass+'>'+epl.jplayerplaylist._formatTime(remaintimesec)+' remaining</span>';
+                remainingStr = epl.jplayerplaylist._formatTime(remaintimesec)+' remaining'
             } else {
-                var proc = remaintracks.length/epl.jplayerplaylist.playlist.length;
+                //show remaining tracks
+                proc = remaintracks.length/epl.jplayerplaylist.playlist.length;
                 littleTimeLeft = remaintracks.length < 3;
-                var cssclass = littleTimeLeft ? ' class="label label-important" ' : ' class="label" ';
-                var remaindisplay = '<span'+cssclass+'>'+remaintracks.length+' remaining tracks</span>';
+                remainingStr = remaintracks.length+' remaining tracks';
             }
-            var barWarning = littleTimeLeft ? 'bar-danger' : '';
-            var progressbar = '<div class="progress" style="height: 3px;"><div class="bar '+barWarning+'" style="width: '+parseInt(100-proc*100)+'%;"></div></div>';
-            cmdstr += '<div class="playlist-progress">'+remaindisplay+progressbar+'</div>';
-            cmds.html(cmdstr);
+            if(littleTimeLeft){
+                $('.remaining-tracks-or-time').addClass('label-important');
+                $('.playlist-progress-bar .bar').addClass('bar-danger');
+            } else {
+                $('.remaining-tracks-or-time').removeClass('label-important');
+                $('.playlist-progress-bar .bar').removeClass('bar-danger');
+            }
+            $('.remaining-tracks-or-time').html(remainingStr);           
+            $('.playlist-progress-bar .bar').css('width',parseInt(100-proc*100)+'%');
         }
     },
     refreshTabs : function(){
