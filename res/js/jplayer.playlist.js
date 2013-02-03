@@ -145,8 +145,6 @@
 			this._refresh(function() {
 				if(self.options.playlistOptions.autoPlay) {
 					self.play(self.current);
-				} else {
-					self.select(self.current);
 				}
 			});
 		},

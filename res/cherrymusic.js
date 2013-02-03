@@ -618,6 +618,8 @@ function savePlaylistAndHideDialog(){
         savePlaylist(pl.id,name,pub);
         $('#saveplaylistmodal').modal('hide');
     }
+    $(this).blur();
+    return false;
 }
 
 function savePlaylist(plid,playlistname,ispublic){
