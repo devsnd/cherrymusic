@@ -906,7 +906,7 @@ function userDelete(userid){
     var success = function(data){
         updateUserList();
     };
-    api(data,success,errorFunc('failed delete user'));
+    api(data,success,errorFunc('failed to delete user'));
 }
 function userChangePassword(){
     var data = {'action':'userchangepassword',
@@ -919,7 +919,7 @@ function userChangePassword(){
         $('#userOptions').modal('hide');
         successNotify('Password changed successfully!')();
     };
-    api(data,success,errorFunc('failed delete user'));
+    api(data,success,errorFunc('failed to change password'));
 }
 
 function enableJplayerDebugging(){

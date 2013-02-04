@@ -46,7 +46,7 @@ def getUserDataPath():
         userdata = os.path.join(os.path.expanduser('~'),'Application Support','cherrymusic')
     
     if not userdata:
-        userdata = os.path.join(os.path.expanduser('~'), '.cherrymusic')
+        userdata = fallbackPath()
     assureFolderExists(userdata,['db','albumart','sessions'])
     return userdata
 
@@ -66,9 +66,18 @@ def getConfigPath():
             configpath = os.path.join(os.path.expanduser('~'),'Application Support','cherrymusic')
         
         if not configpath:
-            configpath = os.path.join(os.path.expanduser('~'), '.cherrymusic')
+            configpath = fallbackPath()
         assureFolderExists(configpath)
         return configpath
+
+def fallbackPath():
+    return os.path.join(os.path.expanduser('~'), '.cherrymusic')
+
+def fallbackPathInUse():
+    for _, _, files in os.walk(fallbackPath()):
+        if files:
+            return True
+    return False
 
 def configurationFile():
     return os.path.join(getConfigPath(), 'config')

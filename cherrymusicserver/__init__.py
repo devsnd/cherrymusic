@@ -61,8 +61,11 @@ class CherryMusic:
 ''' + newconfigpath)
             exit(0)
         if not pathprovider.configurationFileExists():
-            configuration.write_to_file(configuration.from_defaults(), pathprovider.configurationFile())
-            self.printWelcomeAndExit()
+            if pathprovider.fallbackPathInUse():   # temp. remove @ v0.30 or so
+                self.printMigrationNoticeAndExit()
+            else:
+                configuration.write_to_file(configuration.from_defaults(), pathprovider.configurationFile())
+                self.printWelcomeAndExit()
         self._init_config()
         self.db = sqlitecache.SQLiteCache(pathprovider.databaseFilePath('cherry.cache.db'))
 
@@ -126,13 +129,35 @@ class CherryMusic:
                   ''',
             )
 
+    def printMigrationNoticeAndExit(self):  # temp. remove @ v0.30 or so
+        print("""
+==========================================================================
+Oops!
+
+CherryMusic changed some file locations while you weren't looking.
+(To better comply with best practices, if you wanna know.)
+
+To continue, please move the following:
+
+    $ mv """ + os.path.join(pathprovider.fallbackPath(), 'config') + ' ' +
+        pathprovider.configurationFile() + """
+
+    $ mv """ + os.path.join(pathprovider.fallbackPath(), '*') + ' ' +
+        pathprovider.getUserDataPath() + """
+
+Thank you, and enjoy responsibly. :)
+==========================================================================
+""")
+        exit(1)
+
+
     def printWelcomeAndExit(self):
         print("""
 ==========================================================================
 Welcome to CherryMusic """ + VERSION + """!
 
 To get this party started, you need to edit the configuration file, which
-resides in your home directory:
+resides under the following path:
 
     """ + pathprovider.configurationFile() + """
 
