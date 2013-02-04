@@ -892,6 +892,12 @@ function userDelete(userid){
     api(data,success,errorFunc('failed delete user'));
 }
 
+function enableJplayerDebugging(){
+    $('#jplayer_inspector').jPlayerInspector({jPlayer:$('#jquery_jplayer_1'),visible:true});
+    $('#jquery_jplayer_1').data().jPlayer.options.errorAlerts = true;
+    $('#jquery_jplayer_1').data().jPlayer.options.warningAlerts = true;
+    $('#jplayer_inspector_update_0').click();
+}
 /***
 MESSAGE OF THE DAY
 ***/
