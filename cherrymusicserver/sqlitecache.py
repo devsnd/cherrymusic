@@ -175,21 +175,21 @@ class SQLiteCache(object):
         return list(map(str.lower, words))
 
 
-    def fetchFileIds(self, terms, maxFileIds, mode):
+    def fetchFileIds(self, terms, maxFileIdsPerTerm, mode):
         resultlist = []
-
-        query = '''SELECT search.frowid FROM dictionary JOIN search ON search.drowid = dictionary.rowid WHERE '''
-        orterms = '('+' OR '.join([' dictionary.word LIKE ? '] * len(terms))+')'
-        limit = ' LIMIT 0, ' + str(maxFileIds) #TODO add maximum db results as configuration parameter
-        #log.d('Search term: ' + term)
-        sql = query + orterms + limit
-        if debug:
-            log.d('Query used: ' + sql)
-        #print(self.conn.execute('EXPLAIN QUERY PLAN '+sql, (term+'%',)).fetchall())
+        
         terms[-1] = terms[-1]+'%'
-        self.db.execute(sql, tuple(terms))
-        resultlist += self.db.fetchall()
-
+        for term in terms:
+            query = '''SELECT search.frowid FROM dictionary JOIN search ON search.drowid = dictionary.rowid WHERE '''
+            where = ''' dictionary.word LIKE ? '''
+            limit = ' LIMIT 0, ' + str(maxFileIdsPerTerm) #TODO add maximum db results as configuration parameter
+            #log.d('Search term: ' + term)
+            sql = query + where + limit
+            if debug:
+                log.d('Query used: ' + sql)
+            #print(self.conn.execute('EXPLAIN QUERY PLAN '+sql, (term+'%',)).fetchall())
+            self.db.execute(sql, (term,))
+            resultlist += self.db.fetchall()
         return resultlist
 
     def searchfor(self, value, maxresults=10):
@@ -215,9 +215,9 @@ class SQLiteCache(object):
             results = []
             resultfileids = {}
 
-            maxFileIds = NORMAL_FILE_SEARCH_LIMIT * len(terms)
+            maxFileIdsPerTerm = NORMAL_FILE_SEARCH_LIMIT
             with Performance('file id fetching'):
-                fileids = self.fetchFileIds(terms, maxFileIds, mode)
+                fileids = self.fetchFileIds(terms, maxFileIdsPerTerm, mode)
 
             if debug:
                 log.d('fileids')
