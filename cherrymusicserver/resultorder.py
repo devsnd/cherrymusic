@@ -33,61 +33,106 @@ fetched from the database by some mystic-voodoo-
 hocuspocus heuristics"""
 
 from cherrymusicserver import pathprovider
+from cherrymusicserver import log
+import cherrymusicserver.tweak
+from imp import reload
+from cherrymusicserver.util import Performance
 
 class ResultOrder:
-    def __init__(self, searchword):
+    def __init__(self, searchword, debug=False):
+        self.debug = debug
         self.fullsearchterm = searchword.lower()
         self.searchwords = searchword.lower().split(' ')
-        self.perfectMatchBias = 100
-        self.partialPerfectMatchBias = 20
-        self.startsWithMatchBias = 10
-        self.folderBonus = 5
+        
+        reload(cherrymusicserver.tweak)        
+        self.perfect_match_bonus = cherrymusicserver.tweak.ResultOrderTweaks.perfect_match_bonus
+        self.partial_perfect_match_bonus = cherrymusicserver.tweak.ResultOrderTweaks.partial_perfect_match_bonus
+        self.starts_with_bonus = cherrymusicserver.tweak.ResultOrderTweaks.starts_with_bonus
+        self.folder_bonus = cherrymusicserver.tweak.ResultOrderTweaks.folder_bonus
+        self.word_in_file_name_bonus = cherrymusicserver.tweak.ResultOrderTweaks.word_in_file_name_bonus
+        self.word_not_in_file_name_penalty = cherrymusicserver.tweak.ResultOrderTweaks.word_not_in_file_name_penalty
+        self.word_in_file_path_bonus = cherrymusicserver.tweak.ResultOrderTweaks.word_in_file_path_bonus
+        self.word_not_in_file_path_penalty = cherrymusicserver.tweak.ResultOrderTweaks.word_not_in_file_path_penalty
     def __call__(self,element):
         file = element.path
         isdir = element.dir
         fullpath = file.lower()
-        file = pathprovider.filename(file).lower()
+        filename = pathprovider.filename(file).lower()
+        filename_words = filename.split(' ')
+        
         bias = 0
-
-
+        occurences_bias = 0
+        perfect_match_bias = 0
+        partial_perfect_match_bias = 0
+        folder_bias = 0
+        starts_with_bias = 0
+        starts_with_no_track_number_bias = 0
+        
         #count occurences of searchwords
         occurences=0
         for searchword in self.searchwords:
             if searchword in fullpath:
-                occurences += 3 #magic number for bias
+                occurences_bias += self.word_in_file_path_bonus
             else:
-                occurences -= 10
-            if searchword in file:
-                occurences += 10 #magic number for bias"""
+                occurences_bias += self.word_not_in_file_path_penalty
+            if searchword in filename:
+                occurences_bias += self.word_in_file_name_bonus
             else:
-                occurences -= 10
-
-        bias += occurences
+                occurences_bias += self.word_not_in_file_name_penalty
 
         #perfect match?
-        if file == self.fullsearchterm or self.noThe(file) == self.fullsearchterm:
-            return bias+self.perfectMatchBias
+        if filename == self.fullsearchterm or self.noThe(filename) == self.fullsearchterm:
+            perfect_match_bias += self.perfect_match_bonus
 
-        file = pathprovider.stripext(file)
+        filename = pathprovider.stripext(filename)
         #partial perfect match?
         for searchword in self.searchwords:
-            if file == searchword:
-                if isdir:
-                    bias += self.folderBonus
-                return bias+self.partialPerfectMatchBias
+            if searchword in filename_words:
+                partial_perfect_match_bias += self.partial_perfect_match_bonus
+        if isdir:
+            folder_bias += self.folder_bonus
 
         #file starts with match?
         for searchword in self.searchwords:
-            if file.startswith(searchword):
-                bias += self.startsWithMatchBias
+            if filename.startswith(searchword):
+                starts_with_bias += self.starts_with_bonus
 
         #remove possible track number
-        while len(file)>0 and '0' <= file[0] and file[0] <= '9':
-            file = file[1:]
-        file = file.strip()
+        while len(filename)>0 and '0' <= filename[0] <= '9':
+            filename = filename[1:]
+        filename = filename.strip()
         for searchword in self.searchwords:
-            if file == searchword:
-                return bias + self.startsWithMatchBias
+            if filename == searchword:
+                starts_with_no_track_number_bias += self.startsWithMatchBias
+
+        bias = occurences_bias + perfect_match_bias + folder_bias + starts_with_bias + starts_with_no_track_number_bias
+
+        if self.debug:
+            element.debugOutputSort = '''
+fullsearchterm: %s
+searchwords: %s
+filename: %s
+filepath: %s
+occurences_bias                  %d
+perfect_match_bias               %d
+partial_perfect_match_bias       %d
+folder_bias                      %d
+starts_with_bias                 %d
+starts_with_no_track_number_bias %d
+------------------------------------
+total bias                       %d
+            ''' % (
+        self.fullsearchterm,
+        self.searchwords,
+        filename,
+        fullpath, 
+        occurences_bias,
+        perfect_match_bias,
+        partial_perfect_match_bias,
+        folder_bias,
+        starts_with_bias,
+        starts_with_no_track_number_bias,
+        bias)
 
         return bias
 

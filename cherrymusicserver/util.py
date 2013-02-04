@@ -181,6 +181,10 @@ class Performance:
             duration = (time() - self.time) * 1000
             log.w('|   ' * (Performance.indentation - 1) + '\__ %g ms' % (duration,))
             Performance.indentation -= 1
+            
+    def log(text):
+        for line in text.split('\n'):
+            log.w('|   ' * (Performance.indentation) + line)
 
 def time2text(sec):
     abssec = abs(sec)

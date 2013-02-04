@@ -122,8 +122,12 @@ class CherryModel:
             log.d(user+' searched for "'+term+'"')
         results = self.cache.searchfor(term, maxresults=cherry.config.search.maxresults.int)
         with Performance('sorting DB results using ResultOrder'):
-            results = sorted(results,key=resultorder.ResultOrder(term),reverse=True)
+            debug = True
+            results = sorted(results,key=resultorder.ResultOrder(term,debug=debug),reverse=True)
             results = results[:min(len(results), cherry.config.search.maxresults.int)]
+            if debug:
+                for sortedResults in results[:5]:
+                    Performance.log(sortedResults.debugOutputSort)
 
         with Performance('checking and classifying results:'):
             results = list(filter(isValidMediaFile, results))
