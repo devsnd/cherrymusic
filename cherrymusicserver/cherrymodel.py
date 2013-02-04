@@ -128,6 +128,8 @@ class CherryModel:
             if debug:
                 for sortedResults in results[:5]:
                     Performance.log(sortedResults.debugOutputSort)
+                for sortedResults in results:
+                    sortedResults.debugOutputSort = None #free ram
 
         with Performance('checking and classifying results:'):
             results = list(filter(isValidMediaFile, results))

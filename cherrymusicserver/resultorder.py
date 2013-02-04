@@ -103,7 +103,7 @@ class ResultOrder:
         filename = filename.strip()
         for searchword in self.searchwords:
             if filename == searchword:
-                starts_with_no_track_number_bias += self.startsWithMatchBias
+                starts_with_no_track_number_bias += self.starts_with_bonus
 
         bias = occurences_bias + perfect_match_bias + folder_bias + starts_with_bias + starts_with_no_track_number_bias
 
