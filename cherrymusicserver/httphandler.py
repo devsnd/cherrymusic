@@ -86,6 +86,7 @@ class HTTPHandler(object):
             'getuserlist' : self.api_getuserlist,
             'adduser' : self.api_adduser,
             'userdelete' : self.api_userdelete,
+            'userchangepassword': self.api_userchangepassword,
             'showplaylists' : self.api_showplaylists,
             'logout' : self.api_logout,
             'downloadpls' : self.api_downloadpls,
@@ -463,12 +464,16 @@ class HTTPHandler(object):
             return "You didn't think that would work, did you?"
     
     def api_userchangepassword(self, value):
-        user = json.loads(value)
-        isself = self.userdb.getNameById(pl['userid']) == user['username']
+        params = json.loads(value)
+        isself = not 'userid' in params
+        if isself:
+            params['username'] = cherrypy.session['username']
+            if not self.userdb.auth(params['username'], params['oldpassword']):
+                 raise cherrypy.HTTPError("401 Unauthorized")
         if isself or cherrypy.session['admin']:
-            return self.userdb.changePassword(user['username'],user['password'])
+            return self.userdb.changePassword(params['username'],params['newpassword'])
         else:
-            return 'No no no. Can not change password. No.'
+            raise cherrypy.HTTPError("401 Unauthorized")
 
     def api_userdelete(self, value):
         params = json.loads(value)

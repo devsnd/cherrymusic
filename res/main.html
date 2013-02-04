@@ -122,7 +122,7 @@
                 onkeyup="optionSetter('custom_theme.primary_color',$(this).val(),reloadStylesheets,function(){})();">
                 <a class="button" onclick="optionSetter('custom_theme.primary_color','#F02E75',reloadStylesheets,function(){})();">reset</a><br>
             -->
-            <h2>keyboard shortcuts</h2>
+            <h3>keyboard shortcuts</h3>
             
             <table>
                 <tr>
@@ -168,12 +168,48 @@
                 <span></span>
                 <input value="" onkeyup="" />
             </div>
+            <h3>change password</h3>
+            <a class="btn" href="#changePassword" role="button" data-toggle="modal">change password</a>
         </div>
     </div>
     <div class="modal-footer">
         <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
     </div>
 </div>
+    <!-- change password -->
+    <div id="changePassword" class="modal fade hide">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3>change password</h3>
+        </div>
+        <div class="modal-body">
+            <div class="content">
+            <form class="form-horizontal">  
+                <fieldset>  
+                    <div class="control-group">  
+                        <label class="control-label" for="oldpassword">old password</label>  
+                        <div class="controls">  
+                            <input type="password" class="input-xlarge" id="oldpassword-change">  
+                        </div>  
+                    </div>  
+                    <div class="control-group">  
+                        <label class="control-label" for="newpassword">new password</label>  
+                        <div class="controls">  
+                            <input type="password" class="input-xlarge" id="newpassword-change">  
+                        </div>  
+                    </div>  
+                    <div class="form-actions">  
+                        <a href="javascript:;" onclick="userChangePassword()" class="btn">confirm password change</a>
+                    </div>  
+                </fieldset>  
+            </form>  
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+        </div>
+    </div>
+    <!-- change password end -->
 <!-- USER OPTIONS END-->
 
 <!-- ADMIN PANEL START -->

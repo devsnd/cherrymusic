@@ -96,19 +96,31 @@ function api(data_or_action, successfunc, errorfunc, background){
 function errorFunc(msg){
     "use strict";
     return function(){
-        displayError(msg);
+        displayNotification(msg,'error');
+    };
+}
+function successNotify(msg){
+    return function(){
+        displayNotification(msg,'success');
     };
 }
 
-function renderErrorMessage(msg){
-    return '<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error: </strong>'+msg+'</div>';
+function renderUserMessage(msg, type){
+    if(type == 'error'){
+        cssclass = 'alert-error';
+    } else if(type == 'success'){
+        cssclass = 'alert-success';
+    } else {
+        cssclass = '';
+    }
+    return '<div class="alert '+cssclass+'"><button type="button" class="close" data-dismiss="alert">&times;</button>'+msg+'</div>';
 }
 
-function displayError(msg){
-    $('#errormessage').html(renderErrorMessage(msg));
+function displayNotification(msg,type){
+    $('#errormessage').html(renderUserMessage(msg,type));
 }
 function removeError(msg){
-    if($('#errormessage').html() == renderErrorMessage(msg)){
+    if($('#errormessage').html() == renderUserMessage(msg,'error')){
         $('#errormessage').html('');
     }
 }
@@ -888,6 +900,19 @@ function userDelete(userid){
                 })};
     var success = function(data){
         updateUserList();
+    };
+    api(data,success,errorFunc('failed delete user'));
+}
+function userChangePassword(){
+    var data = {'action':'userchangepassword',
+                'value' : JSON.stringify({
+                    'oldpassword':$('#oldpassword-change').val(),
+                    'newpassword':$('#newpassword-change').val()
+                })};
+    var success = function(data){
+        $('#changePassword').modal('hide');
+        $('#userOptions').modal('hide');
+        successNotify('Password changed successfully!')();
     };
     api(data,success,errorFunc('failed delete user'));
 }
