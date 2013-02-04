@@ -421,7 +421,7 @@ PlaylistManager.prototype = {
             }
             pltabs += '</a></li>';
         }
-        pltabs += '<li><a href="#" onclick="showPlaylistBrowser()"><b>+</b></a></li>';
+        pltabs += '<li><a href="#" onclick="playlistManager.showPlaylistBrowser()"><b>+</b></a></li>';
         $(self.cssSelectorPlaylistChooser+' ul').empty()
         $(self.cssSelectorPlaylistChooser+' ul').append(pltabs);
     },
@@ -453,11 +453,12 @@ PlaylistManager.prototype = {
         this.showPlaylist(this.getEditingPlaylist().id);
     },
     showPlaylist : function(playlistid){
+        $('#playlistCommands').show();
         $('#playlistBrowser').hide();
         var self = this;
         var showpl = $('#'+this.plid2htmlid(playlistid));
         this.hideAll();
-        $('#addPlaylist ul li').removeClass('active');
+        $('#playlistChooser ul li:last').removeClass('active');
         if(showpl.length<1){
             this.setEditingPlaylist(this.managedPlaylists[0].id);
             showpl = $('#'+this.plid2htmlid(this.getEditingPlaylist().id));
@@ -467,6 +468,14 @@ PlaylistManager.prototype = {
         showpl.show();
         this.refreshTabs();
         this.refreshCommands();
+    },
+    showPlaylistBrowser: function(){
+        playlistManager.hideAll();
+        playlistManager.setEditingPlaylist(0);
+        showPlaylists();
+        $('#playlistChooser ul li:last').addClass('active');
+        $('#playlistCommands').hide();
+        $('#playlistBrowser').show();
     },
     hideAll : function(){
         $(this.cssSelectorPlaylistContainerParent+'>div').hide();

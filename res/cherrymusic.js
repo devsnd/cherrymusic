@@ -395,6 +395,7 @@ function renderDir(label,urlpath,dirpath){
     var rendereddir = '<a dir="'+dirpath+'" href="javascript:;" class="listdir">';
     if(dirpath.indexOf('/')>0){
         var searchterms = encodeURIComponent(JSON.stringify({'directory' : dirpath}))
+        //rendereddir += '<div class="changealbumart-button" onclick="showAlbumArtChangePopOver($(this))"></div>';
         rendereddir += '<img src="/api/fetchalbumart/'+searchterms+'" width="80" height="80" />';
     }
     return rendereddir+'<div class="listdir-name-wrap"><span class="listdir-name">'+dirpath+'<span></div></a>';
@@ -563,6 +564,10 @@ registermp3s = function(parent,mode, playlistlabel){
 
 updateLibrary = function(){
     api('updatedb')
+}
+
+function showAlbumArtChangePopOver(jqobj){
+    jqobj.popover({selector: jqobj.siblings('img'), title: 'Change cover art', html: true, content: '<img src="/res/img/folder.png" /><img src="/res/img/folder.png" /><img src="/res/img/folder.png" />'});
 }
 
 /***
@@ -1144,14 +1149,6 @@ function keyboardShortcuts(e){
     }
 }
 
-function showPlaylistBrowser(){
-    playlistManager.hideAll();
-    $('#playlistCommands').html("");
-    playlistManager.setEditingPlaylist(0);
-    showPlaylists();
-    $('#addPlaylist ul li').addClass('active');
-    $('#playlistBrowser').show();
-}
 function sendHeartBeat(){
     api('heartbeat',
         function(){ removeError('connection to server lost')},

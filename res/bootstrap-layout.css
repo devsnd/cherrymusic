@@ -41,6 +41,17 @@ body {
     border-bottom-left-radius:0 !important; 
 }
 
+/* ALBUM ART CHANGER */
+
+.changealbumart-button{
+    background-color: #FF66FF;
+    height: 20px;
+    opacity: 0.5;
+    position: absolute;
+    width: 20px;
+    z-index: 10;
+}
+
 /* NAVBAR LAYOUT */
 
 #brandname{
