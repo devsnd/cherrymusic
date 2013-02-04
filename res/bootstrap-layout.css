@@ -133,6 +133,14 @@ body {
 }
 .jp-seek-bar{
     background-image: linear-gradient(to bottom, #BADFF2, #7AAECB) !important;
+    background-color: #BADFF2 !important;
+    background-image: -moz-linear-gradient(top, #BADFF2, #7AAECB) !important;
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#BADFF2), to(#7AAECB)) !important;
+    background-image: -webkit-linear-gradient(top, #BADFF2, #7AAECB) !important;
+    background-image: -o-linear-gradient(top, #BADFF2, #7AAECB) !important;
+    background-image: linear-gradient(to bottom, #BADFF2, #7AAECB) !important;
+    background-repeat: repeat-x !important;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffBADFF2', endColorstr='#ff7AAECB', GradientType=0) !important;
 }
 .cm-progressbar{
     left: 0;
@@ -186,10 +194,16 @@ body {
 }
 
 
+
 /*every second playlist entry is grey*/
-.jp-playlist ul li:nth-child(2n+1) > div{
+.jp-playlist ul li:nth-child(2n+1){
     background-color: #F6F6F6;
 }
+.jp-playlist ul li.jp-playlist-current{
+    background-color: #b5dbef;
+}
+
+
 .jp-playlist-item-remove{
     float: right;
 }
