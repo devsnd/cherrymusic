@@ -371,7 +371,7 @@ class HTTPHandler(object):
             if header:
                 cherrypy.response.headers["Content-Type"] = header['Content-Type']
                 cherrypy.response.headers["Content-Length"] = header['Content-Length']
-                self.albumartcache_save(imgb64path,data)
+                self.albumartcache_save(b64imgpath,data)
                 return data
         cherrypy.HTTPRedirect("/res/img/folder.png", 302)
     api_fetchalbumart.noauth = True
