@@ -135,6 +135,7 @@ class CherryMusic:
 Oops!
 
 CherryMusic changed some file locations while you weren't looking.
+(To better comply with best practices, if you wanna know.)
 
 To continue, please move the following:
 
@@ -147,7 +148,7 @@ To continue, please move the following:
 Thank you, and enjoy responsibly. :)
 ==========================================================================
 """)
-        exit(0)
+        exit(1)
 
 
     def printWelcomeAndExit(self):
@@ -156,7 +157,7 @@ Thank you, and enjoy responsibly. :)
 Welcome to CherryMusic """ + VERSION + """!
 
 To get this party started, you need to edit the configuration file, which
-resides in your home directory:
+resides under the following path:
 
     """ + pathprovider.configurationFile() + """
 

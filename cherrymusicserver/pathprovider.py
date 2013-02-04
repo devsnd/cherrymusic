@@ -74,10 +74,10 @@ def fallbackPath():
     return os.path.join(os.path.expanduser('~'), '.cherrymusic')
 
 def fallbackPathInUse():
-    hasFiles = False
-    for roots, dirs, files in os.walk(fallbackPath()):
-        hasFiles |= bool(files)
-    return hasFiles
+    for _, _, files in os.walk(fallbackPath()):
+        if files:
+            return True
+    return False
 
 def configurationFile():
     return os.path.join(getConfigPath(), 'config')
