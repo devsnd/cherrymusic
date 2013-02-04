@@ -168,6 +168,8 @@ function loadUserOptions(onSuccess){
         $('#keyboard_shortcuts-play').html(String.fromCharCode(userOptions.keyboard_shortcuts.play.value));
         $('#keyboard_shortcuts-pause').html(String.fromCharCode(userOptions.keyboard_shortcuts.pause.value));
         $('#keyboard_shortcuts-search').html(String.fromCharCode(userOptions.keyboard_shortcuts.search.value));
+        
+        $('#pldlbutton').attr('checked',userOptions.misc.show_playlist_download_buttons);
     }
     api('getuseroptions',success);
 }
@@ -710,8 +712,9 @@ function showPlaylists(){
                         '</div>',
                         '<div class="deletebutton">',
                         '<a href="javascript:;" class="btn btn-mini btn-danger" onclick="confirmDeletePlaylist({{playlistid}}, \'{{playlistlabel}}\')">x</a>',
-                        '</div>',
-                        '<div class="dlbutton">',
+                        '</div>');
+                    if(userOptions.misc.show_playlist_download_buttons){
+                        plsentry.push('<div class="dlbutton">',
                             '<a class="btn btn-mini" href="/api/downloadpls?value={{dlval}}">',
                             '&darr;&nbsp;PLS',
                             '</a>',
@@ -720,11 +723,12 @@ function showPlaylists(){
                             '<a class="btn btn-mini" href="/api/downloadm3u?value={{dlval}}">',
                             '&darr;&nbsp;M3U',
                             '</a>',
+                        '</div>');
+                    }
+                    plsentry.push( '</div>',
+                        '<div class="playlistcontent">',
                         '</div>',
-                    '</div>',
-                    '<div class="playlistcontent">',
-                    '</div>',
-                    '</li>'
+                        '</li>'
                     );
                 pls += Mustache.render(plsentry.join(''),
                     {
@@ -1197,5 +1201,14 @@ $(document).ready(function(){
     });
     $('#saveplaylistmodal').on('hide', function(){
         $('#playlisttitle').unbind('keyup');
+    });
+    $('#pldlbutton').on('change',function(){
+        optionSetter(   'misc.show_playlist_download_buttons',
+                        $(this).attr('checked')=='checked',
+                        function(){
+                            $(this).attr('checked',userOptions.misc.show_playlist_download_buttons)
+                        },
+                        errorFunc('Error setting option!')
+        );
     });
 });

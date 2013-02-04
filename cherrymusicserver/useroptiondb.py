@@ -54,6 +54,9 @@ class UserOptionDB:
                 kbs.hidden = False
                 kbs.readonly = False
                 c.keyboard_shortcuts = kbs
+            with cfg.create('misc') as misc:
+                misc.show_playlist_download_buttons = cfg.Configuration(value=False)
+                c.misc = misc
                 
             c.use_old_gui = cfg.Configuration(value=False, readonly=False, hidden=True)
             
