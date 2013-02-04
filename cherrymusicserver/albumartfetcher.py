@@ -106,22 +106,25 @@ class AlbumArtFetcher:
         @rtype dict, bytestring"""
 
         filetypes = (".jpg", ".jpeg", ".png")
-        for file_in_dir in os.listdir(path):
-            if file_in_dir.lower().endswith(filetypes):
-                try:
-                    imgpath = os.path.join(path,file_in_dir)
-                    if os.path.getsize(imgpath) > self.MAX_IMAGE_SIZE_BYTES:
-                        header, data = self.resize(imgpath,(self.IMAGE_SIZE,self.IMAGE_SIZE))
-                        return header, data, True
-                    else:
-                        with open(imgpath, "rb") as f:
-                            data = f.read()
-                            if(imgpath[-3:] == ".png"):
-                                mimetype = "image/png"
-                            else:
-                                mimetype = "image/jpeg"
-                            header = {'Content-Type':mimetype, 'Content-Length':len(data)}
-                            return header, data, False
-                except IOError:
-                    return None, '', False
+        try:
+            for file_in_dir in os.listdir(path):
+                if file_in_dir.lower().endswith(filetypes):
+                    try:
+                        imgpath = os.path.join(path,file_in_dir)
+                        if os.path.getsize(imgpath) > self.MAX_IMAGE_SIZE_BYTES:
+                            header, data = self.resize(imgpath,(self.IMAGE_SIZE,self.IMAGE_SIZE))
+                            return header, data, True
+                        else:
+                            with open(imgpath, "rb") as f:
+                                data = f.read()
+                                if(imgpath[-3:] == ".png"):
+                                    mimetype = "image/png"
+                                else:
+                                    mimetype = "image/jpeg"
+                                header = {'Content-Type':mimetype, 'Content-Length':len(data)}
+                                return header, data, False
+                    except IOError:
+                        return None, '', False
+        except OSError:
+            return None, '', False
         return None,'', False
