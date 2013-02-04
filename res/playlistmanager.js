@@ -209,12 +209,18 @@ PlaylistManager.prototype = {
         //hack to use flash AND HTML solution in every case
         //https://github.com/happyworm/jPlayer/issues/136#issuecomment-12941923
         availablejPlayerFormats.push("m4v");
+        var usedSolution = "html, flash";
+        
+        if(detectBrowser() == 'midori'){
+            //WORKAROUND: the midori falsely reports mp3 support
+            usedSolution = "flash, html";
+        }        
         var self = this;
         if (typeof self.jPlayerInstance === 'undefined'){
             // Instance jPlayer
             self.jPlayerInstance = $(self.cssSelectorjPlayer).jPlayer({
                 swfPath: "res/js",
-                solution: "html, flash",
+                solution: usedSolution,
                 preload: 'metadata',
                 supplied: availablejPlayerFormats.join(),
                 wmode: "window",

@@ -1032,7 +1032,7 @@ function getFileTypeByExt(filepath){
 }
 
 function detectBrowser(){
-    var browsers = ['firefox','msie','chrome','safari','midori']
+    var browsers = ['midori','firefox','msie','chrome','safari']
     for(var i=0; i<browsers.length; i++){
         if(navigator.userAgent.toLowerCase().indexOf(browsers[i])!=-1){
             return browsers[i];
