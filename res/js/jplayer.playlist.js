@@ -278,11 +278,11 @@
 			$(this.cssSelector.playlist + " a." + this.options.playlistOptions.itemClass).die("click").live("click", function() {
                 $(self.options.playlistOptions.playlistSelector).trigger('requestPlay', [self.options.playlistOptions.playlistSelector]);
 				var index = $(this).parent().parent().index();
-				if(self.current !== index) {
+				//if(self.current !== index) {
 					self.play(index);
-				} else {
-					$(self.cssSelector.jPlayer).jPlayer("play");
-				}
+				//} else {
+				//	$(self.cssSelector.jPlayer).jPlayer("play");
+				//}
 				$(this).blur();
 				return false;
 			});
@@ -337,11 +337,11 @@
 
 			if(playNow) {
 				this.play(this.playlist.length - 1);
-			} else {
+			} /*else {
 				if(this.original.length === 1) {
 					this.select(0);
 				}
-			}
+			}*/
             $(self.options.playlistOptions.playlistSelector).trigger('addedItem', [self.options.playlistOptions.playlistSelector]);
 		},
 		remove: function(index) {
