@@ -53,3 +53,7 @@ class ResultOrderTweaks:
     word_not_in_file_name_penalty = -10
     word_in_file_path_bonus = 3
     word_not_in_file_path_penalty = -10    
+    
+class CherryModelTweaks:
+    result_order_debug = False
+    result_order_debug_files = 10

@@ -35,6 +35,7 @@ import os
 from random import choice
 import cherrypy
 import audiotranscode
+from imp import reload
 
 import cherrymusicserver as cherry
 from cherrymusicserver import util
@@ -42,6 +43,7 @@ from cherrymusicserver import pathprovider
 from cherrymusicserver.util import Performance
 from cherrymusicserver import resultorder
 from cherrymusicserver import log
+import cherrymusicserver.tweak
 
 class CherryModel:
     def __init__(self, cache):
@@ -117,16 +119,17 @@ class CherryModel:
         return True
 
     def search(self, term):
+        reload(cherrymusicserver.tweak)
         user = cherrypy.session.get('username', None)
         if user:
             log.d(user+' searched for "'+term+'"')
         results = self.cache.searchfor(term, maxresults=cherry.config.search.maxresults.int)
         with Performance('sorting DB results using ResultOrder'):
-            debug = True
+            debug = cherrymusicserver.tweak.CherryModelTweaks.result_order_debug
             results = sorted(results,key=resultorder.ResultOrder(term,debug=debug),reverse=True)
             results = results[:min(len(results), cherry.config.search.maxresults.int)]
             if debug:
-                for sortedResults in results[:5]:
+                for sortedResults in results[:cherrymusicserver.tweak.CherryModelTweaks.result_order_debug_files]:
                     Performance.log(sortedResults.debugOutputSort)
                 for sortedResults in results:
                     sortedResults.debugOutputSort = None #free ram
