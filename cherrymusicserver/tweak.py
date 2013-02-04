@@ -44,16 +44,17 @@ make sure to have reload imported as well:
     from imp import reload
 """
 
-class ResultOrderTweaks:   
+class ResultOrderTweaks:
     perfect_match_bonus = 100
-    partial_perfect_match_bonus = 20
+    partial_perfect_match_bonus = 30
     starts_with_bonus = 10
     folder_bonus = 5
-    word_in_file_name_bonus = 10
-    word_not_in_file_name_penalty = -10
+    word_in_file_name_bonus = 20
+    word_not_in_file_name_penalty = -30
     word_in_file_path_bonus = 3
-    word_not_in_file_path_penalty = -10    
-    
+    word_not_in_file_path_penalty = -10
+
 class CherryModelTweaks:
     result_order_debug = False
     result_order_debug_files = 10
+
