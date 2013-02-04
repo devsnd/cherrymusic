@@ -105,7 +105,7 @@ class ResultOrder:
             if filename == searchword:
                 starts_with_no_track_number_bias += self.starts_with_bonus
 
-        bias = occurences_bias + perfect_match_bias + folder_bias + starts_with_bias + starts_with_no_track_number_bias
+        bias = occurences_bias + perfect_match_bias + partial_perfect_match_bias + folder_bias + starts_with_bias + starts_with_no_track_number_bias
 
         if self.debug:
             element.debugOutputSort = '''
