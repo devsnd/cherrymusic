@@ -171,7 +171,7 @@ class SQLiteCache(object):
 
     @classmethod
     def searchterms(cls, searchterm):
-        words = re.findall('(\w+)', searchterm.replace('_', ' '))
+        words = re.findall('(\w+|[^\s\w]+)', searchterm.replace('_', ' '))
         return list(map(str.lower, words))
 
 
