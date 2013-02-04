@@ -171,7 +171,7 @@ class SQLiteCache(object):
 
     @classmethod
     def searchterms(cls, searchterm):
-        words = re.findall('(\w+|[^\s\w]+)', searchterm.replace('_', ' '))
+        words = re.findall('(\w+|[^\s\w]+)', searchterm.replace('_', ' ').replace('%',' '))
         return list(map(str.lower, words))
 
 
@@ -186,7 +186,8 @@ class SQLiteCache(object):
         if debug:
             log.d('Query used: ' + sql)
         #print(self.conn.execute('EXPLAIN QUERY PLAN '+sql, (term+'%',)).fetchall())
-        self.db.execute(sql, tuple(map(lambda x: x + '%', terms)))
+        terms[-1] = terms[-1]+'%'
+        self.db.execute(sql, tuple(terms))
         resultlist += self.db.fetchall()
 
         return resultlist
