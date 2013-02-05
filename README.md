@@ -30,10 +30,10 @@ Getting Started
 
 [download]: http://download.cherrypy.org/cherrypy/3.2.2/
 
-    - Install it. Use your favorite package manager,
+  - Install it. Use your favorite package manager,
       or [download][] it and do a manual install.
 
-    - if you only want to test cherrymusic without installing any dependencies, you
+  - if you only want to test cherrymusic without installing any dependencies, you
       can simply start CherryMusic and it will ask you if you want it to install
       cherrypy in the local folder for you.
 
@@ -64,7 +64,7 @@ This error can be circumvented by setting the
 
         keep_session_in_ram = True
 
-in the configuration file (C:\Documents and Settings\username\.cherrymusic\config)
+in the configuration file (C:\Documents and Settings\username\Application Data\cherrymusic\config)
 
 Requirements
 ------------
