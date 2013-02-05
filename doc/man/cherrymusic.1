@@ -1,0 +1,74 @@
+.\" Manpage for CherryMusic.
+.\" Contact us on github.com/devsnd/cherrymusic to correct errors or typos.
+
+.TH "CHERRYMUSIC" "1" "2013\-02\-04" "CherryMusic devel branch" "CherryMusic man page"
+
+.SH "NAME"
+cherrymusic \- a standalone HTML5 (with Flash fallback) music streaming server based on CherryPy and jPlayer
+
+.SH "SYNOPSIS"
+cherrymusic [OPTIONS]
+
+.SH "DESCRIPTION"
+CherryMusic is a standalone music server written in python based on CherryPy and jPlayer. It is intended to be an alternative to Last.fm, Spotify, Grooveshark... you name it. 
+
+.SH "OPTIONS"
+.IP "\fB\-h, \-\-help\fP"
+Show a help message and exit.
+
+.IP "\fB\-\-update [PATH [PATH ...]]\fP"
+Update the media database. PATH must start with basedir or be relative to basedir.
+
+.IP "\fB\-\-newconfig\fP"
+Creates a new config file in your home directory, e.g. ~/.conifg/cherrymusic/config.new
+
+.IP "\fB\-\-dropfiledb\fP"
+Clears the file database. This might be necesary after a version jump.
+
+.IP "\fB\-\-download\-stagger\fP"
+Downloads the python module "stagger", an ID3-tag library, so that your music can be indexed more precisely. (Should only be used when not installed using a package manager!)
+
+.SH "FILES"
+According to XDG Base Directory Specification, cherrymusic honors $XDG_DATA_HOME and $XDG_CONFIG_HOME. If these variables are empty or not set, files are stored using the standard path:
+
+~/.config/cherrymusic/config
+.PP
+~/.local/share/cherrymusic
+
+.SH "SEE ALSO"
+\fBcherrymusic.conf(5)\fP, \fBcherrymusicd\fP(8)
+
+.SH "BUGS"
+On client:
+.PP
+CherryMusic doesn't work when Flashblock is enabled. Workaround: add the server ip to your flashblock whitelist.
+
+On server:
+.PP
+Currently there is a bug in CherryPy, the server framework cherrymusic was built upon, that prevents serving files that have non-ascii characters in their name. I have already filed a bug with a description of a workaround and I hope it will be resolved soon upstream.
+
+You've found a bug in CherryMusic? That's awesome. Tell us about it! You can open an issue in the issue tracker of github (github.com/devsnd/cherrymusic/issues) and we'll take care of it.
+
+.SH "THANKS"
+To:
+.PP
+.IP o
+The CherryPy team for a great application server
+.IP o
+HappyWorm for the HTML5 audio playback
+.IP o
+Christian Maximilian Blasius for the logo!
+.IP o
+Bootstrap
+.IP o
+Bootswatch for the theme of this site
+.IP o
+6arms1leg for maintaining the AUR package for Arch Linux
+.IP o
+Adrian Sampson for audioread
+
+.SH "AUTHORS"
+CherryMusic was created by Tom Wallroth and is currently developed together with Tilman Börner.
+
+.SH "COPYRIGHT"
+GNU GENERAL PUBLIC LICENSE - Version 3, 29 June 2007
