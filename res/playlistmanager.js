@@ -209,12 +209,12 @@ PlaylistManager.prototype = {
         //hack to use flash AND HTML solution in every case
         //https://github.com/happyworm/jPlayer/issues/136#issuecomment-12941923
         availablejPlayerFormats.push("m4v");
-        var usedSolution = "html, flash";
         
+        var usedSolution = "html, flash";
         if(detectBrowser() == 'midori'){
             //WORKAROUND: the midori falsely reports mp3 support
             usedSolution = "flash, html";
-        }        
+        }
         var self = this;
         if (typeof self.jPlayerInstance === 'undefined'){
             // Instance jPlayer
@@ -423,7 +423,7 @@ PlaylistManager.prototype = {
             
             pltabs += '<a href="#" onclick="playlistManager.showPlaylist('+pl.id+')">'+isplaying+' '+pl.name+ isunsaved;
             if(pl.closable){
-                pltabs += '<span class="pointer" href="#" onclick="playlistManager.closePlaylist('+pl.id+')">&times;</span>';
+                pltabs += '<span class="playlist-tab-closer pointer" href="#" onclick="playlistManager.closePlaylist('+pl.id+')">&times;</span>';
             }
             pltabs += '</a></li>';
         }

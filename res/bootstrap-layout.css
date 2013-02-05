@@ -217,6 +217,12 @@ body {
 
 .jp-playlist-item-remove{
     float: right;
+    font-size: 16px;
+    padding: 4px;
+}
+.jp-playlist-item-remove:hover{
+    text-decoration: none;
+    font-weight: 900;
 }
 .jp-playlist-item{
     display: inline-block;
@@ -225,6 +231,20 @@ body {
 /* playlist close button */
 .jp-playlist ul li a span{
     margin-left: 5px;
+}
+
+/****** PLAYLIST MANAGER ****/
+
+.playlist-tab-closer{
+    display: inline-block;
+    height: 12px;
+    line-height: 11px;
+    margin-left: 4px;
+    padding: 2px;
+    width: 12px;
+}
+.playlist-tab-closer:hover{
+    color: #B94A48;
 }
 
 /*** REMOTE PLAYLISTS ***/
