@@ -1,23 +1,23 @@
 CherryMusic
 ===========
 
-cherrymusic is a standalone music server based on CherryPy and jPlayer. 
-It is intended to be an alternative to edna.
+CherryMusic is a music streaming server based on CherryPy and jPlayer.
+It plays the music inside your PC, smartphone, tablet, toaster or whatever 
+device has a HTML5 compliant browser installed
 
-Current Features:
 
-  - browse and stream your music inside the browser (locally or remote)
-  - search your music
-  - completely AJAX based (no page reloads on click, super fast)
+current features:
+
+  - stream your music inside the browser (locally or remote)
+  - browse and search your music
+  - completely AJAX based (no page reloads on click, therefore fast)
   - create and share playlists
   - multiple user authentication
   - HTTPS support
-
-Upcoming features:
-
-  - searching ID3 tags
-
-    
+  - automatic album cover art fetching
+  - see CHANGES for all the features
+  
+You can find more information on the [CherryMusic website](http://www.fomori.org/cherrymusic).
 
 Getting Started
 ---------------
@@ -33,12 +33,9 @@ Getting Started
     - Install it. Use your favorite package manager,
       or [download][] it and do a manual install.
 
-    - If you don't want to install: get the [download][] 
-      and copy the `cherrypy` subfolder it contains 
-      into the `cherrymusic` folder you created.
-
-      cherrymusic will offer to do this for you if it cannot
-      find an installed CherryPy to use. 
+    - if you only want to test cherrymusic without installing any dependencies, you
+      can simply start CherryMusic and it will ask you if you want it to install
+      cherrypy in the local folder for you.
 
 3. Now simply run the main script using python 3; it will prompt you for anything else.
 
@@ -51,10 +48,6 @@ Getting Started
 
         $ firefox localhost:8080
 
-Side Notes
-----------
-
-By default it uses HTML5 for music playback and supports flash as fallback. 
 
 Known Issues
 ------------
