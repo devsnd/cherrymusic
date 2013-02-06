@@ -1,6 +1,7 @@
 from distutils.core import setup
 import os
 import cherrymusicserver
+from cherrymusicserver import pathprovider
 
 def listFilesRec(crawlpath, installpath):
     filesperfolder = []
@@ -10,6 +11,8 @@ def listFilesRec(crawlpath, installpath):
             files += [os.path.join(r,name)]
         filesperfolder += [(os.path.join(installpath,r),files)]
     return filesperfolder
+
+shareFolder = os.path.join('share',pathprovider.sharedFolderName)
 
 setup( 
     name = "CherryMusic",
@@ -29,6 +32,6 @@ setup(
     #startup script
     scripts = ['cherrymusic','cherrymusicd'],
     #data required by the declared packages
-    data_files=listFilesRec('res','share/cherrymusic')+listFilesRec('themes','share/cherrymusic')
+    data_files=listFilesRec('res',shareFolder)+listFilesRec('themes',shareFolder)
 )
     

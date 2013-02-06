@@ -33,17 +33,22 @@ import sys
 import base64
 import codecs
 
+userDataFolderName = 'cherrymusic'  # $XDG_DATA_HOME/userDataFolderName
+configFolderName = 'cherrymusic'    # $XDG_CONFIG_HOME/configFolderName
+configFileName = 'cherrymusic.conf' # $XDG_CONFIG_HOME/configFolderName/cherrymusic.conf
+sharedFolderName = 'cherrymusic'    # /usr/share/sharedFolderName
+
 def getUserDataPath():
     userdata = ''
     if sys.platform.startswith('linux'):  # linux
         if 'XDG_DATA_HOME' in os.environ:
-            userdata = os.path.join(os.environ['XDG_DATA_HOME'],'cherrymusic')
+            userdata = os.path.join(os.environ['XDG_DATA_HOME'],userDataFolderName)
         else:
-            userdata = os.path.join(os.path.expanduser('~'), '.local', 'share', 'cherrymusic')
+            userdata = os.path.join(os.path.expanduser('~'), '.local', 'share', userDataFolderName)
     elif sys.platform.startswith('win'): # windows
         userdata = os.path.join(os.environ['APPDATA'],'cherrymusic')
     elif sys.platform.startswith('darwin'): # osx
-        userdata = os.path.join(os.path.expanduser('~'),'Application Support','cherrymusic')
+        userdata = os.path.join(os.path.expanduser('~'),'Application Support',userDataFolderName)
     
     if not userdata:
         userdata = fallbackPath()
@@ -57,13 +62,13 @@ def getConfigPath():
         configpath = ''
         if sys.platform.startswith('linux'):  # linux
             if 'XDG_CONFIG_HOME' in os.environ: 
-                configpath = os.path.join(os.environ['XDG_CONFIG_HOME'], 'cherrymusic')
+                configpath = os.path.join(os.environ['XDG_CONFIG_HOME'], configFolderName)
             else:
-                configpath = os.path.join(os.path.expanduser('~'), '.config', 'cherrymusic')
+                configpath = os.path.join(os.path.expanduser('~'), '.config', configFolderName)
         elif sys.platform.startswith('win'): #windows
-            configpath = os.path.join(os.environ['APPDATA'],'cherrymusic')
+            configpath = os.path.join(os.environ['APPDATA'],configFolderName)
         elif sys.platform.startswith('darwin'): #osx
-            configpath = os.path.join(os.path.expanduser('~'),'Application Support','cherrymusic')
+            configpath = os.path.join(os.path.expanduser('~'),'Application Support',configFolderName)
         
         if not configpath:
             configpath = fallbackPath()
@@ -80,7 +85,7 @@ def fallbackPathInUse():
     return False
 
 def configurationFile():
-    return os.path.join(getConfigPath(), 'config')
+    return os.path.join(getConfigPath(), configFileName)
 
 def configurationFileExists():
     return os.path.exists(configurationFile())
@@ -117,7 +122,7 @@ def readRes(path):
 
 def getResourcePath(path):
     #check share first
-    resourceprefix = os.path.join(sys.prefix, 'share', 'cherrymusic')
+    resourceprefix = os.path.join(sys.prefix, 'share', sharedFolderName)
     respath = os.path.join(resourceprefix, path)
     if not os.path.exists(respath):
         #log.w("Couldn't find " + respath + ". Trying local install path.")
