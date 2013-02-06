@@ -3,7 +3,7 @@ CherryMusic
 
 CherryMusic is a music streaming server based on CherryPy and jPlayer.
 It plays the music inside your PC, smartphone, tablet, toaster or whatever 
-device has a HTML5 compliant browser installed
+device has a HTML5 compliant browser installed.
 
 
 current features:
@@ -27,15 +27,12 @@ Getting Started
         $ git clone git://github.com/devsnd/cherrymusic.git
     
 2. To use cherrymusic you need [CherryPy](http://www.cherrypy.org). There are two options:
-
-[download]: http://download.cherrypy.org/cherrypy/3.2.2/
-
-  - Install it. Use your favorite package manager,
-      or [download][] it and do a manual install.
-
-  - if you only want to test cherrymusic without installing any dependencies, you
+    - Install it. Use your favorite package manager,
+      or [download](http://download.cherrypy.org/cherrypy/3.2.2/) it and do a manual install.
+    - If you only want to test cherrymusic without installing any dependencies, you
       can simply start CherryMusic and it will ask you if you want it to install
       cherrypy in the local folder for you.
+
 
 3. Now simply run the main script using python 3; it will prompt you for anything else.
 
@@ -57,14 +54,15 @@ If you have trouble with things like track selection or playback, try whitelisti
 the server in your browser's flash blocker / plugin manager.
 
 On Windows:
-
+```
 FileNotFoundError: [WinError 2] The system cannot find the file specified: 'C:\\Documents and Settings\\username\\.cherrymusic\
 \sessions\\session-622d41384b5f877a840ba5dfe38408dc4853e8f4.lock'
+```
 This error can be circumvented by setting the
 
         keep_session_in_ram = True
 
-in the configuration file (C:\Documents and Settings\username\Application Data\cherrymusic\config)
+in the configuration file (`C:\Documents and Settings\username\Application Data\cherrymusic\config`).
 
 Requirements
 ------------
