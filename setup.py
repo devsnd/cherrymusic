@@ -17,12 +17,8 @@ shareFolder = os.path.join('share',pathprovider.sharedFolderName)
 setup( 
     name = "CherryMusic",
     version = cherrymusicserver.VERSION,
-    description="an mp3 server for your browser",
-    long_description="""CherryMusic is a music streaming
-    server based in cherrypy and jPlayer. You can search
-    your collection, create and share playlists with
-    other users.
-    """,
+    description=cherrymusicserver.DESCRIPTION,
+    long_description=cherrymusicserver.LONG_DESCRIPTION,
     author = "Tom Wallroth & Tilman Boerner",
     author_email="tomwallroth@gmail.com, tilman.boerner@gmx.net",
     url = "http://www.fomori.org/cherrymusic/",
