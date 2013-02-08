@@ -80,6 +80,7 @@ class DecodeError(TranscodeError):
         return repr(self.value)
 
 class AudioTranscode:
+    READ_BUFFER = 1024
     Encoders = [
         #encoders take input from stdin and write output to stout
         Encoder('ogg', ['oggenc', '-b','BITRATE','-']),
@@ -165,7 +166,7 @@ class AudioTranscode:
             decoder_process = self._decode(filepath, decoder)
             encoder_process = self._encode(newformat, decoder_process,bitrate=bitrate,encoder=encoder)
             while encoder_process.poll() == None:
-                data = encoder_process.stdout.read()
+                data = encoder_process.stdout.read(AudioTranscode.READ_BUFFER)
                 if data == None:
                     time.sleep(0.1) #wait for new data...
                     break               

@@ -564,7 +564,6 @@ PlaylistManager.prototype = {
             track[ext2jPlayerFormat(ext)] = path;
             formats.push(ext);
             window.console.log('added native format '+ext);
-            //track.formatPreference = ext2jPlayerFormat(ext);
         } else if(!transcodingEnabled){
             //not natively supported and no transcoding
             window.console.log("browser doesn't support filetype "+ext+'and transcoding is disabled. Transcoding can be enabled in the server configuration.');
@@ -576,22 +575,11 @@ PlaylistManager.prototype = {
                 window.console.log('missing decoder for filetype '+ext+'. track '+path+' can not be transcoded.')
                 return;
             } else {
-                //try to use preferred encoder
-                for(var i=0; i<encoderPreferenceOrder.length; i++){
-                    if(availableEncoders.indexOf(encoderPreferenceOrder[i]) !== -1){
-                        if(formats.indexOf(encoderPreferenceOrder[i]) == -1){
-                            formats.push(encoderPreferenceOrder[i]);
-                            track[ext2jPlayerFormat(encoderPreferenceOrder[i])] = getTranscodePath(path,encoderPreferenceOrder[i]);
-                            window.console.log('added live transcoding '+ext+' --> (preferred) '+encoderPreferenceOrder[i]);
-                        }
-                    }
-                }
-                //use any available encoder for compability                
-                for(var i=0; i<availableEncoders.length; i++){
-                    if(formats.indexOf(availableEncoders[i]) == -1){ //if not yet added
-                        formats.push(availableEncoders[i]);
-                        track[ext2jPlayerFormat(availableEncoders[i])] = getTranscodePath(path,availableEncoders[i]);
-                        window.console.log('added live transcoding '+ext+' --> '+availableEncoders[i]);
+                for(var i=0; i<availablejPlayerFormats.length; i++){
+                    if(availableEncoders.indexOf(availablejPlayerFormats[i]) !== -1){
+                        formats.push(availablejPlayerFormats[i]);
+                        track[ext2jPlayerFormat(availablejPlayerFormats[i])] = getTranscodePath(path,availablejPlayerFormats[i]);
+                        window.console.log('added live transcoding '+ext+' --> '+availablejPlayerFormats[i]);
                     }
                 }
             }

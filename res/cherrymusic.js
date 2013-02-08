@@ -369,7 +369,7 @@ listdirclick = function(mode){
                 registerlistdirs($(currdir).parent().find('ul'));
                 registercompactlistdirs($(currdir).parent().find('ul'));
                 registermp3s($(currdir).parent().find('ul'));
-                $(currdir).siblings("ul").slideDown('slow');
+                $(currdir).siblings("ul").hide().slideDown('fast');
             };
             api(data,success,errorFunc('unable to list directory'));
         }
