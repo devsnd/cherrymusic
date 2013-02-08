@@ -42,3 +42,6 @@ cherrymusic/site.log
 /.pydevproject
 /.settings
 /.checkstyle
+
+# Sublime metafiles
+.sublime*
