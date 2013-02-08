@@ -217,12 +217,16 @@ PlaylistManager.prototype = {
         }
         var self = this;
         if (typeof self.jPlayerInstance === 'undefined'){
+            var usedjPlayerFormats = [];
+            for(var i=0; i<availablejPlayerFormats.length; i++){
+                usedjPlayerFormats.push(ext2jPlayerFormat(availablejPlayerFormats[i]));
+            }
             // Instance jPlayer
             self.jPlayerInstance = $(self.cssSelectorjPlayer).jPlayer({
                 swfPath: "res/js",
                 solution: usedSolution,
                 preload: 'metadata',
-                supplied: availablejPlayerFormats.join(),
+                supplied: "mp3,oga,m4v",
                 wmode: "window",
                 cssSelectorAncestor: self.cssSelectorJPlayerControls,
                 errorAlerts: false,
@@ -559,7 +563,7 @@ PlaylistManager.prototype = {
             wasPlayed : 0,
         }
         var formats = [];
-        if(availablejPlayerFormats.indexOf(ext2jPlayerFormat(ext)) !== -1){
+        if(availablejPlayerFormats.indexOf(ext) !== -1){
             //add natively supported path
             track[ext2jPlayerFormat(ext)] = path;
             formats.push(ext);
