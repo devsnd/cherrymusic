@@ -186,12 +186,13 @@ class HTTPHandler(object):
     def trans(self, *args):
         if not self.isAuthorized():
             raise cherrypy.HTTPRedirect(self.getBaseUrl(), 302)
-        if cherry.config.media.transcode and len(args):
+        if cherry.config.media.transcode.bool and len(args):
             newformat = args[-1][4:] #get.format
             path = os.path.sep.join(args[:-1])
             fullpath = os.path.join(cherry.config.media.basedir.str, path)
-            cherrypy.response.headers["Content-Type"] = audiotranscode.getMimeType(newformat)
-            return audiotranscode.getTranscoded(fullpath, newformat, usetmpfile=True)
+            transcoder = audiotranscode.AudioTranscode()
+            cherrypy.response.headers["Content-Type"] = audiotranscode.AudioTranscode.mimeType(newformat)
+            return transcoder.transcodeStream(fullpath, newformat)
     trans.exposed = True
     trans._cp_config = {'response.stream': True}
 
@@ -527,12 +528,16 @@ class HTTPHandler(object):
 
     def api_getconfiguration(self, value):
         clientconfigkeys = {
-            'getencoders' : audiotranscode.getEncoders(),
-            'getdecoders' : audiotranscode.getDecoders(),
             'transcodingenabled' : cherry.config.media.transcode.bool,
             'fetchalbumart' : cherry.config.media.fetch_album_art.bool,
             'isadmin' : cherrypy.session['admin'],
         }
+        if cherry.config.media.transcode.bool:
+            clientconfigkeys['getdecoders'] = self.model.transcoder.availableDecoderFormats()
+            clientconfigkeys['getencoders'] = self.model.transcoder.availableEncoderFormats()
+        else:
+            clientconfigkeys['getdecoders'] = []
+            clientconfigkeys['getencoders'] = []
         return json.dumps(clientconfigkeys)
 
 

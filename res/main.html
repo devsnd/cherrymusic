@@ -50,6 +50,11 @@
 <script type="text/javascript" src="res/js/jquery-color.js"></script>
 <!-- ui sortable -->
 <script type="text/javascript" src="res/js/jquery-ui-1.10.0.custom.min.js"></script> 
+
+<!-- cherrymusic -->
+<script type="text/javascript" src="res/js/jquery.event.move.min.js"></script>
+
+<!--swipe-->
 <script type="text/javascript" src="res/playlistmanager.js"></script>
 <script type="text/javascript" src="res/cherrymusic.js"></script>
 
@@ -428,8 +433,8 @@ PLAYLIST SAVE DIALOG OVERLAY END -->
 <!-- TABS START -->
 <div id="errormessage"></div>
 <div class="container-fluid">
-    <div class="row-fluid">
-        <div class="span6">
+    <div class="row-fluid swipe-panels">
+        <div class="span6 search-panel active-swipe">
             <!--SEARCH TAB START -->
             <div id="search">
                 <div id="searchfield">
@@ -446,7 +451,7 @@ PLAYLIST SAVE DIALOG OVERLAY END -->
             </div>
             <!--SEARCH TAB END -->
         </div>
-        <div class="span6">
+        <div class="span6 playlist-panel">
             <!-- PLAYLIST TAB START -->
             <div id="jplayer">
             

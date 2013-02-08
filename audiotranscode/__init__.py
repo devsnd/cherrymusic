@@ -2,207 +2,197 @@
 import subprocess
 import re
 import os
-from cherrymusicserver import log
-from cherrymusicserver import configuration
-import tempfile
+import time
 
-def customizeCommand(command, bitrate=192, infile=None):
-    if 'BITRATE' in command:
-        command[command.index('BITRATE')] = bitrate
-    if 'INFILE' in command:
-        command[command.index('INFILE')] = infile
-    return command
-
-Encoders = {
-    #encoders take input and write output from stdin and stout
-    'ogg' : ['oggenc', '-b','BITRATE_OGG','-'],
-    'mp3' : ['lame','-b','BITRATE_MP3','-','-'],
-    #'aac': ['faac','-o','-','-'], #doesn't work yet
-}
-
-#will sort available encoders depending on preference
-encoderPreference = ["ogg","mp3","aac"]
-
-MimeTypes = {
-    'mp3' : 'audio/mpeg',
-    'ogg' : 'audio/ogg',
-}
-
-Decoders = {
-    #filepath must be appendable!
-    'mp3'   : ['mpg123', '-w', '-'],
-    'ogg'   : ['oggdec', '-o', '-'],
-    'flac'  : ['flac', '-F','-d', '-c'],
-    'aac'   : ['faad', '-w'],        #untested
-    
-    #'fallback' : ['mplayer','-vc','null','-vo','null','-ao' 'pcm:waveheader:fast:file=-'],
-}
-
-def sortByPref(elem):
-    if elem in encoderPreference:
-        return encoderPreference.index(elem)
-    else:
-        return len(encoderPreference)
-
-def getEncoders():
-    return sorted(list(Encoders.keys()),key=sortByPref)
-    
-def getDecoders():
-    return list(Decoders.keys())
-
-
-def init():
-    unavailEnc = []
-    for k,v in Encoders.items():
-        if not programAvailable(v[0]):
-            unavailEnc.append((k,v[0]))
-        else:
-            log.d("Encoder '{}' for format '{}' was found.".format(v[0],k))
-    for enc in unavailEnc:
-        Encoders.pop(enc[0])
-        log.d("Encoder '{}' not found. Will not be able to encode {} streams".format(enc[1], enc[0]))
-    
-    unavailDec = []
-    for k,v in Decoders.items():
-        if not programAvailable(v[0]):
-            unavailDec.append((k,v[0]))
-        else:
-            log.d("Decoder '{}' for format '{}' was found.".format(v[0],k))
-    for dec in unavailDec:
-        Decoders.pop(dec[0])
-        log.d("Decoder '{}' not found. Will not be able to decode {} streams".format(dec[1],dec[0]))
-    
-def programAvailable(name):
-    try:
-        subprocess.Popen([name],stdout=devnull, stderr=devnull)
-        return True
-    except OSError:
-        return False
-
-def filetype(filepath):
-    if '.' in filepath:
-        return filepath.lower()[filepath.rindex('.')+1:]
-    return 'unknown filetype'
-
-def decode(filepath):
-    try:
-        return subprocess.Popen(Decoders[filetype(filepath)]+[filepath], stdout=subprocess.PIPE, stderr=devnull)
-    except OSError:
-        log.w("Cannot decode {}, no decoder available, trying fallback decoder!".format(filepath))
+class Transcoder(object):
+    devnull = open(os.devnull,'w')
+    MimeTypes = {
+        'mp3' : 'audio/mpeg',
+        'ogg' : 'audio/ogg',
+        'flac' : 'audio/flac',
+        'aac' : 'audio/aac',
+        'wav' : 'audio/wav',
+    }
+    def __init__(self):
+        self.command = ['']
+        
+    def available(self):
         try:
-            return subprocess.Popen(Decoders[filetype(filepath)]+[filepath], stdout=subprocess.PIPE, stderr=devnull)
+            subprocess.Popen([self.command[0]],stdout=devnull, stderr=devnull)
+            return True
         except OSError:
-            log.w("Fallback failed, cannot decode {}!".format(filepath))
-            raise
+            return False
 
-def encode(newformat, fromdecoder):
-    try:
-        enc = Encoders[newformat]
-        if 'BITRATE_OGG' in enc:
-            enc[enc.index('BITRATE_OGG')] = str(BITRATE_OGG)
-        if 'BITRATE_MP3' in enc:
-            enc[enc.index('BITRATE_MP3')] = str(BITRATE_MP3)
-        return subprocess.Popen(enc, stdin=fromdecoder.stdout, stdout=subprocess.PIPE, stderr=devnull)
-    except OSError:
-        log.w("Cannot encode to {}, no encoder available!")
-        raise
+class Encoder(Transcoder):
+    def __init__(self,filetype,command):
+        self.filetype = filetype
+        self.mimetype = Transcoder.MimeTypes[filetype]
+        self.command = command
+        
+    def encode(self, decoder_process, bitrate):
+        cmd = self.command[:]
+        if 'BITRATE' in cmd:
+            cmd[cmd.index('BITRATE')] = str(bitrate)
+        return subprocess.Popen(cmd,
+                                stdin=decoder_process.stdout,
+                                stdout=subprocess.PIPE,
+                                stderr=Transcoder.devnull
+                                )
+    
+    def __str__(self):
+        return "<Encoder type='%s' cmd='%s'>"%(self.filetype,str(' '.join(self.command)))
 
-def estimateSize(filepath, newformat):
-    return 4*1024*1024
-    
-def transcode(filepath, newformat):
-    log.i("""Transcoding file {}
-{} ---[{}]---> {}""".format(filepath,filetype(filepath),Encoders[newformat][0],newformat))
-    try:
-        fromdecoder = decode(filepath)
-        encoder = encode(newformat, fromdecoder)
-        while True:
-            data = encoder.stdout.read(TRANSCODE_BUFFER)
-            if not data:
-                break               
-            yield data
-    except OSError:
-        log.w("Transcode of file '{}' to format '{}' failed!".format(filepath,newformat))
-    finally:
-        encoder.terminate()
-        fromdecoder.terminate()
+class Decoder(Transcoder):
+    def __init__(self,filetype,command):
+        self.filetype = filetype
+        self.mimetype = Transcoder.MimeTypes[filetype]
+        self.command = command        
         
-def getTranscoded(filepath, newformat, usetmpfile=False):
-    needsTranscoding = True
-    if usetmpfile:
-        tmpfilepath = cache.createCacheFile(filepath,newformat)
-        if cache.exists(filepath,newformat):
-            with open(tmpfilepath,'rb') as f:
-                yield f.read()
-        else:
-            with open(tmpfilepath,'wb') as tmpfilew:
-                with open(tmpfilepath,'rb') as tmpfiler:
-                    for data in transcode(filepath,newformat):
-                        tmpfilew.write(data)
-                        #return as soon as enough data available
-                        if tmpfilew.tell()>tmpfiler.tell()+STREAM_BUFFER:
-                            yield tmpfiler.read(STREAM_BUFFER) 
-                    yield tmpfiler.read() #return rest of file (encoding done)
+    def decode(self, filepath):
+        cmd = self.command[:]
+        if 'INPUT' in cmd:
+            cmd[cmd.index('INPUT')] = filepath
+        return subprocess.Popen(cmd,
+                                stdout=subprocess.PIPE,
+                                stderr=Transcoder.devnull
+                                )
+        
+    def __str__(self):
+        return "<Decoder type='%s' cmd='%s'>"%(self.filetype,str(' '.join(self.command)))
 
-    else:
-        for data in transcode(filepath,newformat):
-            yield data
 
-def getMimeType(format):
-    return MimeTypes[format]
-    
-class TranscodeCache:
-    def __init__(self, maxTmpDirSizeMB = 50):
-        self.maxTmpDirSizeBytes = maxTmpDirSizeMB*1024*1024
-        self.tempdir = os.path.join(tempfile.gettempdir(),'.cherrymusic-cache')
-        if not os.path.exists(self.tempdir):
-            os.mkdir(self.tempdir)
-        self.cacheFiles = [CacheFile(os.path.join(self.tempdir,f)) for f in os.listdir(self.tempdir)]
-    
-    def getTmpFilePath(self,filepath,newformat):
-        return os.path.join(self.tempdir,self.pathToFileName(filepath,newformat))
-    
-    def exists(self,filepath,newformat):
-        exists = os.path.exists(self.getTmpFilePath(filepath,newformat)) 
-        return exists and os.path.getsize(self.getTmpFilePath(filepath,newformat))>0
+class TranscodeError(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
+class EncodeError(TranscodeError):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
+class DecodeError(TranscodeError):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
+class AudioTranscode:
+    Encoders = [
+        #encoders take input from stdin and write output to stout
+        Encoder('ogg', ['oggenc', '-b','BITRATE','-']),
+        #Encoder('ogg', ['ffmpeg', '-i', '-', '-f', 'ogg', '-acodec', 'vorbis', '-']), #doesn't work yet
+        Encoder('mp3', ['lame','-b','BITRATE','-','-']),
+        Encoder('mp3', ['ffmpeg', '-i', '-', '-f', 'mp3', '-acodec', 'libmp3lame', '-ab', 'BITRATE', '-']),
+        Encoder('aac', ['faac','-b','BITRATE','-P','-X','-o','-','-']),
+        Encoder('flac', ['flac', '--force-raw-format', '--endian=little', '--channels=2', '--bps=16', '--sample-rate=44100', '--sign=signed', '-o', '-', '-']),
+        Encoder('wav', ['cat']),
         
-    def createCacheFile(self,filepath,newformat):
-        self.checkQuotaAndDeleteOldest()
-        tmpfile = self.getTmpFilePath(filepath,newformat)
-        self.cacheFiles.append(CacheFile(tmpfile))
-        return tmpfile
+    ]
+    Decoders = [
+        #filepath must be appendable!
+        Decoder('mp3'  , ['mpg123', '-w', '-', 'INPUT']),
+        Decoder('mp3'  , ['ffmpeg', '-i', 'INPUT', '-f', 'wav', '-acodec', 'pcm_s16le', '-']),
+        Decoder('ogg'  , ['oggdec', '-Q','-b', '16', '-o', '-', 'INPUT']),
+        Decoder('ogg'  , ['ffmpeg', '-i', 'INPUT', '-f', 'wav', '-acodec', 'pcm_s16le', '-']),
+        Decoder('flac' , ['flac', '-F','-d', '-c', 'INPUT']),
+        Decoder('aac'  , ['faad', '-w', 'INPUT']), 
+        Decoder('wav'  , ['cat', 'INPUT']), 
+    ]
     
-    def pathToFileName(self,filepath,newformat):
-        return filepath.replace(os.sep,'_')+'.'+newformat
-        
-    def checkQuotaAndDeleteOldest(self):
-        while(sum(map(lambda x:x.size, self.cacheFiles)) > self.maxTmpDirSizeBytes):
-            self.cacheFiles = sorted(self.cacheFiles,key=lambda x:x.ctime)
-            self.cacheFiles[0].delete()
-            self.cacheFiles = self.cacheFiles[1:]
-        for c in self.cacheFiles:
-            c.update()
-        
-class CacheFile:
-    def __init__(self, absfilepath):
-        self.absfilepath = absfilepath
-        self.update()
+    def __init__(self,debug=False):
+        self.debug = debug
+        self.availableEncoders = list(filter(lambda x:x.available,AudioTranscode.Encoders))
+        self.availableDecoders = list(filter(lambda x:x.available,AudioTranscode.Decoders))
+        self.bitrate = {'mp3':160, 'ogg': 128, 'aac': 128}
     
-    def delete(self):
-        os.remove(self.absfilepath)
-               
-    def update(self):
+    def availableEncoderFormats(self):
+        return list(set(map(lambda x:x.filetype, self.availableEncoders)))
+        
+    def availableDecoderFormats(self):
+        return list(set(map(lambda x:x.filetype, self.availableDecoders)))
+    
+    def _filetype(filepath):
+        if '.' in filepath:
+            return filepath.lower()[filepath.rindex('.')+1:]
+    
+    def _decode(self, filepath, decoder=None):
+        if not os.path.exists(filepath):
+            filepath = os.path.abspath(filepath)
+            raise DecodeError('File not Found! Cannot decode "file" %s'%filepath)
+        filetype = AudioTranscode._filetype(filepath)
+        if not filetype in self.availableDecoderFormats():
+            raise DecodeError('No decoder available to handle filetype %s'%filetype)
+        elif not decoder:
+            for d in self.availableDecoders:
+                if d.filetype == filetype:
+                    decoder = d
+                    break
+            if self.debug:
+                print(decoder)
+        return decoder.decode(filepath)
+        
+    def _encode(self, audio_format, decoder_process, bitrate=None,encoder=None):
+        if not audio_format in self.availableEncoderFormats():
+            raise EncodeError('No encoder available to handle audio format %s'%audio_format)
+        if not bitrate:
+            bitrate = self.bitrate.get(audio_format)
+        if not bitrate:
+            bitrate = 128
+        if not encoder:
+            for e in self.availableEncoders:
+                if e.filetype == audio_format:
+                    encoder = e
+                    break
+            if self.debug:
+                print(encoder)
+        return encoder.encode(decoder_process, bitrate)
+
+    def transcode(self, in_file, out_file, bitrate=None):
+        print(out_file)
+        audioformat = AudioTranscode._filetype(out_file)
+        with open(out_file, 'wb') as fh:
+            for data in self.transcodeStream(in_file,audioformat,bitrate):
+                fh.write(data)
+            fh.close()
+
+    def transcodeStream(self, filepath, newformat,bitrate=None,encoder=None,decoder=None):
+        decoder_process = None
+        encoder_process = None
         try:
-            self.ctime = os.path.getctime(self.absfilepath)
-            self.size = os.path.getsize(self.absfilepath)
-        except OSError:
-            self.ctime = 0
-            self.size = 0
-        
-TRANSCODE_BUFFER = 1024*200
-STREAM_BUFFER = 1024*150 # < read buffer!
-BITRATE_OGG = 160
-BITRATE_MP3 = 192
-devnull = open(os.devnull,'w')
-cache = TranscodeCache()
-init()
+            decoder_process = self._decode(filepath, decoder)
+            encoder_process = self._encode(newformat, decoder_process,bitrate=bitrate,encoder=encoder)
+            while encoder_process.poll() == None:
+                data = encoder_process.stdout.read()
+                if data == None:
+                    time.sleep(0.1) #wait for new data...
+                    break               
+                yield data
+        except Exception as e:
+            #pass on exception, but clean up
+            raise e
+        finally:
+            if decoder_process and decoder_process.poll() == None:
+                if decoder_process.stderr:
+                    decoder_process.stderr.close()
+                if decoder_process.stdout:
+                    decoder_process.stdout.close()
+                if decoder_process.stdin:
+                    decoder_process.stdin.close()
+                decoder_process.terminate()
+            if encoder_process:
+                encoder_process.stdout.read()
+                encoder_process.stdout.close()
+                if encoder_process.stdin:
+                    encoder_process.stdin.close()
+                if encoder_process.stderr:
+                    encoder_process.stderr.close()
+                encoder_process.wait()
+    
+    def mimeType(self, fileExtension):
+        return AudioTranscode.mimeType(fileExtension)
+    
+    def mimeType(fileExtension):
+        return Transcoder.MimeTypes.get(fileExtension)

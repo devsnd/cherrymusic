@@ -36,7 +36,7 @@ if(['msie','safari'].indexOf(browser) != -1){
 }
 
 var availableEncoders = undefined;
-var availablejPlayerFormats = [];
+var availablejPlayerFormats = ['mp3','ogg'];
 var availableDecoders = undefined;
 var transcodingEnabled = undefined;
 var userOptions = undefined;
@@ -572,26 +572,6 @@ function showAlbumArtChangePopOver(jqobj){
     jqobj.popover({selector: jqobj.siblings('img'), title: 'Change cover art', html: true, content: '<img src="/res/img/folder.png" /><img src="/res/img/folder.png" /><img src="/res/img/folder.png" />'});
 }
 
-/***
-JPLAYER FUNCTIONS
-***/
-function setAvailableJPlayerFormats(){
-    if(availableEncoders.length == 0){
-        availablejPlayerFormats.push(ext2jPlayerFormat('mp3'));
-    } else {
-        availableEncoders = availableEncoders.sort(function(a,b){
-           var idxa = encoderPreferenceOrder.indexOf(a);
-           var idxb = encoderPreferenceOrder.indexOf(b);
-           idxa = idxa == -1 ? 1000 : idxa;
-           idxb = idxb == -1 ? 1000 : idxb;
-           return idxa-idxb;
-        });
-        for(var i=0; i<availableEncoders.length; i++){
-            availablejPlayerFormats.push(ext2jPlayerFormat(availableEncoders[i]));
-        }
-    }
-}
-
 
 /* PLAYLIST CREATION AND MANAGEMENT END*/
 
@@ -605,6 +585,8 @@ ext2jPlayerFormat = function(ext){
         case "m4a":
         case "mp4":
         case "aac": return "m4a";
+        
+        case "flac" : return "flac"
 
         case "wav": return "wav";
 
@@ -1159,6 +1141,68 @@ function sendHeartBeat(){
         errorFunc('connection to server lost'),
         true)
 }
+
+function enableMobileSwiping(){
+    var wrap = $('.swipe-panels>div');
+    var width = wrap.width();
+    var sp = $('.search-panel').get(0);
+    var pp = $('.playlist-panel').get(0);
+    //set up css rules for swiping:
+    $('body').css('overflow','hidden');
+    $('body').css('height','100%');
+    $('html').css('height','100%');
+    $('.search-panel').css('position', 'absolute');
+    $('.search-panel').css('top', '165px');
+    $('.search-panel').css('left', '0');
+    $('.playlist-panel').css('position', 'absolute');
+    $('.playlist-panel').css('top', '165px');
+    $('.playlist-panel').css('left', '100%');
+    var leftoffset = 0;
+    $('body')
+    .on('movestart', function(e) {
+        leftoffset = $('.search-panel').hasClass('active-swipe')? 0 : -100;
+        width = wrap.width();
+        // If the movestart heads off in a upwards or downwards
+        // direction, prevent it so that the browser scrolls normally.
+        if ((e.distX > e.distY && e.distX < -e.distY) ||
+            (e.distX < e.distY && e.distX > -e.distY)) {
+            e.preventDefault();
+            return;
+        }
+    })
+    .on('move', function(e){
+        var left = 100 * e.distX / width;
+        if (e.distX < 0) {
+            sp.style.left = (leftoffset+left) + '%';
+            sp.style.width = (100-leftoffset+left) + '%';
+            pp.style.left = (leftoffset+left+100)+'%';
+        }
+        if (e.distX > 0) {
+            sp.style.left = (leftoffset+left) + '%';
+            pp.style.left = (leftoffset+left+100)+'%';
+        }
+    })
+    .on('moveend', function(e) {
+       if(parseInt(pp.style.left) < 50){
+           $('.search-panel').animate({left: '-100%'});
+           $('.playlist-panel').animate({left: '0%'});
+           $('.search-panel').removeClass('active-swipe');
+           $('.playlist-panel').addClass('active-swipe');
+       } else {
+            $('.search-panel').animate({left: '0%'});
+            $('.playlist-panel').animate({left: '100%'});
+            $('.search-panel').addClass('active-swipe');
+            $('.playlist-panel').removeClass('active-swipe');
+       }
+    });
+}
+function disableMobileSwiping(){
+    $('body').off('movestart').off('move').off('moveend');
+    $('.search-panel').removeAttr('style');
+    $('.playlist-panel').removeAttr('style');
+    $('body').removeAttr('style');
+    $('html').removeAttr('style');
+}
 /***
 ON DOCUMENT READY... STEADY... GO!
 ***/
@@ -1170,7 +1214,6 @@ $(document).ready(function(){
     fetchMessageOfTheDay();
     $('#searchfield .bigbutton').click(submitsearch);
     $('.hideplaylisttab').hide();
-    executeAfterConfigLoaded.push(setAvailableJPlayerFormats);
     executeAfterConfigLoaded.push(function(){ playlistManager = new PlaylistManager() });
     //executeAfterConfigLoaded.push(restorePlaylistAndRememberPeriodically);
     loadConfig();
@@ -1211,4 +1254,5 @@ $(document).ready(function(){
                         errorFunc('Error setting option!')
         );
     });
+    //enableMobileSwiping();
 });
