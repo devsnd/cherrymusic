@@ -218,87 +218,6 @@ keyboard_shortcut_setter = function(option, optionname){
     $('#shortcut-changer input').bind('keyup',keydownhandler);
     $('html').bind('keyup',keydownhandler);
 }
-/*
-function OptionRenderer(cssselector){
-    this.cssselector = cssselector;
-    this.pretty = {
-        'custom_theme' : 'Custom colors and style',
-        'custom_theme.primary_color' : 'Primary color',
-        'custom_theme.white_on_black' : 'Use white fonts on dark background',
-        'keyboard_shortcuts' : 'keyboard shortcuts',
-        'keyboard_shortcuts.stop' : 'Stop',
-        'keyboard_shortcuts.prev' : 'previous track',
-        'keyboard_shortcuts.search' : 'search',
-        'keyboard_shortcuts.next' : 'next track',
-        'keyboard_shortcuts.play' : 'play',
-        'keyboard_shortcuts.pause' : 'pause',
-        'use_old_gui' : 'use old GUI version',
-    }
-}
-OptionRenderer.prototype = {
-    render : function(optiondict){
-        var self = this;
-        $.each(optiondict, function(optionkey, optionval) {
-            if(typeof self.pretty[optionkey] === 'undefined'){
-                $(self.cssselector).append('<h2>'+optionkey+'</h2>');
-            } else {
-                $(self.cssselector).append('<h2>'+self.pretty[optionkey]+'</h2>');
-            }
-            self.renderOption(optionkey, optionval);
-        });
-    },
-    renderOption : function(optionkey, optionval, prefix){
-        var self = this;
-        prefix = prefix || '';
-        window.console.log("parsing value "+optionkey+':'+optionval);
-        if(typeof optionval == 'boolean'){
-            self.renderOptionField(prefix+optionkey, optionval);
-        } else if(typeof optionval.value !== 'undefined'){
-            self.renderOptionField(prefix+optionkey, optionval.value);
-        } else {
-            $.each(optionval, function(suboptionkey, suboptionval) {
-                self.renderOption(suboptionkey, suboptionval, optionkey+'.');
-            });
-        }
-    },
-    renderOptionField : function(optionkey, optionval){
-        var self = this;
-        if(typeof self.pretty[optionkey] === 'undefined'){
-            var label = optionkey;
-        } else {
-            var label = self.pretty[optionkey];
-        }
-
-        var success = 'false'; //use default handlers
-        var error = 'false';
-        if(optionkey.indexOf('custom_theme') != -1){
-            success = 'reloadStylesheets';
-            error = 'function(){}';
-        }
-
-        switch(typeof optionval){
-            case "string":
-            case "number":
-                var onkeyup = [   'api({action:\'setuseroption\', value:JSON.stringify({',
-                    '\'optionkey\':$(this).attr(\'name\') ,',
-                    '\'optionval\':$(this).val()',
-                    '}) },'+success+','+error+')' ].join(" ");
-                $('#useroptions .content').append(label+'<input onkeyup="'+onkeyup+'" name="'+optionkey+'" value="'+optionval+'"/><br>');
-                break;
-            case "boolean":
-                var checked = optionval? 'checked="checked"' : '';
-                var onchange = ['api({action:\'setuseroption\', value:JSON.stringify({',
-                    '\'optionkey\':\''+optionkey+'\' ,',
-                    '\'optionval\':$(this).attr(\'checked\')==\'checked\'',
-                    '}) },'+success+','+error+')' ].join(" ");
-                $('#useroptions .content').append(label+'<input '+checked+' onchange="'+onchange+'" type="checkbox" name="'+optionkey+'" value="true"></input><br>');
-                break;
-            default:
-                window.console.log("unknown option value "+optionkey+':'+optionval);
-        }
-    },
-}
-*/
 
 function reloadStylesheets() {
     var queryString = '?reload=' + new Date().getTime();
@@ -326,7 +245,6 @@ function fastsearch(append){
         registerlistdirs($('#searchresults').find('ul'));
         registercompactlistdirs($('#searchresults').find('ul'));
         registermp3s($('#searchresults').find('ul'));
-        //search(true);
         $('#searchresults').find('ul').append('<li class="slowsearch">loading more search results...</li>');
     };
     var error = function(){
@@ -359,7 +277,6 @@ function search(append){
     return false;
 }
 function submitsearch(){
-    //fastsearch();
     search();
     return false;
 }
@@ -405,18 +322,14 @@ function renderDir(label,urlpath,dirpath){
 function renderFile(label,urlpath,dirpath){
     "use strict";
     var fullpathlabel = Mustache.render('<span class="fullpathlabel">{{fpdirpath}}</span>',{fpdirpath:dirpath});
-    //if(isPlayableAudioFile(urlpath)){
-        return Mustache.render('<a title="{{atitle}}" href="{{ahref}}" class="{{acssclass}}" path="{{apath}}">{{{afullpathlabel}}} {{alabel}}</a>', {
-                atitle : label,
-                alabel: label,
-                ahref : 'javascript:;',
-                acssclass : 'mp3file',
-                apath : urlpath,
-                afullpathlabel : fullpathlabel,
-            });//+'<a class="floatright" href="javascript:;">&uarr;DIR</a>';
-    //} else {
-    //    return '<span>'+fullpathlabel+label+'</span>';
-    //}
+    return Mustache.render('<a title="{{atitle}}" href="{{ahref}}" class="{{acssclass}}" path="{{apath}}">{{{afullpathlabel}}} {{alabel}}</a>', {
+        atitle : label,
+        alabel: label,
+        ahref : 'javascript:;',
+        acssclass : 'mp3file',
+        apath : urlpath,
+        afullpathlabel : fullpathlabel,
+    });
 }
 function renderCompact(label,filepath, filter){
     "use strict";
@@ -431,16 +344,7 @@ function ulistify(html){
     "use strict";
     return '<ul>'+html+'</ul>';
 }
-/*function isPlayableAudioFile(filePath){
-    "use strict";
-    for(var i=0; i<playableExtensions.length; i++){
-        if(endsWith( filePath.toUpperCase(),
-                     playableExtensions[i].toUpperCase())){
-            return true;
-        }
-    }
-    return false;
-}*/
+
 /***
 INTERACTION
 ***/
@@ -925,41 +829,6 @@ function fetchMessageOfTheDay(){
     api('getmotd', success, errorFunc('could not fetch message of the day'));
 }
 
-/**
-TAB FUNCTIONALITY
-**/
-/*function showTab(tabid){
-    "use strict";
-    $('div.tabs '+tabid).show();
-}
-function hideAllTabs(){
-    "use strict";
-    $('div.tabs > div').each(function(){
-            $(this).hide();
-    });
-}
-
-function initTabs() {
-    "use strict";
-    hideAllTabs();
-    showTab('#search');
-    $('div.tabs ul.tabNavigation a').click(function () {
-        $("html").scrollTop(0);
-        hideAllTabs();
-        showTab(this.hash);
-        if('#browser' === this.hash){
-            loadBrowserIfEmpty();
-        }
-        if('#search' === this.hash){
-            $('#searchform .searchinput').focus();
-        }
-        $('div.tabs ul.tabNavigation a').removeClass('selected');
-        $(this).addClass('selected');
-        return false;
-    });
-    saveOriginalTabColor();
-}*/
-
 function loadBrowserIfEmpty(){
     "use strict";
     if('' === $('#browser').html().trim()){
@@ -1034,15 +903,6 @@ function viewport() {
     }
     return { width : e[ a+'Width' ] , height : e[ a+'Height' ] }
 }
-
-/*function mobileShowSearch(){
-    $('#search').css('display','inherit');
-    $('#jplayer').css('display','none');
-}
-function mobileShowPlaylists(){
-    $('#jplayer').css('display','inherit');
-    $('#search').css('display','none');
-}*/
 
 /*****
  * UTIL
@@ -1215,14 +1075,12 @@ $(document).ready(function(){
     $('#searchfield .bigbutton').click(submitsearch);
     $('.hideplaylisttab').hide();
     executeAfterConfigLoaded.push(function(){ playlistManager = new PlaylistManager() });
-    //executeAfterConfigLoaded.push(restorePlaylistAndRememberPeriodically);
     loadConfig();
     loadUserOptions(initKeyboardshortcuts);
     //register top level directories
 	registerlistdirs($("html").get());
 	registercompactlistdirs($("html").get());
 	$('div#progressscreen').fadeOut('slow');
-    //window.setInterval("displayCurrentSong()", 1000);
     window.setInterval("resizePlaylistSlowly()",2000);
     $('#searchform .searchinput').focus();
     sendHeartBeat();

@@ -685,14 +685,6 @@ PlaylistManager.prototype = {
             self.refresh();
             window.console.log('remembering playlists periodically');
             window.setInterval("playlistManager.rememberPlaylist()",REMEMBER_PLAYLIST_INTERVAL );
-
-                /*
-                var pl = newPlaylist();
-                pl._refresh(true);
-                pl.active = true;
-                self.refresh();
-                //window.setInterval("rememberPlaylistPeriodically()",REMEMBER_PLAYLIST_INTERVAL );
-                * */
         };
         api('restoreplaylist',success,errorFunc('error restoring playlist'));
     },
