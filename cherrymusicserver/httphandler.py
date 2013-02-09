@@ -186,6 +186,7 @@ class HTTPHandler(object):
     def trans(self, *args):
         if not self.isAuthorized():
             raise cherrypy.HTTPRedirect(self.getBaseUrl(), 302)
+        cherrypy.session.release_lock()
         if cherry.config.media.transcode.bool and len(args):
             newformat = args[-1][4:] #get.format
             path = os.path.sep.join(args[:-1])
