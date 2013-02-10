@@ -1,33 +1,34 @@
 .\" Manpage for CherryMusic.
 .\" Contact us on github.com/devsnd/cherrymusic to correct errors or typos.
 
-.TH "CHERRYMUSICD" "(" "2013\-02\-05" "CherryMusic devel branch" "cherrymusicd man page"
+.TH "CHERRYMUSICD" "8" "2013\-02\-10" "CherryMusic devel branch" "cherrymusicd man page"
 
 .SH "NAME"
-cherrymusicd \- the daemon for CherryMusic, a standalone HTML5 (with Flash fallback) music streaming server based on CherryPy and jPlayer
+cherrymusicd \- the daemon for CherryMusic, see \fBcherrymusic\fP(1)
 
 .SH "SYNOPSIS"
-cherrymusicd
+cherrymusicd [OPTIONS]
 
 .SH "DESCRIPTION"
 CherryMusic can also be started as a daemon.
 
 .SH "OPTIONS"
-
-.IP "\foption\fP"
-descr.
+.\.IP "\fB-option\fP"
+Right now, cherrymusicd does not take any options.
 
 .SH "FILES"
-According to XDG Base Directory Specification, cherrymusic honors $XDG_CONFIG_HOME. If this variable is empty or not set, the configuration file is stored using the standard path:
+According to XDG Base Directory Specification, CherryMusic honors $XDG_DATA_HOME and $XDG_CONFIG_HOME. If these variables are empty or not set, files are stored using the standard path:
 
 ~/.config/cherrymusic/cherrymusic.conf
+.PP
+~/.local/share/cherrymusic
 
 .SH "SEE ALSO"
-.PP 
+.PP
 \fBcherrymusic\fP(1), \fBcherrymusic.conf\fP(5)
 
 .SH "BUGS"
-You've found a bug in CherryMusic? That's awesome. Tell us about it! You can open an issue in the issue tracker of github (github.com/devsnd/cherrymusic/issues) and we'll take care of it.
+You've found a bug in CherryMusic? That's awesome. Tell us about it! You can open an issue in the issue tracker of our github project page (github.com/devsnd/cherrymusic/issues) and we'll take care of it.
 
 .SH "AUTHORS"
 CherryMusic was created by Tom Wallroth and is currently developed together with Tilman Börner.
