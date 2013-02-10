@@ -1,36 +1,36 @@
 .\" Manpage for CherryMusic.
 .\" Contact us on github.com/devsnd/cherrymusic to correct errors or typos.
 
-.TH "CHERRYMUSIC.CONF" "5" "2013\-02\-05" "CherryMusic devel branch" "cherrymusic.conf man page"
+.TH "CHERRYMUSIC.CONF" "5" "2013\-02\-10" "CherryMusic devel branch" "cherrymusic.conf man page"
 
 .SH "NAME"
-cherrymusic.conf \- configuration file of CherryMusic, see cherrymusic(1)
+cherrymusic.conf \- configuration file of CherryMusic, see \fBcherrymusic\fP(1)
 
 .SH "SYNOPSIS"
 cherrymusic.conf
 
 .SH "DESCRIPTION"
-The cherrymusic.conf file is the configuration file used to fine tune CherryMusic server.
+The cherrymusic.conf file is the configuration file used to fine tune the CherryMusic server.
 
 .SH "OPTIONS"
 
 .IP "[media]"
 
-.IP "\fB    basedir = /path/to/your/music-collection\fP"
+.IP "\fB    basedir = /path/to/your/music\-collection\fP"
 BASEDIR specifies where the media that should be served is located. It must be the absolute path, e.g. BASEDIR=/absolute/path/to/media.
 
 Links: If your operating system supports them, you can use symlinks directly in BASEDIR. Links to directories which contain BASEDIR will be ignored, just like all links not directly in, but in sublevels of BASEDIR. This is to guard against the adverse effects of link cycles.
 
 .IP "\fB    transcode = True | False\fP"
-(Experimental!) TRANSCODE enables automatic live transcoding of the media to be able to listen to every format on every device. This requires you to have the appropriate codecs installed. Please note that transcoding will significantly increase the stress on the CPU!
+(Experimental!) "transcode" enables automatic live transcoding of the served media files to be able to listen to every format on every device. This requires you to have the appropriate encoders installed. Please note that transcoding will significantly increase the load on the CPU!
 
 .IP "\fB    fetch_album_art = True | False\fP"
-Tries to fetch the album cover from various locations in the web, if no image is found locally. By default it will be fetched from amazon. They will be shown next to folders that qualify as an album.
+This option tries to fetch the album covers from various locations in the web, if no image is found locally. By default it will be fetched from Amazon. They will be shown next to folders that qualify as an album.
 
 .IP "[search]"
 
 .IP "\fB    maxresults = NUM\fP"
-MAXRESULTS sets the maximum amount of search results to be displayed. If MAXRESULTS is set to a higher value, the search will take longer, but will also be more accurate.
+"maxresults" sets the maximum amount of search results to be displayed. If "maxresults" is set to a higher value, the search will take longer, but will also be more accurate.
 
 .IP "\fB    load_file_db_into_memory = True | False\fP"
 This will load parts of the database into memory for improved performance. This option should only be used on systems with sufficient memory, because it will hurt the performance otherwise.
@@ -38,41 +38,45 @@ This will load parts of the database into memory for improved performance. This 
 .IP "[browser]"
 
 ." .IP "\fB    pure_database_lookup = True | False\fP"
-." Only use the media database, never the filesystem, for content lookups in browser and search. Useful if the media files reside on an external hard drive or behind a slow network connection.
+." If this option is enabled, CherryMusic will only use the media database \-\- never the filesystem \-\- for content lookups in the file browser and search function. This can be useful if the media files reside on an external hard drive or behind a slow network connection.
 
 .IP "\fB    maxshowfiles = NUM\fP"
-MAXSHOWFILES specifies how many files and folders should be shown at the same time. E.g. if you open a folder with more than MAXSHOWFILES, the files will be grouped according to the first letter in their name. 100 is a good value, as a cd can have up to 99 tracks.
+"maxshowfiles" specifies how many files and folders should be shown at the same time. E.g. if you open a folder with more than MAXSHOWFILES, the files will be grouped according to the first letter in their name. 100 is a good value, as a CD can have up to 99 tracks.
 
 .IP "[server]"
 
 .IP "\fB    port = PORTNUM\fP"
-The port the server will listen to.
+This specifies the port the server will listen on.
 
 .IP "\fB    localhost_only = True | False\fP"
-When localhost_only is set to true, the server will not be visible in the network and only play music on the same computer it is running on.
+When "localhost_only" is set to "True", the server will not be visible in the network and only play music on the same computer it is running on.
 
 .IP "\fB    localhost_auto_login = True | False\fP"
-When localhost_auto_login is set to "True", the server will not ask for credentials when using it locally. The user will be automatically logged in as admin.
+When "localhost_auto_login" is set to "True", the server will not ask for credentials when connecting locally. The user will be automatically logged in as admin.
 
 .IP "\fB    permit_remote_admin_login = True | False\fP"
-When permit_remote_admin_login is set to "False", admin users may only log in from the computer cherrymusic is currently running on. This can improve security.
+When "permit_remote_admin_login" is set to "False", admin users may only log in from the computer CherryMusic is currently running on. This can improve security.
 
 .IP "\fB    keep_session_in_ram = True | False\fP"
-Will keep the user sessions in RAM instead of a file in the configuration directory. This means, that any unsaved playlists will be lost when the server is restarted.
+If enabled, this option will keep the user sessions in RAM instead of a file in the configuration directory. This means, that any unsaved playlists will be lost when the server is restarted.
 
 .IP "\fB    ssl_enabled = True | False\fP"
-The following options allow you to use cherrymusic with https encryption. If ssl_enabled is set to False, all other ssl options will be ommited.
+This option allows you to use CherryMusic with HTTPS encryption. To enable this option you also have to specify "ssl_port", "ssl_certificate" and "ssl_private_key". If this option is set to "False", all other SSL specific options will be ommited.
 
 .IP "\fB    ssl_port = SSLPORTNUM\fP"
+This sets the port that will listen to SSL encrypted requests. If "ssl_enabled" is set to "True", all unencrypted HTTP requests will be redirected to this port. To take effect, this option needs "ssl_enabled" to be set to "True".
+
 .IP "\fB    ssl_certificate = /path/to/server.crt\fP"
+This is the path to the SSL certificate that CherryMusic will use for SSL encryption. To take effect, this option needs "ssl_enabled" to be set to "True".
+
 .IP "\fB    ssl_private_key = /path/to/server.key\fP"
-The port that will listen to SSL encrypted requests. If ssl_enabled is set to True, all unencrypted HTTP requests will be redirected to this port.
+This is the path to the SSL key that CherryMusic will use for SSL encryption. To take effect, this option needs "ssl_enabled" to be set to "True".
 
 .IP "\fB    dynamic_dns_address = ADDR\fP"
-ex: dynamic_dns_address = http://example.dyndns.com/cm If you have set up a dyndns/no-ip/etc, you can insert the address that points to cherrymusic here. This will enable you to use extra features like the opensearch plugin for your browser, even when your ip changes frequently.
+If you want to use your dynamic DNS address \-\- as provided by dynamic DNS services in the internet \-\- you can insert the address that points to CherryMusic here. This will enable you to use extra features like the opensearch plugin for your browser, even when your IP changes frequently. Example: "dynamic_dns_address = http://example.dyndns.com/cm"
 
 .SH "FILES"
-According to XDG Base Directory Specification, cherrymusic honors $XDG_CONFIG_HOME. If this variable is empty or not set, the configuration file is stored using the standard path:
+According to XDG Base Directory Specification, CherryMusic honors $XDG_CONFIG_HOME. If this variable is empty or not set, the configuration file is stored using the standard path:
 
 ~/.config/cherrymusic/cherrymusic.conf
 
@@ -80,7 +84,7 @@ According to XDG Base Directory Specification, cherrymusic honors $XDG_CONFIG_HO
 \fBcherrymusic\fP(1), \fBcherrymusicd\fP(8)
 
 .SH "BUGS"
-You've found a bug in CherryMusic? That's awesome. Tell us about it! You can open an issue in the issue tracker of github (github.com/devsnd/cherrymusic/issues) and we'll take care of it.
+You've found a bug in CherryMusic? That's awesome. Tell us about it! You can open an issue in the issue tracker of our github project page (github.com/devsnd/cherrymusic/issues) and we'll take care of it.
 
 .SH "AUTHORS"
 CherryMusic was created by Tom Wallroth and is currently developed together with Tilman Börner.
