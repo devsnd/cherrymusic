@@ -1,10 +1,10 @@
 .\" Manpage for CherryMusic.
 .\" Contact us on github.com/devsnd/cherrymusic to correct errors or typos.
 
-.TH "CHERRYMUSIC" "1" "2013\-02\-04" "CherryMusic devel branch" "CherryMusic man page"
+.TH "CHERRYMUSIC" "1" "2013\-02\-10" "CherryMusic devel branch" "CherryMusic man page"
 
 .SH "NAME"
-cherrymusic \- a standalone HTML5 (with Flash fallback) music streaming server written in python.
+cherrymusic \- a standalone HTML5 (with Flash fallback) music streaming server written in Python
 
 .SH "SYNOPSIS"
 cherrymusic [OPTIONS]
@@ -20,34 +20,34 @@ Show a help message and exit.
 Update the media database. PATH must start with basedir or be relative to basedir.
 
 .IP "\fB\-\-newconfig\fP"
-Creates a new config file in your home directory, e.g. ~/.conifg/cherrymusic/config.new
+Creates a new config file in your home directory, e.g. "~/.conifg/cherrymusic/config.new".
 
 .IP "\fB\-\-dropfiledb\fP"
-Clears the file database. This might be necesary after a version jump.
+Clears the file database. This might be necessary after a version jump.
 
 .IP "\fB\-\-download\-stagger\fP"
-Downloads the python module "stagger", an ID3-tag library, into the folder that also contains CherryMusic. It is used for indexing your music collection more precisely. (Should only be used when not installed using a package manager!)
+Downloads the Python module "stagger" \-\- an ID3-tag library \-\- into the directory that also contains CherryMusic. It is used for indexing your music collection more precisely. IMPORTANT: This should only be used when CherryMusic was not installed via your system's package management!
 
 .SH "FILES"
-According to XDG Base Directory Specification, cherrymusic honors $XDG_DATA_HOME and $XDG_CONFIG_HOME. If these variables are empty or not set, files are stored using the standard path:
+According to XDG Base Directory Specification, CherryMusic honors $XDG_DATA_HOME and $XDG_CONFIG_HOME. If these variables are empty or not set, files are stored using the standard path:
 
-~/.config/cherrymusic/config
+~/.config/cherrymusic/cherrymusic.conf
 .PP
 ~/.local/share/cherrymusic
 
 .SH "SEE ALSO"
-\fBcherrymusic.conf(5)\fP, \fBcherrymusicd\fP(8)
+\fBcherrymusic.conf\fP(5), \fBcherrymusicd\fP(8)
 
 .SH "BUGS"
 On client:
 .PP
-CherryMusic might not work when Flashblock is enabled. Workaround: add the server ip to your flashblock whitelist.
+CherryMusic might not work when Flashblock is enabled. Workaround: add the server ip to your Flashblock whitelist.
 
 On server:
 .PP
-Currently there is a bug in CherryPy, the server framework cherrymusic was built upon, that prevents serving files that have non-ascii characters in their name. A bug report with a description of a workaround has already been filed and I hope it will be resolved upstream soon.
+Currently there is a bug in CherryPy \-\- the server framework CherryMusic was built upon \-\- that prevents serving files that have non\-ASCII characters in their name. A bug report with a description of a workaround has already been filed upstream and I hope it will be resolved soon.
 
-You've found another bug in CherryMusic? That's awesome. Tell us about it! You can open an issue in the issue tracker of github (github.com/devsnd/cherrymusic/issues) and we'll take care of it.
+You've found another bug in CherryMusic? That's awesome. Tell us about it! You can open an issue in the issue tracker of our github project page (github.com/devsnd/cherrymusic/issues) and we'll take care of it.
 
 .SH "THANKS"
 To:
@@ -57,7 +57,7 @@ The CherryPy team for a great application server
 .IP o
 HappyWorm for the HTML5 audio playback
 .IP o
-Christian Maximilian Blasius for the logo!
+Christian Maximilian Blasius for the logo
 .IP o
 Bootstrap
 .IP o
