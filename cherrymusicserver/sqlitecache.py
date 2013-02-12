@@ -176,6 +176,7 @@ class SQLiteCache(object):
         return list(map(str.lower, words))
 
     def fetchFileIds(self, terms, maxFileIdsPerTerm, mode):
+        assert '' not in terms, "terms must not contain ''"
         resultlist = []
 
         for term in terms:
