@@ -31,6 +31,7 @@
 import os
 import re
 import sqlite3
+import sys
 import traceback
 
 from collections import deque
@@ -52,8 +53,8 @@ keepInRam = False
 NORMAL_FILE_SEARCH_LIMIT = 400
 FAST_FILE_SEARCH_LIMIT = 20
 
-if debug:
-    log.level(log.DEBUG)
+#if debug:
+#    log.level(log.DEBUG)
 
 
 
@@ -174,21 +175,25 @@ class SQLiteCache(object):
         words = re.findall('(\w+|[^\s\w]+)', searchterm.replace('_', ' ').replace('%',' '))
         return list(map(str.lower, words))
 
-
     def fetchFileIds(self, terms, maxFileIdsPerTerm, mode):
         resultlist = []
-        
-        terms[-1] = terms[-1]+'%'
+
         for term in terms:
+            tprefix, tlast = term[:-1], term[-1]
             query = '''SELECT search.frowid FROM dictionary JOIN search ON search.drowid = dictionary.rowid WHERE '''
-            where = ''' dictionary.word LIKE ? '''
             limit = ' LIMIT 0, ' + str(maxFileIdsPerTerm) #TODO add maximum db results as configuration parameter
-            #log.d('Search term: ' + term)
+            if sys.maxunicode <= ord(tlast):
+                where = ''' dictionary.word LIKE ? '''
+                params = (term + '%',)
+            else:
+                where = ''' (dictionary.word >= ? AND dictionary.word < ?) '''
+                params = (term, tprefix + chr(1 + ord(tlast)))
             sql = query + where + limit
             if debug:
-                log.d('Query used: ' + sql)
-            #print(self.conn.execute('EXPLAIN QUERY PLAN '+sql, (term+'%',)).fetchall())
-            self.db.execute(sql, (term,))
+                log.d('Search term: %r', term)
+                log.d('Query used: %r, %r', sql, params)
+            #print(self.conn.execute('EXPLAIN QUERY PLAN ' + sql, params).fetchall())
+            self.db.execute(sql, params)
             resultlist += self.db.fetchall()
         return resultlist
 
@@ -240,7 +245,7 @@ class SQLiteCache(object):
             if debug:
                 log.d('bestresults')
                 log.d(bestresults)
-            
+
             if mode == 'normal':
                 #capping bestresults, because there can be more fileids than maxresults
                 bestresults = bestresults[:min(len(bestresults), NORMAL_FILE_SEARCH_LIMIT)]
