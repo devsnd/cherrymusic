@@ -34,10 +34,21 @@ body {
     color: #999999;
     font-size: 11px;
 }
+/*scroll to top element order:*/
+.scroll-to-top{
+    position: fixed;
+    z-index: 1;
+    bottom: 0;
+}
 
 .bottom-corners{
     border-bottom-right-radius:0 !important;
     border-bottom-left-radius:0 !important; 
+}
+
+.top-corners{
+    border-top-right-radius:0 !important;
+    border-top-left-radius:0 !important; 
 }
 
 /* ALBUM ART CHANGER */
