@@ -47,6 +47,7 @@ from cherrymusicserver import httphandler
 from cherrymusicserver import util
 from cherrymusicserver import pathprovider
 from cherrymusicserver import log
+import cherrymusicserver.setup
 
 config = None
 VERSION = "0.23.0"
@@ -60,7 +61,9 @@ LONG_DESCRIPTION = """CherryMusic is a music streaming
 
 class CherryMusic:
 
-    def __init__(self, update=None, createNewConfig=False, dropfiledb=False):
+    def __init__(self, update=None, createNewConfig=False, dropfiledb=False, setup=False):
+        if setup:
+            cherrymusicserver.setup.configureAndStartCherryPy()
         if createNewConfig:
             newconfigpath = pathprovider.configurationFile() + '.new'
             configuration.write_to_file(configuration.from_defaults(), newconfigpath)

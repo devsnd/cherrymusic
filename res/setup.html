@@ -43,6 +43,7 @@
 <script type="text/javascript" src="res/js/jquery.jplayer.inspector.js"></script>
 <script type="text/javascript" src="res/js/mustache-0.7.0.js"></script>
 <script type="text/javascript" src="res/js/jquery-color.js"></script>
+<script type="text/javascript" src="res/js/jquery.validate.min.js"></script>
 <!-- ui sortable -->
 <script type="text/javascript" src="res/js/jquery-ui-1.10.0.custom.min.js"></script> 
 
@@ -53,6 +54,58 @@
 <script src="res/bootstrap/js/bootstrap-modal.js"></script>
 <script src="res/bootstrap/js/bootstrap-modalmanager.js"></script>
 <link href="res/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
+<script>
+<!-- 
+function submitConfiguration(){
+    var conf = {
+        'media.basedir':        $('#media-basedir').val(),
+        'server.port'  :        $('#server-port').val(),
+        'server.permit_remote_admin_login'  : ($('#server-permit_remote_admin_login').attr('checked')!==undefined),
+        'server.localhost_auto_login'       : ($('#server-localhost_auto_login').attr('checked')!==undefined),
+        'server.localhost_only'             : ($('#server-localhost_only').attr('checked')!==undefined),
+        'server.fetch_album_art'            : ($('#server-fetch_album_art').attr('checked')!==undefined),
+        'media.transcode'                   : ($('#media-transcode').attr('checked')!==undefined),
+    }
+    $.ajax({
+        url: '/saveconfig',
+        context: $(this),
+        type: 'GET',
+        data: {'values':JSON.stringify(conf)},
+        success: function(){},
+        error: function(){},
+        complete: function(){},
+    });
+    $(this).blur();
+    return false;
+}
+function renderFeature(name, installed, id, msg){
+    var labelClass = installed ? 'label-success' : 'label-important';
+    var labelText = installed ? 'installed' : 'not installed';
+    return ['<div class="control-group">',
+     '   <label class="control-label" for="'+id+'">'+name+'</label>',
+     '   <div class="controls">',
+     '       <div id="'+id+'"><span class="label '+labelClass+'">'+labelText+'</span> '+msg+'</div>',
+     '   </div>',
+     '</div>'].join('');
+
+}
+$(function(){
+    $.ajax({
+        url: '/getfeatures',
+        context: $(this),
+        type: 'GET',
+        success: function(data){
+            var features = $.parseJSON(data);
+            $.each(features, function(idx, val){
+                $('#feature-check').append(renderFeature(val[0], val[1], val[2], val[3]));
+            });
+        },
+        error: function(){},
+        complete: function(){},
+    });
+});
+-->
+</script>
 </head>
 <body>
     <div class="container">
@@ -248,39 +301,11 @@
                             <button class="btn" data-dismiss="modal" aria-hidden="true">Okeydonkey!</button>
                         </div>
                     </div>
-                    <div class="control-group">  
-                        <label class="control-label" for="has-imagemagick">ImageMagick</label>  
-                        <div class="controls">
-                            <div id="has-imagemagick"><span class="label label-important">not installed</span> leads to missing feature: resizing album covers</div>
-                        </div>
-                    </div>
-                    <div class="control-group">  
-                        <label class="control-label" for="has-lame">lame</label>  
-                        <div class="controls">
-                            <div id="has-lame"><span class="label label-success">installed</span> enables encoding and decoding of MP3s</div>
-                        </div>
-                    </div>
-                    <div class="control-group">  
-                        <label class="control-label" for="has-vorbis-tools">vorbis-tools</label>  
-                        <div class="controls">
-                            <div id="has-vorbis-tools"><span class="label label-important">not installed</span> leads to missing feature: encoding and decoding of OGGs</div>
-                        </div>
-                    </div>
-                    <div class="control-group">  
-                        <label class="control-label" for="has-flac">flac</label>  
-                        <div class="controls">
-                            <div id="has-flac"><span class="label label-important">not installed</span> leads to missing feature: encoding and decoding of FLACs</div>
-                        </div>
-                    </div>
-                    <div class="control-group">  
-                        <label class="control-label" for="has-mplayer">mplayer</label>  
-                        <div class="controls">
-                            <div id="has-mplayer"><span class="label">not installed</span> unneeded extra feature: decoding OGG, MP3, FLAC, WMA and AAC</div>
-                        </div>
+                    <div id="feature-check">
                     </div>
                 </fieldset>
                     <div class="form-actions">  
-                        <button type="submit" class="btn btn-primary">Save Configuration and start CherryMusic</button>  
+                        <button onclick="submitConfiguration(); return false;" type="submit" class="btn btn-primary">Save Configuration and start CherryMusic</button>  
                     </div>  
             </form>
         </div>
