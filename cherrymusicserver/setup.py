@@ -28,24 +28,34 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
-from cherrymusicserver import pathprovider
 import os
 import cherrypy
 import json
 import subprocess
 
+from cherrymusicserver import pathprovider
+from cherrymusicserver import configuration as cfg
+
 class SetupHandler:
     def index(self):
         return pathprovider.readRes('res/setup.html')
     index.exposed = True
-    
-    def saveconfig(self,values):
-        print(json.loads(values))
-        #check config validity
-        #write config file
-        validAndConfigFileWritten = True
+
+    def saveconfig(self, values):
+        config = cfg.from_defaults()
+        try:
+            customcfg = cfg.from_dict(json.loads(values))
+            config += customcfg
+        except Exception as e:
+            print(repr(e))      # whole exception
+            print(e.args)       # error message (args[0]), etc.
+            validAndConfigFileWritten = False
+        else:
+            cfg.write_to_file(config, pathprovider.configurationFile())
+            validAndConfigFileWritten = True
         if validAndConfigFileWritten:
             cherrypy.engine.exit()
+
     saveconfig.exposed = True
     
     def mockFeatureCheck(self):

@@ -63,7 +63,7 @@ function submitConfiguration(){
         'server.permit_remote_admin_login'  : ($('#server-permit_remote_admin_login').attr('checked')!==undefined),
         'server.localhost_auto_login'       : ($('#server-localhost_auto_login').attr('checked')!==undefined),
         'server.localhost_only'             : ($('#server-localhost_only').attr('checked')!==undefined),
-        'server.fetch_album_art'            : ($('#server-fetch_album_art').attr('checked')!==undefined),
+        'media.fetch_album_art'             : ($('#media-fetch_album_art').attr('checked')!==undefined),
         'media.transcode'                   : ($('#media-transcode').attr('checked')!==undefined),
     }
     $.ajax({
@@ -234,9 +234,9 @@ $(function(){
                 <fieldset>
                     <legend>Extras</legend>
                     <div class="control-group">  
-                        <label class="control-label" for="server-fetch_album_art">Fetch Album Cover Art from Web</label>  
+                        <label class="control-label" for="media-fetch_album_art">Fetch Album Cover Art from Web</label>  
                         <div class="controls">  
-                            <input type="checkbox" checked="checked" class="input-xlarge" id="server-fetch_album_art">
+                            <input type="checkbox" checked="checked" class="input-xlarge" id="media-fetch_album_art">
                             <p class="help-block">Automatic fetch album cover art from the web <a href="#serverAlbumArtModal" role="button" class="btn btn-mini" data-toggle="modal">?</a></p>                           
                             <div id="serverAlbumArtModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="serverAlbumArtModalLabel" aria-hidden="true">
                                 <div class="modal-header">

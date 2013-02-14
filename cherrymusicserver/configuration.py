@@ -381,7 +381,8 @@ class Key(object):
                                 ^                       # start of string
                                 %(name)s                # one name
                                 (?: %(sep)s %(name)s )* # more names with leading separators (non-grouping)
-                                $                       # nothing else'''
+                                $                       # nothing else
+                                '''
                                 % {'name': _name,
                                    'sep': '[' + _namesep + ']'},
                                 re.VERBOSE)
