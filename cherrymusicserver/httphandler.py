@@ -401,12 +401,15 @@ class HTTPHandler(object):
         return self.jsonrenderer.render(self.model.listdir(dirtorender))
 
     def api_search(self, value):
+        jsonresults = '[]'
         if not value.strip():
-            return self.jsonrenderer.render([MusicEntry(path="if you're looking for nothing, you'll be getting nothing",repr="")])
-        with Performance('processing whole search request'):
-            searchresults = self.model.search(value.strip())
-            with Performance('rendering search results as json'):
-                return self.jsonrenderer.render(searchresults)
+            jsonresults = self.jsonrenderer.render([MusicEntry(path="if you're looking for nothing, you'll be getting nothing",repr="")])
+        else:
+            with Performance('processing whole search request'):
+                searchresults = self.model.search(value.strip())
+                with Performance('rendering search results as json'):
+                    jsonresults = self.jsonrenderer.render(searchresults)
+        return jsonresults
 
     def api_rememberplaylist(self, value):
         cherrypy.session['playlist'] = value
