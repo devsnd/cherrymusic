@@ -335,6 +335,8 @@ div#progressscreen{
 }
 .listdir:hover{
 	background-color: #bbbbbb;
+    background-image: linear-gradient(to bottom, #ededed, #ffffff);
+    text-decoration: none;
 }
 .listdir img{
     background-image: url("/res/img/folder.png");
@@ -347,6 +349,11 @@ div#progressscreen{
 }
 .listdir{
     height: 80px;
+    border-color: #CCCCCC #aaaaaa #aaaaaa #CCCCCC;
+    border-style: solid;
+    border-width: 1px 1px 1px 6px;
+    border-radius: 10px 0 0 10px;
+    background-image: linear-gradient(to bottom, #ffffff, #ededed)
 }
 .listdir-name{
     display: table-cell;
@@ -369,6 +376,13 @@ div#progressscreen{
 
 li.fileinlist{
 	background-color: #fafafa;
+    margin: 0;
+    padding: 0;
+}
+.mp3file{
+    border-color: #eeeeee #cccccc #cccccc #eeeeee;
+    border-style: solid;
+    border-width: 1px;
 }
 
 li.fileinlist a{
@@ -380,14 +394,16 @@ li.fileinlist a{
 
 .mp3file:hover{
 	color: #ffffff;
-	background-color: #004260;
+    background-color: #004260;
+}
+.mp3file:hover>.fullpathlabel{
+	color: #ffffff;
 }
 
 .fullpathlabel{
-	display: block;
-	font-size: 80%;
     display: block;
 	font-size: 80%;
+    color: #3A7187;
 }
 
 .helptext{
@@ -395,15 +411,21 @@ li.fileinlist a{
     font-size: 9px;
 }
 .addAllToPlaylist{
-    text-decoration: none;
-	background-color: #555555;
-	color: #ffffff;
+    background-color: #666666;
+    border-color: #BBBBBB #333333 #333333 #BBBBBB;
+    border-radius: 8px 8px 8px 8px;
+    border-style: solid;
+    border-width: 1px;
+    color: #FFFFFF;
     display: block;
     margin: 5px 0;
     padding: 10px;
+    text-decoration: none;
 }
 .addAllToPlaylist:hover{
+    text-decoration: none;
 	background-color: #aaaaaa;
+    border-color: #333333 #BBBBBB #BBBBBB #333333;
 }
 
 #shortcut-changer{
