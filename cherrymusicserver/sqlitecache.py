@@ -251,18 +251,15 @@ class SQLiteCache(object):
                 #capping bestresults, because there can be more fileids than maxresults
                 bestresults = bestresults[:min(len(bestresults), NORMAL_FILE_SEARCH_LIMIT)]
                 with Performance('querying fullpaths for %s fileIds' % len(bestresults)):
-                    for fileidtuple in bestresults:
-                        results.append(self.musicEntryFromFileId(fileidtuple[0]))
+                    fileids = [fileidtuple[0] for fileidtuple in bestresults]
+                    results += self.musicEntryFromFileIds(fileids)
             else:
                 # we can't yet throw away the most of the results, because the results
                 # would only become less, when searching for fileonly or dironly
                 with Performance('querying fullpaths for %s fileIds, files only' % len(bestresults)):
-                    for fileidtuple in bestresults:
-                        musicentry = self.musicEntryFromFileId(fileidtuple[0])
-                        if musicentry.dir == (mode == 'dironly'):
-                            results.append(musicentry)
-                        if len(bestresults) >= NORMAL_FILE_SEARCH_LIMIT:
-                            break
+                    fileids = [fileidtuple[0] for fileidtuple in bestresults]
+                    results += self.musicEntryFromFileIds(fileids,mode=mode)
+                    
             if debug:
                 log.d('resulting paths')
                 log.d(results)
@@ -277,25 +274,56 @@ class SQLiteCache(object):
                         return []
         return list(map(lambda f: f.basename, self.fetch_child_files(targetdir)))
 
-
-    def musicEntryFromFileId(self, filerowid):
+    def musicEntryFromFileIds(self, filerowids, incompleteMusicEntries={},mode='normal'):
+        #incompleteMusicEntries maps db parentid to incomplete musicEntry
+        musicEntries = [] #result list
+        
         if self.file_db_in_memory():
             db = self.file_db_mem.db
         else:
             db = self.conn
-        path = ''
-        parent = None
-        isdirectory = None
-        while(not parent == -1):
-            #print(self.conn.execute('''EXPLAIN QUERY PLAN SELECT parent, filename, filetype FROM files WHERE rowid=? LIMIT 0,1''', (filerowid,)).fetchall())
-            cursor = db.cursor()
-            cursor.execute('''SELECT parent, filename, filetype, isdir FROM files WHERE rowid=? LIMIT 0,1''', (filerowid,))
-            parent, filename, fileext, isdir = cursor.fetchone()
-            if isdirectory == None:
-                isdirectory = bool(isdir)
-            path = os.path.join(filename + fileext, path)
-            filerowid = parent
-        return MusicEntry(os.path.dirname(path), dir=isdirectory)
+    
+        cursor = db.cursor()
+        sqlquery = '''  SELECT rowid, parent, filename, filetype, isdir
+                        FROM files WHERE rowid IN ('''+', '.join(map(str,filerowids))+''') '''
+            
+        if not incompleteMusicEntries:
+            #only filter 1st recursion level
+            if mode != 'normal':
+                sqlquery += ' AND isdir = '+str(int('dironly'==mode))
+            sqlquery += ' LIMIT 0,'+str(NORMAL_FILE_SEARCH_LIMIT)
+        
+        tempIncompleteEntries = {}
+        for rowid, parent, filename, fileext, isdir in cursor.execute(sqlquery).fetchall():
+            path = filename + fileext
+            #check if fetched row is parent of existing entry
+            if rowid in incompleteMusicEntries:
+                #remove item and map to new parent id
+                entries = incompleteMusicEntries.pop(rowid)
+                for entry in entries:
+                    entry.path = os.path.join(path,entry.path)
+            else:
+                #rowid is not parent of any entry, so make a new one
+                entries = [MusicEntry(path, dir=bool(isdir))]
+            
+            if parent == -1:
+                #put entries in result list if they've reached top level
+                musicEntries += entries
+            else:
+                #otherwise map parent id to dict
+                tempIncompleteEntries[parent] = tempIncompleteEntries.get(parent,[]) + entries
+        
+        for k, v in tempIncompleteEntries.items():
+            incompleteMusicEntries[k] = v
+        
+        if incompleteMusicEntries:
+            #recurse for all incomplete entries
+            musicEntries += self.musicEntryFromFileIds(
+                                incompleteMusicEntries.keys(),
+                                incompleteMusicEntries = incompleteMusicEntries,
+                                mode = mode
+                            )
+        return musicEntries
 
     def fullpath(self, filerowid):
         """DEPRECATED, musicEntryFromFileId is used instead"""
