@@ -723,16 +723,7 @@ function logout(){
 /***
 ADMIN PANEL
 ***/
-function toggleAdminPanel(){
-    "use strict";
-    var panel = $('#adminpanel');
-    if(panel.is(":visible")){
-        panel.slideUp();
-    } else {
-        updateUserList();
-        panel.slideDown();
-    }
-}
+
 function updateUserList(){
     "use strict";
     var success = function(data){
@@ -1085,7 +1076,7 @@ $(document).ready(function(){
     $('#searchform .searchinput').focus();
     sendHeartBeat();
     window.setInterval("sendHeartBeat()",HEARTBEAT_INTERVAL_MS);
-    $('#adminpanel').on('show', function (e) {
+    $('#adminpanel').on('shown', function (e) {
         updateUserList();
     });
     $('#saveplaylistmodal').on('shown',function(){
