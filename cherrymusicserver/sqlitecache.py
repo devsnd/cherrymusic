@@ -52,6 +52,7 @@ keepInRam = False
 
 NORMAL_FILE_SEARCH_LIMIT = 400
 FAST_FILE_SEARCH_LIMIT = 20
+SEARCHTERM_SPLIT_REGEX = re.compile('(\w+|[^\s\w]+)')
 
 #if debug:
 #    log.level(log.DEBUG)
@@ -172,7 +173,7 @@ class SQLiteCache(object):
 
     @classmethod
     def searchterms(cls, searchterm):
-        words = re.findall('(\w+|[^\s\w]+)', searchterm.replace('_', ' ').replace('%',' '))
+        words = SEARCHTERM_SPLIT_REGEX.findall(searchterm.replace('_', ' ').replace('%',' '))
         return list(map(str.lower, words))
 
     def fetchFileIds(self, terms, maxFileIdsPerTerm, mode):
@@ -212,9 +213,9 @@ class SQLiteCache(object):
         elif value.endswith(' !d'):
             mode = 'dironly'
             value = value[:-3]
+        
         terms = SQLiteCache.searchterms(value)
         with Performance('searching for a maximum of %s files' % str(NORMAL_FILE_SEARCH_LIMIT * len(terms))):
-            self.db = self.conn.cursor()
             if debug:
                 log.d('searchterms')
                 log.d(terms)
@@ -225,32 +226,33 @@ class SQLiteCache(object):
             with Performance('file id fetching'):
                 fileids = self.fetchFileIds(terms, maxFileIdsPerTerm, mode)
 
-            if debug:
-                log.d('fileids')
-                log.d(fileids)
-            for fileid in fileids:
-                if fileid in resultfileids:
-                    resultfileids[fileid] += 1
-                else:
-                    resultfileids[fileid] = 1
-            if debug:
-                log.d('all file ids')
-                log.d(resultfileids)
-            #sort items by occurences and only return maxresults
-            sortedresults = sorted(resultfileids.items(), key=itemgetter(1), reverse=True)
-            #sortedresults = sortedresults[:min(len(resultfileids),maxresults)]
-            if debug:
-                log.d('sortedresults')
-                log.d(sortedresults)
-            bestresults = list(map(itemgetter(0), sortedresults))
-            if debug:
-                log.d('bestresults')
-                log.d(bestresults)
+            with Performance('sorting results by fileid occurences'):
+                if debug:
+                    log.d('fileids')
+                    log.d(fileids)
+                for fileid in fileids:
+                    if fileid in resultfileids:
+                        resultfileids[fileid] += 1
+                    else:
+                        resultfileids[fileid] = 1
+                if debug:
+                    log.d('all file ids')
+                    log.d(resultfileids)
+                #sort items by occurences and only return maxresults
+                sortedresults = sorted(resultfileids.items(), key=itemgetter(1), reverse=True)
+                #sortedresults = sortedresults[:min(len(resultfileids),maxresults)]
+                if debug:
+                    log.d('sortedresults')
+                    log.d(sortedresults)
+                bestresults = list(map(itemgetter(0), sortedresults))
+                if debug:
+                    log.d('bestresults')
+                    log.d(bestresults)
 
             if mode == 'normal':
-                #capping bestresults, because there can be more fileids than maxresults
-                bestresults = bestresults[:min(len(bestresults), NORMAL_FILE_SEARCH_LIMIT)]
                 with Performance('querying fullpaths for %s fileIds' % len(bestresults)):
+                    #capping bestresults, because there can be more fileids than maxresults
+                    bestresults = bestresults[:min(len(bestresults), NORMAL_FILE_SEARCH_LIMIT)]
                     fileids = [fileidtuple[0] for fileidtuple in bestresults]
                     results += self.musicEntryFromFileIds(fileids)
             else:
