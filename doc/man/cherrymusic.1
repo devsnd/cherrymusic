@@ -28,6 +28,9 @@ Clears the file database. This might be necessary after a version jump.
 .IP "\fB\-\-download\-stagger\fP"
 Downloads the Python module "stagger" \-\- an ID3-tag library \-\- into the directory that also contains CherryMusic. It is used for indexing your music collection more precisely. IMPORTANT: This should only be used when CherryMusic was not installed via your system's package management!
 
+.IP "\fB\-\-setup\fP"
+If invoked with this switch, CherryMusic will walk you through the basic configuration setup in your browser on first startup. Use this if you just want to get things running without going through the configuration file yourself. CherryMusic will ask you about the most important options and configure everything for you. Note that if you want to enable more advanced features, you still need to edit the configuration file yourself. Please see \fBcherrymusic.conf\fP(5).
+
 .SH "FILES"
 According to XDG Base Directory Specification, CherryMusic honors $XDG_DATA_HOME and $XDG_CONFIG_HOME. If these variables are empty or not set, files are stored using the standard path:
 
