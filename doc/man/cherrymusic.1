@@ -46,6 +46,8 @@ On client:
 .PP
 CherryMusic might not work when Flashblock is enabled. Workaround: add the server ip to your Flashblock whitelist.
 
+Currently, ogg files are not played in the Midori web browser. Since Midori falsely reports mp3 support, a workaround was added that relies on the Flash fallback to play mp3 files. Using Flash, there is no ogg support. This, however, is not a problem with CherryMusic, but with Midori and needs to be fixed upstream.
+
 On server:
 .PP
 Currently there is a bug in CherryPy \-\- the server framework CherryMusic was built upon \-\- that prevents serving files that have non\-ASCII characters in their name. A bug report with a description of a workaround has already been filed upstream and I hope it will be resolved soon.
