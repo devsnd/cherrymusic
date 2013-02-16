@@ -44,17 +44,21 @@ class SetupHandler:
     def saveconfig(self, values):
         config = cfg.from_defaults()
         try:
+            if not os.path.exists(config.media.basedir.str):
+                raise Exception('media.basedir')
             customcfg = cfg.from_dict(json.loads(values))
             config += customcfg
         except Exception as e:
             print(repr(e))      # whole exception
             print(e.args)       # error message (args[0]), etc.
             validAndConfigFileWritten = False
+            raise cherrypy.HTTPError(400) #bad request
         else:
             cfg.write_to_file(config, pathprovider.configurationFile())
             validAndConfigFileWritten = True
         if validAndConfigFileWritten:
-            cherrypy.engine.exit()
+            cherrypy.engine.exit() #server shuts down slowly
+            return '' #so request should still reach client...
 
     saveconfig.exposed = True
     
