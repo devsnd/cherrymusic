@@ -286,6 +286,31 @@ def property_to_tuple(prop):
     return _PropTuple(*args)
 
 
+def update_errors(target, update):
+    '''Return a tuple of all errors updating the Configuration `target` with
+     `update` would generate. Tuple elements are objects with the attributes
+     `key`, `value`, `msg`, `detail`, specifying the error at hand.
+
+     It is intended that these will be actual exception objects with the same
+     attributes, once proper exception classes are introduced.'''
+    if not isinstance(target, Configuration):
+        raise TypeError('target must be a Configuration (is %s)' % (type(target),))
+    if not isinstance(update, Property):
+        raise TypeError('update must be a Property (is %s)' % (type(update),))
+    return tuple(_get_config_update_errors(target, update))
+
+
+def _get_config_update_errors(targetcfg, update):
+    targetcfg = from_dict(to_dict(targetcfg))     # copy targetcfg
+    for proptuple in to_list(update):
+        try:
+            targetcfg += Property(*proptuple)
+        except (ConfigError, KeyError, ValueError, TypeError) as e:
+            yield _ErrorObject(proptuple.name, proptuple.value, e.args[0], repr(e))
+
+_ErrorObject = namedtuple('ErrorObject', 'key value msg detail')
+
+
 def _property_to_dict(prop):
     d = {}
     for key in Property._attributes():
@@ -1360,7 +1385,7 @@ class Configuration(Property):
                 raise ConfigKeyError(key.str)
             if self._create_mode:
                 return self._properties.setdefault(key, Configuration(key.str, parent=self))
-            raise
+            raise KeyError('configuration has no key %r' % (key.str,))
 
 
     def _set(self, key, value):

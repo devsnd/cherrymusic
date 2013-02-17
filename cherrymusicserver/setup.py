@@ -43,22 +43,35 @@ class SetupHandler:
 
     def saveconfig(self, values):
         config = cfg.from_defaults()
+        errors = []
+        badkeys = {}
+        success = False
+
         try:
-            if not os.path.exists(config.media.basedir.str):
-                raise Exception('media.basedir')
             customcfg = cfg.from_dict(json.loads(values))
-            config += customcfg
         except Exception as e:
-            print(repr(e))      # whole exception
-            print(e.args)       # error message (args[0]), etc.
-            validAndConfigFileWritten = False
-            raise cherrypy.HTTPError(400) #bad request
+            # a dict key violates config naming rules or values is not a dict
+            # == we got sent bad data
+            # exceptions not useful yet for automatic processing
+            errors.append(str(e))
         else:
-            cfg.write_to_file(config, pathprovider.configurationFile())
-            validAndConfigFileWritten = True
-        if validAndConfigFileWritten:
-            cherrypy.engine.exit() #server shuts down slowly
-            return '' #so request should still reach client...
+            try:
+                if not os.path.exists(customcfg.media.basedir.str):
+                    badkeys['media.basedir'] = 'does not exist'
+                    raise Exception('media.basedir')
+                config += customcfg
+            except:
+                for e in cfg.update_errors(config, customcfg):
+                    print(e.key, e.value, e.msg, e.detail)  # error info
+                    badkeys[e.key] = e.msg
+            else:
+                cfg.write_to_file(config, pathprovider.configurationFile())
+                success = True
+        if not success:
+            # TODO stuff with errors and badkeys
+            raise cherrypy.HTTPError(400)               # bad request
+        cherrypy.engine.exit()  # server shuts down slowly
+        return ''  # so request should still reach client...
 
     saveconfig.exposed = True
     
