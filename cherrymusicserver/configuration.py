@@ -393,7 +393,7 @@ class Key(object):
     '''A hierarchically structured name for something. Letters, numbers and
     the underscore are legal characters; only letters are allowed for the first
     character. Use a '.' to delimit hierarchical components. The empty name is
-    allowed. In equality comparisons, case is ignored.'''
+    allowed (None defaults to ''). In equality comparisons, case is ignored.'''
 
     _name_leadchars = 'a-zA-Z'
     _name_nonleadchars = '0-9_'
@@ -547,8 +547,13 @@ class Property(object):
 
     **validity** (final)
 
-    A 'validity' string can be used as a further method to control which values
-    can be set. That string, if non-empty, is taken as a regular expression that
+    A str or a callable to be used as a further method to control which values
+    can be set.
+
+    The callable will be passed the value as an argument. If it returns something
+    that looks False, an error will be raised.
+
+    A string, if non-empty, is taken as a regular expression that
     must match the whole str(ingified) value for the value to be legal. ('^' and
     '$' are implied to enclose the validity string.)
 
@@ -846,15 +851,22 @@ class Property(object):
 
 
     def _validate_single_value(self, value, validity):
+        if isinstance(validity, str):
+            return self._validate_by_regex(value, validity)
+        if validity(value):
+            return value
+        raise ValueError("invalid value (%r): doesn't match requirement set by %r (%r)" % (value, validity.__name__, validity.__doc__))
+
+    def _validate_by_regex(self, value, regex):
         testvalue = '' if value is None else str(value).strip()
-        testexpr = validity
+        testexpr = regex
         testexpr = testexpr.strip().lstrip('^').rstrip('$').strip()
         testexpr = '^' + testexpr + '$' if testexpr else ''
 
         if not re.match(testexpr, testvalue):
             raise ValueError("invalid value (%r): doesn't match validity requirement %r"
                              " (testexpr=%r, teststring=%r)"
-                             % (value, validity, testexpr, testvalue))
+                             % (value, regex, testexpr, testvalue))
 
         return value.strip() if isinstance(value, str) else value
 
