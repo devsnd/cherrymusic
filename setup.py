@@ -49,6 +49,6 @@ setup(
         }
     ],
     #data required by the declared packages
-    data_files=listFilesRec('res',shareFolder)+listFilesRec('themes',shareFolder)
+    data_files=listFilesRec('res',shareFolder)
 )
     
