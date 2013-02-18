@@ -499,7 +499,7 @@ class SQLiteCache(object):
         necesary changes.'''
 
         log.i('running full update...')
-
+        self.create_and_alter_tables()
         try:
             self.update_db_recursive(cherry.config.media.basedir.str, skipfirst=True)
         except:
