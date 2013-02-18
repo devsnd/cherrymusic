@@ -30,26 +30,68 @@
 -->
 <html>
 <head>
-<link href="theme/login.css?nocache" rel="stylesheet" type="text/css" />
+<meta content='width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;' name='viewport' />
+<link href="res/login.css?nocache" rel="stylesheet" type="text/css" />
 <style>
 <!--
-#login{
-    width: 400px !important;
-}
+html,body{
+        margin: 0;
+        padding: 0;
+        top: 0;
+        left: 0;
+        height: 99%;
+        width: 100%;
+    }
+    .cm{
+        text-shadow: 1px 1px 1px #fff, -1px -1px 1px #fff;
+    }
+    #login{
+        height: 100%;
+        display: table;
+        width: 350px;
+    }
+    #login .credentials{
+        position:absolute;
+        bottom:0;
+        left:0;
+    }
+    #login .credentials input{
+        width: 100%;
+        font-size: 150%;
+    }
+    #login .logo{
+        background-image: url("res/cherry_music_web_notext.png");
+        background-repeat: no-repeat;
+        position:relative;
+        height: 100%;
+        width: 100%;
+        max-height: 480px;
+        background-position: 50% 0;
+    }
+    .bgwhite{
+        background-color: #fff;
+        font-family: sans-serif;
+        font-size: 12px;
+    }
 -->
 </style>
 </head>
 <body OnLoad="document.loginform.username.focus();">
 <div id="login">
-<img class="cm" src="res/cherry_music_web_notext.png" />
-<span class="cm">CherryMusic</span>
-Welcome to CherryMusic!<br><br>As this seems to be the first time you started the server, you can now create an admin user. You can create more users inside the admin panel (on the top left corner), once you're logged in.<br><br>
-<form method="post" action="" name="loginform">
-Username:<br><input type="text" name="username" /><br>
-Password:<br><input type="password" name="password" /><br>
-<input type="submit" name="login" value="create admin user" />
-</form>
-<a class="fomori" href="http://www.fomori.org">visit fomori.org</a>
+    <div class="logo">
+        <div class="credentials">
+            <span class="cm">CherryMusic</span>
+            <form method="post" action="" name="loginform">
+            Username:<br><input type="text" name="username" /><br>
+            Password:<br><input type="password" name="password" /><br>
+            <input type="submit" name="login" value="create admin user" />
+            </form>
+             <span class="bgwhite">
+                Welcome to CherryMusic!<br><br>As this seems to be the first time you started the server, you can now create an admin user. You can create more users inside the admin panel (on the top left corner), once you're logged in.<br><br>
+            </span>
+            <a class="fomori" href="http://www.fomori.org">visit fomori.org</a>
+        </div>
+    </div>
 </div>
 </body>
 </html>
