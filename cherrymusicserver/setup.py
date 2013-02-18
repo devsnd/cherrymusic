@@ -37,6 +37,7 @@ import threading
 from cherrymusicserver import pathprovider
 from cherrymusicserver import configuration as cfg
 
+
 class SetupHandler:
     def index(self):
         return pathprovider.readRes('res/setup.html')
@@ -48,35 +49,33 @@ class SetupHandler:
         badkeys = {}
         success = False
 
+        with cfg.extend(config):
+            config.media.basedir.validity = lambda f: os.path.isabs(f) and os.path.exists(f) and os.path.isdir(f)
+
         try:
             customcfg = cfg.from_dict(json.loads(values))
         except Exception as e:
             # a dict key violates config naming rules or values is not a dict
             # == we got sent bad data
-            # exceptions not useful yet for automatic processing
             errors.append(str(e))
         else:
             try:
                 config += customcfg
             except:
                 for e in cfg.update_errors(config, customcfg):
-                    #print(e.key, e.value, e.msg, e.detail)  # error info
                     badkeys[e.key] = e.msg
-                    if not os.path.exists(customcfg.media.basedir.str):
-                        badkeys['media.basedir'] = 'does not exist'
             else:
                 cfg.write_to_file(config, pathprovider.configurationFile())
                 success = True
         if not success:
-            # TODO stuff with errors and badkeys
-            return json.dumps({"status":"error", 'fields':list(map(str,badkeys.keys()))})
+            return json.dumps({"status": "error", 'fields': list(badkeys)})
         #kill server in a second
         threading.Timer(1, lambda: cherrypy.engine.exit()).start()
         # so request should still reach client...
-        return json.dumps({"status":"success"})
+        return json.dumps({"status": "success"})
 
     saveconfig.exposed = True
-    
+
     def mockFeatureCheck(self):
         import random
         return bool(random.random()-0.5>0)
