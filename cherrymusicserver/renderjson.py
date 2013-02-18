@@ -37,7 +37,10 @@ import json
 
 import cherrymusicserver as cherry
 from cherrymusicserver import util, pathprovider
-from urllib.parse import quote
+try:
+    from urllib.parse import quote
+except ImportError:
+    from backport.urllib.parse import quote
 
 class JSON(object):
 

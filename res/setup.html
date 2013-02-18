@@ -111,6 +111,7 @@ function reloadIfReady(newip){
             window.setTimeout("reloadIfReady('"+newip+"')", 1000);
         },
         error: function(jqXHR){
+            window.console.log(jqXHR);
             if(jqXHR.status == 404){
                 //cherrymusic doesn't have a ping call, so 404 means alive
                 window.location.href = newip

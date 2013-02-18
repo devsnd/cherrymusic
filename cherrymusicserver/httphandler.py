@@ -36,7 +36,16 @@ import os #shouldn't have to list any folder in the future!
 import json
 import cherrypy
 import codecs
-from urllib.parse import unquote
+try:
+    from urllib.parse import unquote
+except ImportError:
+    from backport.urllib.parse import unquote
+try:
+    from urllib import parse
+except ImportError:
+    from backport.urllib import parse
+
+
 import audiotranscode
 
 from cherrymusicserver import renderjson
@@ -52,8 +61,6 @@ from cherrymusicserver.util import Performance
 from cherrymusicserver import util
 from cherrymusicserver import useroptiondb
 import time
-
-from urllib import parse
 
 debug = True
 

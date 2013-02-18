@@ -32,7 +32,10 @@ import os
 import sqlite3
 from cherrymusicserver import log
 from cherrymusicserver.cherrymodel import MusicEntry
-from urllib.parse import unquote
+try:
+    from urllib.parse import unquote
+except ImportError:
+    from backport.urllib.parse import unquote
 
 class PlaylistDB:
     def __init__(self, PLAYLISTDBFILE):

@@ -29,6 +29,7 @@
 #
 
 import cmbootstrap
+from backport import input
 
 try:
     import cherrypy
@@ -61,13 +62,7 @@ try:
 	import argparse
 except ImportError:
 	#python 3.1 workaround, can be dropped once 3.2 is in debian.
-	import optparse as argparse
-	argparse.ArgumentParser = argparse.OptionParser
-	argparse.ArgumentParser.add_argument = argparse.ArgumentParser.add_option
-	argparse.ArgumentParser.__parse_args__ = argparse.ArgumentParser.parse_args
-	def parseargs(self):
-		return self.__parse_args__()[0]
-	argparse.ArgumentParser.parse_args = parseargs
+	from backport import argparse
     #end of workaround
 
 parser = argparse.ArgumentParser(description='''CherryMusic Server

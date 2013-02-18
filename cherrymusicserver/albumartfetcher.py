@@ -1,7 +1,10 @@
 #!/usr/bin/python3
 
-import urllib.request
-import urllib.parse
+try:
+    import urllib.request
+    import urllib.parse
+except ImportError:
+    import backport.urllib as urllib
 import os.path
 import codecs
 import re
