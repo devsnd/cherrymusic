@@ -47,8 +47,7 @@ setup(
                 ],
     #startup script
     scripts = ['cherrymusic','cherrymusicd'],
-    console = ['cherrymusic'],
-    windows = [
+    console = [
         {
             "icon_resources": [(1, "res/favicon.ico")],
             "script":'cherrymusic'
