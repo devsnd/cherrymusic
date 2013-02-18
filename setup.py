@@ -19,6 +19,8 @@ def listFilesRec(crawlpath, installpath):
 def module(foldername):
     ret = [foldername]
     for i in os.listdir(foldername):
+        if i == '__pycache__':
+            continue
         subfolder = os.path.join(foldername, i)
         if os.path.isdir(subfolder):
             ret += module(subfolder)
@@ -26,7 +28,7 @@ def module(foldername):
     return ret
 
 shareFolder = os.path.join('share',pathprovider.sharedFolderName)
-
+                
 setup( 
     name = "CherryMusic",
     version = cherrymusicserver.VERSION,
@@ -37,14 +39,7 @@ setup(
     url = "http://www.fomori.org/cherrymusic/",
     license = 'GPL',
     install_requires=["CherryPy >= 3.2.2"],
-    packages = [
-                module('cherrymusicserver'),
-                module('audioread'),
-                module('audiotranscode'),
-                module('unidecode'),
-                module('cmbootstrap'),
-                module('backport')
-                ],
+    packages = module('cherrymusicserver')+module('audioread')+module('audiotranscode')+module('unidecode')+module('cmbootstrap')+module('backport'),
     #startup script
     scripts = ['cherrymusic','cherrymusicd'],
     console = [
