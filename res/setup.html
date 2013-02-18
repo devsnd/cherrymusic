@@ -43,7 +43,6 @@
 <script type="text/javascript" src="res/js/jquery.jplayer.inspector.js"></script>
 <script type="text/javascript" src="res/js/mustache-0.7.0.js"></script>
 <script type="text/javascript" src="res/js/jquery-color.js"></script>
-<script type="text/javascript" src="res/js/jquery.validate.min.js"></script>
 <!-- ui sortable -->
 <script type="text/javascript" src="res/js/jquery-ui-1.10.0.custom.min.js"></script> 
 
@@ -69,15 +68,62 @@ function submitConfiguration(){
     $.ajax({
         url: '/saveconfig',
         context: $(this),
-        type: 'GET',
+        type: 'POST',
         data: {'values':JSON.stringify(conf)},
-        success: function(){},
+        success: function(data){
+            var response = $.parseJSON(data);
+            if(response.status == 'success'){
+                $('#serverRestartModal').modal({
+                    backdrop: 'static',
+                    keyboard: false,
+                });
+                reloadIfReady('http://'+window.location.hostname+':'+conf['server.port']);
+            } else {
+                
+                    var selector = '#'+response.fields[0].replace('.','-');
+                    $('html,body').animate(
+                        {
+                            scrollTop: $(selector).offset().top - 40
+                        },
+                        'slow',
+                        function(){
+                            $(selector).focus();
+                        }
+                    );
+
+            }
+        },
         error: function(){},
         complete: function(){},
     });
     $(this).blur();
     return false;
 }
+
+function reloadIfReady(newip){
+     $.ajax({
+        url: newip+'/ping',
+        context: $(this),
+        type: 'POST',
+        timeout: 900,
+        success: function(){
+            //setup server dead, but cherrymusic not up yet
+            window.setTimeout("reloadIfReady('"+newip+"')", 1000);
+        },
+        error: function(jqXHR){
+            if(jqXHR.status == 404){
+                //cherrymusic doesn't have a ping call, so 404 means alive
+                window.location.href = newip
+            } else {
+                //if it responds to ping, setup server is still alive
+                //on same port as cherrymusic
+                window.setTimeout("reloadIfReady('"+newip+"')", 1000);
+            }
+        },
+        complete: function(){},
+    });
+}
+
 function renderFeature(name, installed, id, msg){
     var labelClass = installed ? 'label-success' : 'label-important';
     var labelText = installed ? 'installed' : 'not installed';
@@ -90,10 +136,11 @@ function renderFeature(name, installed, id, msg){
 
 }
 $(function(){
+    $('#configurationForm').submit(submitConfiguration);
     $.ajax({
         url: '/getfeatures',
         context: $(this),
-        type: 'GET',
+        type: 'POST',
         success: function(data){
             var features = $.parseJSON(data);
             $.each(features, function(idx, val){
@@ -108,16 +155,28 @@ $(function(){
 </script>
 </head>
 <body>
+    <div id="serverRestartModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="serverRestartModalLabel" aria-hidden="true">
+        <div class="modal-header">
+            <h3 id="serverRestartModalLabel">Setup completed!</h3>
+        </div>
+        <div class="modal-body">
+            <p>CherryMusic is saving the configuration and preparing the first start.</p>
+            <img src="res/cherrymusic_loader.gif" style="position: relative; opacity: 0.3; margin: 0px 50%; left: -40px;"/>
+            <p></p>
+        </div>
+        <div class="modal-footer">
+        </div>
+    </div>
     <div class="container">
         <h1>CherryMusic Setup<img src="res/favicon32.png"/></h1>
         <div class="row-fluid">
-            <form class="form-horizontal">  
+            <form class="form-horizontal" id="configurationForm">  
                 <fieldset>  
                     <legend>Basic Setup</legend>  
                     <div class="control-group">  
                         <label class="control-label" for="media-basedir">Media base directory</label>  
                         <div class="controls">  
-                            <input type="text" class="input-xlarge" id="media-basedir">
+                            <input type="text" class="input-xlarge" id="media-basedir"  pattern="(/.*)|([A-Za-z]:\\.*)" required>
                             <p class="help-block">The absolute path where your music is located. <a href="#baseDirModal" role="button" class="btn btn-mini" data-toggle="modal">?</a></p>                           
                             <div id="baseDirModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="baseDirModalLabel" aria-hidden="true">
                                 <div class="modal-header">
@@ -140,7 +199,7 @@ $(function(){
                     <div class="control-group">  
                         <label class="control-label" for="server-port">Server Port</label>  
                         <div class="controls">  
-                            <input type="number" class="input-xlarge" id="server-port">
+                            <input type="number" class="input-xlarge" id="server-port" pattern="[0-6]?[0-9]{0,4}" required>
                             <p class="help-block">This specifies the port on which CherryMusic will listen <a href="#serverPortModal" role="button" class="btn btn-mini" data-toggle="modal">?</a></p>                           
                             <div id="serverPortModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="serverPortModalLabel" aria-hidden="true">
                                 <div class="modal-header">

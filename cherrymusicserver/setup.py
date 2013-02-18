@@ -32,6 +32,7 @@ import os
 import cherrypy
 import json
 import subprocess
+import threading
 
 from cherrymusicserver import pathprovider
 from cherrymusicserver import configuration as cfg
@@ -56,22 +57,23 @@ class SetupHandler:
             errors.append(str(e))
         else:
             try:
-                if not os.path.exists(customcfg.media.basedir.str):
-                    badkeys['media.basedir'] = 'does not exist'
-                    raise Exception('media.basedir')
                 config += customcfg
             except:
                 for e in cfg.update_errors(config, customcfg):
-                    print(e.key, e.value, e.msg, e.detail)  # error info
+                    #print(e.key, e.value, e.msg, e.detail)  # error info
                     badkeys[e.key] = e.msg
+                    if not os.path.exists(customcfg.media.basedir.str):
+                        badkeys['media.basedir'] = 'does not exist'
             else:
                 cfg.write_to_file(config, pathprovider.configurationFile())
                 success = True
         if not success:
             # TODO stuff with errors and badkeys
-            raise cherrypy.HTTPError(400)               # bad request
-        cherrypy.engine.exit()  # server shuts down slowly
-        return ''  # so request should still reach client...
+            return json.dumps({"status":"error", 'fields':list(map(str,badkeys.keys()))})
+        #kill server in a second
+        threading.Timer(1, lambda: cherrypy.engine.exit()).start()
+        # so request should still reach client...
+        return json.dumps({"status":"success"})
 
     saveconfig.exposed = True
     
@@ -107,6 +109,10 @@ class SetupHandler:
         #self.checkFeature(featurelist, 'mplayer')
         return json.dumps(featurelist)
     getfeatures.exposed = True
+    
+    def ping(self):
+        return "pong"
+    ping.exposed = True
     
 class Feature:
     def __init__(self, command):
