@@ -2,6 +2,10 @@ from distutils.core import setup
 import os
 import cherrymusicserver
 from cherrymusicserver import pathprovider
+try:
+    import py2exe
+except ImportError:
+    pass
 
 def listFilesRec(crawlpath, installpath):
     filesperfolder = []
@@ -11,6 +15,15 @@ def listFilesRec(crawlpath, installpath):
             files += [os.path.join(r,name)]
         filesperfolder += [(os.path.join(installpath,r),files)]
     return filesperfolder
+
+def module(foldername):
+    ret = [foldername]
+    for i in os.listdir(foldername):
+        subfolder = os.path.join(foldername, i)
+        if os.path.isdir(subfolder):
+            ret += module(subfolder)
+            ret += [subfolder.replace(os.sep,'.')]
+    return ret
 
 shareFolder = os.path.join('share',pathprovider.sharedFolderName)
 
@@ -24,10 +37,24 @@ setup(
     url = "http://www.fomori.org/cherrymusic/",
     license = 'GPL',
     install_requires=["CherryPy >= 3.2.2"],
-    packages = ['cherrymusicserver','cherrymusicserver.test','audioread','audiotranscode','unidecode','cmbootstrap','backport'],
+    packages = [
+                module('cherrymusicserver'),
+                module('audioread'),
+                module('audiotranscode'),
+                module('unidecode'),
+                module('cmbootstrap'),
+                module('backport')
+                ],
     #startup script
     scripts = ['cherrymusic','cherrymusicd'],
+    console = ['cherrymusic'],
+    windows = [
+        {
+            "icon_resources": [(1, "res/favicon.ico")],
+            "script":'cherrymusic'
+        }
+    ],
     #data required by the declared packages
-    data_files=listFilesRec('res',shareFolder)+listFilesRec('themes',shareFolder)
+    data_files=listFilesRec('res',shareFolder)
 )
     
