@@ -449,6 +449,8 @@ class Key(object):
     def __bool__(self):
         return bool(self._fullname.replace(self._namesep, ''))
 
+    __nonzero__ = __bool__  # python 2 compatibility
+
     def __len__(self):
         return self._fullname.count(self._namesep) + 1 if self else 0
 
@@ -702,7 +704,7 @@ class Property(object):
                     or self.hidden is not None
                     or self.desc
                     )
-
+    __nonzero__ = __bool__  # python 2 compatibility
 
     def __int__(self):
         return self.int
@@ -1131,7 +1133,7 @@ class Configuration(Property):
                  parent=None):
         self.__key = Key(name)
         self._parent = parent
-        super(__class__, self).__init__(name, value, type, validity, readonly, hidden, desc)
+        super(self.__class__, self).__init__(name, value, type, validity, readonly, hidden, desc)
         self._properties = OrderedDict()
         self._create = False
 
@@ -1188,7 +1190,7 @@ class Configuration(Property):
     @util.Property
     def validity():     #@NoSelf
         def fget(self):
-            return super(__class__, self).validity
+            return super(self.__class__, self).validity
 
         def fset(self, newval):
             if self._create_mode:
@@ -1206,7 +1208,7 @@ class Configuration(Property):
     @util.Property
     def type():     #@NoSelf
         def fget(self):
-            return super(__class__, self).type
+            return super(self.__class__, self).type
 
         def fset(self, newval):
             if self._create_mode:
@@ -1262,7 +1264,7 @@ class Configuration(Property):
     def __eq__(self, other):
         if not isinstance(other, Configuration):
             return False
-        if not super(__class__, self).__eq__(other):
+        if not super(self.__class__, self).__eq__(other):
             return False
         if not len(self) == len(other):
             return False
@@ -1309,15 +1311,15 @@ class Configuration(Property):
 
 
     def __bool__(self):
-        return super(__class__, self).__bool__() or len(self._properties) > 0
-
+        return super(self.__class__, self).__bool__() or len(self._properties) > 0
+    __nonzero__ = __bool__  # python 2 compatibility
 
     def __repr__(self):
         return repr(to_dict(self))
 
 
     def __str__(self):
-        sup = super(__class__, self).__str__()
+        sup = super(self.__class__, self).__str__()
         if len(self):
             sup = sup[:-1] + '(+)]'
         return sup
@@ -1327,26 +1329,26 @@ class Configuration(Property):
         try:
             return self._get(Key(name))
         except ConfigKeyError:  # fallback for when name in self._reserved()
-            return super(__class__, self).__getitem__(name)
+            return super(self.__class__, self).__getitem__(name)
 
 
     def __setitem__(self, name, value):
         try:
             return self._set(Key(name), value)
         except ConfigKeyError:
-            return super(__class__, self).__setitem__(name, value)
+            return super(self.__class__, self).__setitem__(name, value)
 
 
     def __delitem__(self, name):
         try:
             self._del(Key(name))
         except ConfigKeyError:
-            return super(__class__, self).__delitem__(name)
+            return super(self.__class__, self).__delitem__(name)
 
 
     def __getattr__(self, name):
         if name.startswith('_') or name in self._reserved():
-            return super(__class__, self).__getattribute__(name)
+            return super(self.__class__, self).__getattribute__(name)
         try:
             return self._get_local(Key(name))
         except KeyError:
@@ -1355,7 +1357,7 @@ class Configuration(Property):
 
     def __setattr__(self, name, value):
         if name.startswith('_') or name in self._reserved():
-            return super(__class__, self).__setattr__(name, value)
+            return super(self.__class__, self).__setattr__(name, value)
         try:
             self._set_local(Key(name), value)
         except KeyError:
@@ -1364,7 +1366,7 @@ class Configuration(Property):
 
     def __delattr__(self, name):
         if name.startswith('_') or name in self._reserved():
-            return super(__class__, self).__delattr__(name)
+            return super(self.__class__, self).__delattr__(name)
         self._del_local(Key(name))
 
     @property
@@ -1373,7 +1375,7 @@ class Configuration(Property):
 
 
     def _update(self, other):
-        super(__class__, self)._update(other)
+        super(self.__class__, self)._update(other)
         if not isinstance(other, Configuration):
             return
         self.readonly = None    # super()_update might have set readonly to true
@@ -1472,7 +1474,7 @@ class TransformError(Exception):
         self._value = val
         self._default = default
         self._cause = cause
-        super(__class__, self).__init__(self._msg)
+        super(self.__class__, self).__init__(self._msg)
 
     @property
     def msg(self):
