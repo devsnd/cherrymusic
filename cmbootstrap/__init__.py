@@ -71,9 +71,6 @@ class DependencyInstaller:
     
     def dl(self,url,target):
          with open(target, 'wb') as f:
-            print(urllib)
-            print(urllib.request)
-            print(urllib.request.urlopen)
             urlhandler = urllib.request.urlopen(urllib.request.Request(url))
             f.write(urlhandler.read())
         
