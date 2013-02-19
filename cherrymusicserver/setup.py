@@ -49,8 +49,8 @@ class SetupHandler:
         badkeys = {}
         success = False
 
-        with cfg.extend(config):
-            config.media.basedir.validity = lambda f: os.path.isabs(f) and os.path.exists(f) and os.path.isdir(f)
+        with cfg.create() as bsdcheck:
+            bsdcheck.media.basedir.validity = lambda x: x is None or os.path.isabs(x) and os.path.isdir(x)
 
         try:
             customcfg = cfg.from_dict(json.loads(values))
@@ -61,8 +61,11 @@ class SetupHandler:
         else:
             try:
                 config += customcfg
+                bsdcheck += customcfg.media.basedir
             except:
                 for e in cfg.update_errors(config, customcfg):
+                    badkeys[e.key] = e.msg
+                for e in cfg.update_errors(bsdcheck, customcfg.media.basedir):
                     badkeys[e.key] = e.msg
             else:
                 cfg.write_to_file(config, pathprovider.configurationFile())
