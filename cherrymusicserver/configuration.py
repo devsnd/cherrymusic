@@ -254,6 +254,8 @@ def to_list(cfg):
     if not isinstance(cfg, Configuration):  # cfg is a plain Property
         return [property_to_tuple(cfg)]
     l = [property_to_tuple(p) for p in cfg._recursive_properties() if p.value != None or p.desc]
+    if cfg.value != None or cfg.desc:
+        l.append(property_to_tuple(cfg))
     return l
 
 
