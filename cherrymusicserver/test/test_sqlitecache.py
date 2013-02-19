@@ -466,7 +466,7 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
                   and parameters[0][0] == undeletable.uid:
                     self.__class__.exceptcount += 1
                     raise Exception("boom goes the dynamite")
-                return super().execute(stmt, *parameters)
+                return super(__class__, self).execute(stmt, *parameters)
 
 
         # SETUP
