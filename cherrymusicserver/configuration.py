@@ -441,10 +441,6 @@ class Key(object):
         return key.lower()
 
     def __init__(self, name=''):
-        if name:
-            name+=''    #python 2.6+ compability hack
-                        #ensures unicode encoding because of
-                        #unicode_literals import
         if isinstance(name, Key):
             name = name._fullname
         elif name is None:
@@ -452,6 +448,9 @@ class Key(object):
         elif not isinstance(name, type('')):
             raise TypeError("'name' must be str, is %s (%s)" % (name.__class__.__name__, name))
         elif name:
+            name+=''    #python 2.6+ compability hack
+                        #ensures unicode encoding because of
+                        #unicode_literals import
             self._validate_complexkey(name)
         self._fullname = name
 
