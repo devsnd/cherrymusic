@@ -1,2 +1,2 @@
-from . import parse
-from . import request
+import urllib2 as request
+parse = request
