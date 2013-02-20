@@ -315,10 +315,29 @@ function renderDir(label,urlpath,dirpath){
     if(dirpath.indexOf('/')>0){
         var searchterms = encodeURIComponent(JSON.stringify({'directory' : dirpath}))
         //rendereddir += '<div class="changealbumart-button" onclick="showAlbumArtChangePopOver($(this))"></div>';
-        rendereddir += '<img src="/api/fetchalbumart/'+searchterms+'" width="80" height="80" />';
+        rendereddir += renderCoverArtFetcher(searchterms);
     }
     return rendereddir+'<div class="listdir-name-wrap"><span class="listdir-name">'+dirpath+'<span></div></a>';
 }
+function renderCoverArtFetcher(searchterms){
+    return ['<div class="albumart-display unloaded" search-data="'+searchterms+'">',
+    '<img src="/res/img/folder.png" width="80" height="80" />',
+    '</div>'].join('');
+}
+
+function albumArtLoader(){
+    var winpos = $(window).height()+$(window).scrollTop();
+    $('.albumart-display.unloaded').each(
+        function(idx){
+            if($(this).position().top < winpos){
+               $(this).find('img').attr('src', '/api/fetchalbumart/'+$(this).attr('search-data'));
+               $(this).removeClass('unloaded');
+            }
+        }
+    );
+}
+    
+
 function renderFile(label,urlpath,dirpath){
     "use strict";
     var fullpathlabel = Mustache.render('<span class="fullpathlabel">{{fpdirpath}}</span>',{fpdirpath:dirpath});
@@ -370,6 +389,7 @@ listdirclick = function(mode){
                 registercompactlistdirs($(currdir).parent().find('ul'));
                 registermp3s($(currdir).parent().find('ul'));
                 $(currdir).siblings("ul").hide().slideDown('fast');
+                albumArtLoader();
             };
             api(data,success,errorFunc('unable to list directory'));
         }
@@ -398,6 +418,7 @@ compactlistdirclick = function(){
             registercompactlistdirs($(currdir).parent().find('ul'));
             registermp3s($(currdir).parent().find('ul'));
             $(currdir).siblings("ul").slideDown('slow');
+            albumArtLoader();
         };
         api(data,success,errorFunc('unable to list compact directory'));
     }
@@ -1054,6 +1075,7 @@ function disableMobileSwiping(){
     $('body').removeAttr('style');
     $('html').removeAttr('style');
 }
+
 /***
 ON DOCUMENT READY... STEADY... GO!
 ***/
@@ -1103,5 +1125,7 @@ $(document).ready(function(){
                         errorFunc('Error setting option!')
         );
     });
+    //enable loading of images when in viewport
+    window.onscroll = albumArtLoader;
     //enableMobileSwiping();
 });
