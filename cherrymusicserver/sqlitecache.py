@@ -29,6 +29,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
+#python 2.6+ backward compability
+from __future__ import unicode_literals
+
 import os
 import re
 import sqlite3
@@ -175,7 +178,7 @@ class SQLiteCache(object):
     @classmethod
     def searchterms(cls, searchterm):
         words = SEARCHTERM_SPLIT_REGEX.findall(searchterm.replace('_', ' ').replace('%',' '))
-        return list(map(str.lower, words))
+        return list(map(type('').lower, words))
 
     def fetchFileIds(self, terms, maxFileIdsPerTerm, mode):
         """returns list of ids each packed in a tuple containing the id"""

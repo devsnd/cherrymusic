@@ -28,6 +28,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
+#python 2.6+ backward compability
+from __future__ import unicode_literals
+
 import os
 import cherrypy
 import threading

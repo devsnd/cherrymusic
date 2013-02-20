@@ -28,6 +28,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
+#python 2.6+ backward compability
+from __future__ import unicode_literals
+from io import open
+
 import os
 import re
 
@@ -172,8 +176,11 @@ def from_configparser(filepath):
     if not os.path.isfile(filepath):
         logging.error('configuration path is not a file: %s', filepath)
         return None
-
-    from configparser import ConfigParser
+    
+    try:
+        from configparser import ConfigParser
+    except ImportError:
+        from backport.configparser import ConfigParser
     cfgp = ConfigParser()
     cfgp.read(filepath)
     dic = {}
@@ -189,6 +196,9 @@ def from_configparser(filepath):
                 section_name = ''
             dic[section_name] = {}
             for name, value in cfgp.items(section_name):
+                value+=''   #inner workaround for python 2.6+
+                            #transforms ascii str to unicode because
+                            #of unicode_literals import
                 dic[section_name][name] = value
         #workaround end
 
@@ -431,11 +441,15 @@ class Key(object):
         return key.lower()
 
     def __init__(self, name=''):
+        if name:
+            name+=''    #python 2.6+ compability hack
+                        #ensures unicode encoding because of
+                        #unicode_literals import
         if isinstance(name, Key):
             name = name._fullname
         elif name is None:
             name = ''
-        elif not isinstance(name, str):
+        elif not isinstance(name, type('')):
             raise TypeError("'name' must be str, is %s (%s)" % (name.__class__.__name__, name))
         elif name:
             self._validate_complexkey(name)
@@ -899,6 +913,9 @@ class Property(object):
 
 
     def _transform(self, value, typename):
+        #workaround for python 2.6+
+        if 'unicode' == typename and type(value) == str:
+            return value+''
         try:
             return Transformers[typename](value)
         except (TransformError, KeyError) as e:
@@ -962,7 +979,7 @@ class Property(object):
             value = value.__name__
         elif value is None:
             value = ''
-        elif not isinstance(value, str):
+        elif not isinstance(value, type('')):
             raise TypeError("'type' must be None, a str or one of %s" % self._potential_transform_targets())
         if value not in Transformers:
             value = ''
@@ -1467,7 +1484,7 @@ def transformer(name):
     def transformer_decorator(func):
         def transformer_wrapper(self, *args, **kwargs):
             return func(*args, **kwargs)
-        ttype = type(name, (object,), {'__new__':transformer_wrapper})
+        ttype = type(str(name), (object,), {'__new__':transformer_wrapper})
         Transformers[name] = ttype
         return ttype
     return transformer_decorator
@@ -1516,9 +1533,9 @@ def _to_bool_transformer(val=None):
         try:
             return bool(_to_float_transformer(val))
         except (TypeError, ValueError, TransformError):
-            if isinstance(val, str) and val.strip().lower() in ('yes', 'true'):
+            if isinstance(val, type('')) and val.strip().lower() in ('yes', 'true'):
                 return True
-            if isinstance(val, str) and val.strip().lower() in ('false', 'no', ''):
+            if isinstance(val, type('')) and val.strip().lower() in ('false', 'no', ''):
                 return False
             raise TransformError('bool', val, default=False)
 

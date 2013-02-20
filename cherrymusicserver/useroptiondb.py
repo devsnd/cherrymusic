@@ -57,8 +57,6 @@ class UserOptionDB:
             with cfg.create('misc') as misc:
                 misc.show_playlist_download_buttons = cfg.Configuration(value=False)
                 c.misc = misc
-                
-            c.use_old_gui = cfg.Configuration(value=False, readonly=False, hidden=True)
             
             with cfg.create('custom_theme') as theme:
                 theme.primary_color = cfg.Configuration(value='#F02E75',validity='#[0-9a-fA-F]{6}', hidden=False, readonly=False)
@@ -70,7 +68,6 @@ class UserOptionDB:
                 value=0,
                 name='last_time_online',
                 validity='\\d+',
-                type='int',
                 readonly = False,
                 hidden = True
             )
