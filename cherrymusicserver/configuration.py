@@ -1608,12 +1608,12 @@ def _to_str_transformer(val=None):
 
 class ValueConverter(object):
 
-    __transformers = { str(t.__name__): t for t in [_to_int_transformer,
+    __transformers = dict((str(t.__name__), t) for t in [_to_int_transformer,
                                                     _to_float_transformer,
                                                     _to_bool_transformer,
                                                     _to_list_transformer,
                                                     _to_str_transformer,
-                                                    ]}
+                                                    ])
 
     def __init__(self, val):
         self.value = val
