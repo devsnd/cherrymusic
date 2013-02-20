@@ -12,7 +12,7 @@ install: "pip install cherrypy --use-mirrors"
 
 # prepare test run: install locally
 before_script:
-  - python setup.py install
+  - python setup.py -q install
   
 # command to run tests
 script:  python -m cherrymusicserver.test
