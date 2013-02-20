@@ -35,7 +35,8 @@ from io import open
 import os
 import re
 
-from collections import MutableSet, OrderedDict, namedtuple
+from collections import MutableSet, namedtuple
+from backport.collections import OrderedDict
 
 from cherrymusicserver import log as logging
 from cherrymusicserver import util
