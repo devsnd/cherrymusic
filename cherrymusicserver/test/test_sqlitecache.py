@@ -89,19 +89,30 @@ def getAbsPath(*relpath):
 
 def setupTestfile(testfile):
     if testfile.isdir:
-        os.makedirs(testfile.fullpath, exist_ok=True)
+        setupDir(testfile.fullpath)
+        # os.makedirs(testfile.fullpath, exist_ok=True)
     else:
         if not os.path.exists(testfile.fullpath):
             open(testfile.fullpath, 'w').close()
 
 
 def setupTestfiles(testdir, testfiles):
-    os.makedirs(testdir, exist_ok=True)
+    setupDir(testdir)
     os.chdir(testdir)
     for filename in testfiles:
         setupTestfile(TestFile(filename))
     os.chdir('..')
 
+
+def setupDir(testdir):
+    import errno
+    try:
+        os.makedirs(testdir)  #, exist_ok=True) # py2 compatibility
+    except OSError as exc:
+        if exc.errno == errno.EEXIST and os.path.isdir(testdir):
+            pass
+        else:
+            raise
 
 def removeTestfile(testfile):
     if testfile.isdir:

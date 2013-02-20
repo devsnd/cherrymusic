@@ -476,6 +476,9 @@ class Key(object):
     def __eq__(self, other):
         return self.normstr == other.normstr
 
+    def __ne__(self, other):
+        return not (self == other)
+
     def __hash__(self):
         return hash(self.normstr)
 
@@ -748,6 +751,8 @@ class Property(object):
             return False
         return True
 
+    def __ne__(self, other):
+        return not (self == other)
 
     @property
     def name(self):
@@ -1274,6 +1279,9 @@ class Configuration(Property):
             if not child.__eq__(other[child._key.last]):
                 return False
         return True
+
+    def __ne__(self, other):
+        return not (self == other)
 
 
     def __len__(self):
