@@ -716,8 +716,9 @@ class File():
             path = path.rstrip(os.path.sep)
         if parent is None:
             self.root = self
-            self.basepath = os.path.dirname(path)
-            self.basename = os.path.basename(path)
+            #python 2.6 workaround, add '' to string to convert to unicode
+            self.basepath = os.path.dirname(path)+''
+            self.basename = os.path.basename(path)+''
         else:
             if os.path.sep in path:
                 raise ValueError('non-root filepaths must be direct relative to parent: path: %s, parent: %s' % (path, parent))
