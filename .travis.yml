@@ -6,30 +6,27 @@
 
 language: python
 python:
-  - "3.2"
+  - "2.7"
 # command to install dependencies
 install: "pip install cherrypy --use-mirrors"
 
 # prepare test run: install locally
 before_script:
-  - python setup.py -q sdist --keep-temp
-  - cd `ls | grep CherryMusic`
-  - python setup.py -q install
-  - INSTALLDIR=/home/travis/virtualenv/python3.2/lib/python3.2/site-packages
-  - cd $INSTALLDIR
+  - python setup.py install
   
 # command to run tests
-script:  python -m unittest discover --failfast -s ./cherrymusicserver/test -t .
+script:  python -m cherrymusicserver.test
 
 branches:
   # whitelist
   only:
-    - master
-    - devel
+    #- master
+    #- devel
+    - python2
 
-#notifications:
-#  email:
-#    recipients:
-#      - tilman.boerner@gmx.de
-#    on_success: change  # [always|never|change] # default: change
-#    on_failure: always  # [always|never|change] # default: always
+notifications:
+ email:
+   recipients:
+     - tilman.boerner@gmx.de
+   on_success: change  # [always|never|change] # default: change
+   on_failure: always  # [always|never|change] # default: always
