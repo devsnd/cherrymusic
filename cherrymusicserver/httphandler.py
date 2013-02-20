@@ -199,7 +199,7 @@ class HTTPHandler(object):
             path = os.path.sep.join(args[:-1])
             fullpath = os.path.join(cherry.config.media.basedir.str, path)
             transcoder = audiotranscode.AudioTranscode()
-            cherrypy.response.headers["Content-Type"] = audiotranscode.AudioTranscode.mimeType(newformat)
+            cherrypy.response.headers["Content-Type"] = transcoder.mimeType(newformat)
             return transcoder.transcodeStream(fullpath, newformat)
     trans.exposed = True
     trans._cp_config = {'response.stream': True}
