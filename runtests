@@ -44,7 +44,7 @@ fi
 
 
 echo "running unit tests..."
-python -m unittest discover --failfast -s ${TESTDIR} -t ${PROJECTDIR}
+python -m unittest cherrymusicserver.test
 if [ $? != 0 ]; then
     echo "unit test(s) failed" >&2
     exit 1
