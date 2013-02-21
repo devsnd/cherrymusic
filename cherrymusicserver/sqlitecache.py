@@ -56,7 +56,6 @@ keepInRam = False
 
 NORMAL_FILE_SEARCH_LIMIT = 400
 FAST_FILE_SEARCH_LIMIT = 20
-SEARCHTERM_SPLIT_REGEX = re.compile('(\w+|[^\s\w]+)')
 
 #if debug:
 #    log.level(log.DEBUG)
@@ -177,7 +176,7 @@ class SQLiteCache(object):
 
     @classmethod
     def searchterms(cls, searchterm):
-        words = SEARCHTERM_SPLIT_REGEX.findall(searchterm.replace('_', ' ').replace('%',' '))
+        words = re.findall('(\w+|[^\s\w]+)',searchterm.replace('_', ' ').replace('%',' '),re.UNICODE)
         return list(map(type('').lower, words))
 
     def fetchFileIds(self, terms, maxFileIdsPerTerm, mode):

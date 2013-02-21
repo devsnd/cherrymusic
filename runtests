@@ -47,6 +47,16 @@ echo "running unit tests..."
 python -m unittest cherrymusicserver.test
 if [ $? != 0 ]; then
     echo "unit test(s) failed" >&2
+    echo ^^^ `python -V` ^^^
+    exit 1
+fi
+
+if [ $(command -v python2) ]; then
+    python2 -m unittest discover --failfast -s ${TESTDIR} -t ${PROJECTDIR}
+fi
+if [ $? != 0 ]; then
+    echo "unit test(s) failed" >&2
+    echo ^^^ `python2 -V` ^^^
     exit 1
 fi
 
