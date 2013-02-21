@@ -29,6 +29,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
+#python 2.6+ backward compability
+from __future__ import unicode_literals
+
 import unittest
 
 import os
@@ -214,7 +217,8 @@ class AddFilesToDatabaseTest(unittest.TestCase):
         ids = self.Cache.add_to_dictionary_table(filename)
 
         wordset = set(words)
-        self.assertTrue(len(wordset) < len(words), "there must be duplicate words in the test")
+        self.assertTrue(len(wordset) < len(words), "there must be duplicate words in the test, \nset: %s \nlist: %s"
+            % (wordset, words) )
         idset = set(ids)
         self.assertTrue(len(ids) == len(idset), "there must be no duplicate ids")
         for word in wordset:

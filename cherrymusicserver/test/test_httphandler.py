@@ -221,7 +221,7 @@ class TestHTTPHandler(unittest.TestCase):
     def test_api_customcss(self):
         """when attribute error is raised, this means that cherrypy
         session is used to authenticate the http request."""
-        self.assertRaises(AttributeError, self.http.api, 'customcss')
+        self.assertRaises(AttributeError, self.http.api, 'customcss.css')
         
     def test_api_changeplaylist(self):
         """when attribute error is raised, this means that cherrypy

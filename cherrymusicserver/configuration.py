@@ -979,7 +979,7 @@ class Property(object):
             value = value.__name__
         elif value is None:
             value = ''
-        elif not isinstance(value, type('')):
+        elif not isinstance(value, type('')) and not isinstance(value, str):
             raise TypeError("'type' must be None, a str or one of %s" % self._potential_transform_targets())
         if value not in Transformers:
             value = ''
@@ -1533,10 +1533,11 @@ def _to_bool_transformer(val=None):
         try:
             return bool(_to_float_transformer(val))
         except (TypeError, ValueError, TransformError):
-            if isinstance(val, type('')) and val.strip().lower() in ('yes', 'true'):
-                return True
-            if isinstance(val, type('')) and val.strip().lower() in ('false', 'no', ''):
-                return False
+            if isinstance(val, type('')) or isinstance(val, str):
+                if val.strip().lower() in ('yes', 'true'):
+                    return True
+                if val.strip().lower() in ('false', 'no', ''):
+                    return False
             raise TransformError('bool', val, default=False)
 
 
