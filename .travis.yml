@@ -18,7 +18,7 @@ before_script:
   - python setup.py -q install
   
 # command to run tests
-script:  python -m cherrymusicserver.test
+script:  python -m unittest cherrymusicserver.test
 
 branches:
   # whitelist
