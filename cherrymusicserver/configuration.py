@@ -446,7 +446,7 @@ class Key(object):
             name = name._fullname
         elif name is None:
             name = ''
-        elif not isinstance(name, type('')):
+        elif not isinstance(name, type('')) and not isinstance(name, str):
             raise TypeError("'name' must be str, is %s (%s)" % (name.__class__.__name__, name))
         elif name:
             name+=''    #python 2.6+ compability hack
