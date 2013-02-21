@@ -29,7 +29,7 @@
 #
 
 # pylint: disable=W0611
-import logging
+from backport import logging
 import logging.config
 import inspect
 import os
@@ -68,7 +68,11 @@ formatter_briefest = logging.Formatter(fmt='[%(asctime)s] %(message)s', datefmt=
 formatter_brief = logging.Formatter(fmt='[%(asctime)s] %(levelname)-8s: %(message)s', datefmt='%y%m%d-%H:%M')
 formatter_full = logging.Formatter(fmt=('-'*80)+ '\n%(levelname)-8s [%(asctime)s] : %(name)-20s : from line (%(lineno)d) at\n\t%(pathname)s\n\t--\n\t%(message)s\n')
 
-handler_console = logging.StreamHandler(stream=sys.stdout)
+try:
+    handler_console = logging.StreamHandler(stream=sys.stdout)
+except TypeError: #python 2.6 doesn't support stream argument
+    handler_console = logging.StreamHandler()
+    
 handler_console.formatter = formatter_briefest
 handler_console.level = DEBUG
 handler_console.addFilter(LowPass(WARNING))
