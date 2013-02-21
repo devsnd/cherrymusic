@@ -68,7 +68,7 @@ formatter_briefest = logging.Formatter(fmt='[%(asctime)s] %(message)s', datefmt=
 formatter_brief = logging.Formatter(fmt='[%(asctime)s] %(levelname)-8s: %(message)s', datefmt='%y%m%d-%H:%M')
 formatter_full = logging.Formatter(fmt=('-'*80)+ '\n%(levelname)-8s [%(asctime)s] : %(name)-20s : from line (%(lineno)d) at\n\t%(pathname)s\n\t--\n\t%(message)s\n')
 
-handler_console = logging.StreamHandler()
+handler_console = logging.StreamHandler(stream=sys.stdout)
     
 handler_console.formatter = formatter_briefest
 handler_console.level = DEBUG
