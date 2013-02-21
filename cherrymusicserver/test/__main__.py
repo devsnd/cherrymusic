@@ -10,9 +10,9 @@ runner = unittest.TextTestRunner()
 
 from . import discover_tests
 
-class Fail(unittest.TestCase):
-    def testfail(self):
-        self.fail()
+# class Fail(unittest.TestCase):
+#     def testfail(self):
+#         self.fail()
 
 if __name__ == '__main__':
     # test = loader.suiteClass(loader.loadTestsFromTestCase(Fail))
