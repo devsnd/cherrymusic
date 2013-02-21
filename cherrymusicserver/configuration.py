@@ -35,7 +35,8 @@ from io import open
 import os
 import re
 
-from collections import MutableSet, OrderedDict, namedtuple
+from collections import MutableSet, namedtuple
+from backport.collections import OrderedDict
 
 from cherrymusicserver import log as logging
 from cherrymusicserver import util
@@ -441,10 +442,6 @@ class Key(object):
         return key.lower()
 
     def __init__(self, name=''):
-        if name:
-            name+=''    #python 2.6+ compability hack
-                        #ensures unicode encoding because of
-                        #unicode_literals import
         if isinstance(name, Key):
             name = name._fullname
         elif name is None:
@@ -452,6 +449,9 @@ class Key(object):
         elif not isinstance(name, type('')):
             raise TypeError("'name' must be str, is %s (%s)" % (name.__class__.__name__, name))
         elif name:
+            name+=''    #python 2.6+ compability hack
+                        #ensures unicode encoding because of
+                        #unicode_literals import
             self._validate_complexkey(name)
         self._fullname = name
 
@@ -1609,12 +1609,12 @@ def _to_str_transformer(val=None):
 
 class ValueConverter(object):
 
-    __transformers = { str(t.__name__): t for t in [_to_int_transformer,
+    __transformers = dict((str(t.__name__), t) for t in [_to_int_transformer,
                                                     _to_float_transformer,
                                                     _to_bool_transformer,
                                                     _to_list_transformer,
                                                     _to_str_transformer,
-                                                    ]}
+                                                    ])
 
     def __init__(self, val):
         self.value = val

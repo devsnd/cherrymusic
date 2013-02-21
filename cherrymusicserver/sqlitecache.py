@@ -631,7 +631,7 @@ class SQLiteCache(object):
             itemfactory(infs, indb, parent [, optional arguments])
         and must return an object satisfying the above requirements for an item.
         '''
-        from collections import OrderedDict
+        from backport.collections import OrderedDict
         basedir = cherry.config.media.basedir.str
         startpath = os.path.normcase(startpath).rstrip(os.path.sep)
         Item = itemfactory

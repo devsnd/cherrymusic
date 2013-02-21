@@ -8,6 +8,8 @@ language: python
 python:
   - "2.6"
   - "2.7"
+  - "3.2"
+  - "3.3"
 # command to install dependencies
 install: "pip install cherrypy --use-mirrors"
 
@@ -21,13 +23,13 @@ script:  python -m cherrymusicserver.test
 branches:
   # whitelist
   only:
-    #- master
-    #- devel
+    - master
+    - devel
     - python2
 
-notifications:
- email:
-   recipients:
-     - tilman.boerner@gmx.de
-   on_success: change  # [always|never|change] # default: change
-   on_failure: always  # [always|never|change] # default: always
+#notifications:
+# email:
+#   recipients:
+#     - tilman.boerner@gmx.de
+#   on_success: change  # [always|never|change] # default: change
+#   on_failure: always  # [always|never|change] # default: always
