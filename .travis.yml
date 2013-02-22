@@ -11,8 +11,9 @@ python:
   - "3.2"
   - "3.3"
 # command to install dependencies
-install: "pip install cherrypy --use-mirrors"
-install: "if [[ $TRAVIS_PYTHON_VERSION = 2.6 ]]; then pip install unittest2 --use-mirrors; fi"
+install:
+  - "pip install cherrypy --use-mirrors"
+  - "if [[ $TRAVIS_PYTHON_VERSION = 2.6 ]]; then pip install unittest2 --use-mirrors; fi"
 
 # prepare test run: install locally
 before_script:
