@@ -12,13 +12,14 @@ python:
   - "3.3"
 # command to install dependencies
 install: "pip install cherrypy --use-mirrors"
+install: "if [[ $TRAVIS_PYTHON_VERSION = 2.6 ]]; then pip install unittest2 --use-mirrors; fi"
 
 # prepare test run: install locally
 before_script:
   - python setup.py -q install
   
 # command to run tests
-script:  python -m cherrymusicserver.test.__main__
+script: test_travis_ci.sh
 
 branches:
   # whitelist
