@@ -18,6 +18,8 @@ install:
 # prepare test run: install locally
 before_script:
   - python setup.py -q install
+  - tree
+  - pwd; ls
   
 # command to run tests
 script: test_travis_ci.sh
