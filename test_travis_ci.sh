@@ -4,3 +4,4 @@ if [[ $TRAVIS_PYTHON_VERSION = 2.6 ]]; then
 else
     python -m unittest discover --failfast -s ./cherrymusicserver/test -t .
 fi
+exit $?

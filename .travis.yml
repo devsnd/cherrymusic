@@ -23,7 +23,7 @@ before_script:
   - pwd; ls
   
 # command to run tests
-script: test_travis_ci.sh
+script: sh ./test_travis_ci.sh
 
 branches:
   # whitelist
