@@ -51,8 +51,9 @@ class TestKey(unittest.TestCase):
     def testAssignAdd(self):
         key = Key('a')
 
-        with self.assertRaises(NotImplementedError):
-            key += 'b'
+        self.assertRaises(NotImplementedError, key.__iadd__, 'b')
+        # with self.assertRaises(NotImplementedError):  # 2.6 compat
+        #     key += 'b'
 
         self.assertEqual('a', key.str)
 
@@ -84,8 +85,9 @@ class TestProperty(unittest.TestCase):
         p = Property('test', value=1)
         self.assertTrue('int' in Property._reserved(), "precondition")
 
-        with self.assertRaises(AttributeError):
-            p.int = 9
+        self.assertRaises(AttributeError, setattr, p, 'int', 9)
+        # with self.assertRaises(AttributeError):   # 2.6 compat
+        #     p.int = 9
 
 
     def test_nonreserved_attributes_can_be_set(self):
@@ -122,10 +124,12 @@ class TestProperty(unittest.TestCase):
         p = Property('p')
         p.readonly = True
 
-        with self.assertRaises(ConfigError):
-            p.value = True
-        with self.assertRaises(ConfigError):
-            p.desc = "Lala"
+        self.assertRaises(ConfigError, setattr, p, 'value', True)
+        self.assertRaises(ConfigError, setattr, p, 'desc', 'lala')
+        # with self.assertRaises(ConfigError):
+        #     p.value = True
+        # with self.assertRaises(ConfigError):
+        #     p.desc = "Lala"
 
 
     def test_validation(self):
@@ -134,12 +138,14 @@ class TestProperty(unittest.TestCase):
         p.value = object()  # uninitialized validation must allow all, including weird, values
 
         '''can't re-set validity string'''
-        with self.assertRaises(AttributeError):
-            p.validity = 'something'
+        self.assertRaises(AttributeError, setattr, p, 'validity', 'something')
+        # with self.assertRaises(AttributeError):
+        #     p.validity = 'something'
 
         '''validation takes place in constructor'''
-        with self.assertRaises(ValueError):
-            Property('test', validity='brai+ns!')
+        self.assertRaises(ConfigError, configuration._property_from_dict, {'name': 'test', 'validity': 'brai+ns!'})
+        # with self.assertRaises(ValueError):
+        #     Property('test', validity='brai+ns!')
 
 
         ### REGULAR EXPRESSIONS
@@ -148,12 +154,14 @@ class TestProperty(unittest.TestCase):
                          'validation is through regex')
 
         '''validation is by match, not by find'''
-        with self.assertRaises(ValueError):
-            Property('test', 'halfbrains!', validity='brai+ns!')
+        self.assertRaises(ConfigError, configuration._property_from_dict, {'name': 'test', 'value': 'halfbrains!', 'validity': 'brai+ns!'})
+        # with self.assertRaises(ValueError):
+        #     Property('test', 'halfbrains!', validity='brai+ns!')
 
         '''validation is by full match'''
-        with self.assertRaises(ValueError):
-            Property('test', 'brains! supple brains!', validity='brai+ns!')
+        self.assertRaises(ConfigError, configuration._property_from_dict, {'name': 'test', 'value': 'brains! supple brains!', 'validity': 'brai+ns!'})
+        # with self.assertRaises(ValueError):
+        #     Property('test', 'brains! supple brains!', validity='brai+ns!')
 
 
         ### NON-STRING VALUES
@@ -171,8 +179,9 @@ class TestProperty(unittest.TestCase):
                          'validation trims whitespace from validity expression')
 
         '''validation respects explicit whitespace in regex'''
-        with self.assertRaises(ValueError):
-            Property('test', '\f\n\r\t\v XY ', validity=r'\f\n\r\t\v XY\s') # invalid because value gets trimmed
+        self.assertRaises(ConfigError, configuration._property_from_dict, {'name': 'test', 'value': '\f\n\r\t\v XY ', 'validity': r'\f\n\r\t\v XY\s'})
+        # with self.assertRaises(ValueError):
+        #     Property('test', '\f\n\r\t\v XY ', validity=r'\f\n\r\t\v XY\s') # invalid because value gets trimmed
 
         self.assertEqual('brains!', Property('test', 'brains!', validity=' ^ brai+ns! $ ').value,
                          'leading ^ and trailing $ is ignored, even if embedded in whitespace')
@@ -186,8 +195,9 @@ class TestProperty(unittest.TestCase):
         '''value must be validated as list'''
         p.value = ' 1, 123   '
 
-        with self.assertRaises(ValueError):
-            p.value = '1, 123, None'
+        self.assertRaises(ValueError, setattr, p, 'value', '1, 123, None')
+        # with self.assertRaises(ValueError):
+        #     p.value = '1, 123, None'
 
 
 
@@ -228,8 +238,9 @@ class TestProperty(unittest.TestCase):
 
         '''can't assign inconvertible objects'''
         self.assertRaises(configuration.TransformError, configuration.Transformers['int'], object())
-        with self.assertRaises(TypeError):
-            p.value = object()
+        self.assertRaises(TypeError, setattr, p, 'value', object())
+        # with self.assertRaises(TypeError):
+        #     p.value = object()
 
         '''assigning None works though and goes to default'''
         p.value = None
@@ -248,8 +259,9 @@ class TestProperty(unittest.TestCase):
         no_type = Property('no_type', 0)
         no_type.value = 3.14
         self.assertEqual(3, no_type.value)
-        with self.assertRaises(TypeError):
-            no_type.value = 'not an int'
+        self.assertRaises(TypeError, setattr, no_type, 'value', 'not an int')
+        # with self.assertRaises(TypeError):
+        #     no_type.value = 'not an int'
 
         '''with non-transformable-type value set, can assign value of same type'''
         no_type = Property('no_type', object())
@@ -258,8 +270,9 @@ class TestProperty(unittest.TestCase):
 
         '''with non-transformable-type  value set, can't assign different type'''
         no_type = Property('no_type', type(object))
-        with self.assertRaises(TypeError):
-            no_type.value = 3.14
+        self.assertRaises(TypeError, setattr, no_type, 'value', 3.14)
+        # with self.assertRaises(TypeError):
+        #     no_type.value = 3.14
 
 
     def test_bool(self):
@@ -447,11 +460,13 @@ class TestConfiguration(unittest.TestCase):
         self.assertEqual(Configuration('a'), configuration.from_list([('a',), ('b',)], name='a'))
         self.assertEqual(Configuration(), configuration.from_list([('a',), ('b',)], name='a', rename=''))
 
-        with self.assertRaises(ValueError):
-            configuration.from_list([('a',), ('b',)], name='c')
+        self.assertRaises(ValueError, configuration.from_list, [('a',), ('b',)], 'c')
+        # with self.assertRaises(ValueError):
+        #     configuration.from_list([('a',), ('b',)], name='c')
 
-        with self.assertRaises(configuration.ConfigKeyError):
-            configuration.from_list([], rename='contains.bad.name')
+        self.assertRaises(configuration.ConfigKeyError, configuration.from_list, [('a',), ('b',)], '', 'contains.bad.name')
+        # with self.assertRaises(configuration.ConfigKeyError):
+        #     configuration.from_list([], rename='contains.bad.name')
 
         with configuration.create('nyah') as cfg:
             cfg.a.b = Property('nyah.a.b', 1, 'int', '\d', True, True, 'description')
@@ -481,7 +496,8 @@ class TestConfiguration(unittest.TestCase):
             c.c.d.e = 55
             c.c.readonly = True
 
-        self.assertDictEqual(d, configuration.to_dict(c))
+        self.assertEqual(d, configuration.to_dict(c))
+        # self.assertDictEqual(d, configuration.to_dict(c))
 
         cfg = configuration.from_dict(d)
 
@@ -628,14 +644,18 @@ class TestConfiguration(unittest.TestCase):
     def test_errors_for_undefined_keys(self):
         cfg = Configuration()
 
-        with self.assertRaises(KeyError):
-            cfg['a']
-        with self.assertRaises(AttributeError):
-            cfg.a
-        with self.assertRaises(AttributeError):
-            cfg.a = 9
-        with self.assertRaises(AttributeError):
-            cfg.b.desc = 'schweinebacke'
+        self.assertRaises(KeyError, cfg.__getitem__, 'a')
+        self.assertRaises(AttributeError, getattr, cfg, 'a')
+        self.assertRaises(AttributeError, setattr, cfg, 'a', 9)
+
+        # with self.assertRaises(KeyError):
+        #     cfg['a']
+        # with self.assertRaises(AttributeError):
+        #     cfg.a
+        # with self.assertRaises(AttributeError):
+        #     cfg.a = 9
+        # with self.assertRaises(AttributeError):
+        #     cfg.b.desc = 'schweinebacke'
 
 
     def test_hidden_and_readonly_parent_overrules_child(self):
@@ -674,8 +694,9 @@ class TestConfiguration(unittest.TestCase):
             self.assertEqual('bla', c.d.desc)
 
             c.e.readonly = True
-            with self.assertRaises(ConfigError):
-                c.e = 11
+            self.assertRaises(ConfigError, setattr, c, 'e', 11)
+            # with self.assertRaises(ConfigError):
+            #     c.e = 11
 
             c.v = 11
             self.assertEqual(11, c.v.value)
@@ -689,15 +710,17 @@ class TestConfiguration(unittest.TestCase):
             self.assertEqual('\d+', c.v.f.validity)
             self.assertEqual('bla', c.v.f.desc)
 
-            with self.assertRaises(ConfigError):
-                c.x = Property('NOT.X')
+            self.assertRaises(ConfigError, setattr, c, 'x', Property('NOT.X'))
+            # with self.assertRaises(ConfigError):
+            #     c.x = Property('NOT.X')
 
         'merging is atomic'
         with configuration.create() as c:
             e = Configuration('e', 0, type='int')
             c.e = e
-        with self.assertRaises(ConfigError):
-            c.e = Property('e', 'a', validity='a', hidden=True, readonly=True, desc='bla')
+        self.assertRaises(ConfigError, setattr, c, 'e', Property('e', 'a', validity='a', hidden=True, readonly=True, desc='bla'))
+        # with self.assertRaises(ConfigError):
+        #     c.e = Property('e', 'a', validity='a', hidden=True, readonly=True, desc='bla')
         self.assertEqual(e, c.e)
 
     def test_add(self):
@@ -729,14 +752,19 @@ class TestConfiguration(unittest.TestCase):
 
         _assertConfigEqual(TWO_THREE, TWO + Property('ron', 45))
 
-        with self.assertRaises(TypeError):
-            ONE + 3
 
-        with self.assertRaises(ConfigError):
-            ONE + Configuration('different name')
+        self.assertRaises(TypeError, ONE.__add__, 3)
+        self.assertRaises(ConfigError, ONE.__add__, THREE)
+        # self.assertRaises(ConfigError, ONE.__add__, Configuration('different_name'))  # TODO
 
-        with self.assertRaises(ConfigError):
-            ONE + THREE
+        # with self.assertRaises(TypeError):
+        #     ONE + 3
+
+        # with self.assertRaises(ConfigError):
+        #     ONE + Configuration('different_name')
+
+        # with self.assertRaises(ConfigError):
+        #     ONE + THREE
 
 
     def test_equal(self):

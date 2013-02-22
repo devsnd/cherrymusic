@@ -13,7 +13,7 @@ class All(unittest.TestSuite):
 
 
 def discover_tests():
-    package = __package__
+    package = __package__ or __name__
     packdir = __file__.rsplit(os.path.sep, 1)[0]
     parent = None
     modules = (i[1] for i in pkgutil.iter_modules([packdir]))

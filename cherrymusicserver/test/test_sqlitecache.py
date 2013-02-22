@@ -37,6 +37,7 @@ import unittest
 import os
 import shutil
 import sqlite3
+import sys
 import tempfile
 
 import cherrymusicserver as cherry
@@ -50,7 +51,7 @@ class TestFile(object):
 
     def __init__(self, fullpath, parent=None, isdir=None):
         self.uid = -1
-        self.fullpath = fullpath
+        self.fullpath = fullpath if not parent else os.path.join(parent.fullpath, fullpath)
         self.parent = parent
         self.isdir = fullpath.endswith(os.path.sep) if (isdir is None) else isdir
         if self.isdir:
@@ -67,6 +68,10 @@ class TestFile(object):
                                   - 1 if self.parent is None
                                     else self.parent.uid)
 
+    @property
+    def exists(self):
+        return os.path.exists(self.fullpath)
+
 
     @classmethod
     def enumerate_files_in(cls, somewhere, sort):
@@ -74,15 +79,13 @@ class TestFile(object):
                                   % (__name__, cls.__name__))
 
 tmpdir = None
-oldwd = os.getcwd()
-
 def setUpModule():
     global tmpdir
     tmpdir = tempfile.mkdtemp(suffix='-test_sqlitecache', prefix='tmp-cherrymusic-')
-    os.chdir(tmpdir)
+if sys.version_info < (2, 7):  # hack to support python 2.6 which doesn't setUpModule()
+    setUpModule()
 
 def tearDownModule():
-    os.chdir(oldwd)
     shutil.rmtree(tmpdir, ignore_errors=False, onerror=None)
 
 def getAbsPath(*relpath):
@@ -97,14 +100,15 @@ def setupTestfile(testfile):
     else:
         if not os.path.exists(testfile.fullpath):
             open(testfile.fullpath, 'w').close()
+    assert testfile.exists
 
 
 def setupTestfiles(testdir, testfiles):
-    setupDir(testdir)
-    os.chdir(testdir)
+    testdir = os.path.join(tmpdir, testdir, '')
+    setupTestfile(TestFile(testdir))
     for filename in testfiles:
+        filename = os.path.join(testdir, filename)
         setupTestfile(TestFile(filename))
-    os.chdir('..')
 
 
 def setupDir(testdir):
@@ -125,6 +129,7 @@ def removeTestfile(testfile):
 
 
 def removeTestfiles(testdir, testfiles):
+    testdir = os.path.join(tmpdir, testdir)
     shutil.rmtree(testdir, ignore_errors=True, onerror=None)
 
 
@@ -284,6 +289,7 @@ class FileTest(unittest.TestCase):
         removeTestfiles(self.testdir, self.testfiles)
 
     def assertFilesEqual(self, expected, actual):
+        self.assertTrue(actual.exists)
         self.assertTrue(expected.fullpath == actual.fullpath, "equal fullpath %s vs %s" % (expected.fullpath, actual.fullpath))
         self.assertTrue(expected.name == actual.name, "equal name %s vs %s " % (expected.name, actual.name))
         self.assertTrue(expected.ext == actual.ext, 'equal extension %s vs %s' % (expected.ext, actual.ext))
@@ -292,7 +298,7 @@ class FileTest(unittest.TestCase):
 
     def testFileClass(self):
         for filename in self.testfiles:
-            filename = os.path.join(self.testdir, filename)
+            filename = os.path.join(tmpdir, self.testdir, filename)
             expected = TestFile(filename)
             if filename.endswith(os.path.sep):
                 filename = filename[:-1]
@@ -512,10 +518,12 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
 
 
         # ASSERT
-        self.assertLessEqual(1, BoobyTrap.exceptcount,
+        self.assertTrue(1 <= BoobyTrap.exceptcount,
+        # self.assertLessEqual(1, BoobyTrap.exceptcount,
                          'test must have raised at least one exception')
 
-        self.assertListEqual(deletable, removed,
+        self.assertEqual(deletable, removed,
+        # self.assertListEqual(deletable, removed,
                         'complete rollback must restore all deleted entries.')
 
 
