@@ -14,6 +14,7 @@ python:
 install:
   - "pip install cherrypy --use-mirrors"
   - "if [[ $TRAVIS_PYTHON_VERSION = 2.6 ]]; then pip install unittest2 --use-mirrors; fi"
+  - "if [[ $TRAVIS_PYTHON_VERSION = 3.3 ]]; then ./patch_cherrypy.sh cherrypy_issue1163_threading_Timer.patch; fi"
 
 # prepare test run: install locally
 before_script:
