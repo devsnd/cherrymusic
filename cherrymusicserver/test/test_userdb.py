@@ -40,6 +40,14 @@ class TestAuthenticate(unittest.TestCase):
     def setUp(self):
         self.users = userdb.UserDB(':memory:')
         self.users.addUser('user', 'password', False)
+        
+        #unittest2 compability
+        if not self.assertTupleEqual:
+            def assertTupEq(t1,t2,msg):
+                if not all(i==j for i,j in zip(t1,t2)):
+                    raise AssertionError(msg)
+            self.assertTupleEqual = assertTupEq
+        #end of workaround
 
 
     def tearDown(self):
