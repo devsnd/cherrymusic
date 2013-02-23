@@ -42,7 +42,7 @@ class TestAuthenticate(unittest.TestCase):
         self.users.addUser('user', 'password', False)
         
         #unittest2 compability
-        if not self.assertTupleEqual:
+        if not hasattr(self,'assertTupleEqual'):
             def assertTupEq(t1,t2,msg):
                 if not all(i==j for i,j in zip(t1,t2)):
                     raise AssertionError(msg)
