@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/sh
 
 patch=$1
 cherrypy=$(python -c "import os, cherrypy; print(os.path.split(cherrypy.__file__)[0])")
