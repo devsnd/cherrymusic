@@ -5,7 +5,7 @@ patch="$1"
 # if we're in a Travis CI environment
 if [ $TRAVIS_PYTHON_VERSION ]; then
 	pyversion=$TRAVIS_PYTHON_VERSION
-	cherrypy="../../lib/python/${pyversion}/site-packages/cherrypy"
+	cherrypy="../../lib/python${pyversion}/site-packages/cherrypy"
 fi
 
 # we're probably not in Travis
