@@ -175,12 +175,22 @@ class HTTPHandler(object):
         return False
 
     def session_auth(self, username, password):
-        user = self.userdb.auth(username, password)
-        if user.isadmin and not cherry.config.server.permit_remote_admin_login and not cherrypy.request.remote.ip == '127.0.0.1':
-            user = userdb.User.nobody()
-        cherrypy.session['username'] = user.name
-        cherrypy.session['userid'] = user.uid
-        cherrypy.session['admin'] = user.isadmin
+        try:
+            user = self.userdb.auth(username, password)
+            if user.isadmin and not cherry.config.server.permit_remote_admin_login and not cherrypy.request.remote.ip == '127.0.0.1':
+                user = userdb.User.nobody()
+            cherrypy.session['username'] = user.name
+            cherrypy.session['userid'] = user.uid
+            cherrypy.session['admin'] = user.isadmin
+        except (UnicodeDecodeError, ValueError) as e:
+            estr = str(e)
+            if estr.startswith("'ascii' codec can't decode byte") or estr == "unsupported pickle protocol: 3": 
+                log.w('Dropping all sessions! Try not to change between python 2 and 3, everybody has to relogin now.')
+                cherrypy.session.delete()
+        finally:
+            cherrypy.session['username'] = user.name
+            cherrypy.session['userid'] = user.uid
+            cherrypy.session['admin'] = user.isadmin
 
     def getUserId(self):
         try:
