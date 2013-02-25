@@ -548,7 +548,7 @@ PlaylistManager.prototype = {
             this.editingPlaylist = 0;
             plname = 'unknown playlist'
         }
-        $('.plsmgr-editingplaylist-name').html(plname);
+        $('.plsmgr-editingplaylist-name').text(plname);
     },
     setPlayingPlaylist : function (plid){
         this.playingPlaylist = plid;
@@ -626,7 +626,7 @@ PlaylistManager.prototype = {
         }
         var jPlaylist = pl.jplayerplaylist;
         if(jPlaylist.playlist && typeof jPlaylist.current !== 'undefined' && jPlaylist.playlist.length>0){
-            $('.cm-songtitle').html(jPlaylist.playlist[jPlaylist.current].title);
+            $('.cm-songtitle').text(jPlaylist.playlist[jPlaylist.current].title);
             return
         }
         $('.cm-songtitle').html('');
