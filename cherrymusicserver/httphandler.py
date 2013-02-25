@@ -543,6 +543,7 @@ class HTTPHandler(object):
             'transcodingenabled' : cherry.config.media.transcode.bool,
             'fetchalbumart' : cherry.config.media.fetch_album_art.bool,
             'isadmin' : cherrypy.session['admin'],
+            'username' : cherrypy.session['username'],
         }
         if cherry.config.media.transcode.bool:
             clientconfigkeys['getdecoders'] = self.model.transcoder.availableDecoderFormats()

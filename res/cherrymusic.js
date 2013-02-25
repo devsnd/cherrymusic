@@ -41,6 +41,7 @@ var availableDecoders = undefined;
 var transcodingEnabled = undefined;
 var userOptions = undefined;
 var isAdmin = undefined;
+var loggedInUserName = undefined;
 var REMEMBER_PLAYLIST_INTERVAL = 3000;
 var HEARTBEAT_INTERVAL_MS = 30*1000;
 
@@ -93,6 +94,13 @@ function api(data_or_action, successfunc, errorfunc, background){
     });
 }
 
+htmlencode = function(val){
+    return $('<div />').text(val?val:'').html();
+}
+htmldecode = function(val){
+    return $('<div />').html(val?val:'').text();
+}
+
 function errorFunc(msg){
     "use strict";
     return function(){
@@ -138,6 +146,7 @@ function loadConfig(){
         availableDecoders = dictatedClientConfig.getdecoders;
         transcodingEnabled = dictatedClientConfig.transcodingenabled;
         isAdmin = dictatedClientConfig.isadmin;
+        loggedInUserName = dictatedClientConfig.username;
         for(var i=0; i<executeAfterConfigLoaded.length; i++){
             executeAfterConfigLoaded[i]();
         }
@@ -598,58 +607,63 @@ function showPlaylists(){
             var addressAndPort = getAddrPort();
             var pls = '<ul>';
             $.each($.parseJSON(data),function(i,e){
-                var plsentry = ['<li id="playlist{{playlistid}}">',
+                pls += Mustache.render([
+                '<li id="playlist{{playlistid}}">',
                     '<div class="remoteplaylist">',
                         '<div class="playlisttitle">',
                             '<a href="javascript:;" onclick="loadPlaylist({{playlistid}}, \'{{playlistlabel}}\')">',
                             '{{playlistlabel}}',
                             '</a>',
                         '</div>',
-                    ];
-                    if(e.owner){
-                        plsentry.push(
+                    
+                        '{{#isowner}}',
                             '<div class="ispublic">',
-                                '<span class="label {{publiclabelclass}}">{{publicorprivate}} <input onchange="changePlaylist({{playlistid}},\'public\',$(this).is(\':checked\'))" type="checkbox" {{publicchecked}}></span>',
-                            '</div>'
-                        );
-                    }
-                    plsentry.push(
-                        '<div class="usernamelabel">',
-                            '<span class="badge" style="background-color: {{usernamelabelcolor}}" >{{username}}</span>',
-                        '</div>',
+                                '<span class="label {{publiclabelclass}}">',
+                                    '{{publicorprivate}}',
+                                    '<input onchange="changePlaylist({{playlistid}},\'public\',$(this).is(\':checked\'))" type="checkbox" {{publicchecked}}>',
+                                    '</span>',
+                            '</div>',
+                        '{{/isowner}}',                   
+                        
+                        '{{{usernamelabel}}}',
+                        
                         '<div class="deletebutton">',
-                        '<a href="javascript:;" class="btn btn-mini btn-danger" onclick="confirmDeletePlaylist({{playlistid}}, \'{{playlistlabel}}\')">x</a>',
-                        '</div>');
-                    if(userOptions.misc.show_playlist_download_buttons){
-                        plsentry.push('<div class="dlbutton">',
-                            '<a class="btn btn-mini" href="/api/downloadpls?value={{dlval}}">',
-                            '&darr;&nbsp;PLS',
-                            '</a>',
+                            '<a href="javascript:;" class="btn btn-mini btn-danger" onclick="confirmDeletePlaylist({{playlistid}}, \'{{playlistlabel}}\')">x</a>',
                         '</div>',
-                        '<div class="dlbutton">',
-                            '<a class="btn btn-mini" href="/api/downloadm3u?value={{dlval}}">',
-                            '&darr;&nbsp;M3U',
-                            '</a>',
-                        '</div>');
-                    }
-                    plsentry.push( '</div>',
-                        '<div class="playlistcontent">',
-                        '</div>',
-                        '</li>'
-                    );
-                pls += Mustache.render(plsentry.join(''),
+                        
+                        '{{#showdownloadbuttons}}',
+                            '<div class="dlbutton">',
+                                '<a class="btn btn-mini" href="/api/downloadpls?value={{dlval}}">',
+                                '&darr;&nbsp;PLS',
+                                '</a>',
+                            '</div>',
+                            '<div class="dlbutton">',
+                                '<a class="btn btn-mini" href="/api/downloadm3u?value={{dlval}}">',
+                                '&darr;&nbsp;M3U',
+                                '</a>',
+                            '</div>',
+                        '{{/showdownloadbuttons}}',
+                        
+                    '</div>',
+                    '<div class="playlistcontent">',
+                    '</div>',
+                '</li>'
+                ].join(''),
                     {
-                    playlistid:e['plid'],
+                    playlistid: e['plid'],
+                    isowner: e.owner,
+                    showdownloadbuttons: userOptions.misc.show_playlist_download_buttons,
                     playlistlabel:e['title'],
                     dlval : JSON.stringify({ 'plid' : e['plid'],
                         'addr' : addressAndPort
                         }),
                     username: e['username'],
-                    usernamelabelcolor: userNameToColor(e['username']),
+                    usernamelabel: renderUserNameLabel(e['username']),
                     publicchecked: e['public'] ? 'checked="checked"' : '',
                     publicorprivate: e['public'] ? 'public' : 'private',
                     publiclabelclass : e['public'] ? 'label-success' : 'label-info',
-                    });
+                    }
+                );
             });
             pls += '</ul>';
             $('.available-playlists').html(pls);
@@ -661,6 +675,21 @@ function showPlaylists(){
     var error = errorFunc('error loading external playlists');
 
     api('showplaylists',success,error);
+}
+
+renderUserNameLabel = function(username){
+    return Mustache.render([
+        '<div class="usernamelabel">',
+            '<span class="badge" style="background-color: {{hexcolor}}">',
+                '{{username}}',
+            '</span>',
+        '</div>'
+    ].join(''),
+    {
+        hexcolor: userNameToColor(username),
+        username: username,
+    }
+    );
 }
 
 function changePlaylist(plid,attrname,value){
@@ -1088,6 +1117,7 @@ $(document).ready(function(){
     $('#searchfield .bigbutton').click(submitsearch);
     $('.hideplaylisttab').hide();
     executeAfterConfigLoaded.push(function(){ playlistManager = new PlaylistManager() });
+    executeAfterConfigLoaded.push(function(){ $('#username-label').text('('+loggedInUserName+')') });
     loadConfig();
     loadUserOptions(initKeyboardshortcuts);
     //register top level directories
