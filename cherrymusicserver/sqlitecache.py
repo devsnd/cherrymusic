@@ -29,6 +29,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
+#python 2.6+ backward compability
+from __future__ import unicode_literals
+
 import os
 import re
 import sqlite3
@@ -53,7 +56,6 @@ keepInRam = False
 
 NORMAL_FILE_SEARCH_LIMIT = 400
 FAST_FILE_SEARCH_LIMIT = 20
-SEARCHTERM_SPLIT_REGEX = re.compile('(\w+|[^\s\w]+)')
 
 #if debug:
 #    log.level(log.DEBUG)
@@ -174,8 +176,8 @@ class SQLiteCache(object):
 
     @classmethod
     def searchterms(cls, searchterm):
-        words = SEARCHTERM_SPLIT_REGEX.findall(searchterm.replace('_', ' ').replace('%',' '))
-        return list(map(str.lower, words))
+        words = re.findall('(\w+|[^\s\w]+)',searchterm.replace('_', ' ').replace('%',' '),re.UNICODE)
+        return list(map(type('').lower, words))
 
     def fetchFileIds(self, terms, maxFileIdsPerTerm, mode):
         """returns list of ids each packed in a tuple containing the id"""
@@ -628,7 +630,7 @@ class SQLiteCache(object):
             itemfactory(infs, indb, parent [, optional arguments])
         and must return an object satisfying the above requirements for an item.
         '''
-        from collections import OrderedDict
+        from backport.collections import OrderedDict
         basedir = cherry.config.media.basedir.str
         startpath = os.path.normcase(startpath).rstrip(os.path.sep)
         Item = itemfactory
@@ -713,8 +715,9 @@ class File():
             path = path.rstrip(os.path.sep)
         if parent is None:
             self.root = self
-            self.basepath = os.path.dirname(path)
-            self.basename = os.path.basename(path)
+            #python 2.6 workaround, add '' to string to convert to unicode
+            self.basepath = os.path.dirname(path)+''
+            self.basename = os.path.basename(path)+''
         else:
             if os.path.sep in path:
                 raise ValueError('non-root filepaths must be direct relative to parent: path: %s, parent: %s' % (path, parent))

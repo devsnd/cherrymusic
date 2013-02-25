@@ -4,15 +4,17 @@ import re
 import os
 import time
 
+MimeTypes = {
+    'mp3' : 'audio/mpeg',
+    'ogg' : 'audio/ogg',
+    'flac' : 'audio/flac',
+    'aac' : 'audio/aac',
+    'wav' : 'audio/wav',
+}
+
 class Transcoder(object):
     devnull = open(os.devnull,'w')
-    MimeTypes = {
-        'mp3' : 'audio/mpeg',
-        'ogg' : 'audio/ogg',
-        'flac' : 'audio/flac',
-        'aac' : 'audio/aac',
-        'wav' : 'audio/wav',
-    }
+    
     def __init__(self):
         self.command = ['']
         
@@ -26,7 +28,7 @@ class Transcoder(object):
 class Encoder(Transcoder):
     def __init__(self,filetype,command):
         self.filetype = filetype
-        self.mimetype = Transcoder.MimeTypes[filetype]
+        self.mimetype = MimeTypes[filetype]
         self.command = command
         
     def encode(self, decoder_process, bitrate):
@@ -45,7 +47,7 @@ class Encoder(Transcoder):
 class Decoder(Transcoder):
     def __init__(self,filetype,command):
         self.filetype = filetype
-        self.mimetype = Transcoder.MimeTypes[filetype]
+        self.mimetype = MimeTypes[filetype]
         self.command = command        
         
     def decode(self, filepath):
@@ -193,7 +195,4 @@ class AudioTranscode:
                 encoder_process.wait()
     
     def mimeType(self, fileExtension):
-        return AudioTranscode.mimeType(fileExtension)
-    
-    def mimeType(fileExtension):
-        return Transcoder.MimeTypes.get(fileExtension)
+        return MimeTypes.get(fileExtension)

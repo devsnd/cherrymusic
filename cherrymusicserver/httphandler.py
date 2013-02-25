@@ -167,7 +167,7 @@ class HTTPHandler(object):
         return cherrypy.session.get('username', None) or self.autoLoginEnabled()
 
     def autoLoginEnabled(self):
-        if cherrypy.request.remote.ip == '127.0.0.1' and cherry.config.server.localhost_auto_login.bool:
+        if cherrypy.request.remote.ip not in ('127.0.0.1', '::1') and cherry.config.server.localhost_auto_login.bool:
             cherrypy.session['username'] = self.userdb.getNameById(1)
             cherrypy.session['userid'] = 1
             cherrypy.session['admin'] = True
@@ -175,12 +175,22 @@ class HTTPHandler(object):
         return False
 
     def session_auth(self, username, password):
-        user = self.userdb.auth(username, password)
-        if user.isadmin and not cherry.config.server.permit_remote_admin_login and not cherrypy.request.remote.ip == '127.0.0.1':
-            user = userdb.User.nobody()
-        cherrypy.session['username'] = user.name
-        cherrypy.session['userid'] = user.uid
-        cherrypy.session['admin'] = user.isadmin
+        try:
+            user = self.userdb.auth(username, password)
+        except (UnicodeDecodeError, ValueError) as e:
+            # workaround for python2/python3 jump, filed bug in cherrypy
+            # https://bitbucket.org/cherrypy/cherrypy/issue/1216/sessions-python2-3-compability-unsupported
+            log.w('Dropping all sessions! Try not to change between python 2 and 3, everybody has to relogin now.')
+            cherrypy.session.delete()
+            #retry with new session:
+            user = self.userdb.auth(username, password)
+        finally:
+            if user.isadmin and not cherry.config.server.permit_remote_admin_login.bool and not cherrypy.request.remote.ip in ('127.0.0.1', '::1'):
+                log.i('Rejected remote admin login from user: %s'%user.name)
+                user = userdb.User.nobody()
+            cherrypy.session['username'] = user.name
+            cherrypy.session['userid'] = user.uid
+            cherrypy.session['admin'] = user.isadmin
 
     def getUserId(self):
         try:
@@ -199,7 +209,7 @@ class HTTPHandler(object):
             path = os.path.sep.join(args[:-1])
             fullpath = os.path.join(cherry.config.media.basedir.str, path)
             transcoder = audiotranscode.AudioTranscode()
-            cherrypy.response.headers["Content-Type"] = audiotranscode.AudioTranscode.mimeType(newformat)
+            cherrypy.response.headers["Content-Type"] = transcoder.mimeType(newformat)
             return transcoder.transcodeStream(fullpath, newformat)
     trans.exposed = True
     trans._cp_config = {'response.stream': True}

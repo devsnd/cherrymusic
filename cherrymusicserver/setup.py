@@ -37,7 +37,10 @@ import threading
 from cherrymusicserver import pathprovider
 from cherrymusicserver import configuration as cfg
 
-
+def obj_hook(inp):
+    print(type(inp))
+    return inp
+    
 class SetupHandler:
     def index(self):
         return pathprovider.readRes('res/setup.html')
@@ -53,7 +56,7 @@ class SetupHandler:
             bsdcheck.media.basedir.validity = lambda x: x is None or os.path.isabs(x) and os.path.isdir(x)
 
         try:
-            customcfg = cfg.from_dict(json.loads(values))
+            customcfg = cfg.from_dict(json.loads(values,encoding='str'))
         except Exception as e:
             # a dict key violates config naming rules or values is not a dict
             # == we got sent bad data

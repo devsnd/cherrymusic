@@ -1,7 +1,7 @@
 import sys
-from . import urllib
 
 if sys.version_info < (3,0):
+    from . import urllib
     input = raw_input
 else:
     input = input

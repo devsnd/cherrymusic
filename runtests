@@ -44,11 +44,22 @@ fi
 
 
 echo "running unit tests..."
-python -m unittest discover --failfast -s ${TESTDIR} -t ${PROJECTDIR}
+python -m unittest discover --failfast -s ./cherrymusicserver/test -t .
 if [ $? != 0 ]; then
     echo "unit test(s) failed" >&2
+    echo ^^^ `python -V` ^^^
     exit 1
 fi
+
+if [ $(command -v python2) ]; then
+    python2 -m unittest discover --failfast -s ./cherrymusicserver/test -t .
+    if [ $? != 0 ]; then
+        echo "unit test(s) failed" >&2
+        echo ^^^ `python2 -V` ^^^
+        exit 1
+    fi
+fi
+
 
 echo "checking dist metadata..."
 python ${PROJECTDIR}/setup.py check

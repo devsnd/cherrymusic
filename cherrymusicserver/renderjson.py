@@ -28,6 +28,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
+#python 2.6+ backward compability
+from __future__ import unicode_literals
+
 """
 This class encapsulates all values returned by the cherrymodel
 to be served as json to the client.

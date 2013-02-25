@@ -28,9 +28,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
+#python 2.6+ backward compability
+from __future__ import unicode_literals
+
+import sys
+import threading
+
+# woraround for cherrypy 3.2.2: 
+# https://bitbucket.org/cherrypy/cherrypy/issue/1163/attributeerror-in-cherrypyprocessplugins
+if sys.version_info >= (3,3):
+    threading._Timer = threading.Timer
+
 import os
 import cherrypy
-import threading
+
 
 """patch cherrypy crashing on startup because of double checking
 for loopback interface, see:

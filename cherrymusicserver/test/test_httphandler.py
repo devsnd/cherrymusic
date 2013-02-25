@@ -212,12 +212,32 @@ class TestHTTPHandler(unittest.TestCase):
         session is used to authenticate the http request."""
         if not self.http.handlers['fetchalbumart'].noauth:
             self.assertRaises(AttributeError, self.http.api, 'fetchalbumart')
-            
         
+    def test_api_setuseroption(self):
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'setuseroption')
+        
+    def test_api_customcss(self):
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'customcss.css')
+        
+    def test_api_changeplaylist(self):
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        if not self.http.handlers['fetchalbumart'].noauth:
+            self.assertRaises(AttributeError, self.http.api, 'fetchalbumart')
+            
     def test_api_listdir(self):
         """when attribute error is raised, this means that cherrypy
         session is used to authenticate the http request."""
-        self.assertRaises(AttributeError, self.http.api, 'listdir')
+        self.assertRaises(AttributeError, self.http.api, 'changeplaylist')
+        
+    def test_api_userchangepassword(self):
+        """when attribute error is raised, this means that cherrypy
+        session is used to authenticate the http request."""
+        self.assertRaises(AttributeError, self.http.api, 'userchangepassword')
 
 
 

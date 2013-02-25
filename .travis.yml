@@ -6,30 +6,34 @@
 
 language: python
 python:
+  - "2.6"
+  - "2.7"
   - "3.2"
+  - "3.3"
+  - "pypy"
+
 # command to install dependencies
-install: "pip install cherrypy --use-mirrors"
+install:
+  - "pip install cherrypy --use-mirrors"
+  - "if [[ $TRAVIS_PYTHON_VERSION = 2.6 ]]; then pip install unittest2 --use-mirrors; fi"
 
 # prepare test run: install locally
 before_script:
-  - python setup.py -q sdist --keep-temp
-  - cd `ls | grep CherryMusic`
   - python setup.py -q install
-  - INSTALLDIR=/home/travis/virtualenv/python3.2/lib/python3.2/site-packages
-  - cd $INSTALLDIR
   
 # command to run tests
-script:  python -m unittest discover --failfast -s ./cherrymusicserver/test -t .
+script: ./test_travis_ci.sh
 
 branches:
   # whitelist
   only:
     - master
     - devel
+    - python2
 
 #notifications:
-#  email:
-#    recipients:
-#      - tilman.boerner@gmx.de
-#    on_success: change  # [always|never|change] # default: change
-#    on_failure: always  # [always|never|change] # default: always
+# email:
+#   recipients:
+#     - tilman.boerner@gmx.de
+#   on_success: change  # [always|never|change] # default: change
+#   on_failure: always  # [always|never|change] # default: always

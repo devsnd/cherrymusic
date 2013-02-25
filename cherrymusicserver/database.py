@@ -37,7 +37,7 @@ from operator import itemgetter
 from cherrymusicserver import log
 
 
-class SQLDatabase:
+class SQLDatabase(object):
 
     def __init__(self, name):
         if not name:
@@ -84,7 +84,7 @@ class SQLDatabase:
             yield con
 
 
-class TableColumn:
+class TableColumn(object):
     def __init__(self, name, datatype, attributes=''):
         self.name = name
         self.datatype = self.checkdatatype(datatype)
@@ -100,7 +100,7 @@ class TableColumn:
             raise TypeError("column cannot have datatype: %s" % datatype)
 
 
-class TableDescriptor:
+class TableDescriptor(object):
     def __init__(self, tablename, columns):
         self.tablename = tablename
         self.columns = {}
