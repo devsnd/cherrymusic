@@ -428,7 +428,7 @@ class HTTPHandler(object):
             public=1 if pl['public'] else 0,
             playlist=pl['playlist'],
             playlisttitle=pl['playlistname'],
-            overwrite=True if 'overwrite' in pl and pl['overwrite'] else False);
+            overwrite= pl.get('overwrite', False) )
         if res == "success":
             return res
         else:
