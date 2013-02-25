@@ -54,12 +54,15 @@ class PlaylistDB:
         cursor.execute("""DELETE FROM tracks WHERE playlistid = ?""",(plid,))
         self.conn.commit()
 
-    def savePlaylist(self, userid, public, playlist, playlisttitle):
+    def savePlaylist(self, userid, public, playlist, playlisttitle, overwrite=False):
         if not len(playlist):
             return 'I will not create an empty playlist. sorry.'
-        duplicatetitles = self.conn.execute("""SELECT * FROM playlists
-            WHERE userid = ? AND title = ?""",(userid,playlisttitle)).fetchall()
-        if not duplicatetitles:
+        duplicateplaylistid = self.conn.execute("""SELECT rowid FROM playlists
+            WHERE userid = ? AND title = ?""",(userid,playlisttitle)).fetchone()
+        if duplicateplaylistid and overwrite:
+            self.deletePlaylist(duplicateplaylistid[0], userid)
+            duplicateplaylistid = False
+        if not duplicateplaylistid:
             cursor = self.conn.cursor()
             cursor.execute("""INSERT INTO playlists
                 (title, userid, public) VALUES (?,?,?)""",

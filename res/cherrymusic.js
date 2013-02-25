@@ -41,6 +41,7 @@ var availableDecoders = undefined;
 var transcodingEnabled = undefined;
 var userOptions = undefined;
 var isAdmin = undefined;
+var loggedInUserName = undefined;
 var REMEMBER_PLAYLIST_INTERVAL = 3000;
 var HEARTBEAT_INTERVAL_MS = 30*1000;
 
@@ -93,6 +94,13 @@ function api(data_or_action, successfunc, errorfunc, background){
     });
 }
 
+htmlencode = function(val){
+    return $('<div />').text(val?val:'').html();
+}
+htmldecode = function(val){
+    return $('<div />').html(val?val:'').text();
+}
+
 function errorFunc(msg){
     "use strict";
     return function(){
@@ -106,14 +114,18 @@ function successNotify(msg){
 }
 
 function renderUserMessage(msg, type){
-    if(type == 'error'){
-        cssclass = 'alert-error';
-    } else if(type == 'success'){
-        cssclass = 'alert-success';
-    } else {
-        cssclass = '';
-    }
-    return '<div class="alert '+cssclass+'"><button type="button" class="close" data-dismiss="alert">&times;</button>'+msg+'</div>';
+    return Mustache.render([
+        '<div class="alert {{cssclass}}">',
+            '<button type="button" class="close" data-dismiss="alert">',
+                '&times;',
+            '</button>',
+            '{{msg}}',
+        '</div>',
+    ].join(''),
+    {
+        msg : msg,
+        cssclass: type=='error'?'alert-error':type=='success'?'alert-success':''
+    });
 }
 
 function displayNotification(msg,type){
@@ -138,6 +150,7 @@ function loadConfig(){
         availableDecoders = dictatedClientConfig.getdecoders;
         transcodingEnabled = dictatedClientConfig.transcodingenabled;
         isAdmin = dictatedClientConfig.isadmin;
+        loggedInUserName = dictatedClientConfig.username;
         for(var i=0; i<executeAfterConfigLoaded.length; i++){
             executeAfterConfigLoaded[i]();
         }
@@ -292,59 +305,80 @@ function renderList(l){
     "use strict";
     var html = "";
     $.each(l, function(i, e) {
-        switch(e.type){
-            case 'file':
-                html += listify(renderFile(e.label,e.urlpath,e.path),'class="fileinlist"');
-                break;
-            case 'dir':
-                html += listify(renderDir(e.label,e.urlpath,e.path));
-                break;
-            case 'compact':
-                html += listify(renderCompact(e.label,e.urlpath,e.label));
-                break;
-            default:
-                errorFunc('server response is not valid!')();
-                break;
-        }
+        html+=Mustache.render([
+            '{{#isfile}}',
+                '<li class="fileinlist">',
+                    '<a title="{{label}}" href="javascript:;" class="mp3file" path="{{fileurl}}">',
+                        '<span class="fullpathlabel">',
+                            '{{fullpath}}',
+                        '</span>',
+                        '{{label}}',
+                    '</a>',
+                '</li>',
+            '{{/isfile}}',
+            '{{#isdir}}',
+                '<li>',
+                    '<a dir="{{dirpath}}" href="javascript:;" class="listdir">',
+                        '{{^isrootdir}}',
+                                '{{{coverartfetcher}}}',
+                        '{{/isrootdir}}',
+                        '<div class="listdir-name-wrap">',
+                            '<span class="listdir-name">{{dirpath}}<span>',
+                        '</div>',
+                    '</a>',
+                '</li>',
+            '{{/isdir}}',
+            '{{#iscompact}}',
+                '<li>',
+                   '<a dir="{{filepath}}" filter="{{filter}}" href="javascript:;" class="compactlistdir">',
+                        '{{filterUPPER}}',
+                    '</a>',
+                '</li>',
+            '{{/iscompact}}',
+            ].join(''),
+            {
+                isfile: e.type == 'file',
+                label: e.label,
+                fullpath: e.path,
+                fileurl : e.urlpath,
+                
+                isdir: e.type == 'dir',
+                dirpath: e.path,
+                isrootdir: e.path && !e.path.indexOf('/')>0,
+                coverartfetcher: function(){
+                    return renderCoverArtFetcher(encodeURIComponent(JSON.stringify({'directory' : e.path})))
+                },
+                
+                iscompact: e.type == 'compact',
+                filepath: e.urlpath,
+                filter: e.label,
+                filterUPPER: e.label.toUpperCase(),
+            });
     });
-    return ulistify(html);
-}
-function renderDir(label,urlpath,dirpath){
-    "use strict";
-    var rendereddir = '<a dir="'+dirpath+'" href="javascript:;" class="listdir">';
-    if(dirpath.indexOf('/')>0){
-        var searchterms = encodeURIComponent(JSON.stringify({'directory' : dirpath}))
-        //rendereddir += '<div class="changealbumart-button" onclick="showAlbumArtChangePopOver($(this))"></div>';
-        rendereddir += '<img src="/api/fetchalbumart/'+searchterms+'" width="80" height="80" />';
+    if(html==""){
+        html += '<li><div style="text-align: center">Nothing found. Sorry.</div></li>'
     }
-    return rendereddir+'<div class="listdir-name-wrap"><span class="listdir-name">'+dirpath+'<span></div></a>';
-}
-function renderFile(label,urlpath,dirpath){
-    "use strict";
-    var fullpathlabel = Mustache.render('<span class="fullpathlabel">{{fpdirpath}}</span>',{fpdirpath:dirpath});
-    return Mustache.render('<a title="{{atitle}}" href="{{ahref}}" class="{{acssclass}}" path="{{apath}}">{{{afullpathlabel}}} {{alabel}}</a>', {
-        atitle : label,
-        alabel: label,
-        ahref : 'javascript:;',
-        acssclass : 'mp3file',
-        apath : urlpath,
-        afullpathlabel : fullpathlabel,
-    });
-}
-function renderCompact(label,filepath, filter){
-    "use strict";
-    return '<a dir="'+filepath+'" filter="'+filter+'" href="javascript:;" class="compactlistdir">'+filter.toUpperCase()+'</a>';
-}
-function listify(html, classes){
-    "use strict";
-    if(!classes){classes='';}
-    return '<li '+classes+'>'+html+'</li>';
-}
-function ulistify(html){
-    "use strict";
     return '<ul>'+html+'</ul>';
 }
 
+function renderCoverArtFetcher(searchterms){
+    return ['<div class="albumart-display unloaded" search-data="'+searchterms+'">',
+    '<img src="/res/img/folder.png" width="80" height="80" />',
+    '</div>'].join('');
+}
+
+function albumArtLoader(){
+    var winpos = $(window).height()+$(window).scrollTop();
+    $('.albumart-display.unloaded').each(
+        function(idx){
+            if($(this).position().top < winpos){
+               $(this).find('img').attr('src', '/api/fetchalbumart/'+$(this).attr('search-data'));
+               $(this).removeClass('unloaded');
+            }
+        }
+    );
+}
+    
 /***
 INTERACTION
 ***/
@@ -370,6 +404,7 @@ listdirclick = function(mode){
                 registercompactlistdirs($(currdir).parent().find('ul'));
                 registermp3s($(currdir).parent().find('ul'));
                 $(currdir).siblings("ul").hide().slideDown('fast');
+                albumArtLoader();
             };
             api(data,success,errorFunc('unable to list directory'));
         }
@@ -398,6 +433,7 @@ compactlistdirclick = function(){
             registercompactlistdirs($(currdir).parent().find('ul'));
             registermp3s($(currdir).parent().find('ul'));
             $(currdir).siblings("ul").slideDown('slow');
+            albumArtLoader();
         };
         api(data,success,errorFunc('unable to list compact directory'));
     }
@@ -527,13 +563,18 @@ function savePlaylistAndHideDialog(){
     return false;
 }
 
-function savePlaylist(plid,playlistname,ispublic){
+function savePlaylist(plid,playlistname,ispublic,overwrite){
     "use strict";
+    var pl = playlistManager.getPlaylistById(plid);
+    overwrite = Boolean(overwrite);
+    ispublic = ispublic || pl.public;
+    playlistname = playlistname || pl.name;
     var data = { 'action':'saveplaylist',
                 'value':JSON.stringify({
-                            'playlist':playlistManager.getPlaylistById(plid).jplayerplaylist.playlist,
+                            'playlist':pl.jplayerplaylist.playlist,
                             'public':ispublic,
-                            'playlistname':playlistname
+                            'playlistname':playlistname,
+                            'overwrite':overwrite,
                         })
                 };
     var success = function(){
@@ -577,58 +618,63 @@ function showPlaylists(){
             var addressAndPort = getAddrPort();
             var pls = '<ul>';
             $.each($.parseJSON(data),function(i,e){
-                var plsentry = ['<li id="playlist{{playlistid}}">',
+                pls += Mustache.render([
+                '<li id="playlist{{playlistid}}">',
                     '<div class="remoteplaylist">',
                         '<div class="playlisttitle">',
                             '<a href="javascript:;" onclick="loadPlaylist({{playlistid}}, \'{{playlistlabel}}\')">',
                             '{{playlistlabel}}',
                             '</a>',
                         '</div>',
-                    ];
-                    if(e.owner){
-                        plsentry.push(
+                    
+                        '{{#isowner}}',
                             '<div class="ispublic">',
-                                '<span class="label {{publiclabelclass}}">{{publicorprivate}} <input onchange="changePlaylist({{playlistid}},\'public\',$(this).is(\':checked\'))" type="checkbox" {{publicchecked}}></span>',
-                            '</div>'
-                        );
-                    }
-                    plsentry.push(
-                        '<div class="usernamelabel">',
-                            '<span class="badge" style="background-color: {{usernamelabelcolor}}" >{{username}}</span>',
-                        '</div>',
+                                '<span class="label {{publiclabelclass}}">',
+                                    '{{publicorprivate}}',
+                                    '<input onchange="changePlaylist({{playlistid}},\'public\',$(this).is(\':checked\'))" type="checkbox" {{publicchecked}}>',
+                                    '</span>',
+                            '</div>',
+                        '{{/isowner}}',                   
+                        
+                        '{{{usernamelabel}}}',
+                        
                         '<div class="deletebutton">',
-                        '<a href="javascript:;" class="btn btn-mini btn-danger" onclick="confirmDeletePlaylist({{playlistid}}, \'{{playlistlabel}}\')">x</a>',
-                        '</div>');
-                    if(userOptions.misc.show_playlist_download_buttons){
-                        plsentry.push('<div class="dlbutton">',
-                            '<a class="btn btn-mini" href="/api/downloadpls?value={{dlval}}">',
-                            '&darr;&nbsp;PLS',
-                            '</a>',
+                            '<a href="javascript:;" class="btn btn-mini btn-danger" onclick="confirmDeletePlaylist({{playlistid}}, \'{{playlistlabel}}\')">x</a>',
                         '</div>',
-                        '<div class="dlbutton">',
-                            '<a class="btn btn-mini" href="/api/downloadm3u?value={{dlval}}">',
-                            '&darr;&nbsp;M3U',
-                            '</a>',
-                        '</div>');
-                    }
-                    plsentry.push( '</div>',
-                        '<div class="playlistcontent">',
-                        '</div>',
-                        '</li>'
-                    );
-                pls += Mustache.render(plsentry.join(''),
+                        
+                        '{{#showdownloadbuttons}}',
+                            '<div class="dlbutton">',
+                                '<a class="btn btn-mini" href="/api/downloadpls?value={{dlval}}">',
+                                '&darr;&nbsp;PLS',
+                                '</a>',
+                            '</div>',
+                            '<div class="dlbutton">',
+                                '<a class="btn btn-mini" href="/api/downloadm3u?value={{dlval}}">',
+                                '&darr;&nbsp;M3U',
+                                '</a>',
+                            '</div>',
+                        '{{/showdownloadbuttons}}',
+                        
+                    '</div>',
+                    '<div class="playlistcontent">',
+                    '</div>',
+                '</li>'
+                ].join(''),
                     {
-                    playlistid:e['plid'],
+                    playlistid: e['plid'],
+                    isowner: e.owner,
+                    showdownloadbuttons: userOptions.misc.show_playlist_download_buttons,
                     playlistlabel:e['title'],
                     dlval : JSON.stringify({ 'plid' : e['plid'],
                         'addr' : addressAndPort
                         }),
                     username: e['username'],
-                    usernamelabelcolor: userNameToColor(e['username']),
+                    usernamelabel: renderUserNameLabel(e['username']),
                     publicchecked: e['public'] ? 'checked="checked"' : '',
                     publicorprivate: e['public'] ? 'public' : 'private',
                     publiclabelclass : e['public'] ? 'label-success' : 'label-info',
-                    });
+                    }
+                );
             });
             pls += '</ul>';
             $('.available-playlists').html(pls);
@@ -640,6 +686,21 @@ function showPlaylists(){
     var error = errorFunc('error loading external playlists');
 
     api('showplaylists',success,error);
+}
+
+renderUserNameLabel = function(username){
+    return Mustache.render([
+        '<div class="usernamelabel">',
+            '<span class="badge" style="background-color: {{hexcolor}}">',
+                '{{username}}',
+            '</span>',
+        '</div>'
+    ].join(''),
+    {
+        hexcolor: userNameToColor(username),
+        username: username,
+    }
+    );
 }
 
 function changePlaylist(plid,attrname,value){
@@ -669,7 +730,7 @@ function confirmDeletePlaylist(id,title){
         $('#dialog').fadeOut('fast');
         showPlaylists();
     });
-    $('#deleteplaylistmodalLabel').html('Really delete Playlist "'+title+'"');
+    $('#deleteplaylistmodalLabel').html(Mustache.render('Really delete Playlist "{{title}}"',{title:title}));
     $('#deleteplaylistmodal').modal('show');
 }
 
@@ -730,27 +791,35 @@ function updateUserList(){
         var htmllist = "";
         var response = $.parseJSON(data);
         var time = response['time'];
-        $.each(response['userlist'],function(i,e){
+        $.each(response['userlist'],function(i,e){           
             var reltime = time - e.last_time_online;
-            var fuzzytime = time2text(reltime);
-            var isonline = reltime < HEARTBEAT_INTERVAL_MS/500;
-            if(e.admin){
-                htmllist += '<li class="admin">';
-            } else {
-                htmllist += '<li>';
-            }
-            var delbutton = '';
-            if(e.deletable){
-                delbutton = '<a class="btn btn-mini btn-danger" href="javascript:;" onclick="userDelete('+e.id+')">delete</a>';
-            }
-            var onlinetag = isonline ? '<span class="badge badge-success">&#x2022;</span>' : '<span class="badge badge-important">&#x2022;</span>';
-            var usernamelabelstyle = ' style="background-color: '+userNameToColor(e.username)+';" ';
-            htmllist += '<div class="row-fluid">';
-                htmllist += '<div class="span1">'+onlinetag+'</div>';
-                htmllist += '<div class="span4"><span '+usernamelabelstyle+' class="label">'+e.username+'</span></div>';
-                htmllist += '<div class="span5"> last seen: '+fuzzytime+'</div>';
-                htmllist += '<div class="span2">'+delbutton+'</div>';
-            htmllist += '</div>';
+            htmllist += Mustache.render([
+                '<li {{#isadmin}}class="admin"{{/isadmin}}>',
+                    '<div class="row-fluid">',
+                        '<div class="span1">',
+                            '<span class="badge ',
+                                '{{#isonline}}badge-success{{/isonline}}',
+                                '{{^isonline}}badge-important{{/isonline}}',
+                                '">&#x2022;',
+                            '</span>',
+                        '</div>',
+                        '<div class="span4">{{{usernamelabel}}}</div>',
+                        '<div class="span5"> last seen: {{fuzzytime}}</div>',
+                        '<div class="span2">',
+                            '{{#isdeletable}}',
+                                '<a class="btn btn-mini btn-danger" href="javascript:;" onclick="userDelete({{userid}})">delete</a>',
+                            '{{/isdeletable}}',
+                        '</div>',
+                    '</div>',
+                '</li>',
+            ].join(''),{
+                isadmin: e.admin,
+                isdeletable: e.deletable,
+                userid: e.id,
+                isonline: reltime < HEARTBEAT_INTERVAL_MS/500,
+                usernamelabel: renderUserNameLabel(e.username),
+                fuzzytime: time2text(reltime),
+            });
         });
         $('#adminuserlist').html(htmllist);
     };
@@ -815,7 +884,7 @@ MESSAGE OF THE DAY
 function fetchMessageOfTheDay(){
     "use strict";
     var success = function(data){
-        $('#oneliner').html(data);
+        $('#oneliner').text(data);
     };
     api('getmotd', success, errorFunc('could not fetch message of the day'));
 }
@@ -874,7 +943,7 @@ function getFileTypeByExt(filepath){
 }
 
 function detectBrowser(){
-    var browsers = ['midori','firefox','msie','chrome','safari']
+    var browsers = ['midori','firefox','msie','chrome','safari','opera']
     for(var i=0; i<browsers.length; i++){
         if(navigator.userAgent.toLowerCase().indexOf(browsers[i])!=-1){
             return browsers[i];
@@ -1054,6 +1123,7 @@ function disableMobileSwiping(){
     $('body').removeAttr('style');
     $('html').removeAttr('style');
 }
+
 /***
 ON DOCUMENT READY... STEADY... GO!
 ***/
@@ -1066,6 +1136,7 @@ $(document).ready(function(){
     $('#searchfield .bigbutton').click(submitsearch);
     $('.hideplaylisttab').hide();
     executeAfterConfigLoaded.push(function(){ playlistManager = new PlaylistManager() });
+    executeAfterConfigLoaded.push(function(){ $('#username-label').text('('+loggedInUserName+')') });
     loadConfig();
     loadUserOptions(initKeyboardshortcuts);
     //register top level directories
@@ -1103,5 +1174,7 @@ $(document).ready(function(){
                         errorFunc('Error setting option!')
         );
     });
+    //enable loading of images when in viewport
+    window.onscroll = albumArtLoader;
     //enableMobileSwiping();
 });

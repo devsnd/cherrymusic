@@ -437,7 +437,8 @@ class HTTPHandler(object):
             userid=self.getUserId(),
             public=1 if pl['public'] else 0,
             playlist=pl['playlist'],
-            playlisttitle=pl['playlistname']);
+            playlisttitle=pl['playlistname'],
+            overwrite= pl.get('overwrite', False) )
         if res == "success":
             return res
         else:
@@ -552,6 +553,7 @@ class HTTPHandler(object):
             'transcodingenabled' : cherry.config.media.transcode.bool,
             'fetchalbumart' : cherry.config.media.fetch_album_art.bool,
             'isadmin' : cherrypy.session['admin'],
+            'username' : cherrypy.session['username'],
         }
         if cherry.config.media.transcode.bool:
             clientconfigkeys['getdecoders'] = self.model.transcoder.availableDecoderFormats()
