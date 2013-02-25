@@ -474,14 +474,16 @@ class HTTPHandler(object):
         """DEPRECATED"""
         return json.dumps(cherry.config.media.playable.list)
 
-    def api_getuserlist(self,value):
+    def api_getuserlist(self, value):
         if cherrypy.session['admin']:
             userlist = self.userdb.getUserList()
             for user in userlist:
+                if user['id'] == cherrypy.session['userid']:    # hacky, but best spot I found for this. til.
+                    user['deletable'] = False
                 user['last_time_online'] = self.useroptions.forUser(user['id']).getOptionValue('last_time_online')
-            return json.dumps({'time':int(time.time()),'userlist':userlist})
+            return json.dumps({'time': int(time.time()), 'userlist': userlist})
         else:
-            return json.dumps({'time':0,'userlist':[]})
+            return json.dumps({'time': 0, 'userlist': []})
 
     def api_adduser(self, value):
         if cherrypy.session['admin']:
