@@ -427,7 +427,8 @@ class HTTPHandler(object):
             userid=self.getUserId(),
             public=1 if pl['public'] else 0,
             playlist=pl['playlist'],
-            playlisttitle=pl['playlistname']);
+            playlisttitle=pl['playlistname'],
+            overwrite=True if 'overwrite' in pl and pl['overwrite'] else False);
         if res == "success":
             return res
         else:
