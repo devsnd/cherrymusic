@@ -355,6 +355,9 @@ function renderList(l){
                 filterUPPER: e.label.toUpperCase(),
             });
     });
+    if(html==""){
+        html += '<li><div style="text-align: center">Nothing found. Sorry.</div></li>'
+    }
     return '<ul>'+html+'</ul>';
 }
 
