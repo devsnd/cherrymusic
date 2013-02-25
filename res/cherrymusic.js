@@ -560,13 +560,18 @@ function savePlaylistAndHideDialog(){
     return false;
 }
 
-function savePlaylist(plid,playlistname,ispublic){
+function savePlaylist(plid,playlistname,ispublic,overwrite){
     "use strict";
+    var pl = playlistManager.getPlaylistById(plid);
+    overwrite = Boolean(overwrite);
+    ispublic = ispublic || pl.public;
+    playlistname = playlistname || pl.name;
     var data = { 'action':'saveplaylist',
                 'value':JSON.stringify({
-                            'playlist':playlistManager.getPlaylistById(plid).jplayerplaylist.playlist,
+                            'playlist':pl.jplayerplaylist.playlist,
                             'public':ispublic,
-                            'playlistname':playlistname
+                            'playlistname':playlistname,
+                            'overwrite':overwrite,
                         })
                 };
     var success = function(){

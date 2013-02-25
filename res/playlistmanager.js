@@ -357,7 +357,7 @@ PlaylistManager.prototype = {
                 if(!epl.saved){
                     $('.save-current-playlist').off(); //remove old handlers
                     $('.save-current-playlist').on("click",function(){
-                        showPlaylistSaveDialog(epl.id);
+                        savePlaylist(epl.id,false,false,true);
                         $(this).blur();
                         return false;
                     });
