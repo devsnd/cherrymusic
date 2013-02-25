@@ -445,7 +445,11 @@ class HTTPHandler(object):
              raise cherrypy.HTTPError(400, res)
 
     def api_deleteplaylist(self, value):
-        return self.playlistdb.deletePlaylist(value, self.getUserId())
+        res = self.playlistdb.deletePlaylist(value, self.getUserId(), override_owner=False)
+        if res == "success":
+            return res
+        else:
+            raise cherrypy.HTTPError(400, res)  # not the ideal status code but we don't know the actual cause without parsing res
 
     def api_loadplaylist(self,value):
         return  self.jsonrenderer.render(self.playlistdb.loadPlaylist(

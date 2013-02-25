@@ -48,11 +48,19 @@ class PlaylistDB:
             self.conn.commit()
             log.d('done.')
             log.d('Connected to Database. (' + PLAYLISTDBFILE + ')')
-    def deletePlaylist(self, plid, userid):
+
+    def deletePlaylist(self, plid, userid, override_owner=False):
         cursor = self.conn.cursor()
-        cursor.execute("""DELETE FROM playlists WHERE rowid = ? and userid = ?""",(plid,userid))
-        cursor.execute("""DELETE FROM tracks WHERE playlistid = ?""",(plid,))
+        ownerid = cursor.execute(
+            "SELECT userid FROM playlists WHERE rowid = ?", (plid,)).fetchone()
+        if not ownerid:
+            return "This playlist doesn't exist! Nothing deleted!"
+        if userid != ownerid[0] and not override_owner:
+            return "This playlist belongs to another user! Nothing deleted."
+        cursor.execute("""DELETE FROM playlists WHERE rowid = ?""", (plid,))
+        cursor.execute("""DELETE FROM tracks WHERE playlistid = ?""", (plid,))
         self.conn.commit()
+        return 'success'
 
     def savePlaylist(self, userid, public, playlist, playlisttitle, overwrite=False):
         if not len(playlist):
