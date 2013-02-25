@@ -298,11 +298,22 @@ PlaylistManager.prototype = {
         this.getPlayingPlaylist().jplayerplaylist.next();
     },
     checkFlashBlock : function(){
+        flashBlocked = false;
         
-        $('#jquery_jplayer_1 div').css('background-color', '#fff');
-        this.flashSize('100%','80px','10000');
-        //detect firefox flashblock:
-        if(typeof $('#jquery_jplayer_1 div').attr('dataattribute') !== 'undefined'){
+        if(detectBrowser() == 'opera'){
+            try {
+                window.document.getElementById('jp_flash_0').SetVariable("flashblock", "flashblock");
+            } catch(err) {
+                flashBlocked = true;
+            }
+        } else {
+            //works for firefox and chrome    
+            flashBlocked = typeof $('#jquery_jplayer_1 div').attr('dataattribute') !== 'undefined';
+        }
+        
+        if(flashBlocked){ 
+            $('#jquery_jplayer_1 div').css('background-color', '#fff');
+            this.flashSize('100%','80px','10000');
             errorFunc('Flashblock is enabled. Please click on the flash symbol on top of the player to activate flash.')();
         } else {
             window.clearInterval(this.flashBlockCheckIntervalId);
@@ -352,8 +363,8 @@ PlaylistManager.prototype = {
                 $('.save-current-playlist').hide();
             } else {
                 $('.new-playlist-from-queue').hide();
-                $('.clear-playlist').hide()
-                $('.remove-played-tracks').hide()
+                $('.clear-playlist').hide();
+                $('.remove-played-tracks').hide();
                 if(!epl.saved){
                     $('.save-current-playlist').off(); //remove old handlers
                     $('.save-current-playlist').on("click",function(){
@@ -370,7 +381,8 @@ PlaylistManager.prototype = {
             var remaintracks = epl.getRemainingTracks();
             var completetimesec = epl.getPlayTimeSec(epl.jplayerplaylist.playlist);
             var remaintimesec = epl.getPlayTimeSec(remaintracks);
-            if(epl.id === this.getPlayingPlaylist().id){
+            var playingPlaylist = this.getPlayingPlaylist();
+            if(playingPlaylist && epl.id === playingPlaylist.id){
                 remaintimesec -= $(this.cssSelectorjPlayer).data("jPlayer").status.currentTime;
             }
             remaintimesec = remaintimesec < 0 ? 0 : remaintimesec;

@@ -943,7 +943,7 @@ function getFileTypeByExt(filepath){
 }
 
 function detectBrowser(){
-    var browsers = ['midori','firefox','msie','chrome','safari']
+    var browsers = ['midori','firefox','msie','chrome','safari','opera']
     for(var i=0; i<browsers.length; i++){
         if(navigator.userAgent.toLowerCase().indexOf(browsers[i])!=-1){
             return browsers[i];
