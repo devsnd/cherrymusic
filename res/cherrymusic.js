@@ -859,6 +859,9 @@ function userDelete(userid){
     api(data,success,errorFunc('failed to delete user'));
 }
 function userChangePassword(){
+    if (! validateNewPassword($('#newpassword-change'), $('#repeatpassword-change'))) {
+        return false;
+    }
     var data = {'action':'userchangepassword',
                 'value' : JSON.stringify({
                     'oldpassword':$('#oldpassword-change').val(),
@@ -872,6 +875,16 @@ function userChangePassword(){
         successNotify('Password changed successfully!')();
     };
     api(data,success,errorFunc('failed to change password'));
+}
+function validateNewPassword($newpwfield, $repeatpwfield){
+    var newpw = $newpwfield.val();
+    var repeatpw = $repeatpwfield.val();
+    if (newpw == repeatpw) {
+        $repeatpwfield.closest('.control-group').removeClass('error')
+        return true;
+    }
+    $repeatpwfield.closest('.control-group').addClass('error')
+    return false;
 }
 
 function enableJplayerDebugging(){
