@@ -164,9 +164,15 @@ class HTTPHandler(object):
     index.exposed = True
 
     def isAuthorized(self):
-        return cherrypy.session.get('username', None) or self.autoLoginEnabled()
+        sessionUsername = cherrypy.session.get('username', None)
+        if not sessionUsername:
+            return self.autoLoginIfPossible()
+        elif sessionUsername != self.userdb.getNameById(cherrypy.session['userid']):
+            self.api_logout(value=None)
+            return False
+        return True
 
-    def autoLoginEnabled(self):
+    def autoLoginIfPossible(self):
         if cherrypy.request.remote.ip in ('127.0.0.1', '::1') and cherry.config.server.localhost_auto_login.bool:
             cherrypy.session['username'] = self.userdb.getNameById(1)
             cherrypy.session['userid'] = 1
@@ -227,7 +233,7 @@ class HTTPHandler(object):
         handler = self.handlers[action]
         needsAuth = not ('noauth' in dir(handler) and handler.noauth)
         if needsAuth and not self.isAuthorized():
-            raise cherrypy.HTTPRedirect(self.getBaseUrl(), 302)
+            raise cherrypy.HTTPError(401, 'Unauthorized')
         #parse value (is list of arguments, but if the list has only
         #one element, this element is directly passed to the handler)
         value=kwargs.get('value','')
