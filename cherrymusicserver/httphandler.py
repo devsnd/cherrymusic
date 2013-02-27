@@ -497,12 +497,12 @@ class HTTPHandler(object):
         isself = not 'userid' in params
         if isself:
             params['username'] = cherrypy.session['username']
-            if not self.userdb.auth(params['username'], params['oldpassword']):
-                 raise cherrypy.HTTPError("401 Unauthorized")
+            if userdb.User.nobody() == self.userdb.auth(params['username'], params['oldpassword']):
+                raise cherrypy.HTTPError(401, "Unauthorized")
         if isself or cherrypy.session['admin']:
             return self.userdb.changePassword(params['username'], params['newpassword'])
         else:
-            raise cherrypy.HTTPError("401 Unauthorized")
+            raise cherrypy.HTTPError(403, "Forbidden")
 
     def api_userdelete(self, value):
         params = json.loads(value)
