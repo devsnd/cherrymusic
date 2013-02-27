@@ -864,7 +864,9 @@ function userChangePassword(){
                     'oldpassword':$('#oldpassword-change').val(),
                     'newpassword':$('#newpassword-change').val()
                 })};
+    $('#oldpassword-change').val('');
     var success = function(data){
+        $('#changePassword').find('input').each(function(idx, el) { $(el).val(''); } )
         $('#changePassword').modal('hide');
         $('#userOptions').modal('hide');
         successNotify('Password changed successfully!')();
