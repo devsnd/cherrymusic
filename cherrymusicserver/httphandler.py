@@ -360,7 +360,7 @@ class HTTPHandler(object):
         cherrypy.session.release_lock()
         params = json.loads(value)
         directory = params['directory']
-        
+
         #try getting a cached album art image
         b64imgpath = albumArtFilePath(directory)
         img_data = self.albumartcache_load(b64imgpath)
@@ -370,9 +370,9 @@ class HTTPHandler(object):
 
         #try getting album art inside local folder
         fetcher = albumartfetcher.AlbumArtFetcher()
-        localpath = os.path.join(cherry.config.media.basedir.str, directory) 
+        localpath = os.path.join(cherry.config.media.basedir.str, directory)
         header, data, resized = fetcher.fetchLocal(localpath)
-            
+
         if header:
             if resized:
                 #cache resized image for next time
@@ -394,12 +394,12 @@ class HTTPHandler(object):
                 return data
         cherrypy.HTTPRedirect("/res/img/folder.png", 302)
     api_fetchalbumart.noauth = True
-    
+
     def albumartcache_load(self, imgb64path):
         if os.path.exists(imgb64path):
             with open(imgb64path,'rb') as f:
                 return f.read()
-        
+
     def albumartcache_save(self, path, data):
         with open(path,'wb') as f:
             f.write(data)
@@ -456,7 +456,7 @@ class HTTPHandler(object):
                             playlistid=value,
                             userid=self.getUserId()
                 ));
-            
+
     def api_changeplaylist(self, value):
         params = json.loads(value)
         if params['attribute'] == 'public' and type(params['value']) == bool and type(params['plid']) == int:
@@ -491,7 +491,7 @@ class HTTPHandler(object):
             return self.userdb.addUser(new['username'], new['password'], new['isadmin'])
         else:
             return "You didn't think that would work, did you?"
-    
+
     def api_userchangepassword(self, value):
         params = json.loads(value)
         isself = not 'userid' in params
@@ -500,7 +500,7 @@ class HTTPHandler(object):
             if not self.userdb.auth(params['username'], params['oldpassword']):
                  raise cherrypy.HTTPError("401 Unauthorized")
         if isself or cherrypy.session['admin']:
-            return self.userdb.changePassword(params['username'],params['newpassword'])
+            return self.userdb.changePassword(params['username'], params['newpassword'])
         else:
             raise cherrypy.HTTPError("401 Unauthorized")
 
