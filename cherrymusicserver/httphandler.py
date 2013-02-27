@@ -167,7 +167,7 @@ class HTTPHandler(object):
         return cherrypy.session.get('username', None) or self.autoLoginEnabled()
 
     def autoLoginEnabled(self):
-        if cherrypy.request.remote.ip not in ('127.0.0.1', '::1') and cherry.config.server.localhost_auto_login.bool:
+        if cherrypy.request.remote.ip in ('127.0.0.1', '::1') and cherry.config.server.localhost_auto_login.bool:
             cherrypy.session['username'] = self.userdb.getNameById(1)
             cherrypy.session['userid'] = 1
             cherrypy.session['admin'] = True
