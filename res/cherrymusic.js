@@ -776,7 +776,7 @@ OTHER
 
 function logout(){
     "use strict";
-    var success = function(data){ reload(); };
+    var success = function(data){ location.reload(true); };
     api('logout',success);
 }
 
