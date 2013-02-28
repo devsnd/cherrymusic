@@ -39,7 +39,7 @@ setup(
     url = "http://www.fomori.org/cherrymusic/",
     license = 'GPL',
     install_requires=["CherryPy >= 3.2.2"],
-    packages = module('cherrymusicserver')+module('audioread')+module('audiotranscode')+module('unidecode')+module('cmbootstrap')+module('backport'),
+    packages = module('cherrymusicserver')+module('audioread')+module('audiotranscode')+module('cmbootstrap')+module('backport'),
     #startup script
     scripts = ['cherrymusic','cherrymusicd'],
     console = [

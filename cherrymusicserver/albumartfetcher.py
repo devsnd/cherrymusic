@@ -9,8 +9,13 @@ import os.path
 import codecs
 import re
 import subprocess
-from unidecode import unidecode
 from cherrymusicserver import log
+
+#unidecode is opt-dependency
+try:
+    from unidecode import unidecode
+except ImportError:
+    unidecode = lambda x: x
 
 class AlbumArtFetcher:
     def __init__(self,method='amazon', timeout=10):
