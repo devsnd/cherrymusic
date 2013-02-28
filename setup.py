@@ -1,17 +1,42 @@
 from distutils.core import setup
 import os
 import cherrymusicserver
+import subprocess
+import codecs
 from cherrymusicserver import pathprovider
 try:
     import py2exe
 except ImportError:
     pass
 
-def listFilesRec(crawlpath, installpath):
+import gzip
+def gzipManPages():
+    localManPagePath = 'doc/man'
+    for manpage in os.listdir(localManPagePath):
+        #man pages end in numbers
+        if manpage.endswith(tuple(map(str,range(10)))):
+            manpagefn = os.path.join(localManPagePath, manpage)
+            with open(manpagefn, 'rb') as manfile:
+                with gzip.open(manpagefn+'.gz', 'wb') as manfilegz:
+                    manfilegz.writelines(manfile)
+
+def getManPath():
+    manpathstr = codecs.decode(subprocess.check_output(['man','--path']),'UTF-8')
+    manpaths = manpathstr.strip().split(':')
+    #use usual posix man path if available
+    if '/usr/share/man' in manpaths:
+        return '/usr/share/man'
+    else:
+        return manpaths[0]
+
+def listFilesRec(crawlpath, installpath, filterfunc=None):
     filesperfolder = []
     for r,d,f in os.walk(crawlpath):
         files = []
         for name in f:
+            if filterfunc:
+                if not filterfunc(name):
+                    continue
             files += [os.path.join(r,name)]
         filesperfolder += [(os.path.join(installpath,r),files)]
     return filesperfolder
@@ -27,8 +52,20 @@ def module(foldername):
             ret += [subfolder.replace(os.sep,'.')]
     return ret
 
+#setup preparations:
+gzipManPages()
 shareFolder = os.path.join('share',pathprovider.sharedFolderName)
-                
+manpath = getManPath()
+
+# files to put in /usr/share
+data_files = listFilesRec('res',shareFolder)
+# man pages
+data_files += [(os.path.join(manpath,'man1'), ['doc/man/cherrymusic.1.gz'])]
+data_files += [(os.path.join(manpath,'man5'), ['doc/man/cherrymusic.conf.5.gz'])]
+data_files += [(os.path.join(manpath,'man8'), ['doc/man/cherrymusicd.8.gz'])]
+
+print(data_files)
+
 setup( 
     name = "CherryMusic",
     version = cherrymusicserver.VERSION,
@@ -42,13 +79,14 @@ setup(
     packages = module('cherrymusicserver')+module('audioread')+module('audiotranscode')+module('cmbootstrap')+module('backport'),
     #startup script
     scripts = ['cherrymusic','cherrymusicd'],
+    
+    #py2exe specific
     console = [
         {
             "icon_resources": [(1, "res/favicon.ico")],
             "script":'cherrymusic'
         }
     ],
-    #data required by the declared packages
-    data_files=listFilesRec('res',shareFolder)
+    data_files=data_files
 )
     
