@@ -82,6 +82,7 @@ class UserDB:
     def deleteUser(self, userid):
         if self.isDeletable(userid):
             self.conn.execute('''DELETE FROM users WHERE rowid = ?''', (userid,))
+            self.conn.commit()
             return True
         return False
 

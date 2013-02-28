@@ -164,10 +164,16 @@ class HTTPHandler(object):
     index.exposed = True
 
     def isAuthorized(self):
-        return cherrypy.session.get('username', None) or self.autoLoginEnabled()
+        sessionUsername = cherrypy.session.get('username', None)
+        if not sessionUsername:
+            return self.autoLoginIfPossible()
+        elif sessionUsername != self.userdb.getNameById(cherrypy.session['userid']):
+            self.api_logout(value=None)
+            return False
+        return True
 
-    def autoLoginEnabled(self):
-        if cherrypy.request.remote.ip not in ('127.0.0.1', '::1') and cherry.config.server.localhost_auto_login.bool:
+    def autoLoginIfPossible(self):
+        if cherrypy.request.remote.ip in ('127.0.0.1', '::1') and cherry.config.server.localhost_auto_login.bool:
             cherrypy.session['username'] = self.userdb.getNameById(1)
             cherrypy.session['userid'] = 1
             cherrypy.session['admin'] = True
@@ -227,7 +233,7 @@ class HTTPHandler(object):
         handler = self.handlers[action]
         needsAuth = not ('noauth' in dir(handler) and handler.noauth)
         if needsAuth and not self.isAuthorized():
-            raise cherrypy.HTTPRedirect(self.getBaseUrl(), 302)
+            raise cherrypy.HTTPError(401, 'Unauthorized')
         #parse value (is list of arguments, but if the list has only
         #one element, this element is directly passed to the handler)
         value=kwargs.get('value','')
@@ -360,7 +366,7 @@ class HTTPHandler(object):
         cherrypy.session.release_lock()
         params = json.loads(value)
         directory = params['directory']
-        
+
         #try getting a cached album art image
         b64imgpath = albumArtFilePath(directory)
         img_data = self.albumartcache_load(b64imgpath)
@@ -370,9 +376,9 @@ class HTTPHandler(object):
 
         #try getting album art inside local folder
         fetcher = albumartfetcher.AlbumArtFetcher()
-        localpath = os.path.join(cherry.config.media.basedir.str, directory) 
+        localpath = os.path.join(cherry.config.media.basedir.str, directory)
         header, data, resized = fetcher.fetchLocal(localpath)
-            
+
         if header:
             if resized:
                 #cache resized image for next time
@@ -394,12 +400,12 @@ class HTTPHandler(object):
                 return data
         cherrypy.HTTPRedirect("/res/img/folder.png", 302)
     api_fetchalbumart.noauth = True
-    
+
     def albumartcache_load(self, imgb64path):
         if os.path.exists(imgb64path):
             with open(imgb64path,'rb') as f:
                 return f.read()
-        
+
     def albumartcache_save(self, path, data):
         with open(path,'wb') as f:
             f.write(data)
@@ -445,14 +451,18 @@ class HTTPHandler(object):
              raise cherrypy.HTTPError(400, res)
 
     def api_deleteplaylist(self, value):
-        return self.playlistdb.deletePlaylist(value, self.getUserId())
+        res = self.playlistdb.deletePlaylist(value, self.getUserId(), override_owner=False)
+        if res == "success":
+            return res
+        else:
+            raise cherrypy.HTTPError(400, res)  # not the ideal status code but we don't know the actual cause without parsing res
 
     def api_loadplaylist(self,value):
         return  self.jsonrenderer.render(self.playlistdb.loadPlaylist(
                             playlistid=value,
                             userid=self.getUserId()
                 ));
-            
+
     def api_changeplaylist(self, value):
         params = json.loads(value)
         if params['attribute'] == 'public' and type(params['value']) == bool and type(params['plid']) == int:
@@ -470,14 +480,16 @@ class HTTPHandler(object):
         """DEPRECATED"""
         return json.dumps(cherry.config.media.playable.list)
 
-    def api_getuserlist(self,value):
+    def api_getuserlist(self, value):
         if cherrypy.session['admin']:
             userlist = self.userdb.getUserList()
             for user in userlist:
+                if user['id'] == cherrypy.session['userid']:    # hacky, but best spot I found for this. til.
+                    user['deletable'] = False
                 user['last_time_online'] = self.useroptions.forUser(user['id']).getOptionValue('last_time_online')
-            return json.dumps({'time':int(time.time()),'userlist':userlist})
+            return json.dumps({'time': int(time.time()), 'userlist': userlist})
         else:
-            return json.dumps({'time':0,'userlist':[]})
+            return json.dumps({'time': 0, 'userlist': []})
 
     def api_adduser(self, value):
         if cherrypy.session['admin']:
@@ -485,18 +497,18 @@ class HTTPHandler(object):
             return self.userdb.addUser(new['username'], new['password'], new['isadmin'])
         else:
             return "You didn't think that would work, did you?"
-    
+
     def api_userchangepassword(self, value):
         params = json.loads(value)
         isself = not 'userid' in params
         if isself:
             params['username'] = cherrypy.session['username']
-            if not self.userdb.auth(params['username'], params['oldpassword']):
-                 raise cherrypy.HTTPError("401 Unauthorized")
+            if userdb.User.nobody() == self.userdb.auth(params['username'], params['oldpassword']):
+                raise cherrypy.HTTPError(401, "Unauthorized")
         if isself or cherrypy.session['admin']:
-            return self.userdb.changePassword(params['username'],params['newpassword'])
+            return self.userdb.changePassword(params['username'], params['newpassword'])
         else:
-            raise cherrypy.HTTPError("401 Unauthorized")
+            raise cherrypy.HTTPError(403, "Forbidden")
 
     def api_userdelete(self, value):
         params = json.loads(value)

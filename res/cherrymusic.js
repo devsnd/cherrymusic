@@ -776,7 +776,7 @@ OTHER
 
 function logout(){
     "use strict";
-    var success = function(data){ reload(); };
+    var success = function(data){ location.reload(true); };
     api('logout',success);
 }
 
@@ -859,17 +859,32 @@ function userDelete(userid){
     api(data,success,errorFunc('failed to delete user'));
 }
 function userChangePassword(){
+    if (! validateNewPassword($('#newpassword-change'), $('#repeatpassword-change'))) {
+        return false;
+    }
     var data = {'action':'userchangepassword',
                 'value' : JSON.stringify({
                     'oldpassword':$('#oldpassword-change').val(),
                     'newpassword':$('#newpassword-change').val()
                 })};
+    $('#oldpassword-change').val('');
     var success = function(data){
+        $('#changePassword').find('input').each(function(idx, el) { $(el).val(''); } )
         $('#changePassword').modal('hide');
         $('#userOptions').modal('hide');
         successNotify('Password changed successfully!')();
     };
     api(data,success,errorFunc('failed to change password'));
+}
+function validateNewPassword($newpwfield, $repeatpwfield){
+    var newpw = $newpwfield.val();
+    var repeatpw = $repeatpwfield.val();
+    if (newpw == repeatpw) {
+        $repeatpwfield.closest('.control-group').removeClass('error')
+        return true;
+    }
+    $repeatpwfield.closest('.control-group').addClass('error')
+    return false;
 }
 
 function enableJplayerDebugging(){
