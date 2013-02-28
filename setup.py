@@ -17,8 +17,9 @@ def gzipManPages():
         if manpage.endswith(tuple(map(str,range(10)))):
             manpagefn = os.path.join(localManPagePath, manpage)
             with open(manpagefn, 'rb') as manfile:
-                with gzip.open(manpagefn+'.gz', 'wb') as manfilegz:
-                    manfilegz.writelines(manfile)
+                manfilegz = gzip.open(manpagefn+'.gz', 'wb')
+                manfilegz.writelines(manfile)
+                manfilegz.close()
 
 def getManPath():
     manpathstr = codecs.decode(subprocess.check_output(['man','--path']),'UTF-8')
@@ -59,10 +60,6 @@ manpath = getManPath()
 
 # files to put in /usr/share
 data_files = listFilesRec('res',shareFolder)
-# man pages
-data_files += [(os.path.join(manpath,'man1'), ['doc/man/cherrymusic.1.gz'])]
-data_files += [(os.path.join(manpath,'man5'), ['doc/man/cherrymusic.conf.5.gz'])]
-data_files += [(os.path.join(manpath,'man8'), ['doc/man/cherrymusicd.8.gz'])]
 
 setup( 
     name = "CherryMusic",
