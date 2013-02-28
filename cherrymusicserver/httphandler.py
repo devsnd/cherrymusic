@@ -164,7 +164,15 @@ class HTTPHandler(object):
     index.exposed = True
 
     def isAuthorized(self):
-        sessionUsername = cherrypy.session.get('username', None)
+        try:
+            sessionUsername = cherrypy.session.get('username', None)
+        except (UnicodeDecodeError, ValueError) as e:
+            # workaround for python2/python3 jump, filed bug in cherrypy
+            # https://bitbucket.org/cherrypy/cherrypy/issue/1216/sessions-python2-3-compability-unsupported
+            log.w('Dropping all sessions! Try not to change between python 2 and 3, everybody has to relogin now.')
+            cherrypy.session.delete()
+            sessionUsername = None
+        
         if not sessionUsername:
             return self.autoLoginIfPossible()
         elif sessionUsername != self.userdb.getNameById(cherrypy.session['userid']):
@@ -181,16 +189,7 @@ class HTTPHandler(object):
         return False
 
     def session_auth(self, username, password):
-        try:
             user = self.userdb.auth(username, password)
-        except (UnicodeDecodeError, ValueError) as e:
-            # workaround for python2/python3 jump, filed bug in cherrypy
-            # https://bitbucket.org/cherrypy/cherrypy/issue/1216/sessions-python2-3-compability-unsupported
-            log.w('Dropping all sessions! Try not to change between python 2 and 3, everybody has to relogin now.')
-            cherrypy.session.delete()
-            #retry with new session:
-            user = self.userdb.auth(username, password)
-        finally:
             if user.isadmin and not cherry.config.server.permit_remote_admin_login.bool and not cherrypy.request.remote.ip in ('127.0.0.1', '::1'):
                 log.i('Rejected remote admin login from user: %s'%user.name)
                 user = userdb.User.nobody()
@@ -527,6 +526,7 @@ class HTTPHandler(object):
 
     def api_logout(self,value):
         cherrypy.lib.sessions.expire()
+    api_logout.no_auth = True
 
     def api_downloadpls(self,value):
         dlval = json.loads(value)
