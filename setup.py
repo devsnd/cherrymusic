@@ -21,15 +21,6 @@ def gzipManPages():
                 manfilegz.writelines(manfile)
                 manfilegz.close()
 
-def getManPath():
-    manpathstr = codecs.decode(subprocess.check_output(['man','--path']),'UTF-8')
-    manpaths = manpathstr.strip().split(':')
-    #use usual posix man path if available
-    if '/usr/share/man' in manpaths:
-        return '/usr/share/man'
-    else:
-        return manpaths[0]
-
 def listFilesRec(crawlpath, installpath, filterfunc=None):
     filesperfolder = []
     for r,d,f in os.walk(crawlpath):
@@ -56,7 +47,6 @@ def module(foldername):
 #setup preparations:
 gzipManPages()
 shareFolder = os.path.join('share',pathprovider.sharedFolderName)
-manpath = getManPath()
 
 # files to put in /usr/share
 data_files = listFilesRec('res',shareFolder)
