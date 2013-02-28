@@ -42,6 +42,16 @@ if sys.version_info >= (3,3):
 import os
 import cherrypy
 
+cherrypyReqVersion = '3'
+cherrypyCurrVersion = str(cherrypy.__version__)
+if cherrypyCurrVersion < cherrypyReqVersion:
+    print("""
+cherrypy version is too old!
+Current version: %s
+Required version: %s or higher
+"""%(cherrypyCurrVersion,cherrypyReqVersion))
+    sys.exit(1)
+
 
 """patch cherrypy crashing on startup because of double checking
 for loopback interface, see:
