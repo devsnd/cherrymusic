@@ -72,9 +72,9 @@ LONG_DESCRIPTION = """CherryMusic is a music streaming
 
 class CherryMusic:
 
-    def __init__(self, update=None, createNewConfig=False, dropfiledb=False, setup=False):
+    def __init__(self, update=None, createNewConfig=False, dropfiledb=False, setup=False, port=False):
         if setup:
-            cherrymusicserver.setup.configureAndStartCherryPy()
+            cherrymusicserver.setup.configureAndStartCherryPy(port)
         if createNewConfig:
             newconfigpath = pathprovider.configurationFile() + '.new'
             configuration.write_to_file(configuration.from_defaults(), newconfigpath)
@@ -95,7 +95,7 @@ class CherryMusic:
         else:
             self.cherrymodel = cherrymodel.CherryModel(self.db)
             self.httphandler = httphandler.HTTPHandler(config, self.cherrymodel)
-            self.server()
+            self.server(port)
 
     class UpdateThread(threading.Thread):
         def __init__(self, db, update,dropfiledb):
@@ -188,7 +188,7 @@ Have fun!
 """)
         exit(0)
 
-    def start(self):
+    def start(self, port):
         socket_host = "127.0.0.1" if config.server.localhost_only.bool else "0.0.0.0"
 
         resourcedir = os.path.abspath(pathprovider.getResourcePath('res'))
@@ -206,8 +206,10 @@ Have fun!
             redirecter.thread_pool = 10
             redirecter.subscribe()
         else:
+            if not port:
+                port = config.server.port.int
             cherrypy.config.update({
-                'server.socket_port': config.server.port.int,
+                'server.socket_port': port,
             })
 
         cherrypy.config.update({
@@ -260,6 +262,6 @@ Have fun!
         cherrypy.server.unsubscribe()
         self.start()
 
-    def server(self):
+    def server(self, port):
         cherrypy.config.update({'log.screen': True})
-        self.start()
+        self.start(port)

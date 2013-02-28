@@ -76,11 +76,13 @@ parser.add_argument('--newconfig', dest='newconfig', action='store_true', help='
 parser.add_argument('--dropfiledb', dest='dropfiledb', action='store_true', help='Clears the file database. This might be necesary after a version jump.')
 parser.add_argument('--download-stagger', dest='downloadstagger', action='store_true', help='downloads the python module "stagger", an ID3-tag library, so that your music can be indexed more precisely. (should only be used when not installed using a package manager!)')
 parser.add_argument('--setup', dest='setup', action='store_true', help='Configure CherryMusic in your browser')
+parser.add_argument('--port', dest='port', nargs=1, help='Override the port used to start the server')
 args = parser.parse_args()
 
 if args.downloadstagger:
     cmbootstrap.DependencyInstaller().install_stagger()
 
 if __name__ == "__main__":
-    cherrymusicserver.CherryMusic(update=args.update, createNewConfig=args.newconfig, dropfiledb=args.dropfiledb,setup=args.setup)
+    port = int(args.port[0]) if args.port else False
+    cherrymusicserver.CherryMusic(update=args.update, createNewConfig=args.newconfig, dropfiledb=args.dropfiledb,setup=args.setup, port=port)
 

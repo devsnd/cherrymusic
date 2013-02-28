@@ -130,7 +130,9 @@ class Feature:
         except OSError:
             return False
 
-def configureAndStartCherryPy(port=8080):
+def configureAndStartCherryPy(port):
+        if not port:
+            port = 8080
         socket_host = "0.0.0.0"
 
         resourcedir = os.path.abspath(pathprovider.getResourcePath('res'))
