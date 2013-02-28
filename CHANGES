@@ -1,6 +1,37 @@
 Changelog
 ---------
 
+0.24.0 (2013-02-28)
+
+ - FEATURE: reworked UI using bootstrap (pretty & shiny!)
+ - FEATURE: new --setup switch enables first configuration in browser
+ - FEATURE: album art resizing (requires opt-depend ImageMagick)
+ - FEATURE: man pages!
+ - FEATURE: backward compatibility down to python 2.6
+        supporting now python 2.6, 2.7, 3.0+ and pypy
+ - FEATURE: users can change their password in the option menu
+ - IMPROVEMENT: search speed *and* quality greatly improved
+ - IMPROVEMENT: rewrite of transcoding module (works more reliably now)
+ - IMPROVEMENT: using HTML5 & Flash at the same time to reduce need to transcode
+ - IMPROVEMENT: playlist visibility can be changed in playlist browser
+ - IMPROVEMENT: users can change their passwords in the option menu
+ - IMPROVEMENT: flash block detection for opera
+ - IMPROVEMENT: better IPv6 support
+ - CHANGE: honoring XDG Base Directory Specification,
+        move the files like this to migrate:
+        $ mv ~/.cherrymusic/config $XDG_CONFIG_HOME/cherrymusic/cherrymusic.conf
+        $ mv ~/.cherrymusic/* $XDG_DATA_HOME/cherrymusic
+ - CHANGE: M3U & PLS download buttons hidden by default, can be reactivated in options
+ - CHANGE: removed unidecode from package, is now opt-depend
+ - FIX: Album art fetching doesn't stall interface anymore
+ - FIX: user online time display is now correct independent of the client time
+ - FIX: Loading or creating a playlist no longer interrupts playback
+ - FIX: Workaround for older cherrypy version on python 3.3
+ - FIX: users can no longer modify other user's public playlists
+ - FIX: invalidating session of deleted users
+ - FIX: local autologin works again
+ + a lot more (like every time)!
+
 0.23.0 (2013-01-23)
 
  - FEATURE: New 2 Column Layout (Search and Playlists side by side)
