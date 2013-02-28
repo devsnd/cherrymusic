@@ -71,7 +71,7 @@ from cherrymusicserver import log
 import cherrymusicserver.setup
 
 config = None
-VERSION = "0.23.0"
+VERSION = "0.24.0"
 DESCRIPTION = "an mp3 server for your browser"
 LONG_DESCRIPTION = """CherryMusic is a music streaming
     server written in python. It's based on cherrypy and jPlayer.
