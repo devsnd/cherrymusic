@@ -74,3 +74,34 @@ class DependencyInstaller:
             urlhandler = urllib.request.urlopen(urllib.request.Request(url))
             f.write(urlhandler.read())
         
+import sys
+try:
+    import cherrypy
+except ImportError:
+    print('''
+    CherryMusic needs the module "cherrypy" to run. You should install it 
+    using the package manager of your OS. Alternatively cherrymusic can 
+    download it for you and put it in the folder in which currently
+    CherryMusic resides.
+    ''')
+    if input("Download cherrypy now? (y/n)") == 'y':
+        inst = DependencyInstaller()
+        install_stagger = False
+        #install stagger only for python 3
+        if sys.version_info >= (3,):
+            try:
+                import stagger
+            except ImportError:
+                print("""
+    You seem to be missing the optional module "stagger", an ID3-tag
+    library. You should install it using the package manager of your OS.
+    Alternatively cherrymusic can download it for you and put it in the
+    folder in which cherrymusic resides.
+    """)
+                install_stagger = bool(input("Download ID3-tag library stagger? (y/n)") == 'y')
+        inst.install_cherrypy()
+        if install_stagger:
+            inst.install_stagger()
+        print('Successfully installed cherrymusic dependencies! You can now start cherrymusic.')
+    else:
+        sys.exit(1)

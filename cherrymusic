@@ -29,34 +29,6 @@
 #
 
 import cmbootstrap
-from backport import input
-
-try:
-    import cherrypy
-except ImportError:
-    print("""
-cherrymusic needs the module "cherrypy" to run. You should install it
-using the package manager of your OS. Alternatively cherrymusic can
-download it for you and put it in the folder in which cherrymusic resides.""")
-    if input("(d)ownload cherrypy / (q)uit and install cherrpy manually? [d/q]") == 'd':
-        inst = cmbootstrap.DependencyInstaller()
-        try:
-            install_stagger = False
-            import stagger
-        except ImportError:
-            print("""
-You seem to be missing the optional module "stagger", an ID3-tag
-library. You should install it using the package manager of your OS.
-Alternatively cherrymusic can download it for you and put it in the
-folder in which cherrymusic resides.""")
-            install_stagger = bool(input("(d)ownload stagger / (s)kip download of stagger [d/s]") == 'd')
-        inst.install_cherrypy()
-        if install_stagger:
-            inst.install_stagger()
-        print('Successfully installed cherrymusic dependencies! You can now start cherrymusic.')
-    else:
-        raise
-
 import cherrymusicserver
 try:
 	import argparse

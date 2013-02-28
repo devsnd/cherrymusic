@@ -35,8 +35,7 @@ try:
     import stagger
     has_stagger = True
 except ImportError:
-    log.w('''python library "stagger" not found!
--There will be no ID-tag support!''')
+    log.w('''python library "stagger" not found: There will be no ID-tag support!''')
     has_stagger = False
 
 try:
