@@ -64,8 +64,6 @@ data_files += [(os.path.join(manpath,'man1'), ['doc/man/cherrymusic.1.gz'])]
 data_files += [(os.path.join(manpath,'man5'), ['doc/man/cherrymusic.conf.5.gz'])]
 data_files += [(os.path.join(manpath,'man8'), ['doc/man/cherrymusicd.8.gz'])]
 
-print(data_files)
-
 setup( 
     name = "CherryMusic",
     version = cherrymusicserver.VERSION,
