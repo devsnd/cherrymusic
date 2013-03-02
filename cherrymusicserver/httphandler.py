@@ -202,7 +202,7 @@ class HTTPHandler(object):
             return cherrypy.session['userid']
         except KeyError:
             cherrypy.lib.sessions.expire()
-            cherrypy.HTTPRedirect(cherrypy.url(), 303)
+            cherrypy.HTTPRedirect(cherrypy.url(), 302)
             return ''
 
     def trans(self, *args):

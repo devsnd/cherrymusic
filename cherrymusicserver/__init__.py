@@ -262,7 +262,7 @@ Have fun!
                     'tools.staticfile.filename' : resourcedir+'/favicon.ico',
                 }
         })
-        log.i('Starting server on port %s ...' % config.server.port.str)
+        log.i('Starting server on port %s ...' % port)
 
         cherrypy.lib.caching.expires(0) #disable expiry caching
         cherrypy.engine.start()

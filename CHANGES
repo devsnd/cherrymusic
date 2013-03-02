@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+0.24.1 (2013-03-01)
+
+ - FIX: logout works also with previous request containing post-data
+
 0.24.0 (2013-02-28)
 
  - FEATURE: reworked UI using bootstrap (pretty & shiny!)
