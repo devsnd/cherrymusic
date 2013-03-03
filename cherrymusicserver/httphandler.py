@@ -212,6 +212,11 @@ class HTTPHandler(object):
         if cherry.config.media.transcode.bool and len(args):
             newformat = args[-1][4:] #get.format
             path = os.path.sep.join(args[:-1])
+            """ugly workaround for #273, should be handled somewhere in 
+            cherrypy, but don't know where...
+            """
+            path = codecs.decode(codecs.encode(path,'latin1'),'utf-8')
+            
             fullpath = os.path.join(cherry.config.media.basedir.str, path)
             transcoder = audiotranscode.AudioTranscode()
             cherrypy.response.headers["Content-Type"] = transcoder.mimeType(newformat)
