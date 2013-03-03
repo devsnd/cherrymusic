@@ -34,7 +34,7 @@ from __future__ import unicode_literals
 import sys
 import threading
 
-# woraround for cherrypy 3.2.2: 
+# woraround for cherrypy 3.2.2:
 # https://bitbucket.org/cherrypy/cherrypy/issue/1163/attributeerror-in-cherrypyprocessplugins
 if sys.version_info >= (3,3):
     threading._Timer = threading.Timer
@@ -80,7 +80,7 @@ from cherrymusicserver import httphandler
 from cherrymusicserver import util
 from cherrymusicserver import pathprovider
 from cherrymusicserver import log
-import cherrymusicserver.setup
+import cherrymusicserver.browsersetup
 
 config = None
 VERSION = "0.24.0"
@@ -96,7 +96,7 @@ class CherryMusic:
 
     def __init__(self, update=None, createNewConfig=False, dropfiledb=False, setup=False, port=False):
         if setup:
-            cherrymusicserver.setup.configureAndStartCherryPy(port)
+            cherrymusicserver.browsersetup.configureAndStartCherryPy(port)
         if createNewConfig:
             newconfigpath = pathprovider.configurationFile() + '.new'
             configuration.write_to_file(configuration.from_defaults(), newconfigpath)
@@ -274,7 +274,7 @@ Have fun!
                     'tools.staticfile.filename' : resourcedir+'/favicon.ico',
                 }
         })
-        log.i('Starting server on port %s ...' % config.server.port.str)
+        log.i('Starting server on port %s ...' % port)
 
         cherrypy.lib.caching.expires(0) #disable expiry caching
         cherrypy.engine.start()

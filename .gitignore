@@ -36,6 +36,7 @@ cherrymusic/site.log
 /playlist.db
 /user.db
 /config
+/doc/man/*.gz
 
 # Eclipse metafiles
 /.project

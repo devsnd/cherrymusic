@@ -70,11 +70,22 @@ function api(data_or_action, successfunc, errorfunc, background){
         senddata = {"value" :  data_or_action['value'] };
 
     }
-    if(!errorfunc){
-        errorfunc = function(){
-            errorFunc('calling API function "'+apiaction+'"')();
-            $('div#progressscreen').fadeOut('fast');
+    var errorFuncWrapper = function(errorFunc){
+        return function(httpstatus){
+            if(httpstatus.status == 401){
+                reloadPage();
+            }
+            errorFunc();
         }
+    }
+    var defaultErrorHandler = function(){
+        errorFunc('calling API function "'+apiaction+'"')();
+        $('div#progressscreen').fadeOut('fast');
+    };
+    if(!errorfunc){
+        errorfunc = errorFuncWrapper(defaultErrorHandler);
+    } else {
+        errorfunc = errorFuncWrapper(errorfunc);
     }
     if(!background){
         $('div#progressscreen').fadeIn('fast');
@@ -774,9 +785,15 @@ function resizePlaylistSlowly(){
 OTHER
 *****/
 
+function reloadPage(){
+    //reconstruct url to suppress page reload post-data warning
+    var reloadurl = window.location.protocol+'//'+window.location.host;
+    window.location.href = reloadurl;
+}
+
 function logout(){
     "use strict";
-    var success = function(data){ location.reload(true); };
+    var success = reloadPage;
     api('logout',success);
 }
 
