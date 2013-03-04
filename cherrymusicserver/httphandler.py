@@ -36,6 +36,7 @@ import os #shouldn't have to list any folder in the future!
 import json
 import cherrypy
 import codecs
+import sys
 try:
     from urllib.parse import unquote
 except ImportError:
@@ -215,7 +216,10 @@ class HTTPHandler(object):
             """ugly workaround for #273, should be handled somewhere in 
             cherrypy, but don't know where...
             """
-            path = codecs.decode(codecs.encode(path,'latin1'),'utf-8')
+            if sys.version_info < (3,0):
+                path = path
+            else:
+                path = codecs.decode(codecs.encode(path,'latin1'),'utf-8')
             
             fullpath = os.path.join(cherry.config.media.basedir.str, path)
             transcoder = audiotranscode.AudioTranscode()
