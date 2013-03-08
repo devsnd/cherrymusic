@@ -44,7 +44,7 @@ if 'OptionParser' in dir(argparse):
     parser.add_argument('--update', dest='update', nargs=0, default=None, help='update the media database (get Python >= 3.2 or the argparse module to choose paths)')
 else:
     parser.add_argument('--update', dest='update', nargs='*', metavar='PATH', help='update the media database. PATH must start with basedir or be relative to basedir.')
-parser.add_argument('--newconfig', dest='newconfig', action='store_true', help='creates a new config file in your home directory, e.g. ~/.cherrymusic/config.new')
+parser.add_argument('--newconfig', dest='newconfig', action='store_true', help='creates a new config file next to your current one, e.g. ~/.config/cherrymusic/cherrymusic.conf.new')
 parser.add_argument('--dropfiledb', dest='dropfiledb', action='store_true', help='Clears the file database. This might be necesary after a version jump.')
 parser.add_argument('--download-stagger', dest='downloadstagger', action='store_true', help='downloads the python module "stagger", an ID3-tag library, so that your music can be indexed more precisely. (should only be used when not installed using a package manager!)')
 parser.add_argument('--setup', dest='setup', action='store_true', help='Configure CherryMusic in your browser')
