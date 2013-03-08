@@ -51,25 +51,22 @@ import audiotranscode
 
 from cherrymusicserver import renderjson
 from cherrymusicserver import userdb
-from cherrymusicserver import playlistdb
 from cherrymusicserver import log
 from cherrymusicserver import albumartfetcher
+from cherrymusicserver import service
 from cherrymusicserver.cherrymodel import MusicEntry
 from cherrymusicserver.pathprovider import databaseFilePath, readRes, albumArtFilePath
 import cherrymusicserver as cherry
 import cherrymusicserver.metainfo as metainfo
 from cherrymusicserver.util import Performance
-from cherrymusicserver import util
-from cherrymusicserver import useroptiondb
 import time
 
 debug = True
 
+@service.user(model='cherrymodel', playlistdb='playlist', useroptions='useroptions', userdb='users')
 class HTTPHandler(object):
-    def __init__(self, config, model):
-        self.model = model
+    def __init__(self, config):
         self.config = config
-        self.useroptions = useroptiondb.UserOptionDB(databaseFilePath('useroptions.db'))
         self.jsonrenderer = renderjson.JSON()
 
         template_main = 'res/main.html'
@@ -79,8 +76,6 @@ class HTTPHandler(object):
         self.mainpage = readRes(template_main)
         self.loginpage = readRes(template_login)
         self.firstrunpage = readRes(template_firstrun)
-        self.userdb = userdb.UserDB(databaseFilePath('user.db'))
-        self.playlistdb = playlistdb.PlaylistDB(databaseFilePath('playlist.db'))
 
         self.handlers = {
             'search' : self.api_search,
@@ -173,7 +168,7 @@ class HTTPHandler(object):
             log.w('Dropping all sessions! Try not to change between python 2 and 3, everybody has to relogin now.')
             cherrypy.session.delete()
             sessionUsername = None
-        
+
         if not sessionUsername:
             return self.autoLoginIfPossible()
         elif sessionUsername != self.userdb.getNameById(cherrypy.session['userid']):

@@ -32,15 +32,21 @@ import unittest
 from cherrymusicserver import log
 log.setTest()
 
+from cherrymusicserver import database
+from cherrymusicserver import service
 from cherrymusicserver import userdb
+from cherrymusicserver.database.sql import MemConnector
+
 
 class TestAuthenticate(unittest.TestCase):
     '''test authentication functions of userdb'''
 
     def setUp(self):
-        self.users = userdb.UserDB(':memory:')
+        service.provide(MemConnector)
+        database.ensure_requirements(userdb.DBNAME)
+        self.users = userdb.UserDB()
         self.users.addUser('user', 'password', False)
-        
+
         #unittest2 compability
         if not hasattr(self,'assertTupleEqual'):
             def assertTupEq(t1,t2,msg):
@@ -79,21 +85,21 @@ class TestAuthenticate(unittest.TestCase):
 
         self.assertTupleEqual(userdb.User.nobody(), authuser,
                          'authentication failure must return invalid user')
-                         
+
     def testChangePassword(self):
         #create new user
         self.users.addUser('newpwuser', 'password', False)
         msg = self.users.changePassword('newpwuser', 'newpassword')
         self.assertEqual(msg, "success")
-        
+
         authuser = self.users.auth('newpwuser', 'password')
         self.assertTupleEqual(userdb.User.nobody(), authuser,
                          'authentication with old password after change must fail')
-        
+
         authuser = self.users.auth('newpwuser', 'newpassword')
         self.assertEqual('newpwuser', authuser.name,
                          'authentication with new passowrd failed')
-        
+
 
 
 if __name__ == "__main__":

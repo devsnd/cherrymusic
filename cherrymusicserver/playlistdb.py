@@ -28,26 +28,23 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
-import os
-import sqlite3
+from cherrymusicserver import database
 from cherrymusicserver import log
+from cherrymusicserver import service
 from cherrymusicserver.cherrymodel import MusicEntry
+from cherrymusicserver.database.connect import BoundConnector
 try:
     from urllib.parse import unquote
 except ImportError:
     from backport.urllib.parse import unquote
 
+DBNAME = 'playlist'
+
+@service.provider('playlist')
 class PlaylistDB:
-    def __init__(self, PLAYLISTDBFILE):
-        setupDB = not os.path.isfile(PLAYLISTDBFILE) or os.path.getsize(PLAYLISTDBFILE) == 0
-        self.conn = sqlite3.connect(PLAYLISTDBFILE, check_same_thread=False)
-        if setupDB:
-            log.d('Creating playlist db...')
-            self.conn.execute('CREATE TABLE playlists (title text, userid int, public int)')
-            self.conn.execute('CREATE TABLE tracks (playlistid int, track int, url text, title text)')
-            self.conn.commit()
-            log.d('done.')
-            log.d('Connected to Database. (' + PLAYLISTDBFILE + ')')
+    def __init__(self, connector=None):
+        database.require(DBNAME, version='1')
+        self.conn = BoundConnector(DBNAME, connector).connection()
 
     def deletePlaylist(self, plid, userid, override_owner=False):
         cursor = self.conn.cursor()
@@ -114,7 +111,7 @@ class PlaylistDB:
             print(result)
             return result[0][1]
         return 'playlist'
-        
+
     def setPublic(self, userid, plid, value):
         ispublic = 1 if value else 0
         cur = self.conn.cursor()

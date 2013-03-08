@@ -28,21 +28,26 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
-import sqlite3
-import os
 import json
 
+from cherrymusicserver import database
 from cherrymusicserver import log
+from cherrymusicserver import service
 from cherrymusicserver import configuration as cfg
+from cherrymusicserver.database.connect import BoundConnector
 
+DBNAME = 'useroptions'
+
+@service.provider('useroptions')
 class UserOptionDB:
-    
-    def __init__(self, USEROPTIONDBFILE):
+
+    def __init__(self, connector=None):
         """user configuration:
             hidden values can not be set by the user in the options,
             but might be subject of bing set automatically, e.g. the
             heartbeat.
         """
+        database.require(DBNAME, version='0')
         with cfg.create() as c:
             with cfg.create('keyboard_shortcuts') as kbs:
                 kbs.prev = cfg.Configuration(value=89,validity='\d\d?\d?')
@@ -57,12 +62,12 @@ class UserOptionDB:
             with cfg.create('misc') as misc:
                 misc.show_playlist_download_buttons = cfg.Configuration(value=False)
                 c.misc = misc
-            
+
             with cfg.create('custom_theme') as theme:
                 theme.primary_color = cfg.Configuration(value='#F02E75',validity='#[0-9a-fA-F]{6}', hidden=False, readonly=False)
                 theme.white_on_black = cfg.Configuration(value=False, hidden=False, readonly=False)
                 c.custom_theme = theme
-            
+
             #UNIX TIME (1.1.1970 = never)
             c.last_time_online = cfg.Property(
                 value=0,
@@ -71,18 +76,10 @@ class UserOptionDB:
                 readonly = False,
                 hidden = True
             )
-            
-            self.DEFAULTS = c
-        
-        setupDB = not os.path.isfile(USEROPTIONDBFILE) or os.path.getsize(USEROPTIONDBFILE) == 0
-        self.conn = sqlite3.connect(USEROPTIONDBFILE, check_same_thread=False)
 
-        if setupDB:
-            log.i('Creating user options db table...')
-            self.conn.execute('CREATE TABLE option (userid int, name text, value text)')
-            self.conn.execute('CREATE INDEX IF NOT EXISTS idx_userid_name ON option(userid, name)')
-            log.i('done.')
-            log.i('Connected to Database. (' + USEROPTIONDBFILE + ')')
+            self.DEFAULTS = c
+
+        self.conn = BoundConnector(DBNAME, connector).connection()
 
     def getOptionFromMany(self, key, userids):
         result = {}
@@ -96,7 +93,7 @@ class UserOptionDB:
 
     def forUser(self, userid):
         return UserOptionDB.UserOptionProxy(self, userid)
-        
+
     class UserOptionProxy:
         def __init__(self, useroptiondb, userid):
             self.useroptiondb = useroptiondb
@@ -109,8 +106,8 @@ class UserOptionDB:
                     if not opts[c]._hidden:
                         nothidden_opts[c] = opts[c]
                 return cfg.to_dict(nothidden_opts)
-                    
-        
+
+
         def getOptions(self):
             results =  self.useroptiondb.conn.execute('''SELECT name, value FROM option WHERE userid = ?''',(self.userid,)).fetchall()
             decoded = []
@@ -122,15 +119,15 @@ class UserOptionDB:
             except cfg.ConfigError: #changed defaults might reset user options
                 return self.useroptiondb.DEFAULTS
             return c
-        
+
         def getOptionValue(self, key):
             return self.getOptions()[key]['value']
-        
+
         def setOption(self, key, value):
             opts = self.getOptions()
             opts[key]['value'] = value
             self.setOptions(opts)
-        
+
         def setOptions(self, c):
             for k in cfg.to_list(c):
                 value = json.dumps(k[1])
@@ -144,6 +141,3 @@ class UserOptionDB:
                     self.useroptiondb.conn.execute('''INSERT INTO option (userid, name, value) VALUES (?,?,?)''',
                         (self.userid, key, value))
             self.useroptiondb.conn.commit()
-            
-    
-            
