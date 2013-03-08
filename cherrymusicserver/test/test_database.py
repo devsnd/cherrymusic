@@ -84,15 +84,6 @@ class TestDefs(unittest.TestCase):
                     yield vnum, missing
         self.run_forall_defs(check)
 
-    def test_versionkeys_sqlkeys_have_valid_scripts(self):
-        def check(dbdef):
-            "values of *.sql keys must look like sql statements"
-            for vnum, version in dbdef.items():
-                for scriptkey in (k for k in version if k.endswith('.sql')):
-                    if not sqlite3.complete_statement(version[scriptkey]):
-                        yield {vnum: scriptkey}
-        self.run_forall_defs(check)
-
     def test_versionpermutations_are_updatable(self):
         def check(dbdef):
             "incremental updates must work for all versions"
@@ -155,19 +146,22 @@ def runscript(dbdef, vnum, scriptname, conn):
     for stmt in script.split(';'):
         linecount = stmt.count('\n')   # yeah, linux linesep.
         try:
-            conn.cursor().execute(stmt)
+            cursor = conn.cursor()
+            cursor.execute(stmt.strip())
         except sqlite3.Error as e:
             if stmt.splitlines() and not stmt.splitlines()[0].strip():  # skip 1st line if empty
                 lno += 1
                 linecount -= 1
             msg = '{br}{script}:{br}{listing}{br}{br}{error}'.format(
-                script='{0}:{1}'.format(vnum, scriptname),
+                script='{0}:{1}:{2}'.format(vnum, scriptname, lno),
                 listing=os.linesep.join(script_lines(script, lno, linecount + 1)),
                 error=e,
                 br=os.linesep)
             raise AssertionError(msg)
         else:
             lno += linecount
+        finally:
+            cursor.close()
 
 
 def script_lines(script, start=1, length=0):
