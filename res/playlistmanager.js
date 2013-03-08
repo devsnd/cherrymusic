@@ -726,7 +726,7 @@ PlaylistManager.prototype = {
     },
     newPlaylistNoShow : function(playlist, name){
         playlist = playlist || [];
-        var newpl = this._createPlaylist(playlist,true,true,'me','ownwill', name, true);
+        var newpl = this._createPlaylist(playlist,true,false,'me','ownwill', name, true);
         return newpl;
     },
     removePlayedFromPlaylist : function (){

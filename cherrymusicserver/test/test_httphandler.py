@@ -33,8 +33,11 @@ import json
 
 import cherrymusicserver as cherry
 
-from cherrymusicserver import httphandler
 from cherrymusicserver import configuration
+cherry.config = configuration.from_defaults()
+
+from cherrymusicserver import httphandler
+from cherrymusicserver import service
 from cherrymusicserver.cherrymodel import MusicEntry
 
 from cherrymusicserver import log
@@ -42,6 +45,7 @@ from cherrymusicserver import log
 class MockAction(Exception):
     pass
 
+@service.provider('cherrymodel')
 class MockModel:
     def __init__(self):
         pass
@@ -54,24 +58,26 @@ class MockModel:
         return "motd"
     def updateLibrary(self):
         raise MockAction('updateLibrary')
-        
+service.provide(MockModel)
+
 
 class CherryPyMock:
     def __init__(self):
         self.session = {'admin': False}
 
+@service.provider('playlist')
 class MockPlaylistDB:
     def __init__(self):
         pass
 
     def getName(self, val, userid):
         return str(val)+str(userid)
+service.provide(MockPlaylistDB)
+
 
 class TestHTTPHandler(unittest.TestCase):
     def setUp(self):
-        self.playlistdb = MockPlaylistDB()
-        cherry.config = configuration.from_defaults()
-        self.http = httphandler.HTTPHandler(cherry.config,MockModel())
+        self.http = httphandler.HTTPHandler(cherry.config)
         for apicall, func in self.http.handlers.items():
             try:
                 getattr(self,'test_'+func.__name__)

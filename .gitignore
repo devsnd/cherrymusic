@@ -36,6 +36,7 @@ cherrymusic/site.log
 /playlist.db
 /user.db
 /config
+/doc/man/*.gz
 
 # Eclipse metafiles
 /.project
@@ -45,3 +46,7 @@ cherrymusic/site.log
 
 # Sublime metafiles
 .sublime*
+
+# Sphinx builds
+doc/sphinx/_build
+

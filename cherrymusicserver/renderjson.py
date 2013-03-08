@@ -29,7 +29,7 @@
 #
 
 #python 2.6+ backward compability
-from __future__ import unicode_literals
+#from __future__ import unicode_literals
 
 """
 This class encapsulates all values returned by the cherrymodel
@@ -37,6 +37,7 @@ to be served as json to the client.
 """
 
 import json
+import codecs
 
 import cherrymusicserver as cherry
 from cherrymusicserver import util, pathprovider
@@ -60,11 +61,14 @@ class JSON(object):
             elif entry.dir:
                 #dir
                 simplename = pathprovider.filename(entry.path)
-                retlist.append({'type':'dir', 'path':entry.path,'label':simplename})
+                retlist.append({'type':'dir',
+                                'path':entry.path,
+                                'label':simplename
+                                })
             else:
                 #file
                 simplename = pathprovider.filename(entry.path)
-                urlpath = quote('/serve/' + entry.path);
+                urlpath = quote(('/serve/' + entry.path).encode('utf8'));
                 retlist.append({'type':'file',
                                 'urlpath':urlpath,
                                 'path':entry.path,

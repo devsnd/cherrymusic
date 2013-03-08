@@ -42,10 +42,12 @@ from collections import deque
 from operator import itemgetter
 
 import cherrymusicserver as cherry
+from cherrymusicserver import database
 from cherrymusicserver import log
+from cherrymusicserver import service
 from cherrymusicserver import util
 from cherrymusicserver.cherrymodel import MusicEntry
-from cherrymusicserver.database import TableDescriptor, TableColumn
+from cherrymusicserver.database.connect import BoundConnector
 from cherrymusicserver.util import Performance
 from cherrymusicserver.progress import ProgressTree, ProgressReporter
 
@@ -60,33 +62,19 @@ FAST_FILE_SEARCH_LIMIT = 20
 #if debug:
 #    log.level(log.DEBUG)
 
+DBNAME = 'cherry.cache'
 
 
+@service.provider('filecache')
 class SQLiteCache(object):
-    def __init__(self, DBFILENAME):
+
+    def __init__(self, connector=None):
+        database.require(DBNAME, version='1')
         self.validate_basedir()
-        self.DBFILENAME = DBFILENAME
-        setupDB = not os.path.isfile(DBFILENAME) or os.path.getsize(DBFILENAME) == 0
-        setupDB |= DBFILENAME == ':memory:' #always rescan when using ram db.
-
-        self.filestable = TableDescriptor('files', [
-            TableColumn('parent', 'int', 'NOT NULL'),
-            TableColumn('filename', 'text', 'NOT NULL'),
-            TableColumn('filetype', 'text'),
-            TableColumn('isdir', 'int', 'NOT NULL'),
-        ])
-        self.dictionarytable = TableDescriptor('dictionary', [
-            TableColumn('word', 'text', 'NOT NULL'),
-            TableColumn('occurences', 'int', 'NOT NULL DEFAULT 1'),
-            ])
-
-        self.searchtable = TableDescriptor('search', [
-            TableColumn('drowid', 'int', 'NOT NULL'),
-            TableColumn('frowid', 'int', 'NOT NULL')])
-
-        self.conn = sqlite3.connect(DBFILENAME, check_same_thread=False)
+        connector = BoundConnector(DBNAME, connector)
+        self.DBFILENAME = connector.dblocation
+        self.conn = connector.connection()
         self.db = self.conn.cursor()
-        self.rootDir = cherry.config.media.basedir.str
 
         #I don't care about journaling!
         self.conn.execute('PRAGMA synchronous = OFF')
@@ -102,78 +90,6 @@ class SQLiteCache(object):
             self.file_db_mem.db.execute('CREATE INDEX IF NOT EXISTS idx_files_parent'
                           ' ON files(parent)')
 
-    def __table_exists(self, name):
-        return bool(self.conn.execute('SELECT name FROM sqlite_master'
-                                      ' WHERE type="table" AND name=?', (name,)
-                                      ).fetchall())
-
-
-    def __table_is_empty(self, name):
-        if not self.__table_exists(name):
-            raise ValueError("table does not exist: %s" % name)
-        query = 'SELECT rowid FROM %s LIMIT 1' % (name,)
-        res = self.conn.execute(query).fetchall()
-        return not bool(res)
-
-    def create_and_alter_tables(self, suppressWarning=False):
-        tableChanged = False
-        tableChanged |= self.filestable.createOrAlterTable(self.conn)
-        tableChanged |= self.dictionarytable.createOrAlterTable(self.conn)
-        tableChanged |= self.searchtable.createOrAlterTable(self.conn)
-
-        if tableChanged and not suppressWarning:
-            log.w('The database layout has changed, please run "cherrymusic --update" to make sure everthing is up to date.')
-        return tableChanged
-
-    def __create_index_if_non_exist(self):
-        self.filestable.createIndex(self.conn, ['parent'])
-        self.dictionarytable.createIndex(self.conn, ['word'])
-        self.searchtable.createIndex(self.conn, ['drowid', 'frowid'])
-
-    def __create_tables(self):
-        """DEPRECATED, has been replaced by create_and_alter_tables"""
-        self.__drop_tables()
-        self.conn.execute('CREATE TABLE files ('
-                          ' parent int NOT NULL,'
-                          ' filename text NOT NULL,'
-                          ' filetype text,'
-                          ' isdir int NOT NULL)')
-        self.conn.execute('CREATE TABLE dictionary (word text NOT NULL)')
-        self.conn.execute('CREATE TABLE search ('
-                          ' drowid int NOT NULL,'
-                          ' frowid int NOT NULL)')
-
-
-    def drop_tables(self):
-        self.conn.execute('DROP TABLE IF EXISTS files')
-        self.conn.execute('DROP TABLE IF EXISTS dictionary')
-        self.conn.execute('DROP TABLE IF EXISTS search')
-
-
-    def __create_indexes(self):
-        """DEPRECATED, has been replaced by __create_index_if_non_exist"""
-        self.conn.execute('CREATE INDEX IF NOT EXISTS idx_files_parent'
-                          ' ON files(parent)')
-        self.conn.execute('CREATE INDEX IF NOT EXISTS idx_dictionary'
-                          ' ON dictionary(word)')
-        self.conn.execute('CREATE INDEX IF NOT EXISTS idx_search'
-                          ' ON search(drowid,frowid)')
-        self.conn.execute('CREATE INDEX IF NOT EXISTS idx_search_rvs'
-                          ' ON search(frowid,drowid)')
-
-
-    def __drop_indexes(self):
-        self.conn.execute('DROP INDEX IF EXISTS idx_files_parent')
-        self.conn.execute('DROP INDEX IF EXISTS idx_dictionary')
-        self.conn.execute('DROP INDEX IF EXISTS idx_search')
-        self.conn.execute('DROP INDEX IF EXISTS idx_search_rvs')
-
-
-    def isEmpty(self):
-        """DEPRECATED create_and_alter_tables returns changes in DB"""
-        return self.__table_is_empty('files')
-
-
     @classmethod
     def searchterms(cls, searchterm):
         words = re.findall('(\w+|[^\s\w]+)',searchterm.replace('_', ' ').replace('%',' '),re.UNICODE)
@@ -181,7 +97,7 @@ class SQLiteCache(object):
 
     def fetchFileIds(self, terms, maxFileIdsPerTerm, mode):
         """returns list of ids each packed in a tuple containing the id"""
-        
+
         assert '' not in terms, "terms must not contain ''"
         resultlist = []
 
@@ -218,39 +134,39 @@ class SQLiteCache(object):
         elif value.endswith(' !d'):
             mode = 'dironly'
             value = value[:-3]
-        
+
         terms = SQLiteCache.searchterms(value)
         with Performance('searching for a maximum of %s files' % str(NORMAL_FILE_SEARCH_LIMIT * len(terms))):
             if debug:
                 log.d('searchterms')
                 log.d(terms)
             results = []
-            
+
             maxFileIdsPerTerm = NORMAL_FILE_SEARCH_LIMIT
             with Performance('file id fetching'):
                 #unpack tuples
                 fileids = [t[0] for t in self.fetchFileIds(terms, maxFileIdsPerTerm, mode)]
 
             if len(fileids) > NORMAL_FILE_SEARCH_LIMIT:
-                with Performance('sorting results by fileid occurences'):
+                with Performance('sorting results by fileid occurrences'):
                     resultfileids = {}
                     for fileid in fileids:
                         if fileid in resultfileids:
                             resultfileids[fileid] += 1
                         else:
                             resultfileids[fileid] = 1
-                    #sort items by occurences and only return maxresults
+                    #sort items by occurrences and only return maxresults
                     fileids = sorted(resultfileids.items(), key=itemgetter(1), reverse=True)
                     fileids = [t[0] for t in fileids]
                     fileids = fileids[:min(len(fileids), NORMAL_FILE_SEARCH_LIMIT)]
-                    
+
             if mode == 'normal':
                 with Performance('querying fullpaths for %s fileIds' % len(fileids)):
                     results += self.musicEntryFromFileIds(fileids)
             else:
                 with Performance('querying fullpaths for %s fileIds, files only' % len(fileids)):
                     results += self.musicEntryFromFileIds(fileids,mode=mode)
-                    
+
             if debug:
                 log.d('resulting paths')
                 log.d(results)
@@ -268,22 +184,22 @@ class SQLiteCache(object):
     def musicEntryFromFileIds(self, filerowids, incompleteMusicEntries={},mode='normal'):
         #incompleteMusicEntries maps db parentid to incomplete musicEntry
         musicEntries = [] #result list
-        
+
         if self.file_db_in_memory():
             db = self.file_db_mem.db
         else:
             db = self.conn
-    
+
         cursor = db.cursor()
         sqlquery = '''  SELECT rowid, parent, filename, filetype, isdir
                         FROM files WHERE rowid IN ('''+', '.join(map(str,filerowids))+''') '''
-            
+
         if not incompleteMusicEntries:
             #only filter 1st recursion level
             if mode != 'normal':
                 sqlquery += ' AND isdir = '+str(int('dironly'==mode))
             sqlquery += ' LIMIT 0,'+str(NORMAL_FILE_SEARCH_LIMIT)
-        
+
         tempIncompleteEntries = {}
         for rowid, parent, filename, fileext, isdir in cursor.execute(sqlquery).fetchall():
             path = filename + fileext
@@ -296,17 +212,17 @@ class SQLiteCache(object):
             else:
                 #rowid is not parent of any entry, so make a new one
                 entries = [MusicEntry(path, dir=bool(isdir))]
-            
+
             if parent == -1:
                 #put entries in result list if they've reached top level
                 musicEntries += entries
             else:
                 #otherwise map parent id to dict
                 tempIncompleteEntries[parent] = tempIncompleteEntries.get(parent,[]) + entries
-        
+
         for k, v in tempIncompleteEntries.items():
             incompleteMusicEntries[k] = v
-        
+
         if incompleteMusicEntries:
             #recurse for all incomplete entries
             musicEntries += self.musicEntryFromFileIds(
@@ -502,14 +418,12 @@ class SQLiteCache(object):
         necesary changes.'''
 
         log.i('running full update...')
-        self.create_and_alter_tables()
         try:
             self.update_db_recursive(cherry.config.media.basedir.str, skipfirst=True)
         except:
             log.e('error during media update. database update incomplete.')
         finally:
-            self.__create_index_if_non_exist()
-            self.update_word_occurences()
+            self.update_word_occurrences()
             log.i('media database update complete.')
 
 
@@ -529,7 +443,7 @@ class SQLiteCache(object):
                 self.update_db_recursive(normpath, skipfirst=False)
             except Exception as exception:
                 log.e('update incomplete: %r', exception)
-        self.update_word_occurences()
+        self.update_word_occurrences()
         log.i('done updating paths.')
 
 
@@ -594,9 +508,9 @@ class SQLiteCache(object):
             log.i('items added %d, removed %d', add, deld)
             self.load_db_to_memory()
 
-    def update_word_occurences(self):
-        log.i('updating word occurences...')
-        self.conn.execute('''UPDATE dictionary SET occurences = (
+    def update_word_occurrences(self):
+        log.i('updating word occurrences...')
+        self.conn.execute('''UPDATE dictionary SET occurrences = (
                 select count(*) from search WHERE search.drowid = dictionary.rowid
             )''')
 
@@ -626,8 +540,10 @@ class SQLiteCache(object):
         All three can be None, signifying non-existence.
 
         It is possible to customize item creation by providing an `itemfactory`.
-        The argument must be a callable with the following parameter signature:
+        The argument must be a callable with the following parameter signature::
+
             itemfactory(infs, indb, parent [, optional arguments])
+
         and must return an object satisfying the above requirements for an item.
         '''
         from backport.collections import OrderedDict

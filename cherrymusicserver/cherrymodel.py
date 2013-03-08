@@ -39,6 +39,7 @@ import audiotranscode
 from imp import reload
 
 import cherrymusicserver as cherry
+from cherrymusicserver import service
 from cherrymusicserver import util
 from cherrymusicserver import pathprovider
 from cherrymusicserver.util import Performance
@@ -46,9 +47,11 @@ from cherrymusicserver import resultorder
 from cherrymusicserver import log
 import cherrymusicserver.tweak
 
+@service.provider('cherrymodel')
+@service.user(cache='filecache')
 class CherryModel:
-    def __init__(self, cache):
-        self.cache = cache
+
+    def __init__(self):
         CherryModel.NATIVE_BROWSER_FORMATS = ['ogg','mp3']
         CherryModel.supportedFormats = CherryModel.NATIVE_BROWSER_FORMATS[:]
         if cherry.config.media.transcode:
@@ -223,8 +226,8 @@ def isplayable(filename):
     the configured 'playable' list'''
     ext = os.path.splitext(filename)[1]
     return ext and ext[1:].lower() in CherryModel.supportedFormats
-    
-        
+
+
 
 def strippath(path):
     if path.startswith(cherry.config.media.basedir.str):

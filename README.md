@@ -45,6 +45,22 @@ Getting Started
 
         $ firefox localhost:8080
 
+Requirements
+------------
+* [Python](http://python.org/download/releases/)
+* [CherryPy](http://www.cherrypy.org)
+
+
+Optional Dependencies
+---------------------
+python 2:
+  
+  - HTTPS support: pyOpenSSL
+  - ID3 Tag Support: stagger
+
+python 3:
+
+  - None so far.
 
 Known Issues
 ------------
@@ -63,8 +79,3 @@ This error can be circumvented by setting the
         keep_session_in_ram = True
 
 in the configuration file (`C:\Documents and Settings\username\Application Data\cherrymusic\config`).
-
-Requirements
-------------
-* [Python 3](http://python.org/download/releases/)
-* [CherryPy](http://www.cherrypy.org)
