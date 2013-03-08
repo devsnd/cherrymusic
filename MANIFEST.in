@@ -1,3 +1,4 @@
-include COPYING README CHANGES
+include COPYING README.md CHANGES
 recursive-include res *
-recursive-include themes *
+recursive-include cherrymusicserver/database/defs *
+global-exclude *.pyc *.pyo
