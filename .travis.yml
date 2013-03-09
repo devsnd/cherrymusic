@@ -17,19 +17,18 @@ install:
   - "pip install cherrypy --use-mirrors"
   - "if [[ $TRAVIS_PYTHON_VERSION = 2.6 ]]; then pip install unittest2 --use-mirrors; fi"
 
-# prepare test run: install locally
+# prepare test run; test local install
 before_script:
   - python setup.py -q install
   
 # command to run tests
-script: ./test_travis_ci.sh
+script: nosetests
 
 branches:
   # whitelist
   only:
     - master
     - devel
-    - python2
 
 #notifications:
 # email:
