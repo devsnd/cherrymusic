@@ -30,11 +30,105 @@
 
 import cmbootstrap
 import cherrymusicserver
+
+
+class ConfigOptionsBase(object):
+    """ Add command line options to override the cherrymusic configuration.
+
+        It's possible to use a general option for arbitrary config keys, and
+        also shortcut options which target a fixed config key. If a key is
+        specified more than once, the one that got parsed last wins.
+
+        There are two slightly different implementations, to support both
+        argparse and optparse (for forward and backward compatibility).
+    """
+    configdict = {}
+
+    _metavar = 'KEY=VALUE'
+
+    @classmethod
+    def addGeneralOption(cls, parser, names, help):
+        kwargs = {'help': help, 'metavar': cls._metavar}
+        kwargs.update(cls._config_params())
+        parser.add_argument(*names, **kwargs)
+
+    @classmethod
+    def addShortcutOption(cls, parser, names, key, type, help):
+        kwargs = {'help': help}
+        kwargs.update(cls._shortcut_params(key, type))
+        parser.add_argument(*names, **kwargs)
+
+    @classmethod
+    def _splitoption(cls, option):
+        errormsg = "bad option: %r; use %r" % (option, cls._metavar)
+        if not '=' in option:
+            raise cls._error(option, errormsg)
+        key, val = option.split('=', 1)
+        if not (key and val):
+            raise cls._error(errormsg)
+        return key, val
+
+
 try:
-	import argparse
+    import argparse
+
+    class ConfigOptions(ConfigOptionsBase):
+
+        @classmethod
+        def _config_params(cls):
+            class Action(argparse.Action):
+                def __call__(self, actingparser, namespace, values, optstr):
+                    for option in values:
+                        try:
+                            key, value = cls._splitoption(option)
+                        except ValueError as e:
+                            actingparser.error(e)
+                        cls.configdict[key] = value
+            return {'action': Action, 'nargs': '+'}
+
+        @classmethod
+        def _shortcut_params(cls, key, type=str):
+            class Action(argparse.Action):
+                def __call__(self, actingparser, namespace, values, optstr):
+                    cls.configdict[key] = values
+            return {'action': Action, 'type': type}
+
+        @classmethod
+        def _error(cls, msg):
+            return ValueError(msg)
+
 except ImportError:
-	#python 3.1 workaround, can be dropped once 3.2 is in debian.
-	from backport import argparse
+    #python 3.1 and 2.6 workaround
+    from backport import argparse
+
+    class ConfigOptions(ConfigOptionsBase):
+
+        @classmethod
+        def _config_params(cls):
+            def callback(option, optstr, value, actingparser):
+                key, value = cls._splitoption(value)
+                cls.configdict[key] = value
+            return {
+                'action': 'callback',
+                'callback': callback,
+                'type': 'str',
+            }
+
+        @classmethod
+        def _shortcut_params(cls, key, type=str):
+            def callback(option, optstr, value, actingparser):
+                cls.configdict[key] = value
+            return {
+                'action': 'callback',
+                'callback': callback,
+                'type': type.__name__,
+            }
+
+        @classmethod
+        def _error(cls, msg):
+            return argparse.OptionValueError(msg)
+
+
     #end of workaround
 
 parser = argparse.ArgumentParser(description='''CherryMusic Server
@@ -45,16 +139,23 @@ if 'OptionParser' in dir(argparse):
 else:
     parser.add_argument('--update', dest='update', nargs='*', metavar='PATH', help='update the media database. PATH must start with basedir or be relative to basedir.')
 parser.add_argument('--newconfig', dest='newconfig', action='store_true', help='creates a new config file next to your current one, e.g. ~/.config/cherrymusic/cherrymusic.conf.new')
-parser.add_argument('--dropfiledb', dest='dropfiledb', action='store_true', help='Clears the file database. This might be necesary after a version jump.')
+parser.add_argument('--dropfiledb', dest='dropfiledb', action='store_true', help='Clears the file database. This might be necessary after a version jump.')
 parser.add_argument('--download-stagger', dest='downloadstagger', action='store_true', help='downloads the python module "stagger", an ID3-tag library, so that your music can be indexed more precisely. (should only be used when not installed using a package manager!)')
 parser.add_argument('--setup', dest='setup', action='store_true', help='Configure CherryMusic in your browser')
-parser.add_argument('--port', dest='port', nargs=1, help='Override the port used to start the server')
+
+ConfigOptions.addShortcutOption(parser, ('--port', '-p'), key='server.port', type=int, help='The port the server will listen to.')
+ConfigOptions.addGeneralOption(parser, ('--conf', '-c'), help='Override configuration values')
+
 args = parser.parse_args()
 
 if args.downloadstagger:
     cmbootstrap.DependencyInstaller().install_stagger()
 
 if __name__ == "__main__":
-    port = int(args.port[0]) if args.port else False
-    cherrymusicserver.CherryMusic(update=args.update, createNewConfig=args.newconfig, dropfiledb=args.dropfiledb,setup=args.setup, port=port)
-
+    cherrymusicserver.CherryMusic(
+        update=args.update,
+        createNewConfig=args.newconfig,
+        dropfiledb=args.dropfiledb,
+        setup=args.setup,
+        cfg_override=ConfigOptions.configdict
+    )
