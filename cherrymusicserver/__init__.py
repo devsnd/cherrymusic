@@ -94,8 +94,9 @@ LONG_DESCRIPTION = """CherryMusic is a music streaming
 
 class CherryMusic:
 
-    def __init__(self, update=None, createNewConfig=False, dropfiledb=False, setup=False, port=False):
+    def __init__(self, update=None, createNewConfig=False, dropfiledb=False, setup=False, cfg_override={}):
         if setup:
+            port = cfg_override.get('server.port', False)
             cherrymusicserver.browsersetup.configureAndStartCherryPy(port)
         if createNewConfig:
             newconfigpath = pathprovider.configurationFile() + '.new'
@@ -109,7 +110,7 @@ class CherryMusic:
             else:
                 configuration.write_to_file(configuration.from_defaults(), pathprovider.configurationFile())
                 self.printWelcomeAndExit()
-        self._init_config()
+        self._init_config(cfg_override)
         self.db = sqlitecache.SQLiteCache(pathprovider.databaseFilePath('cherry.cache.db'))
 
         if not update == None or dropfiledb:
@@ -117,7 +118,7 @@ class CherryMusic:
         else:
             self.cherrymodel = cherrymodel.CherryModel(self.db)
             self.httphandler = httphandler.HTTPHandler(config, self.cherrymodel)
-            self.server(port)
+            self.server()
 
     class UpdateThread(threading.Thread):
         def __init__(self, db, update,dropfiledb):
@@ -136,13 +137,15 @@ class CherryMusic:
             elif self.update is not None:
                 self.db.full_update()
 
-    def _init_config(self):
+    def _init_config(self, override_dict):
         global config
         defaultcfg = configuration.from_defaults()
+        override = configuration.from_dict(override_dict)
         configFilePath = pathprovider.configurationFile()
         log.d('loading configuration from %s', configFilePath)
         filecfg = configuration.from_configparser(configFilePath)
         config = defaultcfg + filecfg
+        config += override
         self._check_for_config_updates(filecfg)
 
     def _check_for_config_updates(self, known_config):
@@ -210,7 +213,7 @@ Have fun!
 """)
         exit(0)
 
-    def start(self, port):
+    def start(self):
         socket_host = "127.0.0.1" if config.server.localhost_only.bool else "0.0.0.0"
 
         resourcedir = os.path.abspath(pathprovider.getResourcePath('res'))
@@ -228,10 +231,8 @@ Have fun!
             redirecter.thread_pool = 10
             redirecter.subscribe()
         else:
-            if not port:
-                port = config.server.port.int
             cherrypy.config.update({
-                'server.socket_port': port,
+                'server.socket_port': config.server.port.int,
             })
 
         cherrypy.config.update({
@@ -274,7 +275,7 @@ Have fun!
                     'tools.staticfile.filename' : resourcedir+'/favicon.ico',
                 }
         })
-        log.i('Starting server on port %s ...' % port)
+        log.i('Starting server on port %s ...' % config.server.port.int)
 
         cherrypy.lib.caching.expires(0) #disable expiry caching
         cherrypy.engine.start()
@@ -284,6 +285,6 @@ Have fun!
         cherrypy.server.unsubscribe()
         self.start()
 
-    def server(self, port):
+    def server(self):
         cherrypy.config.update({'log.screen': True})
-        self.start(port)
+        self.start()
