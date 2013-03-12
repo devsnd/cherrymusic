@@ -34,14 +34,11 @@ Getting Started
       cherrypy in the local folder for you.
 
 
-3. Now simply run the main script using python 3; it will prompt you for anything else.
+3. Now simply run the main script using python
 
-        $ python cherrymusic
+        $ python cherrymusic --setup --port 8080
 
-4. On first start: The server creates a config file for you. 
-   Make the necessary changes and restart the server.
-
-5. Open your browser and play some music!
+4. Open your browser configure cherrymusic and play some music!
 
         $ firefox localhost:8080
 
