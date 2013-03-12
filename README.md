@@ -53,11 +53,10 @@ Optional Dependencies
 python 2:
   
   - HTTPS support: pyOpenSSL
-  - ID3 Tag Support: stagger
 
 python 3:
 
-  - None so far.
+  - ID3 Tag Support: stagger
 
 Known Issues
 ------------
