@@ -55,7 +55,7 @@ for i in "" "2" "3"; do
     cmd="nosetests${i}"
     if [ $(command -v $cmd) ]; then
         echo "running ${cmd}:"
-        $cmd
+        $cmd -e cherrypy
         if [ $? != 0 ]; then
             failed="$failed $cmd"
         else
