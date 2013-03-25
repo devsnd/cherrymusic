@@ -85,12 +85,20 @@ class Updater(object):
         'drop.sql': """DROP TABLE IF EXISTS _meta_version;"""
     }
 
+    _active_updaters = set()
+
     def __init__(self, name, dbdef):
         assert name and dbdef
+        assert name not in self._active_updaters, (
+            'there can be only one active updater per database (%r)' % (name,))
+        self._active_updaters.add(name)
         self.name = name
         self.desc = dbdef
         self.db = BoundConnector(self.name)
         self._init_meta()
+
+    def __del__(self):
+        self._active_updaters.remove(self.name)
 
     def __repr__(self):
         return 'updater({0!r}, {1} -> {2})'.format(
