@@ -34,11 +34,9 @@ import sqlite3
 import tempfile
 
 from cherrymusicserver import log
-from cherrymusicserver import service
 from cherrymusicserver.database.connect import AbstractConnector, BoundConnector
 
 
-@service.provider('dbconnector')
 class SQLiteConnector(AbstractConnector):
     '''Connector for SQLite3 databases.
 
@@ -209,7 +207,6 @@ class Updater(object):
             self._setversion(vnum, txn)
 
 
-@service.provider('dbconnector')
 class TmpConnector(AbstractConnector):
     """Special SQLite Connector that uses its own temporary directory.
 
@@ -229,7 +226,6 @@ class TmpConnector(AbstractConnector):
         return os.path.join(self.testdirname, basename)
 
 
-@service.provider('dbconnector')
 class MemConnector(AbstractConnector):  # NOT threadsafe
     """Special SQLite3 Connector that reuses THE SAME memory connection for
     each dbname. This connection is NOT CLOSABLE by normal means.

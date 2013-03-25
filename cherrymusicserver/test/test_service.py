@@ -38,10 +38,9 @@ class TestService(unittest.TestCase):
     def test_mutual_dependency(self):
 
         @service.user(myfoo='fooservice')
-        @service.provider('fooservice')
         class Reflecto(object):
             def __init__(self):
-                service.provide(self.__class__)
+                service.provide('fooservice', self.__class__)
                 assert self.myfoo
 
         self.assertRaises(service.MutualDependencyBreak, Reflecto)

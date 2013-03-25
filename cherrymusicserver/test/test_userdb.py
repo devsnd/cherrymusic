@@ -42,7 +42,7 @@ class TestAuthenticate(unittest.TestCase):
     '''test authentication functions of userdb'''
 
     def setUp(self):
-        service.provide(MemConnector)
+        service.provide('dbconnector', MemConnector)
         database.ensure_requirements(userdb.DBNAME)
         self.users = userdb.UserDB()
         self.users.addUser('user', 'password', False)
@@ -58,7 +58,6 @@ class TestAuthenticate(unittest.TestCase):
 
     def tearDown(self):
         pass
-
 
     def testRegisteredUserCanLogin(self):
         '''successful authentication must return authenticated user'''

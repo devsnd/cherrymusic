@@ -40,7 +40,6 @@ except ImportError:
 
 DBNAME = 'playlist'
 
-@service.provider('playlist')
 class PlaylistDB:
     def __init__(self, connector=None):
         database.require(DBNAME, version='1')

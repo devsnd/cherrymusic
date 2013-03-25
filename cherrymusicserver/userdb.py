@@ -41,7 +41,6 @@ from cherrymusicserver.database.connect import BoundConnector
 DBNAME = 'user'
 
 
-@service.provider('users')
 class UserDB:
     def __init__(self, connector=None):
         database.require(DBNAME, version='1')

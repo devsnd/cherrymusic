@@ -38,7 +38,6 @@ from cherrymusicserver.database.connect import BoundConnector
 
 DBNAME = 'useroptions'
 
-@service.provider('useroptions')
 class UserOptionDB:
 
     def __init__(self, connector=None):

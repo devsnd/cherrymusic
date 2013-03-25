@@ -27,36 +27,34 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
-"""Dependency injection module.
+""" Dependency injection and other facilities to match providers of services
+    with their users.
 
-Usage::
+    Nature and interface of a service are left for the concerned parties to
+    agree on; all this module knows about the service is its name, or "handle".
 
-    >>> from cherrymusicserver import service
-    >>> @service.provider('fooservice')     # register as provider
-    ... class Foo(object):
-    ...     def dofoo(self):
-    ...         print('Foo!')
-    ...
-    >>> @service.user(myfoo='fooservice')   # become a user
-    ... class User(object):
-    ...     pass
-    ...
-    >>> service.provide(Foo)    # activate provider
-    >>> User().myfoo.dofoo()    # provider is injected, and instantiated on first access
-    Foo!
+    Basic usage::
 
-Without decorators::
+        >>> pizza = object()
+        >>> service.provide('pizzaservice', pizza)
+        >>> pizza is service.get('pizzaservice')
+        True
 
-    >>> service.provider('someservice')(someprovider)
-    >>> service.provide(someprovider)
+    Types as providers and users::
 
-Shortcut::
-
-    >>> service.provide(service.provider('someservice')(someprovider))
-
+        >>> class PizzaService(object):
+        ...     pass
+        ...
+        >>> @service.user(mypizza='pizzaservice')     # become a user
+        ... class PizzaUser(object):
+        ...     pass
+        ...
+        >>> user = PizzaUser()
+        >>> service.provide('pizzaservice', PizzaService)
+        >>> isinstance(user.mypizza, PizzaService)    # provider as attribute
+        True
 """
 import threading
-from collections import Hashable
 
 from cherrymusicserver import log
 
@@ -78,82 +76,30 @@ class MutualDependencyBreak(Exception):
     pass
 
 
-class ServiceError(Exception):
-    pass
-
-
-class ServiceNotAvailableError(ServiceError):
-    """No provider is active for a given service handle."""
-    pass
-
-
-class ProviderUnknownError(ServiceError):
-    """An object is not registered as a provider."""
-    pass
-
-
-__registry = {}
 __provider_factories = {}
 __providercache = {}
 
 
-def provider(handle):
-    """Register a service provider for a service handle.
+def provide(handle, provider, args=(), kwargs={}):
+    """ Activate a provider for the service identified by ``handle``,
+        replacing a previous provider for the same service.
 
-    To actually use a provider, activate it by calling :func:`provide` after
-    registering.
+        If the provider is a ``type``, an instance will be created as the
+        actual provider. Instantiation is lazy, meaning it will be deferred
+        until the provider is requested (:func:`get`) by some user.
 
-    handle : Hashable, not None
-        The handle the provided service goes by.
+        To use a type as a provider, you need to wrap it into something that is
+        not a type.
 
-    Returns: Decorator
-        A function that takes the provider as its sole argument.
-        The provider must be Hashable and not None.
+        handle : str
+            The name of the serivce.
+        provider :
+            An object that provides the service, or a type that instantiates
+            such objects. Instantiation will happen on the first get call.
+        args, kwargs :
+            Pass on arguments to a type.
     """
-    assert handle is not None
-    assert isinstance(handle, Hashable)
-
-    def decorator(type_):
-        assert type_ is not None
-        assert isinstance(type_, Hashable)
-        __registry[type_] = handle
-        return type_
-
-    return decorator
-
-
-def user(**requirements):
-    """Inject required service providers into the decorated class.
-
-    requirements : name=handle
-        Create :class:`require` descriptor attributes in the class:
-        ``name = require(handle)``.
-
-    Returns: Class Decorator
-        A function that takes the user class as its sole argument.
-    """
-    def clsdecorator(cls):
-        for attribute, handle in requirements.items():
-            setattr(cls, attribute, require(handle))
-        return cls
-    return clsdecorator
-
-
-def provide(provider, args=(), kwargs={}):
-    """Activate a provider for the service it registered for.
-
-    Callable providers will not be called (e.g. classes instantiated) until
-    they are requested (:func:`get`) by some user.
-
-    provider :
-        The provider as it was registered: that is, if a class was registered,
-        supply the class, not an instance.
-    args, kwargs :
-        Pass on arguments to a callable provider.
-
-    """
-    assert callable(provider) or not (args or kwargs)
-    handle = _gethandle(provider)
+    assert isinstance(provider, type) or not (args or kwargs)
     __provider_factories[handle] = _ProviderFactory.get(provider, args, kwargs)
     __providercache.pop(handle, None)
     log.d('service %r: now provided by %r', handle, provider)
@@ -162,13 +108,11 @@ def provide(provider, args=(), kwargs={}):
 def get(handle):
     """Request the provider for the service identified by ``handle``.
 
-    If a callable object was registered for the handle, the actual provider
-    will be the result of calling the callable. The call will be made when the
-    handle is first requested.
+    If a type was registered for the handle, the actual provider will be the
+    result of instantiating the type when it is first requested.
 
-    For example, if a class was registered as provider, an instance of the
-    class will be created on the first request and returned to all users of the
-    service.
+    Although the goal is to create only one instance, it is possible that
+    different threads see different instances.
     """
     try:
         return __providercache[handle]
@@ -177,11 +121,11 @@ def get(handle):
 
 
 class require(object):
-    """Descriptor for attributes that contain a service provider.
+    """Descriptor to make a service provider available as a class attribute.
 
         >>> import cherrymusicserver.service as service
         >>> class ServiceUser(object):
-        ...     myfoo = service.require('fooservice')
+        ...     mypizzas = service.require('pizzaservice')
     """
     def __init__(self, handle):
         self.handle = handle
@@ -193,45 +137,61 @@ class require(object):
         return get(self.handle)
 
 
-def _gethandle(provider):
-    try:
-        return __registry[provider]
-    except KeyError:
-        raise ProviderUnknownError(provider)
+def user(**requirements):
+    """ Class deocrator to inject service providers as attributes into the
+        decorated class.
+
+        requirements : name=handle
+            Create :class:`require` descriptor attributes in the class:
+            ``name = require(handle)``.
+
+        Returns: Class Decorator
+            A function that takes the user class as its sole argument.
+    """
+    def clsdecorator(cls):
+        for attribute, handle in requirements.items():
+            setattr(cls, attribute, require(handle))
+        return cls
+    return clsdecorator
 
 
 def _createprovider(handle):
     try:
         factory = __provider_factories[handle]
     except KeyError:
-        raise ServiceNotAvailableError(handle)
-    return __providercache.setdefault(handle, factory())
+        raise LookupError('Service not available: {0!r}'.format(handle))
+    return __providercache.setdefault(handle, factory.make())
 
 
 class _ProviderFactory(object):
-    """High security facility to contain cyclic dependency and multithreading
-    issues. Manage instances to allow one factory per provider, which guards
-    against dependency cycles.
+    """ High security facility to contain cyclic dependency and multithreading
+        issues.
 
-    .. warning:: Always use :meth:`get` to obtain instances.
+        Factory instances guard against dependency cycles by raising a
+        :class:`MutualDependencyBreak` when mutually dependent providers
+        try to instantiate each other.
     """
 
-    master_lock = threading.Lock()
+    _master_lock = threading.Lock()
 
     __factories = {}
 
     @classmethod
-    def get(cls, provider, args, kwargs):
-        with cls.master_lock:
-            if provider in cls.__factories:
-                instance = cls.__factories[provider]
-            else:
-                instance = cls.__factories.setdefault(provider, cls(provider))
-            instance.args = args
-            instance.kwargs = kwargs
-        return instance
+    def get(cls, provider, args=(), kwargs=None):
+        if kwargs is None:
+            kwargs = {}
+        with cls._master_lock:
+            try:
+                factory = cls.__factories[id(provider)]
+                factory.args = args
+                factory.kwargs = kwargs
+            except KeyError:
+                factory = cls(provider, args, kwargs)
+                cls.__factories[id(provider)] = factory
+            return factory
 
     def __init__(self, provider, args=(), kwargs={}):
+        assert self._master_lock.locked(), 'use .get(...) to obtain instances'
         self.provider = provider
         self.args = args
         self.kwargs = kwargs
@@ -245,18 +205,20 @@ class _ProviderFactory(object):
         try:
             lock = local.lock
         except AttributeError:
-            with self.master_lock:
+            with self._master_lock:
                 lock = local.__dict__.setdefault('lock', threading.Lock())
         return lock
 
-    def __call__(self):
+    def make(self):
+        """ Return a provider instance.
+
+            Raises : :cls:`MutualDependencyBreak`
+                If called recursively within the same thread, which happens
+                when mutually dependent providers try to instantiate each other.
+        """
         if self.lock.locked():
             raise MutualDependencyBreak(self.provider)
         with self.lock:
-            value = self._make()
-        return value
-
-    def _make(self):
-        if callable(self.provider):
-            return self.provider(*self.args, **self.kwargs)
-        return self.provider
+            if isinstance(self.provider, type):
+                return self.provider(*self.args, **self.kwargs)
+            return self.provider

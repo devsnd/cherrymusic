@@ -65,7 +65,6 @@ FAST_FILE_SEARCH_LIMIT = 20
 DBNAME = 'cherry.cache'
 
 
-@service.provider('filecache')
 class SQLiteCache(object):
 
     def __init__(self, connector=None):

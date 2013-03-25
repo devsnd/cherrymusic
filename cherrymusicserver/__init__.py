@@ -109,12 +109,12 @@ class CherryMusic:
 
     @classmethod
     def setup_services(cls):
-        service.provide(sqlitecache.SQLiteCache)
-        service.provide(cherrymodel.CherryModel)
-        service.provide(playlistdb.PlaylistDB)
-        service.provide(userdb.UserDB)
-        service.provide(useroptiondb.UserOptionDB)
-        service.provide(database.sql.SQLiteConnector, kwargs={
+        service.provide('filecache', sqlitecache.SQLiteCache)
+        service.provide('cherrymodel', cherrymodel.CherryModel)
+        service.provide('playlist', playlistdb.PlaylistDB)
+        service.provide('users', userdb.UserDB)
+        service.provide('useroptions', useroptiondb.UserOptionDB)
+        service.provide('dbconnector', database.sql.SQLiteConnector, kwargs={
             'datadir': pathprovider.databaseFilePath(''),
             'extension': 'db',
             'connargs': {'check_same_thread': False},

@@ -175,7 +175,7 @@ class AddFilesToDatabaseTest(unittest.TestCase):
         self.testdir = getAbsPath(self.testdirname)
         setupTestfiles(self.testdir, ())
         self.setupConfig()
-        service.provide(MemConnector)
+        service.provide('dbconnector', MemConnector)
         database.ensure_requirements(sqlitecache.DBNAME, autoconsent=True)
         self.Cache = sqlitecache.SQLiteCache()
         self.Cache.full_update()
@@ -361,7 +361,7 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
         self.testdir = getAbsPath(self.testdirname)
         setupTestfiles(self.testdir, self.testfiles)
         self.setupConfig()
-        service.provide(MemConnector)
+        service.provide('dbconnector', MemConnector)
         database.ensure_requirements(sqlitecache.DBNAME, autoconsent=True)
         self.Cache = sqlitecache.SQLiteCache()
         self.Cache.full_update()
@@ -506,7 +506,7 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
 
         # SPECIAL SETUP
         connector = BoobytrappedConnector()
-        service.provide(service.provider('dbconnector')(connector))
+        service.provide('dbconnector', connector)
         database.ensure_requirements(sqlitecache.DBNAME, autoconsent=True)
         self.Cache = sqlitecache.SQLiteCache()
         self.Cache.full_update()
@@ -553,7 +553,7 @@ class SymlinkTest(unittest.TestCase):
         self.testdir = getAbsPath(self.testdirname)
         setupTestfiles(self.testdir, self.testfiles)
         cherry.config.media.basedir = self.testdir
-        service.provide(MemConnector)
+        service.provide('dbconnector', MemConnector)
         database.ensure_requirements(sqlitecache.DBNAME, autoconsent=True)
         self.Cache = sqlitecache.SQLiteCache()
 
@@ -621,7 +621,7 @@ class UpdateTest(unittest.TestCase):
             config.search.autoupdate = 'True'
 
     def setupCache(self):
-        service.provide(MemConnector)
+        service.provide('dbconnector', MemConnector)
         database.ensure_requirements(sqlitecache.DBNAME, autoconsent=True)
         self.Cache = sqlitecache.SQLiteCache()
         self.Cache.full_update()

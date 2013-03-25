@@ -47,7 +47,6 @@ from cherrymusicserver import resultorder
 from cherrymusicserver import log
 import cherrymusicserver.tweak
 
-@service.provider('cherrymodel')
 @service.user(cache='filecache')
 class CherryModel:
 

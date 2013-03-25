@@ -45,7 +45,6 @@ from cherrymusicserver import log
 class MockAction(Exception):
     pass
 
-@service.provider('cherrymodel')
 class MockModel:
     def __init__(self):
         pass
@@ -58,21 +57,20 @@ class MockModel:
         return "motd"
     def updateLibrary(self):
         raise MockAction('updateLibrary')
-service.provide(MockModel)
+service.provide('cherrymodel', MockModel)
 
 
 class CherryPyMock:
     def __init__(self):
         self.session = {'admin': False}
 
-@service.provider('playlist')
 class MockPlaylistDB:
     def __init__(self):
         pass
 
     def getName(self, val, userid):
         return str(val)+str(userid)
-service.provide(MockPlaylistDB)
+service.provide('playlist', MockPlaylistDB)
 
 
 class TestHTTPHandler(unittest.TestCase):
