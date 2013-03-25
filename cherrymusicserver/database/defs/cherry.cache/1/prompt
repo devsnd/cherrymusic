@@ -1,0 +1,4 @@
+There could be inconsistencies in the file database due to the previous
+database layout.
+Continue the update to preserve the existing content; abort and restart with the
+"--dropfiledb" switch to recreate the database from scratch.

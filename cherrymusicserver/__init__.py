@@ -130,7 +130,7 @@ class CherryMusic:
                 path=newconfigpath,
                 br=os.linesep
             ))
-            exit(0)
+            sys.exit(0)
         if not pathprovider.configurationFileExists():
             if pathprovider.fallbackPathInUse():   # temp. remove @ v0.30 or so
                 self.printMigrationNoticeAndExit()
@@ -144,18 +144,38 @@ class CherryMusic:
             update = ()
             database.resetdb(sqlitecache.DBNAME)
         db_is_ready = database.ensure_requirements(
-            autoconsent=False,
-            consent_callback=lambda: input(
-                'ok to update database schema? [y/N]: '
-            ).lower() in ('y',))
+            consent_callback=self._get_user_consent_for_db_schema_update)
         if not db_is_ready:
             log.i("database schema update aborted. quitting.")
-            exit(1)
-
+            sys.exit(1)
         if update is not None:
             self._update_if_necessary(update)
             # threading.Thread('UpdateThread', target=self._update_if_necessary, args=(update,)).start()
-            exit(0)
+            sys.exit(0)
+
+    @staticmethod
+    def _get_user_consent_for_db_schema_update(reasons):
+        import textwrap
+        wrap = lambda r: os.linesep.join(
+            textwrap.wrap(r, initial_indent=' - ', subsequent_indent="   "))
+        msg = """
+==========================================================================
+A database schema update is needed and requires your consent.
+
+{reasons}
+
+To continue without changes, you need to downgrade to an earlier
+version of CherryMusic.
+
+To backup your database files first, abort for now and find them here:
+
+{dblocation}
+
+==========================================================================
+Run schema update? [y/N]: """.format(
+            reasons=(2 * os.linesep).join(wrap(r) for r in reasons),
+            dblocation='\t' + pathprovider.databaseFilePath(''))
+        return input(msg).lower().strip() in ('y',)
 
     def _update_if_necessary(self, update):
         cache = sqlitecache.SQLiteCache()

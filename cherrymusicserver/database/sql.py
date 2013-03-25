@@ -114,6 +114,15 @@ class Updater(object):
                 return True
         return False
 
+    @property
+    def reasons(self):
+        """ Return an iterable of strings giving the reasons for updates that
+            require user consent.
+        """
+        for version in self._updates_due:
+            if 'prompt' in self.desc[version]:
+                yield self.desc[version]['prompt']
+
     def run(self):
         """Update database schema to the highest possible version."""
         log.i('%r: updating database schema', self.name)

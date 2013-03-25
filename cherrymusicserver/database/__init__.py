@@ -33,13 +33,17 @@ To support schema changes that are not backward-compatible, databases can be
 versioned.
 """
 
+import itertools
+
 from cherrymusicserver import log
 from cherrymusicserver.database import defs
 from cherrymusicserver.database import sql
 
 
 def require(dbname, version):
-    """Make sure the database exists and has the given version."""
+    """ Raise an AssertionError if the database does not exist or has the wrong
+        version.
+    """
     if not dbname:
         raise ValueError('dbname must not be empty or None')
     isversion = MultiUpdater.checkversion(dbname)
@@ -66,15 +70,14 @@ def ensure_requirements(dbname=None, autoconsent=False, consent_callback=None):
         ``True`` if requirements are met.
     '''
     if autoconsent or consent_callback is None:
-        consent_callback = lambda: autoconsent
-    assert callable(consent_callback), (type(consent_callback))
-    update = _create_updater(dbname)
+        consent_callback = lambda _: autoconsent
+    update = MultiUpdater(dbname)
     if update.needed:
-        log.i('database definition out of date')
-        if update.requires_consent and not consent_callback():
+        if update.requires_consent and not consent_callback(update.reasons):
             return False
+        log.w("Database schema update running; don't turn off the program!")
         update.run()
-        log.i('database definition updated')
+        log.i('Database schema update complete.')
     return True
 
 
@@ -86,12 +89,8 @@ def resetdb(dbname):
     '''
     if not dbname:
         raise ValueError('dbname must not be empty or None')
-    updater = _create_updater(dbname)
+    updater = MultiUpdater(dbname)
     updater.reset()
-
-
-def _create_updater(*dbnames):
-    return MultiUpdater(tuple(n for n in dbnames if n is not None))
 
 
 class MultiUpdater(object):
@@ -102,9 +101,12 @@ class MultiUpdater(object):
     connector : :class:`.connect.AbstractConnector`
         For connecting to the databases.
     '''
-    def __init__(self, dbnames=()):
-        dbdefs = defs.getall() if not dbnames else dict((n, defs.get(n)) for n in dbnames)
-        self.updaters = tuple(sql.Updater(k, dbdefs[k]) for k in dbdefs)
+    def __init__(self, dbname=None):
+        if dbname is None:
+            dbdefs = defs.getall()
+            self.updaters = tuple(sql.Updater(k, dbdefs[k]) for k in dbdefs)
+        else:
+            self.updaters = (sql.Updater(dbname, defs.get(dbname)),)
 
     def __iter__(self):
         return iter(self.updaters)
@@ -115,8 +117,8 @@ class MultiUpdater(object):
 
         See :meth:`.sql.Updater.needed`.
         """
-        for u in self:
-            if u.needed:
+        for updater in self:
+            if updater.needed:
                 return True
         return False
 
@@ -126,27 +128,34 @@ class MultiUpdater(object):
 
         See :meth:`.sql.Updater.requires_consent`.
         """
-        for u in self:
-            if u.requires_consent:
+        for updater in self:
+            if updater.requires_consent:
                 return True
         return False
+
+    @property
+    def reasons(self):
+        """ An iterable of strings with reasons for updates that require
+            consent.
+        """
+        return itertools.chain(*(updater.reasons for updater in self))
 
     def run(self):
         """Update all databases with out of date versions.
 
         See :meth:`.sql.Updater.run`.
         """
-        for u in self:
-            if u.needed:
-                u.run()
+        for updater in self:
+            if updater.needed:
+                updater.run()
 
     def reset(self):
         """Delete content and data structures of all included databases.
 
         See :meth:`.sql.Updater.reset`.
         """
-        for u in self:
-            u.reset()
+        for updater in self:
+            updater.reset()
 
     @classmethod
     def checkversion(self, dbname):
