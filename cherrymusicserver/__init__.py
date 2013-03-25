@@ -116,7 +116,7 @@ class CherryMusic:
         service.provide(useroptiondb.UserOptionDB)
         service.provide(database.sql.SQLiteConnector, kwargs={
             'datadir': pathprovider.databaseFilePath(''),
-            'suffix': 'db',
+            'extension': 'db',
             'connargs': {'check_same_thread': False},
         })
 

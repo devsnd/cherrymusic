@@ -47,22 +47,22 @@ class SQLiteConnector(AbstractConnector):
 
     datadir: str
         Base directories of database files.
-    suffix: str (optional)
-        Suffix to append to database filenames.
+    extension: str (optional)
+        Extension to append to database filenames.
     connargs: dict (optional)
         Dictionary with keyword args to pass on to sqlite3.Connection.
     '''
-    def __init__(self, datadir='', suffix='', connargs={}):
+    def __init__(self, datadir='', extension='', connargs={}):
         self.datadir = datadir
-        self.suffix = suffix
+        self.extension = extension
         self.connargs = connargs
 
     def connection(self, dbname):
         return sqlite3.connect(self.dblocation(dbname), **self.connargs)
 
     def dblocation(self, basename):
-        if self.suffix:
-            basename = os.path.extsep.join((basename, self.suffix))
+        if self.extension:
+            basename = os.path.extsep.join((basename, self.extension))
         return os.path.join(self.datadir, basename)
 
 
