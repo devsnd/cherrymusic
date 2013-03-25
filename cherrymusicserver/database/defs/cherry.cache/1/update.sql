@@ -10,9 +10,12 @@ CREATE TABLE _tmp_files_copy(
     filetype TEXT,
     isdir INTEGER NOT NULL
 );
+
 INSERT INTO _tmp_files_copy(_id, _created, parent, filename, filetype, isdir)
     SELECT rowid, 0, parent, filename, filetype, isdir FROM files;
+
 DROP TABLE files;
+
 ALTER TABLE _tmp_files_copy RENAME TO files;
 
 
@@ -23,9 +26,16 @@ CREATE TABLE _tmp_dict_copy(
     word TEXT NOT NULL,
     occurrences INTEGER NOT NULL DEFAULT 1
 );
-INSERT INTO _tmp_dict_copy(_id, word, occurrences)
-    SELECT rowid, word, occurences FROM dictionary;
+
+INSERT INTO _tmp_dict_copy(_id, word)
+    SELECT rowid, word FROM dictionary;
+
+UPDATE _tmp_dict_copy SET occurrences = (
+    SELECT COUNT(1) FROM search
+        WHERE search.drowid = _tmp_dict_copy._id);
+
 DROP TABLE dictionary;
+
 ALTER TABLE _tmp_dict_copy RENAME TO dictionary;
 
 
@@ -36,9 +46,12 @@ CREATE TABLE _tmp_search_copy(
     drowid INTEGER NOT NULL,
     frowid INTEGER NOT NULL
 );
+
 INSERT INTO _tmp_search_copy(_id, drowid, frowid)
     SELECT rowid, drowid, frowid FROM search;
+
 DROP TABLE search;
+
 ALTER TABLE _tmp_search_copy RENAME TO search;
 
 
