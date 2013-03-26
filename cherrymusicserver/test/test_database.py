@@ -124,6 +124,7 @@ class TestDefs(unittest.TestCase):
 def create(dbdef, vnum, connector):
     with connector.connection() as c:
         runscript(dbdef, vnum, 'create.sql', c)
+        runscript(dbdef, vnum, 'after.sql', c, missing_ok=True)
 
 
 def drop(dbdef, vnum, connector):
@@ -135,15 +136,21 @@ def update(dbdef, vnums, connector):
     for vnum in vnums:
         with connector.connection() as c:
             runscript(dbdef, vnum, 'update.sql', c)
+            runscript(dbdef, vnum, 'after.sql', c, missing_ok=True)
 
 
-def runscript(dbdef, vnum, scriptname, conn):
+def runscript(dbdef, vnum, scriptname, conn, missing_ok=False):
     '''Run an SQL script, statement per statement, and give a helpful
     message on error.
     '''
-    script = dbdef[str(vnum)][scriptname]
+    try:
+        script = dbdef[str(vnum)][scriptname]
+    except KeyError:
+        if missing_ok:
+            return
+        raise
     lno = 1
-    for stmt in script.split(';'):
+    for stmt in split_sqlscript(script):
         linecount = stmt.count('\n')   # yeah, linux linesep.
         try:
             cursor = conn.cursor()
@@ -162,6 +169,21 @@ def runscript(dbdef, vnum, scriptname, conn):
             lno += linecount
         finally:
             cursor.close()
+
+
+def split_sqlscript(script):
+    import re
+    stmts = [x + ';' for x in script.split(';')]
+    i = 0
+    while i < len(stmts):
+        if re.search(r'\bBEGIN\b', stmts[i], re.I):
+            while (i + 1) < len(stmts) and not re.search(r'\bEND\b', stmts[i], re.I):
+                stmts[i] += stmts[i + 1]
+                del stmts[i + 1]
+                if re.search(r'\bEND\b', stmts[i], re.I):
+                    break
+        i += 1
+    return stmts
 
 
 def script_lines(script, start=1, length=0):

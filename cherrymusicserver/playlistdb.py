@@ -54,7 +54,6 @@ class PlaylistDB:
         if userid != ownerid[0] and not override_owner:
             return "This playlist belongs to another user! Nothing deleted."
         cursor.execute("""DELETE FROM playlists WHERE rowid = ?""", (plid,))
-        cursor.execute("""DELETE FROM tracks WHERE playlistid = ?""", (plid,))
         self.conn.commit()
         return 'success'
 

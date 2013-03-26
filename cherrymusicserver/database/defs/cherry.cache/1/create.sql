@@ -1,11 +1,13 @@
+
+
 CREATE TABLE files(
-    _id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     _created INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
-    _modified INTEGER DEFAULT 0,
+    _modified INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
     _deleted INTEGER DEFAULT 0,
     parent INTEGER NOT NULL,
     filename TEXT NOT NULL,
-    filetype TEXT NOT NULL,
+    filetype TEXT,
     isdir INTEGER NOT NULL
 );
 
@@ -20,9 +22,3 @@ CREATE TABLE search(
     drowid INTEGER NOT NULL,
     frowid INTEGER NOT NULL
 );
-
-
-CREATE INDEX idx_files_parent ON files(parent);
-CREATE INDEX idx_dictionary_word ON dictionary(word);
-CREATE INDEX idx_search_drowid_frowid ON search(drowid, frowid);    -- for lookup
-CREATE INDEX idx_search_frowid_drowid ON search(frowid, drowid);    -- for deletion

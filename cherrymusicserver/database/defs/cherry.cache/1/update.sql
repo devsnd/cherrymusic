@@ -3,7 +3,7 @@
 CREATE TABLE _tmp_files_copy(
     _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     _created INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
-    _modified INTEGER DEFAULT 0,
+    _modified INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
     _deleted INTEGER DEFAULT 0,
     parent INTEGER NOT NULL,
     filename TEXT NOT NULL,
@@ -11,8 +11,8 @@ CREATE TABLE _tmp_files_copy(
     isdir INTEGER NOT NULL
 );
 
-INSERT INTO _tmp_files_copy(_id, _created, parent, filename, filetype, isdir)
-    SELECT rowid, 0, parent, filename, filetype, isdir FROM files;
+INSERT INTO _tmp_files_copy(_id, parent, filename, filetype, isdir)
+    SELECT rowid, parent, filename, filetype, isdir FROM files;
 
 DROP TABLE files;
 
@@ -53,11 +53,3 @@ INSERT INTO _tmp_search_copy(_id, drowid, frowid)
 DROP TABLE search;
 
 ALTER TABLE _tmp_search_copy RENAME TO search;
-
-
--- indexes
-
-CREATE INDEX idx_files_parent ON files(parent);
-CREATE INDEX idx_dictionary_word ON dictionary(word);
-CREATE INDEX idx_search_drowid_frowid ON search(drowid, frowid);    -- for lookup
-CREATE INDEX idx_search_frowid_drowid ON search(frowid, drowid);    -- for deletion
