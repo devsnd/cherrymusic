@@ -122,18 +122,18 @@ class TestDefs(unittest.TestCase):
 
 
 def create(dbdef, vnum, connector):
-    with connector.transaction() as c:
+    with connector.connection() as c:
         runscript(dbdef, vnum, 'create.sql', c)
 
 
 def drop(dbdef, vnum, connector):
-    with connector.transaction() as c:
+    with connector.connection() as c:
         runscript(dbdef, vnum, 'drop.sql', c)
 
 
 def update(dbdef, vnums, connector):
     for vnum in vnums:
-        with connector.transaction() as c:
+        with connector.connection() as c:
             runscript(dbdef, vnum, 'update.sql', c)
 
 

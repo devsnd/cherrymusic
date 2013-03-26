@@ -31,11 +31,10 @@
 Connect to databases.
 '''
 
-
 # from abc import ABCMeta, abstractmethod   # don't, for py2 compatibility
-from contextlib import contextmanager
 
 import cherrymusicserver.service as service
+
 
 # class AbstractConnector(metaclass=ABCMeta):
 class AbstractConnector(object):
@@ -82,13 +81,6 @@ class BoundConnector(object):
     def connection(self):
         '''Return a connection object to talk to the bound database.'''
         return self.baseconnector.connection(self.name)
-
-    @contextmanager
-    def transaction(self):
-        '''*Context Manager*; return a connection to the bound database,
-        wrapped in an active transaction and commit active transactions on exit.'''
-        with self.connection() as con:
-            yield con
 
     def execute(self, query, params=()):
         '''Connect to the bound database and execute a query; then return the

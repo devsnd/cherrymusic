@@ -147,12 +147,12 @@ class Updater(object):
         if None is version:
             log.d('nothing to reset.')
             return
-        with self.db.transaction() as txn:
-            txn.isolation_level = 'EXCLUSIVE'
-            txn.executescript(self.desc[version]['drop.sql'])
-            txn.executescript(self._metatable['drop.sql'])
-            txn.executescript(self._metatable['create.sql'])
-            self._setversion(None, txn)
+        with self.db.connection() as cxn:
+            cxn.executescript(self.desc[version]['drop.sql'])
+            cxn.executescript(self._metatable['drop.sql'])
+            cxn.executescript(self._metatable['create.sql'])
+            self._setversion(None, cxn)
+        cxn.close()
 
     @property
     def _version(self):
@@ -185,26 +185,40 @@ class Updater(object):
     def _init_meta(self):
         content = self.db.execute('SELECT type, name FROM sqlite_master;').fetchall()
         content = [(t, n) for t, n in content if n != '_meta_version' and not n.startswith('sqlite')]
-        with self.db.transaction() as txn:
-            txn.isolation_level = "EXCLUSIVE"
-            txn.executescript(self._metatable['create.sql'])
+        with self.db.connection() as cxn:
+            cxn.isolation_level = "EXCLUSIVE"
+            cxn.executescript(self._metatable['create.sql'])
             if content and self._version is None:
                 log.d('%s: unversioned content found: %r', self.name, content)
-                self._setversion(0, txn)
+                self._setversion(0, cxn)
+        cxn.isolation_level = ''
+        cxn.close()
 
     def _init_with_version(self, vnum):
         log.d('initializing database %r to version %d', self.name, vnum)
-        with self.db.transaction() as txn:
-            txn.isolation_level = "EXCLUSIVE"
-            txn.executescript(self.desc[vnum]['create.sql'])
-            self._setversion(vnum, txn)
+        cxn = self.db.connection()
+        cxn.isolation_level = None  # autocommit
+        cxn.executescript(self.desc[vnum]['create.sql'])
+        self._run_afterscript_if_exists(vnum, cxn)
+        self._setversion(vnum, cxn)
+        cxn.isolation_level = ''
+        cxn.close()
 
     def _update_to_version(self, vnum):
         log.d('updating database %r to version %d', self.name, vnum)
-        with self.db.transaction() as txn:
-            txn.isolation_level = "EXCLUSIVE"
-            txn.executescript(self.desc[vnum]['update.sql'])
-            self._setversion(vnum, txn)
+        cxn = self.db.connection()
+        cxn.isolation_level = None  # autocommit
+        cxn.executescript(self.desc[vnum]['update.sql'])
+        self._run_afterscript_if_exists(vnum, cxn)
+        self._setversion(vnum, cxn)
+        cxn.isolation_level = ''
+        cxn.close()
+
+    def _run_afterscript_if_exists(self, vnum, conn):
+        try:
+            conn.executescript(self.desc[vnum]['after.sql'])
+        except KeyError:
+            pass
 
 
 class TmpConnector(AbstractConnector):
