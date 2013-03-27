@@ -44,32 +44,33 @@ from cherrymusicserver import pathprovider
 from cherrymusicserver.util import Performance
 from cherrymusicserver import resultorder
 from cherrymusicserver import log
-import cherrymusicserver.tweak
+from cherrymusicserver.tweak import CherryModelTweaks
+
 
 class CherryModel:
     def __init__(self, cache):
         self.cache = cache
-        CherryModel.NATIVE_BROWSER_FORMATS = ['ogg','mp3']
+        CherryModel.NATIVE_BROWSER_FORMATS = ['ogg', 'mp3']
         CherryModel.supportedFormats = CherryModel.NATIVE_BROWSER_FORMATS[:]
         if cherry.config.media.transcode:
             self.transcoder = audiotranscode.AudioTranscode()
             CherryModel.supportedFormats += self.transcoder.availableDecoderFormats()
             CherryModel.supportedFormats = list(set(CherryModel.supportedFormats))
 
-    def abspath(self,path):
+    def abspath(self, path):
         return os.path.join(cherry.config.media.basedir.str, path)
 
-    def sortFiles(self,files,fullpath=''):
+    def sortFiles(self, files, fullpath=''):
+        upper_case_filename = lambda x: pathprovider.filename(x).upper()
         #sort alphabetically (case insensitive)
-        sortedfiles = sorted(files,
-                            key=lambda x : pathprovider.filename(x).upper() )
+        sortedfiles = sorted(files, key=upper_case_filename)
         if fullpath:
             #sort directories up
-            sortedfiles = sorted(sortedfiles,
-                                key=lambda x : os.path.isfile(os.path.join(fullpath,x)))
+            isfile = lambda x: os.path.isfile(os.path.join(fullpath, x))
+            sortedfiles = sorted(sortedfiles, key=isfile)
         return sortedfiles
 
-    def listdir(self,dirpath,filterstr=''):
+    def listdir(self, dirpath, filterstr=''):
         absdirpath = self.abspath(dirpath)
         if cherry.config.browser.pure_database_lookup.bool:
             allfilesindir = self.cache.listdir(dirpath)
@@ -83,38 +84,46 @@ class CherryModel:
 
         musicentries = []
 
-        compactlisting = len(allfilesindir) > cherry.config.browser.maxshowfiles.int
+        maximum_shown_files = cherry.config.browser.maxshowfiles.int
+        compactlisting = len(allfilesindir) > maximum_shown_files
         if compactlisting:
-            filterstr=os.path.commonprefix(list(map(str.upper,allfilesindir)))
+            upper_case_files = map(str.upper, allfilesindir)
+            filterstr = os.path.commonprefix(list(upper_case_files))
             filterlength = len(filterstr)+1
-            currentletter = '/' #impossible first character
+            currentletter = '/'  # impossible first character
             sortedfiles = self.sortFiles(allfilesindir)
             for dir in sortedfiles:
-                if dir.upper().startswith(currentletter.upper()) and not len(currentletter)<filterlength:
+                filter_match = dir.upper().startswith(currentletter.upper())
+                if filter_match and not len(currentletter) < filterlength:
                     continue
                 else:
                     currentletter = dir[:filterlength]
                     #if the filter equals the foldername
                     if len(currentletter) == len(filterstr):
-                        subpath = os.path.join(absdirpath,dir)
+                        subpath = os.path.join(absdirpath, dir)
                         self.addMusicEntry(subpath, musicentries)
                     else:
-                        musicentries.append(MusicEntry(strippath(absdirpath),repr=currentletter,compact=True))
+                        musicentries.append(
+                            MusicEntry(strippath(absdirpath),
+                                       repr=currentletter,
+                                       compact=True))
         else:
             sortedfiles = self.sortFiles(allfilesindir, absdirpath)
             for dir in sortedfiles:
-                subpath = os.path.join(absdirpath,dir)
+                subpath = os.path.join(absdirpath, dir)
                 self.addMusicEntry(subpath, musicentries)
         if musicentries == []:
-            musicentries.append(MusicEntry(path="No playable media files found.", repr=""))
+            musicentries.append(
+                MusicEntry(path="No playable media files found.",
+                           repr=""))
         return musicentries
 
-    def addMusicEntry(self,fullpath, list):
+    def addMusicEntry(self, fullpath, list):
         if os.path.isfile(fullpath):
             if isplayable(fullpath):
                 list.append(MusicEntry(strippath(fullpath)))
         else:
-            list.append(MusicEntry(strippath(fullpath),dir=True))
+            list.append(MusicEntry(strippath(fullpath), dir=True))
 
     def updateLibrary(self):
         self.cache.full_update()
@@ -125,70 +134,74 @@ class CherryModel:
         user = cherrypy.session.get('username', None)
         if user:
             log.d(user+' searched for "'+term+'"')
-        results = self.cache.searchfor(term, maxresults=cherry.config.search.maxresults.int)
+        max_search_results = cherry.config.search.maxresults.int
+        results = self.cache.searchfor(term, maxresults=max_search_results)
         with Performance('sorting DB results using ResultOrder'):
-            debug = cherrymusicserver.tweak.CherryModelTweaks.result_order_debug
-            results = sorted(results,key=resultorder.ResultOrder(term,debug=debug),reverse=True)
-            results = results[:min(len(results), cherry.config.search.maxresults.int)]
+            debug = CherryModelTweaks.result_order_debug
+            order_function = resultorder.ResultOrder(term, debug=debug)
+            results = sorted(results, key=order_function, reverse=True)
+            results = results[:min(len(results), max_search_results)]
             if debug:
-                for sortedResults in results[:cherrymusicserver.tweak.CherryModelTweaks.result_order_debug_files]:
+                n = CherryModelTweaks.result_order_debug_files
+                for sortedResults in results[:n]:
                     Performance.log(sortedResults.debugOutputSort)
                 for sortedResults in results:
-                    sortedResults.debugOutputSort = None #free ram
+                    sortedResults.debugOutputSort = None  # free ram
 
         with Performance('checking and classifying results:'):
             results = list(filter(isValidMediaFile, results))
         return results
 
     def motd(self):
-        artist = [  'Hendrix',
-                    'the Beatles',
-                    'James Brown',
-                    'Nina Simone',
-                    'Mozart',
-                    'Einstein',
-                    'Bach',
-                    'John Coltraine',
-                    'Deep Purple',
-                    'Frank Sinatra',
-                    'Django Reinhardt',
-                    'Radiohead',
-                    'The chemical brothers',
-                    'Vivaldi',
-                    'Björk']
-        search = [  'Wadda ya wanna hea-a?',
-                    'I would like to dance to',
-                    'Someone told me to listen to',
-                    'There is nothing better than',
-                    'The GEMA didnt let me hear',
-                    'Give me',
-                    'If only {artist} had played with',
-                    'My feet cant stop when I hear',
-                    '{artist} actually stole everything from',
-                    '{artist} really liked to listen to',
-                    '{artist} played backwards is actually',
-                    'Each Beatle had sex with',
-                    'Turn the volume up to 11, it\'s',
-                    'If {artist} made Reggae it sounded like',
-                    '{artist} backwards is "{revartist}"',
-                    '2 songs of {artist} are only composed of haikus.',
-                    '{artist} used to sing with',
-                    '{artist} had a dog the size of',
-                    '{artist} was once sued by',
-                    '{artist} named his dog after',
-                    '{artist} claimed to be funkier than',
-                    '{artist} could never stand the music of',
-                    '{artist} could not stop listening to',
-                    '{artist} was once interviewed by',
-                    '{artist} actually has 2 noses.',
-                ]
+        artist = ['Hendrix',
+                  'the Beatles',
+                  'James Brown',
+                  'Nina Simone',
+                  'Mozart',
+                  'Einstein',
+                  'Bach',
+                  'John Coltraine',
+                  'Deep Purple',
+                  'Frank Sinatra',
+                  'Django Reinhardt',
+                  'Radiohead',
+                  'The chemical brothers',
+                  'Vivaldi',
+                  'Björk']
+        search = ['Wadda ya wanna hea-a?',
+                  'I would like to dance to',
+                  'Someone told me to listen to',
+                  'There is nothing better than',
+                  'The GEMA didnt let me hear',
+                  'Give me',
+                  'If only {artist} had played with',
+                  'My feet cant stop when I hear',
+                  '{artist} actually stole everything from',
+                  '{artist} really liked to listen to',
+                  '{artist} played backwards is actually',
+                  'Each Beatle had sex with',
+                  'Turn the volume up to 11, it\'s',
+                  'If {artist} made Reggae it sounded like',
+                  '{artist} backwards is "{revartist}"',
+                  '2 songs of {artist} are only composed of haikus.',
+                  '{artist} used to sing with',
+                  '{artist} had a dog the size of',
+                  '{artist} was once sued by',
+                  '{artist} named his dog after',
+                  '{artist} claimed to be funkier than',
+                  '{artist} could never stand the music of',
+                  '{artist} could not stop listening to',
+                  '{artist} was once interviewed by',
+                  '{artist} actually has 2 noses.',
+                  ]
         oneliner = choice(search)
         if '{artist}' in oneliner:
             a = choice(artist)
-            oneliner=oneliner.replace('{artist}',a)
+            oneliner = oneliner.replace('{artist}', a)
             if '{revartist}' in oneliner:
-                oneliner=oneliner.replace('{revartist}',a.lower()[::-1])
+                oneliner = oneliner.replace('{revartist}', a.lower()[::-1])
         return oneliner
+
 
 def isValidMediaFile(file):
     file.path = strippath(file.path)
@@ -218,18 +231,19 @@ def createMusicEntryByFilePath(file):
     else:
         return [MusicEntry(strippedpath, dir=True)]
 
+
 def isplayable(filename):
     '''checks to see if there's no extension or if the extension is in
     the configured 'playable' list'''
     ext = os.path.splitext(filename)[1]
     return ext and ext[1:].lower() in CherryModel.supportedFormats
-    
-        
+
 
 def strippath(path):
     if path.startswith(cherry.config.media.basedir.str):
         return path[len(cherry.config.media.basedir.str) + 1:]
     return path
+
 
 class MusicEntry:
     def __init__(self, path, compact=False, dir=False, repr=None):
@@ -237,12 +251,14 @@ class MusicEntry:
         self.compact = compact
         self.dir = dir
         self.repr = repr
+
     def __repr__(self):
-        return "<MusicEntry path:%s, dir:%s>"%(self.path,self.dir)
+        return "<MusicEntry path:%s, dir:%s>" % (self.path, self.dir)
+
 
 class StartsWithCaseInsensitive:
-    def __init__(self,startswith):
+    def __init__(self, startswith):
         self.startswith = startswith.upper()
 
-    def __call__(self,string):
+    def __call__(self, string):
         return string.upper().startswith(self.startswith)
