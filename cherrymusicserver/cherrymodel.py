@@ -44,7 +44,7 @@ from cherrymusicserver import pathprovider
 from cherrymusicserver.util import Performance
 from cherrymusicserver import resultorder
 from cherrymusicserver import log
-from cherrymusicserver.tweak import CherryModelTweaks
+import cherrymusicserver.tweak
 
 
 class CherryModel:
@@ -131,18 +131,19 @@ class CherryModel:
 
     def search(self, term):
         reload(cherrymusicserver.tweak)
+        tweaks = cherrymusicserver.tweak.CherryModelTweaks
         user = cherrypy.session.get('username', None)
         if user:
             log.d(user+' searched for "'+term+'"')
         max_search_results = cherry.config.search.maxresults.int
         results = self.cache.searchfor(term, maxresults=max_search_results)
         with Performance('sorting DB results using ResultOrder'):
-            debug = CherryModelTweaks.result_order_debug
+            debug = tweaks.result_order_debug
             order_function = resultorder.ResultOrder(term, debug=debug)
             results = sorted(results, key=order_function, reverse=True)
             results = results[:min(len(results), max_search_results)]
             if debug:
-                n = CherryModelTweaks.result_order_debug_files
+                n = tweaks.result_order_debug_files
                 for sortedResults in results[:n]:
                     Performance.log(sortedResults.debugOutputSort)
                 for sortedResults in results:
