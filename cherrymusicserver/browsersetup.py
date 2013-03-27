@@ -37,12 +37,10 @@ import threading
 from cherrymusicserver import pathprovider
 from cherrymusicserver import configuration as cfg
 
-
 def obj_hook(inp):
     print(type(inp))
     return inp
-
-
+    
 class SetupHandler:
     def index(self):
         return pathprovider.readRes('res/setup.html')
@@ -55,13 +53,10 @@ class SetupHandler:
         success = False
 
         with cfg.create() as bsdcheck:
-            isabs = os.path.isabs
-            isdir = os.path.isdir
-            validbasedir = lambda x: x is None or isabs(x) and isdir(x)
-            bsdcheck.media.basedir.validity = validbasedir
+            bsdcheck.media.basedir.validity = lambda x: x is None or os.path.isabs(x) and os.path.isdir(x)
 
         try:
-            customcfg = cfg.from_dict(json.loads(values, encoding='str'))
+            customcfg = cfg.from_dict(json.loads(values,encoding='str'))
         except Exception as e:
             # a dict key violates config naming rules or values is not a dict
             # == we got sent bad data
@@ -89,26 +84,17 @@ class SetupHandler:
 
     def mockFeatureCheck(self):
         import random
-        return bool(random.random()-0.5 > 0)
-
+        return bool(random.random()-0.5>0)
+        
     def checkFeature(self, featurelist, feature):
         checkers = {
-            'ImageMagick':  (Feature('convert'),
-                             'has-imagemagick',
-                             'resizing of album covers'),
-            'Vorbis Tools': (Feature('oggenc'),
-                             'has-has-vorbis-tools',
-                             'encoding and decoding of OGGs'),
-            'Lame':         (Feature('lame'),
-                             'has-lame',
-                             'encoding and decoding of MP3s'),
-            'FLAC':         (Feature('flac'),
-                             'has-flac',
-                             'encoding and decoding of FLACs'),
-            'mplayer':      (Feature('mplayer'),
-                             'has-mplayer',
-                             'decoding OGG, MP3, FLAC, WMA and AAC'),
+            'ImageMagick': (Feature('convert'), 'has-imagemagick', 'resizing of album covers'),
+            'Vorbis Tools' : (Feature('oggenc'), 'has-has-vorbis-tools', 'encoding and decoding of OGGs'),
+            'Lame': (Feature('lame'), 'has-lame', 'encoding and decoding of MP3s'),
+            'FLAC': (Feature('flac'), 'has-flac', 'encoding and decoding of FLACs'),
+            'mplayer':(Feature('mplayer'), 'has-mplayer', 'decoding OGG, MP3, FLAC, WMA and AAC'),
         }
+        
         if feature in checkers:
             installed = checkers[feature][0]()
             idx = checkers[feature][1]
@@ -118,7 +104,7 @@ class SetupHandler:
             else:
                 text = 'leads to missing feature: '+msg
             featurelist.append([feature, installed, idx, text])
-
+        
     def getfeatures(self):
         featurelist = []
         self.checkFeature(featurelist, 'ImageMagick')
@@ -128,61 +114,58 @@ class SetupHandler:
         #self.checkFeature(featurelist, 'mplayer')
         return json.dumps(featurelist)
     getfeatures.exposed = True
-
+    
     def ping(self):
         return "pong"
     ping.exposed = True
-
-
+    
 class Feature:
     def __init__(self, command):
         self.command = command
-
     def __call__(self):
         try:
-            with open(os.devnull, 'w') as devnull:
-                subprocess.Popen([self.command],
-                                 stdout=devnull,
-                                 stderr=devnull)
+            with open(os.devnull,'w') as devnull:
+                subprocess.Popen([self.command],stdout=devnull, stderr=devnull)
             return True
         except OSError:
             return False
-
 
 def configureAndStartCherryPy(port):
         if not port:
             port = 8080
         socket_host = "0.0.0.0"
+
         resourcedir = os.path.abspath(pathprovider.getResourcePath('res'))
-        userdatapath = pathprovider.getUserDataPath()
+    
         cherrypy.config.update({
             'server.socket_port': port,
-            'log.error_file': os.path.join(userdatapath, 'server.log'),
+            'log.error_file': os.path.join(pathprovider.getUserDataPath(), 'server.log'),
             'environment': 'production',
             'server.socket_host': socket_host,
-            'server.thread_pool': 30,
-            'tools.sessions.on': True,
-            'tools.sessions.timeout': 60 * 24,
-        })
-        resource_config = {
-            '/res': {
-                'tools.staticdir.on': True,
-                'tools.staticdir.dir': resourcedir,
-                'tools.staticdir.index': 'index.html',
-                'tools.caching.on': False,
-            },
-            '/favicon.ico': {
-                'tools.staticfile.on': True,
-                'tools.staticfile.filename': resourcedir+'/favicon.ico',
-            }
-        }
-        cherrypy.tree.mount(SetupHandler(), '/', config=resource_config)
-        print('Starting setup server on port %d ...' % port)
-        print('Open your browser and put the server IP:%d in the address bar.'
-              % port)
-        print('If you run the server locally, use: localhost:%d' % port)
+            'server.thread_pool' : 30,
+            'tools.sessions.on' : True,
+            'tools.sessions.timeout' : 60 * 24,
+            })
 
-        cherrypy.lib.caching.expires(0)
+        cherrypy.tree.mount(SetupHandler(), '/',
+            config={
+                '/res': {
+                    'tools.staticdir.on': True,
+                    'tools.staticdir.dir': resourcedir,
+                    'tools.staticdir.index': 'index.html',
+                    'tools.caching.on' : False,
+                },
+                '/favicon.ico':{
+                    'tools.staticfile.on' : True,
+                    'tools.staticfile.filename' : resourcedir+'/favicon.ico',
+                }
+            }
+        )
+        print('Starting setup server on port %d ...' % port)
+        print('Open your browser and put the server IP:%d in the address bar.'%port)
+        print('If you run the server locally, use: localhost:%d'%port)
+
+        cherrypy.lib.caching.expires(0) #disable expiry caching
         cherrypy.engine.timeout_monitor.frequency = 1
         cherrypy.engine.start()
         cherrypy.engine.block()

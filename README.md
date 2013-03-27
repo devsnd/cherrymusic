@@ -45,12 +45,9 @@ Getting Started
 
         $ python cherrymusic --setup --port 8080
 
-4. Open your browser, configure cherrymusic and play some music!
+4. Open your browser configure cherrymusic and play some music!
 
         $ firefox localhost:8080
-        
-5. It's currently necessary to initialize the search database manually. 
-   To do that, go to the *Admin* panel in the web interface and click `[Update Music Library]`.
 
 Requirements
 ------------

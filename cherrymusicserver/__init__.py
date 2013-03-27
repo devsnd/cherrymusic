@@ -95,7 +95,7 @@ LONG_DESCRIPTION = """CherryMusic is a music streaming
     server written in python. It's based on cherrypy and jPlayer.
     You can search your collection, create and share playlists with
     other users. It's able to play music on almost all devices since
-    it happens in your browser and uses HTML5 for audio playback.
+    it happends in your browser and uses HTML5 for audio playback.
     """
 
 
@@ -103,7 +103,7 @@ class CherryMusic:
 
     def __init__(self, update=None, createNewConfig=False, dropfiledb=False, setup=False, port=False, cfg_override={}):
         self.setup_services()
-        self.setup_config(createNewConfig, setup, port, cfg_override)
+        self.setup_config(createNewConfig, setup, port)
         self.setup_databases(update, dropfiledb)
         self.server(port, httphandler.HTTPHandler(config))
 
@@ -120,14 +120,12 @@ class CherryMusic:
             'connargs': {'check_same_thread': False},
         })
 
-    def setup_config(self, createNewConfig, browsersetup, port, cfg_override):
+    def setup_config(self, createNewConfig, browsersetup, port):
         if browsersetup:
-            port = cfg_override.get('server.port', False)
             cherrymusicserver.browsersetup.configureAndStartCherryPy(port)
         if createNewConfig:
             newconfigpath = pathprovider.configurationFile() + '.new'
-            configuration.write_to_file(
-                configuration.from_defaults(), newconfigpath)
+            configuration.write_to_file(configuration.from_defaults(), newconfigpath)
             log.i('New configuration file was written to:{br}{path}'.format(
                 path=newconfigpath,
                 br=os.linesep
@@ -137,11 +135,9 @@ class CherryMusic:
             if pathprovider.fallbackPathInUse():   # temp. remove @ v0.30 or so
                 self.printMigrationNoticeAndExit()
             else:
-                configuration.write_to_file(
-                    configuration.from_defaults(),
-                    pathprovider.configurationFile())
+                configuration.write_to_file(configuration.from_defaults(), pathprovider.configurationFile())
                 self.printWelcomeAndExit()
-        self._init_config(cfg_override)
+        self._init_config()
 
     def setup_databases(self, update, dropfiledb):
         if dropfiledb:
@@ -154,6 +150,7 @@ class CherryMusic:
             sys.exit(1)
         if update is not None:
             self._update_if_necessary(update)
+            # threading.Thread('UpdateThread', target=self._update_if_necessary, args=(update,)).start()
             sys.exit(0)
 
     @staticmethod
@@ -187,7 +184,7 @@ Run schema update? [y/N]: """.format(
         elif update is not None:
             cache.full_update()
 
-    def _init_config(self, override_dict):
+    def _init_config(self):
         global config
         defaultcfg = configuration.from_defaults()
         override = configuration.from_dict(override_dict)
@@ -204,10 +201,10 @@ Run schema update? [y/N]: """.format(
         default = configuration.from_defaults()
         transform = lambda s: '[{0}]: {2}'.format(*(s.partition('.')))
 
-        for property in configuration.to_list(default):
+        for property in configuration.to_list(default):     #@ReservedAssignment
             if property.name not in known_config and not property.hidden:
                 new.append(transform(property.name))
-        for property in configuration.to_list(known_config):
+        for property in configuration.to_list(known_config): #@ReservedAssignment
             if property.name not in default:
                 deprecated.append(transform(property.name))
 
