@@ -155,15 +155,6 @@ def from_defaults():
         c.server.ssl_certificate = 'certs/server.crt'
         c.server.ssl_private_key = 'certs/server.key'
 
-        c.server.dynamic_dns_address = ''
-        c.server.dynamic_dns_address.desc = '''
-                                    ex: dynamic_dns_address = http://example.dyndns.com/cm
-                                    If you have set up a dyndns/no-ip/etc, you can insert the
-                                    address that points to cherrymusic here. This will enable
-                                    you to use extra features like the opensearch plugin for
-                                    your browser, even when your ip changes frequently.
-                                    '''
-
     return c
 
 

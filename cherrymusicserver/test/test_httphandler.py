@@ -197,11 +197,6 @@ class TestHTTPHandler(unittest.TestCase):
         session is used to authenticate the http request."""
         self.assertRaises(AttributeError, self.http.api, 'userdelete')
         
-    def test_api_opensearchdescription(self):
-        """when attribute error is raised, this means that cherrypy
-        session is used to authenticate the http request."""
-        self.assertRaises(AttributeError, self.http.api, 'opensearchdescription')
-        
     def test_api_heartbeat(self):
         """when attribute error is raised, this means that cherrypy
         session is used to authenticate the http request."""
