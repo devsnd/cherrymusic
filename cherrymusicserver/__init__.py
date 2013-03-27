@@ -95,15 +95,15 @@ LONG_DESCRIPTION = """CherryMusic is a music streaming
     server written in python. It's based on cherrypy and jPlayer.
     You can search your collection, create and share playlists with
     other users. It's able to play music on almost all devices since
-    it happends in your browser and uses HTML5 for audio playback.
+    it happens in your browser and uses HTML5 for audio playback.
     """
 
 
 class CherryMusic:
 
-    def __init__(self, update=None, createNewConfig=False, dropfiledb=False, setup=False, port=False):
+    def __init__(self, update=None, createNewConfig=False, dropfiledb=False, setup=False, port=False, cfg_override={}):
         self.setup_services()
-        self.setup_config(createNewConfig, setup, port)
+        self.setup_config(createNewConfig, setup, port, cfg_override)
         self.setup_databases(update, dropfiledb)
         self.server(port, httphandler.HTTPHandler(config))
 
@@ -120,8 +120,9 @@ class CherryMusic:
             'connargs': {'check_same_thread': False},
         })
 
-    def setup_config(self, createNewConfig, browsersetup, port):
+    def setup_config(self, createNewConfig, browsersetup, port, cfg_override):
         if browsersetup:
+            port = cfg_override.get('server.port', False)
             cherrymusicserver.browsersetup.configureAndStartCherryPy(port)
         if createNewConfig:
             newconfigpath = pathprovider.configurationFile() + '.new'
@@ -137,7 +138,7 @@ class CherryMusic:
             else:
                 configuration.write_to_file(configuration.from_defaults(), pathprovider.configurationFile())
                 self.printWelcomeAndExit()
-        self._init_config()
+        self._init_config(cfg_override)
 
     def setup_databases(self, update, dropfiledb):
         if dropfiledb:
@@ -150,7 +151,6 @@ class CherryMusic:
             sys.exit(1)
         if update is not None:
             self._update_if_necessary(update)
-            # threading.Thread('UpdateThread', target=self._update_if_necessary, args=(update,)).start()
             sys.exit(0)
 
     @staticmethod
@@ -184,13 +184,15 @@ Run schema update? [y/N]: """.format(
         elif update is not None:
             cache.full_update()
 
-    def _init_config(self):
+    def _init_config(self, override_dict):
         global config
         defaultcfg = configuration.from_defaults()
+        override = configuration.from_dict(override_dict)
         configFilePath = pathprovider.configurationFile()
         log.d('loading configuration from %s', configFilePath)
         filecfg = configuration.from_configparser(configFilePath)
         config = defaultcfg + filecfg
+        config += override
         self._check_for_config_updates(filecfg)
 
     def _check_for_config_updates(self, known_config):
@@ -327,10 +329,6 @@ Have fun!
         cherrypy.lib.caching.expires(0) #disable expiry caching
         cherrypy.engine.start()
         cherrypy.engine.block()
-
-    def serverless(self):
-        cherrypy.server.unsubscribe()
-        self.start()
 
     def server(self, port, httphandler):
         cherrypy.config.update({'log.screen': True})

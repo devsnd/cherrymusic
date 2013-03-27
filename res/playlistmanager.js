@@ -613,8 +613,12 @@ PlaylistManager.prototype = {
         if (typeof playlist == 'undefined') {
             playlist = this.getEditingPlaylist();
         }
-
         playlist.addTrack(track);
+        
+        //directly play first added track
+        if(this.getPlayingPlaylist() == playlist && playlist.jplayerplaylist.playlist.length == 1){
+            playlist.jplayerplaylist.play(0);
+        }
         pulse('.tabNavigation li a.jplayer');
         var success = function(data){
             var metainfo = $.parseJSON(data)
@@ -628,7 +632,10 @@ PlaylistManager.prototype = {
     },
     clearPlaylist : function(){
         "use strict";
-        getEditingPlaylist().remove();
+        this.getEditingPlaylist().remove();
+        if(this.getEditingPlaylist() == this.getPlayingPlaylist()){
+            $(this.cssSelectorjPlayer).jPlayer("clearMedia");
+        }
         return false;
     },
     displayCurrentSong : function (){
