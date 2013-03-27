@@ -117,7 +117,7 @@ def assureFolderExists(folder,subfolders=['']):
             os.makedirs(dirpath)
 
 def readRes(path):
-    with codecs.open(getResourcePath(path),encoding="utf-8") as f:
+    with open(getResourcePath(path)) as f:
         return f.read()
 
 def getResourcePath(path):

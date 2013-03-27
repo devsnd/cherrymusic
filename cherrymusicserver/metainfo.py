@@ -29,18 +29,13 @@
 #
 
 from cherrymusicserver import log
-import sys
 
 #check for meta info libraries
-if sys.version_info >= (3,):
-    #stagger is only for python 3
-    try:
-        import stagger
-        has_stagger = True
-    except ImportError:
-        log.w('''python library "stagger" not found: There will be no ID-tag support!''')
-        has_stagger = False
-else:
+try:
+    import stagger
+    has_stagger = True
+except ImportError:
+    log.w('''python library "stagger" not found: There will be no ID-tag support!''')
     has_stagger = False
 
 try:

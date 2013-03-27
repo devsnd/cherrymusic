@@ -1,4 +1,2 @@
-import sys
+from urllib2 import *
 
-if sys.version_info < (3,):
-    from urllib2 import *

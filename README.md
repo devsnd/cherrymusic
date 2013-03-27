@@ -19,13 +19,6 @@ current features:
   
 You can find more information on the [CherryMusic website](http://www.fomori.org/cherrymusic).
 
-master | devel
---- | --- 
-[![Build Status](https://travis-ci.org/devsnd/cherrymusic.png?branch=master)](https://travis-ci.org/devsnd/cherrymusic) | [![Build Status](https://travis-ci.org/devsnd/cherrymusic.png?branch=devel)](https://travis-ci.org/devsnd/cherrymusic)
- 
-
-
-
 Getting Started
 ---------------
 
@@ -41,11 +34,14 @@ Getting Started
       cherrypy in the local folder for you.
 
 
-3. Now simply run the main script using python
+3. Now simply run the main script using python 3; it will prompt you for anything else.
 
-        $ python cherrymusic --setup --port 8080
+        $ python cherrymusic
 
-4. Open your browser configure cherrymusic and play some music!
+4. On first start: The server creates a config file for you. 
+   Make the necessary changes and restart the server.
+
+5. Open your browser and play some music!
 
         $ firefox localhost:8080
 
@@ -60,10 +56,11 @@ Optional Dependencies
 python 2:
   
   - HTTPS support: pyOpenSSL
+  - ID3 Tag Support: stagger
 
 python 3:
 
-  - ID3 Tag Support: stagger
+  - None so far.
 
 Known Issues
 ------------
