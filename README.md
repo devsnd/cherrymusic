@@ -6,16 +6,16 @@ It plays the music inside your PC, smartphone, tablet, toaster or whatever
 device has a HTML5 compliant browser installed.
 
 
-Current features:
+current features:
 
-  - stream your music inside the browser (locally or remote),
-  - browse and search your music,
-  - completely AJAX based (no page reloads on click, therefore fast),
-  - create and share playlists,
-  - multiple user authentication,
-  - HTTPS support,
-  - automatic album cover art fetching,
-  - see `CHANGES` for all the features.
+  - stream your music inside the browser (locally or remote)
+  - browse and search your music
+  - completely AJAX based (no page reloads on click, therefore fast)
+  - create and share playlists
+  - multiple user authentication
+  - HTTPS support
+  - automatic album cover art fetching
+  - see CHANGES for all the features
   
 You can find more information on the [CherryMusic website](http://www.fomori.org/cherrymusic).
 
