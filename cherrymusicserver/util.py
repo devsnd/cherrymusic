@@ -41,6 +41,7 @@ from time import time
 
 PERFORMANCE_TEST = True
 
+
 def timed(func):
     """decorator to time function execution and log result on DEBUG"""
     def wrapper(*args, **kwargs):
@@ -63,16 +64,18 @@ def trim_to_maxlen(maxlen, s, insert=' ... '):
 
 
 def phrase_to_lines(phrase, length=80):
-    """splits a string along whitespace and distributes the parts into 
-    lines of the given length. 
-    
-    each paragraph is followed by a blank line, replacing all blank lines
-    separating the paragraphs in the phrase; if paragraphs get squashed in your
-    multiline strings, try inserting explicit newlines."""
+    """splits a string along whitespace and distributes the parts into
+    lines of the given length.
+
+    each paragraph is followed by a blank line, replacing all blank
+    lines separating the paragraphs in the phrase; if paragraphs get
+    squashed in your multiline strings, try inserting explicit newlines.
+
+    """
 
     import re
-    parag_ptn = r'''(?x)   # verbose mode  
-    (?:                       # non-capturing group: 
+    parag_ptn = r'''(?x)      # verbose mode
+    (?:                       # non-capturing group:
         [ \t\v\f\r]*          #    any non-breaking space
         \n                    #    linebreak
     ){2,}                     # at least two of these
@@ -95,7 +98,7 @@ def phrase_to_lines(phrase, length=80):
 
 
 def splittime(seconds):
-    '''converts time given in seconds into a tuple: (hours, minutes, seconds)'''
+    '''converts time given in seconds into a tuple: (hours, mins, secs)'''
     tmp = seconds
     hh = tmp / 3600
     tmp %= 3600
@@ -109,7 +112,7 @@ def Property(func):
     """
     decorator that allows defining acessors in place as local functions.
     func must define fget, and may define fset, fdel and doc; `return locals()`
-    at the end. 
+    at the end.
     Seen at http://adam.gomaa.us/blog/2008/aug/11/the-python-property-builtin/
     """
     return property(**func())
@@ -117,6 +120,8 @@ def Property(func):
 
 from collections import deque
 import math
+
+
 class MovingAverage(object):
     def __init__(self, size=15, fill=0):
         assert size > 0
@@ -167,8 +172,10 @@ class MovingAverage(object):
         self._values.append(val)
         return self._avg
 
+
 class Performance:
     indentation = 0
+
     def __init__(self, text):
         self.text = text
 
@@ -177,18 +184,21 @@ class Performance:
         if PERFORMANCE_TEST:
             self.time = time()
             Performance.indentation += 1
-            log.w('|   ' * (Performance.indentation - 1) + '/ˉˉ' + self.text)
+            log.w('|   ' * (Performance.indentation - 1)
+                  + '/ˉˉ' + self.text)
 
     def __exit__(self, type, value, traceback):
         global PERFORMANCE_TEST
         if PERFORMANCE_TEST:
             duration = (time() - self.time) * 1000
-            log.w('|   ' * (Performance.indentation - 1) + '\__ %g ms' % (duration,))
+            log.w('|   ' * (Performance.indentation-1)
+                  + '\__ %g ms' % (duration,))
             Performance.indentation -= 1
-            
+
     def log(text):
         for line in text.split('\n'):
             log.w('|   ' * (Performance.indentation) + line)
+
 
 def time2text(sec):
     abssec = abs(sec)
@@ -200,7 +210,7 @@ def time2text(sec):
     years = months/12
     if abssec > 30:
         if int(years) != 0:
-            t = str(int(years))+' years'            
+            t = str(int(years))+' years'
         elif int(months) != 0:
             t = str(int(months))+' months'
         elif int(weeks) != 0:
