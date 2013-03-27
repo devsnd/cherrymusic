@@ -34,7 +34,6 @@
 ##############################################################################
 
 PROJECTDIR=`dirname $0`
-TESTDIR=${PROJECTDIR}/cherrymusicserver/test
 
 if [ ! -d ${PROJECTDIR} -o ! -f ${PROJECTDIR}/cherrymusic ]; then
     echo "cannot find main script: 'cherrymusic'" >&2
@@ -42,29 +41,36 @@ if [ ! -d ${PROJECTDIR} -o ! -f ${PROJECTDIR}/cherrymusic ]; then
     exit 1
 fi
 
-
-echo "running unit tests..."
-python -m unittest discover --failfast -s ./cherrymusicserver/test -t .
-if [ $? != 0 ]; then
-    echo "unit test(s) failed" >&2
-    echo ^^^ `python -V` ^^^
-    exit 1
-fi
-
-if [ $(command -v python2) ]; then
-    python2 -m unittest discover --failfast -s ./cherrymusicserver/test -t .
-    if [ $? != 0 ]; then
-        echo "unit test(s) failed" >&2
-        echo ^^^ `python2 -V` ^^^
-        exit 1
-    fi
-fi
-
-
 echo "checking dist metadata..."
 python ${PROJECTDIR}/setup.py check
 if [ $? != 0 ]; then
     echo "distribution metadata check failure" >&2
     exit 1
 fi
+echo "done."
 
+
+# nosetests
+for i in "" "2" "3"; do
+    cmd="nosetests${i}"
+    if [ $(command -v $cmd) ]; then
+        echo "running ${cmd}:"
+        $cmd -e cherrypy
+        if [ $? != 0 ]; then
+            failed="$failed $cmd"
+        else
+            passed="$passed $cmd"
+        fi
+    fi
+done
+
+if [ "$failed" ]; then
+    echo "FAILED: $failed" >&2
+    exit 1
+fi
+
+if [ ! "$passed" ]; then
+    echo "no unittest runners found!" >&2
+    echo "get nosetests from https://nose.readthedocs.org/en/latest/" >&2
+    exit 1
+fi

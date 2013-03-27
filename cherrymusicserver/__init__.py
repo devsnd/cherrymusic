@@ -101,7 +101,7 @@ LONG_DESCRIPTION = """CherryMusic is a music streaming
 
 class CherryMusic:
 
-    def __init__(self, update=None, createNewConfig=False, dropfiledb=False, setup=False, port=False):
+    def __init__(self, update=None, createNewConfig=False, dropfiledb=False, setup=False, port=False, cfg_override={}):
         self.setup_services()
         self.setup_config(createNewConfig, setup, port)
         self.setup_databases(update, dropfiledb)
@@ -187,10 +187,12 @@ Run schema update? [y/N]: """.format(
     def _init_config(self):
         global config
         defaultcfg = configuration.from_defaults()
+        override = configuration.from_dict(override_dict)
         configFilePath = pathprovider.configurationFile()
         log.d('loading configuration from %s', configFilePath)
         filecfg = configuration.from_configparser(configFilePath)
         config = defaultcfg + filecfg
+        config += override
         self._check_for_config_updates(filecfg)
 
     def _check_for_config_updates(self, known_config):
