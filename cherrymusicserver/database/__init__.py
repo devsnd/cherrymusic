@@ -47,20 +47,22 @@ def require(dbname, version):
     if not dbname:
         raise ValueError('dbname must not be empty or None')
     isversion = MultiUpdater.checkversion(dbname)
-    assert isversion == version, '{0!r}: bad version: {1!r} (want: {2!r})'.format(dbname, isversion, version)
+    assert isversion == version, (
+        '{0!r}: bad version: {1!r} (want: {2!r})'.format(
+            dbname, isversion, version))
 
 
-def ensure_requirements(dbname=None, autoconsent=False, consent_callback=None):
+def ensure_requirements(dbname=None, autoconsent=False, consentcallback=None):
     '''Make sure all defined databases exist and are up to date.
 
-    Will connect to all these databases and try to update them, if
+    Will connect to all these databases and try to update their layout, if
     necessary, possibly asking the user for consent.
 
     dbname : str
         When given, only make sure of the database with that name.
     autoconsent : bool
         When ``True``, don't ask for consent, ever.
-    consent_callback: callable
+    consentcallback: callable
         Called when an update requires user consent; if the return value
         does not evaluate to ``True``, abort don't run any updates and
         return ``False``. If no callback is given or autoconsent == True,
@@ -69,15 +71,15 @@ def ensure_requirements(dbname=None, autoconsent=False, consent_callback=None):
     Returns : bool
         ``True`` if requirements are met.
     '''
-    if autoconsent or consent_callback is None:
-        consent_callback = lambda _: autoconsent
-    update = MultiUpdater(dbname)
-    if update.needed:
-        if update.requires_consent and not consent_callback(update.reasons):
-            return False
-        log.w("Database schema update running; don't turn off the program!")
-        update.run()
-        log.i('Database schema update complete.')
+    if autoconsent or consentcallback is None:
+        consentcallback = lambda _: autoconsent
+    with MultiUpdater(dbname) as update:
+        if update.needed:
+            if update.requires_consent and not consentcallback(update.prompts):
+                return False
+            log.w("Database schema update; don't turn off the program!")
+            update.run()
+            log.i('Database schema update complete.')
     return True
 
 
@@ -85,12 +87,13 @@ def resetdb(dbname):
     '''Delete all content and defined data structures from a database.
 
     Raises:
-        ValueError : If dbname is ``None`` or empty, or not a defined database name.
+        ValueError : If dbname is ``None`` or empty, or not a defined database
+        name.
     '''
     if not dbname:
         raise ValueError('dbname must not be empty or None')
-    updater = MultiUpdater(dbname)
-    updater.reset()
+    with MultiUpdater(dbname) as updater:
+        updater.reset()
 
 
 class MultiUpdater(object):
@@ -110,6 +113,15 @@ class MultiUpdater(object):
 
     def __iter__(self):
         return iter(self.updaters)
+
+    def __enter__(self):
+        for updater in self:
+            updater._lock()
+        return self
+
+    def __exit__(self, exctype, exception, traceback):
+        for updater in self:
+            updater._unlock()
 
     @property
     def needed(self):
@@ -134,11 +146,9 @@ class MultiUpdater(object):
         return False
 
     @property
-    def reasons(self):
-        """ An iterable of strings with reasons for updates that require
-            consent.
-        """
-        return itertools.chain(*(updater.reasons for updater in self))
+    def prompts(self):
+        """An iterable of string prompts for updates that require consent."""
+        return itertools.chain(*(updater.prompts for updater in self))
 
     def run(self):
         """Update all databases with out of date versions.
@@ -160,4 +170,5 @@ class MultiUpdater(object):
     @classmethod
     def checkversion(self, dbname):
         """Return the effective version of a database."""
-        return sql.Updater(dbname, defs.get(dbname))._version
+        with sql.Updater(dbname, defs.get(dbname)) as updater:
+            return updater._version

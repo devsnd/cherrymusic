@@ -145,7 +145,7 @@ class CherryMusic:
             update = ()
             database.resetdb(sqlitecache.DBNAME)
         db_is_ready = database.ensure_requirements(
-            consent_callback=self._get_user_consent_for_db_schema_update)
+            consentcallback=self._get_user_consent_for_db_schema_update)
         if not db_is_ready:
             log.i("database schema update aborted. quitting.")
             sys.exit(1)

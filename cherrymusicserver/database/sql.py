@@ -32,6 +32,7 @@
 import os.path
 import sqlite3
 import tempfile
+import threading
 
 from cherrymusicserver import log
 from cherrymusicserver.database.connect import AbstractConnector, BoundConnector
@@ -83,20 +84,19 @@ class Updater(object):
         'drop.sql': """DROP TABLE IF EXISTS _meta_version;"""
     }
 
-    _active_updaters = set()
+    _classlock = threading.RLock()
+    _dblockers = {}
 
     def __init__(self, name, dbdef):
         assert name and dbdef
-        assert name not in self._active_updaters, (
-            'there can be only one active updater per database (%r)' % (name,))
-        self._active_updaters.add(name)
         self.name = name
         self.desc = dbdef
         self.db = BoundConnector(self.name)
-        self._init_meta()
+        with self:
+            self._init_meta()
 
     def __del__(self):
-        self._active_updaters.remove(self.name)
+        self._unlock()
 
     def __repr__(self):
         return 'updater({0!r}, {1} -> {2})'.format(
@@ -105,32 +105,64 @@ class Updater(object):
             self._target,
         )
 
+    def __enter__(self):
+        self._lock()
+        return self
+
+    def __exit__(self, exctype, exception, traceback):
+        self._unlock()
+
+    @property
+    def _islocked(self):
+        name, lockers = self.name, self._dblockers
+        with self._classlock:
+            return name in lockers and lockers[name] is self
+
+    def _lock(self):
+        name, lockers = self.name, self._dblockers
+        with self._classlock:
+            assert lockers.get(name, self) is self, (
+                name + ': is locked by another updater')
+            lockers[name] = self
+
+    def _unlock(self):
+        with self._classlock:
+            if self._islocked:
+                del self._dblockers[self.name]
+
     @property
     def needed(self):
-        """``True`` if the database version is less then the maximum defined."""
+        """ ``True`` if the database is unversioned or if its version is less
+            then the maximum defined.
+        """
+        self._validate_locked()
         version, target = self._version, self._target
-        log.d('%s update check: version=[%s] target=[%s]', self.name, version, target)
+        log.d('%s update check: version=[%s] target=[%s]',
+              self.name, version, target)
         return version is None or version < target
 
     @property
     def requires_consent(self):
         """`True` if any missing updates require user consent."""
+        self._validate_locked()
         for version in self._updates_due:
             if 'prompt' in self.desc[version]:
                 return True
         return False
 
     @property
-    def reasons(self):
-        """ Return an iterable of strings giving the reasons for updates that
-            require user consent.
+    def prompts(self):
+        """ Return an iterable of string prompts for updates that require user
+            consent.
         """
+        self._validate_locked()
         for version in self._updates_due:
             if 'prompt' in self.desc[version]:
                 yield self.desc[version]['prompt']
 
     def run(self):
         """Update database schema to the highest possible version."""
+        self._validate_locked()
         log.i('%r: updating database schema', self.name)
         log.d('from version %r to %r', self._version, self._target)
         if None is self._version:
@@ -141,6 +173,7 @@ class Updater(object):
 
     def reset(self):
         """Delete all content from the database along with supporting structures."""
+        self._validate_locked()
         version = self._version
         log.i('%s: resetting database', self.name)
         log.d('version: %s', version)
@@ -153,6 +186,9 @@ class Updater(object):
             cxn.executescript(self._metatable['create.sql'])
             self._setversion(None, cxn)
         cxn.close()
+
+    def _validate_locked(self):
+        assert self._islocked, 'must be called in updater context (use "with")'
 
     @property
     def _version(self):
