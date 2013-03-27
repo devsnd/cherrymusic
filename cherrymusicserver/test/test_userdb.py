@@ -43,7 +43,7 @@ class TestAuthenticate(unittest.TestCase):
 
     def setUp(self):
         service.provide('dbconnector', MemConnector)
-        database.ensure_requirements(userdb.DBNAME)
+        database.ensure_current_version(userdb.DBNAME)
         self.users = userdb.UserDB()
         self.users.addUser('user', 'password', False)
 

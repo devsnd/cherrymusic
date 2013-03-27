@@ -52,7 +52,7 @@ def require(dbname, version):
             dbname, isversion, version))
 
 
-def ensure_requirements(dbname=None, autoconsent=False, consentcallback=None):
+def ensure_current_version(dbname=None, autoconsent=False, consentcallback=None):
     '''Make sure all defined databases exist and are up to date.
 
     Will connect to all these databases and try to update their layout, if
