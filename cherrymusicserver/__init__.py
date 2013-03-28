@@ -108,7 +108,7 @@ class CherryMusic:
                  setup=False, port=False, cfg_override={}):
         self.setup_services()
         self.setup_config(createNewConfig, setup, port, cfg_override)
-        self.setup_databases(update, dropfiledb)
+        self.setup_databases(update, dropfiledb, setup)
         self.server(port, httphandler.HTTPHandler(config))
 
     @classmethod
@@ -146,17 +146,24 @@ class CherryMusic:
                 self.printWelcomeAndExit()
         self._init_config(cfg_override)
 
-    def setup_databases(self, update, dropfiledb):
+    def setup_databases(self, update, dropfiledb, setup):
         if dropfiledb:
             update = ()
             database.resetdb(sqlitecache.DBNAME)
+        if setup:
+            update = update or ()
         db_is_ready = database.ensure_current_version(
             consentcallback=self._get_user_consent_for_db_schema_update)
         if not db_is_ready:
             log.i("database schema update aborted. quitting.")
             sys.exit(1)
         if update is not None:
-            self._update_if_necessary(update)
+            cacheupdate = threading.Thread(name="Updater",
+                                           target=self._update_if_necessary,
+                                           args=(update,))
+            cacheupdate.start()
+            # self._update_if_necessary(update)
+        if not setup:
             sys.exit(0)
 
     @staticmethod

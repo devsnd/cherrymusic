@@ -106,7 +106,6 @@ class HTTPHandler(object):
             'fetchalbumart': self.api_fetchalbumart,
             'heartbeat': self.api_heartbeat,
             'getuseroptions': self.api_getuseroptions,
-            'opensearchdescription': self.api_opensearchdescription,
             'setuseroption': self.api_setuseroption,
             'customcss.css': self.api_customcss,
             'changeplaylist': self.api_changeplaylist,
@@ -354,19 +353,6 @@ everybody has to relogin now.''')
         g = hex(g)[2:].zfill(2)
         b = hex(b)[2:].zfill(2)
         return r+g+b
-
-    def api_opensearchdescription(self, value):
-        if cherry.config.server.dynamic_dns_address.str.strip():
-            url = cherry.config.server.dynamic_dns_address.str
-        else:
-            url = self.getBaseUrl()
-        return """<?xml version="1.0" encoding="UTF-8"?>
-<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
- <ShortName>CherryMusic</ShortName>
- <Description>open source streaming server</Description>
- <Tags>cherrymusic open source streaming server python mp3 jplayer</Tags>
- <Url type="text/html" template="{}/?search={{searchTerms}}"/>
-</OpenSearchDescription>""".format(url)
 
     def api_getuseroptions(self, value):
         uo = self.useroptions.forUser(self.getUserId())

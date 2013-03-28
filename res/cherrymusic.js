@@ -649,9 +649,11 @@ function showPlaylists(){
                         
                         '{{{usernamelabel}}}',
                         
-                        '<div class="deletebutton">',
-                            '<a href="javascript:;" class="btn btn-mini btn-danger" onclick="confirmDeletePlaylist({{playlistid}}, \'{{playlistlabel}}\')">x</a>',
-                        '</div>',
+                        '{{#candelete}}',
+                            '<div class="deletebutton">',
+                                '<a href="javascript:;" class="btn btn-mini btn-danger" onclick="confirmDeletePlaylist({{playlistid}}, \'{{playlistlabel}}\')">x</a>',
+                            '</div>',
+                        '{{/candelete}}',
                         
                         '{{#showdownloadbuttons}}',
                             '<div class="dlbutton">',
@@ -674,6 +676,7 @@ function showPlaylists(){
                     {
                     playlistid: e['plid'],
                     isowner: e.owner,
+                    candelete: e.owner || isAdmin, 
                     showdownloadbuttons: userOptions.misc.show_playlist_download_buttons,
                     playlistlabel:e['title'],
                     dlval : JSON.stringify({ 'plid' : e['plid'],
