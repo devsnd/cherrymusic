@@ -36,7 +36,7 @@ import threading
 
 # woraround for cherrypy 3.2.2:
 # https://bitbucket.org/cherrypy/cherrypy/issue/1163/attributeerror-in-cherrypyprocessplugins
-if sys.version_info >= (3,3):
+if sys.version_info >= (3, 3):
     threading._Timer = threading.Timer
 
 import os
@@ -50,39 +50,48 @@ if cherrypyCurrVersion < cherrypyReqVersion:
 cherrypy version is too old!
 Current version: %s
 Required version: %s or higher
-"""%(cherrypyCurrVersion,cherrypyReqVersion))
+""" % (cherrypyCurrVersion, cherrypyReqVersion))
     sys.exit(1)
 
 
-"""patch cherrypy crashing on startup because of double checking
-for loopback interface, see:
-https://bitbucket.org/cherrypy/cherrypy/issue/1100/cherrypy-322-gives-engine-error-when
-"""
+# patch cherrypy crashing on startup because of double checking
+# for loopback interface, see:
+# https://bitbucket.org/cherrypy/cherrypy/issue/1100/cherrypy-322-gives-engine-error-when
 def fake_wait_for_occupied_port(host, port):
     return
 cherrypy.process.servers.wait_for_occupied_port = fake_wait_for_occupied_port
-"""end of port patch"""
+# end of port patch
 
-"""workaround for cherrypy not using unicode strings for URI, see:
-https://bitbucket.org/cherrypy/cherrypy/issue/1148/wrong-encoding-for-urls-containing-utf-8
-"""
+# workaround for cherrypy not using unicode strings for URI, see:
+# https://bitbucket.org/cherrypy/cherrypy/issue/1148/wrong-encoding-for-urls-containing-utf-8
 cherrypy.lib.static.__serve_file = cherrypy.lib.static.serve_file
-def serve_file_utf8_fix(path, content_type=None, disposition=None, name=None, debug=False):
-    path = codecs.decode(codecs.encode(path,'latin-1'),'utf-8')
-    return cherrypy.lib.static.__serve_file(path, content_type, disposition, name, debug)
+
+
+def serve_file_utf8_fix(path, content_type=None, disposition=None,
+                        name=None, debug=False):
+    path = codecs.decode(codecs.encode(path, 'latin-1'), 'utf-8')
+    return cherrypy.lib.static.__serve_file(path, content_type, disposition,
+                                            name, debug)
+
 cherrypy.lib.static.serve_file = serve_file_utf8_fix
-"""end of unicode workaround"""
+# end of unicode workaround
 
 from cherrymusicserver import configuration
-from cherrymusicserver import sqlitecache
+config = None
+
+
 from cherrymusicserver import cherrymodel
+from cherrymusicserver import database
 from cherrymusicserver import httphandler
-from cherrymusicserver import util
-from cherrymusicserver import pathprovider
 from cherrymusicserver import log
+from cherrymusicserver import pathprovider
+from cherrymusicserver import playlistdb
+from cherrymusicserver import service
+from cherrymusicserver import sqlitecache
+from cherrymusicserver import userdb
+from cherrymusicserver import useroptiondb
 import cherrymusicserver.browsersetup
 
-config = None
 VERSION = "0.24.1"
 DESCRIPTION = "an mp3 server for your browser"
 LONG_DESCRIPTION = """CherryMusic is a music streaming
@@ -92,52 +101,101 @@ LONG_DESCRIPTION = """CherryMusic is a music streaming
     it happens in your browser and uses HTML5 for audio playback.
     """
 
+
 class CherryMusic:
 
-    def __init__(self, update=None, createNewConfig=False, dropfiledb=False, setup=False, cfg_override={}):
-        if setup:
+    def __init__(self, update=None, createNewConfig=False, dropfiledb=False,
+                 setup=False, port=False, cfg_override={}):
+        self.setup_services()
+        self.setup_config(createNewConfig, setup, port, cfg_override)
+        self.setup_databases(update, dropfiledb, setup)
+        self.server(port, httphandler.HTTPHandler(config))
+
+    @classmethod
+    def setup_services(cls):
+        service.provide('filecache', sqlitecache.SQLiteCache)
+        service.provide('cherrymodel', cherrymodel.CherryModel)
+        service.provide('playlist', playlistdb.PlaylistDB)
+        service.provide('users', userdb.UserDB)
+        service.provide('useroptions', useroptiondb.UserOptionDB)
+        service.provide('dbconnector', database.sql.SQLiteConnector, kwargs={
+            'datadir': pathprovider.databaseFilePath(''),
+            'extension': 'db',
+            'connargs': {'check_same_thread': False},
+        })
+
+    def setup_config(self, createNewConfig, browsersetup, port, cfg_override):
+        if browsersetup:
             port = cfg_override.get('server.port', False)
             cherrymusicserver.browsersetup.configureAndStartCherryPy(port)
         if createNewConfig:
             newconfigpath = pathprovider.configurationFile() + '.new'
-            configuration.write_to_file(configuration.from_defaults(), newconfigpath)
-            log.i('''New configuration file was written to:
-''' + newconfigpath)
-            exit(0)
+            configuration.write_to_file(configuration.from_defaults(),
+                                        newconfigpath)
+            log.i('New configuration file was written to:{br}{path}'.format(
+                path=newconfigpath,
+                br=os.linesep
+            ))
+            sys.exit(0)
         if not pathprovider.configurationFileExists():
             if pathprovider.fallbackPathInUse():   # temp. remove @ v0.30 or so
                 self.printMigrationNoticeAndExit()
             else:
-                configuration.write_to_file(configuration.from_defaults(), pathprovider.configurationFile())
+                configuration.write_to_file(configuration.from_defaults(),
+                                            pathprovider.configurationFile())
                 self.printWelcomeAndExit()
         self._init_config(cfg_override)
-        self.db = sqlitecache.SQLiteCache(pathprovider.databaseFilePath('cherry.cache.db'))
 
-        if not update is None or dropfiledb:
-            CherryMusic.UpdateThread(self.db, update, dropfiledb).start()
-        else:
-            if setup:
-                CherryMusic.UpdateThread(self.db, [], False).start()
-            self.cherrymodel = cherrymodel.CherryModel(self.db)
-            self.httphandler = httphandler.HTTPHandler(config, self.cherrymodel)
-            self.server()
+    def setup_databases(self, update, dropfiledb, setup):
+        if dropfiledb:
+            update = ()
+            database.resetdb(sqlitecache.DBNAME)
+        if setup:
+            update = update or ()
+        db_is_ready = database.ensure_current_version(
+            consentcallback=self._get_user_consent_for_db_schema_update)
+        if not db_is_ready:
+            log.i("database schema update aborted. quitting.")
+            sys.exit(1)
+        if update is not None:
+            cacheupdate = threading.Thread(name="Updater",
+                                           target=self._update_if_necessary,
+                                           args=(update,))
+            cacheupdate.start()
+            # self._update_if_necessary(update)
+        if not setup:
+            sys.exit(0)
 
-    class UpdateThread(threading.Thread):
-        def __init__(self, db, update, dropfiledb):
-            threading.Thread.__init__(self)
-            self.db = db
-            self.dropfiledb = dropfiledb
-            self.update = update #command line switch
-        def run(self):
-            if self.dropfiledb:
-                self.db.drop_tables()
-            dbLayoutChangesOrCreation = self.db.create_and_alter_tables()
-            if dbLayoutChangesOrCreation:
-                self.db.full_update()
-            elif self.update:
-                self.db.partial_update(*self.update)
-            elif self.update is not None:
-                self.db.full_update()
+    @staticmethod
+    def _get_user_consent_for_db_schema_update(reasons):
+        import textwrap
+        wrap = lambda r: os.linesep.join(
+            textwrap.wrap(r, initial_indent=' - ', subsequent_indent="   "))
+        msg = """
+==========================================================================
+A database schema update is needed and requires your consent.
+
+{reasons}
+
+To continue without changes, you need to downgrade to an earlier
+version of CherryMusic.
+
+To backup your database files first, abort for now and find them here:
+
+{dblocation}
+
+==========================================================================
+Run schema update? [y/N]: """.format(
+            reasons=(2 * os.linesep).join(wrap(r) for r in reasons),
+            dblocation='\t' + pathprovider.databaseFilePath(''))
+        return input(msg).lower().strip() in ('y',)
+
+    def _update_if_necessary(self, update):
+        cache = sqlitecache.SQLiteCache()
+        if update:
+            cache.partial_update(*update)
+        elif update is not None:
+            cache.full_update()
 
     def _init_config(self, override_dict):
         global config
@@ -156,10 +214,10 @@ class CherryMusic:
         default = configuration.from_defaults()
         transform = lambda s: '[{0}]: {2}'.format(*(s.partition('.')))
 
-        for property in configuration.to_list(default):     #@ReservedAssignment
+        for property in configuration.to_list(default):
             if property.name not in known_config and not property.hidden:
                 new.append(transform(property.name))
-        for property in configuration.to_list(known_config): #@ReservedAssignment
+        for property in configuration.to_list(known_config):
             if property.name not in default:
                 deprecated.append(transform(property.name))
 
@@ -173,9 +231,8 @@ class CherryMusic:
                         %s''',
                   '\n\t\t\t'.join(deprecated))
         if new or deprecated:
-            log.i('''Start with --newconfig to generate a new default config file next to your current one.
-                  ''',
-            )
+            log.i('Start with --newconfig to generate a new default config'
+                  ' file next to your current one.')
 
     def printMigrationNoticeAndExit(self):  # temp. remove @ v0.30 or so
         print("""
@@ -187,17 +244,18 @@ CherryMusic changed some file locations while you weren't looking.
 
 To continue, please move the following:
 
-    $ mv """ + os.path.join(pathprovider.fallbackPath(), 'config') + ' ' +
-        pathprovider.configurationFile() + """
+    $ mv {src} {tgt}""".format(
+            src=os.path.join(pathprovider.fallbackPath(), 'config'),
+            tgt=pathprovider.configurationFile()) + """
 
-    $ mv """ + os.path.join(pathprovider.fallbackPath(), '*') + ' ' +
-        pathprovider.getUserDataPath() + """
+    $ mv {src} {tgt}""".format(
+            src=os.path.join(pathprovider.fallbackPath(), '*'),
+            tgt=pathprovider.getUserDataPath()) + """
 
 Thank you, and enjoy responsibly. :)
 ==========================================================================
 """)
         exit(1)
-
 
     def printWelcomeAndExit(self):
         print("""
@@ -215,7 +273,7 @@ Have fun!
 """)
         exit(0)
 
-    def start(self):
+    def start(self, port, httphandler):
         socket_host = "127.0.0.1" if config.server.localhost_only.bool else "0.0.0.0"
 
         resourcedir = os.path.abspath(pathprovider.getResourcePath('res'))
@@ -233,60 +291,59 @@ Have fun!
             redirecter.thread_pool = 10
             redirecter.subscribe()
         else:
+            if not port:
+                port = config.server.port.int
             cherrypy.config.update({
-                'server.socket_port': config.server.port.int,
+                'server.socket_port': port,
             })
 
         cherrypy.config.update({
-            'log.error_file': os.path.join(pathprovider.getUserDataPath(), 'server.log'),
+            'log.error_file': os.path.join(
+                pathprovider.getUserDataPath(), 'server.log'),
             'environment': 'production',
             'server.socket_host': socket_host,
-            'server.thread_pool' : 30,
-            'tools.sessions.on' : True,
-            'tools.sessions.timeout' : 60 * 24,
-            })
+            'server.thread_pool': 30,
+            'tools.sessions.on': True,
+            'tools.sessions.timeout': 60 * 24,
+        })
 
         if not config.server.keep_session_in_ram.bool:
-            sessiondir = os.path.join(pathprovider.getUserDataPath(), 'sessions')
+            sessiondir = os.path.join(
+                pathprovider.getUserDataPath(), 'sessions')
             if not os.path.exists(sessiondir):
                 os.mkdir(sessiondir)
             cherrypy.config.update({
-                'tools.sessions.storage_type' : "file",
-                'tools.sessions.storage_path' : sessiondir,
-                })
+                'tools.sessions.storage_type': "file",
+                'tools.sessions.storage_path': sessiondir,
+            })
 
-
-        cherrypy.tree.mount(self.httphandler, '/',
+        cherrypy.tree.mount(
+            httphandler, '/',
             config={
                 '/res': {
                     'tools.staticdir.on': True,
                     'tools.staticdir.dir': resourcedir,
                     'tools.staticdir.index': 'index.html',
-                    'tools.caching.on' : False,
+                    'tools.caching.on': False,
                 },
-                '/serve' :{
+                '/serve': {
                     'tools.staticdir.on': True,
                     'tools.staticdir.dir': config.media.basedir.str,
                     'tools.staticdir.index': 'index.html',
-                    'tools.encode.on' : True,
-                    'tools.encode.encoding' : 'utf-8',
-                    'tools.caching.on' : False,
+                    'tools.encode.on': True,
+                    'tools.encode.encoding': 'utf-8',
+                    'tools.caching.on': False,
                 },
-                '/favicon.ico':{
-                    'tools.staticfile.on' : True,
-                    'tools.staticfile.filename' : resourcedir+'/favicon.ico',
-                }
-        })
-        log.i('Starting server on port %s ...' % config.server.port.int)
+                '/favicon.ico': {
+                    'tools.staticfile.on': True,
+                    'tools.staticfile.filename': resourcedir+'/favicon.ico',
+                }})
+        log.i('Starting server on port %s ...' % port)
 
-        cherrypy.lib.caching.expires(0) #disable expiry caching
+        cherrypy.lib.caching.expires(0)  # disable expiry caching
         cherrypy.engine.start()
         cherrypy.engine.block()
 
-    def serverless(self):
-        cherrypy.server.unsubscribe()
-        self.start()
-
-    def server(self):
+    def server(self, port, httphandler):
         cherrypy.config.update({'log.screen': True})
-        self.start()
+        self.start(port, httphandler)

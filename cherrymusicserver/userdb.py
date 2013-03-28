@@ -29,24 +29,22 @@
 #
 
 import hashlib
-import sqlite3
-import os
 import uuid
 
 from collections import namedtuple
+
+from cherrymusicserver import database
 from cherrymusicserver import log
+from cherrymusicserver import service
+from cherrymusicserver.database.connect import BoundConnector
+
+DBNAME = 'user'
+
 
 class UserDB:
-    def __init__(self, USERDBFILE):
-        setupDB = not os.path.isfile(USERDBFILE) or os.path.getsize(USERDBFILE) == 0
-        self.conn = sqlite3.connect(USERDBFILE, check_same_thread=False)
-
-        if setupDB:
-            log.i('Creating user db table...')
-            self.conn.execute('CREATE TABLE users (username text UNIQUE, admin int, password text, salt text)')
-            self.conn.execute('CREATE INDEX idx_users ON users(username)');
-            log.i('done.')
-            log.i('Connected to Database. (' + USERDBFILE + ')')
+    def __init__(self, connector=None):
+        database.require(DBNAME, version='1')
+        self.conn = BoundConnector(DBNAME, connector).connection()
 
     def addUser(self, username, password, admin):
         if not (username.strip() or password.strip()):
@@ -62,13 +60,13 @@ class UserDB:
         msg = 'added user: ' + user.name
         log.d(msg)
         return msg
-        
+
     def isDeletable(self, userid):
         #cant delete 1st admin
         if not userid == 1:
             return True
         return False
-        
+
     def changePassword(self, username, newpassword):
         if not newpassword.strip():
             return "not a valid password"
@@ -78,7 +76,7 @@ class UserDB:
             UPDATE users SET password = ?, salt = ? WHERE username = ?
             ''', (newuser.password, newuser.salt, newuser.name) )
             return "success"
-    
+
     def deleteUser(self, userid):
         if self.isDeletable(userid):
             self.conn.execute('''DELETE FROM users WHERE rowid = ?''', (userid,))

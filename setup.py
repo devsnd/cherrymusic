@@ -39,9 +39,27 @@ def module(foldername):
         if i == '__pycache__':
             continue
         subfolder = os.path.join(foldername, i)
-        if os.path.isdir(subfolder):
+        if os.path.isdir(subfolder) and _ispackage(subfolder):
             ret += module(subfolder)
             ret += [subfolder.replace(os.sep,'.')]
+    return ret
+
+def _ispackage(foldername):
+    return '__init__.py' in os.listdir(foldername)
+
+def packagedata(pkgfolder, childpath=''):
+    ret = []
+    for n in os.listdir(os.path.join(pkgfolder, childpath)):
+        if n == '__pycache__':
+            continue
+        child = os.path.join(childpath, n)
+        fullchild = os.path.join(pkgfolder, child)
+        if os.path.isdir(fullchild):
+            if not _ispackage(fullchild):
+                ret += packagedata(pkgfolder, child)
+        elif os.path.isfile(fullchild):
+            if not os.path.splitext(n)[1].startswith('.py'):
+                ret += [child]
     return ret
 
 #setup preparations:
@@ -62,6 +80,9 @@ setup(
     license = 'GPL',
     install_requires=["CherryPy >= 3.2.2"],
     packages = module('cherrymusicserver')+module('audioread')+module('audiotranscode')+module('cmbootstrap')+module('backport'),
+    package_data = {
+        'cherrymusicserver.database.defs': packagedata('cherrymusicserver/database/defs'),
+    },
     #startup script
     scripts = ['cherrymusic','cherrymusicd'],
     
@@ -74,4 +95,3 @@ setup(
     ],
     data_files=data_files
 )
-    

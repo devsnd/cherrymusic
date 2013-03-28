@@ -46,3 +46,7 @@ cherrymusic/site.log
 
 # Sublime metafiles
 .sublime*
+
+# Sphinx builds
+doc/sphinx/_build
+
