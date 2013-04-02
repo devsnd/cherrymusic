@@ -51,28 +51,23 @@ import audiotranscode
 
 from cherrymusicserver import renderjson
 from cherrymusicserver import userdb
-from cherrymusicserver import playlistdb
 from cherrymusicserver import log
 from cherrymusicserver import albumartfetcher
+from cherrymusicserver import service
 from cherrymusicserver.cherrymodel import MusicEntry
 from cherrymusicserver.pathprovider import databaseFilePath, readRes
 from cherrymusicserver.pathprovider import albumArtFilePath
 import cherrymusicserver as cherry
 import cherrymusicserver.metainfo as metainfo
 from cherrymusicserver.util import Performance
-from cherrymusicserver import util
-from cherrymusicserver import useroptiondb
 import time
 
 debug = True
 
-
+@service.user(model='cherrymodel', playlistdb='playlist', useroptions='useroptions', userdb='users')
 class HTTPHandler(object):
-    def __init__(self, config, model):
-        self.model = model
+    def __init__(self, config):
         self.config = config
-        user_option_db_file = databaseFilePath('useroptions.db')
-        self.useroptions = useroptiondb.UserOptionDB(user_option_db_file)
         self.jsonrenderer = renderjson.JSON()
 
         template_main = 'res/main.html'
@@ -82,9 +77,6 @@ class HTTPHandler(object):
         self.mainpage = readRes(template_main)
         self.loginpage = readRes(template_login)
         self.firstrunpage = readRes(template_firstrun)
-        self.userdb = userdb.UserDB(databaseFilePath('user.db'))
-        playlist_db_file = databaseFilePath('playlist.db')
-        self.playlistdb = playlistdb.PlaylistDB(playlist_db_file)
 
         self.handlers = {
             'search': self.api_search,
