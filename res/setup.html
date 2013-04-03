@@ -137,6 +137,7 @@ function renderFeature(name, installed, id, msg){
 
 }
 $(function(){
+    $('#server-port').val(window.location.port);
     $('#configurationForm').submit(submitConfiguration);
     $.ajax({
         url: '/getfeatures',
@@ -200,7 +201,7 @@ $(function(){
                     <div class="control-group">  
                         <label class="control-label" for="server-port">Server Port</label>  
                         <div class="controls">  
-                            <input type="number" class="input-xlarge" id="server-port" pattern="[0-6]?[0-9]{0,4}" required>
+                            <input type="number" disabled="disabled" class="input-xlarge" id="server-port" pattern="[0-6]?[0-9]{0,4}" required>
                             <p class="help-block">This specifies the port on which CherryMusic will listen <a href="#serverPortModal" role="button" class="btn btn-mini" data-toggle="modal">?</a></p>                           
                             <div id="serverPortModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="serverPortModalLabel" aria-hidden="true">
                                 <div class="modal-header">

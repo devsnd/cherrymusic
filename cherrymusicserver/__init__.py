@@ -105,11 +105,11 @@ LONG_DESCRIPTION = """CherryMusic is a music streaming
 class CherryMusic:
 
     def __init__(self, update=None, createNewConfig=False, dropfiledb=False,
-                 setup=False, port=False, cfg_override={}):
+                 setup=False, cfg_override={}):
         self.setup_services()
-        self.setup_config(createNewConfig, setup, port, cfg_override)
+        self.setup_config(createNewConfig, setup, cfg_override)
         self.setup_databases(update, dropfiledb, setup)
-        self.server(port, httphandler.HTTPHandler(config))
+        self.server(httphandler.HTTPHandler(config))
 
     @classmethod
     def setup_services(cls):
@@ -124,9 +124,9 @@ class CherryMusic:
             'connargs': {'check_same_thread': False},
         })
 
-    def setup_config(self, createNewConfig, browsersetup, port, cfg_override):
+    def setup_config(self, createNewConfig, browsersetup, cfg_override):
         if browsersetup:
-            port = cfg_override.get('server.port', False)
+            port = cfg_override.pop('server.port', False)
             cherrymusicserver.browsersetup.configureAndStartCherryPy(port)
         if createNewConfig:
             newconfigpath = pathprovider.configurationFile() + '.new'
@@ -273,7 +273,7 @@ Have fun!
 """)
         exit(0)
 
-    def start(self, port, httphandler):
+    def start(self, httphandler):
         socket_host = "127.0.0.1" if config.server.localhost_only.bool else "0.0.0.0"
 
         resourcedir = os.path.abspath(pathprovider.getResourcePath('res'))
@@ -291,8 +291,7 @@ Have fun!
             redirecter.thread_pool = 10
             redirecter.subscribe()
         else:
-            if not port:
-                port = config.server.port.int
+            port = config.server.port.int
             cherrypy.config.update({
                 'server.socket_port': port,
             })
@@ -344,6 +343,6 @@ Have fun!
         cherrypy.engine.start()
         cherrypy.engine.block()
 
-    def server(self, port, httphandler):
+    def server(self, httphandler):
         cherrypy.config.update({'log.screen': True})
-        self.start(port, httphandler)
+        self.start(httphandler)
