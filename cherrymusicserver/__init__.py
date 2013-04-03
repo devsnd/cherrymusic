@@ -163,8 +163,8 @@ class CherryMusic:
                                            args=(update,))
             cacheupdate.start()
             # self._update_if_necessary(update)
-        if not setup:
-            sys.exit(0)
+            if not setup:
+                sys.exit(0)
 
     @staticmethod
     def _get_user_consent_for_db_schema_update(reasons):
