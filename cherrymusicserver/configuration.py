@@ -278,8 +278,11 @@ class ConfigError(Exception):
             detail=self.detail,
         )
 
+    def __str__(self):
+        return '{0}: {1}'.format(self.__class__.__name__, self.msg)
 
-class ConfigNameError(ConfigError):
+
+class ConfigNamingError(ConfigError):
     """Something is wrong with the name ('Key') of a config Property."""
     def __init__(self, key, detail=''):
         ConfigError.__init__(self, key, None,
@@ -350,9 +353,9 @@ class Key(object):
         elif isinstance(name, Key):
             name = name._str
         elif not isinstance(name, (str, type(''))):
-            raise ConfigNameError(name, 'name must be a Key, str or unicode (is %r)' % (type(name),))
+            raise ConfigNamingError(name, 'name must be a Key, str or unicode (is %r)' % (type(name),))
         elif not self._re.match(name):
-            raise ConfigNameError(
+            raise ConfigNamingError(
                 name, 'Key parts must only contain the characters [A-Za-z0-9_],'
                 ' start with a letter and be separated by a ' + self._sep)
         name += ''   # inner workaround for python 2.6+
@@ -788,7 +791,7 @@ class Configuration(Mapping):
             Resulting ConfigErrors will be raised or passed to a callable
             error handler, if given.
         """
-        return self._get_mutated_by(mapping, self.__propertymap.replace, on_error)
+        return self._mutated_by(mapping, self.__propertymap.replace, on_error)
 
     def update(self, mapping, on_error=raising_error_handler):
         """ Return a copy of this configuration with some values replaced or
@@ -797,11 +800,17 @@ class Configuration(Mapping):
             Resulting ConfigErrors will be raised or passed to a callable
             error handler, if given.
         """
-        return self._get_mutated_by(mapping, self.__propertymap.update, on_error)
+        return self._mutated_by(mapping, self.__propertymap.update, on_error)
 
-    def _get_mutated_by(self, mapping, mutator, on_error):
+    def _mutated_by(self, mapping, mutator, on_error):
         mutated = self.__class__()
-        mutated.__propertymap = mutator(self.from_mapping(mapping).to_properties(), on_error)
+        properties = []
+        for key, value in mapping.items():
+            try:
+                properties.append(Property(key, value))
+            except ConfigError as e:
+                on_error(e)
+        mutated.__propertymap = mutator(properties, on_error)
         return mutated
 
 

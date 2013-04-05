@@ -76,7 +76,7 @@ def serve_file_utf8_fix(path, content_type=None, disposition=None,
 cherrypy.lib.static.serve_file = serve_file_utf8_fix
 # end of unicode workaround
 
-from cherrymusicserver import configuration
+from cherrymusicserver import configuration as cfg
 config = None
 
 
@@ -130,8 +130,7 @@ class CherryMusic:
             cherrymusicserver.browsersetup.configureAndStartCherryPy(port)
         if createNewConfig:
             newconfigpath = pathprovider.configurationFile() + '.new'
-            configuration.write_to_file(configuration.from_defaults(),
-                                        newconfigpath)
+            cfg.write_to_file(cfg.from_defaults(), newconfigpath)
             log.i('New configuration file was written to:{br}{path}'.format(
                 path=newconfigpath,
                 br=os.linesep
@@ -141,8 +140,7 @@ class CherryMusic:
             if pathprovider.fallbackPathInUse():   # temp. remove @ v0.30 or so
                 self.printMigrationNoticeAndExit()
             else:
-                configuration.write_to_file(configuration.from_defaults(),
-                                            pathprovider.configurationFile())
+                cfg.write_to_file(cfg.from_defaults(), pathprovider.cfgFile())
                 self.printWelcomeAndExit()
         self._init_config(cfg_override)
 
@@ -198,25 +196,22 @@ Run schema update? [y/N]: """.format(
             cache.full_update()
 
     def _init_config(self, override_dict):
+        defaults = cfg.from_defaults()
+        filecfg = cfg.from_configparser(pathprovider.configurationFile())
+        custom = defaults.replace(filecfg, on_error=log.e)
         global config
-        defaultcfg = configuration.from_defaults()
-        override = configuration.from_dict(override_dict)
-        configFilePath = pathprovider.configurationFile()
-        log.d('loading configuration from %s', configFilePath)
-        filecfg = configuration.from_configparser(configFilePath)
-        config = defaultcfg.replace(filecfg).replace(override)
-        self._check_for_config_updates(filecfg)
+        config = custom.replace(override_dict, on_error=log.e)
+        self._check_for_config_updates(defaults, filecfg)
 
-    def _check_for_config_updates(self, known_config):
+    def _check_for_config_updates(self, default, known_config):
         new = []
         deprecated = []
-        default = configuration.from_defaults()
         transform = lambda s: '[{0}]: {2}'.format(*(s.partition('.')))
 
-        for property in configuration.to_list(default):
+        for property in cfg.to_list(default):
             if property.key not in known_config and not property.hidden:
                 new.append(transform(property.key))
-        for property in configuration.to_list(known_config):
+        for property in cfg.to_list(known_config):
             if property.key not in default:
                 deprecated.append(transform(property.key))
 
