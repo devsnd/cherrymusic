@@ -134,9 +134,9 @@ class UserOptionDB:
             self.useroptiondb.conn.commit()
 
         def deleteOptionIfExists(self, key):
-            stmt = """DELETE FROM option WHERE userid = ?;"""
+            stmt = """DELETE FROM option WHERE userid = ? AND name = ?;"""
             with self.useroptiondb.conn as conn:
-                conn.execute(stmt, (self.userid,))
+                conn.execute(stmt, (self.userid, key))
 
         def delete_bad_option(self, error):
             self.deleteOptionIfExists(error.key)
