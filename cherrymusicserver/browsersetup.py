@@ -49,38 +49,15 @@ class SetupHandler:
     index.exposed = True
 
     def saveconfig(self, values):
-        config = cfg.from_defaults()
-        errors = []
-        badkeys = {}
-        success = False
-
-        with cfg.create() as bsdcheck:
-            isabs = os.path.isabs
-            isdir = os.path.isdir
-            validbasedir = lambda x: x is None or isabs(x) and isdir(x)
-            bsdcheck.media.basedir.validity = validbasedir
-
-        try:
-            customcfg = cfg.from_dict(json.loads(values, encoding='str'))
-        except Exception as e:
-            # a dict key violates config naming rules or values is not a dict
-            # == we got sent bad data
-            errors.append(str(e))
-        else:
-            try:
-                config += customcfg
-                bsdcheck += customcfg.media.basedir
-            except:
-                for e in cfg.update_errors(config, customcfg):
-                    badkeys[e.key] = e.msg
-                for e in cfg.update_errors(bsdcheck, customcfg.media.basedir):
-                    badkeys[e.key] = e.msg
-            else:
-                cfg.write_to_file(config, pathprovider.configurationFile())
-                success = True
-        if not success:
+        collect_errors = cfg.error_collector()
+        baseconfig = cfg.from_defaults()
+        newconfig = json.loads(values, encoding='str')
+        customcfg = baseconfig.replace(newconfig, collect_errors)
+        if collect_errors:
+            badkeys = (e.key for e in collect_errors)
             return json.dumps({"status": "error", 'fields': list(badkeys)})
-        #kill server in a second
+        cfg.write_to_file(customcfg, pathprovider.configurationFile())
+        # kill server in a second
         threading.Timer(1, lambda: cherrypy.engine.exit()).start()
         # so request should still reach client...
         return json.dumps({"status": "success"})
