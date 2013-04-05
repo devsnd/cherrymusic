@@ -49,9 +49,6 @@ Getting Started
 
         $ firefox localhost:8080
         
-5. It's currently necessary to initialize the search database manually. 
-   To do that, go to the *Admin* panel in the web interface and click `[Update Music Library]`.
-
 Requirements
 ------------
 * [Python](http://python.org/download/releases/)

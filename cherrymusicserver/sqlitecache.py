@@ -69,7 +69,7 @@ class SQLiteCache(object):
 
     def __init__(self, connector=None):
         database.require(DBNAME, version='1')
-        self.validate_basedir()
+        self.normalize_basedir()
         connector = BoundConnector(DBNAME, connector)
         self.DBFILENAME = connector.dblocation
         self.conn = connector.connection()
@@ -81,7 +81,7 @@ class SQLiteCache(object):
         self.load_db_to_memory()
 
     def file_db_in_memory(self):
-        return not self.DBFILENAME == ':memory:' and cherry.config.search.load_file_db_into_memory.bool
+        return not self.DBFILENAME == ':memory:' and cherry.config['search.load_file_db_into_memory']
 
     def load_db_to_memory(self):
         if self.file_db_in_memory():
@@ -154,7 +154,7 @@ class SQLiteCache(object):
                             resultfileids[fileid] += 1
                         else:
                             resultfileids[fileid] = 1
-                    #sort items by occurrences and only return maxresults
+                    # sort items by occurrences and only return maxresults
                     fileids = sorted(resultfileids.items(), key=itemgetter(1), reverse=True)
                     fileids = [t[0] for t in fileids]
                     fileids = fileids[:min(len(fileids), NORMAL_FILE_SEARCH_LIMIT)]
@@ -172,7 +172,7 @@ class SQLiteCache(object):
             return results
 
     def listdir(self, path):
-        basedir = cherry.config.media.basedir.str
+        basedir = cherry.config['media.basedir']
         targetpath = os.path.join(basedir, path)
         targetdir = self.db_find_file_by_path(targetpath)
         if targetdir is None:
@@ -394,20 +394,12 @@ class SQLiteCache(object):
                      uid=uid) for uid, name, ext, isdir in id_tuples)
 
 
-    def validate_basedir(self):
-        basedir = cherry.config.media.basedir.str
-        if not basedir:
-            raise AssertionError('basedir is not set')
-        if not os.path.isabs(basedir):
-            raise AssertionError('basedir must be absolute path: %s' % basedir)
-        if not os.path.exists(basedir):
-            raise AssertionError("basedir doesn't exist: %s" % basedir)
-        if not os.path.isdir(basedir):
-            raise AssertionError("basedir is not a directory: %s" % basedir)
+    def normalize_basedir(self):
+        basedir = cherry.config['media.basedir']
         basedir = os.path.normcase(basedir)
         if len(basedir) > 1:
             basedir = basedir.rstrip(os.path.sep)
-        cherry.config.media.basedir = basedir
+        cherry.config = cherry.config.replace({'media.basedir': basedir})
         log.d('media base directory: %r' % basedir)
 
 
@@ -418,7 +410,7 @@ class SQLiteCache(object):
 
         log.i('running full update...')
         try:
-            self.update_db_recursive(cherry.config.media.basedir.str, skipfirst=True)
+            self.update_db_recursive(cherry.config['media.basedir'], skipfirst=True)
         except:
             log.e('error during media update. database update incomplete.')
         finally:
@@ -427,7 +419,7 @@ class SQLiteCache(object):
 
 
     def partial_update(self, path, *paths):
-        basedir = cherry.config.media.basedir.str
+        basedir = cherry.config['media.basedir']
         paths = (path,) + paths
         log.i('updating paths: %s' % (paths,))
         for path in paths:
@@ -546,7 +538,7 @@ class SQLiteCache(object):
         and must return an object satisfying the above requirements for an item.
         '''
         from backport.collections import OrderedDict
-        basedir = cherry.config.media.basedir.str
+        basedir = cherry.config['media.basedir']
         startpath = os.path.normcase(startpath).rstrip(os.path.sep)
         Item = itemfactory
         if Item is None:
@@ -597,7 +589,7 @@ class SQLiteCache(object):
         children.
         '''
         assert os.path.isabs(fullpath)
-        basedir = cherry.config.media.basedir.str
+        basedir = cherry.config['media.basedir']
         if not fullpath.startswith(basedir):
             return None
 
@@ -723,7 +715,7 @@ class File():
 
     @classmethod
     def inputfilter(cls, files_iter):
-        basedir = cherry.config.media.basedir.str
+        basedir = cherry.config['media.basedir']
         for f in files_iter:
             if not f.exists:
                 log.e('file not found: ' + f.fullpath + ' . skipping.')

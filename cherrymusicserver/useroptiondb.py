@@ -30,65 +30,61 @@
 
 import json
 
-from cherrymusicserver import database
 from cherrymusicserver import log
-from cherrymusicserver import service
 from cherrymusicserver import configuration as cfg
+from cherrymusicserver import database as db
 from cherrymusicserver.database.connect import BoundConnector
 
 DBNAME = 'useroptions'
+
 
 class UserOptionDB:
 
     def __init__(self, connector=None):
         """user configuration:
             hidden values can not be set by the user in the options,
-            but might be subject of bing set automatically, e.g. the
+            but might be subject of being set automatically, e.g. the
             heartbeat.
         """
-        database.require(DBNAME, version='0')
-        with cfg.create() as c:
-            with cfg.create('keyboard_shortcuts') as kbs:
-                kbs.prev = cfg.Configuration(value=89,validity='\d\d?\d?')
-                kbs.play = cfg.Configuration(value=88,validity='\d\d?\d?')
-                kbs.pause = cfg.Configuration(value=67,validity='\d\d?\d?')
-                kbs.stop = cfg.Configuration(value=86,validity='\d\d?\d?')
-                kbs.next = cfg.Configuration(value=66,validity='\d\d?\d?')
-                kbs.search = cfg.Configuration(value=83,validity='\d\d?\d?')
-                kbs.hidden = False
-                kbs.readonly = False
-                c.keyboard_shortcuts = kbs
-            with cfg.create('misc') as misc:
-                misc.show_playlist_download_buttons = cfg.Configuration(value=False)
-                misc.autoplay_on_add = cfg.Configuration(value=True)
-                c.misc = misc
+        db.require(DBNAME, '0')
+        c = cfg.ConfigBuilder()
+        with c['keyboard_shortcuts'] as kbs:
+            kbs.valid = '\d\d?\d?'
+            kbs['prev'].value = 89
+            kbs['play'].value = 88
+            kbs['pause'].value = 67
+            kbs['stop'].value = 86
+            kbs['next'].value = 66
+            kbs['search'].value = 83
+        with c['misc.show_playlist_download_buttons'] as pl_download_buttons:
+            pl_download_buttons.value = False
+        with c['misc.autoplay_on_add'] as autoplay_on_add:
+            autoplay_on_add.value = False
+        with c['custom_theme.primary_color'] as primary_color:
+            primary_color.value = '#F02E75'
+            primary_color.valid = '#[0-9a-fA-F]{6}'
+        with c['custom_theme.white_on_black'] as white_on_black:
+            white_on_black.value = False
+        with c['last_time_online'] as last_time_online:
+            last_time_online.value = 0
+            last_time_online.valid = '\\d+'
+            last_time_online.hidden = True
+            last_time_online.doc = "UNIX TIME (1.1.1970 = never)"
 
-            with cfg.create('custom_theme') as theme:
-                theme.primary_color = cfg.Configuration(value='#F02E75',validity='#[0-9a-fA-F]{6}', hidden=False, readonly=False)
-                theme.white_on_black = cfg.Configuration(value=False, hidden=False, readonly=False)
-                c.custom_theme = theme
-
-            #UNIX TIME (1.1.1970 = never)
-            c.last_time_online = cfg.Property(
-                value=0,
-                name='last_time_online',
-                validity='\\d+',
-                readonly = False,
-                hidden = True
-            )
-
-            self.DEFAULTS = c
+        self.DEFAULTS = c.to_configuration()
 
         self.conn = BoundConnector(DBNAME, connector).connection()
 
     def getOptionFromMany(self, key, userids):
         result = {}
         for userid in userids:
-            val = self.useroptiondb.conn.execute('''SELECT value FROM option WHERE  userid = ? AND name = ?''',(userid, key,)).fetchone()
+            val = self.useroptiondb.conn.execute(
+                '''SELECT value FROM option WHERE  userid = ? AND name = ?''',
+                (userid, key,)).fetchone()
             if val:
                 result[userid] = val
             else:
-                result[userid] = self.DEFAULTS[key]['value']
+                result[userid] = self.DEFAULTS[key]
         return result
 
     def forUser(self, userid):
@@ -101,43 +97,50 @@ class UserOptionDB:
 
         def getChangableOptions(self):
             opts = self.getOptions()
-            with cfg.create() as nothidden_opts:
-                for c in self.useroptiondb.DEFAULTS:
-                    if not opts[c]._hidden:
-                        nothidden_opts[c] = opts[c]
-                return cfg.to_dict(nothidden_opts)
-
+            visible_props = (p for p in opts.to_properties() if not p.hidden)
+            return cfg.from_list(visible_props).to_nested_dict()
 
         def getOptions(self):
-            results =  self.useroptiondb.conn.execute('''SELECT name, value FROM option WHERE userid = ?''',(self.userid,)).fetchall()
-            decoded = []
-            for a in results:
-                decoded.append((a[0],json.loads(a[1])))
-            c = cfg.from_list(decoded)
-            try:
-                c = self.useroptiondb.DEFAULTS + c
-            except cfg.ConfigError: #changed defaults might reset user options
-                return self.useroptiondb.DEFAULTS
-            return c
+            results = self.useroptiondb.conn.execute(
+                '''SELECT name, value FROM option WHERE userid = ?''',
+                (self.userid,)).fetchall()
+            useropts = dict((r[0], json.loads(r[1])) for r in results)
+            return self.useroptiondb.DEFAULTS.replace(
+                useropts,
+                on_error=self.delete_bad_option)
 
         def getOptionValue(self, key):
-            return self.getOptions()[key]['value']
+            return self.getOptions()[key]
 
         def setOption(self, key, value):
-            opts = self.getOptions()
-            opts[key]['value'] = value
+            opts = self.getOptions().replace({key: value})
             self.setOptions(opts)
 
         def setOptions(self, c):
             for k in cfg.to_list(c):
-                value = json.dumps(k[1])
-                key = k[0]
-                sel =  self.useroptiondb.conn.execute('''SELECT name, value FROM option WHERE userid = ? AND name = ?''',
+                value = json.dumps(k.value)
+                key = k.key
+                sel = self.useroptiondb.conn.execute(
+                    '''SELECT name, value FROM option
+                        WHERE userid = ? AND name = ?''',
                     (self.userid, key)).fetchone()
                 if sel:
-                    self.useroptiondb.conn.execute('''UPDATE option SET value = ? WHERE userid = ? AND name = ?''',
+                    self.useroptiondb.conn.execute(
+                        '''UPDATE option SET value = ?
+                            WHERE userid = ? AND name = ?''',
                         (value, self.userid, key))
                 else:
-                    self.useroptiondb.conn.execute('''INSERT INTO option (userid, name, value) VALUES (?,?,?)''',
-                        (self.userid, key, value))
+                    self.useroptiondb.conn.execute(
+                        '''INSERT INTO option (userid, name, value) VALUES
+                            (?,?,?)''', (self.userid, key, value))
             self.useroptiondb.conn.commit()
+
+        def deleteOptionIfExists(self, key):
+            stmt = """DELETE FROM option WHERE userid = ? AND name = ?;"""
+            with self.useroptiondb.conn as conn:
+                conn.execute(stmt, (self.userid, key))
+
+        def delete_bad_option(self, error):
+            self.deleteOptionIfExists(error.key)
+            log.warning('deleted bad option %r for userid %r (%s)',
+                        error.key, self.userid, error.msg)

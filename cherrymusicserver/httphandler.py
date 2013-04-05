@@ -117,11 +117,11 @@ class HTTPHandler(object):
     def getBaseUrl(self, redirect_unencrypted=False):
         ipAndPort = parse.urlparse(cherrypy.url()).netloc
         is_secure_connection = self.issecure(cherrypy.url())
-        ssl_enabled = cherry.config.server.ssl_enabled.bool
+        ssl_enabled = cherry.config['server.ssl_enabled']
         if ssl_enabled and not is_secure_connection:
             log.d('Not secure, redirecting...')
             ip = ipAndPort[:ipAndPort.rindex(':')]
-            url = 'https://' + ip + ':' + cherry.config.server.ssl_port.str
+            url = 'https://' + ip + ':' + str(cherry.config['server.ssl_port'])
             if redirect_unencrypted:
                 raise cherrypy.HTTPRedirect(url, 302)
         else:
@@ -184,7 +184,7 @@ everybody has to relogin now.''')
 
     def autoLoginIfPossible(self):
         is_loopback = cherrypy.request.remote.ip in ('127.0.0.1', '::1')
-        if is_loopback and cherry.config.server.localhost_auto_login.bool:
+        if is_loopback and cherry.config['server.localhost_auto_login']:
             cherrypy.session['username'] = self.userdb.getNameById(1)
             cherrypy.session['userid'] = 1
             cherrypy.session['admin'] = True
@@ -193,7 +193,7 @@ everybody has to relogin now.''')
 
     def session_auth(self, username, password):
         user = self.userdb.auth(username, password)
-        allow_remote = cherry.config.server.permit_remote_admin_login.bool
+        allow_remote = cherry.config['server.permit_remote_admin_login']
         is_loopback = cherrypy.request.remote.ip in ('127.0.0.1', '::1')
         if not is_loopback and user.isadmin and not allow_remote:
             log.i('Rejected remote admin login from user: %s' % user.name)
@@ -214,7 +214,7 @@ everybody has to relogin now.''')
         if not self.isAuthorized():
             raise cherrypy.HTTPRedirect(self.getBaseUrl(), 302)
         cherrypy.session.release_lock()
-        if cherry.config.media.transcode.bool and len(args):
+        if cherry.config['media.transcode'] and len(args):
             newformat = args[-1][4:]  # get.format
             path = os.path.sep.join(args[:-1])
             """ugly workaround for #273, should be handled somewhere in
@@ -224,7 +224,7 @@ everybody has to relogin now.''')
                 path = path
             else:
                 path = codecs.decode(codecs.encode(path, 'latin1'), 'utf-8')
-            fullpath = os.path.join(cherry.config.media.basedir.str, path)
+            fullpath = os.path.join(cherry.config['media.basedir'], path)
             transcoder = audiotranscode.AudioTranscode()
             mimetype = transcoder.mimeType(newformat)
             cherrypy.response.headers["Content-Type"] = mimetype
@@ -383,7 +383,7 @@ everybody has to relogin now.''')
 
         #try getting album art inside local folder
         fetcher = albumartfetcher.AlbumArtFetcher()
-        localpath = os.path.join(cherry.config.media.basedir.str, directory)
+        localpath = os.path.join(cherry.config['media.basedir'], directory)
         header, data, resized = fetcher.fetchLocal(localpath)
 
         if header:
@@ -392,7 +392,7 @@ everybody has to relogin now.''')
                 self.albumartcache_save(b64imgpath, data)
             cherrypy.response.headers.update(header)
             return data
-        elif cherry.config.media.fetch_album_art.bool:
+        elif cherry.config['media.fetch_album_art']:
             #fetch album art from online source
             album = os.path.basename(directory)
             artist = os.path.basename(os.path.dirname(directory))
@@ -491,7 +491,7 @@ everybody has to relogin now.''')
 
     def api_getplayables(self, value):
         """DEPRECATED"""
-        return json.dumps(cherry.config.media.playable.list)
+        return json.dumps(cherry.config['media.playable'])
 
     def api_getuserlist(self, value):
         if cherrypy.session['admin']:
@@ -571,7 +571,7 @@ everybody has to relogin now.''')
             return self.serve_string_as_file(pls, name+'.m3u')
 
     def api_getsonginfo(self, value):
-        basedir = cherry.config.media.basedir.str
+        basedir = cherry.config['media.basedir']
         #TODO yet another dirty hack. removing the /serve thing is a mess.
         abspath = os.path.join(basedir, unquote(value)[7:])
         return json.dumps(metainfo.getSongInfo(abspath).dict())
@@ -583,7 +583,7 @@ everybody has to relogin now.''')
         return json.dumps(audiotranscode.getDecoders())
 
     def api_transcodingenabled(self, value):
-        return json.dumps(cherry.config.media.transcode.bool)
+        return json.dumps(cherry.config['media.transcode'])
 
     def api_updatedb(self, value):
         self.model.updateLibrary()
@@ -591,12 +591,12 @@ everybody has to relogin now.''')
 
     def api_getconfiguration(self, value):
         clientconfigkeys = {
-            'transcodingenabled': cherry.config.media.transcode.bool,
-            'fetchalbumart': cherry.config.media.fetch_album_art.bool,
+            'transcodingenabled': cherry.config['media.transcode'],
+            'fetchalbumart': cherry.config['media.fetch_album_art'],
             'isadmin': cherrypy.session['admin'],
             'username': cherrypy.session['username'],
         }
-        if cherry.config.media.transcode.bool:
+        if cherry.config['media.transcode']:
             decoders = self.model.transcoder.availableDecoderFormats()
             clientconfigkeys['getdecoders'] = decoders
             encoders = self.model.transcoder.availableEncoderFormats()
