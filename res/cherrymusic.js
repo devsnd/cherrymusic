@@ -183,15 +183,15 @@ function loadUserOptions(onSuccess){
         if(typeof onSuccess !== 'undefined'){
             onSuccess();
         }
-        $('#custom_theme-primary_color').val(userOptions.custom_theme.primary_color.value);
-        $('#custom_theme-white_on_black').attr('checked',userOptions.custom_theme.white_on_black.value);
+        $('#custom_theme-primary_color').val(userOptions.custom_theme.primary_color);
+        $('#custom_theme-white_on_black').attr('checked',userOptions.custom_theme.white_on_black);
 
-        $('#keyboard_shortcuts-next').html(String.fromCharCode(userOptions.keyboard_shortcuts.next.value));
-        $('#keyboard_shortcuts-prev').html(String.fromCharCode(userOptions.keyboard_shortcuts.prev.value));
-        $('#keyboard_shortcuts-stop').html(String.fromCharCode(userOptions.keyboard_shortcuts.stop.value));
-        $('#keyboard_shortcuts-play').html(String.fromCharCode(userOptions.keyboard_shortcuts.play.value));
-        $('#keyboard_shortcuts-pause').html(String.fromCharCode(userOptions.keyboard_shortcuts.pause.value));
-        $('#keyboard_shortcuts-search').html(String.fromCharCode(userOptions.keyboard_shortcuts.search.value));
+        $('#keyboard_shortcuts-next').html(String.fromCharCode(userOptions.keyboard_shortcuts.next));
+        $('#keyboard_shortcuts-prev').html(String.fromCharCode(userOptions.keyboard_shortcuts.prev));
+        $('#keyboard_shortcuts-stop').html(String.fromCharCode(userOptions.keyboard_shortcuts.stop));
+        $('#keyboard_shortcuts-play').html(String.fromCharCode(userOptions.keyboard_shortcuts.play));
+        $('#keyboard_shortcuts-pause').html(String.fromCharCode(userOptions.keyboard_shortcuts.pause));
+        $('#keyboard_shortcuts-search').html(String.fromCharCode(userOptions.keyboard_shortcuts.search));
         
         $('#pldlbutton').attr('checked',userOptions.misc.show_playlist_download_buttons);
     }
@@ -1078,7 +1078,7 @@ function keyboardShortcuts(e){
                         'stop' :    function(e){playlistManager.cmd_stop()},
                         };
         for(var action in actions){
-            if(e.which === userOptions.keyboard_shortcuts[action].value){
+            if(e.which === userOptions.keyboard_shortcuts[action]){
                 window.console.log('triggering: '+action);
                 actions[action](e);
             }

@@ -52,13 +52,13 @@ class CherryModel:
     def __init__(self):
         CherryModel.NATIVE_BROWSER_FORMATS = ['ogg', 'mp3']
         CherryModel.supportedFormats = CherryModel.NATIVE_BROWSER_FORMATS[:]
-        if cherry.config.media.transcode:
+        if cherry.config['media.transcode']:
             self.transcoder = audiotranscode.AudioTranscode()
             CherryModel.supportedFormats += self.transcoder.availableDecoderFormats()
             CherryModel.supportedFormats = list(set(CherryModel.supportedFormats))
 
     def abspath(self, path):
-        return os.path.join(cherry.config.media.basedir.str, path)
+        return os.path.join(cherry.config['media.basedir'], path)
 
     def sortFiles(self, files, fullpath=''):
         upper_case_filename = lambda x: pathprovider.filename(x).upper()
@@ -72,7 +72,7 @@ class CherryModel:
 
     def listdir(self, dirpath, filterstr=''):
         absdirpath = self.abspath(dirpath)
-        if cherry.config.browser.pure_database_lookup.bool:
+        if cherry.config['browser.pure_database_lookup']:
             allfilesindir = self.cache.listdir(dirpath)
         else:
             allfilesindir = os.listdir(absdirpath)
@@ -84,7 +84,7 @@ class CherryModel:
 
         musicentries = []
 
-        maximum_shown_files = cherry.config.browser.maxshowfiles.int
+        maximum_shown_files = cherry.config['browser.maxshowfiles']
         compactlisting = len(allfilesindir) > maximum_shown_files
         if compactlisting:
             upper_case_files = map(str.upper, allfilesindir)
@@ -135,7 +135,7 @@ class CherryModel:
         user = cherrypy.session.get('username', None)
         if user:
             log.d(user+' searched for "'+term+'"')
-        max_search_results = cherry.config.search.maxresults.int
+        max_search_results = cherry.config['search.maxresults']
         results = self.cache.searchfor(term, maxresults=max_search_results)
         with Performance('sorting DB results using ResultOrder'):
             debug = tweaks.result_order_debug
@@ -217,7 +217,7 @@ def createMusicEntryByFilePath(file):
     strippedpath = strippath(file)
     #let only playable files appear in the search results
     playable = isplayable(strippedpath)
-    fullpath = os.path.join(cherry.config.media.basedir.str, file)
+    fullpath = os.path.join(cherry.config['media.basedir'], file)
 
     if not os.path.exists(fullpath):
         log.w('search found inexistent file: %r', file)
@@ -241,8 +241,8 @@ def isplayable(filename):
 
 
 def strippath(path):
-    if path.startswith(cherry.config.media.basedir.str):
-        return path[len(cherry.config.media.basedir.str) + 1:]
+    if path.startswith(cherry.config['media.basedir']):
+        return path[len(cherry.config['media.basedir']) + 1:]
     return path
 
 
