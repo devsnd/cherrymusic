@@ -108,7 +108,7 @@ class TestProperty(object):
         assert 'x.y' == Property('X.Y').key
 
     def test_type_inferrence(self):
-        for T in (bool, int, float, str, type(''), type(u''),):
+        for T in (bool, int, float, str, type(''),):
             assert T.__name__ == Property(value=T()).type, T
 
         class UnknownType:

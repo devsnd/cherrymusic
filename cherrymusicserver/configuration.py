@@ -349,7 +349,7 @@ class Key(object):
             name = ''
         elif isinstance(name, Key):
             name = name._str
-        elif not isinstance(name, (str, type(''), type(u''))):
+        elif not isinstance(name, (str, type(''))):
             raise ConfigNameError(name, 'name must be a Key, str or unicode (is %r)' % (type(name),))
         elif not self._re.match(name):
             raise ConfigNameError(
@@ -598,8 +598,8 @@ class Property(namedtuple('PropertyTuple', 'key value type valid readonly hidden
     @staticmethod
     def _get_valid_type(value, type_):
         """ Turn the type argument into something useful. """
-        if type_ in (None, '', u''):
-            if type(value) in (bool, int, float, str, type(''), type(u'')):
+        if type_ in (None, ''):
+            if type(value) in (bool, int, float, str, type('')):
                 type_ = type(value)
             else:
                 return None
@@ -862,7 +862,7 @@ def _identity(val=None):
 def _to_bool_transformer(val=None):
     if isinstance(val, (bool, int, float, complex, list, set, dict, tuple)):
         return bool(val)
-    if isinstance(val, (type(''), type(u''), str)):
+    if isinstance(val, (type(''), str)):
         if val.strip().lower() in ('yes', 'true', 'y', '1'):
             return True
         if val.strip().lower() in ('false', 'no', '', 'n', '0'):
@@ -890,7 +890,7 @@ def _to_float_transformer(val=None):
 def _to_str_transformer(val=None):
     if val is None:
         return ''
-    if isinstance(val, (str, type(''), type(u''))):
+    if isinstance(val, (str, type(''))):
         return val.strip() + ''  # inner workaround for python 2.6+
     return str(val) + ''         # transforms ascii str to unicode because
                                  # of unicode_literals import
