@@ -193,7 +193,8 @@ function loadUserOptions(onSuccess){
         $('#keyboard_shortcuts-pause').html(String.fromCharCode(userOptions.keyboard_shortcuts.pause.value));
         $('#keyboard_shortcuts-search').html(String.fromCharCode(userOptions.keyboard_shortcuts.search.value));
         
-        $('#pldlbutton').attr('checked',userOptions.misc.show_playlist_download_buttons);
+        $('#misc-show_playlist_download_buttons').attr('checked',userOptions.misc.show_playlist_download_buttons);
+        $('#misc-autoplay_on_add').attr('checked',userOptions.misc.autoplay_on_add);
     }
     api('getuseroptions',success);
 }
@@ -1159,6 +1160,18 @@ function disableMobileSwiping(){
     $('html').removeAttr('style');
 }
 
+function userOptionCheckboxListener(htmlid, optionname){
+    $(htmlid).on('change',function(){
+        optionSetter(   optionname,
+                        $(this).attr('checked')=='checked',
+                        function(){
+                            $(this).attr('checked',userOptions[optionname])
+                        },
+                        errorFunc('Error setting option! '+optionname)
+        );
+    });
+}
+
 /***
 ON DOCUMENT READY... STEADY... GO!
 ***/
@@ -1200,15 +1213,10 @@ $(document).ready(function(){
     $('#saveplaylistmodal').on('hide', function(){
         $('#playlisttitle').unbind('keyup');
     });
-    $('#pldlbutton').on('change',function(){
-        optionSetter(   'misc.show_playlist_download_buttons',
-                        $(this).attr('checked')=='checked',
-                        function(){
-                            $(this).attr('checked',userOptions.misc.show_playlist_download_buttons)
-                        },
-                        errorFunc('Error setting option!')
-        );
-    });
+    userOptionCheckboxListener('#misc-show_playlist_download_buttons',
+                               'misc.show_playlist_download_buttons');
+    userOptionCheckboxListener('#misc-autoplay_on_add',
+                               'misc.autoplay_on_add');
     //enable loading of images when in viewport
     window.onscroll = albumArtLoader;
     //enableMobileSwiping();

@@ -615,9 +615,13 @@ PlaylistManager.prototype = {
         }
         playlist.addTrack(track);
         
-        //directly play first added track
+        //directly play/select first added track
         if(this.getPlayingPlaylist() == playlist && playlist.jplayerplaylist.playlist.length == 1){
-            playlist.jplayerplaylist.play(0);
+            if(userOptions.misc.autoplay_on_add){
+                playlist.jplayerplaylist.play(0);
+            } else {
+                playlist.jplayerplaylist.select(0);
+            }
         }
         pulse('.tabNavigation li a.jplayer');
         var success = function(data){

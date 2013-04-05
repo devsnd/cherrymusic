@@ -60,6 +60,7 @@ class UserOptionDB:
                 c.keyboard_shortcuts = kbs
             with cfg.create('misc') as misc:
                 misc.show_playlist_download_buttons = cfg.Configuration(value=False)
+                misc.autoplay_on_add = cfg.Configuration(value=True)
                 c.misc = misc
 
             with cfg.create('custom_theme') as theme:
