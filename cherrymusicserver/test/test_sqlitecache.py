@@ -137,38 +137,13 @@ def removeTestfiles(testdir, testfiles):
     shutil.rmtree(testdir, ignore_errors=True, onerror=None)
 
 
-class SQLiteCacheTest(unittest.TestCase):
-
-    def test_init_checks_basedir(self):
-        # not set
-        cherry.config.media.basedir = ''
-        self.assertRaises(AssertionError, sqlitecache.SQLiteCache, ':memory:')
-        cherry.config.media.basedir = None
-        self.assertRaises(AssertionError, sqlitecache.SQLiteCache, ':memory:')
-
-        # not absolute path
-        cherry.config.media.basedir = 'harfnarf'
-        self.assertRaises(AssertionError, sqlitecache.SQLiteCache, ':memory:')
-
-        # doesn't exist
-        cherry.config.media.basedir = '/harfnarf'
-        self.assertRaises(AssertionError, sqlitecache.SQLiteCache, ':memory:')
-
-        # not a dir
-        testfile = TestFile('harfnarf')
-        setupTestfile(testfile)
-        cherry.config.media.basedir = os.path.abspath('harfnarf')
-        self.assertRaises(AssertionError, sqlitecache.SQLiteCache, ':memory:')
-        removeTestfile(testfile)
-
-
 class AddFilesToDatabaseTest(unittest.TestCase):
 
     testdirname = 'empty'
 
     def setupConfig(self):
         cherry.config = configuration.from_defaults()
-        cherry.config.media.basedir = self.testdir
+        cherry.config = cherry.config.replace({'media.basedir': self.testdir})
 
 
     def setUp(self):
@@ -330,9 +305,9 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
 
     def setupConfig(self):
         cherry.config = configuration.from_defaults()
-        with configuration.extend(cherry.config) as cfg:
-            cfg.media.basedir = self.testdir
-            cfg.search.autoupdate = 'True'
+        cherry.config = cherry.config.replace({
+            'media.basedir': self.testdir,
+        })
 
 
     def setupFileObjects(self):
@@ -552,7 +527,7 @@ class SymlinkTest(unittest.TestCase):
     def setUp(self):
         self.testdir = getAbsPath(self.testdirname)
         setupTestfiles(self.testdir, self.testfiles)
-        cherry.config.media.basedir = self.testdir
+        cherry.config = cherry.config.replace({'media.basedir': self.testdir})
         service.provide('dbconnector', MemConnector)
         database.ensure_current_version(sqlitecache.DBNAME, autoconsent=True)
         self.Cache = sqlitecache.SQLiteCache()
@@ -616,9 +591,9 @@ class UpdateTest(unittest.TestCase):
 
     def setupConfig(self):
         cherry.config = configuration.from_defaults()
-        with configuration.extend(cherry.config) as config:
-            config.media.basedir = self.testdir
-            config.search.autoupdate = 'True'
+        cherry.config = cherry.config.replace({
+            'media.basedir': self.testdir,
+        })
 
     def setupCache(self):
         service.provide('dbconnector', MemConnector)
@@ -734,19 +709,6 @@ class UpdateTest(unittest.TestCase):
         self.assertNotEqual(None, self.Cache.db_find_file_by_path(path_to(newfiles[0])), msg)
         self.assertEqual(None, self.Cache.db_find_file_by_path(path_to(newfiles[1])), msg)
         self.assertEqual(None, self.Cache.db_find_file_by_path(path_to(newfiles[2])), msg)
-
-
-#    @unittest.skipIf(True, "facilitates quick manual testruns")
-#    def test_update(self):
-#        log.level(log.DEBUG)
-#        self.clearCache()
-#        cherry.config.media.basedir = '/home/til/Music'
-#        self.Cache.full_update()
-#        cherry.config.media.basedir = '/media/audio/+audiobooks/'# Audiobooks'
-#        self.Cache.full_update()
-#        cherry.config.media.basedir = '/home/til/Music'
-#        self.Cache.full_update()
-#        log.level(log.CRITICAL)
 
 
 if __name__ == "__main__":

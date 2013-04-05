@@ -204,8 +204,7 @@ Run schema update? [y/N]: """.format(
         configFilePath = pathprovider.configurationFile()
         log.d('loading configuration from %s', configFilePath)
         filecfg = configuration.from_configparser(configFilePath)
-        config = defaultcfg + filecfg
-        config += override
+        config = defaultcfg.replace(filecfg).replace(override)
         self._check_for_config_updates(filecfg)
 
     def _check_for_config_updates(self, known_config):
@@ -215,11 +214,11 @@ Run schema update? [y/N]: """.format(
         transform = lambda s: '[{0}]: {2}'.format(*(s.partition('.')))
 
         for property in configuration.to_list(default):
-            if property.name not in known_config and not property.hidden:
-                new.append(transform(property.name))
+            if property.key not in known_config and not property.hidden:
+                new.append(transform(property.key))
         for property in configuration.to_list(known_config):
-            if property.name not in default:
-                deprecated.append(transform(property.name))
+            if property.key not in default:
+                deprecated.append(transform(property.key))
 
         if new:
             log.i('''New configuration options available:
@@ -274,26 +273,25 @@ Have fun!
         exit(0)
 
     def start(self, httphandler):
-        socket_host = "127.0.0.1" if config.server.localhost_only.bool else "0.0.0.0"
+        socket_host = "127.0.0.1" if config['server.localhost_only'] else "0.0.0.0"
 
         resourcedir = os.path.abspath(pathprovider.getResourcePath('res'))
 
-        if config.server.ssl_enabled.bool:
+        if config['server.ssl_enabled']:
             cherrypy.config.update({
-                'server.ssl_certificate': config.server.ssl_certificate.str,
-                'server.ssl_private_key': config.server.ssl_private_key.str,
-                'server.socket_port': config.server.ssl_port.int,
+                'server.ssl_certificate': config['server.ssl_certificate'],
+                'server.ssl_private_key': config['server.ssl_private_key'],
+                'server.socket_port': config['server.ssl_port'],
             })
             # Create second server for http redirect:
             redirecter = cherrypy._cpserver.Server()
-            redirecter.socket_port = config.server.port.int
+            redirecter.socket_port = config['server.port']
             redirecter._socket_host = socket_host
             redirecter.thread_pool = 10
             redirecter.subscribe()
         else:
-            port = config.server.port.int
             cherrypy.config.update({
-                'server.socket_port': port,
+                'server.socket_port': config['server.port'],
             })
 
         cherrypy.config.update({
@@ -306,7 +304,7 @@ Have fun!
             'tools.sessions.timeout': 60 * 24,
         })
 
-        if not config.server.keep_session_in_ram.bool:
+        if not config['server.keep_session_in_ram']:
             sessiondir = os.path.join(
                 pathprovider.getUserDataPath(), 'sessions')
             if not os.path.exists(sessiondir):
@@ -327,7 +325,7 @@ Have fun!
                 },
                 '/serve': {
                     'tools.staticdir.on': True,
-                    'tools.staticdir.dir': config.media.basedir.str,
+                    'tools.staticdir.dir': config['media.basedir'],
                     'tools.staticdir.index': 'index.html',
                     'tools.encode.on': True,
                     'tools.encode.encoding': 'utf-8',
@@ -335,9 +333,9 @@ Have fun!
                 },
                 '/favicon.ico': {
                     'tools.staticfile.on': True,
-                    'tools.staticfile.filename': resourcedir+'/favicon.ico',
+                    'tools.staticfile.filename': resourcedir + '/favicon.ico',
                 }})
-        log.i('Starting server on port %s ...' % port)
+        log.i('Starting server on port %s ...' % config['server.port'])
 
         cherrypy.lib.caching.expires(0)  # disable expiry caching
         cherrypy.engine.start()
