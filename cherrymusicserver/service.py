@@ -219,6 +219,11 @@ class _ProviderFactory(object):
         if self.lock.locked():
             raise MutualDependencyBreak(self.provider)
         with self.lock:
-            if isinstance(self.provider, type):
+            if isinstance(self.provider, (type, type(Python2OldStyleClass))):
                 return self.provider(*self.args, **self.kwargs)
             return self.provider
+
+
+class Python2OldStyleClass:
+    """In Python2, I am a ``classobj`` which is not the same as a ``type``."""
+    pass
