@@ -76,7 +76,7 @@ class PlaylistDB:
             for entry in zip(range(len(playlist)), playlist):
                 track = entry[0]
                 song = entry[1]
-                numberedplaylist.append((playlistid, track, song['mp3'], song['title']))
+                numberedplaylist.append((playlistid, track, song['url'], song['title']))
             cursor.executemany("""INSERT INTO tracks (playlistid, track, url, title)
                 VALUES (?,?,?,?)""", numberedplaylist)
             self.conn.commit()

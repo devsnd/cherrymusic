@@ -117,7 +117,11 @@
 				removeItemClass: "jp-playlist-item-remove",
 				playlistSelector: false,
 				playtimeClass: "jp-playlist-playtime",
-			}
+			},
+            hooks: {
+                //can transform track before playing in jPlayer
+                "setMedia" : function(track){return track}, 
+            },
 		},
 		option: function(option, value) { // For changing playlist options only
 			if(value === undefined) {
@@ -410,7 +414,10 @@
 				this.current = index;
 				this._highlight(index);
                 this.playlist[this.current].wasPlayed += 1;
-				$(this.cssSelector.jPlayer).jPlayer("setMedia", this.playlist[this.current]);
+                var self = this;
+				$(this.cssSelector.jPlayer).jPlayer("setMedia", 
+                    self.options.hooks["setMedia"](this.playlist[this.current])
+                );
 			} else {
 				this.current = 0;
 			}

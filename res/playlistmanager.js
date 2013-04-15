@@ -14,13 +14,14 @@ var ManagedPlaylist = function(playlistManager, playlist, options){
     this.reason_open = options.reason_open;
 
     this.jplayerplaylist;
-    this._init(playlist)
+    this._init(playlist, playlistManager)
 }
 ManagedPlaylist.prototype = {
-    _init : function(playlist){
+    _init : function(playlist, playlistManager){
         var self = this;
         this.playlistSelector = self._createNewPlaylistContainer();
-        self.jplayerplaylist = new jPlayerPlaylist({
+        self.jplayerplaylist = new jPlayerPlaylist(
+            {
                 jPlayer: this.playlistManager.cssSelectorjPlayer,
                 cssSelectorAncestor: this.playlistManager.cssSelectorJPlayerControls
             },
@@ -29,6 +30,9 @@ ManagedPlaylist.prototype = {
                     'enableRemoveControls': true,
                     'playlistSelector': this.playlistSelector,
                     'playlistController' : this
+                },
+                hooks: {
+                    "setMedia": playlistManager.transcodeURL
                 }
             }
         );
@@ -566,9 +570,11 @@ PlaylistManager.prototype = {
         this.playingPlaylist = plid;
         this.refreshTabs();
     },
-    addSong : function(path,title, plid){
+    transcodeURL: function(track){
         "use strict";
         var self = this;
+        var path = track.url;
+        var title = track.title;
         var ext = getFileTypeByExt(path);
         var track = {
             title: title,
@@ -604,8 +610,16 @@ PlaylistManager.prototype = {
                 return;
             }
         }
-
-
+        return track;
+    },
+    addSong : function(path,title, plid){
+        "use strict";
+        var self = this;
+        var track = {
+            title: title,
+            url: path,
+            wasPlayed : 0,
+        }
         var playlist;
         if (plid) {
             playlist = this.getPlaylistById(plid);
