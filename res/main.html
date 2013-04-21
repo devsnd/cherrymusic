@@ -265,7 +265,7 @@
             </div>
             <h4>Advanced:</h4>
             <div class="row-fluid">
-                <a class="btn" href="javascript:;" onclick="updateLibrary()" class="button">
+                <a class="btn" href="javascript:;" onclick="api('updatedb')" class="button">
                 Update Music Library (may take some time!)
                 </a>
             </div>
@@ -427,7 +427,7 @@ PLAYLIST SAVE DIALOG OVERLAY END -->
       <div class="nav-collapse collapse">
         <ul class="nav">
           <li><a href="#userOptions" role="button" data-toggle="modal">Options</a></li>
-          <li><a href="#adminpanel" role="button" data-toggle="modal">Admin</a></li>
+          <li><a style="display: none;" href="#adminpanel" role="button" data-toggle="modal">Admin</a></li>
           <li><a href="javascript:;" onclick="logout()">Logout <span id="username-label"></span></a></li>
         </ul>
       </div>

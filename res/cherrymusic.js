@@ -150,7 +150,7 @@ function removeError(msg){
 /*******************
 CONFIGURATION LOADER
 *******************/
-function loadConfig(){
+function loadConfig(executeAfter){
     "use strict";
     var data = {
         'action' : 'getconfiguration',
@@ -162,11 +162,10 @@ function loadConfig(){
         transcodingEnabled = dictatedClientConfig.transcodingenabled;
         isAdmin = dictatedClientConfig.isadmin;
         loggedInUserName = dictatedClientConfig.username;
-        for(var i=0; i<executeAfterConfigLoaded.length; i++){
-            executeAfterConfigLoaded[i]();
-        }
-        if(!isAdmin){
-            $('a[href="#adminpanel"]').hide();
+        
+        executeAfter();
+        if(isAdmin){
+            $('a[href="#adminpanel"]').show();
         }
     };
     var error = errorFunc("Could not fetch client configuration, CherryMusic will not work. Clearing the browser cache might help.");
@@ -197,12 +196,6 @@ function loadUserOptions(onSuccess){
         $('#misc-autoplay_on_add').attr('checked',userOptions.misc.autoplay_on_add);
     }
     api('getuseroptions',success);
-}
-
-function loadAndShowUserOptions(){
-    loadUserOptions(function(){
-        $('#useroptions').fadeIn();
-    });
 }
 
 var optionSetter = function(name,val,success,error){
@@ -244,17 +237,6 @@ keyboard_shortcut_setter = function(option, optionname){
     $('html').bind('keyup',keydownhandler);
 }
 
-function reloadStylesheets() {
-    var queryString = '?reload=' + new Date().getTime();
-    $('link[rel="stylesheet"]').each(function () {
-        if(this.href.indexOf('api/customcss.css') != -1){
-            this.href = this.href.replace(/\?.*|$/, queryString);
-        }
-    });
-}
-/***
-SEARCH
-***/
 function search(append){
     "use strict";
     var data = {
@@ -278,10 +260,6 @@ function submitsearch(){
 /***
 INTERACTION
 ***/
-
-updateLibrary = function(){
-    api('updatedb')
-}
 
 function showAlbumArtChangePopOver(jqobj){
     jqobj.popover({selector: jqobj.siblings('img'), title: 'Change cover art', html: true, content: '<img src="/res/img/folder.png" /><img src="/res/img/folder.png" /><img src="/res/img/folder.png" />'});
@@ -512,12 +490,6 @@ function confirmDeletePlaylist(id,title){
     $('#deleteplaylistmodal').modal('show');
 }
 
-function hidePlaylists(){
-    "use strict";
-    $('.showplayliststab').slideDown('fast');
-    $('.hideplayliststab').slideUp('fast');
-    $('.available-playlists').slideUp();
-}
 function loadPlaylist(playlistid, playlistlabel){
     "use strict";
     var pldomid = "#playlist"+playlistid+' .playlistcontent';
@@ -534,13 +506,11 @@ function loadPlaylist(playlistid, playlistlabel){
     }
 }
 
-
-
 var lastPlaylistHeight = 0;
 function resizePlaylistSlowly(){
     var currentHeight = $('.jp-playlist').height();
     if(lastPlaylistHeight <= currentHeight){
-        $('#jp-playlist-wrapper').animate({'min-height': currentHeight});
+        $('#playlistContainerParent').animate({'min-height': currentHeight});
     }
     lastPlaylistHeight = currentHeight;
 }
@@ -673,16 +643,6 @@ function enableJplayerDebugging(){
     $('#jquery_jplayer_1').data().jPlayer.options.errorAlerts = true;
     $('#jquery_jplayer_1').data().jPlayer.options.warningAlerts = true;
     $('#jplayer_inspector_update_0').click();
-}
-/***
-MESSAGE OF THE DAY
-***/
-function fetchMessageOfTheDay(){
-    "use strict";
-    var success = function(data){
-        $('#oneliner').text(data);
-    };
-    api('getmotd', success, errorFunc('could not fetch message of the day'));
 }
 
 function loadBrowser(){
@@ -928,15 +888,14 @@ ON DOCUMENT READY... STEADY... GO!
 var playlistManager;
 $(document).ready(function(){
     "use strict";
-    //initTabs();
     $('#playlistBrowser').hide();
-    fetchMessageOfTheDay();
-    $('#searchfield .bigbutton').click(submitsearch);
-    $('.hideplaylisttab').hide();
-    executeAfterConfigLoaded.push(function(){ playlistManager = new PlaylistManager() });
-    executeAfterConfigLoaded.push(function(){ $('#username-label').text('('+loggedInUserName+')') });
-    loadConfig();
-    loadUserOptions(initKeyboardshortcuts);
+    loadConfig(function(){
+        playlistManager = new PlaylistManager();
+        $('#username-label').text('('+loggedInUserName+')');
+    });
+    loadUserOptions(initKeyboardshortcuts);    
+    api('getmotd',function(data){$('#oneliner').text(data)},
+        errorFunc('could not fetch message of the day'));
     window.onscroll = MediaBrowser.static.albumArtLoader; //enable loading of images when in viewport
     
     //register top level directories
