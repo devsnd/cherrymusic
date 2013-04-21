@@ -198,7 +198,7 @@ MediaBrowser.static = {
             }
             var currdir = this;
             var success = function(data){
-                var json = JSON.parse(data);
+                var json = jQuery.parseJSON(data);
                 $(currdir).parent().append(MediaBrowser.static._renderList(json));
                 playlistManager.setTrackDestinationLabel();
                 $(currdir).siblings("ul").slideDown('fast');
