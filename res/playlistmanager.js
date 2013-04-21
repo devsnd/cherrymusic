@@ -491,6 +491,7 @@ PlaylistManager.prototype = {
         } else {
             this.setEditingPlaylist(playlistid);
         }
+        this.setTrackDestinationLabel();
         showpl.show();
         this.refreshTabs();
         this.refreshCommands();
@@ -502,6 +503,10 @@ PlaylistManager.prototype = {
         $('#playlistChooser ul li:last').addClass('active');
         $('#playlistCommands').hide();
         $('#playlistBrowser').show();
+        this.setTrackDestinationLabel();
+    },
+    setTrackDestinationLabel : function(){
+        $('#searchresults .add-track-destination').text('add all to '+this.getEditingPlaylist().name);        
     },
     hideAll : function(){
         $(this.cssSelectorPlaylistContainerParent+'>div').hide();

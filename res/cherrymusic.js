@@ -255,29 +255,6 @@ function reloadStylesheets() {
 /***
 SEARCH
 ***/
-function fastsearch(append){
-    "use strict";
-    var data = {
-        'action' : 'fastsearch',
-        'value' : $('#searchfield input').val()
-    };
-    var success = function(data){
-        if(append){
-            $('#searchresults').append(parseAndRender(data));
-        } else {
-            $('#searchresults').html(parseAndRender(data));
-        }
-        registerlistdirs($('#searchresults').find('ul'));
-        registercompactlistdirs($('#searchresults').find('ul'));
-        registermp3s($('#searchresults').find('ul'));
-        $('#searchresults').find('ul').append('<li class="slowsearch">loading more search results...</li>');
-    };
-    var error = function(){
-        errorFunc('failed loading fast-search results')();
-    };
-    api(data,success,error);
-    return false;
-}
 function search(append){
     "use strict";
     var data = {
@@ -285,15 +262,7 @@ function search(append){
         'value' : $('#searchfield input').val()
     };
     var success = function(data){
-        if(append){
-            $('#searchresults').append(parseAndRender(data));
-        } else {
-            $('#searchresults').html(parseAndRender(data));
-        }
-        registerlistdirs($('#searchresults').find('ul'));
-        registercompactlistdirs($('#searchresults').find('ul'));
-        registermp3s($('#searchresults').find('ul'),false);
-        $('#searchresults').find('ul li.slowsearch').remove();
+        MediaBrowser('#searchresults', jQuery.parseJSON(data));
     };
     var error = function(){
         errorFunc('failed loading search results')();
@@ -305,216 +274,10 @@ function submitsearch(){
     search();
     return false;
 }
-
-/********
-RENDERING
-********/
-function parseAndRender(data){
-    "use strict";
-    return renderList(jQuery.parseJSON(data));
-}
-function renderList(l){
-    "use strict";
-    var html = "";
-    $.each(l, function(i, e) {
-        html+=Mustache.render([
-            '{{#isfile}}',
-                '<li class="fileinlist">',
-                    '<a title="{{label}}" href="javascript:;" class="mp3file" path="{{fileurl}}">',
-                        '<span class="fullpathlabel">',
-                            '{{fullpath}}',
-                        '</span>',
-                        '{{label}}',
-                    '</a>',
-                '</li>',
-            '{{/isfile}}',
-            '{{#isdir}}',
-                '<li>',
-                    '<a dir="{{dirpath}}" href="javascript:;" class="listdir">',
-                        '{{^isrootdir}}',
-                                '{{{coverartfetcher}}}',
-                        '{{/isrootdir}}',
-                        '<div class="listdir-name-wrap">',
-                            '<span class="listdir-name">{{dirpath}}<span>',
-                        '</div>',
-                    '</a>',
-                '</li>',
-            '{{/isdir}}',
-            '{{#iscompact}}',
-                '<li>',
-                   '<a dir="{{filepath}}" filter="{{filter}}" href="javascript:;" class="compactlistdir">',
-                        '{{filterUPPER}}',
-                    '</a>',
-                '</li>',
-            '{{/iscompact}}',
-            ].join(''),
-            {
-                isfile: e.type == 'file',
-                label: e.label,
-                fullpath: e.path,
-                fileurl : e.urlpath,
-                
-                isdir: e.type == 'dir',
-                dirpath: e.path,
-                isrootdir: e.path && !e.path.indexOf('/')>0,
-                coverartfetcher: function(){
-                    return renderCoverArtFetcher(encodeURIComponent(JSON.stringify({'directory' : e.path})))
-                },
-                
-                iscompact: e.type == 'compact',
-                filepath: e.urlpath,
-                filter: e.label,
-                filterUPPER: e.label.toUpperCase(),
-            });
-    });
-    if(html==""){
-        html += '<li><div style="text-align: center">Nothing found. Sorry.</div></li>'
-    }
-    return '<ul>'+html+'</ul>';
-}
-
-function renderCoverArtFetcher(searchterms){
-    return ['<div class="albumart-display unloaded" search-data="'+searchterms+'">',
-    '<img src="/res/img/folder.png" width="80" height="80" />',
-    '</div>'].join('');
-}
-
-function albumArtLoader(){
-    var winpos = $(window).height()+$(window).scrollTop();
-    $('.albumart-display.unloaded').each(
-        function(idx){
-            if($(this).position().top < winpos){
-               $(this).find('img').attr('src', '/api/fetchalbumart/'+$(this).attr('search-data'));
-               $(this).removeClass('unloaded');
-            }
-        }
-    );
-}
     
 /***
 INTERACTION
 ***/
-listdirclick = function(mode){
-        "use strict";
-        var directory = $(this).attr("dir");
-        if($(this).siblings('ul').length>0){
-            if($(this).siblings('ul').is(":visible")){
-                $(this).siblings('ul').slideUp('slow');
-            } else {
-                $(this).siblings('ul').slideDown('slow');
-            }
-        } else {
-            //$('div#progressscreen').fadeIn('fast');
-            var data = {
-                'action' : 'listdir',
-                'value' : JSON.stringify({ 'directory' : directory })
-            };
-            var currdir = this;
-            var success = function(data){
-                $(currdir).parent().append(parseAndRender(data));
-                registerlistdirs($(currdir).parent().find('ul'));
-                registercompactlistdirs($(currdir).parent().find('ul'));
-                registermp3s($(currdir).parent().find('ul'));
-                $(currdir).siblings("ul").hide().slideDown('fast');
-                albumArtLoader();
-            };
-            api(data,success,errorFunc('unable to list directory'));
-        }
-};
-compactlistdirclick = function(){
-    "use strict";
-    var directory = $(this).attr("dir");
-    var filter = $(this).attr("filter");
-    //alert(directory);
-    if($(this).siblings('ul').length>0){
-        if($(this).siblings('ul').is(":visible")){
-            $(this).siblings('ul').slideUp('slow');
-        } else {
-            $(this).siblings('ul').slideDown('slow');
-        }
-    } else {
-        var data = {
-            'action' : 'compactlistdir',
-            'value' : JSON.stringify({ 'directory' : directory,
-                        'filter' : filter })
-        };
-        var currdir = this;
-        var success = function(data){
-            $(currdir).parent().append(parseAndRender(data));
-            registerlistdirs($(currdir).parent().find('ul'));
-            registercompactlistdirs($(currdir).parent().find('ul'));
-            registermp3s($(currdir).parent().find('ul'));
-            $(currdir).siblings("ul").slideDown('slow');
-            albumArtLoader();
-        };
-        api(data,success,errorFunc('unable to list compact directory'));
-    }
-
-};
-registerlistdirs = function(parent){
-    "use strict";
-    $(parent).find("a.listdir").click(
-        listdirclick
-    );
-};
-
-registercompactlistdirs = function(parent){
-    "use strict";
-    $(parent).find("a.compactlistdir").click(
-        compactlistdirclick
-    );
-};
-
-addAllToPlaylist = function($source, plid){
-    "use strict";
-    $source.siblings('li').find('.mp3file').each(function(){
-        playlistManager.addSong( $(this).attr("path"), $(this).attr("title"), plid );
-    });
-    $(this).blur();
-    return false;
-};
-addThisTrackToPlaylist = function(){
-    playlistManager.addSong( $(this).attr("path"), $(this).attr("title") );
-    $(this).blur();
-    return false;
-}
-
-registermp3s = function(parent,mode, playlistlabel){
-    "use strict";
-    if(typeof mode === 'undefined'){
-        mode = 'addPlayAll';
-    }
-    var foundMp3 = $(parent).find(".mp3file").click(
-        addThisTrackToPlaylist
-    ).html();
-    if(foundMp3){
-        var editplaylist = playlistManager.getEditingPlaylist();
-        switch(mode) {
-            case 'loadPlaylist':
-                $(parent).prepend('<a class="addAllToPlaylist" href="javascript:;">load playlist</a>');
-                $(parent).children('.addAllToPlaylist').click( function() {
-                    var pl = playlistManager.newPlaylistNoShow([], playlistlabel);
-                    addAllToPlaylist($(this), pl.id);
-                    pl.saved = true;
-                    playlistManager.showPlaylist(pl.id);
-                    $(this).blur();
-                    return false;
-                });
-                 break;
-            case 'addPlayAll':
-                var playlistname  = typeof editplaylist === 'undefined' ? 'undefined playlist' : editplaylist.name;
-                $(parent).prepend('<a class="addAllToPlaylist" href="javascript:;"><b>+</b> add all to <span class="plsmgr-editingplaylist-name">' + playlistname + '</span></a>');
-                $(parent).children('.addAllToPlaylist').click( function() {
-                    addAllToPlaylist($(this));
-                    $(this).blur();
-                    return false;
-                });
-                break;
-            default:
-                break;
-        }
-    }
-}
 
 updateLibrary = function(){
     api('updatedb')
@@ -763,10 +526,7 @@ function loadPlaylist(playlistid, playlistlabel){
         var data = {'action':'loadplaylist',
                     'value': playlistid };
         var success = function(data){
-            $(pldomid).hide();
-            $(pldomid).append(parseAndRender(data));
-            $(pldomid).slideDown('slow');
-            registermp3s($(pldomid).find('ul'), 'loadPlaylist', playlistlabel);
+            MediaBrowser(pldomid, jQuery.parseJSON(data), true, playlistlabel);
         };
         api(data,success,errorFunc('error loading external playlist'))
     } else {
@@ -925,20 +685,10 @@ function fetchMessageOfTheDay(){
     api('getmotd', success, errorFunc('could not fetch message of the day'));
 }
 
-function loadBrowserIfEmpty(){
-    "use strict";
-    if('' === $('#browser').html().trim()){
-        loadBrowser();
-    }
-}
-
 function loadBrowser(){
     var data = { 'action' : 'listdir' };
     var success = function(data){
-        $('#searchresults').html(parseAndRender(data));
-        registerlistdirs($('#searchresults').find('ul'));
-        registercompactlistdirs($('#searchresults').find('ul'));
-        registermp3s($('#searchresults').find('ul'));
+        MediaBrowser('#searchresults', jQuery.parseJSON(data));
     };
     api(data,success,errorFunc('failed to load file browser'));
 }
@@ -1187,10 +937,10 @@ $(document).ready(function(){
     executeAfterConfigLoaded.push(function(){ $('#username-label').text('('+loggedInUserName+')') });
     loadConfig();
     loadUserOptions(initKeyboardshortcuts);
+    window.onscroll = MediaBrowser.static.albumArtLoader; //enable loading of images when in viewport
+    
     //register top level directories
-	registerlistdirs($("html").get());
-	registercompactlistdirs($("html").get());
-	$('div#progressscreen').fadeOut('slow');
+    $('div#progressscreen').fadeOut('slow');
     window.setInterval("resizePlaylistSlowly()",2000);
     $('#searchform .searchinput').focus();
     sendHeartBeat();
@@ -1217,7 +967,5 @@ $(document).ready(function(){
                                'misc.show_playlist_download_buttons');
     userOptionCheckboxListener('#misc-autoplay_on_add',
                                'misc.autoplay_on_add');
-    //enable loading of images when in viewport
-    window.onscroll = albumArtLoader;
     //enableMobileSwiping();
 });
