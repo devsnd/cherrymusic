@@ -480,6 +480,7 @@ PlaylistManager.prototype = {
     },
     showPlaylist : function(playlistid){
         $('#playlistCommands').show();
+        $('#playlistContainerParent').show();
         $('#playlistBrowser').hide();
         var self = this;
         var showpl = $('#'+this.plid2htmlid(playlistid));
@@ -502,6 +503,7 @@ PlaylistManager.prototype = {
         showPlaylists();
         $('#playlistChooser ul li:last').addClass('active');
         $('#playlistCommands').hide();
+        $('#playlistContainerParent').hide();
         $('#playlistBrowser').show();
         this.setTrackDestinationLabel();
     },
