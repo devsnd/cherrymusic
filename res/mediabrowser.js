@@ -201,10 +201,14 @@ MediaBrowser.static = {
                 var json = jQuery.parseJSON(data);
                 $(currdir).parent().append(MediaBrowser.static._renderList(json));
                 playlistManager.setTrackDestinationLabel();
-                $(currdir).siblings("ul").slideDown('fast');
+                $(currdir).siblings("ul").hide().slideDown('fast');
                 MediaBrowser.static.albumArtLoader();
             };
-            api(data,success,errorFunc('unable to list compact directory'));
+            busy($(currdir).parent()).hide().fadeIn();
+            api(data,
+                success,
+                errorFunc('unable to list compact directory'),
+                function(){busy($(currdir).parent()).fadeOut('fast')});
         }
     },    
     albumArtLoader: function(cssSelector){

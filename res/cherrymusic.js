@@ -49,26 +49,13 @@ var playlistSelector = '.jp-playlist';
 
 var executeAfterConfigLoaded = []
 
-function api(data_or_action, successfunc, errorfunc, background){
+function api(data_or_action, successfunc, errorfunc, completefunc){
     "use strict";
     if(!successfunc){
         successfunc = function(){};
     }
-    var completefunc;
-    if(background){
+    if(!completefunc){
         completefunc = function(){};
-    } else {
-        completefunc = function(){$('div#progressscreen').fadeOut('fast')};
-    }
-    var senddata;
-    var apiaction;
-    if(typeof data_or_action === "string"){
-        apiaction = data_or_action;
-        senddata = {};
-    } else {
-        apiaction = data_or_action['action'];
-        senddata = {"value" :  data_or_action['value'] };
-
     }
     var errorFuncWrapper = function(errorFunc){
         return function(httpstatus){
@@ -80,15 +67,21 @@ function api(data_or_action, successfunc, errorfunc, background){
     }
     var defaultErrorHandler = function(){
         errorFunc('calling API function "'+apiaction+'"')();
-        $('div#progressscreen').fadeOut('fast');
     };
     if(!errorfunc){
         errorfunc = errorFuncWrapper(defaultErrorHandler);
     } else {
         errorfunc = errorFuncWrapper(errorfunc);
     }
-    if(!background){
-        $('div#progressscreen').fadeIn('fast');
+    var senddata;
+    var apiaction;
+    if(typeof data_or_action === "string"){
+        apiaction = data_or_action;
+        senddata = {};
+    } else {
+        apiaction = data_or_action['action'];
+        senddata = {"value" :  data_or_action['value'] };
+
     }
     var urlaction = '/api';
     if(apiaction){
@@ -169,7 +162,7 @@ function loadConfig(executeAfter){
         }
     };
     var error = errorFunc("Could not fetch client configuration, CherryMusic will not work. Clearing the browser cache might help.");
-    api(data,success,error,true);
+    api(data,success,error);
 }
 
 /************
@@ -195,10 +188,11 @@ function loadUserOptions(onSuccess){
         $('#misc-show_playlist_download_buttons').attr('checked',userOptions.misc.show_playlist_download_buttons);
         $('#misc-autoplay_on_add').attr('checked',userOptions.misc.autoplay_on_add);
     }
-    api('getuseroptions',success);
+    api('getuseroptions', success);
 }
 
 var optionSetter = function(name,val,success,error){
+    busy('#userOptions .content').hide().fadeIn();
     api(
             {
                 action:'setuseroption',
@@ -210,7 +204,8 @@ var optionSetter = function(name,val,success,error){
                 )
             },
             function(){success(); loadUserOptions();},
-            error
+            error,
+            function(){busy('#userOptions .content').fadeOut('fast')}
     )
 }
 keyboard_shortcut_setter = function(option, optionname){
@@ -229,12 +224,29 @@ keyboard_shortcut_setter = function(option, optionname){
             $('#shortcut-changer').fadeOut('fast');
         }
         if(e.which !== 27 && e.which !== 32){ //do not bind escape / space
-            optionSetter(option,e.which,keyboardsetterend,keyboardsetterend)();
+            optionSetter(option,e.which,keyboardsetterend,keyboardsetterend);
         }
         keyboardsetterend();
     }
     $('#shortcut-changer input').bind('keyup',keydownhandler);
     $('html').bind('keyup',keydownhandler);
+}
+
+function busy(selector){
+    "use strict";
+    var domelem = $(selector).children('.busy-indicator');
+    if(domelem.length == 0){
+        domelem = $('<div></div>');
+        domelem.addClass('busy-indicator');
+        $(selector).append(domelem);
+    }
+    var pos = $(selector).offset();
+    var top = 'top: '+pos.top+'px;';
+    var left = 'left: '+pos.left+'px;';
+    var width = 'width: '+$(selector).width()+'px;';
+    var height = 'height: '+$(selector).height()+'px;';
+    domelem.attr('style','position: absolute;'+top+left+width+height);   
+    return domelem;
 }
 
 function search(append){
@@ -245,10 +257,13 @@ function search(append){
     };
     var success = function(data){
         MediaBrowser('#searchresults', jQuery.parseJSON(data));
+        busy('#searchform').fadeOut('fast');
     };
     var error = function(){
         errorFunc('failed loading search results')();
+        busy('#searchform').fadeOut('fast');
     };
+    busy('#searchform').hide().fadeIn('fast');
     api(data,success,error);
     return false;
 }
@@ -337,7 +352,11 @@ function savePlaylist(plid,playlistname,ispublic,overwrite){
         playlistManager.refresh();
         playlistManager.showPlaylist(plid);
     }
-    api(data,success,errorFunc('error saving playlist'));
+    busy('.playlist-panel').hide().fadeIn('fast');
+    api(data,
+        success,
+        errorFunc('error saving playlist'),
+        function(){busy('.playlist-panel').fadeOut('fast')});
 }
 function getAddrPort(){
     m = (window.location+"").match(/https?:\/\/(.+?):?(\d+).*/);
@@ -441,7 +460,13 @@ function showPlaylists(){
 
     var error = errorFunc('error loading external playlists');
 
-    api('showplaylists',success,error);
+    $('.available-playlists').slideUp('fast');
+    busy('.playlist-panel').hide().fadeIn('fast');
+    api('showplaylists',
+        success,
+        error,
+        function(){busy('.playlist-panel').fadeOut('fast')}
+    );
 }
 
 renderUserNameLabel = function(username){
@@ -463,6 +488,7 @@ function changePlaylist(plid,attrname,value){
     window.console.log(plid);
     window.console.log(attrname);
     window.console.log(value);
+    busy('.playlist-panel').hide().fadeIn('fast');
     api(
         {
             action:'changeplaylist',
@@ -475,14 +501,20 @@ function changePlaylist(plid,attrname,value){
         function(){
             showPlaylists();
         },
-        errorFunc('error changing playlist attribute')
+        errorFunc('error changing playlist attribute'),
+        function(){busy('.playlist-panel').fadeOut('fast')}
     );
 }
 
 function confirmDeletePlaylist(id,title){
     $('#deletePlaylistConfirmButton').off();
     $('#deletePlaylistConfirmButton').on('click', function(){
-        api({action:'deleteplaylist', value: id},false,errorFunc('error deleting playlist'));
+        busy('.playlist-panel').hide().fadeIn('fast');
+        api({action:'deleteplaylist', value: id},
+            false,
+            errorFunc('error deleting playlist'),
+            function(){busy('.playlist-panel').fadeOut('fast')}
+        );
         $('#dialog').fadeOut('fast');
         showPlaylists();
     });
@@ -500,7 +532,12 @@ function loadPlaylist(playlistid, playlistlabel){
         var success = function(data){
             MediaBrowser(pldomid, jQuery.parseJSON(data), true, playlistlabel);
         };
-        api(data,success,errorFunc('error loading external playlist'))
+        busy('.playlist-panel').hide().fadeIn('fast');
+        api(data,
+            success,
+            errorFunc('error loading external playlist'),
+            function(){busy('.playlist-panel').fadeOut('fast')}
+        );
     } else {
         $(pldomid).slideToggle('slow');
     }
@@ -574,7 +611,12 @@ function updateUserList(){
         });
         $('#adminuserlist').html(htmllist);
     };
-    api('getuserlist',success,errorFunc('cannot fetch user list'));
+    busy('#adminuserlist').hide().fadeIn('fast');
+    api('getuserlist',
+        success,
+        errorFunc('cannot fetch user list'),
+        function(){busy('#adminuserlist').fadeOut('fast')}
+    );
 }
 function addNewUser(){
     "use strict";
@@ -596,7 +638,12 @@ function addNewUser(){
         $('#newisadmin').prop('checked', false);
         updateUserList();
     };
-    api(data,success,errorFunc('failed to add new user'));
+    busy('#adminpanel').hide().fadeIn('fast');
+    api(data,
+        success,
+        errorFunc('failed to add new user'),
+        function(){busy('#adminpanel').fadeOut('fast')}
+    );
 }
 
 function userDelete(userid){
@@ -607,7 +654,12 @@ function userDelete(userid){
     var success = function(data){
         updateUserList();
     };
-    api(data,success,errorFunc('failed to delete user'));
+    busy('#adminuserlist').hide().fadeIn('fast');
+    api(data,
+        success,
+        errorFunc('failed to delete user'),
+        function(){busy('#adminuserlist').fadeOut('fast')}
+    );
 }
 function userChangePassword(){
     if (! validateNewPassword($('#newpassword-change'), $('#repeatpassword-change'))) {
@@ -625,7 +677,12 @@ function userChangePassword(){
         $('#userOptions').modal('hide');
         successNotify('Password changed successfully!')();
     };
-    api(data,success,errorFunc('failed to change password'));
+    busy('#adminpanel').hide().fadeIn('fast');
+    api(data,
+        success,
+        errorFunc('failed to change password'),
+        function(){busy('#adminpanel').fadeOut('fast')}
+    );
 }
 function validateNewPassword($newpwfield, $repeatpwfield){
     var newpw = $newpwfield.val();
@@ -650,7 +707,11 @@ function loadBrowser(){
     var success = function(data){
         MediaBrowser('#searchresults', jQuery.parseJSON(data));
     };
-    api(data,success,errorFunc('failed to load file browser'));
+    busy('#searchfield').hide().fadeIn('fast');
+    api(data,
+        success,
+        errorFunc('failed to load file browser'),
+        function(){busy('#searchfield').fadeOut('fast')});
 }
 var origcolors = {};
 function pulse(selector){
