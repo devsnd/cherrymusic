@@ -1,6 +1,25 @@
 Changelog
 ---------
 
+0.25.0 (2013-05-11)
+
+ - FIX: serving files with non-ASCII names (CherryPy monkey-patch)
+ - FEATURE: database versioning support
+ - FEATURE: busy indicator only occupies busy parts of the interface
+ - IMPROVEMENT: warn user about database updates before perfoming them
+ - FEATURE: CLI configuration override: --conf KEY=VALUE
+ - FEATURE: --port switch for overriding server port on start-up
+ - FEATURE: autoplay on adding first track to playlist (optional)
+ - FIX: minor corrections for various messages and help files
+ - FIX: correctly adding tracks to playlist after clearing it before
+ - FIX: preventing python 3 module stagger to be imported in python 2
+ - FIX: automatically indexing music on first start after setup
+ - FIX: playlist deletion button only visible for admins and owners
+ - FIX: track transcoding is determined on the fly (playlist portablity)
+ - IMPROVEMENT: switched to nosetest for automatic testing
+ - CHANGE: removed open search plugin
+ + a bunch of internal changes, clean-up & stability
+
 0.24.1 (2013-03-01)
 
  - FIX: logout works also with previous request containing post-data

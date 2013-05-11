@@ -92,7 +92,7 @@ from cherrymusicserver import userdb
 from cherrymusicserver import useroptiondb
 import cherrymusicserver.browsersetup
 
-VERSION = "0.24.1"
+VERSION = "0.25.0"
 DESCRIPTION = "an mp3 server for your browser"
 LONG_DESCRIPTION = """CherryMusic is a music streaming
     server written in python. It's based on cherrypy and jPlayer.

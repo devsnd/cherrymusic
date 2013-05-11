@@ -40,7 +40,7 @@ MediaBrowser = function(cssSelector, json, isplaylist, playlistlabel){
     $(cssSelector).on('click', '.mp3file', s.addThisTrackToPlaylist);
     $(cssSelector).on('click', '.addAllToPlaylist', function() {
         if(isplaylist){
-            var pl = playlistManager.newPlaylistNoShow([], playlistlabel);
+            var pl = playlistManager.newPlaylist([], playlistlabel);
         } else {
             var pl = playlistManager.getEditingPlaylist();
         }
