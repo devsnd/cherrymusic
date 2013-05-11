@@ -85,12 +85,13 @@ ManagedPlaylist.prototype = {
             var track = {
                 title : elem.title,
                 duration : elem.duration,
+                url: elem.url,
             }
-            if(typeof elem.mp3 !== 'undefined'){
-                track.mp3 = elem.mp3
+            if(typeof track.url === 'undefined' && typeof elem.mp3 !== 'undefined'){
+                track.url = elem.mp3
             }
-            if(typeof elem.oga !== 'undefined'){
-                track.oga = elem.oga
+            if(typeof track.url === 'undefined' && typeof elem.oga !== 'undefined'){
+                track.url = elem.oga
             }
             canonical.push(track);
         }
@@ -242,13 +243,7 @@ PlaylistManager.prototype = {
 
             /* JPLAYER EVENT BINDINGS */
             $(this.cssSelectorjPlayer).bind($.jPlayer.event.ended, function(event) {
-                if(self.shuffled){
-                   self.getPlayingPlaylist().jplayerplaylist.playRandomTrack();
-                   return false;
-                } else {
-                    self.getPlayingPlaylist().jplayerplaylist.next();
-                    return false;
-                }
+                self.cmd_next();
             });
 
             /* JPLAYER CONTROLS BINDINGS */
@@ -291,7 +286,7 @@ PlaylistManager.prototype = {
         } else {
             $(this.cssSelectorjPlayer).jPlayer("pause");
         }
-    },
+    },  
     cmd_stop : function(){
         $(this.cssSelectorjPlayer).jPlayer("stop");
     },
@@ -299,7 +294,13 @@ PlaylistManager.prototype = {
         this.getPlayingPlaylist().jplayerplaylist.previous();
     },
     cmd_next : function(){
-        this.getPlayingPlaylist().jplayerplaylist.next();
+        if(this.shuffled){
+            this.getPlayingPlaylist().jplayerplaylist.playRandomTrack();
+            return false;
+        } else {
+            this.getPlayingPlaylist().jplayerplaylist.next();
+            return false;
+        }
     },
     checkFlashBlock : function(){
         flashBlocked = false;
