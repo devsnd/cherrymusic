@@ -678,9 +678,13 @@ function userChangePassword(){
         successNotify('Password changed successfully!')();
     };
     busy('#adminpanel').hide().fadeIn('fast');
+    var error = function(){
+        $('#oldpassword-change').focus();
+        $("#changePassword").modal('attention');
+    }
     api(data,
         success,
-        errorFunc('failed to change password'),
+        error,
         function(){busy('#adminpanel').fadeOut('fast')}
     );
 }
@@ -983,6 +987,10 @@ $(document).ready(function(){
     $('#saveplaylistmodal').on('hide', function(){
         $('#playlisttitle').unbind('keyup');
     });
+    $('#changePassword').on('show', function(){
+        $('#changePassword').data('modal').options.focusOn = '#oldpassword-change';
+    });
+    
     userOptionCheckboxListener('#misc-show_playlist_download_buttons',
                                'misc.show_playlist_download_buttons');
     userOptionCheckboxListener('#misc-autoplay_on_add',

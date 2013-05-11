@@ -525,7 +525,7 @@ everybody has to relogin now.''')
                                            params['oldpassword'])
             is_authenticated = userdb.User.nobody() != authed_user
             if not is_authenticated:
-                raise cherrypy.HTTPError(401, "Unauthorized")
+                raise cherrypy.HTTPError(403, "Forbidden")
         if isself or cherrypy.session['admin']:
             return self.userdb.changePassword(params['username'],
                                               params['newpassword'])
