@@ -240,7 +240,7 @@ function busy(selector){
         domelem.addClass('busy-indicator');
         $(selector).append(domelem);
     }
-    var pos = $(selector).offset();
+    var pos = $(selector).position();
     var top = 'top: '+pos.top+'px;';
     var left = 'left: '+pos.left+'px;';
     var width = 'width: '+$(selector).width()+'px;';
