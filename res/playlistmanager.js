@@ -396,7 +396,11 @@ PlaylistManager.prototype = {
             var proc = 0;
             if(typeof remaintimesec !== 'undefined' && typeof completetimesec !== 'undefined' ){
                 //if there is enough time info, show remaining time
-                proc = remaintimesec/completetimesec;
+                if(completetimesec != 0){
+                    proc = remaintimesec/completetimesec;
+                } else {
+                    proc = 1;
+                }
                 littleTimeLeft = remaintimesec < 300;
                 remainingStr = epl.jplayerplaylist._formatTime(remaintimesec)+' remaining'
             } else {
@@ -558,6 +562,7 @@ PlaylistManager.prototype = {
     },
     clearQueue : function(){
       this.managedPlaylists[0].jplayerplaylist.remove();
+      this.refreshCommands();
       $(this).blur();
       return false;
     },
