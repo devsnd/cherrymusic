@@ -89,11 +89,18 @@ MediaBrowser.static = {
             }
         });
         if(html==""){
-            html += '<li><div style="text-align: center">Nothing found. Sorry.</div></li>';
+            html += MediaBrowser.static._renderMessage('No playable media files here.');
         }
         return '<ul>'+addAll+html+'</ul>';
     },
     
+    _renderMessage : function(msg){
+        return [
+            '<li class="fileinlist">',
+                '<div style="text-align: center">'+msg+'</div>',
+            '</li>'
+        ].join('');
+    },
     _renderFile : function(json){
         return Mustache.render([
             '<li class="fileinlist">',

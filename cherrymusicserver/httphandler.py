@@ -430,9 +430,8 @@ everybody has to relogin now.''')
         return self.jsonrenderer.render(self.model.listdir(dirtorender))
 
     def api_search(self, value):
-        jsonresults = '[]'
         if not value.strip():
-            jsonresults = self.jsonrenderer.render([MusicEntry(path="if you're looking for nothing, you'll be getting nothing", repr="")])
+            jsonresults = '[]'
         else:
             with Performance('processing whole search request'):
                 searchresults = self.model.search(value.strip())

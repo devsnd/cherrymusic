@@ -251,6 +251,13 @@ function busy(selector){
 
 function search(append){
     "use strict";
+    if($('#searchfield input').val().trim() == ""){
+        //make sure no spaces, so placeholder is shown
+        $('#searchfield input').val('');
+        $('#searchfield input').prop('placeholder', 'Search for what?')
+        $('#searchfield input').focus();
+        return false;
+    }
     var data = {
         'action' : 'search',
         'value' : $('#searchfield input').val()

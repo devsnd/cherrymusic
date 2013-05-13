@@ -112,10 +112,6 @@ class CherryModel:
             for dir in sortedfiles:
                 subpath = os.path.join(absdirpath, dir)
                 self.addMusicEntry(subpath, musicentries)
-        if musicentries == []:
-            musicentries.append(
-                MusicEntry(path="No playable media files found.",
-                           repr=""))
         return musicentries
 
     def addMusicEntry(self, fullpath, list):
