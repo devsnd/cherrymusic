@@ -68,7 +68,7 @@ class JSON(object):
             else:
                 #file
                 simplename = pathprovider.filename(entry.path)
-                urlpath = quote(('/serve/' + entry.path).encode('utf8'));
+                urlpath = quote(('serve/' + entry.path).encode('utf8'));
                 retlist.append({'type':'file',
                                 'urlpath':urlpath,
                                 'path':entry.path,

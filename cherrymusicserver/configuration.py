@@ -141,6 +141,18 @@ def from_defaults():
                     same computer it is running on.
                     '''
 
+    with c['server.rootpath'] as rootpath:
+        rootpath.value = '/'
+        rootpath.doc = '''
+                    The path cherrymusic will be available on. Normally
+                    you'll want to leave it as '/', so that CherryMusic is
+                    available under e.g. localhost:8080. You might want to
+                    change the path if CherryMusic runs behind a reverse
+                    proxy. Changing it to '/cherrymusic' will make it available
+                    under e.g. localhost:8080/cherrymusic
+                        '''
+
+
     with c['server.localhost_auto_login'] as localhost_auto_login:
         localhost_auto_login.value = False
         localhost_auto_login.doc = '''

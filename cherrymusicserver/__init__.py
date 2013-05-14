@@ -310,7 +310,7 @@ Have fun!
             })
 
         cherrypy.tree.mount(
-            httphandler, '/',
+            httphandler, config['server.rootpath'],
             config={
                 '/res': {
                     'tools.staticdir.on': True,

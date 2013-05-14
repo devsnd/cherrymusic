@@ -97,7 +97,12 @@ class PlaylistDB:
             apiplaylist = []
             for track in alltracks:
                 #TODO ugly hack: playlistdb saves the "serve" dir as well...
-                apiplaylist.append(MusicEntry(path=unquote(track[1])[7:], repr=unquote(track[0])))
+                trackurl = unquote(track[1])
+                if trackurl.startswith('/serve/'):
+                    trackurl = trackurl[7:]
+                elif trackurl.startswith('serve/'):
+                    trackurl = trackurl[6:]
+                apiplaylist.append(MusicEntry(path=trackurl, repr=unquote(track[0])))
             return apiplaylist
 
     def getName(self, plid, userid ):

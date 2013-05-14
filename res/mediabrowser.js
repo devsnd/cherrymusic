@@ -224,7 +224,7 @@ MediaBrowser.static = {
         $('.albumart-display.unloaded').each(
             function(idx){
                 if($(this).position().top < winpos){
-                   $(this).find('img').attr('src', '/api/fetchalbumart/'+$(this).attr('search-data'));
+                   $(this).find('img').attr('src', 'api/fetchalbumart/'+$(this).attr('search-data'));
                    $(this).removeClass('unloaded');
                 }
             }

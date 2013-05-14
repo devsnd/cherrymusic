@@ -83,7 +83,7 @@ function api(data_or_action, successfunc, errorfunc, completefunc){
         senddata = {"value" :  data_or_action['value'] };
 
     }
-    var urlaction = '/api';
+    var urlaction = 'api';
     if(apiaction){
         urlaction += '/'+apiaction;
     }
