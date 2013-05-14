@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+0.25.1 (2013-05-14)
+
+ - FIX: Error on first startup when not using the browser setup
+
 0.25.0 (2013-05-11)
 
  - FIX: serving files with non-ASCII names (CherryPy monkey-patch)
