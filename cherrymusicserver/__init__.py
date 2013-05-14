@@ -140,7 +140,7 @@ class CherryMusic:
             if pathprovider.fallbackPathInUse():   # temp. remove @ v0.30 or so
                 self.printMigrationNoticeAndExit()
             else:
-                cfg.write_to_file(cfg.from_defaults(), pathprovider.cfgFile())
+                cfg.write_to_file(cfg.from_defaults(), pathprovider.configurationFile())
                 self.printWelcomeAndExit()
         self._init_config(cfg_override)
 
