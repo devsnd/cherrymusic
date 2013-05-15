@@ -90,10 +90,7 @@ class CherryModel:
         maximum_shown_files = cherry.config['browser.maxshowfiles']
         compactlisting = len(allfilesindir) > maximum_shown_files
         if compactlisting:
-            if sys.version_info < (3, 0):
-                upper_case_files = map(unicode.upper, allfilesindir)
-            else:
-                upper_case_files = map(str.upper, allfilesindir)
+            upper_case_files = [x.upper() for x in allfilesindir]
             filterstr = os.path.commonprefix(list(upper_case_files))
             filterlength = len(filterstr)+1
             currentletter = '/'  # impossible first character
