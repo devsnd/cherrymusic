@@ -32,7 +32,10 @@
 will delegate different calls between other classes.
 """
 
+from __future__ import unicode_literals
+
 import os
+import sys
 from random import choice
 import cherrypy
 import audiotranscode
@@ -87,7 +90,10 @@ class CherryModel:
         maximum_shown_files = cherry.config['browser.maxshowfiles']
         compactlisting = len(allfilesindir) > maximum_shown_files
         if compactlisting:
-            upper_case_files = map(str.upper, allfilesindir)
+            if sys.version_info < (3, 0):
+                upper_case_files = map(unicode.upper, allfilesindir)
+            else:
+                upper_case_files = map(str.upper, allfilesindir)
             filterstr = os.path.commonprefix(list(upper_case_files))
             filterlength = len(filterstr)+1
             currentletter = '/'  # impossible first character
