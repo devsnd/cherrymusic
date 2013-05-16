@@ -1,7 +1,7 @@
 .\" Manpage for CherryMusic.
 .\" Contact us on github.com/devsnd/cherrymusic to correct errors or typos.
 
-.TH "CHERRYMUSIC.CONF" "5" "2013\-02\-10" "CherryMusic devel branch" "cherrymusic.conf man page"
+.TH "CHERRYMUSIC.CONF" "5" "2013\-05\-16" "CherryMusic" "cherrymusic.conf man page"
 
 .SH "NAME"
 cherrymusic.conf \- configuration file of CherryMusic, see \fBcherrymusic\fP(1)
@@ -29,7 +29,7 @@ This option tries to fetch the album covers from various locations in the web, i
 
 .IP "[search]"
 
-.IP "\fB    maxresults = NUM\fP"
+.IP "\fB    maxresults = NUMBER\fP"
 "maxresults" sets the maximum amount of search results to be displayed. If "maxresults" is set to a higher value, the search will take longer, but will also be more accurate.
 
 .IP "\fB    load_file_db_into_memory = True | False\fP"
@@ -40,16 +40,19 @@ This will load parts of the database into memory for improved performance. This 
 ." .IP "\fB    pure_database_lookup = True | False\fP"
 ." If this option is enabled, CherryMusic will only use the media database \-\- never the filesystem \-\- for content lookups in the file browser and search function. This can be useful if the media files reside on an external hard drive or behind a slow network connection.
 
-.IP "\fB    maxshowfiles = NUM\fP"
+.IP "\fB    maxshowfiles = NUMBER\fP"
 "maxshowfiles" specifies how many files and folders should be shown at the same time. E.g. if you open a folder with more than MAXSHOWFILES, the files will be grouped according to the first letter in their name. 100 is a good value, as a CD can have up to 99 tracks.
 
 .IP "[server]"
 
-.IP "\fB    port = PORTNUM\fP"
+.IP "\fB    port = PORTNUMBER\fP"
 This specifies the port the server will listen on.
 
 .IP "\fB    localhost_only = True | False\fP"
 When "localhost_only" is set to "True", the server will not be visible in the network and only play music on the same computer it is running on.
+
+.IP "\fB    rootpath = ROOTPATH\fP"
+This is the path CherryMusic will be available on. Normally, you will want to leave this as "/". That way CherryMusic is available under e.g. "localhost:8080". You might want to change this path if CherryMusic runs behind a reverse proxy. For example changing it to "/cherrymusic" will make it available under e.g. "localhost:8080/cherrymusic".
 
 .IP "\fB    localhost_auto_login = True | False\fP"
 When "localhost_auto_login" is set to "True", the server will not ask for credentials when connecting locally. The user will be automatically logged in as admin.
@@ -63,7 +66,7 @@ If enabled, this option will keep the user sessions in RAM instead of a file in 
 .IP "\fB    ssl_enabled = True | False\fP"
 This option allows you to use CherryMusic with HTTPS encryption. To enable this option you also have to specify "ssl_port", "ssl_certificate" and "ssl_private_key". If this option is set to "False", all other SSL specific options will be ommited.
 
-.IP "\fB    ssl_port = SSLPORTNUM\fP"
+.IP "\fB    ssl_port = SSLPORTNUMBER\fP"
 This sets the port that will listen to SSL encrypted requests. If "ssl_enabled" is set to "True", all unencrypted HTTP requests will be redirected to this port. To take effect, this option needs "ssl_enabled" to be set to "True".
 
 .IP "\fB    ssl_certificate = /path/to/server.crt\fP"
@@ -72,7 +75,7 @@ This is the path to the SSL certificate that CherryMusic will use for SSL encryp
 .IP "\fB    ssl_private_key = /path/to/server.key\fP"
 This is the path to the SSL key that CherryMusic will use for SSL encryption. To take effect, this option needs "ssl_enabled" to be set to "True".
 
-.IP "\fB    dynamic_dns_address = ADDR\fP"
+.IP "\fB    dynamic_dns_address = ADDRESS\fP"
 If you want to use your dynamic DNS address \-\- as provided by dynamic DNS services in the internet \-\- you can insert the address that points to CherryMusic here. This will enable you to use extra features like the opensearch plugin for your browser, even when your IP changes frequently. Example: "dynamic_dns_address = http://example.dyndns.com/cm"
 
 .SH "FILES"
