@@ -1,7 +1,7 @@
 .\" Manpage for CherryMusic.
 .\" Contact us on github.com/devsnd/cherrymusic to correct errors or typos.
 
-.TH "CHERRYMUSIC.CONF" "5" "2013\-05\-16" "CherryMusic" "cherrymusic.conf man page"
+.TH "CHERRYMUSIC.CONF" "5" "2013\-05\-18" "CherryMusic" "cherrymusic.conf man page"
 
 .SH "NAME"
 cherrymusic.conf \- configuration file of CherryMusic, see \fBcherrymusic\fP(1)
@@ -74,9 +74,6 @@ This is the path to the SSL certificate that CherryMusic will use for SSL encryp
 
 .IP "\fB    ssl_private_key = /path/to/server.key\fP"
 This is the path to the SSL key that CherryMusic will use for SSL encryption. To take effect, this option needs "ssl_enabled" to be set to "True".
-
-.IP "\fB    dynamic_dns_address = ADDRESS\fP"
-If you want to use your dynamic DNS address \-\- as provided by dynamic DNS services in the internet \-\- you can insert the address that points to CherryMusic here. This will enable you to use extra features like the opensearch plugin for your browser, even when your IP changes frequently. Example: "dynamic_dns_address = http://example.dyndns.com/cm"
 
 .SH "FILES"
 According to XDG Base Directory Specification, CherryMusic honors $XDG_CONFIG_HOME. If this variable is empty or not set, the configuration file is stored using the standard path:
