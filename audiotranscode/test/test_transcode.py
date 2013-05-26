@@ -28,8 +28,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
-import unittest
-
 import os
 
 from nose.tools import *
@@ -39,14 +37,15 @@ import audiotranscode as transcode
 transcoder = transcode.AudioTranscode(debug=True)
 testdir = os.path.dirname(__file__)
 testfiles = {
-    'mp3' : os.path.join(testdir,'test.mp3'),
-    'ogg' : os.path.join(testdir,'test.ogg'),
-    'flac': os.path.join(testdir,'test.flac'),
-    'wav': os.path.join(testdir,'test.wav'),
+    'mp3': os.path.join(testdir, 'test.mp3'),
+    'ogg': os.path.join(testdir, 'test.ogg'),
+    'flac': os.path.join(testdir, 'test.flac'),
+    'wav': os.path.join(testdir, 'test.wav'),
 }
-outputpath = os.path.join(testdir,'output')
+outputpath = os.path.join(testdir, 'output')
 if not os.path.exists(outputpath):
     os.mkdir(outputpath)
+
 
 def generictestfunc(filepath, newformat, encoder, decoder):
     ident = "%s_%s_to_%s_%s" % (
@@ -54,25 +53,28 @@ def generictestfunc(filepath, newformat, encoder, decoder):
             os.path.basename(filepath),
             encoder.command[0],
             newformat
-        )
+    )
     #print(ident)
     outdata = b''
-    for data in transcoder.transcodeStream(filepath, newformat, encoder=encoder, decoder=decoder):
+    transcode_stream = transcoder.transcodeStream(
+        filepath, newformat, encoder=encoder, decoder=decoder)
+    for data in transcode_stream:
         outdata += data
-    ok_(len(outdata)>0, 'No data received: '+ident)
-    with open(os.path.join(outputpath,ident+'.'+newformat),'wb') as outfile:
+    ok_(len(outdata) > 0, 'No data received: ' + ident)
+    outname = os.path.join(outputpath, ident + '.' + newformat)
+    with open(outname, 'wb') as outfile:
         outfile.write(outdata)
 
 
 def test_generator():
     for enc in transcoder.Encoders:
         if not enc.filetype in transcoder.availableEncoderFormats():
-            print('Encoder %s not installed!'%enc.command[0])
+            print('Encoder %s not installed!' % (enc.command[0],))
             continue
         for dec in transcoder.Decoders:
             if not dec.filetype in transcoder.availableDecoderFormats():
-                print('Encoder %s not installed!'%dec.command[0])
+                print('Encoder %s not installed!' % (dec.command[0],))
                 continue
             if dec.filetype in testfiles:
-                yield generictestfunc, testfiles[dec.filetype], enc.filetype, enc, dec
-
+                filename = testfiles[dec.filetype]
+                yield generictestfunc, filename, enc.filetype, enc, dec
