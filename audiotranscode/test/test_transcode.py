@@ -29,22 +29,33 @@
 #
 
 import os
+import tempfile
 
 from nose.tools import *
 
 import audiotranscode as transcode
 
+CAPTURE_OUTPUT = True
+
 transcoder = transcode.AudioTranscode(debug=True)
-testdir = os.path.dirname(__file__)
+inputdir = os.path.dirname(__file__)
+outputpath = tempfile.mkdtemp(prefix='test.cherrymusic.audiotranscode.')
 testfiles = {
-    'mp3': os.path.join(testdir, 'test.mp3'),
-    'ogg': os.path.join(testdir, 'test.ogg'),
-    'flac': os.path.join(testdir, 'test.flac'),
-    'wav': os.path.join(testdir, 'test.wav'),
+    'mp3': os.path.join(inputdir, 'test.mp3'),
+    'ogg': os.path.join(inputdir, 'test.ogg'),
+    'flac': os.path.join(inputdir, 'test.flac'),
+    'wav': os.path.join(inputdir, 'test.wav'),
 }
-outputpath = os.path.join(testdir, 'output')
-if not os.path.exists(outputpath):
-    os.mkdir(outputpath)
+
+
+def setup_module():
+    if CAPTURE_OUTPUT:
+        print('writing transcoder output to %r' % (outputpath,))
+
+
+def teardown_module():
+    if not CAPTURE_OUTPUT:
+        os.rmdir(outputpath)
 
 
 def generictestfunc(filepath, newformat, encoder, decoder):
@@ -56,14 +67,15 @@ def generictestfunc(filepath, newformat, encoder, decoder):
     )
     #print(ident)
     outdata = b''
-    transcode_stream = transcoder.transcodeStream(
+    transcoder_stream = transcoder.transcodeStream(
         filepath, newformat, encoder=encoder, decoder=decoder)
-    for data in transcode_stream:
+    for data in transcoder_stream:
         outdata += data
+    if CAPTURE_OUTPUT:
+        outname = os.path.join(outputpath, ident + '.' + newformat)
+        with open(outname, 'wb') as outfile:
+            outfile.write(outdata)
     ok_(len(outdata) > 0, 'No data received: ' + ident)
-    outname = os.path.join(outputpath, ident + '.' + newformat)
-    with open(outname, 'wb') as outfile:
-        outfile.write(outdata)
 
 
 def test_generator():
