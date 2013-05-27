@@ -28,25 +28,35 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
-import unittest
-
 import os
+import tempfile
 
 from nose.tools import *
 
 import audiotranscode as transcode
 
+CAPTURE_OUTPUT = True
+
 transcoder = transcode.AudioTranscode(debug=True)
-testdir = os.path.dirname(__file__)
+inputdir = os.path.dirname(__file__)
+outputpath = tempfile.mkdtemp(prefix='test.cherrymusic.audiotranscode.')
 testfiles = {
-    'mp3' : os.path.join(testdir,'test.mp3'),
-    'ogg' : os.path.join(testdir,'test.ogg'),
-    'flac': os.path.join(testdir,'test.flac'),
-    'wav': os.path.join(testdir,'test.wav'),
+    'mp3': os.path.join(inputdir, 'test.mp3'),
+    'ogg': os.path.join(inputdir, 'test.ogg'),
+    'flac': os.path.join(inputdir, 'test.flac'),
+    'wav': os.path.join(inputdir, 'test.wav'),
 }
-outputpath = os.path.join(testdir,'output')
-if not os.path.exists(outputpath):
-    os.mkdir(outputpath)
+
+
+def setup_module():
+    if CAPTURE_OUTPUT:
+        print('writing transcoder output to %r' % (outputpath,))
+
+
+def teardown_module():
+    if not CAPTURE_OUTPUT:
+        os.rmdir(outputpath)
+
 
 def generictestfunc(filepath, newformat, encoder, decoder):
     ident = "%s_%s_to_%s_%s" % (
@@ -54,25 +64,29 @@ def generictestfunc(filepath, newformat, encoder, decoder):
             os.path.basename(filepath),
             encoder.command[0],
             newformat
-        )
+    )
     #print(ident)
     outdata = b''
-    for data in transcoder.transcodeStream(filepath, newformat, encoder=encoder, decoder=decoder):
+    transcoder_stream = transcoder.transcodeStream(
+        filepath, newformat, encoder=encoder, decoder=decoder)
+    for data in transcoder_stream:
         outdata += data
-    ok_(len(outdata)>0, 'No data received: '+ident)
-    with open(os.path.join(outputpath,ident+'.'+newformat),'wb') as outfile:
-        outfile.write(outdata)
+    if CAPTURE_OUTPUT:
+        outname = os.path.join(outputpath, ident + '.' + newformat)
+        with open(outname, 'wb') as outfile:
+            outfile.write(outdata)
+    ok_(len(outdata) > 0, 'No data received: ' + ident)
 
 
 def test_generator():
     for enc in transcoder.Encoders:
         if not enc.filetype in transcoder.availableEncoderFormats():
-            print('Encoder %s not installed!'%enc.command[0])
+            print('Encoder %s not installed!' % (enc.command[0],))
             continue
         for dec in transcoder.Decoders:
             if not dec.filetype in transcoder.availableDecoderFormats():
-                print('Encoder %s not installed!'%dec.command[0])
+                print('Encoder %s not installed!' % (dec.command[0],))
                 continue
             if dec.filetype in testfiles:
-                yield generictestfunc, testfiles[dec.filetype], enc.filetype, enc, dec
-
+                filename = testfiles[dec.filetype]
+                yield generictestfunc, filename, enc.filetype, enc, dec

@@ -18,5 +18,11 @@ else:
     import argparse
 
 
-
+if (3,) <= sys.version_info < (3, 2):
+    import collections
+    def callable(x):
+        """ isinstance(x, collections.Callable)"""
+        return isinstance(x, collections.Callable)
+else:
+    callable = callable
 
