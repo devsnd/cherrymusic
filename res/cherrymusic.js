@@ -316,7 +316,7 @@ TRANSCODING
 
 function getTranscodePath(filepath, format){
     "use strict";
-    var match = filepath.match(/\/serve(.*)$/);
+    var match = filepath.match(/serve(.*)$/);
     if(match){
         return "/trans"+match[1]+"/get."+format;
     }
