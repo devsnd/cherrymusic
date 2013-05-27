@@ -1,5 +1,4 @@
+from collections import *
 
-try:
-    from collections import OrderedDict
-except ImportError:
+if not 'OrderedDict' in dir():
     from _backported import OrderedDict
