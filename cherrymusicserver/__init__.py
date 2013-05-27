@@ -30,6 +30,7 @@
 
 #python 2.6+ backward compability
 from __future__ import unicode_literals
+from backport import input
 
 import sys
 import threading
