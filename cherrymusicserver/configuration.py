@@ -39,6 +39,7 @@ import weakref
 
 from collections import Mapping, namedtuple
 from backport.collections import OrderedDict
+from backport import callable
 
 from cherrymusicserver import util
 from cherrymusicserver import log as logging
