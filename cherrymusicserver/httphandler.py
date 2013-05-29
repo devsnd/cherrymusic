@@ -572,7 +572,12 @@ everybody has to relogin now.''')
     def api_getsonginfo(self, value):
         basedir = cherry.config['media.basedir']
         #TODO yet another dirty hack. removing the /serve thing is a mess.
-        abspath = os.path.join(basedir, unquote(value)[7:])
+        path = unquote(value)
+        if path.startswith('/serve/'):
+            path = path[7:]
+        elif path.startswith('serve/'):
+            path = path[6:]
+        abspath = os.path.join(basedir, path)
         return json.dumps(metainfo.getSongInfo(abspath).dict())
 
     def api_getencoders(self, value):
