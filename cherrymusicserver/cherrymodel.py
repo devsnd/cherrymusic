@@ -48,6 +48,7 @@ from cherrymusicserver import pathprovider
 from cherrymusicserver.util import Performance
 from cherrymusicserver import resultorder
 from cherrymusicserver import log
+from cherrymusicserver.ext import zipstream
 
 
 @service.user(cache='filecache')
@@ -126,6 +127,18 @@ class CherryModel:
 
     def updateLibrary(self):
         self.cache.full_update()
+        return True
+    
+    def compress(self, filelist):
+        fullpath_filelist = [cherry.config['media.basedir']+f for f in filelist]
+        yield zipstream.ZipStream(fullpath_filelist)
+
+    def file_size_within_limit(filelist, maximum_download_size):
+        acc_size = 0
+        for f in filelist:
+            acc_size += os.path.getsize(self.abspath(f))
+            if acc_size > maximum_download_size:
+                return False
         return True
 
     def search(self, term):

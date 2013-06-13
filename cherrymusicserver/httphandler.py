@@ -109,6 +109,7 @@ class HTTPHandler(object):
             'setuseroption': self.api_setuseroption,
             'customcss.css': self.api_customcss,
             'changeplaylist': self.api_changeplaylist,
+            #'download': self.api_download,
         }
 
     def issecure(self, url):
@@ -330,6 +331,23 @@ everybody has to relogin now.''')
             }
             """
         return style
+    
+    def api_download(self, filelist):
+        #TODO: make sure file are not outside of basedir
+        size_limit = cherry.config['media.maximum_download_size']
+        active_download = cherrypy.session.get('active_download', False)
+        if not active_download:
+            if self.model.file_size_within_limit(filelist, maximum_download_size):
+                cherrypy.session['active_download'] = True
+                cherrypy.session.release_lock()                
+                cherrypy.response.headers["Content-Type"] = 'application/zip'
+                cherrypy.response.headers['Content-Disposition'] = 'attachment; filename="dl.zip"'
+                chunk = self.model.compress(filelist)
+                while not chunk is None:
+                    yield chunk
+                    chunk = self.model.compress(filelist)
+    api_download._cp_config = {'response.stream': True}
+            
 
     def invert(self, htmlcolor):
         r, g, b = self.html2rgb(htmlcolor)
