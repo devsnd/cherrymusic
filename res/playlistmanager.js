@@ -361,27 +361,32 @@ PlaylistManager.prototype = {
     refreshCommands : function(){
         var epl = this.getEditingPlaylist();
         if(typeof epl !== 'undefined'){
-            if(epl.reason_open == 'queue'){
-                $('.new-playlist-from-queue').show();
-                $('.clear-playlist').show();
-                $('.remove-played-tracks').show();
-                $('.save-current-playlist').hide();
-            } else {
-                $('.new-playlist-from-queue').hide();
-                $('.clear-playlist').hide();
-                $('.remove-played-tracks').hide();
-                if(!epl.saved){
-                    $('.save-current-playlist').off(); //remove old handlers
-                    $('.save-current-playlist').on("click",function(){
-                        savePlaylist(epl.id,false,false,true);
-                        $(this).blur();
-                        return false;
-                    });
-                    $('.save-current-playlist').show();
-                } else {
-                    $('.save-current-playlist').hide();
+            show_ui_conditionally(
+                ['.playlist-command-buttons',
+                 '#playlist-command-button-group'],
+                {
+                    'queue': epl.reason_open == 'queue',
+                    'playlist': epl.reason_open != 'queue',
+                    'not-saved': epl.saved == false,
                 }
-            }
+            );
+            
+            $('.save-current-playlist-button').off().on("click",function(){
+                var epl = playlistManager.getEditingPlaylist();
+                savePlaylist(epl.id, false,false,true);                       
+                $(this).blur();
+                return false;
+            });
+
+            $('.save-as-new-playlist-button').off().on("click",function(){
+                var epl = playlistManager.getEditingPlaylist();
+                $('#playlisttitle').val(epl.name+' copy');
+                if(epl.public){
+                    $("#playlistpublic").attr("checked", true);
+                } else {
+                    $("#playlistpublic").removeAttr("checked");
+                }                
+            });
             
             var remaintracks = epl.getRemainingTracks();
             var completetimesec = epl.getPlayTimeSec(epl.jplayerplaylist.playlist);
@@ -547,6 +552,10 @@ PlaylistManager.prototype = {
     newPlaylistFromQueue : function(){
         return this.newPlaylist(this.managedPlaylists[0].jplayerplaylist.playlist);
     },
+    newPlaylistFromEditing : function(){
+        return this.newPlaylist(this.getEditingPlaylist().jplayerplaylist.playlist);
+    },
+    
     closePlaylist : function(plid){
         for(var i=0; i<this.managedPlaylists.length; i++){
             if(this.managedPlaylists[i].id == plid){

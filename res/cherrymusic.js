@@ -330,7 +330,7 @@ function savePlaylistAndHideDialog(){
     var name = $('#playlisttitle').val();
     var pub = $('#playlistpublic').attr('checked')?true:false;
     if(name.trim() !== ''){
-        var pl = playlistManager.newPlaylistFromQueue();
+        var pl = playlistManager.newPlaylistFromEditing();
         savePlaylist(pl.id,name,pub);
         $('#saveplaylistmodal').modal('hide');
     }
@@ -954,6 +954,39 @@ function userOptionCheckboxListener(htmlid, optionname){
     });
 }
 
+/*****************************
+CONDITIONAL USER INTERFACE 
+ *****************************/
+
+function show_ui_conditionally(selectors, conditions_table){
+    var conditions_met = [];
+    for(var condition_name in conditions_table){
+        if(conditions_table.hasOwnProperty(condition_name)){
+            if(conditions_table[condition_name]){
+                conditions_met.push(condition_name);
+            }
+        }
+    }
+    //support for single string as first argument
+    if(!selectors instanceof Array){
+        selectors = [selectors];
+    }
+    for(var i=0; i<selectors.length; i++){
+        //check all buttons for their show conditions and hide/show them
+        $(selectors[i]+' > [show-cond]').each(function(i, e){
+            var ui_element = $(e);
+            var conditions_needed = ui_element.attr('show-cond').split(' ');
+            ui_element.show();
+            $.each(conditions_needed, function(i, e){
+                if(conditions_met.indexOf(e) < 0){
+                    ui_element.hide();
+                    return false;
+                }
+            });
+        });
+    }
+}
+
 /***
 ON DOCUMENT READY... STEADY... GO!
 ***/
@@ -979,10 +1012,12 @@ $(document).ready(function(){
     $('#adminpanel').on('shown', function (e) {
         updateUserList();
     });
+    $('#save-playlist-from-queue').on('click',function(){
+        $('#playlisttitle').val('');
+        $("#playlistpublic").attr("checked", true);
+    });
     $('#saveplaylistmodal').on('shown',function(){
         $('#playlisttitle').focus();
-        $('#playlisttitle').val('');
-        $('#playlistpublic').attr('checked', true);
         $('#playlisttitle').bind('keyup',function(e){
             if(e.which === 13) { //enter
                 savePlaylistAndHideDialog();

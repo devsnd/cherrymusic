@@ -475,10 +475,21 @@ PLAYLIST SAVE DIALOG OVERLAY END -->
                 </div>
                 <div id="playlistCommands">
                     <div class="playlist-command-buttons row-fluid">
-                        <a href="#saveplaylistmodal"  data-toggle="modal" class="hide pull-left new-playlist-from-queue btn btn-mini">save as playlist</a>
-                        <a class="hide pull-right clear-playlist btn btn-mini" onclick="playlistManager.clearQueue(); return false;">clear</a>
-                        <a class="hide pull-right remove-played-tracks btn btn-mini" onclick="playlistManager.removePlayedFromPlaylist(); return false;" >remove played</a>
-                        <a class="hide pull-left save-current-playlist btn">save</a>
+                        <a show-cond="queue" id="save-playlist-from-queue" href="#saveplaylistmodal"  data-toggle="modal" class="hide pull-left new-playlist-from-queue btn btn-mini">save as playlist</a>
+                        <a show-cond="queue" class="hide pull-right clear-playlist btn btn-mini" onclick="playlistManager.clearQueue(); return false;">clear</a>
+                        <a show-cond="queue" class="hide pull-right remove-played-tracks btn btn-mini" onclick="playlistManager.removePlayedFromPlaylist(); return false;" >remove played</a>
+                        <div show-cond="playlist" id="playlist-command-button-group" class="hide pull-left btn-group">
+                            <button show-cond="playlist not-saved" class="btn save-current-playlist-button">save</a>
+                            <button class="btn dropdown-toggle" data-toggle="dropdown">
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a href="#saveplaylistmodal" data-toggle="modal" class="save-as-new-playlist-button" tabindex="-1" href="#">Save as new playlist</a></li>
+                                <li class="divider"></li>
+                                <li><a class="delete-playlist-button" tabindex="-1" href="#">Delete playlist</a></li>
+                                <li><a class="toggle-public-private-playlist" tabindex="-1" href="#"></a></li>
+                            </ul>
+                        </div>
                     </div>
                     <div class="playlist-progress row-fluid">
                         <span class="remaining-tracks-or-time bottom-corners label"></span>
