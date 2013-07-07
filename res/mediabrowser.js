@@ -31,16 +31,17 @@
 RENDERING
 ********/
 
-MediaBrowser = function(cssSelector, json, isplaylist, playlistlabel){
+MediaBrowser = function(cssSelector, json, isplaylist, playlistlabel, serverplid){
     "use strict";
-    var s = MediaBrowser.static
+    var s = MediaBrowser.static    
     $(cssSelector).off('click');
     $(cssSelector).on('click', '.listdir', s.listdirclick);
     $(cssSelector).on('click', '.compactlistdir', s.listdirclick);
     $(cssSelector).on('click', '.mp3file', s.addThisTrackToPlaylist);
     $(cssSelector).on('click', '.addAllToPlaylist', function() {
         if(isplaylist){
-            var pl = playlistManager.newPlaylist([], playlistlabel);
+            window.console.log('server plid '+serverplid);
+            var pl = playlistManager.newPlaylist([], playlistlabel, {'serverid': serverplid});
         } else {
             var pl = playlistManager.getEditingPlaylist();
         }

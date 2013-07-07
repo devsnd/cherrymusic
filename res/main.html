@@ -301,6 +301,8 @@
                 </div>  
             </div>
         </fieldset>
+        <!--hidden fields for modal configuration-->
+        <input id="playlist-create-copy" type="checkbox" style="display:none">
     </div>
     <div class="modal-footer">
         <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">cancel</button>
@@ -479,7 +481,12 @@ PLAYLIST SAVE DIALOG OVERLAY END -->
                         <a show-cond="queue" class="hide pull-right clear-playlist btn btn-mini" onclick="playlistManager.clearQueue(); return false;">clear</a>
                         <a show-cond="queue" class="hide pull-right remove-played-tracks btn btn-mini" onclick="playlistManager.removePlayedFromPlaylist(); return false;" >remove played</a>
                         <div show-cond="playlist" id="playlist-command-button-group" class="hide pull-left btn-group">
-                            <button show-cond="playlist not-saved" class="btn save-current-playlist-button">save</a>
+                            <button show-cond="playlist not-saved not-autoname" 
+                                    class="btn save-current-playlist-button">save</a>
+                            <button show-cond="playlist not-saved autoname" 
+                                    href="#saveplaylistmodal"
+                                    data-toggle="modal"
+                                    class="btn save-unnamed-playlist-button">save</a>
                             <button class="btn dropdown-toggle" data-toggle="dropdown">
                                 <span class="caret"></span>
                             </button>

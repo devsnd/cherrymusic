@@ -329,8 +329,12 @@ function savePlaylistAndHideDialog(){
     "use strict";
     var name = $('#playlisttitle').val();
     var pub = $('#playlistpublic').attr('checked')?true:false;
+    var create_copy = $('#playlist-create-copy').attr('checked')?true:false;
     if(name.trim() !== ''){
-        var pl = playlistManager.newPlaylistFromEditing();
+        var pl = playlistManager.getEditingPlaylist();
+        if(create_copy){
+            pl = playlistManager.newPlaylistFromEditing();
+        }
         savePlaylist(pl.id,name,pub);
         $('#saveplaylistmodal').modal('hide');
     }
@@ -352,10 +356,14 @@ function savePlaylist(plid,playlistname,ispublic,overwrite){
                             'overwrite':overwrite,
                         })
                 };
-    var success = function(){
-        playlistManager.getPlaylistById(plid).name = playlistname;
-        playlistManager.getPlaylistById(plid).public = ispublic;
-        playlistManager.getPlaylistById(plid).saved = true;
+    var success = function(data){
+        var playlistdata = $.parseJSON(data);
+        var pl = playlistManager.getPlaylistById(plid);
+        pl.serverid = playlistdata.playlistid;
+        pl.name = playlistname;
+        pl.public = ispublic;
+        pl.saved = true;
+        pl.autoname = false;
         playlistManager.refresh();
         playlistManager.showPlaylist(plid);
     }
@@ -513,14 +521,19 @@ function changePlaylist(plid,attrname,value){
     );
 }
 
-function confirmDeletePlaylist(id,title){
+function confirmDeletePlaylist(serverid,title, clientid){
     $('#deletePlaylistConfirmButton').off();
     $('#deletePlaylistConfirmButton').on('click', function(){
         busy('.playlist-panel').hide().fadeIn('fast');
-        api({action:'deleteplaylist', value: id},
+        api({action:'deleteplaylist', value: serverid},
             false,
             errorFunc('error deleting playlist'),
-            function(){busy('.playlist-panel').fadeOut('fast')}
+            function(){
+                busy('.playlist-panel').fadeOut('fast');
+                if(clientid){
+                    playlistManager.closePlaylist(clientid);
+                }
+            }
         );
         $('#dialog').fadeOut('fast');
         showPlaylists();
@@ -537,7 +550,7 @@ function loadPlaylist(playlistid, playlistlabel){
         var data = {'action':'loadplaylist',
                     'value': playlistid };
         var success = function(data){
-            MediaBrowser(pldomid, jQuery.parseJSON(data), true, playlistlabel);
+            MediaBrowser(pldomid, jQuery.parseJSON(data), true, playlistlabel, playlistid);
         };
         busy('.playlist-panel').hide().fadeIn('fast');
         api(data,

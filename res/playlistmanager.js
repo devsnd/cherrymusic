@@ -10,6 +10,8 @@ var ManagedPlaylist = function(playlistManager, playlist, options){
     this.public = options.public;
     this.owner = options.owner;
     this.saved = options.saved;
+    //automatically generated name?
+    this.autoname = options.autoname; 
     //can be 'recommendation', 'ownwill', 'queue'
     this.reason_open = options.reason_open;
 
@@ -368,24 +370,45 @@ PlaylistManager.prototype = {
                     'queue': epl.reason_open == 'queue',
                     'playlist': epl.reason_open != 'queue',
                     'not-saved': epl.saved == false,
+                    'autoname': epl.autoname,
+                    'not-autoname': !epl.autoname,
                 }
             );
             
             $('.save-current-playlist-button').off().on("click",function(){
                 var epl = playlistManager.getEditingPlaylist();
-                savePlaylist(epl.id, false,false,true);                       
+                savePlaylist(epl.id, false,false,true);
                 $(this).blur();
                 return false;
             });
-
-            $('.save-as-new-playlist-button').off().on("click",function(){
+            
+            var setupSavePlaylistModal = function(is_copy, suggest_public, create_copy){
                 var epl = playlistManager.getEditingPlaylist();
-                $('#playlisttitle').val(epl.name+' copy');
-                if(epl.public){
+                var playlistname = epl.name;
+                if(is_copy){
+                    playlistname += ' copy';
+                }
+                $('#playlisttitle').val(playlistname);
+                if(suggest_public || epl.public){
                     $("#playlistpublic").attr("checked", true);
                 } else {
                     $("#playlistpublic").removeAttr("checked");
-                }                
+                }
+                if(create_copy){
+                    $("#playlist-create-copy").attr("checked", true);
+                } else {
+                    $("#playlist-create-copy").removeAttr("checked");
+                }
+            }
+            $('.save-unnamed-playlist-button').off().on("click",function(){
+                setupSavePlaylistModal(false, true, false);
+            });
+
+            $('.save-as-new-playlist-button').off().on("click",function(){
+                setupSavePlaylistModal(false, false, true);
+            });
+            $('.delete-playlist-button').off().on('click', function(){
+                confirmDeletePlaylist(epl.serverid, epl.name, epl.id);
             });
             
             var remaintracks = epl.getRemainingTracks();
@@ -723,12 +746,28 @@ PlaylistManager.prototype = {
                 window.console.log('should restore playlist now');
                 for(var i=0; i<playlistsToRestore.length; i++){
                     var pl = playlistsToRestore[i];
-                    var newpl = self._createPlaylist(pl.playlist,pl.closable,pl.public,pl.owner,pl.reason_open,pl.name,pl.saved);
+                    var newpl = self._createPlaylist(pl.playlist,{
+                                            closable:   pl.closable,
+                                            public:     pl.public,
+                                            owner:      pl.owner,
+                                            reason:     pl.reason_open,
+                                            name:       pl.name,
+                                            saved:      pl.saved,
+                                            autoname:   false,
+                                        });
                 }
                 self.setPlayingPlaylist(self.getPlayingPlaylist().id);
                 self.showPlaylist();
             } else {
-                var pl = self._createPlaylist([],false,false,'self','queue','Queue',true);
+                var pl = self._createPlaylist([], {
+                    closable:   false,
+                    public:     false,
+                    owner:      'self',
+                    reason:     'queue',
+                    name:       'Queue',
+                    saved:      true,
+                    autoname:   false,
+                });
                 self.playingPlaylist = pl.id;
                 self.setEditingPlaylist(pl.id);
                 self.showPlaylist(pl.id);
@@ -739,41 +778,51 @@ PlaylistManager.prototype = {
         };
         api('restoreplaylist',success,errorFunc('error restoring playlist'));
     },
-    _createPlaylist : function(playlist, closable, public, owner, reason, name, saved){
+    _createPlaylist : function(playlist, options){
         var a = new Date();
         var timemillis = a.getTime();
         if(typeof name === 'undefined'){
             this.nrOfCreatedPlaylists++;
             name = 'playlist '+this.nrOfCreatedPlaylists;
+            options.autoname = true;
         }
         if(typeof saved === 'undefined'){
             saved = false;
         }
+        
+        $.extend(options, {
+            'id' : parseInt(timemillis),
+        });
+
         var newpl = new ManagedPlaylist(
             this,
             playlist,
-            {
-                'id' : parseInt(timemillis),
-                'name' : name,
-                'closable' : closable,
-                'public' : public,
-                'owner' : owner,
-                'reason_open' : reason,
-                'saved' : saved,
-            }
+            options
         );
         this.managedPlaylists.push(newpl);
         this.refresh();
         return newpl;
     },
-    newPlaylist : function(playlist, name){
-        var newpl = this.newPlaylistNoShow(playlist, name);
+    newPlaylist : function(playlist, name, options){
+        var newpl = this.newPlaylistNoShow(playlist, name, options);
         this.showPlaylist(newpl.id);
         return newpl;
     },
-    newPlaylistNoShow : function(playlist, name){
+    newPlaylistNoShow : function(playlist, name, options){
         playlist = playlist || [];
-        var newpl = this._createPlaylist(playlist,true,false,'me','ownwill', name, true);
+        var default_options = {
+            closable:   true,
+            public:     false,
+            owner:      'me',
+            reason:     'ownwill',
+            name:       name,
+            saved:      true,
+            autoname:   false,
+        }
+        $.extend(default_options, options)
+        var newpl = this._createPlaylist(
+                            playlist,
+                            default_options);
         return newpl;
     },
     removePlayedFromPlaylist : function (){
