@@ -59,7 +59,7 @@ class PlaylistDB:
 
     def savePlaylist(self, userid, public, playlist, playlisttitle, overwrite=False):
         if not len(playlist):
-            return 'I will not create an empty playlist. sorry.'
+            return 'I will not create an empty playlist. sorry.', 0
         duplicateplaylistid = self.conn.execute("""SELECT rowid FROM playlists
             WHERE userid = ? AND title = ?""",(userid,playlisttitle)).fetchone()
         if duplicateplaylistid and overwrite:
@@ -80,9 +80,9 @@ class PlaylistDB:
             cursor.executemany("""INSERT INTO tracks (playlistid, track, url, title)
                 VALUES (?,?,?,?)""", numberedplaylist)
             self.conn.commit()
-            return "success"
+            return "success", playlistid
         else:
-            return "This playlist name already exists! Nothing saved."
+            return "This playlist name already exists! Nothing saved.", 0
 
     def loadPlaylist(self, playlistid, userid):
         cursor = self.conn.cursor()
@@ -126,7 +126,12 @@ class PlaylistDB:
         cur.execute("""SELECT rowid as id,title, userid, public FROM playlists WHERE
             public = 1 OR userid = ?""", (userid,));
         res = cur.fetchall()
-        return list(map(lambda x: {'plid':x[0], 'title':x[1], 'userid':x[2],'public':bool(x[3]), 'owner':bool(userid==x[2])}, res))
+        return [{'plid':x[0],
+                 'title':x[1],
+                 'userid':x[2],
+                 'public':bool(x[3]),
+                 'owner':bool(userid==x[2])
+                 } for x in res]
 
     def createPLS(self,userid,plid, addrstr):
         pl = self.loadPlaylist(userid, plid)

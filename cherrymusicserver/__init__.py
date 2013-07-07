@@ -84,6 +84,7 @@ config = None
 from cherrymusicserver import cherrymodel
 from cherrymusicserver import database
 from cherrymusicserver import httphandler
+from cherrymusicserver import restv1
 from cherrymusicserver import log
 from cherrymusicserver import pathprovider
 from cherrymusicserver import playlistdb
@@ -110,7 +111,8 @@ class CherryMusic:
         self.setup_services()
         self.setup_config(createNewConfig, setup, cfg_override)
         self.setup_databases(update, dropfiledb, setup)
-        self.server(httphandler.HTTPHandler(config))
+        self.server(httphandler.HTTPHandler(config),
+                    restv1.RESTInterfaceV1(config))
 
     @classmethod
     def setup_services(cls):
@@ -268,7 +270,7 @@ Have fun!
 """)
         exit(0)
 
-    def start(self, httphandler):
+    def start(self, httphandler, restinterface):
         socket_host = "127.0.0.1" if config['server.localhost_only'] else "0.0.0.0"
 
         resourcedir = os.path.abspath(pathprovider.getResourcePath('res'))
@@ -331,12 +333,18 @@ Have fun!
                     'tools.staticfile.on': True,
                     'tools.staticfile.filename': resourcedir + '/favicon.ico',
                 }})
+        cherrypy.tree.mount(
+            restinterface,
+            config['server.rootpath']+'/api/v1',
+            config={
+                'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+            })
         log.i('Starting server on port %s ...' % config['server.port'])
 
         cherrypy.lib.caching.expires(0)  # disable expiry caching
         cherrypy.engine.start()
         cherrypy.engine.block()
 
-    def server(self, httphandler):
+    def server(self, httphandler, restinterface):
         cherrypy.config.update({'log.screen': True})
-        self.start(httphandler)
+        self.start(httphandler, restinterface)

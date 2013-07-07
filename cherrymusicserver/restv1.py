@@ -28,11 +28,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
-"""This class provides the api to talk to the client.
-It will then call the cherrymodel, to get the
-requested information"""
-
-import os  # shouldn't have to list any folder in the future!
 import json
 import cherrypy
 import codecs
@@ -64,11 +59,105 @@ import time
 
 debug = True
 
-@service.user(model='cherrymodel', playlistdb='playlist', useroptions='useroptions', userdb='users')
-class HTTPHandler(object):
+
+class RESTResource(object):
+    @cherrypy.expose
+    def default(self, *vpath, **params):
+        try:
+            method = getattr(self, cherrypy.request.method)
+            return method(*vpath, **params)
+        except AttributeError:
+            raise cherrypy.HTTPError(405, "Method not implemented.")
+
+    def parsepath(self, vpath, numargs):
+        args = vpath[:]
+        args += [None] * (numargs - len(vpath))
+        return args
+
+
+class Media(RESTResource):
+    def GET(self, *vpath, **params):
+        pass
+
+
+class Playlists(RESTResource):
+    def GET(self, *vpath, **params):
+        plformat = params.get('format', 'json')
+        username, playlistid = self.parsepath(vpath, 2)
+        if username:
+            if playlistid:
+                # get specific playlist
+                pass
+            else:
+                # get playlists by user
+                pass
+        else:
+            # get all playlists
+            pass
+
+
+class Users(RESTResource):
+    def GET(self, *vpath, **params):
+        username = self.parsepath(vpath, 1)
+        if username:
+            # get user info
+            pass
+        else:
+            # get user list
+            pass
+
+
+class Sessions(RESTResource):
+    def POST(self, *vpath, **params):
+        #login
+        pass
+
+    def PUT(self, *vpath, **params):
+        #save session
+        pass
+
+    def DELETE(self, *vpath, **params):
+        # logout
+        pass
+
+
+class Config(RESTResource):
+    def GET(self, *vpath, **params):
+        username = self.parsepath(vpath, 1)
+        if username:
+            # get server config and user options
+            pass
+        else:
+            # get server config
+            pass
+
+
+class Search(RESTResource):
+    def GET(self, *vpath, **params):
+        all_fields = ["playlist", "collection", "tracks"]
+        query = params.get('q', None)
+        fieldstrs = params.get('fields', '')
+        fields = [f.strip() for f in fieldstrs.split(',') if f in all_fields]
+        if len(fields) == 0:
+            fields = all_fields
+        pass
+
+
+class Heartbeat(RESTResource):
+    def GET(self, *vpath, **params):
+        pass
+
+
+class AlbumArt(RESTResource):
+    def GET(self, *vpath, **params):
+        pass
+
+
+@service.user(model='cherrymodel', playlistdb='playlist',
+              useroptions='useroptions', userdb='users')
+class RESTInterfaceV1(object):
     def __init__(self, config):
         self.config = config
-        self.jsonrenderer = renderjson.JSON()
 
         template_main = 'res/main.html'
         template_login = 'res/login.html'
@@ -77,40 +166,11 @@ class HTTPHandler(object):
         self.mainpage = readRes(template_main)
         self.loginpage = readRes(template_login)
         self.firstrunpage = readRes(template_firstrun)
-
-        self.handlers = {
-            'search': self.api_search,
-            'rememberplaylist': self.api_rememberplaylist,
-            'saveplaylist': self.api_saveplaylist,
-            'loadplaylist': self.api_loadplaylist,
-            'deleteplaylist': self.api_deleteplaylist,
-            'getmotd': self.api_getmotd,
-            'restoreplaylist': self.api_restoreplaylist,
-            'getplayables': self.api_getplayables,
-            'getuserlist': self.api_getuserlist,
-            'adduser': self.api_adduser,
-            'userdelete': self.api_userdelete,
-            'userchangepassword': self.api_userchangepassword,
-            'showplaylists': self.api_showplaylists,
-            'logout': self.api_logout,
-            'downloadpls': self.api_downloadpls,
-            'downloadm3u': self.api_downloadm3u,
-            'getsonginfo': self.api_getsonginfo,
-            'getencoders': self.api_getencoders,
-            'getdecoders': self.api_getdecoders,
-            'transcodingenabled': self.api_transcodingenabled,
-            'updatedb': self.api_updatedb,
-            'getconfiguration': self.api_getconfiguration,
-            'compactlistdir': self.api_compactlistdir,
-            'listdir': self.api_listdir,
-            'fetchalbumart': self.api_fetchalbumart,
-            'heartbeat': self.api_heartbeat,
-            'getuseroptions': self.api_getuseroptions,
-            'setuseroption': self.api_setuseroption,
-            'customcss.css': self.api_customcss,
-            'changeplaylist': self.api_changeplaylist,
-            #'download': self.api_download,
-        }
+        
+        # rest resource names
+        self.media = Media()
+        self.playlists = Playlists()
+        self.media = Media()
 
     def issecure(self, url):
         return parse.urlparse(url).scheme == 'https'
@@ -137,6 +197,9 @@ class HTTPHandler(object):
             self.mainpage = readRes('res/main.html')
             self.loginpage = readRes('res/login.html')
             self.firstrunpage = readRes('res/firstrun.html')
+        
+        if cherrypy.session['username']:
+            pass
         if 'login' in kwargs:
             username = kwargs.get('username', '')
             password = kwargs.get('password', '')
@@ -462,12 +525,16 @@ everybody has to relogin now.''')
 
     def api_saveplaylist(self, value):
         pl = json.loads(value)
-        res, playlistid = self.playlistdb.savePlaylist(
-                            userid=self.getUserId(),
-                            public=1 if pl['public'] else 0,
-                            playlist=pl['playlist'],
-                            playlisttitle=pl['playlistname'],
-                            overwrite=pl.get('overwrite', False))
+        userid = self.getUserId()
+        public = 1 if pl['public'] else 0
+        playlist = pl['playlist']
+        title = pl['playlistname']
+        overwrite = pl.get('overwrite', False)
+        res, playlistid = self.playlistdb.savePlaylist(userid=userid,
+                                                       public=public,
+                                                       playlist=playlist,
+                                                       playlisttitle=title,
+                                                       overwrite=overwrite)
         if res == "success":
             return json.dumps({'playlistid': playlistid})
         else:
