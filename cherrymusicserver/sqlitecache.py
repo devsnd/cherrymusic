@@ -92,7 +92,7 @@ class SQLiteCache(object):
     @classmethod
     def searchterms(cls, searchterm):
         words = re.findall('(\w+|[^\s\w]+)',searchterm.replace('_', ' ').replace('%',' '),re.UNICODE)
-        return list(map(type('').lower, words))
+        return [word.lower() for word in words]
 
     def fetchFileIds(self, terms, maxFileIdsPerTerm, mode):
         """returns list of ids each packed in a tuple containing the id"""
@@ -103,14 +103,15 @@ class SQLiteCache(object):
         for term in terms:
             tprefix, tlast = term[:-1], term[-1]
             query = '''SELECT search.frowid FROM dictionary JOIN search ON search.drowid = dictionary.rowid WHERE '''
-            limit = ' LIMIT 0, ' + str(maxFileIdsPerTerm) #TODO add maximum db results as configuration parameter
             if sys.maxunicode <= ord(tlast):
                 where = ''' dictionary.word LIKE ? '''
                 params = (term + '%',)
             else:
                 where = ''' (dictionary.word >= ? AND dictionary.word < ?) '''
                 params = (term, tprefix + chr(1 + ord(tlast)))
-            sql = query + where + limit
+            order = ' ORDER BY dictionary.occurrences ASC '
+            limit = ' LIMIT 0, ' + str(maxFileIdsPerTerm) #TODO add maximum db results as configuration parameter
+            sql = query + where + order +limit
             if debug:
                 log.d('Search term: %r', term)
                 log.d('Query used: %r, %r', sql, params)
