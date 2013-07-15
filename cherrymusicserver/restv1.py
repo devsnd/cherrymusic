@@ -59,20 +59,59 @@ import time
 
 debug = True
 
+if not debug:
+    def report_report_attribute_access(cls):
+        return cls
+else:
+    def report_attribute_access(cls):
+        ''' Class decorator to trace attribute read access; to debug routing.
+        '''
+        def attribute_lookup_wrapper(instance, attrname):
+            try:
+                try:
+                    value = cls.__getattribute__(instance, attrname)    # default
+                except AttributeError:
+                    value = cls.__getattr__(instance, attrname)         # fallback
+            except:
+                outcome = '?'
+                raise
+            else:
+                outcome = '=> {0}'.format(value)
+                return value
+            finally:
+                if not attrname.startswith('__'):
+                    call = '{0}.{1}'.format(instance, attrname)
+                    print(call, outcome)
 
+        def short_repr(instance):
+            short_id = hex(id(instance))[-4:]
+            return '{0}:{1}'.format(instance.__class__.__name__, short_id)
+
+        subclass = type(cls.__name__, (cls,), {
+            '__getattribute__': attribute_lookup_wrapper,
+            '__repr__': short_repr,
+        })
+        return subclass
+
+
+@report_attribute_access
+class Test(object):
+    exposed = True
+
+    @cherrypy.tools.json_out()              # auto-converts return value to JSON
+    def GET(self, *args, **params):
+        return "Test().GET", args, params
+
+
+@report_attribute_access
 class RESTResource(object):
-    @cherrypy.expose
-    def default(self, *vpath, **params):
-        try:
-            method = getattr(self, cherrypy.request.method)
-            return method(*vpath, **params)
-        except AttributeError:
-            raise cherrypy.HTTPError(405, "Method not implemented.")
+    exposed = True
 
-    def parsepath(self, vpath, numargs):
-        args = vpath[:]
-        args += [None] * (numargs - len(vpath))
-        return args
+    # CherryPy auto-responds with 405 status for undefined HTTP methods
+
+    def parsepath(self, path_elements, min_length=0):
+        padding = (None,) * (min_length - len(path_elements))
+        return tuple(path_elements) + padding
 
 
 class Media(RESTResource):
@@ -153,9 +192,40 @@ class AlbumArt(RESTResource):
         pass
 
 
+@report_attribute_access
 @service.user(model='cherrymodel', playlistdb='playlist',
               useroptions='useroptions', userdb='users')
 class RESTInterfaceV1(object):
+
+    exposed = True
+
+    def GET(self, *subpath, **params):
+        ''' For GET to work without a subpath, i.e. for index requests,
+            there must be no `default` or `index` methods in the handler,
+            since CherryPy tries these before falling back to the member
+            whose name matches the HTTP request method.
+        '''
+        return '{0} {1} {2}'.format('RESTInterfaceV1().GET', subpath, params)
+
+    def __getattr__(self, name):
+        ''' When routing subpaths, CherryPy first looks at attributes. GET
+            is the fallback, *if* it allows enough positional arguments.
+
+            .. warning::
+                This method instantiates a new resource controller for each
+                request. This is bad form and not intended for production.
+        '''
+        def create_resource_controller(name):
+            import sys
+            import inspect
+            classname = name.lower().capitalize()   # won't work for AlbumArt
+            cls = dict(inspect.getmembers(sys.modules[__name__]))[classname]
+            return cls()
+        try:
+            return create_resource_controller(name)
+        except LookupError:
+            raise AttributeError(name)
+
     def __init__(self, config):
         self.config = config
 
@@ -166,7 +236,7 @@ class RESTInterfaceV1(object):
         self.mainpage = readRes(template_main)
         self.loginpage = readRes(template_login)
         self.firstrunpage = readRes(template_firstrun)
-        
+
         # rest resource names
         self.media = Media()
         self.playlists = Playlists()
@@ -197,7 +267,7 @@ class RESTInterfaceV1(object):
             self.mainpage = readRes('res/main.html')
             self.loginpage = readRes('res/login.html')
             self.firstrunpage = readRes('res/firstrun.html')
-        
+
         if cherrypy.session['username']:
             pass
         if 'login' in kwargs:
@@ -394,7 +464,7 @@ everybody has to relogin now.''')
             }
             """
         return style
-    
+
     def api_download(self, filelist):
         #TODO: make sure file are not outside of basedir
         size_limit = cherry.config['media.maximum_download_size']
@@ -402,7 +472,7 @@ everybody has to relogin now.''')
         if not active_download:
             if self.model.file_size_within_limit(filelist, maximum_download_size):
                 cherrypy.session['active_download'] = True
-                cherrypy.session.release_lock()                
+                cherrypy.session.release_lock()
                 cherrypy.response.headers["Content-Type"] = 'application/zip'
                 cherrypy.response.headers['Content-Disposition'] = 'attachment; filename="dl.zip"'
                 chunk = self.model.compress(filelist)
@@ -410,7 +480,7 @@ everybody has to relogin now.''')
                     yield chunk
                     chunk = self.model.compress(filelist)
     api_download._cp_config = {'response.stream': True}
-            
+
 
     def invert(self, htmlcolor):
         r, g, b = self.html2rgb(htmlcolor)

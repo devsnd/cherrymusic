@@ -335,9 +335,11 @@ Have fun!
                 }})
         cherrypy.tree.mount(
             restinterface,
-            config['server.rootpath']+'/api/v1',
+            config['server.rootpath'] + 'api/v1',
             config={
-                'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+                '/': {
+                    'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+                }
             })
         log.i('Starting server on port %s ...' % config['server.port'])
 
