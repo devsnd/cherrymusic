@@ -1,6 +1,14 @@
 Changelog
 ---------
 
+0.26.0 (2013-07-15)
+
+ - IMPROVEMENT: search quality, rare words are considered more important
+ - FEATURE: M4A transcoding support
+ - FEATURE: playlist saving menu
+ - FIX: playlist backward compability
+ - FIX: audioread path backward compability fix
+
 0.25.1 (2013-05-14)
 
  - FIX: Error on first startup when not using the browser setup
