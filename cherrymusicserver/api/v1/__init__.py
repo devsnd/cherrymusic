@@ -94,13 +94,25 @@ else:
         return subclass
 
 
-@report_attribute_access
-class Test(object):
-    exposed = True
+def _get_controller(name):
+    qualname = __qualify_module(name)
+    try:
+        return sys.modules[qualname]
+    except KeyError:
+        try:
+            return __import_module(qualname)
+        except ImportError as e:
+            print(e)
+            raise LookupError(name)
 
-    @cherrypy.tools.json_out()              # auto-converts return value to JSON
-    def GET(self, *args, **params):
-        return "Test().GET", args, params
+
+def __import_module(qualname):
+    __import__(qualname)
+    return sys.modules[qualname]
+
+
+def __qualify_module(name):
+    return '.'.join((__package__, name))
 
 
 @report_attribute_access
@@ -215,14 +227,10 @@ class RESTInterfaceV1(object):
                 This method instantiates a new resource controller for each
                 request. This is bad form and not intended for production.
         '''
-        def create_resource_controller(name):
-            import sys
-            import inspect
-            classname = name.lower().capitalize()   # won't work for AlbumArt
-            cls = dict(inspect.getmembers(sys.modules[__name__]))[classname]
-            return cls()
+        if name.startswith('_'):
+            raise AttributeError(name)
         try:
-            return create_resource_controller(name)
+            return _get_controller(name)
         except LookupError:
             raise AttributeError(name)
 
