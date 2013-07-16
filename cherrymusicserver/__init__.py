@@ -84,7 +84,7 @@ config = None
 from cherrymusicserver import cherrymodel
 from cherrymusicserver import database
 from cherrymusicserver import httphandler
-from cherrymusicserver import restv1
+from cherrymusicserver import api
 from cherrymusicserver import log
 from cherrymusicserver import pathprovider
 from cherrymusicserver import playlistdb
@@ -112,7 +112,7 @@ class CherryMusic:
         self.setup_config(createNewConfig, setup, cfg_override)
         self.setup_databases(update, dropfiledb, setup)
         self.server(httphandler.HTTPHandler(config),
-                    restv1.RESTInterfaceV1(config))
+                    api.v1.RESTInterfaceV1(config))
 
     @classmethod
     def setup_services(cls):
