@@ -300,6 +300,7 @@ Have fun!
             'server.thread_pool': 30,
             'tools.sessions.on': True,
             'tools.sessions.timeout': 60 * 24,
+            'tools.auth.on': True,
         })
 
         if not config['server.keep_session_in_ram']:

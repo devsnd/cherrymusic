@@ -120,6 +120,14 @@ class UserDB:
         username = res.fetchone()
         return username[0] if username else 'nobody'
 
+    def getById(self, userid):
+        res = self.conn.execute(
+            'SELECT rowid, username, admin FROM users WHERE rowid = ? LIMIT 1',
+            (userid,)).fetchone()
+        return User(*res) if res else User.nobody()
+
+
+
 class Crypto(object):
 
     @classmethod
@@ -143,6 +151,9 @@ class User(namedtuple('User_', 'uid name isadmin password salt')):
 
     __NOBODY = None
 
+    def __new__(cls, uid, name, isadmin=0, password='', salt=''):
+        return super(cls, cls).__new__(cls, uid, name, isadmin, password, salt)
+
     @classmethod
     def create(cls, name, password, isadmin=False):
         '''create a new user with given name and password.
@@ -157,10 +168,13 @@ class User(namedtuple('User_', 'uid name isadmin password salt')):
         password = Crypto.scramble(password, salt)
         return User(-1, name, isadmin, password, salt)
 
-
     @classmethod
     def nobody(cls):
         '''return a user object representing an unknown user'''
         if User.__NOBODY is None:
             User.__NOBODY = User(-1, None, None, None, None)
         return User.__NOBODY
+
+    @property
+    def is_valid(self):
+        return self.uid >= 0
