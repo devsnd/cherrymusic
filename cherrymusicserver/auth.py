@@ -32,7 +32,7 @@ import cherrypy
 from cherrymusicserver import service
 
 
-_users = service.get('users')
+users = service.get('users')
 
 #TODO : local auto login
 #TODO : deny remote admin
@@ -47,7 +47,7 @@ _SESSION_KEY = '_auth_uid'
 
 
 def login(username, password):
-    user = _users.auth(username, password)
+    user = users.auth(username, password)
     cherrypy.session.regenerate()
     cherrypy.session[_SESSION_KEY] = user.uid
     cherrypy.request.user = user
@@ -72,7 +72,7 @@ def is_user(required_user):
 
 def check(*conditions):
     uid = cherrypy.session.get(_SESSION_KEY, None)
-    user = _users.getById(uid)
+    user = users.getById(uid)
     if not (user and user.is_valid):
         raise cherrypy.HTTPError(401)
     for condition in conditions:
