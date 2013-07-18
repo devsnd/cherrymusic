@@ -20,7 +20,7 @@ install:
 # prepare test run; test local install
 before_script:
   - python setup.py -q install
-  
+
 # command to run tests
 script: nosetests
 
@@ -29,6 +29,7 @@ branches:
   only:
     - master
     - devel
+    - restful
 
 #notifications:
 # email:
