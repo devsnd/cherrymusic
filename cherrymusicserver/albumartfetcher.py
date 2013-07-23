@@ -118,14 +118,14 @@ class AlbumArtFetcher:
         """ search a local path for image files.
         @param path: directory path
         @type path: string
-        @return header, imagedata
+        @return header, imagedata, is_resized
         @rtype dict, bytestring"""
 
         filetypes = (".jpg", ".jpeg", ".png")
         try:
             for file_in_dir in os.listdir(path):
                 if not file_in_dir.lower().endswith(filetypes):
-                    return None, '', False
+                    continue
                 try:
                     imgpath = os.path.join(path, file_in_dir)
                     if os.path.getsize(imgpath) > self.MAX_IMAGE_SIZE_BYTES:
@@ -136,7 +136,7 @@ class AlbumArtFetcher:
                     else:
                         with open(imgpath, "rb") as f:
                             data = f.read()
-                            if(imgpath[-3:] == ".png"):
+                            if(imgpath.lower().endswith(".png")):
                                 mimetype = "image/png"
                             else:
                                 mimetype = "image/jpeg"
