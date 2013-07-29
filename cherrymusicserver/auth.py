@@ -57,11 +57,11 @@ def login(username, password):
 def logout():
     cherrypy.lib.sessions.expire()
     cherrypy.session[_SESSION_KEY] = None
-    cherrypy.request.login = None
+    cherrypy.request.user = None
 
 
 def is_admin():
-    return lambda: cherrypy.request.user.isadmin
+    return cherrypy.request.user.isadmin
 
 
 def is_user(required_user):
@@ -71,13 +71,13 @@ def is_user(required_user):
 
 
 def check(*conditions):
-    uid = cherrypy.session.get(_SESSION_KEY, None)
-    user = users.getById(uid)
-    if not (user and user.is_valid):
+    user = getattr(cherrypy.request, 'user', None)
+    if not (user and user.is_valid is True):
         raise cherrypy.HTTPError(401)
     for condition in conditions:
         if not condition():
             raise cherrypy.HTTPError(403)
+    return True
 
 
 def check_tool(*args, **kwargs):

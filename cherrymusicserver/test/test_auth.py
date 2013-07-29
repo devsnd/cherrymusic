@@ -30,40 +30,96 @@
 from mock import *
 from nose.tools import *
 
+import cherrypy
+
 from cherrymusicserver import service
-service.provide('users', 'i am the userservice stand-in')
+service.provide('users', 'userservice (replace by mock)')
 
 from cherrymusicserver import auth
 
 
 def no_login():
     auth.users = Mock()
-    auth.cherrypy = Mock()
     auth.cherrypy.session = MagicMock()
-    auth.cherrypy.request = Mock()
+    if hasattr(auth.cherrypy.request, 'user'):
+        del auth.cherrypy.request.user
+
+
+def logged_in():
+    no_login()
+    user = Mock()
+    user.is_valid = True
+    auth.cherrypy.request.user = user
+
 
 @with_setup(no_login)
-def test_login_should_authenticate_credentials():
+@patch('cherrymusicserver.auth.cherrypy')
+def test_login_should_authenticate_credentials(cherrypy):
     auth.login('some_name', 'some_password')
     auth.users.auth.assert_called_with('some_name', 'some_password')
 
 
 @with_setup(no_login)
-def test_login_success_should_return_user():
+@patch('cherrymusicserver.auth.cherrypy')
+def test_login_should_return_user(cherrypy):
     user = auth.users.auth.return_value = Mock()
     assert user is auth.login('some_name', 'some_password')
 
 
 @with_setup(no_login)
-def test_login_success_should_reset_session():
+@patch('cherrymusicserver.auth.cherrypy')
+def test_login_should_reset_session(cherrypy):
     auth.login('some_name', 'some_password')
-    auth.cherrypy.session.regenerate.assert_called()
+    cherrypy.session.regenerate.assert_called()
 
 
 @with_setup(no_login)
-def test_login_success_should_set_request_user():
+@patch('cherrymusicserver.auth.cherrypy')
+def test_login_should_set_request_user(cherrypy):
     user = auth.users.auth.return_value = Mock()
 
     auth.login('some_name', 'some_password')
 
-    auth.cherrypy.session.user.assert_equals(user)
+    assert cherrypy.request.user is user
+
+
+@with_setup(logged_in)
+@patch('cherrymusicserver.auth.cherrypy')
+def test_logout_should_unset_request_user_and_session(cherrypy):
+    auth.logout()
+
+    assert cherrypy.request.user is None, cherrypy.request.user
+    cherrypy.session.__setitem__.assert_called
+
+
+@with_setup(no_login)
+@raises(cherrypy.HTTPError)
+def test_check_should_fail_without_login():
+    auth.check()
+
+
+@with_setup(logged_in)
+def test_check_should_return_true_with_login():
+    assert auth.check() is True
+
+
+@with_setup(logged_in)
+def test_check_must_call_conditions():
+    condition_one, condition_two = Mock(), Mock()
+
+    auth.check(condition_one, condition_two)
+
+    condition_one.assert_called
+    condition_two.assert_called
+
+
+@with_setup(logged_in)
+@raises(cherrypy.HTTPError)
+def test_check_must_fail_on_false_condition():
+    auth.check(Mock(return_value=False))
+
+
+@with_setup(logged_in)
+@raises(cherrypy.HTTPError)
+def test_check_must_fail_on_untrue_condition():
+    auth.check(Mock(return_value=None))
