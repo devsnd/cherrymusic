@@ -26,3 +26,17 @@ if (3,) <= sys.version_info < (3, 2):
 else:
     callable = callable
 
+
+if sys.version_info < (3,):
+    def with_metaclass(metacls):
+        class MetaclsCompat(object):
+            __metaclass__ = metacls
+        return MetaclsCompat
+else:
+    def with_metaclass(metacls):
+        globals = {}
+        locals = {'metacls': metacls}
+        exec(
+            "class MetaclsCompat(metaclass=metacls): pass",
+            globals, locals)
+        return locals['MetaclsCompat']
