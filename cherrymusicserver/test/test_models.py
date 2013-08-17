@@ -151,10 +151,9 @@ def test_model_constructor_assigns_fields_in_order_defined():
         testcls(*values))
 
 
-@raises(AttributeError)
+@raises(TypeError)
 def test_model_constructor_does_not_accept_nonfield_params():
-    eq_(99,
-        Model(bla=99)._id)
+    Model(bla=99)
 
 
 def test_model_subclasses_can_define_own_fields():
@@ -173,12 +172,6 @@ def test_model_subclasses_can_override_fields():
 def test_model_subclasses_cannot_override_fields_with_nonfields():
     class Test(Model):
         _id = 12
-
-
-@raises(AttributeError)
-def test_model_subclasses_cannot_override__fields_attribute():
-    class Test(Model):
-        _fields = 12
 
 
 def test_model_field_string_representation():

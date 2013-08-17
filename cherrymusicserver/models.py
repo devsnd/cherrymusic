@@ -93,74 +93,77 @@ class Field(object):
             return d
 
 
-class _ModelMeta(type):
+class _FieldContainer(type):
 
-    def __new__(cls, name, bases, clsdict):
-        cls.__prohibit_overriding_final_attributes(clsdict)
-        cls.__register_fields(bases, clsdict)
-        cls.__check_fields(clsdict)
-        return super(_ModelMeta, cls).__new__(cls, name, bases, clsdict)
-
-    @classmethod
-    def __register_fields(cls, bases, clsdict):
-        base = cls.__get_basefields(bases)
-        own = cls.__process_newfields(clsdict)
-        fields = OrderedDict()
-        fields.update(base)
-        fields.update(own)
-        clsdict['_fields'] = tuple(fields)
-        clsdict['__fields'] = fields
+    def __new__(metacls, name, bases, clsdict):
+        cls = super(_FieldContainer, metacls).__new__(metacls, name, bases, clsdict)
+        cls.__new__ = metacls.__new_instance
+        metacls.__register_fields(cls, bases, clsdict)
+        metacls.__disallow_foreign_overrides(cls)
+        return cls
 
     @classmethod
-    def __get_basefields(cls, bases):
-        basefields = OrderedDict()
-        for base in bases:
-            basefields.update(getattr(base, '__fields', {}))
-        return basefields
+    def __new_instance(metacls, cls, *a, **kw):
+        instance = object.__new__(cls)
+        try:
+            metacls.__init_instance_fields(instance, *a, **kw)
+        except KeyError as err:
+            msg = "{cls}() got an unexpected keyword argument {err!s}"
+            # msg_idx = "{{cls}}() takes at most {0} positional arguments but {{err!d}} were given".format(len(cls.__fields))
+            raise TypeError(msg.format(cls=cls.__name__, err=err))
+        return instance
 
     @classmethod
-    def __process_newfields(cls, clsdict):
-        from operator import itemgetter
+    def __init_instance_fields(metacls, instance, *args, **kwargs):
+        values = dict.fromkeys(instance.__fields, None)
+        values.update(dict(zip(instance._fields, args)))
+        values.update(kwargs)
+        for name, value in values.items():
+            field = instance.__fields[name]
+            field.init(instance, values[name])
+
+    @classmethod
+    def __register_fields(metacls, cls, bases, clsdict):
+        base = metacls.__get_basefields(bases)
+        own = metacls.__process_newfields(clsdict)
+        fields = OrderedDict((f.name, f) for f in sorted(base) + sorted(own))
+        cls._fields = tuple(fields)
+        cls.__fields = fields
+
+    @classmethod
+    def __get_basefields(metacls, bases):
+        for base in (b for b in bases if isinstance(b, metacls)):
+            for field in base.__fields.values():
+                yield field
+
+    @classmethod
+    def __process_newfields(metacls, clsdict):
         newfields = (i for i in clsdict.items() if isinstance(i[1], Field))
-        newfields = sorted(newfields, key=itemgetter(1))
-        newfields = OrderedDict(newfields)
-        for name in newfields:
-            clsdict[name].name = name
-        return newfields
-
+        for name, field in newfields:
+            field.name = name
+            yield field
 
     @classmethod
-    def __prohibit_overriding_final_attributes(cls, clsdict):
-        final = ('_fields',)
-        for attr in clsdict:
-            if attr in final:
-                raise AttributeError('cannot override attribute {0!r}'.format(attr))
-
-
-    @classmethod
-    def __check_fields(cls, clsdict):
-        for name in clsdict['_fields']:
-            if name in clsdict and not isinstance(clsdict[name], Field):
+    def __disallow_foreign_overrides(metacls, cls):
+        for name in dir(cls):
+            attr = getattr(cls, name, None)
+            if name in cls.__fields and not isinstance(attr, Field):
                 raise AttributeError(
                     "{attr!r} must be instance of {expect}, is {type}".format(
                         attr=name,
                         expect=Field,
-                        type=type(clsdict[name]),
+                        type=type(attr),
+                        repr=attr,
                 ))
 
 
-class Model(with_metaclass(_ModelMeta)):
+class Model(with_metaclass(_FieldContainer)):
 
     _id = Field(default=-1)
 
     @Field
     def _type(self):
         return self.__class__.__name__.lower()
-
-    def __new__(cls, *args, **kwargs):
-        instance = super(Model, cls).__new__(cls)
-        instance.__init_fields(args, kwargs)
-        return instance
 
     def __repr__(self):
         return repr(self._as_dict())
@@ -179,12 +182,3 @@ class Model(with_metaclass(_ModelMeta)):
 
     def _as_dict(self):
         return dict((name, getattr(self, name)) for name in self._fields)
-
-    def __init_fields(self, args, kwargs):
-        cls = self.__class__
-        values = dict.fromkeys(cls._fields, None)
-        values.update(dict(zip(cls._fields, args)))
-        values.update(kwargs)
-        for name, value in values.items():
-            field = getattr(cls, name)
-            field.init(self, value)
