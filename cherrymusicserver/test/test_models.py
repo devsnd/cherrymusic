@@ -31,14 +31,21 @@
 from mock import *
 from nose.tools import *
 
+from backport.collections import OrderedDict
+
 from cherrymusicserver.models import *
 
 def create_model(clsname=None, **fields):
     '''
         Create a Model subclass with the given fields and return an instance.
+
+        Fields get created ordered by their default values.
     '''
+    from operator import itemgetter
     clsname = clsname or 'TestModel'
-    clsdict = dict((name, Field(default)) for name, default in fields.items())
+    clsdict = OrderedDict()
+    for name in (i[0] for i in sorted(fields.items(), key=itemgetter(1))):
+        clsdict[name] = Field(default=fields[name])
     return type(clsname, (Model,), clsdict)()
 
 
@@ -133,8 +140,8 @@ def test_model_constructor_sets_fields_from_params():
         Model(_id=99)._id)
 
 
-def test_model_constructor_assigns_params_in_alphabetical_oder():
-    params = sorted('_id _type z a b c'.split())
+def test_model_constructor_assigns_fields_in_order_defined():
+    params = '_id _type z a c b'.split()
     values = range(len(params))
     paramdict = dict(zip(params, values))
 

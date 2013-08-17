@@ -29,9 +29,27 @@
 #
 
 from backport import callable, with_metaclass
+from backport.collections import OrderedDict
+from backport.functools import total_ordering
 
+from threading import Lock
 
+@total_ordering
 class Field(object):
+
+    __instance_count = 0
+    __lock = Lock()
+
+    def __new__(cls, *args, **kwargs):
+        instance = super(Field, cls).__new__(cls)
+        instance.__id = Field.__get_new_id()
+        return instance
+
+    @staticmethod
+    def __get_new_id():
+        with Field.__lock:
+            Field.__instance_count += 1
+            return Field.__instance_count
 
     def __init__(self, default=None, name=None):
         self.default = default
@@ -44,26 +62,34 @@ class Field(object):
             default= self.default,
         )
 
+    def __lt__(self, other):
+        if not isinstance(other, Field):
+            return NotImplemented
+        return self.__id < other.__id
+
+    def __hash__(self):
+        return self.__id
+
     def __get__(self, instance, owner=None):
         if instance is None:
             return self
-        value = self.__fielddict(instance).get(self.name, self.default)
+        value = self.__value_dict(instance).get(self, self.default)
         return value(instance) if callable(value) else value
 
     def __set__(self, instance, value):
         raise AttributeError("can't set attribute: {0!r}".format(self.name))
 
     def init(self, owner_instance, value):
-        _fields = self.__fielddict(owner_instance)
-        if self.name in _fields:
+        valdict = self.__value_dict(owner_instance)
+        if self in valdict:
             raise AttributeError("{0!r} already initialized".format(self.name))
-        _fields[self.name] = self.default if value is None else value
+        valdict[self] = self.default if value is None else value
 
-    def __fielddict(self, owner):
+    def __value_dict(self, instance):
         try:
-            return owner.__fielddict
+            return instance.__values
         except AttributeError:
-            d = owner.__fielddict = {}
+            d = instance.__values = {}
             return d
 
 
@@ -79,28 +105,36 @@ class _ModelMeta(type):
     def __register_fields(cls, bases, clsdict):
         base = cls.__get_basefields(bases)
         own = cls.__process_newfields(clsdict)
-        fieldset = set(base) | set(own)
-        clsdict['_fields'] = tuple(sorted(fieldset))
+        fields = OrderedDict()
+        fields.update(base)
+        fields.update(own)
+        clsdict['_fields'] = tuple(fields)
+        clsdict['__fields'] = fields
 
     @classmethod
     def __get_basefields(cls, bases):
+        basefields = OrderedDict()
         for base in bases:
-            for field in getattr(base, '_fields', ()):
-                yield field
+            basefields.update(getattr(base, '__fields', {}))
+        return basefields
 
     @classmethod
     def __process_newfields(cls, clsdict):
-        newfields = (n for n, v in clsdict.items() if isinstance(v, Field))
+        from operator import itemgetter
+        newfields = (i for i in clsdict.items() if isinstance(i[1], Field))
+        newfields = sorted(newfields, key=itemgetter(1))
+        newfields = OrderedDict(newfields)
         for name in newfields:
             clsdict[name].name = name
-            yield name
+        return newfields
+
 
     @classmethod
     def __prohibit_overriding_final_attributes(cls, clsdict):
         final = ('_fields',)
         for attr in clsdict:
             if attr in final:
-                raise AttributeError('cannot override attribute {0!r}', attr)
+                raise AttributeError('cannot override attribute {0!r}'.format(attr))
 
 
     @classmethod
@@ -113,7 +147,6 @@ class _ModelMeta(type):
                         expect=Field,
                         type=type(clsdict[name]),
                 ))
-
 
 
 class Model(with_metaclass(_ModelMeta)):
