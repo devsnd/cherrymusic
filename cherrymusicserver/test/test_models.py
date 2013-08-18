@@ -37,6 +37,9 @@ from backport.collections import OrderedDict
 
 from cherrymusicserver.models import *
 
+@model
+class Model(object): pass
+
 def create_model(clsname=None, **fields):
     '''
         Create a Model subclass with the given fields and return an instance.
@@ -47,8 +50,8 @@ def create_model(clsname=None, **fields):
     clsname = clsname or 'TestModel'
     clsdict = OrderedDict()
     for name in (i[0] for i in sorted(fields.items(), key=itemgetter(1))):
-        clsdict[name] = Field(default=fields[name])
-    return type(clsname, (Model,), clsdict)()
+        clsdict[name] = field(default=fields[name])
+    return model(type(clsname, (object,), clsdict))()
 
 
 def test_model_string_representation():
@@ -83,17 +86,7 @@ def test_model_is_not_hashable():
     hash(Model())
 
 
-def test_model_universal_fields_present():
-    expected_fields = ('_id', '_type')
-
-    eq_(expected_fields,
-        Model()._fields)
-
-    for fieldname in expected_fields:
-        assert isinstance(getattr(Model, fieldname), Field)
-
-
-def test_model_universal_field_defaults():
+def test_model_universal_field_present_with_defaults():
     eq_(Model(),
         {
         '_id': -1,

@@ -28,28 +28,38 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
-from backport import callable, with_metaclass
-from backport.collections import OrderedDict
-from backport.functools import total_ordering
+from backport import callable as _callable
+from backport import with_metaclass as _with_metaclass
+from backport.collections import OrderedDict as _OrderedDict
+from backport.functools import total_ordering as _total_ordering
 
-from threading import Lock
+from threading import Lock as _Lock
 
-@total_ordering
-class Field(object):
+
+def model(cls):
+     return _FieldContainer(cls.__name__, (cls, _ModelBase), dict(cls.__dict__))
+
+
+def field(default=None, *a, **kw):
+    return _Field(default, *a, **kw)
+
+
+@_total_ordering
+class _Field(object):
 
     __instance_count = 0
-    __lock = Lock()
+    __lock = _Lock()
 
     def __new__(cls, *args, **kwargs):
-        instance = super(Field, cls).__new__(cls)
-        instance.__id = Field.__get_new_id()
+        instance = super(_Field, cls).__new__(cls)
+        instance.__id = _Field.__get_new_id()
         return instance
 
     @staticmethod
     def __get_new_id():
-        with Field.__lock:
-            Field.__instance_count += 1
-            return Field.__instance_count
+        with _Field.__lock:
+            _Field.__instance_count += 1
+            return _Field.__instance_count
 
     def __init__(self, default=None, name=None):
         self.default = default
@@ -63,7 +73,7 @@ class Field(object):
         )
 
     def __lt__(self, other):
-        if not isinstance(other, Field):
+        if not isinstance(other, _Field):
             return NotImplemented
         return self.__id < other.__id
 
@@ -74,7 +84,7 @@ class Field(object):
         if instance is None:
             return self
         value = self.__value_dict(instance).get(self, self.default)
-        return value(instance) if callable(value) else value
+        return value(instance) if _callable(value) else value
 
     def __set__(self, instance, value):
         raise AttributeError("can't set attribute: {0!r}".format(self.name))
@@ -126,7 +136,7 @@ class _FieldContainer(type):
     def __register_fields(metacls, cls, bases, clsdict):
         base = metacls.__get_basefields(bases)
         own = metacls.__process_newfields(clsdict)
-        fields = OrderedDict((f.name, f) for f in sorted(base) + sorted(own))
+        fields = _OrderedDict((f.name, f) for f in sorted(base) + sorted(own))
         cls._fields = tuple(fields)
         cls.__fields = fields
 
@@ -138,7 +148,7 @@ class _FieldContainer(type):
 
     @classmethod
     def __process_newfields(metacls, clsdict):
-        newfields = (i for i in clsdict.items() if isinstance(i[1], Field))
+        newfields = (i for i in clsdict.items() if isinstance(i[1], _Field))
         for name, field in newfields:
             field.name = name
             yield field
@@ -147,21 +157,21 @@ class _FieldContainer(type):
     def __disallow_foreign_overrides(metacls, cls):
         for name in dir(cls):
             attr = getattr(cls, name, None)
-            if name in cls.__fields and not isinstance(attr, Field):
+            if name in cls.__fields and not isinstance(attr, _Field):
                 raise AttributeError(
                     "{attr!r} must be instance of {expect}, is {type}".format(
                         attr=name,
-                        expect=Field,
+                        expect=_Field,
                         type=type(attr),
                         repr=attr,
                 ))
 
 
-class Model(with_metaclass(_FieldContainer)):
+class _ModelBase(_with_metaclass(_FieldContainer)):
 
-    _id = Field(default=-1)
+    _id = field(default=-1)
 
-    @Field
+    @field
     def _type(self):
         return self.__class__.__name__.lower()
 
@@ -169,7 +179,7 @@ class Model(with_metaclass(_FieldContainer)):
         return repr(self._as_dict())
 
     def __eq__(self, other):
-        if not isinstance(other, (Model, dict)):
+        if not isinstance(other, (_ModelBase, dict)):
             return NotImplemented
         selfdict = self._as_dict()
         otherdict = other if isinstance(other, dict) else other._as_dict()
