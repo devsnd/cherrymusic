@@ -31,6 +31,8 @@
 from mock import *
 from nose.tools import *
 
+from .tools import *
+
 from backport.collections import OrderedDict
 
 from cherrymusicserver.models import *
@@ -182,6 +184,7 @@ def test_model_field_value_accessible_as_model_attribute():
     eq_(13,
         create_model(a=13).a)
 
+@deprecated
 def test_model_field_object_accessible_as_class_attribute():
     assert isinstance(Model._id, Field)
 
