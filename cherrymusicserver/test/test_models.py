@@ -147,8 +147,14 @@ def test_model_constructor_assigns_fields_in_order_defined():
 
 
 @raises(TypeError)
-def test_model_constructor_does_not_accept_nonfield_params():
+def test_model_constructor_does_not_accept_nonfield_kwargs():
     Model(bla=99)
+
+
+@raises(TypeError)
+def test_model_constructor_does_not_accept_more_arguments_than_fields():
+    args = range(len(Model._fields) + 1)
+    Model(*args)
 
 
 def test_model_subclasses_can_define_own_fields():
@@ -177,21 +183,28 @@ def test_model_field_value_accessible_as_model_attribute():
     eq_(13,
         create_model(a=13).a)
 
+
 @deprecated
 def test_model_field_object_accessible_as_class_attribute():
     assert isinstance(Model._id, Field)
+
 
 @raises(AttributeError)
 def test_model_field_cannot_be_set():
     create_model(a=13).a = 12
 
 
-@raises(AttributeError)
-def test_model_field_cannot_be_initialized_again():
-    model = create_model(a=13)
-    field = type(model).a
+def test_fields_compare_in_creation_order():
+    f1 = field()
+    f2 = field()
 
-    field.init(model, 1)
+    ok_(f1 == f1, 'Field must equal itself')
+    ok_(f1 <= f2, 'Field created earlier must compare as less or equal')
+    ok_(f2 >= f1, 'Field created later must compare as more or equal')
+    ok_(f1 < f2, 'Field created earlier must compare as less')
+    ok_(f2 > f1, 'Field created later must compare as more')
+    ok_(not f1 != f1, 'Field must not be unequal to itself')
 
 
-
+def test_fields_unimplemented_comparison():
+    eq_(NotImplemented, field().__lt__(-1))

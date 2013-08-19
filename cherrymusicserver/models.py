@@ -80,27 +80,25 @@ class _Field(object):
     def __hash__(self):
         return self.__id
 
-    def __get__(self, instance, owner=None):
-        if instance is None:
+    def __get__(self, container, owner):
+        if container is None:
             return self
-        value = self.__value_dict(instance).get(self, self.default)
-        return value(instance) if _callable(value) else value
+        value = container.__values.get(self, self.default)
+        return value(container) if _callable(value) else value
 
-    def __set__(self, instance, value):
-        raise AttributeError("can't set attribute: {0!r}".format(self.name))
+    def __set__(self, container, value):
+        with self.__lock:
+            self.__init(container, value)
 
-    def init(self, owner_instance, value):
-        valdict = self.__value_dict(owner_instance)
+    @classmethod
+    def register_container(cls, container):
+        container.__values = {}
+
+    def __init(self, container, value):
+        valdict = container.__values
         if self in valdict:
             raise AttributeError("{0!r} already initialized".format(self.name))
         valdict[self] = self.default if value is None else value
-
-    def __value_dict(self, instance):
-        try:
-            return instance.__values
-        except AttributeError:
-            d = instance.__values = {}
-            return d
 
 
 class _FieldContainer(type):
@@ -115,56 +113,60 @@ class _FieldContainer(type):
     @classmethod
     def __new_instance(metacls, cls, *a, **kw):
         instance = object.__new__(cls)
+        _Field.register_container(instance)
         try:
             metacls.__init_instance_fields(instance, *a, **kw)
-        except KeyError as err:
-            msg = "{cls}() got an unexpected keyword argument {err!s}"
-            # msg_idx = "{{cls}}() takes at most {0} positional arguments but {{err!d}} were given".format(len(cls.__fields))
+        except (KeyError, IndexError) as err:
+            msg_key = "{cls}() got unexpected keyword argument(s) {err!s}"
+            msg_idx = "{{cls}}() got too many positional arguments (max. {0}): {{err}}".format(len(cls._fields))
+            msg = msg_key if isinstance(err, KeyError) else msg_idx
             raise TypeError(msg.format(cls=cls.__name__, err=err))
         return instance
 
     @classmethod
     def __init_instance_fields(metacls, instance, *args, **kwargs):
-        values = dict.fromkeys(instance.__fields, None)
+        if len(args) > len(instance._fields):
+            raise IndexError(args)
+
+        unknown_kwargs = set(kwargs).difference(set(instance._fields))
+        if unknown_kwargs:
+            raise KeyError(unknown_kwargs)
+
+        values = dict.fromkeys(instance._fields, None)
         values.update(dict(zip(instance._fields, args)))
         values.update(kwargs)
         for name, value in values.items():
-            field = instance.__fields[name]
-            field.init(instance, values[name])
+            setattr(instance, name, value)
 
     @classmethod
     def __register_fields(metacls, cls, bases, clsdict):
         base = metacls.__get_basefields(bases)
         own = metacls.__process_newfields(clsdict)
         fields = _OrderedDict((f.name, f) for f in sorted(base) + sorted(own))
-        cls._fields = tuple(fields)
-        cls.__fields = fields
+        cls._fields = tuple(fields.keys())
+        cls.__fields = tuple(fields.values())
 
     @classmethod
     def __get_basefields(metacls, bases):
         for base in (b for b in bases if isinstance(b, metacls)):
-            for field in base.__fields.values():
+            for field in base.__fields:
                 yield field
 
     @classmethod
     def __process_newfields(metacls, clsdict):
-        newfields = (i for i in clsdict.items() if isinstance(i[1], _Field))
+        newfields = [i for i in clsdict.items() if isinstance(i[1], _Field)]
         for name, field in newfields:
             field.name = name
-            yield field
+        return [i[1] for i in newfields]
 
     @classmethod
     def __disallow_foreign_overrides(metacls, cls):
         for name in dir(cls):
             attr = getattr(cls, name, None)
-            if name in cls.__fields and not isinstance(attr, _Field):
+            if name in cls._fields and not isinstance(attr, _Field):
                 raise AttributeError(
-                    "{attr!r} must be instance of {expect}, is {type}".format(
-                        attr=name,
-                        expect=_Field,
-                        type=type(attr),
-                        repr=attr,
-                ))
+                    "{0!r} must be instance of {1}, is {2}".format(
+                        name, _Field, type(attr)))
 
 
 class _ModelBase(_with_metaclass(_FieldContainer)):
