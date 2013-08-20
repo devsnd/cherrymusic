@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
 """
 This library was created by SpiderOak, Inc. and is released under the GPLv3.
 https://github.com/gourneau/SpiderOak-zipstream

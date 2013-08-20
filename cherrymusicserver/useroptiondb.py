@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 #
 # CherryMusic - a standalone music server
 # Copyright (c) 2012 Tom Wallroth & Tilman Boerner

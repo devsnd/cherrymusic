@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+#
 # Copyright (c) 2009 Raymond Hettinger
 #
 # Permission is hereby granted, free of charge, to any person
