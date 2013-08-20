@@ -82,8 +82,9 @@ class CherryModel:
 
         #remove all files not inside the filter
         if filterstr:
-            filterByStart = StartsWithCaseInsensitive(filterstr)
-            allfilesindir = list(filter(filterByStart, allfilesindir))
+            filterstr = filterstr.lower()
+            allfilesindir = [f for f in allfilesindir
+                             if f.lower().startswith(filterstr)]
 
         musicentries = []
 
@@ -91,7 +92,7 @@ class CherryModel:
         compactlisting = len(allfilesindir) > maximum_shown_files
         if compactlisting:
             upper_case_files = [x.upper() for x in allfilesindir]
-            filterstr = os.path.commonprefix(list(upper_case_files))
+            filterstr = os.path.commonprefix(upper_case_files)
             filterlength = len(filterstr)+1
             currentletter = '/'  # impossible first character
             sortedfiles = self.sortFiles(allfilesindir)
@@ -262,11 +263,3 @@ class MusicEntry:
 
     def __repr__(self):
         return "<MusicEntry path:%s, dir:%s>" % (self.path, self.dir)
-
-
-class StartsWithCaseInsensitive:
-    def __init__(self, startswith):
-        self.startswith = startswith.upper()
-
-    def __call__(self, string):
-        return string.upper().startswith(self.startswith)
