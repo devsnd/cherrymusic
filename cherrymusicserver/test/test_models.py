@@ -75,7 +75,7 @@ def test_model_equality_to_other_models():
 
 def test_unimplemented_equality():
     examples = [
-        tuple(Model()._as_dict().values()),
+        tuple(Model().as_dict.values()),
     ]
     for case in examples:
         eq_(NotImplemented,
@@ -102,7 +102,7 @@ def test_model_type_defaults_to_classname():
 
 
 def test_model_dict_view():
-    dict_view = create_model(a='test')._as_dict()
+    dict_view = create_model(a='test').as_dict
 
     assert isinstance(dict_view, dict)
 
@@ -116,14 +116,14 @@ def test_model_dict_idempotence():
     d = dict(zip(fields, values))
 
     eq_(d,
-        Model(**d)._as_dict())
+        Model(**d).as_dict)
 
 
 def test_model_equality_to_dicts():
     eq_(Model(),
-        Model()._as_dict(),
+        Model().as_dict,
         "a model must equal its dict view")
-    eq_(Model()._as_dict(),
+    eq_(Model().as_dict,
         Model(),
         "a dict must equal a model with equal dict view")
 
@@ -192,6 +192,21 @@ def test_model_field_object_accessible_as_class_attribute():
 @raises(AttributeError)
 def test_model_field_cannot_be_set():
     create_model(a=13).a = 12
+
+
+def test_model_replace_returns_new_object():
+    model = Model()
+    ok_(model is not model.replace())
+
+
+def test_model_replace_changes_attribute_values():
+    eq_({'_id': 11, '_type': 33},
+        Model().replace(_id=11, _type=33))
+
+
+@raises(TypeError)
+def test_model_replace_rejects_unknown_kwargs():
+    Model().replace(k=13)
 
 
 def test_fields_compare_in_creation_order():

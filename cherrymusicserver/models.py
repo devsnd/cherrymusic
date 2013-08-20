@@ -178,13 +178,13 @@ class _ModelBase(_with_metaclass(_FieldContainer)):
         return self.__class__.__name__.lower()
 
     def __repr__(self):
-        return repr(self._as_dict())
+        return repr(self.as_dict)
 
     def __eq__(self, other):
         if not isinstance(other, (_ModelBase, dict)):
             return NotImplemented
-        selfdict = self._as_dict()
-        otherdict = other if isinstance(other, dict) else other._as_dict()
+        selfdict = self.as_dict
+        otherdict = other if isinstance(other, dict) else other.as_dict
         return selfdict == otherdict
 
     def __ne__(self, other):
@@ -192,5 +192,11 @@ class _ModelBase(_with_metaclass(_FieldContainer)):
 
     __hash__ = None     # explicitly set to None for python2 compat
 
-    def _as_dict(self):
+    @property
+    def as_dict(self):
         return dict((name, getattr(self, name)) for name in self._fields)
+
+    def replace(self, **kwargs):
+        fields = self.as_dict
+        fields.update(kwargs)
+        return type(self)(**fields)
