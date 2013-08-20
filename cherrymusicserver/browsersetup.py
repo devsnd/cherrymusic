@@ -72,29 +72,35 @@ class SetupHandler:
         checkers = {
             'ImageMagick':  (Feature('convert'),
                              'has-imagemagick',
-                             'resizing of album covers'),
+                             'resizing of album covers',
+                             'The executable "convert" was not found in you PATH'),
             'Vorbis Tools': (Feature('oggenc'),
                              'has-has-vorbis-tools',
-                             'encoding and decoding of OGGs'),
+                             'encoding and decoding of OGGs',
+                             'The executables "oggenc" and "oggdec" were not found in you PATH'),
             'Lame':         (Feature('lame'),
                              'has-lame',
-                             'encoding and decoding of MP3s'),
+                             'encoding and decoding of MP3s',
+                             'The executable "lame" was not found in you PATH'),
             'FLAC':         (Feature('flac'),
                              'has-flac',
-                             'encoding and decoding of FLACs'),
+                             'encoding and decoding of FLACs',
+                             'The executable "flac" was not found in you PATH'),
             'mplayer':      (Feature('mplayer'),
                              'has-mplayer',
-                             'decoding OGG, MP3, FLAC, WMA and AAC'),
+                             'decoding OGG, MP3, FLAC, WMA and AAC',
+                             'The executable "mplayer" was not found in you PATH'),
         }
         if feature in checkers:
             installed = checkers[feature][0]()
             idx = checkers[feature][1]
             msg = checkers[feature][2]
+            explaination = checkers[feature][3]
             if installed:
                 text = 'enables '+msg
             else:
                 text = 'leads to missing feature: '+msg
-            featurelist.append([feature, installed, idx, text])
+            featurelist.append([feature, installed, idx, text, explaination])
 
     def getfeatures(self):
         featurelist = []
