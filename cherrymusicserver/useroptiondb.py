@@ -65,6 +65,8 @@ class UserOptionDB:
             primary_color.valid = '#[0-9a-fA-F]{6}'
         with c['custom_theme.white_on_black'] as white_on_black:
             white_on_black.value = False
+        with c['media.may_download'] as may_download:
+            may_download.value = False
         with c['last_time_online'] as last_time_online:
             last_time_online.value = 0
             last_time_online.valid = '\\d+'

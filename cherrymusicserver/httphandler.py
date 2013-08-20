@@ -37,6 +37,7 @@ import json
 import cherrypy
 import codecs
 import sys
+import re
 try:
     from urllib.parse import unquote
 except ImportError:
@@ -60,11 +61,15 @@ from cherrymusicserver.pathprovider import albumArtFilePath
 import cherrymusicserver as cherry
 import cherrymusicserver.metainfo as metainfo
 from cherrymusicserver.util import Performance
+
+from cherrymusicserver.ext import zipstream
 import time
 
 debug = True
 
-@service.user(model='cherrymodel', playlistdb='playlist', useroptions='useroptions', userdb='users')
+
+@service.user(model='cherrymodel', playlistdb='playlist',
+              useroptions='useroptions', userdb='users')
 class HTTPHandler(object):
     def __init__(self, config):
         self.config = config
@@ -109,7 +114,8 @@ class HTTPHandler(object):
             'setuseroption': self.api_setuseroption,
             'customcss.css': self.api_customcss,
             'changeplaylist': self.api_changeplaylist,
-            #'download': self.api_download,
+            'downloadcheck': self.api_downloadcheck,
+            'setuseroptionfor': self.api_setuseroptionfor,
         }
 
     def issecure(self, url):
@@ -331,23 +337,60 @@ everybody has to relogin now.''')
             }
             """
         return style
-    
-    def api_download(self, filelist):
-        #TODO: make sure file are not outside of basedir
+        
+    def download_check_files(self, filelist):
+        # only admins and allowed users may download
+        if not cherrypy.session['admin']:
+            uo = self.useroptions.forUser(self.getUserId())
+            if not uo.getOptionValue('media.may_download'):
+                return 'not_permitted'
+        # make sure nobody tries to escape from basedir
+        for f in filelist:
+            if '/../' in f:
+                return 'invalid_file'
+        # make sure all files are smaller than maximum download size
         size_limit = cherry.config['media.maximum_download_size']
-        active_download = cherrypy.session.get('active_download', False)
-        if not active_download:
-            if self.model.file_size_within_limit(filelist, maximum_download_size):
-                cherrypy.session['active_download'] = True
-                cherrypy.session.release_lock()                
-                cherrypy.response.headers["Content-Type"] = 'application/zip'
-                cherrypy.response.headers['Content-Disposition'] = 'attachment; filename="dl.zip"'
-                chunk = self.model.compress(filelist)
-                while not chunk is None:
-                    yield chunk
-                    chunk = self.model.compress(filelist)
-    api_download._cp_config = {'response.stream': True}
-            
+        if self.model.file_size_within_limit(filelist, size_limit):
+            return 'ok'
+        else:
+            return 'too_big'
+
+    def api_downloadcheck(self, value):
+        filelist = [unquote(filepath) for filepath in json.loads(value)]
+        status = self.download_check_files(filelist)
+        if status == 'not_permitted':
+            return """You are not allowed to download files."""
+        elif status == 'invalid_file':
+            return """Error: File has invalid filename""" % f
+        elif status == 'too_big':
+            size_limit = cherry.config['media.maximum_download_size']
+            return """Can't download: Playlist is bigger than %s mB.
+            The server administrator can change this configuration.
+            """ % (size_limit/1024/1024)
+        elif status == 'ok':
+            return status
+        else:
+            log.e("Unknown download file check status '%s'" % status)
+            return 'error'
+
+    def download(self, value):
+        if not self.isAuthorized():
+            raise cherrypy.HTTPError(401, 'Unauthorized')
+        filelist = [unquote(filepath) for filepath in json.loads(value)]
+        dlstatus = self.download_check_files(filelist)
+        if dlstatus == 'ok':
+            cherrypy.session.release_lock()
+            zipmime = 'application/x-zip-compressed'
+            cherrypy.response.headers["Content-Type"] = zipmime
+            zipname = 'attachment; filename="music.zip"'
+            cherrypy.response.headers['Content-Disposition'] = zipname
+            basedir = cherry.config['media.basedir']
+            fullpath_filelist = [os.path.join(basedir, f) for f in filelist]
+            return zipstream.ZipStream(fullpath_filelist)
+        else:
+            return dlstatus
+    download.exposed = True
+    download._cp_config = {'response.stream': True}
 
     def invert(self, htmlcolor):
         r, g, b = self.html2rgb(htmlcolor)
@@ -375,6 +418,10 @@ everybody has to relogin now.''')
     def api_getuseroptions(self, value):
         uo = self.useroptions.forUser(self.getUserId())
         uco = uo.getChangableOptions()
+        if cherrypy.session['admin']:
+            uco['media'] = {'may_download': True}
+        else:
+            uco['media'] = {'may_download': uo.getOptionValue('media.may_download')}
         return json.dumps(uco)
 
     def api_heartbeat(self, value):
@@ -386,6 +433,15 @@ everybody has to relogin now.''')
         uo = self.useroptions.forUser(self.getUserId())
         uo.setOption(params["optionkey"], params["optionval"])
         return "success"
+    
+    def api_setuseroptionfor(self, value):
+        if cherrypy.session['admin']:
+            params = json.loads(value)
+            uo = self.useroptions.forUser(params['userid'])
+            uo.setOption(params["optionkey"], params["optionval"])
+            return "success"
+        else:
+            return "error: not permitted. Only admins can change other users options"
 
     def api_fetchalbumart(self, value):
         cherrypy.session.release_lock()
@@ -518,7 +574,9 @@ everybody has to relogin now.''')
                     user['deletable'] = False
                 user_options = self.useroptions.forUser(user['id'])
                 t = user_options.getOptionValue('last_time_online')
+                may_download = user_options.getOptionValue('media.may_download')
                 user['last_time_online'] = t
+                user['may_download'] = may_download
             return json.dumps({'time': int(time.time()),
                                'userlist': userlist})
         else:

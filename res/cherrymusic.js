@@ -559,6 +559,28 @@ function resizePlaylistSlowly(){
     lastPlaylistHeight = currentHeight;
 }
 
+function download_editing_playlist(){
+    var pl = playlistManager.getEditingPlaylist();
+    var p = pl.jplayerplaylist.playlist;
+    var track_urls = []
+    for(i=0; i<p.length; i++){
+        track_urls.push(htmldecode(p[i].url.slice(6)));
+    }
+    var tracks_json = JSON.stringify(track_urls)
+    api({action: 'downloadcheck', value: tracks_json},
+        function(msg){
+            if(msg == 'ok'){
+                //add tracks to hidden form and call to call download using post data
+                $('#download-redirect-files').val(tracks_json);
+                $('#download-redirect').submit();
+            } else {
+                alert(msg);
+            }
+        },
+        errorFunc('Failed to check if playlist may be downloaded')
+    );
+}
+
 /*****
 OTHER
 *****/
@@ -598,9 +620,16 @@ function updateUserList(){
                                 '">&#x2022;',
                             '</span>',
                         '</div>',
-                        '<div class="span4">{{{usernamelabel}}}</div>',
-                        '<div class="span5"> last seen: {{fuzzytime}}</div>',
-                        '<div class="span2">',
+                        '<div class="span3">{{{usernamelabel}}}</div>',
+                        '<div class="span3"> last seen: {{fuzzytime}}</div>',
+                        '<div class="span3">',
+                            '{{#isnotadmin}}',
+                            'permit download<input type="checkbox" ',
+                            'onchange="userSetPermitDownload({{userid}}, $(this).is(\':checked\'))" id="misc-autoplay_on_add" value="option1" ',
+                            '{{#may_download}}checked="checked"{{/may_download}}>',
+                            '{{/isnotadmin}}',
+                        '</div>',
+                        '<div class="span1">',
                             '{{#isdeletable}}',
                                 '<a class="btn btn-mini btn-danger" href="javascript:;" onclick="userDelete({{userid}})">delete</a>',
                             '{{/isdeletable}}',
@@ -609,6 +638,8 @@ function updateUserList(){
                 '</li>',
             ].join(''),{
                 isadmin: e.admin,
+                may_download: e.may_download,
+                isnotadmin: !e.admin,
                 isdeletable: e.deletable,
                 userid: e.id,
                 isonline: reltime < HEARTBEAT_INTERVAL_MS/500,
@@ -654,7 +685,7 @@ function addNewUser(){
 }
 
 function userDelete(userid){
-    var data = {'action':'userdelete',
+    var data = {'action':'setuseroptionfor',
                 'value' : JSON.stringify({
                     'userid':userid
                 })};
@@ -668,6 +699,25 @@ function userDelete(userid){
         function(){busy('#adminuserlist').fadeOut('fast')}
     );
 }
+
+function userSetPermitDownload(userid, allow_download){
+    var data = {'action':'setuseroptionfor',
+                'value' : JSON.stringify({
+                    'optionkey': 'media.may_download',
+                    'optionval': allow_download,
+                    'userid': userid,
+                })};
+    var success = function(data){
+        updateUserList();
+    };
+    busy('#adminuserlist').hide().fadeIn('fast');
+    api(data,
+        success,
+        errorFunc('Failed to set user download state'),
+        function(){busy('#adminuserlist').fadeOut('fast')}
+    );
+}
+
 function userChangePassword(){
     if (! validateNewPassword($('#newpassword-change'), $('#repeatpassword-change'))) {
         return false;

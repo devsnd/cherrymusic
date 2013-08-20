@@ -95,6 +95,13 @@ def from_defaults():
                     They will be shown next to folders that qualify as a possible
                     album.
                     """
+                    
+    with c['media.maximum_download_size'] as maxdl:
+        maxdl.value = 1024*1024*250
+        maxdl.doc = """
+                    Maximum size in bytes of all files to be downloaded in one zipfile.
+                    Defaults to 250 megabytes.
+                    """
 
     with c['search.maxresults'] as maxresults:
         maxresults.value = 20

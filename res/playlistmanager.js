@@ -368,6 +368,7 @@ PlaylistManager.prototype = {
                     'queue': epl.reason_open == 'queue',
                     'playlist': epl.reason_open != 'queue',
                     'not-saved': epl.saved == false,
+                    'user-may-download': userOptions.media.may_download,
                 }
             );
             
