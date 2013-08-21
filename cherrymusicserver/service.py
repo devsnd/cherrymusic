@@ -36,8 +36,8 @@
     Basic usage::
 
         >>> pizza = object()
-        >>> service.provide('pizzaservice', pizza)
-        >>> pizza is service.get('pizzaservice')
+        >>> provide('pizzaservice', pizza)
+        >>> pizza is get('pizzaservice')
         True
 
     Types as providers and users::
@@ -45,12 +45,12 @@
         >>> class PizzaService(object):
         ...     pass
         ...
-        >>> @service.user(mypizza='pizzaservice')     # become a user
+        >>> @user(mypizza='pizzaservice')             # become a user
         ... class PizzaUser(object):
         ...     pass
         ...
         >>> user = PizzaUser()
-        >>> service.provide('pizzaservice', PizzaService)
+        >>> provide('pizzaservice', PizzaService)
         >>> isinstance(user.mypizza, PizzaService)    # provider as attribute
         True
 """
@@ -123,9 +123,8 @@ def get(handle):
 class require(object):
     """Descriptor to make a service provider available as a class attribute.
 
-        >>> import cherrymusicserver.service as service
         >>> class ServiceUser(object):
-        ...     mypizzas = service.require('pizzaservice')
+        ...     mypizzas = require('pizzaservice')
     """
     def __init__(self, handle):
         self.handle = handle

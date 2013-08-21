@@ -37,7 +37,7 @@ PROJECTDIR=`dirname $0`
 SPECIFIC_TEST="$1"
 
 TEST_EXCLUDE_REGEX='cherrypy'
-COVERAGE_OPTIONS="--with-coverage --cover-erase"
+TEST_OPTIONS="--with-coverage --cover-erase"
 
 if [ ! -d ${PROJECTDIR} -o ! -f ${PROJECTDIR}/cherrymusic ]; then
     echo "cannot find main script: 'cherrymusic'" >&2
@@ -48,11 +48,13 @@ fi
 if [ $SPECIFIC_TEST ]; then
     TEST_LOCATION="cherrymusicserver.test.test_${SPECIFIC_TEST}"
     COVERAGE_TARGET="cherrymusicserver.${SPECIFIC_TEST}"
-    COVERAGE_OPTIONS="${COVERAGE_OPTIONS} --cover-package=${COVERAGE_TARGET} --cover-branches --cover-min-percentage=100"
+    TEST_OPTIONS="${TEST_OPTIONS} --cover-package=${COVERAGE_TARGET} --cover-branches --cover-min-percentage=100"
+    TEST_OPTIONS="${TEST_OPTIONS} --no-deprecated"
 else
     TEST_LOCATION=""
     COVERAGE_TARGET="audiotranscode,cherrymusicserver,cmbootstrap"
-    COVERAGE_OPTIONS="${COVERAGE_OPTIONS} --cover-package=${COVERAGE_TARGET} --cover-min-percentage=50"
+    TEST_OPTIONS="${TEST_OPTIONS} --cover-package=${COVERAGE_TARGET} --cover-min-percentage=50"
+    TEST_OPTIONS="${TEST_OPTIONS} --no-skip"
 
     echo
     echo "[distribution]: setup.py check"
@@ -69,7 +71,7 @@ fi
 for i in "" "2" "3"; do
     TESTER="nosetests${i}"
     if [ $(command -v $TESTER) ]; then
-        RUN="${TESTER} -e ${TEST_EXCLUDE_REGEX} ${COVERAGE_OPTIONS} ${TEST_LOCATION}"
+        RUN="${TESTER} -e ${TEST_EXCLUDE_REGEX} ${TEST_OPTIONS} ${TEST_LOCATION}"
         echo
         echo "[${TESTER}]: ${RUN}"
         $RUN
@@ -80,6 +82,24 @@ for i in "" "2" "3"; do
         fi
     fi
 done
+
+# doctests
+if [ $SPECIFIC_TEST ]; then
+    TESTER="python -m doctest"
+    TEST_OPTIONS=""
+    TEST_LOCATION="cherrymusicserver/${SPECIFIC_TEST}.py"
+    if [ $(command -v $TESTER) ]; then
+        RUN="${TESTER} ${TEST_OPTIONS} ${TEST_LOCATION}"
+        echo
+        echo "[${TESTER}]: ${RUN}"
+        $RUN
+        if [ $? != 0 ]; then
+            failed="$failed doctest"
+        else
+            echo "OK"
+        fi
+    fi
+fi
 
 if [ "$failed" ]; then
     echo "FAILED: $failed" >&2

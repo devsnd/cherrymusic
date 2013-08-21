@@ -184,11 +184,6 @@ def test_model_field_value_accessible_as_model_attribute():
         create_model(a=13).a)
 
 
-@deprecated
-def test_model_field_object_accessible_as_class_attribute():
-    assert isinstance(Model._id, Field)
-
-
 @raises(AttributeError)
 def test_model_field_cannot_be_set():
     create_model(a=13).a = 12

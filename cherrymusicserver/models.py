@@ -37,6 +37,7 @@ from threading import Lock as _Lock
 
 
 def field(default=None, *a, **kw):
+    ''' see _Field.__init__'''
     return _Field(default, *a, **kw)
 
 
@@ -46,13 +47,13 @@ def model(cls):
         parameters for the model fields.
 
         >>> # @model             (decorator works, but doctest module is buggy)
-        >>> class MyModel(object):
+        >>> class Foo(object):
         ...     @field
-        ...     def test(self): return 'calculated value'
+        ...     def x(self): return 'calculated'
         ...
-        >>> MyModel = model(MyModel)                   # workaround for doctest
-        >>> MyModel().as_dict
-        {'test': 'calculated value', '_type': 'mymodel', '_id': None}
+        >>> Foo = model(Foo)                           # workaround for doctest
+        >>> Foo().as_dict == {'_id': None, '_type': 'foo', 'x': 'calculated'}
+        True
 
     '''
     name = cls.__name__
