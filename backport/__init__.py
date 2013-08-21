@@ -29,14 +29,16 @@ else:
 
 if sys.version_info < (3,):
     def with_metaclass(metacls):
-        class MetaclsCompat(object):
+        class MetaclassBearer(object):
             __metaclass__ = metacls
-        return MetaclsCompat
+        return MetaclassBearer
 else:
     def with_metaclass(metacls):
-        globals = {}
-        locals = {'metacls': metacls}
+        _clsname = 'MetaclassBearer_' + metacls.__name__
+        _globals = {'__name__': globals()['__name__']}
+        _locals = {'metacls': metacls}
+                                # hide python 3 syntax from py2 interpreter:
         exec(
-            "class MetaclsCompat(metaclass=metacls): pass",
-            globals, locals)
-        return locals['MetaclsCompat']
+            "class {0}(metaclass=metacls): pass".format(_clsname),
+            _globals, _locals)
+        return _locals[_clsname]
