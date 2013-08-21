@@ -16,6 +16,11 @@ at least one is implemented. ``__lt__`` is taken as the base comparison method
 on which the others are built, but if that is not available it will be
 constructed from the first one found.
 
+.. attention::
+    ``functools.total_ordering``, as defined in the Python stdlib, does
+    NOT define ``__eq__`` and ``__ne__``, so we don't, either!
+    (Modification of original recipe.)
+
 ``force_total_ordering`` does the same, but having taken a comparison method as
 the base it fills in *all* the others - this overwrites additional comparison
 methods that may be implemented, guaranteeing consistent comparison semantics.
@@ -95,8 +100,9 @@ def _ordering(cls, overwrite):
             break
         assert comparison is not None, 'must have at least one of ge, gt, le, lt'
 
-    setter('__ne__', lambda s, o: s < o or o < s)
-    setter('__eq__', lambda s, o: not s != o)
+    # act like total_ordering in stdlib: don't define equality operators
+    # setter('__ne__', lambda s, o: s < o or o < s)
+    # setter('__eq__', lambda s, o: not s != o)
     setter('__gt__', lambda s, o: o < s)
     setter('__ge__', lambda s, o: not (s < o))
     setter('__le__', lambda s, o: not (s > o))
