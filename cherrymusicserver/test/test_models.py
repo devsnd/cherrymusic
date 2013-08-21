@@ -89,7 +89,7 @@ def test_model_is_not_hashable():
 def test_model_universal_field_present_with_defaults():
     eq_(Model(),
         {
-        '_id': -1,
+        '_id': None,
         '_type': 'model',
     })
 
@@ -107,7 +107,7 @@ def test_model_dict_view():
     assert isinstance(dict_view, dict)
 
     eq_(dict_view,
-        {'_id': -1, '_type': 'testmodel', 'a': 'test'})
+        {'_id': None, '_type': 'testmodel', 'a': 'test'})
 
 
 def test_model_dict_idempotence():
@@ -223,3 +223,9 @@ def test_fields_compare_in_creation_order():
 
 def test_fields_unimplemented_comparison():
     eq_(NotImplemented, field().__lt__(-1))
+
+def test_fields_doc_attribute_is_also_docstring():
+    eq_('a docstring',
+        field(doc='a docstring').__doc__)
+    eq_('a docstring',
+        field(doc='a docstring').doc)
