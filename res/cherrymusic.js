@@ -685,7 +685,7 @@ function addNewUser(){
 }
 
 function userDelete(userid){
-    var data = {'action':'setuseroptionfor',
+    var data = {'action': 'userdelete',
                 'value' : JSON.stringify({
                     'userid':userid
                 })};
