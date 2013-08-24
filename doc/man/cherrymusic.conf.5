@@ -1,7 +1,7 @@
 .\" Manpage for CherryMusic.
 .\" Contact us on github.com/devsnd/cherrymusic to correct errors or typos.
 
-.TH "CHERRYMUSIC.CONF" "5" "2013\-05\-18" "CherryMusic" "cherrymusic.conf man page"
+.TH "CHERRYMUSIC.CONF" "5" "2013\-08\-24" "CherryMusic" "cherrymusic.conf man page"
 
 .SH "NAME"
 cherrymusic.conf \- configuration file of CherryMusic, see \fBcherrymusic\fP(1)
@@ -27,6 +27,9 @@ Links: If your operating system supports them, you can use symlinks directly in 
 .IP "\fB    fetch_album_art = True | False\fP"
 This option tries to fetch the album covers from various locations in the web, if no image is found locally. By default it will be fetched from Amazon. They will be shown next to folders that qualify as an album.
 
+.IP "\fB    maximum_download_size = BYTESIZE\fP"
+CherryMusic has a feature that allows certain users (who can be chosen by the admin in the admin panel) to download the audio files contained in a playlist. BYTESIZE sets the maximum size in bytes of all files to be downloaded by a user in one zip file. It defaults to 250 MB.
+
 .IP "[search]"
 
 .IP "\fB    maxresults = NUMBER\fP"
@@ -41,7 +44,7 @@ This will load parts of the database into memory for improved performance. This 
 ." If this option is enabled, CherryMusic will only use the media database \-\- never the filesystem \-\- for content lookups in the file browser and search function. This can be useful if the media files reside on an external hard drive or behind a slow network connection.
 
 .IP "\fB    maxshowfiles = NUMBER\fP"
-"maxshowfiles" specifies how many files and folders should be shown at the same time. E.g. if you open a folder with more than MAXSHOWFILES, the files will be grouped according to the first letter in their name. 100 is a good value, as a CD can have up to 99 tracks.
+"maxshowfiles" specifies how many files and folders should be shown at the same time. E.g. if you open a folder with more than NUMBER files or folders in it, the files will be grouped according to the first letter in their name. 100 is a good value, as a CD can have up to 99 tracks.
 
 .IP "[server]"
 
