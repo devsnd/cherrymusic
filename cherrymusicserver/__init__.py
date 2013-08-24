@@ -81,6 +81,7 @@ from cherrymusicserver import configuration as cfg
 config = None
 
 
+from cherrymusicserver import auth
 from cherrymusicserver import cherrymodel
 from cherrymusicserver import database
 from cherrymusicserver import httphandler

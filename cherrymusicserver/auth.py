@@ -29,49 +29,74 @@
 #
 import cherrypy
 
+import cherrymusicserver as cherry
+from cherrymusicserver import log
 from cherrymusicserver import service
-
-
-users = service.get('users')
-
-#TODO : local auto login
-#TODO : deny remote admin
-#TODO : python2->3 session bug
+from cherrymusicserver import sessions
 
 
 #
-# http://tools.cherrypy.org/wiki/AuthenticationAndAccessRestrictions
+# see:
+#   http://tools.cherrypy.org/wiki/AuthenticationAndAccessRestrictions
 #
 
 _SESSION_KEY = '_auth_uid'
 
 
+class _ServiceProxy(object):
+
+    def __init__(self, handle):
+        self.__handle = handle
+
+    def __getattr__(self, name):
+        s = service.get(self.__handle)
+        return getattr(s, name)
+
+
+users = _ServiceProxy('users')
+
+
 def login(username, password):
     user = users.auth(username, password)
-    cherrypy.session.regenerate()
-    cherrypy.session[_SESSION_KEY] = user.uid
-    cherrypy.request.user = user
-    return user
+    log.d('authenticated user %r', user.name)
+    reject_remote_admin = not cherry.config['server.permit_remote_admin_login']
+    if not _is_loopback_connection() and user.isadmin and reject_remote_admin:
+        log.i('rejected remote login of admin user %r', user.name)
+        user = _nobody()
+    return _login(user)
 
 
 def logout():
-    cherrypy.lib.sessions.expire()
-    cherrypy.session[_SESSION_KEY] = None
-    cherrypy.request.user = None
+    with sessions.current() as session:
+        cherrypy.lib.sessions.expire()
+        try:
+            del session[_SESSION_KEY]
+        except KeyError:
+            pass
+        finally:
+            try:
+                del cherrypy.request.user
+            except AttributeError:
+                pass
 
 
 def is_admin():
-    return cherrypy.request.user.isadmin
+    user = current_user()
+    return user and user.isadmin
 
 
 def is_user(required_user):
     def condition():
-        return required_user == cherrypy.request.user
+        return required_user == current_user()
     return condition
+
+_any = any
+def any(*conditions):
+    return lambda: _any(c() for c in conditions)
 
 
 def check(*conditions):
-    user = getattr(cherrypy.request, 'user', None)
+    user = current_user()
     if not (user and user.is_valid is True):
         raise cherrypy.HTTPError(401)
     for condition in conditions:
@@ -86,7 +111,7 @@ def check_tool(*args, **kwargs):
     conditions that the user must fulfill"""
     conditions = cherrypy.request.config.get('auth.require', None)
     if conditions is not None:
-        check(conditions)
+        check(*conditions)
 cherrypy.tools.auth = cherrypy.Tool('before_handler', check_tool)
 
 
@@ -101,3 +126,48 @@ def require(*conditions):
         f._cp_config['auth.require'].extend(conditions)
         return f
     return decorate
+
+
+def current_user():
+    user = _nobody()
+    try:
+        user = cherrypy.request.user
+    except AttributeError:
+        with sessions.current() as session:
+            try:
+                uid = session[_SESSION_KEY]
+                user = users.getById(uid)
+            except KeyError:
+                user = _try_autologin()
+            else:
+                cherrypy.request.user = user
+    return user
+
+
+def _is_loopback_connection():
+    log.i('remote ip: %r', cherrypy.request.remote.ip)
+    return cherrypy.request.remote.ip in ('127.0.0.1', '::1')
+
+
+def _try_autologin():
+    if _is_loopback_connection() and cherry.config['server.localhost_auto_login']:
+        return _login(users.getById(1))
+    return _nobody()
+
+
+def _login(user):
+    bad_user = not user or not user.is_valid
+    with sessions.current() as session:
+        conflict = _SESSION_KEY in session and session[_SESSION_KEY] != user.uid
+        if bad_user or conflict:
+            logout()
+            return _nobody()
+        session.regenerate()
+        session[_SESSION_KEY] = user.uid
+    cherrypy.request.user = user
+    log.i('logged in: %r', user.name)
+    return user
+
+
+def _nobody():
+    return users.User.nobody()

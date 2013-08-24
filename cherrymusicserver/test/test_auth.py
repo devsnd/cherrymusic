@@ -30,66 +30,86 @@
 from mock import *
 from nose.tools import *
 
+from imp import reload
+from collections import defaultdict
+
 import cherrypy
 
-from cherrymusicserver import service
-service.provide('users', 'userservice (replace by mock)')
-
 from cherrymusicserver import auth
+from cherrymusicserver import log
+from cherrymusicserver import service
+from cherrymusicserver import sessions
+import cherrymusicserver as cherry
+
+def init():
+    cherry.config = defaultdict(lambda: None)
+
+    userdb = Mock()
+    userdb.getById.side_effect = mock_user_by_id
+    userdb.auth.side_effect = mock_user_auth
+    userdb.User.nobody = Mock(return_value=nobody)
+    service.provide('users', userdb)
+
+    auth.cherrypy = MagicMock()
+    auth.cherrypy.HTTPError = cherrypy.HTTPError
+
+    global sessiondir
+    sessiondir = {}
+    session = MagicMock()
+    session.__setitem__.side_effect = session_set
+    session.__getitem__.side_effect = session_get
+    session.__delitem__.side_effect = session_del
+    session.__enter__.return_value = session
+    sessions.current = lambda: session
+
+    init_request()
+
+
+def init_request(ip='127.0.0.1'):
+    auth.cherrypy.request = MagicMock()
+    auth.cherrypy.request.remote = MagicMock()
+    auth.cherrypy.request.remote.ip = ip
+    del auth.cherrypy.request.user
+
+
+def teardown_module():
+    sessions.current = reload(sessions).current
+    auth.cherrypy = reload(cherrypy)
+    service.provide('users', None)
+    cherry.config = None
 
 
 def no_login():
-    auth.users = Mock()
-    auth.cherrypy.session = MagicMock()
-    if hasattr(auth.cherrypy.request, 'user'):
-        del auth.cherrypy.request.user
+    init()
+    session_user(None)
 
 
 def logged_in():
-    no_login()
-    user = Mock()
-    user.is_valid = True
-    auth.cherrypy.request.user = user
+    init()
+    session_user('some_user')
 
 
 @with_setup(no_login)
-@patch('cherrymusicserver.auth.cherrypy')
-def test_login_should_authenticate_credentials(cherrypy):
-    auth.login('some_name', 'some_password')
-    auth.users.auth.assert_called_with('some_name', 'some_password')
+def test_login_should_return_authentication_result():
+    assert some_user is auth.login('some_user', 'some_password')
 
 
 @with_setup(no_login)
-@patch('cherrymusicserver.auth.cherrypy')
-def test_login_should_return_user(cherrypy):
-    user = auth.users.auth.return_value = Mock()
-    assert user is auth.login('some_name', 'some_password')
+def test_login_should_reset_session():
+    auth.login('some_user', 'some_password')
+    auth.cherrypy.session.regenerate.assert_called()
 
 
 @with_setup(no_login)
-@patch('cherrymusicserver.auth.cherrypy')
-def test_login_should_reset_session(cherrypy):
-    auth.login('some_name', 'some_password')
-    cherrypy.session.regenerate.assert_called()
-
-
-@with_setup(no_login)
-@patch('cherrymusicserver.auth.cherrypy')
-def test_login_should_set_request_user(cherrypy):
-    user = auth.users.auth.return_value = Mock()
-
-    auth.login('some_name', 'some_password')
-
-    assert cherrypy.request.user is user
+def test_login_should_set_current_user():
+    auth.login('some_user', 'some_password')
+    assert some_user is auth.current_user()
 
 
 @with_setup(logged_in)
-@patch('cherrymusicserver.auth.cherrypy')
-def test_logout_should_unset_request_user_and_session(cherrypy):
+def test_logout_should_unset_current_user():
     auth.logout()
-
-    assert cherrypy.request.user is None, cherrypy.request.user
-    cherrypy.session.__setitem__.assert_called
+    assert nobody is auth.current_user()
 
 
 @with_setup(no_login)
@@ -123,3 +143,151 @@ def test_check_must_fail_on_false_condition():
 @raises(cherrypy.HTTPError)
 def test_check_must_fail_on_untrue_condition():
     auth.check(Mock(return_value=None))
+
+
+def test_require_should_decorate_with_cpconfig():
+    condition = lambda: None
+    condition2 = lambda: None
+    some_object = lambda: None
+
+    auth.require(condition)(some_object)
+    auth.require(condition2)(some_object)
+
+    eq_({'auth.require': [condition, condition2]},
+        some_object._cp_config)
+
+
+@with_setup(logged_in)
+@patch('cherrymusicserver.auth.check')
+def test_check_tool_should_test_conditions_from_cpconfig(checker):
+    condition = Mock()
+    auth.cherrypy.request.config = {'auth.require': [condition]}
+
+    auth.check_tool()
+
+    checker.assert_called_with(condition)
+
+
+@with_setup(logged_in)
+def test_check_tool_should_handle_no_requirements():
+    auth.cherrypy.request.config = {'auth.require': None}
+    auth.check_tool()
+
+
+@with_setup(no_login)
+def test_conditions_should_work_without_login():
+    auth.is_admin()
+    auth.is_user(None)()
+    assert not auth.any()()
+    assert auth.any(lambda: False, lambda: True)()
+
+
+@with_setup(no_login)
+def test_is_admin_should_reflect_current_user_admin_status():
+    session_user('some_user')
+    assert not auth.is_admin()
+
+    session_user('admin')
+    assert auth.is_admin()
+
+    auth.logout()
+    assert not auth.is_admin()
+
+
+@with_setup(no_login)
+def test_is_user_should_recognize_only_current_user():
+    session_user('some_user')
+
+    assert auth.is_user(mock_user_by_name('some_user'))()
+    assert not auth.is_user(mock_user_by_name('admin'))()
+
+    auth.logout()
+    assert not auth.is_user(mock_user_by_name('some_user'))()
+
+
+@with_setup(no_login)
+def test_current_user_should_autologin_if_possible():
+    with patch.dict(cherry.config, {'server.localhost_auto_login': True}):
+        assert admin is auth.current_user()
+
+
+@with_setup(no_login)
+def test_login_should_reject_remote_admins_when_so_configured():
+
+    init_request(ip='a.remote.ip')
+
+    assert nobody is auth.login('admin', 'some_password')
+
+    with patch.dict(cherry.config, {'server.permit_remote_admin_login': True}):
+        assert admin is auth.login('admin', 'some_password')
+
+
+@with_setup(no_login)
+def test_current_user_survives_to_new_request():
+    auth.login('some_user', 'some_password')
+    init_request()
+    assert some_user is auth.current_user()
+
+
+#
+#   HELPERS
+#
+
+def session_user(name):
+    auth.logout()
+    if name is not None:
+        auth.login(name, 'some_password')
+
+sessiondir = {}
+
+def session_set(key, value):
+    _log_op(key, '<--', value)
+    sessiondir[key] = value
+    _log_op(sessiondir)
+
+def session_get(key):
+    val = sessiondir[key]
+    _log_op(key, '-->', val)
+    return val
+
+def session_del(key):
+    del sessiondir[key]
+    _log_op(key, '<-- DELETE')
+
+usernames = ('nobody', 'admin', 'some_user',)
+
+
+def mock_user(name, id):
+    user = Mock(name=name)
+    user.name = name
+    user.is_valid = name in usernames[1:]
+    user.isadmin = (name == 'admin')
+    user.uid = id if user.is_valid else -1
+    return user
+
+
+users = dict((i, mock_user(name, i)) for i, name in enumerate(usernames))
+nobody = users[0]
+admin = users[1]
+some_user = users[2]
+users = defaultdict(lambda: nobody, users)
+
+
+def mock_user_by_name(name):
+    try:
+        return users[usernames.index(name)]
+    except:
+        return nobody
+
+
+def mock_user_by_id(id):
+    return users[id]
+
+
+def mock_user_auth(name, passw):
+    if passw == 'some_password':
+        return mock_user_by_name(name)
+    return nobody
+
+def _log_op(lval, op='', rval=''):
+    log.d('{0} {1} {2}'.format(lval, op, rval).strip())
