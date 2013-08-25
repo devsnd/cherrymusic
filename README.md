@@ -17,7 +17,8 @@ current features:
   - automatic album cover art fetching
   - see CHANGES for all the features
   
-You can find more information on the [CherryMusic website](http://www.fomori.org/cherrymusic).
+You can find more information on the [CherryMusic website](http://www.fomori.org/cherrymusic)
+and in our [wiki](https://github.com/devsnd/cherrymusic/wiki).
 
 master | devel
 --- | --- 
@@ -51,19 +52,15 @@ Getting Started
         
 Requirements
 ------------
-* [Python](http://python.org/download/releases/)
-* [CherryPy](http://www.cherrypy.org)
+* [Python](http://python.org/download/releases/) >= 2.6, >= 3.2 preferred
+* [CherryPy](http://www.cherrypy.org) >= 3
 
 
-Optional Dependencies
----------------------
-python 2:
-  
-  - HTTPS support: pyOpenSSL
+More
+----
 
-python 3:
-
-  - ID3 Tag Support: stagger
+See our [wiki](https://github.com/devsnd/cherrymusic/wiki), 
+especially the [User Guide](https://github.com/devsnd/cherrymusic/wiki/User-Guide).
 
 Known Issues
 ------------
