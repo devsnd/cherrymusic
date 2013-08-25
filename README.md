@@ -26,30 +26,22 @@ master | devel
  
 
 
-
 Getting Started
 ---------------
 
-1. [We're on github](https://github.com/devsnd/cherrymusic). Checkout or download the cherrymusic sources, e.g.:
+See the [User Guide](https://github.com/devsnd/cherrymusic/wiki/User-Guide) for quickstart instructions and more.
 
-        $ git clone git://github.com/devsnd/cherrymusic.git
+Basically, you can just 
+
+    $ git clone git://github.com/devsnd/cherrymusic.git
+
+and then start the server and follow the instructions:
+
+    $ python cherrymusic --setup --port 8080
     
-2. To use cherrymusic you need [CherryPy](http://www.cherrypy.org). There are two options:
-    - Install it. Use your favorite package manager,
-      or [download](http://download.cherrypy.org/cherrypy/3.2.2/) it and do a manual install.
-    - If you only want to test cherrymusic without installing any dependencies, you
-      can simply start CherryMusic and it will ask you if you want it to install
-      cherrypy in the local folder for you.
+(Leave out the --options for subsequent starts.)
 
 
-3. Now simply run the main script using python
-
-        $ python cherrymusic --setup --port 8080
-
-4. Open your browser, configure cherrymusic and play some music!
-
-        $ firefox localhost:8080
-        
 Requirements
 ------------
 * [Python](http://python.org/download/releases/) >= 2.6, >= 3.2 preferred
@@ -59,23 +51,11 @@ Requirements
 More
 ----
 
-See our [wiki](https://github.com/devsnd/cherrymusic/wiki), 
-especially the [User Guide](https://github.com/devsnd/cherrymusic/wiki/User-Guide).
+See our [wiki](https://github.com/devsnd/cherrymusic/wiki) for user and developer information.
 
-Known Issues
-------------
 
-An active flash blocker can interfere with the web frontend. 
-If you have trouble with things like track selection or playback, try whitelisting
-the server in your browser's flash blocker / plugin manager.
+Troubleshooting
+---------------
 
-On Windows:
-```
-FileNotFoundError: [WinError 2] The system cannot find the file specified: 'C:\\Documents and Settings\\username\\.cherrymusic\
-\sessions\\session-622d41384b5f877a840ba5dfe38408dc4853e8f4.lock'
-```
-This error can be circumvented by setting the
+Please see the [Troubleshooting wiki page](https://github.com/devsnd/cherrymusic/wiki/Troubleshoot).
 
-        keep_session_in_ram = True
-
-in the configuration file (`C:\Documents and Settings\username\Application Data\cherrymusic\config`).
