@@ -29,7 +29,7 @@ master | devel
 Getting Started
 ---------------
 
-See the [User Guide](https://github.com/devsnd/cherrymusic/wiki/User-Guide) for quickstart instructions and more.
+See the [Setup Guide](https://github.com/devsnd/cherrymusic/wiki/Setup-Guide) for quickstart instructions and more.
 
 Basically, you can just 
 
@@ -57,5 +57,5 @@ See our [wiki](https://github.com/devsnd/cherrymusic/wiki) for user and develope
 Troubleshooting
 ---------------
 
-Please see the [Troubleshooting wiki page](https://github.com/devsnd/cherrymusic/wiki/Troubleshoot).
+Please see the [Troubleshooting wiki page](https://github.com/devsnd/cherrymusic/wiki/Setup-Guide#troubleshooting).
 
