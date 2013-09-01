@@ -553,7 +553,6 @@ everybody has to relogin now.''')
         files = self.model.listdir("", "", True)
 
         fileCount = len(files)
-        print fileCount
 
         if fileCount < 50:
             result = files
