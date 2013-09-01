@@ -39,6 +39,7 @@ import cherrypy
 import codecs
 import sys
 import re
+import random
 try:
     from urllib.parse import unquote
 except ImportError:
@@ -89,6 +90,7 @@ class HTTPHandler(object):
             'rememberplaylist': self.api_rememberplaylist,
             'saveplaylist': self.api_saveplaylist,
             'loadplaylist': self.api_loadplaylist,
+            'generaterandomplaylist': self.api_generaterandomplaylist,
             'deleteplaylist': self.api_deleteplaylist,
             'getmotd': self.api_getmotd,
             'restoreplaylist': self.api_restoreplaylist,
@@ -546,6 +548,25 @@ everybody has to relogin now.''')
                                         playlistid=value,
                                         userid=self.getUserId()
                                         ))
+
+    def api_generaterandomplaylist(self, value):
+        files = self.model.listdir("", "", True)
+
+        fileCount = len(files)
+        print fileCount
+
+        if fileCount < 50:
+            result = files
+        else:
+            result = []
+            while len(result) < 50 or len(result) == fileCount:
+                randomValue = int(random.random() * fileCount)
+                file = files[randomValue]
+
+                if not file in result:
+                    result.insert(-1, file)
+
+        return self.jsonrenderer.render(result)
 
     def api_changeplaylist(self, value):
         params = json.loads(value)
