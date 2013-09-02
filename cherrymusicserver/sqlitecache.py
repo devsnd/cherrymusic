@@ -199,7 +199,7 @@ class SQLiteCache(object):
 
             cursor.execute(''' SELECT filetype FROM files WHERE rowid=\'''' + str(randomId) + '''\'''')
             filetype = cursor.fetchone()[0]
-            if filetype == '.mp3' or filetype == '.ogg' or filetype == '.aac':
+            if (filetype == '.mp3' or filetype == '.ogg' or filetype == '.aac') and not randomId in randomList:
                 randomList.insert(-1, randomId)
 
         return self.musicEntryFromFileIds(randomList)
