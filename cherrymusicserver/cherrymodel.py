@@ -73,7 +73,7 @@ class CherryModel:
             sortedfiles = sorted(sortedfiles, key=isfile)
         return sortedfiles
 
-    def listdir(self, dirpath, filterstr='', neverShowCompactListing = False):
+    def listdir(self, dirpath, filterstr=''):
         absdirpath = self.abspath(dirpath)
         if cherry.config['browser.pure_database_lookup']:
             allfilesindir = self.cache.listdir(dirpath)
@@ -90,7 +90,7 @@ class CherryModel:
 
         maximum_shown_files = cherry.config['browser.maxshowfiles']
         compactlisting = len(allfilesindir) > maximum_shown_files
-        if compactlisting and not neverShowCompactListing:
+        if compactlisting:
             upper_case_files = [x.upper() for x in allfilesindir]
             filterstr = os.path.commonprefix(upper_case_files)
             filterlength = len(filterstr)+1

@@ -50,6 +50,7 @@ from cherrymusicserver.cherrymodel import MusicEntry
 from cherrymusicserver.database.connect import BoundConnector
 from cherrymusicserver.util import Performance
 from cherrymusicserver.progress import ProgressTree, ProgressReporter
+import random
 
 scanreportinterval = 1
 AUTOSAVEINTERVAL = 100
@@ -180,6 +181,28 @@ class SQLiteCache(object):
                         log.e('media cache cannot listdir %r: path not in database', path)
                         return []
         return list(map(lambda f: f.basename, self.fetch_child_files(targetdir)))
+
+    def randomMusicEntries(self, count):
+        cursor = self.conn.cursor()
+        cursor.execute(''' SELECT MIN(rowid) as min, MAX(rowid) as max FROM files ''')
+        minId, maxId = cursor.fetchone()
+
+        cursor.execute(''' SELECT COUNT(1) as count FROM files WHERE
+            filetype = ".mp3" or filetype = ".ogg" or filetype = ".aac"''')
+        maxCount = cursor.fetchone()[0]
+
+        idList = xrange(minId, maxId)
+
+        randomList = []
+        while len(randomList) < count and len(randomList) < maxCount:
+            randomId = random.choice(idList)
+
+            cursor.execute(''' SELECT filetype FROM files WHERE rowid=\'''' + str(randomId) + '''\'''')
+            filetype = cursor.fetchone()[0]
+            if filetype == '.mp3' or filetype == '.ogg' or filetype == '.aac':
+                randomList.insert(-1, randomId)
+
+        return self.musicEntryFromFileIds(randomList)
 
     def musicEntryFromFileIds(self, filerowids, incompleteMusicEntries={},mode='normal'):
         #incompleteMusicEntries maps db parentid to incomplete musicEntry

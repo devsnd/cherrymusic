@@ -39,7 +39,6 @@ import cherrypy
 import codecs
 import sys
 import re
-import random
 try:
     from urllib.parse import unquote
 except ImportError:
@@ -550,22 +549,8 @@ everybody has to relogin now.''')
                                         ))
 
     def api_generaterandomplaylist(self, value):
-        files = self.model.listdir("", "", True)
-
-        fileCount = len(files)
-
-        if fileCount < 50:
-            result = files
-        else:
-            result = []
-            while len(result) < 50 or len(result) == fileCount:
-                randomValue = int(random.random() * fileCount)
-                file = files[randomValue]
-
-                if not file in result:
-                    result.insert(-1, file)
-
-        return self.jsonrenderer.render(result)
+        files = self.model.cache.randomMusicEntries(50)
+        return self.jsonrenderer.render(files)
 
     def api_changeplaylist(self, value):
         params = json.loads(value)
