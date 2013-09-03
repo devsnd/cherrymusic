@@ -182,27 +182,23 @@ class SQLiteCache(object):
                         return []
         return list(map(lambda f: f.basename, self.fetch_child_files(targetdir)))
 
-    def randomMusicEntries(self, count):
+    def randomIds(self, count):
+        if sys.version_info < (3,):
+            range = xrange
+
+            loadCount = int(count * 1.5) + 1
+
         cursor = self.conn.cursor()
         cursor.execute(''' SELECT MIN(rowid) as min, MAX(rowid) as max FROM files ''')
         minId, maxId = cursor.fetchone()
 
-        cursor.execute(''' SELECT COUNT(1) as count FROM files WHERE
-            filetype = ".mp3" or filetype = ".ogg" or filetype = ".aac"''')
-        maxCount = cursor.fetchone()[0]
+        # this happens if our database if still empty
+        if not minId or not maxId:
+            return []
 
-        idList = xrange(minId, maxId)
+        idList = range(minId, maxId)
+        return random.sample(idList, loadCount)
 
-        randomList = []
-        while len(randomList) < count and len(randomList) < maxCount:
-            randomId = random.choice(idList)
-
-            cursor.execute(''' SELECT filetype FROM files WHERE rowid=\'''' + str(randomId) + '''\'''')
-            filetype = cursor.fetchone()[0]
-            if (filetype == '.mp3' or filetype == '.ogg' or filetype == '.aac') and not randomId in randomList:
-                randomList.insert(-1, randomId)
-
-        return self.musicEntryFromFileIds(randomList)
 
     def musicEntryFromFileIds(self, filerowids, incompleteMusicEntries={},mode='normal'):
         #incompleteMusicEntries maps db parentid to incomplete musicEntry

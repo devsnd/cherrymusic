@@ -549,7 +549,7 @@ everybody has to relogin now.''')
                                         ))
 
     def api_generaterandomplaylist(self, value):
-        files = self.model.cache.randomMusicEntries(50)
+        files = self.model.randomMusicEntries(50)
         return self.jsonrenderer.render(files)
 
     def api_changeplaylist(self, value):
