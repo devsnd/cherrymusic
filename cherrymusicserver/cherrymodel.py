@@ -215,7 +215,7 @@ class CherryModel:
         loadCount = int(count * 1.5) + 1
         randomIds = self.cache.randomIds(loadCount)
         entries = self.cache.musicEntryFromFileIds(randomIds)
-        filteredEntries = filter(isValidMediaFile, entries)
+        filteredEntries = list(filter(isValidMediaFile, entries))
 
         return filteredEntries[:count]
 
