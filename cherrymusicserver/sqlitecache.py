@@ -183,10 +183,9 @@ class SQLiteCache(object):
         return list(map(lambda f: f.basename, self.fetch_child_files(targetdir)))
 
     def randomIds(self, count):
-        if sys.version_info < (3,):
-            range = xrange
 
-            loadCount = int(count * 1.5) + 1
+
+        loadCount = int(count * 1.5) + 1
 
         cursor = self.conn.cursor()
         cursor.execute(''' SELECT MIN(rowid) as min, MAX(rowid) as max FROM files ''')
@@ -196,7 +195,11 @@ class SQLiteCache(object):
         if not minId or not maxId:
             return []
 
-        idList = range(minId, maxId)
+        if sys.version_info < (3,):
+            idList = xrange(minId, maxId)
+        else:
+            idList = range(minId, maxId)
+
         return random.sample(idList, loadCount)
 
 
