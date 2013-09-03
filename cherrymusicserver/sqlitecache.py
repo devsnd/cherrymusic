@@ -50,6 +50,7 @@ from cherrymusicserver.cherrymodel import MusicEntry
 from cherrymusicserver.database.connect import BoundConnector
 from cherrymusicserver.util import Performance
 from cherrymusicserver.progress import ProgressTree, ProgressReporter
+import random
 
 scanreportinterval = 1
 AUTOSAVEINTERVAL = 100
@@ -180,6 +181,27 @@ class SQLiteCache(object):
                         log.e('media cache cannot listdir %r: path not in database', path)
                         return []
         return list(map(lambda f: f.basename, self.fetch_child_files(targetdir)))
+
+    def randomIds(self, count):
+
+
+        loadCount = int(count * 1.5) + 1
+
+        cursor = self.conn.cursor()
+        cursor.execute(''' SELECT MIN(rowid) as min, MAX(rowid) as max FROM files ''')
+        minId, maxId = cursor.fetchone()
+
+        # this happens if our database if still empty
+        if not minId or not maxId:
+            return []
+
+        if sys.version_info < (3,):
+            idList = xrange(minId, maxId)
+        else:
+            idList = range(minId, maxId)
+
+        return random.sample(idList, loadCount)
+
 
     def musicEntryFromFileIds(self, filerowids, incompleteMusicEntries={},mode='normal'):
         #incompleteMusicEntries maps db parentid to incomplete musicEntry

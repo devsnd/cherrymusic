@@ -550,6 +550,25 @@ function loadPlaylist(playlistid, playlistlabel){
     }
 }
 
+function randomPlaylist() {
+    "use strict";
+    playlistManager.clearQueue();
+    var data = {'action':'generaterandomplaylist'};
+    var success = function(data){
+        var tracks = jQuery.parseJSON(data);
+        for (var i = 0; i < tracks.length; i++) {
+            var track = tracks[i];
+            playlistManager.addSong(track.urlpath, track.label)
+        }
+    };
+    busy('.playlist-panel').hide().fadeIn('fast');
+    api(data,
+        success,
+        errorFunc('error loading random playlist'),
+        function(){busy('.playlist-panel').fadeOut('fast')}
+    );
+}
+
 var lastPlaylistHeight = 0;
 function resizePlaylistSlowly(){
     var currentHeight = $('.jp-playlist').height();
