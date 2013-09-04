@@ -59,3 +59,10 @@ Troubleshooting
 
 Please see the [Troubleshooting wiki page](https://github.com/devsnd/cherrymusic/wiki/Setup-Guide#troubleshooting).
 
+
+Contribute
+----------
+
+There's also a wiki section listing the 
+[1001 ways to lend a hand](https://github.com/devsnd/cherrymusic/wiki/Contribute).
+
