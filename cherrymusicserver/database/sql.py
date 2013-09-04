@@ -232,7 +232,7 @@ class Updater(object):
         cxn.close()
 
     def _init_with_version(self, vnum):
-        log.d('initializing database %r to version %d', self.name, vnum)
+        log.d('initializing database %r to version %s', self.name, vnum)
         cxn = self.db.connection()
         cxn.isolation_level = None  # autocommit
         cxn.executescript(self.desc[vnum]['create.sql'])

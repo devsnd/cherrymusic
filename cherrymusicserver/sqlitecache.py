@@ -196,18 +196,20 @@ class SQLiteCache(object):
         if minId is None:                   # database is empty
             return ()
         if abs(maxId - minId) < count:      # less than count entries
-            return self.musicEntryFromFileIds(range(minId, maxId + 1), mode='filesonly')
+            return self.musicEntryFromFileIds(range(minId, maxId + 1), mode='fileonly')
 
         if sys.version_info < (3,):
             idRange = xrange(minId, maxId + 1)
         else:
             idRange = range(minId, maxId + 1)
 
-        return self.musicEntryFromFileIds(random.sample(idRange, count), mode='filesonly')
+        return self.musicEntryFromFileIds(random.sample(idRange, count), mode='fileonly')
 
-
-    def musicEntryFromFileIds(self, filerowids, incompleteMusicEntries={},mode='normal'):
+    def musicEntryFromFileIds(self, filerowids, incompleteMusicEntries=None, mode='normal'):
         #incompleteMusicEntries maps db parentid to incomplete musicEntry
+        assert mode in ('normal', 'dironly', 'fileonly'), mode
+        if incompleteMusicEntries is None:
+            incompleteMusicEntries = {}
         musicEntries = [] #result list
 
         if self.file_db_in_memory():
@@ -217,36 +219,37 @@ class SQLiteCache(object):
 
         cursor = db.cursor()
         sqlquery = '''  SELECT rowid, parent, filename, filetype, isdir
-                        FROM files WHERE rowid IN ('''+', '.join(map(str,filerowids))+''') '''
+                        FROM files WHERE rowid IN ({ids})'''.format(
+                            ids=', '.join('?' * len(filerowids)))
+        sqlparams = tuple(filerowids)
 
         if not incompleteMusicEntries:
             #only filter 1st recursion level
             if mode != 'normal':
-                sqlquery += ' AND isdir = '+str(int('dironly'==mode))
-            sqlquery += ' LIMIT 0,'+str(NORMAL_FILE_SEARCH_LIMIT)
+                sqlquery += ' AND isdir = ?'
+                sqlparams += ('dironly' == mode,)
+            sqlquery += ' LIMIT 0, ?'
+            sqlparams += (NORMAL_FILE_SEARCH_LIMIT,)
 
-        tempIncompleteEntries = {}
-        for rowid, parent, filename, fileext, isdir in cursor.execute(sqlquery).fetchall():
+        cursor.execute(sqlquery, sqlparams)
+        for id, parent_id, filename, fileext, isdir in cursor.fetchall():
             path = filename + fileext
             #check if fetched row is parent of existing entry
-            if rowid in incompleteMusicEntries:
+            if id in incompleteMusicEntries:
                 #remove item and map to new parent id
-                entries = incompleteMusicEntries.pop(rowid)
+                entries = incompleteMusicEntries.pop(id)
                 for entry in entries:
-                    entry.path = os.path.join(path,entry.path)
+                    entry.path = os.path.join(path, entry.path)
             else:
-                #rowid is not parent of any entry, so make a new one
+                #id is not parent of any entry, so make a new one
                 entries = [MusicEntry(path, dir=bool(isdir))]
 
-            if parent == -1:
+            if parent_id == -1:
                 #put entries in result list if they've reached top level
                 musicEntries += entries
             else:
                 #otherwise map parent id to dict
-                tempIncompleteEntries[parent] = tempIncompleteEntries.get(parent,[]) + entries
-
-        for k, v in tempIncompleteEntries.items():
-            incompleteMusicEntries[k] = v
+                incompleteMusicEntries[parent_id] = incompleteMusicEntries.get(parent_id,[]) + entries
 
         if incompleteMusicEntries:
             #recurse for all incomplete entries
@@ -276,6 +279,7 @@ class SQLiteCache(object):
             self.add_to_file_table(fileobj)
             word_ids = self.add_to_dictionary_table(fileobj.name)
             self.add_to_search_table(fileobj.uid, word_ids)
+            return fileobj
         except UnicodeEncodeError as e:
             log.e("wrong encoding for filename '%s' (%s)", fileobj.relpath, e.__class__.__name__)
 
@@ -284,7 +288,7 @@ class SQLiteCache(object):
         cursor = self.conn.execute('INSERT INTO files (parent, filename, filetype, isdir) VALUES (?,?,?,?)', (fileobj.parent.uid if fileobj.parent else -1, fileobj.name, fileobj.ext, 1 if fileobj.isdir else 0))
         rowid = cursor.lastrowid
         fileobj.uid = rowid
-        return [rowid]
+        return fileobj
 
 
     def add_to_dictionary_table(self, filename):
@@ -614,10 +618,12 @@ class SQLiteCache(object):
         File object with an invalid record id matching the one listed by its
         children.
         '''
-        assert os.path.isabs(fullpath)
         basedir = cherry.config['media.basedir']
-        if not fullpath.startswith(basedir):
-            return None
+        if os.path.isabs(fullpath):
+            if not fullpath.startswith(basedir):
+                return None
+        else:
+            fullpath = os.path.join(basedir, fullpath)
 
         relpath = fullpath[len(basedir):].strip(os.path.sep)
         root = File(basedir, isdir=True, uid= -1)
