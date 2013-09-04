@@ -182,25 +182,28 @@ class SQLiteCache(object):
                         return []
         return list(map(lambda f: f.basename, self.fetch_child_files(targetdir)))
 
-    def randomIds(self, count):
+    def randomFileEntries(self, count):
+        ''' Return a number of random entries from the file cache.
 
-
-        loadCount = int(count * 1.5) + 1
-
+            The actual number returned may be less than ``count`` if the
+            database does not contain enough entries or if randomization hits
+            directory entries or entries that have been deleted.
+        '''
         cursor = self.conn.cursor()
-        cursor.execute(''' SELECT MIN(rowid) as min, MAX(rowid) as max FROM files ''')
+        cursor.execute(''' SELECT MIN(rowid), MAX(rowid) FROM files ''')
         minId, maxId = cursor.fetchone()
 
-        # this happens if our database if still empty
-        if not minId or not maxId:
-            return []
+        if minId is None:                   # database is empty
+            return ()
+        if abs(maxId - minId) < count:      # less than count entries
+            return self.musicEntryFromFileIds(range(minId, maxId + 1), mode='filesonly')
 
         if sys.version_info < (3,):
-            idList = xrange(minId, maxId)
+            idRange = xrange(minId, maxId + 1)
         else:
-            idList = range(minId, maxId)
+            idRange = range(minId, maxId + 1)
 
-        return random.sample(idList, loadCount)
+        return self.musicEntryFromFileIds(random.sample(idRange, count), mode='filesonly')
 
 
     def musicEntryFromFileIds(self, filerowids, incompleteMusicEntries={},mode='normal'):

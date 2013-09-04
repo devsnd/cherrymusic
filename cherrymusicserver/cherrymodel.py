@@ -212,9 +212,8 @@ class CherryModel:
         return oneliner
 
     def randomMusicEntries(self, count):
-        loadCount = int(count * 1.5) + 1
-        randomIds = self.cache.randomIds(loadCount)
-        entries = self.cache.musicEntryFromFileIds(randomIds)
+        loadCount = int(count * 1.5) + 1           # expect 70% valid entries
+        entries = self.cache.randomFileEntries(loadCount)
         filteredEntries = list(filter(isValidMediaFile, entries))
 
         return filteredEntries[:count]

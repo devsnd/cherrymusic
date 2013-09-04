@@ -33,6 +33,7 @@
 from __future__ import unicode_literals
 
 import unittest
+from nose.tools import *
 
 import os
 import shutil
@@ -53,8 +54,8 @@ log.setTest()
 
 class TestFile(object):
 
-    def __init__(self, fullpath, parent=None, isdir=None):
-        self.uid = -1
+    def __init__(self, fullpath, parent=None, isdir=None, uid=None):
+        self.uid = uid if uid else -1
         self.fullpath = fullpath if not parent else os.path.join(parent.fullpath, fullpath)
         self.parent = parent
         self.isdir = fullpath.endswith(os.path.sep) if (isdir is None) else isdir
@@ -512,6 +513,67 @@ class RemoveFilesFromDatabaseTest(unittest.TestCase):
         self.assertEqual(deletable, removed,
         # self.assertListEqual(deletable, removed,
                         'complete rollback must restore all deleted entries.')
+
+
+class RandomEntriesTest(unittest.TestCase):
+
+    testdirname = 'randomFileEntries'
+
+    testfiles = ()
+
+
+    def setUp(self):
+        self.testdir = getAbsPath(self.testdirname)
+        setupTestfiles(self.testdir, self.testfiles)
+        cherry.config = cherry.config.replace({'media.basedir': self.testdir})
+        service.provide('dbconnector', MemConnector)
+        database.ensure_current_version(sqlitecache.DBNAME, autoconsent=True)
+        self.Cache = sqlitecache.SQLiteCache()
+
+    def register_files(self, *paths):
+        for uid, path in enumerate(paths):
+            f = TestFile(path, uid=uid, isdir=path.endswith('/'))
+            self.Cache.register_file_with_db(f)
+
+    def test_should_return_empty_sequence_when_no_files(self):
+        entries = self.Cache.randomFileEntries(10)
+
+        eq_(0, len(entries), entries)
+
+    def test_should_return_empty_sequence_when_zero_count(self):
+        entries = self.Cache.randomFileEntries(0)
+
+        eq_(0, len(entries), entries)
+
+    def test_should_return_all_entries_when_fewer_than_count(self):
+        self.register_files('a', 'b')
+
+        entries = self.Cache.randomFileEntries(10)
+
+        eq_(2, len(entries), entries)
+
+    def test_should_not_return_deleted_entries(self):
+        self.register_files('a', 'b', 'c')
+        file_to_remove = TestFile('b', uid=1)
+        self.Cache.remove_file(file_to_remove)
+
+        entries = self.Cache.randomFileEntries(10)
+
+        eq_(2, len(entries), entries)
+
+    def test_should_not_return_more_than_count_entries(self):
+        self.register_files('a', 'b', 'c')
+
+        entries = self.Cache.randomFileEntries(2)
+
+        ok_(2 >= len(entries), entries)
+
+    def test_should_not_return_dir_entries(self):
+        self.register_files('a_dir/')
+
+        entries = self.Cache.randomFileEntries(10)
+
+        eq_(0, len(entries), entries)
 
 
 class SymlinkTest(unittest.TestCase):

@@ -339,7 +339,7 @@ everybody has to relogin now.''')
             }
             """
         return style
-        
+
     def download_check_files(self, filelist):
         # only admins and allowed users may download
         if not cherrypy.session['admin']:
@@ -435,7 +435,7 @@ everybody has to relogin now.''')
         uo = self.useroptions.forUser(self.getUserId())
         uo.setOption(params["optionkey"], params["optionval"])
         return "success"
-    
+
     def api_setuseroptionfor(self, value):
         if cherrypy.session['admin']:
             params = json.loads(value)
