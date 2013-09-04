@@ -203,7 +203,9 @@ class SQLiteCache(object):
         else:
             idRange = range(minId, maxId + 1)
 
-        return self.musicEntryFromFileIds(random.sample(idRange, count), mode='fileonly')
+        entries = self.musicEntryFromFileIds(random.sample(idRange, count), mode='fileonly')
+        random.shuffle(entries)
+        return entries
 
     def musicEntryFromFileIds(self, filerowids, incompleteMusicEntries=None, mode='normal'):
         #incompleteMusicEntries maps db parentid to incomplete musicEntry
