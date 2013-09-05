@@ -284,6 +284,7 @@ INTERACTION
 ***/
 
 function showAlbumArtChangePopOver(jqobj){
+    // relative img paths so cherrymusic can run in subdir (#344)
     jqobj.popover({selector: jqobj.siblings('img'), title: 'Change cover art', html: true, content: '<img src="res/img/folder.png" /><img src="res/img/folder.png" /><img src="res/img/folder.png" />'});
 }
 
@@ -318,7 +319,7 @@ function getTranscodePath(filepath, format){
     "use strict";
     var match = filepath.match(/serve(.*)$/);
     if(match){
-        return "trans"+match[1]+"/get."+format;
+        return "trans"+match[1]+"/get."+format;     // relative path so cherrymusic can run in subdir (#344)
     }
 }
 

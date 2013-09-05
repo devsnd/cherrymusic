@@ -366,6 +366,7 @@ div#progressscreen img{
     background-image: linear-gradient(to bottom, #ededed, #ffffff);
     text-decoration: none;
 }
+/* relative img path so cherrymusic can run in subdir (#344): */
 .listdir img{
     background-image: url("img/folder.png");
     border: 0 none;

@@ -623,8 +623,9 @@ PlaylistManager.prototype = {
                 for(var i=0; i<availablejPlayerFormats.length; i++){
                     if(availableEncoders.indexOf(availablejPlayerFormats[i]) !== -1){
                         formats.push(availablejPlayerFormats[i]);
-                        track[ext2jPlayerFormat(availablejPlayerFormats[i])] = getTranscodePath(path,availablejPlayerFormats[i]);
-                        window.console.log('added live transcoding '+ext+' --> '+availablejPlayerFormats[i]);
+                        var transcodePath = getTranscodePath(path,availablejPlayerFormats[i]);
+                        track[ext2jPlayerFormat(availablejPlayerFormats[i])] = transcodePath;
+                        window.console.log('added live transcoding '+ext+' --> '+availablejPlayerFormats[i]+' @ '+transcodePath);
                     }
                 }
             }
