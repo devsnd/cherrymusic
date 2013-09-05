@@ -158,7 +158,7 @@ MediaBrowser.static = {
         "use strict";
         var searchterms = encodeURIComponent(JSON.stringify({'directory' : path}))
         return ['<div class="albumart-display unloaded" search-data="'+searchterms+'">',
-        '<img src="/res/img/folder.png" width="80" height="80" />',
+        '<img src="res/img/folder.png" width="80" height="80" />',
         '</div>'].join('');
     },
         
