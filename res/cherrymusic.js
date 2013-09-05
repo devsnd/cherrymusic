@@ -367,8 +367,10 @@ function savePlaylist(plid,playlistname,ispublic,overwrite){
         function(){busy('.playlist-panel').fadeOut('fast')});
 }
 function getAddrPort(){
-    m = (window.location+"").match(/https?:\/\/(.+?):?(\d+).*/);
-    return 'http://'+m[1]+':'+m[2];
+    m = (window.location+"").match(/(https?):\/\/([^/:]+)(?::(\d+))?/);   // won't work for URLs with "user:passw@host"
+    // 0: whole match, 1: protocol, 2: host, 3: port or undefined
+    // whole match = "$protocol://$host(:$port)?"
+    return m[0];
 }
 
 function ord(c)
