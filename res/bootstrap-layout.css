@@ -367,7 +367,7 @@ div#progressscreen img{
     text-decoration: none;
 }
 .listdir img{
-    background-image: url("/res/img/folder.png");
+    background-image: url("img/folder.png");
     border: 0 none;
     float: left;
     height: 80px;
