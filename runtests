@@ -39,7 +39,7 @@ PROJECTDIR=`dirname $0`
 SPECIFIC_TEST="$1"
 
 TEST_EXCLUDE_REGEX='cherrypy'
-TEST_OPTIONS="--with-coverage --cover-erase"
+TEST_OPTIONS="--no-byte-compile --with-coverage --cover-erase"
 
 
 while getopts "d:" FLAG "$@" ; do
@@ -80,7 +80,7 @@ if [ $SPECIFIC_TEST ]; then
 else
     TEST_LOCATION=""
     COVERAGE_TARGET="audiotranscode,cherrymusicserver,cmbootstrap"
-    TEST_OPTIONS="${TEST_OPTIONS} --cover-package=${COVERAGE_TARGET} --cover-min-percentage=54"
+    TEST_OPTIONS="${TEST_OPTIONS} --cover-package=${COVERAGE_TARGET} --cover-min-percentage=52"
     TEST_OPTIONS="${TEST_OPTIONS} --no-skip"
 
     echo
