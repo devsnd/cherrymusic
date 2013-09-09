@@ -9,6 +9,7 @@ MimeTypes = {
     'ogg' : 'audio/ogg',
     'flac' : 'audio/flac',
     'aac' : 'audio/aac',
+    'm4a' : 'audio/m4a',
     'wav' : 'audio/wav',
 }
 
@@ -90,6 +91,7 @@ class AudioTranscode:
         Encoder('mp3', ['lame','-b','BITRATE','-','-']),
         Encoder('mp3', ['ffmpeg', '-i', '-', '-f', 'mp3', '-acodec', 'libmp3lame', '-ab', 'BITRATE', '-']),
         Encoder('aac', ['faac','-b','BITRATE','-P','-X','-o','-','-']),
+        Encoder('m4a', ['faac','-b','BITRATE','-P','-X','-o','-','-']),
         Encoder('flac', ['flac', '--force-raw-format', '--endian=little', '--channels=2', '--bps=16', '--sample-rate=44100', '--sign=signed', '-o', '-', '-']),
         Encoder('wav', ['cat']),
         
@@ -102,6 +104,7 @@ class AudioTranscode:
         Decoder('ogg'  , ['ffmpeg', '-i', 'INPUT', '-f', 'wav', '-acodec', 'pcm_s16le', '-']),
         Decoder('flac' , ['flac', '-F','-d', '-c', 'INPUT']),
         Decoder('aac'  , ['faad', '-w', 'INPUT']), 
+        Decoder('m4a'  , ['faad', '-w', 'INPUT']), 
         Decoder('wav'  , ['cat', 'INPUT']), 
     ]
     

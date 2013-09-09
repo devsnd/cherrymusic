@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 import os
 
 _PACKAGEDIR = os.path.dirname(__file__)

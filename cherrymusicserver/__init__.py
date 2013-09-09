@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 #
 # CherryMusic - a standalone music server
 # Copyright (c) 2012 Tom Wallroth & Tilman Boerner
@@ -95,7 +96,7 @@ from cherrymusicserver import userdb
 from cherrymusicserver import useroptiondb
 import cherrymusicserver.browsersetup
 
-VERSION = "0.25.2"
+VERSION = "0.26.0"
 DESCRIPTION = "an mp3 server for your browser"
 LONG_DESCRIPTION = """CherryMusic is a music streaming
     server written in python. It's based on cherrypy and jPlayer.

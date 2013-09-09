@@ -48,7 +48,6 @@ from cherrymusicserver import pathprovider
 from cherrymusicserver.util import Performance
 from cherrymusicserver import resultorder
 from cherrymusicserver import log
-from cherrymusicserver.ext import zipstream
 
 
 @service.user(cache='filecache')
@@ -83,8 +82,9 @@ class CherryModel:
 
         #remove all files not inside the filter
         if filterstr:
-            filterByStart = StartsWithCaseInsensitive(filterstr)
-            allfilesindir = list(filter(filterByStart, allfilesindir))
+            filterstr = filterstr.lower()
+            allfilesindir = [f for f in allfilesindir
+                             if f.lower().startswith(filterstr)]
 
         musicentries = []
 
@@ -92,7 +92,7 @@ class CherryModel:
         compactlisting = len(allfilesindir) > maximum_shown_files
         if compactlisting:
             upper_case_files = [x.upper() for x in allfilesindir]
-            filterstr = os.path.commonprefix(list(upper_case_files))
+            filterstr = os.path.commonprefix(upper_case_files)
             filterlength = len(filterstr)+1
             currentletter = '/'  # impossible first character
             sortedfiles = self.sortFiles(allfilesindir)
@@ -128,12 +128,8 @@ class CherryModel:
     def updateLibrary(self):
         self.cache.full_update()
         return True
-    
-    def compress(self, filelist):
-        fullpath_filelist = [cherry.config['media.basedir']+f for f in filelist]
-        yield zipstream.ZipStream(fullpath_filelist)
 
-    def file_size_within_limit(filelist, maximum_download_size):
+    def file_size_within_limit(self, filelist, maximum_download_size):
         acc_size = 0
         for f in filelist:
             acc_size += os.path.getsize(self.abspath(f))
@@ -215,6 +211,12 @@ class CherryModel:
                 oneliner = oneliner.replace('{revartist}', a.lower()[::-1])
         return oneliner
 
+    def randomMusicEntries(self, count):
+        loadCount = int(count * 1.5) + 1           # expect 70% valid entries
+        entries = self.cache.randomFileEntries(loadCount)
+        filteredEntries = list(filter(isValidMediaFile, entries))
+
+        return filteredEntries[:count]
 
 def isValidMediaFile(file):
     file.path = strippath(file.path)
@@ -257,7 +259,6 @@ def strippath(path):
         return path[len(cherry.config['media.basedir']) + 1:]
     return path
 
-
 class MusicEntry:
     def __init__(self, path, compact=False, dir=False, repr=None):
         self.path = path
@@ -267,11 +268,3 @@ class MusicEntry:
 
     def __repr__(self):
         return "<MusicEntry path:%s, dir:%s>" % (self.path, self.dir)
-
-
-class StartsWithCaseInsensitive:
-    def __init__(self, startswith):
-        self.startswith = startswith.upper()
-
-    def __call__(self, string):
-        return string.upper().startswith(self.startswith)

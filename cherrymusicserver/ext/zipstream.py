@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
 """
 This library was created by SpiderOak, Inc. and is released under the GPLv3.
 https://github.com/gourneau/SpiderOak-zipstream
@@ -8,6 +11,7 @@ Derived directly from zipfile.py
 """
 import struct, os, time, sys
 import binascii
+import codecs
 
 try:
     import zlib # We may need its compression method
@@ -25,17 +29,17 @@ ZIP_DEFLATED = 8
 # Other ZIP compression methods not supported
 
 # Here are some struct module formats for reading headers
-structEndArchive = "<4s4H2lH"     # 9 items, end of archive, 22 bytes
-stringEndArchive = "PK\005\006"   # magic number for end of archive record
-structCentralDir = "<4s4B4HlLL5HLl"# 19 items, central directory, 46 bytes
-stringCentralDir = "PK\001\002"   # magic number for central directory
-structFileHeader = "<4s2B4HlLL2H"  # 12 items, file header record, 30 bytes
-stringFileHeader = "PK\003\004"   # magic number for file header
-structEndArchive64Locator = "<4slql" # 4 items, locate Zip64 header, 20 bytes
-stringEndArchive64Locator = "PK\x06\x07" # magic token for locator header
-structEndArchive64 = "<4sqhhllqqqq" # 10 items, end of archive (Zip64), 56 bytes
-stringEndArchive64 = "PK\x06\x06" # magic token for Zip64 header
-stringDataDescriptor = "PK\x07\x08" # magic number for data descriptor
+structEndArchive = b"<4s4H2lH"     # 9 items, end of archive, 22 bytes
+stringEndArchive = b"PK\005\006"   # magic number for end of archive record
+structCentralDir = b"<4s4B4HILL5HLI"# 19 items, central directory, 46 bytes
+stringCentralDir = b"PK\001\002"   # magic number for central directory
+structFileHeader = b"<4s2B4HlLL2H"  # 12 items, file header record, 30 bytes
+stringFileHeader = b"PK\003\004"   # magic number for file header
+structEndArchive64Locator = b"<4slql" # 4 items, locate Zip64 header, 20 bytes
+stringEndArchive64Locator = b"PK\x06\x07" # magic token for locator header
+structEndArchive64 = b"<4sqhhllqqqq" # 10 items, end of archive (Zip64), 56 bytes
+stringEndArchive64 = b"PK\x06\x06" # magic token for Zip64 header
+stringDataDescriptor = b"PK\x07\x08" # magic number for data descriptor
 
 # indexes of entries in the central directory structure
 _CD_SIGNATURE = 0
@@ -111,12 +115,12 @@ class ZipInfo (object):
         if os.sep != "/" and os.sep in filename:
             filename = filename.replace(os.sep, "/")
 
-        self.filename = filename        # Normalized file name
+        self.filename = codecs.encode(filename, 'UTF-8')        # Normalized file name
         self.date_time = date_time      # year, month, day, hour, min, sec
         # Standard values:
         self.compress_type = ZIP_STORED # Type of compression for the file
-        self.comment = ""               # Comment for each file
-        self.extra = ""                 # ZIP extra data
+        self.comment = b""               # Comment for each file
+        self.extra = b""                 # ZIP extra data
         if sys.platform == 'win32':
             self.create_system = 0          # System which created ZIP archive
         else:
@@ -137,9 +141,9 @@ class ZipInfo (object):
 
     def DataDescriptor(self):
         if self.compress_size > ZIP64_LIMIT or self.file_size > ZIP64_LIMIT:
-            fmt = "<4slQQ"
+            fmt = "<4sIQQ"
         else:
-            fmt = "<4slLL"
+            fmt = "<4sILL"
         return struct.pack(fmt, stringDataDescriptor, self.CRC, self.compress_size, self.file_size)
 
     def FileHeader(self):
@@ -359,7 +363,6 @@ class ZipStream:
             else:
                 extract_version = zinfo.extract_version
                 create_version = zinfo.create_version
-
             centdir = struct.pack(structCentralDir,
                                   stringCentralDir, create_version,
                                   zinfo.create_system, extract_version, zinfo.reserved,
@@ -397,7 +400,7 @@ class ZipStream:
                                  0, 0, count, count, pos2 - pos1, pos1, 0)
             data.append( self.update_data_ptr(endrec))
 
-        return ''.join(data)
+        return b''.join(data)
 
 
 if __name__ == "__main__":

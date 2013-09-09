@@ -33,11 +33,38 @@
 #
 ##############################################################################
 
+USAGE="Usage: $(basename $0) [-d OUTPUT_DIR] [TEST_TARGET]"
+
 PROJECTDIR=`dirname $0`
 SPECIFIC_TEST="$1"
 
 TEST_EXCLUDE_REGEX='cherrypy'
 TEST_OPTIONS="--with-coverage --cover-erase"
+
+
+while getopts "d:" FLAG "$@" ; do
+
+    if [ "$FLAG" = ":" -o "$FLAG" = "?" ]; then
+        echo $USAGE >&2
+        exit 1
+    fi
+
+    if [ "$FLAG" = "d" ]; then
+        if [ ! -e "$OPTARG" ]; then
+            mkdir -p "$OPTARG"
+        fi
+        if [ ! -d "$OPTARG" ]; then
+            echo "output directory $OPTARG does not exist" >&2
+            exit 1
+        fi
+        TEST_OPTIONS="${TEST_OPTIONS} --cover-html --cover-html-dir=${OPTARG}"
+    fi
+done
+# The first non-flag argument is at index $OPTIND, so shift one fewer
+# to move it into $1
+shift `expr $OPTIND - 1`
+
+SPECIFIC_TEST="$1"
 
 if [ ! -d ${PROJECTDIR} -o ! -f ${PROJECTDIR}/cherrymusic ]; then
     echo "cannot find main script: 'cherrymusic'" >&2
@@ -53,7 +80,7 @@ if [ $SPECIFIC_TEST ]; then
 else
     TEST_LOCATION=""
     COVERAGE_TARGET="audiotranscode,cherrymusicserver,cmbootstrap"
-    TEST_OPTIONS="${TEST_OPTIONS} --cover-package=${COVERAGE_TARGET} --cover-min-percentage=50"
+    TEST_OPTIONS="${TEST_OPTIONS} --cover-package=${COVERAGE_TARGET} --cover-min-percentage=54"
     TEST_OPTIONS="${TEST_OPTIONS} --no-skip"
 
     echo

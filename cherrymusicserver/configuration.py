@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 #
 # CherryMusic - a standalone music server
 # Copyright (c) 2012 Tom Wallroth & Tilman Boerner
@@ -94,6 +95,13 @@ def from_defaults():
                     if no image is found locally. By default it will be fetched from amazon.
                     They will be shown next to folders that qualify as a possible
                     album.
+                    """
+                    
+    with c['media.maximum_download_size'] as maxdl:
+        maxdl.value = 1024*1024*250
+        maxdl.doc = """
+                    Maximum size in bytes of all files to be downloaded in one zipfile.
+                    Defaults to 250 megabytes.
                     """
 
     with c['search.maxresults'] as maxresults:

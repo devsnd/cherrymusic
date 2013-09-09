@@ -284,7 +284,8 @@ INTERACTION
 ***/
 
 function showAlbumArtChangePopOver(jqobj){
-    jqobj.popover({selector: jqobj.siblings('img'), title: 'Change cover art', html: true, content: '<img src="/res/img/folder.png" /><img src="/res/img/folder.png" /><img src="/res/img/folder.png" />'});
+    // relative img paths so cherrymusic can run in subdir (#344)
+    jqobj.popover({selector: jqobj.siblings('img'), title: 'Change cover art', html: true, content: '<img src="res/img/folder.png" /><img src="res/img/folder.png" /><img src="res/img/folder.png" />'});
 }
 
 
@@ -318,7 +319,7 @@ function getTranscodePath(filepath, format){
     "use strict";
     var match = filepath.match(/serve(.*)$/);
     if(match){
-        return "/trans"+match[1]+"/get."+format;
+        return "trans"+match[1]+"/get."+format;     // relative path so cherrymusic can run in subdir (#344)
     }
 }
 
@@ -374,8 +375,10 @@ function savePlaylist(plid,playlistname,ispublic,overwrite){
         function(){busy('.playlist-panel').fadeOut('fast')});
 }
 function getAddrPort(){
-    m = (window.location+"").match(/https?:\/\/(.+?):?(\d+).*/);
-    return 'http://'+m[1]+':'+m[2];
+    m = (window.location+"").match(/(https?):\/\/([^/:]+)(?::(\d+))?/);   // won't work for URLs with "user:passw@host"
+    // 0: whole match, 1: protocol, 2: host, 3: port or undefined
+    // whole match = "$protocol://$host(:$port)?"
+    return m[0];
 }
 
 function ord(c)
@@ -563,6 +566,25 @@ function loadPlaylist(playlistid, playlistlabel){
     }
 }
 
+function randomPlaylist() {
+    "use strict";
+    playlistManager.clearQueue();
+    var data = {'action':'generaterandomplaylist'};
+    var success = function(data){
+        var tracks = jQuery.parseJSON(data);
+        for (var i = 0; i < tracks.length; i++) {
+            var track = tracks[i];
+            playlistManager.addSong(track.urlpath, track.label)
+        }
+    };
+    busy('.playlist-panel').hide().fadeIn('fast');
+    api(data,
+        success,
+        errorFunc('error loading random playlist'),
+        function(){busy('.playlist-panel').fadeOut('fast')}
+    );
+}
+
 var lastPlaylistHeight = 0;
 function resizePlaylistSlowly(){
     var currentHeight = $('.jp-playlist').height();
@@ -570,6 +592,28 @@ function resizePlaylistSlowly(){
         $('#playlistContainerParent').animate({'min-height': currentHeight});
     }
     lastPlaylistHeight = currentHeight;
+}
+
+function download_editing_playlist(){
+    var pl = playlistManager.getEditingPlaylist();
+    var p = pl.jplayerplaylist.playlist;
+    var track_urls = []
+    for(i=0; i<p.length; i++){
+        track_urls.push(htmldecode(p[i].url.slice(6)));
+    }
+    var tracks_json = JSON.stringify(track_urls)
+    api({action: 'downloadcheck', value: tracks_json},
+        function(msg){
+            if(msg == 'ok'){
+                //add tracks to hidden form and call to call download using post data
+                $('#download-redirect-files').val(tracks_json);
+                $('#download-redirect').submit();
+            } else {
+                alert(msg);
+            }
+        },
+        errorFunc('Failed to check if playlist may be downloaded')
+    );
 }
 
 /*****
@@ -611,9 +655,16 @@ function updateUserList(){
                                 '">&#x2022;',
                             '</span>',
                         '</div>',
-                        '<div class="span4">{{{usernamelabel}}}</div>',
-                        '<div class="span5"> last seen: {{fuzzytime}}</div>',
-                        '<div class="span2">',
+                        '<div class="span3">{{{usernamelabel}}}</div>',
+                        '<div class="span3"> last seen: {{fuzzytime}}</div>',
+                        '<div class="span3">',
+                            '{{#isnotadmin}}',
+                            'permit download<input type="checkbox" ',
+                            'onchange="userSetPermitDownload({{userid}}, $(this).is(\':checked\'))" id="misc-autoplay_on_add" value="option1" ',
+                            '{{#may_download}}checked="checked"{{/may_download}}>',
+                            '{{/isnotadmin}}',
+                        '</div>',
+                        '<div class="span1">',
                             '{{#isdeletable}}',
                                 '<a class="btn btn-mini btn-danger" href="javascript:;" onclick="userDelete({{userid}})">delete</a>',
                             '{{/isdeletable}}',
@@ -622,6 +673,8 @@ function updateUserList(){
                 '</li>',
             ].join(''),{
                 isadmin: e.admin,
+                may_download: e.may_download,
+                isnotadmin: !e.admin,
                 isdeletable: e.deletable,
                 userid: e.id,
                 isonline: reltime < HEARTBEAT_INTERVAL_MS/500,
@@ -667,7 +720,7 @@ function addNewUser(){
 }
 
 function userDelete(userid){
-    var data = {'action':'userdelete',
+    var data = {'action': 'userdelete',
                 'value' : JSON.stringify({
                     'userid':userid
                 })};
@@ -681,6 +734,25 @@ function userDelete(userid){
         function(){busy('#adminuserlist').fadeOut('fast')}
     );
 }
+
+function userSetPermitDownload(userid, allow_download){
+    var data = {'action':'setuseroptionfor',
+                'value' : JSON.stringify({
+                    'optionkey': 'media.may_download',
+                    'optionval': allow_download,
+                    'userid': userid,
+                })};
+    var success = function(data){
+        updateUserList();
+    };
+    busy('#adminuserlist').hide().fadeIn('fast');
+    api(data,
+        success,
+        errorFunc('Failed to set user download state'),
+        function(){busy('#adminuserlist').fadeOut('fast')}
+    );
+}
+
 function userChangePassword(){
     if (! validateNewPassword($('#newpassword-change'), $('#repeatpassword-change'))) {
         return false;

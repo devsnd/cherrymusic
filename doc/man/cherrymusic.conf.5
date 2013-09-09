@@ -1,7 +1,7 @@
 .\" Manpage for CherryMusic.
 .\" Contact us on github.com/devsnd/cherrymusic to correct errors or typos.
 
-.TH "CHERRYMUSIC.CONF" "5" "2013\-05\-18" "CherryMusic" "cherrymusic.conf man page"
+.TH "CHERRYMUSIC.CONF" "5" "2013\-08\-25" "CherryMusic" "cherrymusic.conf man page"
 
 .SH "NAME"
 cherrymusic.conf \- configuration file of CherryMusic, see \fBcherrymusic\fP(1)
@@ -17,15 +17,18 @@ The cherrymusic.conf file is the configuration file used to fine tune the Cherry
 .IP "[media]"
 
 .IP "\fB    basedir = /path/to/your/music\-collection\fP"
-BASEDIR specifies where the media that should be served is located. It must be the absolute path, e.g. BASEDIR=/absolute/path/to/media.
+"basedir" specifies where the media that should be served is located. It must be the absolute path, e.g. "basedir = /absolute/path/to/media".
 
-Links: If your operating system supports them, you can use symlinks directly in BASEDIR. Links to directories which contain BASEDIR will be ignored, just like all links not directly in, but in sublevels of BASEDIR. This is to guard against the adverse effects of link cycles.
+Links: If your operating system supports them, you can use symlinks directly in "basedir". Links to directories which contain "basedir" will be ignored, just like all links not directly in, but in sublevels of "basedir". This is to guard against the adverse effects of link cycles.
 
 .IP "\fB    transcode = True | False\fP"
 (Experimental!) "transcode" enables automatic live transcoding of the served media files to be able to listen to every format on every device. This requires you to have the appropriate encoders installed. Please note that transcoding will significantly increase the load on the CPU!
 
 .IP "\fB    fetch_album_art = True | False\fP"
 This option tries to fetch the album covers from various locations in the web, if no image is found locally. By default it will be fetched from Amazon. They will be shown next to folders that qualify as an album.
+
+.IP "\fB    maximum_download_size = BYTESIZE\fP"
+CherryMusic has a feature that allows certain users (who can be chosen by the admin in the admin panel) to download the audio files contained in a playlist. BYTESIZE sets the maximum size in bytes of all files to be downloaded by a user in one zip file. It defaults to 250 MB.
 
 .IP "[search]"
 
@@ -41,7 +44,7 @@ This will load parts of the database into memory for improved performance. This 
 ." If this option is enabled, CherryMusic will only use the media database \-\- never the filesystem \-\- for content lookups in the file browser and search function. This can be useful if the media files reside on an external hard drive or behind a slow network connection.
 
 .IP "\fB    maxshowfiles = NUMBER\fP"
-"maxshowfiles" specifies how many files and folders should be shown at the same time. E.g. if you open a folder with more than MAXSHOWFILES, the files will be grouped according to the first letter in their name. 100 is a good value, as a CD can have up to 99 tracks.
+"maxshowfiles" specifies how many files and folders should be shown at the same time. E.g. if you open a folder with more than NUMBER files or folders in it, the files will be grouped according to the first letter in their name. 100 is a good value, as a CD can have up to 99 tracks.
 
 .IP "[server]"
 

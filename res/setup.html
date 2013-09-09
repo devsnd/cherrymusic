@@ -32,7 +32,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<link rel="icon" href="/res/favicon32.png" type="image/png">
+<link rel="icon" href="res/favicon32.png" type="image/png"> <!-- relative path so cherrymusic can run in subdir (#344) -->
 <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
 
 
@@ -125,13 +125,15 @@ function reloadIfReady(newip){
     });
 }
 
-function renderFeature(name, installed, id, msg){
+function renderFeature(name, installed, id, msg, explaination){
     var labelClass = installed ? 'label-success' : 'label-important';
     var labelText = installed ? 'installed' : 'not installed';
+    var reason = installed ? '' : '<b>reason: '+explaination+'</b>';
     return ['<div class="control-group">',
      '   <label class="control-label" for="'+id+'">'+name+'</label>',
      '   <div class="controls">',
      '       <div id="'+id+'"><span class="label '+labelClass+'">'+labelText+'</span> '+msg+'</div>',
+     '       <div>'+reason+'</div>',
      '   </div>',
      '</div>'].join('');
 
@@ -146,7 +148,7 @@ $(function(){
         success: function(data){
             var features = $.parseJSON(data);
             $.each(features, function(idx, val){
-                $('#feature-check').append(renderFeature(val[0], val[1], val[2], val[3]));
+                $('#feature-check').append(renderFeature(val[0], val[1], val[2], val[3], val[4]));
             });
         },
         error: function(){},

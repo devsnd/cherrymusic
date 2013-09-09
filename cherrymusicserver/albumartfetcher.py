@@ -1,4 +1,33 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
+#
+# CherryMusic - a standalone music server
+# Copyright (c) 2012 Tom Wallroth & Tilman Boerner
+#
+# Project page:
+#   http://fomori.org/cherrymusic/
+# Sources on github:
+#   http://github.com/devsnd/cherrymusic/
+#
+# CherryMusic is based on
+#   jPlayer (GPL/MIT license) http://www.jplayer.org/
+#   CherryPy (BSD license) http://www.cherrypy.org/
+#
+# licensed under GNU GPL version 3 (or later)
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+#
 
 try:
     import urllib.request
@@ -118,14 +147,14 @@ class AlbumArtFetcher:
         """ search a local path for image files.
         @param path: directory path
         @type path: string
-        @return header, imagedata
+        @return header, imagedata, is_resized
         @rtype dict, bytestring"""
 
         filetypes = (".jpg", ".jpeg", ".png")
         try:
             for file_in_dir in os.listdir(path):
                 if not file_in_dir.lower().endswith(filetypes):
-                    return None, '', False
+                    continue
                 try:
                     imgpath = os.path.join(path, file_in_dir)
                     if os.path.getsize(imgpath) > self.MAX_IMAGE_SIZE_BYTES:
@@ -136,7 +165,7 @@ class AlbumArtFetcher:
                     else:
                         with open(imgpath, "rb") as f:
                             data = f.read()
-                            if(imgpath[-3:] == ".png"):
+                            if(imgpath.lower().endswith(".png")):
                                 mimetype = "image/png"
                             else:
                                 mimetype = "image/jpeg"
