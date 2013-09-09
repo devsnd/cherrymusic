@@ -27,8 +27,3 @@ if (3,) <= sys.version_info < (3, 2):
         return isinstance(x, collections.Callable)
 else:
     callable = callable
-
-
-def with_metaclass(metacls):
-    clsname = metacls.__name__ + '_MetaclassBase'
-    return metacls(clsname, (object,), {})

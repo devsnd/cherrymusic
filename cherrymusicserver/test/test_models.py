@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 #
 # CherryMusic - a standalone music server
 # Copyright (c) 2012-2013 Tom Wallroth & Tilman Boerner
@@ -31,28 +32,16 @@
 from mock import *
 from nose.tools import *
 
-from .tools import *
+from collections import namedtuple
 
-from backport.collections import OrderedDict
+from .tools import *
 
 from cherrymusicserver.models import *
 
-@model
-class Model(object): pass
-
 def create_model(clsname=None, **fields):
-    '''
-        Create a Model subclass with the given fields and return an instance.
-
-        Fields get created ordered by their default values.
-    '''
-    from operator import itemgetter
     clsname = clsname or 'TestModel'
-    clsdict = OrderedDict()
-    for name in (i[0] for i in sorted(fields.items(), key=itemgetter(1))):
-        clsdict[name] = field(default=fields[name])
-    return model(type(clsname, (object,), clsdict))()
-
+    modelcls = model(clsname, **fields)
+    return modelcls()
 
 def test_model_string_representation():
     repr(Model())
@@ -130,26 +119,14 @@ def test_model_equality_to_dicts():
 
 def test_model_constructor_sets_fields_from_params():
     eq_(99,
-        Model(99)._id)
-    eq_(99,
         Model(_id=99)._id)
 
+def test_model_constructor_turns_nonfield_kwargs_into_fields():
+    m = Model(bla=99)
 
-def test_model_constructor_assigns_fields_in_order_defined():
-    params = '_id _type z a c b'.split()
-    values = range(len(params))
-    paramdict = dict(zip(params, values))
-
-    testcls = type(create_model(**paramdict))
-
-    eq_(paramdict,
-        testcls(*values))
-
-
-@raises(TypeError)
-def test_model_constructor_does_not_accept_nonfield_kwargs():
-    Model(bla=99)
-
+    eq_(99,
+        m.bla)
+    assert 'bla' in m._fields
 
 @raises(TypeError)
 def test_model_constructor_does_not_accept_more_arguments_than_fields():
@@ -158,7 +135,7 @@ def test_model_constructor_does_not_accept_more_arguments_than_fields():
 
 
 def test_model_subclasses_can_define_own_fields():
-    expected = Model._fields + ('a_field',)
+    expected = set(Model._fields + ('a_field',))
 
     eq_(expected,
         create_model(a_field=None)._fields)
@@ -168,11 +145,11 @@ def test_model_subclasses_can_override_fields():
     eq_('type',
         create_model(_type='type')._type)
 
-
-@raises(AttributeError)
-def test_model_subclasses_cannot_override_fields_with_nonfields():
+def test_model_subclasses_can_override_fields_with_nonfields():
     class Test(Model):
         _id = 12
+
+    eq_(12, Test()._id)
 
 
 def test_model_field_string_representation():
@@ -184,43 +161,33 @@ def test_model_field_value_accessible_as_model_attribute():
         create_model(a=13).a)
 
 
-@raises(AttributeError)
-def test_model_field_cannot_be_set():
-    create_model(a=13).a = 12
+def test_model_field_can_be_set():
+    m = create_model(a=13)
+    eq_(13, m.a)
 
+    m.a = 12
 
-def test_model_replace_returns_new_object():
-    model = Model()
-    ok_(model is not model.replace())
+    eq_(12, m.a)
 
-
-def test_model_replace_changes_attribute_values():
-    eq_({'_id': 11, '_type': 33},
-        Model().replace(_id=11, _type=33))
-
-
-@raises(TypeError)
-def test_model_replace_rejects_unknown_kwargs():
-    Model().replace(k=13)
-
-
-def test_fields_compare_in_creation_order():
-    f1 = field()
-    f2 = field()
-
-    ok_(f1 == f1, 'Field must equal itself')
-    ok_(f1 <= f2, 'Field created earlier must compare as less or equal')
-    ok_(f2 >= f1, 'Field created later must compare as more or equal')
-    ok_(f1 < f2, 'Field created earlier must compare as less')
-    ok_(f2 > f1, 'Field created later must compare as more')
-    ok_(not f1 != f1, 'Field must not be unequal to itself')
-
-
-def test_fields_unimplemented_comparison():
-    eq_(NotImplemented, field().__lt__(-1))
 
 def test_fields_doc_attribute_is_also_docstring():
     eq_('a docstring',
         field(doc='a docstring').__doc__)
     eq_('a docstring',
         field(doc='a docstring').doc)
+
+
+def test_model_can_extend_namedtuple():
+    TestModel = model(namedtuple('TestModel', 'a b'))
+
+    m = TestModel(1,2)
+
+    eq_({'a': 1, 'b': 2}, m.as_dict)
+
+
+def test_model_can_extend_other_models():
+    @model
+    class TestModel(Model):
+        heya = field()
+
+    eq_(('_id', '_type', 'heya'), TestModel._fields)
