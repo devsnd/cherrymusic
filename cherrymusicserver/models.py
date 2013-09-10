@@ -31,6 +31,11 @@
 
 from backport import callable as _callable
 
+from cherrymusicserver import log
+
+def get(typename):
+    return _ModelType.get(typename)
+
 
 class field(object):
     ''' Model attribute descriptor with a default value.
@@ -95,27 +100,45 @@ def model(arg=None, **kwargs):
 
 def _modelcls_from_spec(name, **fields_with_defaults):
     fields = dict((n, field(default=v)) for n, v in fields_with_defaults.items())
-    return _FieldContainer(name, (Model,), fields)
+    return _ModelType(name, (Model,), fields)
 
 def _modelcls_from_class(cls):
-    if issubclass(type(cls), _FieldContainer):
+    if issubclass(type(cls), _ModelType):
         return cls
     bases = (Model,) + cls.__bases__
     clsdict = dict(cls.__dict__)
-    return _FieldContainer(cls.__name__, bases, clsdict)
+    return _ModelType(cls.__name__, bases, clsdict)
 
 
-class _FieldContainer(type):
+class _ModelType(type):
+
+    types = {}
 
     def __new__(meta, name, bases, clsdict):
         attr = {'_fields': ()}
         attr.update(clsdict)
-        cls = super(_FieldContainer, meta).__new__(meta, name, bases, attr)
+        cls = super(_ModelType, meta).__new__(meta, name, bases, attr)
         if not cls._fields:
             is_field = lambda x: isinstance(x, field)
             is_fieldname = lambda n: is_field(getattr(cls, n))
             cls._fields = tuple(filter(is_fieldname, dir(cls)))
+        meta._register(cls)
         return cls
+
+    @classmethod
+    def get(meta, name):
+        return meta.types[name]
+
+    @classmethod
+    def _register(meta, cls):
+        name = cls.__name__.lower()
+        if name in meta.types:
+            msg = 'overwriting type {0!r} {1} with {2}'.format(
+                name, meta.types[name], cls)
+            log.w(msg)
+        cls._type.default = name
+        meta.types[name] = cls
+
 
 class Model(object):
     ''' A generic model class that contains fields (``_fields``) and provides a
@@ -125,11 +148,7 @@ class Model(object):
     '''
 
     _id = field()
-
-    @field
-    def _type(self):
-        ''' the lowercase class name'''
-        return self.__class__.__name__.lower()
+    _type = field('set by metaclass', doc='the lowercase class name')
 
     def __new__(cls, *super_args, **fieldvalues):
         ''' Create a new Model instance.
@@ -172,4 +191,4 @@ class Model(object):
         return dict((name, getattr(self, name)) for name in self._fields)
 
 # Python 2 compatible metaclass workaround:
-Model = _FieldContainer('Model', (object,), dict(Model.__dict__))
+Model = _ModelType('Model', (object,), dict(Model.__dict__))

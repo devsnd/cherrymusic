@@ -38,6 +38,9 @@ from .tools import *
 
 from cherrymusicserver.models import *
 
+from cherrymusicserver import log
+log.setTest()
+
 def create_model(clsname=None, **fields):
     clsname = clsname or 'TestModel'
     modelcls = model(clsname, **fields)
@@ -142,7 +145,12 @@ def test_model_subclasses_can_define_own_fields():
 
 
 def test_model_subclasses_can_override_fields():
-    eq_('type',
+    eq_('meh',
+        create_model(_id='meh')._id)
+
+
+def test_model_subclasses_cannot_override_type_field():
+    eq_('testmodel',
         create_model(_type='type')._type)
 
 def test_model_subclasses_can_override_fields_with_nonfields():
@@ -191,3 +199,9 @@ def test_model_can_extend_other_models():
         heya = field()
 
     eq_(('_id', '_type', 'heya'), TestModel._fields)
+
+
+def test_model_classes_are_stored_after_definition():
+    modelcls = model('Test')
+
+    assert modelcls is get('test')
