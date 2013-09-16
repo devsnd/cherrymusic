@@ -50,9 +50,10 @@ class field(object):
             >>> X().id
             'value'
     '''
-    def __init__(self, default=None, doc=None):
+    def __init__(self, default=None, name=None, doc=None):
         self.default = default
-        self.doc = doc or (_callable(default) and default.__doc__)
+        self.name = name
+        self.doc = doc or (_callable(default) and default.__doc__) or repr(self)
 
     def __get__(self, container, owner):
         if container is None:
@@ -72,6 +73,14 @@ class field(object):
     @doc.setter
     def doc(self, docstr):
         self.__doc__ = docstr
+
+    @property
+    def name(self):
+        return self.__name__
+
+    @name.setter
+    def name(self, name):
+        self.__name__ = name
 
 
 def model(arg=None, **kwargs):
@@ -98,9 +107,9 @@ def model(arg=None, **kwargs):
         return _modelcls_from_class(arg, **kwargs)
     return _modelcls_from_spec(arg, **kwargs)
 
-def _modelcls_from_spec(name, **fields_with_defaults):
+def _modelcls_from_spec(__clsname, **fields_with_defaults):
     fields = dict((n, field(default=v)) for n, v in fields_with_defaults.items())
-    return _ModelType(name, (Model,), fields)
+    return _ModelType(__clsname, (Model,), fields)
 
 def _modelcls_from_class(cls):
     if issubclass(type(cls), _ModelType):
@@ -123,6 +132,7 @@ class _ModelType(type):
             is_fieldname = lambda n: is_field(getattr(cls, n))
             cls._fields = tuple(filter(is_fieldname, dir(cls)))
         meta._register(cls)
+        meta._init_fields(cls)
         return cls
 
     @classmethod
@@ -136,8 +146,18 @@ class _ModelType(type):
             msg = 'overwriting type {0!r} {1} with {2}'.format(
                 name, meta.types[name], cls)
             log.w(msg)
-        cls._type.default = name
+        if '_type' in cls._fields:
+            cls._type = field(name)
         meta.types[name] = cls
+
+    @classmethod
+    def _init_fields(meta, cls):
+        for fieldname in cls._fields:
+            f = getattr(cls, fieldname, None)
+            if not isinstance(f, field):
+                f = field(default=f, name=fieldname)
+            else:
+                f.name = fieldname
 
 
 class Model(object):
@@ -158,8 +178,7 @@ class Model(object):
         '''
         instance = super(Model, cls).__new__(cls, *super_args)
         instance._fields = set(cls._fields)
-        for name in fieldvalues:
-            setattr(instance, name, fieldvalues[name])
+        instance._update(**fieldvalues)
         return instance
 
     def __setattr__(self, name, value):
@@ -189,6 +208,11 @@ class Model(object):
     def as_dict(self):
         ''' dict view of this object's fields and their values'''
         return dict((name, getattr(self, name)) for name in self._fields)
+
+    def _update(self, **fieldvalues):
+        for name, value in fieldvalues.items():
+            setattr(self, name, value)
+        return self
 
 # Python 2 compatible metaclass workaround:
 Model = _ModelType('Model', (object,), dict(Model.__dict__))

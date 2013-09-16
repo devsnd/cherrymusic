@@ -185,6 +185,10 @@ def test_fields_doc_attribute_is_also_docstring():
         field(doc='a docstring').doc)
 
 
+def test_fieldname_is_set_by_metaclass():
+    eq_('asdf', model('Test', asdf=1).asdf.name)
+
+
 def test_model_can_extend_namedtuple():
     TestModel = model(namedtuple('TestModel', 'a b'))
 
