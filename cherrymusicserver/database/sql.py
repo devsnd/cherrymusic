@@ -52,13 +52,21 @@ class SQLiteConnector(AbstractConnector):
     connargs: dict (optional)
         Dictionary with keyword args to pass on to sqlite3.Connection.
     '''
-    def __init__(self, datadir='', extension='', connargs={}):
+    def __init__(self, datadir='', extension='', connargs=None):
         self.datadir = datadir
         self.extension = extension
-        self.connargs = connargs
+        self.connargs = {'factory': _Connection}
+        self.connargs.update(connargs or {})
+
+    def __repr__(self):
+        return self.__class__.__name__ + '[{0}]'.format(self.dblocation(''))
 
     def connection(self, dbname):
-        return sqlite3.connect(self.dblocation(dbname), **self.connargs)
+        location = self.dblocation(dbname)
+        conn = sqlite3.connect(location, **self.connargs)
+        conn.row_factory = _Row
+        conn.location = location
+        return conn
 
     def dblocation(self, basename):
         if self.extension:
@@ -258,44 +266,54 @@ class Updater(object):
             pass
 
 
-class TmpConnector(AbstractConnector):
+class TmpConnector(SQLiteConnector):
     """Special SQLite Connector that uses its own temporary directory.
 
     As with the sqlite3 module in general, sharing connections is NOT THREADSAFE.
     """
     def __init__(self):
-        self.testdirname = tempfile.mkdtemp(suffix=self.__class__.__name__)
+        testdirname = tempfile.mkdtemp(suffix=self.__class__.__name__)
+        super(self.__class__, self).__init__(datadir=testdirname)
+        self.__testdirname = testdirname
 
     def __del__(self):
         import shutil
-        shutil.rmtree(self.testdirname, ignore_errors=True)
+        shutil.rmtree(self.__testdirname, ignore_errors=True)
 
-    def connection(self, dbname):
-        return sqlite3.connect(self.dblocation(dbname))
+import threading
 
-    def dblocation(self, basename):
-        return os.path.join(self.testdirname, basename)
-
-
-class MemConnector(AbstractConnector):  # NOT threadsafe
+class MemConnector(SQLiteConnector):
     """Special SQLite3 Connector that reuses THE SAME memory connection for
-    each dbname. This connection is NOT CLOSABLE by normal means.
-    Therefore, this class is NOT THREADSAFE.
+    each dbname within the same thread.
+
+    This connection is NOT CLOSABLE by normal means to prevent inadvertant
+    closing of shared connections by a caller. It will be closed automatically
+    on de-allocation.
     """
     def __init__(self):
-        self.connections = {}
+        self._local = threading.local()
         self.Connection = type(
             self.__class__.__name__ + '.Connection',
             (sqlite3.Connection,),
             {'close': self.__disconnect})
+        super(MemConnector, self).__init__()
+
+    @property
+    def connections(self):
+        try:
+            return self._local.connections
+        except AttributeError:
+            c = {}
+            self._local.connections = c
+            return c
 
     def __del__(self):
         self.__disconnect(seriously=True)
 
     def __repr__(self):
-        return '{name} [{id}]'.format(
+        return '{name} [{id:x}]'.format(
             name=self.__class__.__name__,
-            id=hex(id(self))
+            id=id(self)
         )
 
     def connection(self, dbname):
@@ -308,7 +326,8 @@ class MemConnector(AbstractConnector):  # NOT threadsafe
         try:
             return self.connections[dbname]
         except KeyError:
-            cxn = sqlite3.connect(':memory:', factory=self.Connection)
+            self.connargs.update({'factory': self.Connection})
+            cxn = super(MemConnector, self).connection(':memory:')
             return self.connections.setdefault(dbname, cxn)
 
     def __disconnect(self, seriously=False):
@@ -317,3 +336,15 @@ class MemConnector(AbstractConnector):  # NOT threadsafe
             self.connections.clear()
             for cxn in connections.values():
                 super(cxn.__class__, cxn).close()
+
+class _Row(sqlite3.Row):
+    def __repr__(self):
+        items = ', '.join('{0}={1}'.format(*i) for i in sorted(dict(self).items()))
+        return self.__class__.__name__ + '({0})'.format(items)
+
+
+class _Connection(sqlite3.Connection):
+
+    def __init__(self, *args, **kwargs):
+        super(_Connection, self).__init__(*args, **kwargs)
+        self.location = None

@@ -34,6 +34,8 @@ Connect to databases.
 
 # from abc import ABCMeta, abstractmethod   # don't, for py2 compatibility
 
+from cherrymusicserver import log
+
 import cherrymusicserver.service as service
 
 
@@ -44,7 +46,7 @@ class AbstractConnector(object):
     Override :meth:`connection` and :meth:`dbname` to subclass.
     '''
     def __repr__(self):
-        return '{0} [{1}]'.format(self.__class__.__name__, hex(id(self)))
+        return self.__class__.__name__
 
     # @abstractmethod
     def connection(self, dbname):
@@ -60,6 +62,7 @@ class AbstractConnector(object):
         '''Return a :class:`BoundConnector` bound to the database with ``dbname``.'''
         return BoundConnector(dbname, self)
 
+from contextlib import contextmanager
 
 @service.user(baseconnector='dbconnector')
 class BoundConnector(object):
@@ -89,3 +92,93 @@ class BoundConnector(object):
         cursor = self.connection().cursor()
         cursor.execute(query, params)
         return cursor
+
+    @contextmanager
+    def transaction(self, comment=None):
+        ''' Context manager that commits or rolls back on exit, depending
+            on exception status. Transactions will nest for the same
+            BoundConnector object and only act when the top level transaction
+            is exited. Nested transactions share the same connection.
+        '''
+        txn = _Transaction(self, comment)
+        with txn as cursor:
+            yield cursor
+
+
+import threading
+
+class ThreadlocalConnector(BoundConnector):
+    ''' A BoundConnector that always returns the same connection from inside
+        the same thread.'''
+
+    def __init__(self, target, overrideconnector=None):
+        ''' target :
+                The database name or a BoundConnector instance
+        '''
+        if isinstance(target, BoundConnector):
+            target = target.name
+        super(self.__class__, self).__init__(target, overrideconnector)
+        self._local = threading.local()
+        log.d('init %s', self)
+
+    def __repr__(self):
+        return super(self.__class__, self).__repr__() + '[{0:x}]'.format(threading.current_thread().ident)
+
+    def connection(self):
+        '''Return a threadlocal connection object to talk to the bound database.'''
+        try:
+            conn = self._local.conn
+        except AttributeError:
+            conn = super(self.__class__, self).connection()
+            self._local.conn = conn
+        return conn
+
+
+class _Transaction(object):
+
+    _local = threading.local()
+
+    def __init__(self, connector, comment=None):
+        self.connector = connector
+        self._stacks.setdefault(connector, [])
+        self.comment = comment or ''
+
+    def __repr__(self):
+        return 'transaction {0!r}'.format(self.comment, self.connector)
+
+    def __enter__(self):
+        stack = self._stacks[self.connector]
+        s = '{enter_self:40} @{connector}'.format(
+            enter_self='    '*len(stack) + '---> ' + str(self),
+            connector=self.connector
+        )
+        log.d(s)
+        if not stack:
+            conn = self.connector.connection()
+            conn.isolation_level = 'IMMEDIATE'
+        else:
+            conn = stack[-1]
+        stack.append(conn)
+        return conn.cursor()
+
+    def __exit__(self, exc_type, exception, traceback):
+        stack = self._stacks[self.connector]
+        conn = stack.pop()
+        conn.isolation_level = None
+        if not stack:
+            del self._stacks[self.connector]
+            if exc_type is None:
+                conn.commit()
+                log.d('COMMIT %s', self)
+            else:
+                conn.rollback()
+                log.d('ROLLBACK %s', self)
+        log.d('%s<--- %s', '    '*len(stack), self)
+
+    @property
+    def _stacks(self):
+        try:
+            return self._local.stacks
+        except AttributeError:
+            self._local.stacks = s = {}
+            return s

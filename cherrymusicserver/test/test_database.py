@@ -1,7 +1,8 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 #
 # CherryMusic - a standalone music server
-# Copyright (c) 2012 Tom Wallroth & Tilman Boerner
+# Copyright (c) 2012-2013 Tom Wallroth & Tilman Boerner
 #
 # Project page:
 #   http://fomori.org/cherrymusic/
@@ -28,7 +29,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
+import nose
 import unittest
+
+from mock import *
+from nose.tools import *
+
+from cherrymusicserver.test.tools import *
+from cherrymusicserver import log
+log.setTest()
+
+
 import sqlite3
 import os
 
@@ -36,9 +47,10 @@ import os
 from cherrymusicserver import log
 log.setTest()
 
-import cherrymusicserver.database.defs as defs
-from cherrymusicserver.database.sql import MemConnector
 
+from cherrymusicserver.database import connect
+from cherrymusicserver.database import defs
+from cherrymusicserver.database import sql
 
 class TestDefs(unittest.TestCase):
 
@@ -90,7 +102,7 @@ class TestDefs(unittest.TestCase):
             start, stop = int(min(dbdef)), int(max(dbdef)) + 1
             program = ((i, range(i + 1, stop)) for i in range(start, stop))
             for base, updates in program:
-                connector = MemConnector().bound(None)  # new MemConnector for fresh db
+                connector = sql.MemConnector().bound(None)  # new MemConnector for fresh db
                 try:
                     create(dbdef, base, connector)
                     update(dbdef, updates, connector)
@@ -103,7 +115,7 @@ class TestDefs(unittest.TestCase):
         def check(dbdef):
             "drop script must clear the database"
             for version in dbdef:
-                connector = MemConnector().bound(None)
+                connector = sql.MemConnector().bound(None)
                 create(dbdef, version, connector)
                 drop(dbdef, version, connector)
                 remaining = connector.execute(
@@ -200,5 +212,75 @@ def script_lines(script, start=1, length=0):
         i += 1
 
 
+import threading
+
+def test_threadlocalconnector_returns_same_connection_in_same_thread():
+    baseconnector = Mock(connect.AbstractConnector)
+    connector = connect.ThreadlocalConnector('test', baseconnector)
+
+    assert connector.connection() is connector.connection()
+
+
+def test_threadlocalconnector_returns_different_connections_in_different_threads():
+    baseconnector = Mock(connect.AbstractConnector)
+    connector = connect.ThreadlocalConnector('test', baseconnector)
+
+    for _ in range(2):
+        t = threading.Thread(None, target=connector.connection)
+        t.start()
+        t.join()
+
+    eq_(2, baseconnector.connection.call_count)
+
+
+def test_threadlocalconnector_different_connectors_return_different_connections():
+    baseconnector = Mock(connect.AbstractConnector)
+
+    connect.ThreadlocalConnector('test', baseconnector).connection()
+    connect.ThreadlocalConnector('test', baseconnector).connection()
+
+    eq_(2, baseconnector.connection.call_count)
+
+
+def test_transaction_should_be_localized_to_thread():
+    connection = Mock(sqlite3.Connection)
+    baseconnector = Mock(connect.AbstractConnector)
+    baseconnector.connection = Mock(return_value=connection)
+    connector = connect.BoundConnector('test', overrideconnector=baseconnector)
+
+    def crash_transaction():
+        try:
+            with connector.transaction('crashing'):
+                assert False
+        except AssertionError:
+            pass
+    bad_transaction_thread = threading.Thread(None, target=crash_transaction)
+
+    with connector.transaction('outer'):
+        bad_transaction_thread.start()
+        bad_transaction_thread.join()
+        with connector.transaction('inner'):
+            connection.execute()
+
+    eq_(2, baseconnector.connection.call_count)
+    eq_(1, connection.rollback.call_count)
+    eq_(1, connection.execute.call_count)
+    eq_(1, connection.commit.call_count)
+
+
+def test_sql_connection_has_location():
+    eq_(':memory:', sql.MemConnector().connection('bla').location)
+
+def test_sql_connection_rows_can_be_tuple_or_dict():
+    connection = sql.MemConnector().connection('bla')
+
+    row = connection.execute('SELECT 1 AS a;').fetchone()
+
+    eq_(1, row[0])
+    eq_(1, row['a'])
+
+    repr(row)   # plz also cover repr override :)
+
+
 if __name__ == '__main__':
-    unittest.main()
+    nose.runmodule()
