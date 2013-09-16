@@ -80,7 +80,7 @@ if [ $SPECIFIC_TEST ]; then
 else
     TEST_LOCATION=""
     COVERAGE_TARGET="audiotranscode,cherrymusicserver,cmbootstrap"
-    TEST_OPTIONS="${TEST_OPTIONS} --cover-package=${COVERAGE_TARGET} --cover-min-percentage=52"
+    TEST_OPTIONS="${TEST_OPTIONS} --cover-package=${COVERAGE_TARGET} --cover-min-percentage=53"
     TEST_OPTIONS="${TEST_OPTIONS} --no-skip"
 
     echo
