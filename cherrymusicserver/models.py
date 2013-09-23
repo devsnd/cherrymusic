@@ -182,8 +182,9 @@ class Model(object):
         return instance
 
     def __setattr__(self, name, value):
+        is_new = name not in dir(self)
         super(Model, self).__setattr__(name, value)
-        if not name in dir(self):
+        if is_new:
             self._fields.add(name)
 
     def __repr__(self):

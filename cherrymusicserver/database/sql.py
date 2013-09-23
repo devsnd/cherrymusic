@@ -337,10 +337,15 @@ class MemConnector(SQLiteConnector):
             for cxn in connections.values():
                 super(cxn.__class__, cxn).close()
 
+
 class _Row(sqlite3.Row):
     def __repr__(self):
         items = ', '.join('{0}={1}'.format(*i) for i in sorted(dict(self).items()))
         return self.__class__.__name__ + '({0})'.format(items)
+
+    def __len__(self):
+        '''pypy sqlite3.Row doesn't implement this'''
+        return len(self.keys())
 
 
 class _Connection(sqlite3.Connection):
