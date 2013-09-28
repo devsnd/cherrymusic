@@ -211,6 +211,12 @@ class CherryModel:
                 oneliner = oneliner.replace('{revartist}', a.lower()[::-1])
         return oneliner
 
+    def randomMusicEntries(self, count):
+        loadCount = int(count * 1.5) + 1           # expect 70% valid entries
+        entries = self.cache.randomFileEntries(loadCount)
+        filteredEntries = list(filter(isValidMediaFile, entries))
+
+        return filteredEntries[:count]
 
 def isValidMediaFile(file):
     file.path = strippath(file.path)
@@ -252,7 +258,6 @@ def strippath(path):
     if path.startswith(cherry.config['media.basedir']):
         return path[len(cherry.config['media.basedir']) + 1:]
     return path
-
 
 class MusicEntry:
     def __init__(self, path, compact=False, dir=False, repr=None):

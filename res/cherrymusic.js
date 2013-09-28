@@ -284,7 +284,8 @@ INTERACTION
 ***/
 
 function showAlbumArtChangePopOver(jqobj){
-    jqobj.popover({selector: jqobj.siblings('img'), title: 'Change cover art', html: true, content: '<img src="/res/img/folder.png" /><img src="/res/img/folder.png" /><img src="/res/img/folder.png" />'});
+    // relative img paths so cherrymusic can run in subdir (#344)
+    jqobj.popover({selector: jqobj.siblings('img'), title: 'Change cover art', html: true, content: '<img src="res/img/folder.png" /><img src="res/img/folder.png" /><img src="res/img/folder.png" />'});
 }
 
 
@@ -318,7 +319,7 @@ function getTranscodePath(filepath, format){
     "use strict";
     var match = filepath.match(/serve(.*)$/);
     if(match){
-        return "/trans"+match[1]+"/get."+format;
+        return "trans"+match[1]+"/get."+format;     // relative path so cherrymusic can run in subdir (#344)
     }
 }
 
@@ -366,8 +367,10 @@ function savePlaylist(plid,playlistname,ispublic,overwrite){
         function(){busy('.playlist-panel').fadeOut('fast')});
 }
 function getAddrPort(){
-    m = (window.location+"").match(/https?:\/\/(.+?):?(\d+).*/);
-    return 'http://'+m[1]+':'+m[2];
+    m = (window.location+"").match(/(https?):\/\/([^/:]+)(?::(\d+))?/);   // won't work for URLs with "user:passw@host"
+    // 0: whole match, 1: protocol, 2: host, 3: port or undefined
+    // whole match = "$protocol://$host(:$port)?"
+    return m[0];
 }
 
 function ord(c)
@@ -550,6 +553,25 @@ function loadPlaylist(playlistid, playlistlabel){
     }
 }
 
+function randomPlaylist() {
+    "use strict";
+    playlistManager.clearQueue();
+    var data = {'action':'generaterandomplaylist'};
+    var success = function(data){
+        var tracks = jQuery.parseJSON(data);
+        for (var i = 0; i < tracks.length; i++) {
+            var track = tracks[i];
+            playlistManager.addSong(track.urlpath, track.label)
+        }
+    };
+    busy('.playlist-panel').hide().fadeIn('fast');
+    api(data,
+        success,
+        errorFunc('error loading random playlist'),
+        function(){busy('.playlist-panel').fadeOut('fast')}
+    );
+}
+
 var lastPlaylistHeight = 0;
 function resizePlaylistSlowly(){
     var currentHeight = $('.jp-playlist').height();
@@ -685,7 +707,7 @@ function addNewUser(){
 }
 
 function userDelete(userid){
-    var data = {'action':'setuseroptionfor',
+    var data = {'action': 'userdelete',
                 'value' : JSON.stringify({
                     'userid':userid
                 })};

@@ -89,6 +89,7 @@ class HTTPHandler(object):
             'rememberplaylist': self.api_rememberplaylist,
             'saveplaylist': self.api_saveplaylist,
             'loadplaylist': self.api_loadplaylist,
+            'generaterandomplaylist': self.api_generaterandomplaylist,
             'deleteplaylist': self.api_deleteplaylist,
             'getmotd': self.api_getmotd,
             'restoreplaylist': self.api_restoreplaylist,
@@ -338,7 +339,7 @@ everybody has to relogin now.''')
             }
             """
         return style
-        
+
     def download_check_files(self, filelist):
         # only admins and allowed users may download
         if not cherrypy.session['admin']:
@@ -434,7 +435,7 @@ everybody has to relogin now.''')
         uo = self.useroptions.forUser(self.getUserId())
         uo.setOption(params["optionkey"], params["optionval"])
         return "success"
-    
+
     def api_setuseroptionfor(self, value):
         if cherrypy.session['admin']:
             params = json.loads(value)
@@ -546,6 +547,10 @@ everybody has to relogin now.''')
                                         playlistid=value,
                                         userid=self.getUserId()
                                         ))
+
+    def api_generaterandomplaylist(self, value):
+        files = self.model.randomMusicEntries(50)
+        return self.jsonrenderer.render(files)
 
     def api_changeplaylist(self, value):
         params = json.loads(value)

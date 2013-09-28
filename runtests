@@ -33,7 +33,36 @@
 #
 ##############################################################################
 
+USAGE="Usage: $(basename $0) [-d OUTPUT_DIR] [TEST_TARGET]"
+
 PROJECTDIR=`dirname $0`
+
+TEST_EXCLUDE_REGEX='cherrypy'
+COVERAGE_OPTIONS="--with-coverage --cover-erase"
+
+while getopts "d:" FLAG "$@" ; do
+
+    if [ "$FLAG" = ":" -o "$FLAG" = "?" ]; then
+        echo $USAGE >&2
+        exit 1
+    fi
+
+    if [ "$FLAG" = "d" ]; then
+        if [ ! -e "$OPTARG" ]; then
+            mkdir -p "$OPTARG"
+        fi
+        if [ ! -d "$OPTARG" ]; then
+            echo "output directory $OPTARG does not exist" >&2
+            exit 1
+        fi
+        COVERAGE_OPTIONS="${COVERAGE_OPTIONS} --cover-html --cover-html-dir=${OPTARG}"
+    fi
+done
+# The first non-flag argument is at index $OPTIND, so shift one fewer
+# to move it into $1
+shift `expr $OPTIND - 1`
+
+SPECIFIC_TEST="$1"
 
 if [ ! -d ${PROJECTDIR} -o ! -f ${PROJECTDIR}/cherrymusic ]; then
     echo "cannot find main script: 'cherrymusic'" >&2
@@ -41,25 +70,38 @@ if [ ! -d ${PROJECTDIR} -o ! -f ${PROJECTDIR}/cherrymusic ]; then
     exit 1
 fi
 
-echo "checking dist metadata..."
-python ${PROJECTDIR}/setup.py check
-if [ $? != 0 ]; then
-    echo "distribution metadata check failure" >&2
-    exit 1
+if [ $SPECIFIC_TEST ]; then
+    TEST_LOCATION="cherrymusicserver.test.test_${SPECIFIC_TEST}"
+    COVERAGE_TARGET="cherrymusicserver.${SPECIFIC_TEST}"
+    COVERAGE_OPTIONS="${COVERAGE_OPTIONS} --cover-package=${COVERAGE_TARGET} --cover-branches --cover-min-percentage=100"
+else
+    TEST_LOCATION=""
+    COVERAGE_TARGET="audiotranscode,cherrymusicserver,cmbootstrap"
+    COVERAGE_OPTIONS="${COVERAGE_OPTIONS} --cover-package=${COVERAGE_TARGET} --cover-min-percentage=54"
+
+    echo
+    echo "[distribution]: setup.py check"
+    python ${PROJECTDIR}/setup.py check
+    if [ $? != 0 ]; then
+        echo "distribution metadata check failure" >&2
+        exit 1
+    fi
+    echo "done."
 fi
-echo "done."
 
 
 # nosetests
 for i in "" "2" "3"; do
-    cmd="nosetests${i}"
-    if [ $(command -v $cmd) ]; then
-        echo "running ${cmd}:"
-        $cmd -e cherrypy
+    TESTER="nosetests${i}"
+    if [ $(command -v $TESTER) ]; then
+        RUN="${TESTER} -e ${TEST_EXCLUDE_REGEX} ${COVERAGE_OPTIONS} ${TEST_LOCATION}"
+        echo
+        echo "[${TESTER}]: ${RUN}"
+        $RUN
         if [ $? != 0 ]; then
-            failed="$failed $cmd"
+            failed="$failed $TESTER"
         else
-            passed="$passed $cmd"
+            passed="$passed $TESTER"
         fi
     fi
 done
