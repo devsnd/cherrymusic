@@ -245,6 +245,15 @@ PlaylistManager.prototype = {
             $(this.cssSelectorjPlayer).bind($.jPlayer.event.ended, function(event) {
                 self.cmd_next();
             });
+            
+            /* WORKAROUND FOR BUG #343 (playback stops sometimes in google chrome) */
+            $(this.cssSelectorjPlayer).bind($.jPlayer.event.error, function(event) {
+                window.console.log("Playback failed! trying to resume from the point it failed.");
+                // get current time where playback failed and resume from there
+                var current_playtime = self.jPlayerInstance.data("jPlayer").status.currentTime;
+                playlistManager.jPlayerInstance.data("jPlayer").play(current_playtime);
+            });
+            /* WORKAROUND END */
 
             /* JPLAYER CONTROLS BINDINGS */
             $(this.cssSelector.previous).click(function() {
