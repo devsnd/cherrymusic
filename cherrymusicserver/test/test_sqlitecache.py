@@ -547,6 +547,8 @@ class RandomEntriesTest(unittest.TestCase):
                     self.Cache.register_file_with_db(fileobj)
                     files[fullpath] = fileobj
                 previous = fullpath
+        self.Cache.conn.commit()
+        assert self.Cache.conn.execute('SELECT 1 FROM files LIMIT 1').fetchone()
         return files
 
     def test_should_return_empty_sequence_when_no_files(self):
