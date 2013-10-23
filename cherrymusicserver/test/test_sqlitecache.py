@@ -48,7 +48,7 @@ from cherrymusicserver import log
 from cherrymusicserver import sqlitecache
 from cherrymusicserver import service
 
-from cherrymusicserver.database.sql import MemConnector
+from cherrymusicserver.database.sql import MemConnector, TmpConnector
 
 log.setTest()
 
@@ -524,7 +524,7 @@ class RandomEntriesTest(unittest.TestCase):
         self.testdir = getAbsPath(self.testdirname)
         setupTestfiles(self.testdir, ())
         cherry.config = cherry.config.replace({'media.basedir': self.testdir})
-        service.provide('dbconnector', MemConnector)
+        service.provide('dbconnector', TmpConnector)
         database.ensure_current_version(sqlitecache.DBNAME, autoconsent=True)
         self.Cache = sqlitecache.SQLiteCache()
         return self
@@ -547,8 +547,6 @@ class RandomEntriesTest(unittest.TestCase):
                     self.Cache.register_file_with_db(fileobj)
                     files[fullpath] = fileobj
                 previous = fullpath
-        self.Cache.conn.commit()
-        assert self.Cache.conn.execute('SELECT 1 FROM files LIMIT 1').fetchone()
         return files
 
     def test_should_return_empty_sequence_when_no_files(self):
