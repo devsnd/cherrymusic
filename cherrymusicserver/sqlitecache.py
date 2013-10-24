@@ -191,20 +191,17 @@ class SQLiteCache(object):
         '''
         assert count >= 0
         cursor = self.conn.cursor()
-        cursor.execute(
-         '''SELECT
-            (SELECT _id FROM files ORDER BY _id ASC LIMIT 1) AS min,
-            (SELECT _id FROM files ORDER BY _id DESC LIMIT 1) AS max;''')
-        minmax = cursor.fetchone()
-        if minmax is None or None in minmax:    # database is empty
-            return ()
+        minId = cursor.execute('''SELECT _id FROM files ORDER BY _id ASC LIMIT 1;''').fetchone()
+        if minId is None:
+            return ()     # database is empty
+        minId = minId[0]
+        maxId = cursor.execute('''SELECT _id FROM files ORDER BY _id DESC LIMIT 1;''').fetchone()[0]
 
         if sys.version_info < (3,):
             genrange = xrange                   # use generator, not a large list
         else:
             genrange = range
 
-        minId, maxId = minmax
         if maxId - minId < count:
             file_ids = genrange(minId, maxId + 1)
         else:

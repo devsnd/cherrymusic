@@ -48,7 +48,7 @@ from cherrymusicserver import log
 from cherrymusicserver import sqlitecache
 from cherrymusicserver import service
 
-from cherrymusicserver.database.sql import MemConnector, TmpConnector
+from cherrymusicserver.database.sql import MemConnector
 
 log.setTest()
 
@@ -524,7 +524,7 @@ class RandomEntriesTest(unittest.TestCase):
         self.testdir = getAbsPath(self.testdirname)
         setupTestfiles(self.testdir, ())
         cherry.config = cherry.config.replace({'media.basedir': self.testdir})
-        service.provide('dbconnector', TmpConnector)
+        service.provide('dbconnector', MemConnector)
         database.ensure_current_version(sqlitecache.DBNAME, autoconsent=True)
         self.Cache = sqlitecache.SQLiteCache()
         return self
