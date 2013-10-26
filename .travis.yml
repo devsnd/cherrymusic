@@ -20,7 +20,7 @@ install:
 # prepare test run; test local install
 before_script:
   - python setup.py -q install
-  
+
 # command to run tests
 script: nosetests
 
@@ -30,7 +30,7 @@ branches:
     - master
     - devel
 
-#notifications:
+# notifications:
 # email:
 #   recipients:
 #     - tilman.boerner@gmx.de

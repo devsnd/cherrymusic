@@ -189,23 +189,29 @@ class SQLiteCache(object):
             database does not contain enough entries or if randomization hits
             directory entries or entries that have been deleted.
         '''
+        assert count >= 0
         cursor = self.conn.cursor()
-        cursor.execute(''' SELECT MIN(rowid), MAX(rowid) FROM files ''')
-        minId, maxId = cursor.fetchone()
-
-        if minId is None:                   # database is empty
-            return ()
-        if abs(maxId - minId) < count:      # less than count entries
-            return self.musicEntryFromFileIds(range(minId, maxId + 1), mode='fileonly')
+        minId = cursor.execute('''SELECT _id FROM files ORDER BY _id ASC LIMIT 1;''').fetchone()
+        if minId is None:
+            return ()     # database is empty
+        minId = minId[0]
+        maxId = cursor.execute('''SELECT _id FROM files ORDER BY _id DESC LIMIT 1;''').fetchone()[0]
 
         if sys.version_info < (3,):
-            idRange = xrange(minId, maxId + 1)
+            genrange = xrange                   # use generator, not a large list
         else:
-            idRange = range(minId, maxId + 1)
+            genrange = range
 
-        entries = self.musicEntryFromFileIds(random.sample(idRange, count), mode='fileonly')
+        if maxId - minId < count:
+            file_ids = genrange(minId, maxId + 1)
+        else:
+            # range generator pays off:
+            file_ids = random.sample(genrange(minId, maxId + 1), count)
+
+        entries = self.musicEntryFromFileIds(file_ids, mode='fileonly')
         random.shuffle(entries)
         return entries
+
 
     def musicEntryFromFileIds(self, filerowids, incompleteMusicEntries=None, mode='normal'):
         #incompleteMusicEntries maps db parentid to incomplete musicEntry
