@@ -35,6 +35,7 @@ import base64
 import codecs
 
 userDataFolderName = 'cherrymusic'  # $XDG_DATA_HOME/userDataFolderName
+pidFileName = 'cherrymusic.pid'     # $XDG_DATA_HOME/userDataFolderName/cherrymusic.pid
 configFolderName = 'cherrymusic'    # $XDG_CONFIG_HOME/configFolderName
 configFileName = 'cherrymusic.conf' # $XDG_CONFIG_HOME/configFolderName/cherrymusic.conf
 sharedFolderName = 'cherrymusic'    # /usr/share/sharedFolderName
@@ -84,6 +85,12 @@ def fallbackPathInUse():
         if files:
             return True
     return False
+
+def pidFile():
+    return os.path.join(getUserDataPath(), pidFileName)
+
+def pidFileExists():
+    return os.path.exists(pidFile())
 
 def configurationFile():
     return os.path.join(getConfigPath(), configFileName)

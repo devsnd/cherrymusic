@@ -35,6 +35,7 @@ from backport import input
 
 import sys
 import threading
+import signal
 
 # woraround for cherrypy 3.2.2:
 # https://bitbucket.org/cherrypy/cherrypy/issue/1163/attributeerror-in-cherrypyprocessplugins
@@ -110,8 +111,32 @@ class CherryMusic:
                  setup=False, cfg_override={}):
         self.setup_services()
         self.setup_config(createNewConfig, setup, cfg_override)
+        signal.signal(signal.SIGTERM, self.stopAndCleanUp)
+        self.create_pid_file()
         self.setup_databases(update, dropfiledb, setup)
         self.server(httphandler.HTTPHandler(config))
+        self.delete_pid_file()
+
+    def stopAndCleanUp(self, signal, stackframe):
+        self.delete_pid_file()
+        print('Shutting down cherrypy server...')
+        sys.exit(0)
+
+    def create_pid_file(self):
+        if pathprovider.pidFileExists():
+            sys.exit("""============================================
+Process id file %s already exists.
+I've you are sure that cherrymusic is not running, you can delete this file and restart cherrymusic.
+============================================""" % pathprovider.pidFile())
+        else:
+            with open(pathprovider.pidFile(), 'w') as pidfile:
+                pidfile.write(str(os.getpid()))
+
+    def delete_pid_file(self):
+        if pathprovider.pidFileExists():
+            os.remove(pathprovider.pidFile())
+        else:
+            print("Error removing pid file, doesn't exist!")
 
     @classmethod
     def setup_services(cls):
@@ -251,7 +276,7 @@ To continue, please move the following:
 Thank you, and enjoy responsibly. :)
 ==========================================================================
 """)
-        exit(1)
+        sys.exit(1)
 
     def printWelcomeAndExit(self):
         print("""
@@ -267,7 +292,7 @@ Then you can start the server and listen to whatever you like.
 Have fun!
 ==========================================================================
 """)
-        exit(0)
+        sys.exit(0)
 
     def start(self, httphandler):
         socket_host = "127.0.0.1" if config['server.localhost_only'] else "0.0.0.0"
