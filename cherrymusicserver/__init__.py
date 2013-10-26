@@ -65,19 +65,18 @@ def fake_wait_for_occupied_port(host, port):
 cherrypy.process.servers.wait_for_occupied_port = fake_wait_for_occupied_port
 # end of port patch
 
-# workaround for cherrypy not using unicode strings for URI, see:
-# https://bitbucket.org/cherrypy/cherrypy/issue/1148/wrong-encoding-for-urls-containing-utf-8
-cherrypy.lib.static.__serve_file = cherrypy.lib.static.serve_file
+if sys.version_info < (3,0):
+    # workaround for cherrypy not using unicode strings for URI, see:
+    # https://bitbucket.org/cherrypy/cherrypy/issue/1148/wrong-encoding-for-urls-containing-utf-8
+    cherrypy.lib.static.__serve_file = cherrypy.lib.static.serve_file
 
-
-def serve_file_utf8_fix(path, content_type=None, disposition=None,
-                        name=None, debug=False):
-    path = codecs.decode(codecs.encode(path, 'latin-1'), 'utf-8')
-    return cherrypy.lib.static.__serve_file(path, content_type, disposition,
-                                            name, debug)
-
-cherrypy.lib.static.serve_file = serve_file_utf8_fix
-# end of unicode workaround
+    def serve_file_utf8_fix(path, content_type=None, disposition=None,
+                            name=None, debug=False):
+        path = codecs.decode(codecs.encode(path, 'latin-1'), 'utf-8')
+        return cherrypy.lib.static.__serve_file(path, content_type, disposition,
+                                                name, debug)
+    cherrypy.lib.static.serve_file = serve_file_utf8_fix
+    # end of unicode workaround
 
 from cherrymusicserver import configuration as cfg
 config = None
@@ -112,6 +111,7 @@ class CherryMusic:
         self.setup_services()
         self.setup_config(createNewConfig, setup, cfg_override)
         signal.signal(signal.SIGTERM, self.stopAndCleanUp)
+        signal.signal(signal.SIGINT, self.stopAndCleanUp)
         self.create_pid_file()
         self.setup_databases(update, dropfiledb, setup)
         self.server(httphandler.HTTPHandler(config))
