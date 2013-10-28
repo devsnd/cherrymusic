@@ -5074,6 +5074,25 @@ body {
   z-index: 1;
   bottom: 70px;
 }
+.busy-indicator {
+  background-image: url(../../cherrymusic_loader.gif);
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-color: #ffffff;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
+  /* IE 5-7 */
+
+  filter: alpha(opacity=60);
+  /* Netscape */
+
+  -moz-opacity: 0.6;
+  /* Safari 1.x */
+
+  -khtml-opacity: 0.6;
+  /* Good browsers */
+
+  opacity: 0.6;
+}
 .user-list-item {
   list-style-type: none;
 }
@@ -5165,6 +5184,12 @@ body {
 .cm-media-list {
   position: relative;
   padding: 0 0 0 10px;
+}
+.cm-media-list-busy {
+  overflow: hidden;
+  background-image: url("../../cherrymusic_loader.gif");
+  background-position: 50% 40px;
+  background-repeat: no-repeat;
 }
 .cm-media-list-category {
   position: relative;

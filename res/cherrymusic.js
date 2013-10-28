@@ -239,7 +239,7 @@ keyboard_shortcut_setter = function(option, optionname){
     $('html').bind('keyup',keydownhandler);
 }
 
-function busy(selector){
+function busy(selector, rect){
     "use strict";
     var domelem = $(selector).children('.busy-indicator');
     if(domelem.length == 0){
@@ -247,11 +247,14 @@ function busy(selector){
         domelem.addClass('busy-indicator');
         $(selector).append(domelem);
     }
+    var top, left, width, height;
+    
     var pos = $(selector).position();
-    var top = 'top: '+pos.top+'px;';
-    var left = 'left: '+pos.left+'px;';
-    var width = 'width: '+$(selector).width()+'px;';
-    var height = 'height: '+$(selector).height()+'px;';
+    top = 'top: '+pos.top+'px;';
+    left = 'left: '+pos.left+'px;';
+    width = 'width: '+$(selector).width()+'px;';
+    height = 'height: '+$(selector).height()+'px;';
+    
     domelem.attr('style','position: absolute;'+top+left+width+height);   
     return domelem;
 }
@@ -268,14 +271,17 @@ function search($form){
     }
     var searchstring = $input.val();
     var success = function(json){
+        $('.searchinput').css('background-image', '');
+        $('.searchinput').css('color', '');
         new MediaBrowser('.search-results', json, 'Search: '+htmlencode(searchstring));
-        busy('#searchform').fadeOut('fast');
     };
     var error = function(){
+        $('.searchinput').css('background-image', '');
+        $('.searchinput').css('color', '');
         errorFunc('failed loading search results')();
-        busy('#searchform').fadeOut('fast');
     };
-    busy('#searchform').hide().fadeIn('fast');
+    $('.searchinput').css('background-image', 'url(res/progress-bars.gif)');
+    $('.searchinput').css('color', '#ffffff');
     api('search', {'searchstring': searchstring}, success, error);
     return false;
 }

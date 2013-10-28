@@ -46,6 +46,7 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs){
         
         "use strict";
         $(self.cssSelector+' .cm-media-list-category').animate({left: '-100%'}, {duration: 1000, queue: false});
+        $(self.cssSelector).addClass('cm-media-list-busy');
         var next_mb_title = '';
         var directory = $(this).attr("dir");
         var compactlisting = $(this).is("[filter]");
@@ -60,14 +61,19 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs){
         }
         var currdir = this;
         var success = function(json){
+            $(self.cssSelector).removeClass('cm-media-list-busy');
             self.listing_data_stack[self.listing_data_stack.length-1].scroll = $(self.cssSelector).parent().parent().scrollTop();
             self.listing_data_stack.push({'title': next_mb_title, 'data': json, 'scroll': 0});
             self.render();
         };
+        var error = function(){
+            $(self.cssSelector).removeClass('cm-media-list-busy');
+            errorFunc('unable to list compact directory');
+        }
         api(action,
             dirdata,
             success,
-            errorFunc('unable to list compact directory'));
+            error);
         $(this).blur();
         return false;
     }
