@@ -41,6 +41,11 @@ import cherrypy
 import audiotranscode
 from imp import reload
 
+try:
+    from urllib.parse import quote
+except ImportError:
+    from backport.urllib.parse import quote
+
 import cherrymusicserver as cherry
 from cherrymusicserver import service
 from cherrymusicserver import util
@@ -265,6 +270,27 @@ class MusicEntry:
         self.compact = compact
         self.dir = dir
         self.repr = repr
+
+    def to_dict(self):
+        if self.compact:
+            #compact
+            return {'type': 'compact',
+                    'urlpath': self.path,
+                    'label': self.repr}
+        elif self.dir:
+            #dir
+            simplename = pathprovider.filename(self.path)
+            return {'type':'dir',
+                    'path':self.path,
+                    'label':simplename }
+        else:
+            #file
+            simplename = pathprovider.filename(self.path)
+            urlpath = quote(self.path.encode('utf8'));
+            return {'type':'file',
+                    'urlpath':urlpath,
+                    'path':self.path,
+                    'label':simplename}
 
     def __repr__(self):
         return "<MusicEntry path:%s, dir:%s>" % (self.path, self.dir)

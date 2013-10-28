@@ -1,0 +1,36 @@
+<li class="playlist-browser-list-item" id="playlist{{playlistid}}">
+    <div class="playlist-browser-list-item-container">
+        <div>
+            <div class="playlist-detail-switch">
+                <a href="javascript:;" onclick="loadPlaylistContent({{playlistid}}, '{{playlistlabel}}')">
+                    <span class="glyphicon glyphicon-chevron-right"></span>
+                </a>
+            </div>
+            <div class="playlist-title">
+                <a href="javascript:;" onclick="loadPlaylist({{playlistid}}, '{{playlistlabel}}')">
+                    {{playlistlabel}}
+                </a>
+            </div>
+            <div class="playlist-ispublic">
+                {{#isowner}}
+                <span class="label {{publiclabelclass}}">
+                    public
+                    <input onchange="changePlaylist({{playlistid}},'public',$(this).is(':checked'))"
+                           type="checkbox" {{publicchecked}}>
+                </span>
+                {{/isowner}}
+            </div>
+            <div class="playlist-usernamelabel">
+                <span class="badge" style="background-color: {{username_color}}">{{username}}</span>
+            </div>
+            {{#candelete}}
+            <div class="playlist-deletebutton">
+                <a href="javascript:;" class="btn btn-xs btn-danger"
+                   onclick="confirmDeletePlaylist({{playlistid}}, '{{playlistlabel}}')">&times;</a>
+            </div>
+            {{/candelete}}
+        </div>
+    </div>
+    <div class="playlistcontent">
+    </div>
+</li>

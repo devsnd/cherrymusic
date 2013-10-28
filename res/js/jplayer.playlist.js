@@ -213,6 +213,7 @@
 			}
             this._updatePlaytime();
             this._highlight(this.current);
+            this._createItemHandlers();
 		},
         _updatePlaytime: function(){
             var self = this;
@@ -279,7 +280,7 @@
 		_createItemHandlers: function() {
 			var self = this;
 			// Create .live() handlers for the playlist items
-			$(this.cssSelector.playlist + " a." + this.options.playlistOptions.itemClass).die("click").live("click", function() {
+			$(this.cssSelector.playlist + " a." + this.options.playlistOptions.itemClass).off("click").on("click", function() {
                 $(self.options.playlistOptions.playlistSelector).trigger('requestPlay', [self.options.playlistOptions.playlistSelector]);
 				var index = $(this).parent().parent().index();
 				//if(self.current !== index) {
@@ -292,14 +293,15 @@
 			});
 
 			// Create .live() handlers that disable free media links to force access via right click
-			$(self.cssSelector.playlist + " a." + this.options.playlistOptions.freeItemClass).die("click").live("click", function() {
+			$(self.cssSelector.playlist + " a." + this.options.playlistOptions.freeItemClass).off("click").on("click", function(event) {
 				$(this).parent().parent().find("." + self.options.playlistOptions.itemClass).click();
 				$(this).blur();
 				return false;
 			});
 
 			// Create .live() handlers for the remove controls
-			$(self.cssSelector.playlist + " a." + this.options.playlistOptions.removeItemClass).die("click").live("click", function() {
+			$(self.cssSelector.playlist + " a." + this.options.playlistOptions.removeItemClass).off("click").on("click", function(event) {
+                event.stopPropagation();
 				var index = $(this).parent().parent().index();
 				self.remove(index);
 				$(this).blur();
@@ -334,8 +336,8 @@
 		add: function(media, playNow) {
             var self = this;
 			$(this.cssSelector.playlist + " ul").append(this._createListItem(media)).find("li:last-child").hide().slideDown(this.options.playlistOptions.addTime);
-            
 			this._updateControls();
+            this._createItemHandlers();
 			this.original.push(media);
 			this.playlist.push(media); // Both array elements share the same object pointer. Comforms with _initPlaylist(p) system.
 

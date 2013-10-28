@@ -20,6 +20,15 @@ ManagedPlaylist.prototype = {
     _init : function(playlist, playlistManager){
         var self = this;
         this.playlistSelector = self._createNewPlaylistContainer();
+        //check if playlist is sane:
+        for(var i=0; i<playlist.length; i++){
+            if(typeof playlist[0].path === 'undefined'){
+                window.console.error('track has no path set!');
+            }
+            if(typeof playlist[0].label === 'undefined'){
+                window.console.error('track has no label set!');
+            }
+        }
         self.jplayerplaylist = new jPlayerPlaylist(
             {
                 jPlayer: this.playlistManager.cssSelectorjPlayer,
@@ -74,7 +83,9 @@ ManagedPlaylist.prototype = {
         var playlistContainerParent = this.playlistManager.cssSelectorPlaylistContainerParent;
         var id = this.playlistManager.plid2htmlid(this.id);
         $(playlistContainerParent).append(
-            '<div class="playlist-container jp-playlist" id="'+id+'"><ul><li></li></ul><div class="jp-playlist-playtime-sum"></div></div>'
+            '<div class="playlist-container jp-playlist" id="'+id+'">'+
+            '<ul class="playlist-container-list"><li></li></ul>'+
+            '<div class="jp-playlist-playtime-sum"></div></div>'
         );
         return '#'+id;
     },
@@ -86,12 +97,6 @@ ManagedPlaylist.prototype = {
                 title : elem.title,
                 duration : elem.duration,
                 url: elem.url,
-            }
-            if(typeof track.url === 'undefined' && typeof elem.mp3 !== 'undefined'){
-                track.url = elem.mp3
-            }
-            if(typeof track.url === 'undefined' && typeof elem.oga !== 'undefined'){
-                track.url = elem.oga
             }
             canonical.push(track);
         }
@@ -175,7 +180,7 @@ var NewplaylistProxy = function(playlistManager){
 PlaylistManager = function(){
     "use strict";
     var self = this;
-    this.cssSelectorPlaylistContainerParent = '#playlistContainerParent';
+    this.cssSelectorPlaylistContainerParent = '.playlist-container-parent';
     this.cssSelectorPlaylistChooser = '#playlistChooser';
     this.cssSelectorPlaylistCommands = '#playlistCommands';
     this.cssSelectorJPlayerControls = '#jp_ancestor';
@@ -331,7 +336,6 @@ PlaylistManager.prototype = {
             errorFunc('Flashblock is enabled. Please click on the flash symbol on top of the player to activate flash.')();
         } else {
             window.clearInterval(this.flashBlockCheckIntervalId);
-            removeError('Flashblock is enabled. Please click on the flash symbol on top of the player to activate flash.');
             window.setTimeout("playlistManager.flashSize('0px','0px',-10000);",1000);
             playlistManager.flashSize('0px','0px',-10000);
         }
@@ -426,14 +430,18 @@ PlaylistManager.prototype = {
                 remainingStr = remaintracks.length+' remaining tracks';
             }
             if(littleTimeLeft){
-                $('.remaining-tracks-or-time').addClass('label-important');
-                $('.playlist-progress-bar .bar').addClass('bar-danger');
+                $('.remaining-tracks-or-time').removeClass('label-default');
+                $('.remaining-tracks-or-time').addClass('label-danger');
+                $('.playlist-progress-bar .progress-bar').addClass('progress-bar-danger');
+                $('.playlist-progress-bar .progress-bar').removeClass('progress-bar-default');
             } else {
-                $('.remaining-tracks-or-time').removeClass('label-important');
-                $('.playlist-progress-bar .bar').removeClass('bar-danger');
+                $('.remaining-tracks-or-time').addClass('label-default');
+                $('.remaining-tracks-or-time').removeClass('label-danger');
+                $('.playlist-progress-bar .progress-bar').addClass('progress-bar-default');
+                $('.playlist-progress-bar .progress-bar').removeClass('progress-bar-danger');
             }
             $('.remaining-tracks-or-time').html(remainingStr);           
-            $('.playlist-progress-bar .bar').css('width',parseInt(100-proc*100)+'%');
+            $('.playlist-progress-bar .progress-bar').css('width',parseInt(100-proc*100)+'%');
         }
     },
     refreshTabs : function(){
@@ -467,7 +475,7 @@ PlaylistManager.prototype = {
             }
             pltabs += '</a></li>';
         }
-        pltabs += '<li><a href="#" onclick="playlistManager.showPlaylistBrowser()"><b>+</b></a></li>';
+        pltabs += '<li><a href="#" onclick="playlistManager.newPlaylist()"><b>+</b></a></li>';
         $(self.cssSelectorPlaylistChooser+' ul').empty()
         $(self.cssSelectorPlaylistChooser+' ul').append(pltabs);
     },
@@ -516,16 +524,6 @@ PlaylistManager.prototype = {
         showpl.show();
         this.refreshTabs();
         this.refreshCommands();
-    },
-    showPlaylistBrowser: function(){
-        playlistManager.hideAll();
-        playlistManager.setEditingPlaylist(0);
-        showPlaylists();
-        $('#playlistChooser ul li:last').addClass('active');
-        $('#playlistCommands').hide();
-        $('#playlistContainerParent').hide();
-        $('#playlistBrowser').show();
-        this.setTrackDestinationLabel();
     },
     setTrackDestinationLabel : function(){
         $('#searchresults .add-track-destination').text('add all to '+this.getEditingPlaylist().name);        
@@ -615,7 +613,7 @@ PlaylistManager.prototype = {
         var formats = [];
         if(availablejPlayerFormats.indexOf(ext) !== -1){
             //add natively supported path
-            track[ext2jPlayerFormat(ext)] = path;
+            track[ext2jPlayerFormat(ext)] = SERVER_CONFIG.serve_path + path;
             formats.push(ext);
             window.console.log('added native format '+ext);
         } else if(!transcodingEnabled){
@@ -632,9 +630,9 @@ PlaylistManager.prototype = {
                 for(var i=0; i<availablejPlayerFormats.length; i++){
                     if(availableEncoders.indexOf(availablejPlayerFormats[i]) !== -1){
                         formats.push(availablejPlayerFormats[i]);
-                        var transcodePath = getTranscodePath(path,availablejPlayerFormats[i]);
-                        track[ext2jPlayerFormat(availablejPlayerFormats[i])] = transcodePath;
-                        window.console.log('added live transcoding '+ext+' --> '+availablejPlayerFormats[i]+' @ '+transcodePath);
+                        var transurl = SERVER_CONFIG.transcode_path + path + '/get.'+availablejPlayerFormats[i];
+                        track[ext2jPlayerFormat(availablejPlayerFormats[i])] = transurl;
+                        window.console.log('added live transcoding '+ext+' --> '+availablejPlayerFormats[i]+' @ '+transurl);
                     }
                 }
             }
@@ -670,7 +668,6 @@ PlaylistManager.prototype = {
                 playlist.jplayerplaylist.select(0);
             }
         }
-        pulse('.tabNavigation li a.jplayer');
         var success = function(data){
             var metainfo = $.parseJSON(data)
             if (metainfo.length) {
@@ -678,8 +675,7 @@ PlaylistManager.prototype = {
             }
             self.getEditingPlaylist().jplayerplaylist._refresh(true);
         }
-        api({action:'getsonginfo',
-            value: path}, success, errorFunc('error getting song metainfo'), true);
+        api('getsonginfo', {'path': decodeURIComponent(path)}, success, errorFunc('error getting song metainfo'), true);
     },
     clearPlaylist : function(){
         "use strict";
@@ -714,13 +710,11 @@ PlaylistManager.prototype = {
         var newToRememberPlaylist = JSON.stringify(canonicalPlaylists)
         if(this.lastRememberedPlaylist !== newToRememberPlaylist){
             // save playlist in session
-            var data = {'action':'rememberplaylist',
-                        'value': newToRememberPlaylist}
             var error = errorFunc('cannot remember playlist: failed to connect to server.');
             var success = function(){
                 self.lastRememberedPlaylist = newToRememberPlaylist;
             }
-            api(data, success, error, true);
+            api('rememberplaylist', {'playlist': canonicalPlaylists}, success, error, true);
         }
     },
     restorePlaylists : function(){
@@ -728,10 +722,9 @@ PlaylistManager.prototype = {
         "use strict";
         /*restore playlist from session*/
         var success = function(data){
-            var playlistsToRestore = $.parseJSON(data);
-            window.console.log(playlistsToRestore);
+            var playlistsToRestore = data;
             if(playlistsToRestore !== null && playlistsToRestore.length>0){
-                window.console.log('should restore playlist now');
+                window.console.log('restoring playlist from last session');
                 for(var i=0; i<playlistsToRestore.length; i++){
                     var pl = playlistsToRestore[i];
                     var newpl = self._createPlaylist(pl.playlist,pl.closable,pl.public,pl.owner,pl.reason_open,pl.name,pl.saved);
@@ -748,7 +741,7 @@ PlaylistManager.prototype = {
             window.console.log('remembering playlists periodically');
             window.setInterval("playlistManager.rememberPlaylist()",REMEMBER_PLAYLIST_INTERVAL );
         };
-        api('restoreplaylist',success,errorFunc('error restoring playlist'));
+        api('restoreplaylist', success, errorFunc('error restoring playlist'));
     },
     _createPlaylist : function(playlist, closable, public, owner, reason, name, saved){
         var a = new Date();

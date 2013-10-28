@@ -1,0 +1,144 @@
+.media-browser{
+    
+}
+
+.cm-media-list{
+    position: relative;
+    padding: 0 0 0 10px;
+    
+    &-category{
+        position: relative;
+    }
+    
+    & a{
+       text-decoration: none; 
+    }
+
+    &-item{
+        list-style-type: none;
+        word-wrap: break-word;
+        margin: 5px 5px 5px 0;
+    }
+    
+    & > li:nth-child(odd) {
+        background-color: @gray-even-lighter;
+    }
+    & > li:nth-child(even) {
+        background-color: @gray-lighter;
+    }
+    
+    &-parent{
+        display: block;
+        height: 50px;
+        font-size: 30px;
+        padding: 5px 10px;
+        
+        &:hover{
+            background-color: @gray-light;
+        }
+        &-item{
+            margin-bottom: 20px;
+        }
+    }
+}
+
+.musicfile{
+    display: block;
+    
+    & > .fullpathlabel{
+        font-size: @font-size-tiny;
+        display: block;
+        white-space: nowrap;
+        color: @gray-light;
+        overflow: hidden;
+    }
+    
+    & > .simplelabel{
+        padding-left: 5px;
+    }
+}
+
+.list-dir{
+    display: block;
+    width: 100%;
+    height: 100%;
+    
+    & > div{
+        display: block;
+    }
+    
+    &-albumart{
+        width: 80px;
+        margin: 0 auto;
+    }
+    
+    &-name{
+        font-size: @font-size-small;
+        display: block;
+        text-align: center;
+    }
+    
+    &-item{
+        display: inline-block;
+        width: 120px;
+        height: 120px;
+        overflow: hidden;
+    }
+    
+    &:hover{
+        background-color: @gray-light;
+    }
+}
+
+.compact-list {
+    &-item {
+        
+    }
+
+    &-dir {
+        display: block;
+        font-size: 120%;
+        padding: 0 0 0 10px;
+        &:hover{
+            background-color: @gray-light;
+        }
+    }
+}
+
+.playlist{
+    &-browser-list-item{
+        list-style-type: none;
+        margin-right: 20px;
+        
+        &-container{
+            display: table;
+            width: 100%;
+            
+            & > div{
+                display: table-row;
+                & > div{
+                    display: table-cell;
+                }
+            }
+        }
+    }
+    &-detail-switch{
+        width: 1%;
+        & > a{
+            display: block;
+            padding: 5px;
+        }
+    }
+    &-title{
+        width: 99%;
+    }
+    &-ispublic{
+        width: 1%;
+    }
+    &-usernamelabel{
+        width: 1%;
+    }
+    &-deletebutton{
+        width: 1%;
+    }
+}

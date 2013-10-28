@@ -1,0 +1,35 @@
+<ul class="user-list">
+    {{#users}}
+    <li class="user-list-item{{#isadmin}} admin{{/isadmin}}">
+        <div class="row">
+            <div class="col-md-1">
+                <span class="badge 
+                    {{#isonline}}badge-success{{/isonline}}
+                    {{^isonline}}badge-important{{/isonline}}
+                    ">&#x2022;
+                </span>
+            </div>
+            <div class="col-md-2">
+                <div class="usernamelabel">
+                <span class="badge" style="background-color: {{username_color}}">
+                    {{username}}
+                </span>
+                </div>
+            </div>
+            <div class="col-md-4"> last seen: {{fuzzytime}}</div>
+            <div class="col-md-3">
+                {{#isnotadmin}}
+                    permit download<input type="checkbox" 
+                    onchange="userSetPermitDownload({{userid}}, $(this).is(\':checked\'))" id="misc-autoplay_on_add" value="option1" 
+                    {{#may_download}}checked="checked"{{/may_download}}>
+                {{/isnotadmin}}
+            </div>
+            <div class="col-md-1">
+                {{#isdeletable}}
+                    <a class="btn btn-mini btn-danger" href="javascript:;" onclick="userDelete({{userid}})">delete</a>
+                {{/isdeletable}}
+            </div>
+        </div>
+    </li>
+    {{/users}}
+</ul>

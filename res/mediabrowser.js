@@ -31,13 +31,148 @@
 RENDERING
 ********/
 
-MediaBrowser = function(cssSelector, json, isplaylist, playlistlabel){
+MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs){
     "use strict";
-    var s = MediaBrowser.static
+    this.listing_data_stack = [{'title': title, 'data': json, 'scroll': 0}];
+    this.cssSelector = cssSelector;
+    $(this.cssSelector).css('left', 0);
+    if(typeof enable_breadcrumbs === 'undefined'){
+        enable_breadcrumbs = true;
+    }
+
+    var self = this;
+    
+    var listdirclick = function(){
+        
+        "use strict";
+        $(self.cssSelector+' .cm-media-list-category').animate({left: '-100%'}, {duration: 1000, queue: false});
+        var next_mb_title = '';
+        var directory = $(this).attr("dir");
+        var compactlisting = $(this).is("[filter]");
+        var action = 'listdir';
+        var dirdata = {'directory' : directory};
+        if(compactlisting){
+            action = 'compactlistdir';
+            dirdata['filterstr'] = $(this).attr("filter");
+            next_mb_title = 'Filter: '+dirdata['filterstr'];
+        } else {
+            next_mb_title = $(this).text();
+        }
+        var currdir = this;
+        var success = function(json){
+            self.listing_data_stack[self.listing_data_stack.length-1].scroll = $(self.cssSelector).parent().parent().scrollTop();
+            self.listing_data_stack.push({'title': next_mb_title, 'data': json, 'scroll': 0});
+            self.render();
+        };
+        api(action,
+            dirdata,
+            success,
+            errorFunc('unable to list compact directory'));
+        $(this).blur();
+        return false;
+    }
+    
+    this.go_to_parent = function(levels){
+        if(typeof levels === 'undefined'){
+            levels = 1;
+        }
+        for(var i=0; i<levels; i++){
+            self.listing_data_stack.pop();
+        }
+    }
+    
+    this.render = function(){
+        var stack_top = self.listing_data_stack[self.listing_data_stack.length-1]['data'];
+        //split into categories:
+        var folders = [];
+        var files = [];
+        var compact = [];
+        var playlist = []
+        for(var i=0; i < stack_top.length; i++){
+            var e = stack_top[i];
+            if("file" == e.type){
+                files.push(e);
+            } else if("dir" == e.type){
+                folders.push(e);
+            } else if("compact" == e.type){
+                compact.push(e);
+            } else if("playlist" == e.type){
+                playlist.push(e);
+            } else {
+                window.console.error('unknown media browser item '+e.type);
+            }
+        }
+        var filehtml = MediaBrowser.static._renderList(files);
+        var folderhtml = MediaBrowser.static._renderList(folders);
+        var compacthtml = MediaBrowser.static._renderList(compact);
+        var playlisthtml = MediaBrowser.static._renderList(playlist);
+        
+        var html = '';
+        if('' != folderhtml){
+            html += '<div class="cm-media-list-category"><h3>Collections</h3>'+
+                    '<ul class="cm-media-list">'+folderhtml+'</ul></div>';
+        }
+        if('' != filehtml){
+            html += '<div class="cm-media-list-category"><h3>Tracks <a href="#" class="btn btn-default" '+
+                    'onclick="MediaBrowser.static._addAllToPlaylist($(this).parent().siblings(\'ul\'))">'+
+                    'add all tracks to curent playlist</a>'+
+                    '</h3><ul class="cm-media-list">'+filehtml+'</ul></div>';
+        }
+        if('' != compacthtml){
+            html += '<div class="cm-media-list-category"><h3>Compact</h3>'+
+                    '<ul class="cm-media-list">'+compacthtml+'</ul></div>';
+        }
+        if('' != playlisthtml){
+            html += '<div class="cm-media-list-category"><h3>Playlists</h3>'+
+                    '<ul class="cm-media-list">'+playlisthtml+'</ul></div>';
+        }
+        if('' == html){
+            html = '<div class="cm-media-list-category"><ul class="cm-media-list">'+MediaBrowser.static._renderMessage('No playable media files here.')+'</ul></div>';
+        }
+        
+        if(enable_breadcrumbs){
+            html = '<ol class="breadcrumb"></ol>' + html;
+        }
+        $(self.cssSelector).html(html);
+        
+        var create_jump_func = function(i){
+            return function(){
+                self.go_to_parent(self.listing_data_stack.length - 1 - i);
+                self.render();
+            };
+        }
+        if(self.listing_data_stack.length > 1){
+            var node = $('<div class="cm-media-list-item cm-media-list-parent-item">'+
+            '   <a class="cm-media-list-parent" href="javascript:;">'+
+            '   <span class="glyphicon glyphicon-arrow-left"></span>'+
+            '</a></div>');
+            node.on('click', create_jump_func(self.listing_data_stack.length-2));
+            $(this.cssSelector).prepend(node);
+        }
+        if(enable_breadcrumbs){
+            for(var i=0; i < self.listing_data_stack.length; i++){
+                var title = self.listing_data_stack[i]['title'];
+                var li = '<li';
+                if(i == self.listing_data_stack.length - 1){
+                    li += ' class="active"';
+                }
+                li += '><a href="#">'+title+'</a></li>';
+                var $li = $(li);
+                $li.on('click', create_jump_func(i));
+                $(this.cssSelector + ' .breadcrumb').append($li);
+            }
+        }
+        $(self.cssSelector).parent().parent().scrollTop(self.listing_data_stack[self.listing_data_stack.length-1].scroll);
+        
+        playlistManager.setTrackDestinationLabel();
+        MediaBrowser.static.albumArtLoader(cssSelector);
+    }
+    
+    this.render();
     $(cssSelector).off('click');
-    $(cssSelector).on('click', '.listdir', s.listdirclick);
-    $(cssSelector).on('click', '.compactlistdir', s.listdirclick);
-    $(cssSelector).on('click', '.mp3file', s.addThisTrackToPlaylist);
+    $(cssSelector).on('click', '.list-dir', listdirclick);
+    $(cssSelector).on('click', '.compact-list-dir', listdirclick);
+    $(cssSelector).on('click', '.musicfile', MediaBrowser.static.addThisTrackToPlaylist);
     $(cssSelector).on('click', '.addAllToPlaylist', function() {
         if(isplaylist){
             var pl = playlistManager.newPlaylist([], playlistlabel);
@@ -51,28 +186,14 @@ MediaBrowser = function(cssSelector, json, isplaylist, playlistlabel){
         $(this).blur();
         return false;
     });
-    $(cssSelector).html(s._renderList(json));
-    playlistManager.setTrackDestinationLabel();
-    s.albumArtLoader(cssSelector);
+    
+   
 }
 MediaBrowser.static = {
     _renderList: function (l){
         "use strict";
         var self = this;
         var html = "";
-        var foundMp3 = false;
-        $.each(l, function(i, e) {
-            if("file" == e.type){
-                foundMp3 = true;
-                return false;
-            }
-        });
-        var addAll = '';
-        if(foundMp3){
-            addAll =    '<li><a class="addAllToPlaylist" href="javascript:;">'+
-                            '<span class="add-track-destination">load playlist</span>'+
-                        '</a></li>';
-        }
         $.each(l, function(i, e) {
             switch(e.type){
                 case 'dir': 
@@ -84,82 +205,61 @@ MediaBrowser.static = {
                 case 'compact':
                     html += MediaBrowser.static._renderCompactDirectory(e);
                     break;
+                case 'playlist':
+                    html += MediaBrowser.static._renderPlaylist(e);
+                    break;
                 default:
                     window.console.log('cannot render unknown type '+e.type);
             }
         });
-        if(html==""){
-            html += MediaBrowser.static._renderMessage('No playable media files here.');
-        }
-        return '<ul>'+addAll+html+'</ul>';
+        return html;
     },
     
     _renderMessage : function(msg){
-        return [
-            '<li class="fileinlist">',
-                '<div style="text-align: center">'+msg+'</div>',
-            '</li>'
-        ].join('');
+        var template = templateLoader.cached('mediabrowser-message');
+        return Mustache.render(template, {message: msg});    
     },
     _renderFile : function(json){
-        return Mustache.render([
-            '<li class="fileinlist">',
-                '<a title="{{label}}" href="javascript:;" class="mp3file" path="{{fileurl}}">',
-                    '<span class="fullpathlabel">',
-                        '{{fullpath}}',
-                    '</span>',
-                    '{{label}}',
-                '</a>',
-            '</li>'
-        ].join(''),
-        {
+        var template = templateLoader.cached('mediabrowser-file');
+        var template_data = {
             fileurl : json.urlpath,
             fullpath: json.path,
             label: json.label,
-        });
+        };
+        return Mustache.render(template, template_data);            
     },
     _renderDirectory : function(json){
-        return Mustache.render([
-            '<li>',
-                '<a dir="{{dirpath}}" href="javascript:;" class="listdir">',
-                    '{{^isrootdir}}',
-                            '{{{coverartfetcher}}}',
-                    '{{/isrootdir}}',
-                    '<div class="listdir-name-wrap">',
-                        '<span class="listdir-name">{{dirpath}}</span>',
-                    '</div>',
-                '</a>',
-            '</li>',
-        ].join(''),
-        {
+        var template = templateLoader.cached('mediabrowser-directory');
+        var template_data = {
             isrootdir: json.path && !json.path.indexOf('/')>0,
             dirpath: json.path,
-            coverartfetcher: function(){
-                return MediaBrowser.static._renderCoverArtFetcher(json.path)
-            },
-        });
+            label: json.label,
+            coverarturl: encodeURIComponent(JSON.stringify({'directory' : json.path}))
+        };
+        return Mustache.render(template, template_data);
+    },
+    _renderPlaylist : function(e){
+        var template = templateLoader.cached('mediabrowser-playlist');
+        var template_data = {
+            playlistid: e['plid'],
+            isowner: e.owner,
+            candelete: e.owner || isAdmin, 
+            playlistlabel:e['title'],
+            username: e['username'],
+            username_color: userNameToColor(e.username),
+            publicchecked: e['public'] ? 'checked="checked"' : '',
+            publiclabelclass : e['public'] ? 'label-success' : 'label-default',
+        };
+        return Mustache.render(template, template_data);
     },
     _renderCompactDirectory : function(json){
-        return Mustache.render([
-        '<li>',
-           '<a dir="{{filepath}}" filter="{{filter}}" href="javascript:;" class="compactlistdir">',
-                '{{filterUPPER}}',
-            '</a>',
-        '</li>',
-        ].join(''),
-        {
+        var template = templateLoader.cached('mediabrowser-compact');
+        var template_data = {
             filepath: json.urlpath,
             filter: json.label,
             filterUPPER: json.label.toUpperCase(),
-        });
-    },
-    
-    _renderCoverArtFetcher : function(path){
-        "use strict";
-        var searchterms = encodeURIComponent(JSON.stringify({'directory' : path}))
-        return ['<div class="albumart-display unloaded" search-data="'+searchterms+'">',
-        '<img src="res/img/folder.png" width="80" height="80" />', // relative path so cherrymusic can run in subdir (#344)
-        '</div>'].join('');
+        };
+        return Mustache.render(template, template_data);
     },
         
     addThisTrackToPlaylist : function(){
@@ -171,61 +271,24 @@ MediaBrowser.static = {
     
     _addAllToPlaylist : function($source, plid){
         "use strict";
-        $source.parent().siblings('li').children('.mp3file').each(function(){
+        $source.find('li .musicfile').each(function(){
             playlistManager.addSong( $(this).attr("path"), $(this).attr("title"), plid );
         });
     },
     
-    listdirclick : function(mode){
-        "use strict";
-        if($(this).siblings('ul').length>0){
-            if($(this).siblings('ul').is(":visible")){
-                $(this).siblings('ul').slideUp('fast');
-            } else {
-                $(this).siblings('ul').slideDown('fast');
-            }
-        } else {
-            var directory = $(this).attr("dir");
-            var compactlisting = $(this).is("[filter]");
-            if(compactlisting){
-                var data = {
-                    'action' : 'compactlistdir',
-                    'value' : JSON.stringify({ 
-                                'directory' : directory,
-                                'filter' : $(this).attr("filter")
-                              })
-                };
-            } else {
-                var data = {
-                    'action' : 'listdir',
-                    'value' : JSON.stringify({
-                                'directory' : directory 
-                              })
-                };
-            }
-            var currdir = this;
-            var success = function(data){
-                var json = jQuery.parseJSON(data);
-                $(currdir).parent().append(MediaBrowser.static._renderList(json));
-                playlistManager.setTrackDestinationLabel();
-                $(currdir).siblings("ul").hide().slideDown('fast');
-                MediaBrowser.static.albumArtLoader();
-            };
-            busy($(currdir).parent()).hide().fadeIn();
-            api(data,
-                success,
-                errorFunc('unable to list compact directory'),
-                function(){busy($(currdir).parent()).fadeOut('fast')});
-        }
-    },    
     albumArtLoader: function(cssSelector){
         "use strict";
-        var winpos = $(window).height()+$(window).scrollTop();
-        $('.albumart-display.unloaded').each(
+        var winheight = $(window).height();
+        var scrolled_down = $(cssSelector).scrollTop();
+        var preload_threshold = 100; //pixels
+        $(cssSelector).find('.list-dir-albumart.unloaded').each(
             function(idx){
-                if($(this).position().top < winpos){
-                   $(this).find('img').attr('src', 'api/fetchalbumart/'+$(this).attr('search-data'));
-                   $(this).removeClass('unloaded');
+                var img_pos = $(this).position().top;
+                var above_screen = img_pos < scrolled_down - preload_threshold;
+                var below_screen = img_pos > winheight + scrolled_down + preload_threshold;
+                if(!above_screen && !below_screen){
+                    $(this).find('img').attr('src', 'api/fetchalbumart/?data='+$(this).attr('search-data'));
+                    $(this).removeClass('unloaded');
                 }
             }
         );

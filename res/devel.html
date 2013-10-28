@@ -35,11 +35,37 @@
 <link rel="icon" href="/res/favicon32.png" type="image/png">
 <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
 
-<link href="res/bootstrap3/gen/cherrymusic.css" media="all" rel="stylesheet" type="text/css" />
+<!--LESS-TO-CSS-BEGIN out=res/bootstrap3/gen/cherrymusic.css-->
+    <link href="res/bootstrap3/less/bootstrap.less" rel="stylesheet/less" />
+<!--LESS-TO-CSS-END-->
 
+<!--REMOVE-BEGIN-->
+    <script type="text/javascript">var less=less||{};less.env='development';</script>
+    <script type="text/javascript" src="res/bootstrap3/assets/less.js"></script>
+<!--REMOVE-END-->
 
+<!--COMPRESS-JS-BEGIN out=res/cherrymusic.dist.js-->
+    <script type="text/javascript" src="res/js/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="res/bootstrap3/js/modal.js"></script>
+    <script type="text/javascript" src="res/bootstrap3/js/collapse.js"></script>
+    <script type="text/javascript" src="res/bootstrap3/js/transition.js"></script>
+    <script type="text/javascript" src="res/bootstrap3/js/dropdown.js"></script>
+    <script type="text/javascript" src="res/bootstrap3/js/alert.js"></script>
 
-<script type="text/javascript" src="res/cherrymusic.dist.js"></script>
+    <script type="text/javascript" src="res/js/json2.min.js"></script>
+    <script type="text/javascript" src="res/js/jquery.jplayer.min.js"></script>
+    <script type="text/javascript" src="res/js/jplayer.playlist.js"></script>
+    <script type="text/javascript" src="res/js/jquery.jplayer.inspector.js"></script>
+    <script type="text/javascript" src="res/js/mustache-0.7.0.js"></script>
+
+    <!-- ui sortable -->
+    <script type="text/javascript" src="res/js/jquery-ui-1.10.0.custom.min.js"></script> 
+
+    <!-- cherrymusic -->
+    <script type="text/javascript" src="res/playlistmanager.js"></script>
+    <script type="text/javascript" src="res/mediabrowser.js"></script>
+    <script type="text/javascript" src="res/cherrymusic.js"></script>
+<!--COMPRESS-JS-END-->
 
 <title>CherryMusic</title>
 </head>

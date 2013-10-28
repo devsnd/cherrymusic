@@ -1,0 +1,115 @@
+@mediaplayer-height: 70px;
+
+.jp-jplayer{
+    width: 1px !important;
+    height: 1px !important;
+}
+
+#mediawrapper{
+    height: @mediaplayer-height;
+    position: fixed;
+    bottom: 0px;
+    right: 0px;
+    left: 0px;
+    overflow: hidden;
+    background-color: #fff;
+    z-index: 2;
+    .box-shadow(~"2px 2px 3px rgba(0,0,0,.4), 0px 0px 5px rgba(0,0,0,.8)");
+}
+
+.cm-songtitle{
+    &-container{
+        position: fixed;
+        left: 50%;
+        bottom: 49px;
+        z-index: 3;
+        pointer-events: none;
+    }
+    float: left;
+    left: -50%;
+    position:relative;
+    white-space: nowrap;
+}
+
+.jp{
+
+    &-bar-seek{
+        .progress-bar-variant(lighten(@brand-primary, 20%));
+        cursor: pointer;
+    }
+    
+    &-bar-played{
+        .progress-bar-variant(@brand-primary);
+        cursor: pointer;
+    }
+    
+    &-controls{
+        position: absolute;
+        padding: 0;
+    }
+
+    &-control-buttons{
+        position: absolute;
+        left: 50%;
+        width: 240px;
+        margin-left: -120px;
+        bottom: 42px
+    }
+
+    &-time-holder{
+        left: 0;
+        top: 10px;
+        width: 100%;
+    }
+    &-current-time{
+        float: left;
+        margin-left: 5px;
+    }
+    &-duration{
+        float: right;
+        margin-right: 5px;
+    }
+
+    &-toggles{
+        list-style-type: none;
+        padding: 0;
+        position: relative;
+    }
+    &-toggles li{
+        display: block;
+    }
+
+    &-controls li{
+        display: inline;
+    }
+    &-volume{    
+        &-toggles{
+            list-style: none outside none;
+            position: absolute;
+            left: 180px;
+            padding: 0;
+        }
+        &-bar{
+            height: 6px !important;
+            position: absolute;
+            width: 60px;
+            top: 28px;
+        }
+        &-toggles li{
+            display: inline;
+        }
+        jp-mute{
+            padding: 1px 4px !important;
+            top: 0;
+        }
+        jp-unmute{
+            padding: 1px 4px !important;
+            top: 0;
+        }
+        &-max{
+            margin-left: 6px;
+            padding: 1px 4px !important;
+            top: 0;
+        }
+    }
+}

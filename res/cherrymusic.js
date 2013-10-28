@@ -35,6 +35,7 @@ if(['msie','safari'].indexOf(browser) != -1){
     var encoderPreferenceOrder = ['ogg','mp3'];
 }
 
+var SERVER_CONFIG = {};
 var availableEncoders = undefined;
 var availablejPlayerFormats = ['mp3','ogg'];
 var availableDecoders = undefined;
@@ -49,51 +50,64 @@ var playlistSelector = '.jp-playlist';
 
 var executeAfterConfigLoaded = []
 
-function api(data_or_action, successfunc, errorfunc, completefunc){
+
+/**
+ * This function can call the cherrymusic api (v1)
+ * api(String actionname,   -> action name as defined in httphandler.py
+ *     [data,]              -> simple js object containing the data
+ *     successfunc,         -> fucntion to be called on success
+ *     errorfunc,           -> function to be called on error
+ *     completefunc)        -> function to be called after error/success
+ */
+function api(){
     "use strict";
-    if(!successfunc){
-        successfunc = function(){};
+    var action = arguments[0];
+    var has_data = !(typeof arguments[1] === 'function');
+    var data = {};
+    if(has_data){
+        data = arguments[1];
     }
-    if(!completefunc){
-        completefunc = function(){};
+    var successfunc = arguments[has_data?2:1];
+    var errorfunc = arguments[has_data?3:2];
+    var completefunc = arguments[has_data?4:3];
+    
+    if(!successfunc) successfunc = function(){};
+    if(!completefunc) completefunc = function(){};
+    
+    var successFuncWrapper = function(successFunc){
+        return function handler(json){
+            var result = $.parseJSON(json);
+            if(result.flash){
+                successNotify(result.flash);
+            }
+            successFunc(result.data);
+        }
     }
+    
+    //wrapper for all error handlers:
     var errorFuncWrapper = function(errorFunc){
         return function(httpstatus){
             if(httpstatus.status == 401){
+                /* if a request get's a 401, that means the user was logged
+                 * out, so we reload to show the login page. */
                 reloadPage();
             }
             errorFunc();
         }
     }
-    var defaultErrorHandler = function(){
-        errorFunc('calling API function "'+apiaction+'"')();
-    };
     if(!errorfunc){
-        errorfunc = errorFuncWrapper(defaultErrorHandler);
-    } else {
-        errorfunc = errorFuncWrapper(errorfunc);
-    }
-    var senddata;
-    var apiaction;
-    if(typeof data_or_action === "string"){
-        apiaction = data_or_action;
-        senddata = {};
-    } else {
-        apiaction = data_or_action['action'];
-        senddata = {"value" :  data_or_action['value'] };
-
-    }
-    var urlaction = 'api';
-    if(apiaction){
-        urlaction += '/'+apiaction;
+        //default error handler
+        errorfunc = function(){
+            errorFunc('Error calling API function "'+action+'"')();
+        };
     }
     $.ajax({
-        url: urlaction,
+        url: 'api/'+action,
         context: $(this),
         type: 'POST',
-        data: senddata,
-        success: successfunc,
-        error: errorfunc,
+        data: {'data': JSON.stringify(data)},
+        success: successFuncWrapper(successfunc),
+        error: errorFuncWrapper(errorfunc),
         complete: completefunc,
     });
 }
@@ -108,6 +122,7 @@ htmldecode = function(val){
 function errorFunc(msg){
     "use strict";
     return function(){
+        window.console.error('CMError: '+msg);
         displayNotification(msg,'error');
     };
 }
@@ -117,44 +132,41 @@ function successNotify(msg){
     };
 }
 
-function renderUserMessage(msg, type){
-    return Mustache.render([
-        '<div class="alert {{cssclass}}">',
-            '<button type="button" class="close" data-dismiss="alert">',
-                '&times;',
-            '</button>',
-            '{{msg}}',
-        '</div>',
-    ].join(''),
-    {
-        msg : msg,
-        cssclass: type=='error'?'alert-error':type=='success'?'alert-success':''
-    });
+function displayNotification(msg,type){
+    templateLoader.render(
+        'flash-message', 
+        {
+            msg : msg,
+            cssclass: type=='error'?'alert-danger':type=='success'?'alert-success':''
+        },
+        $('#errormessage')
+    );
 }
 
-function displayNotification(msg,type){
-    $('#errormessage').html(renderUserMessage(msg,type));
-}
-function removeError(msg){
-    if($('#errormessage').html() == renderUserMessage(msg,'error')){
-        $('#errormessage').html('');
-    }
-}
 /*******************
 CONFIGURATION LOADER
 *******************/
 function loadConfig(executeAfter){
     "use strict";
-    var data = {
-        'action' : 'getconfiguration',
-    };
     var success = function(data){
-        var dictatedClientConfig = jQuery.parseJSON(data);
+        var dictatedClientConfig = data;
+        /** DEPRECATED GLOBAL VARIABLES **/
         availableEncoders = dictatedClientConfig.getencoders;
         availableDecoders = dictatedClientConfig.getdecoders;
         transcodingEnabled = dictatedClientConfig.transcodingenabled;
         isAdmin = dictatedClientConfig.isadmin;
         loggedInUserName = dictatedClientConfig.username;
+        
+        /** USE SERVER CONFIG INSTEAD **/
+        SERVER_CONFIG = {
+            'available_encoders': dictatedClientConfig.getencoders,
+            'available_decoders': dictatedClientConfig.getdecoders,
+            'transcoding_enabled': dictatedClientConfig.transcodingenabled,
+            'is_admin': dictatedClientConfig.isadmin,
+            'user_name': dictatedClientConfig.username,
+            'serve_path': dictatedClientConfig.servepath,
+            'transcode_path': dictatedClientConfig.transcodepath,
+        }
         
         executeAfter();
         if(isAdmin){
@@ -162,7 +174,7 @@ function loadConfig(executeAfter){
         }
     };
     var error = errorFunc("Could not fetch client configuration, CherryMusic will not work. Clearing the browser cache might help.");
-    api(data,success,error);
+    api('getconfiguration', {}, success, error);
 }
 
 /************
@@ -170,8 +182,8 @@ function loadConfig(executeAfter){
  * **********/
 
 function loadUserOptions(onSuccess){
-    var success = function(data){
-        userOptions = jQuery.parseJSON(data);
+    var success = function(userOptionsLoaded){
+        userOptions = userOptionsLoaded;
         if(typeof onSuccess !== 'undefined'){
             onSuccess();
         }
@@ -191,21 +203,16 @@ function loadUserOptions(onSuccess){
     api('getuseroptions', success);
 }
 
-var optionSetter = function(name,val,success,error){
+var optionSetter = function(name, val, success, error){
     busy('#userOptions .content').hide().fadeIn();
-    api(
-            {
-                action:'setuseroption',
-                value:JSON.stringify(
-                    {
-                        'optionkey':name,
-                        'optionval':val
-                    }
-                )
-            },
-            function(){success(); loadUserOptions();},
-            error,
-            function(){busy('#userOptions .content').fadeOut('fast')}
+    api('setuseroption',
+        {
+            'optionkey':name,
+            'optionval':val
+        },
+        function(){ success(); loadUserOptions(); },
+        error,
+        function(){ busy('#userOptions .content').fadeOut('fast'); }
     )
 }
 keyboard_shortcut_setter = function(option, optionname){
@@ -249,21 +256,19 @@ function busy(selector){
     return domelem;
 }
 
-function search(append){
+function search($form){
     "use strict";
-    if($('#searchfield input').val().trim() == ""){
+    var $input = $form.find('input');
+    if($input.val().trim() == ""){
         //make sure no spaces, so placeholder is shown
-        $('#searchfield input').val('');
-        $('#searchfield input').prop('placeholder', 'Search for what?')
-        $('#searchfield input').focus();
+        $input.val('');
+        $input.prop('placeholder', 'Search for what?');
+        $input.focus();
         return false;
     }
-    var data = {
-        'action' : 'search',
-        'value' : $('#searchfield input').val()
-    };
-    var success = function(data){
-        MediaBrowser('#searchresults', jQuery.parseJSON(data));
+    var searchstring = $input.val();
+    var success = function(json){
+        new MediaBrowser('.search-results', json, 'Search: '+htmlencode(searchstring));
         busy('#searchform').fadeOut('fast');
     };
     var error = function(){
@@ -271,7 +276,7 @@ function search(append){
         busy('#searchform').fadeOut('fast');
     };
     busy('#searchform').hide().fadeIn('fast');
-    api(data,success,error);
+    api('search', {'searchstring': searchstring}, success, error);
     return false;
 }
 function submitsearch(){
@@ -311,18 +316,6 @@ ext2jPlayerFormat = function(ext){
 }
 
 
-/**********
-TRANSCODING
-**********/
-
-function getTranscodePath(filepath, format){
-    "use strict";
-    var match = filepath.match(/serve(.*)$/);
-    if(match){
-        return "trans"+match[1]+"/get."+format;     // relative path so cherrymusic can run in subdir (#344)
-    }
-}
-
 /******************
 PLAYLIST MANAGEMENT
 ******************/
@@ -345,14 +338,6 @@ function savePlaylist(plid,playlistname,ispublic,overwrite){
     overwrite = Boolean(overwrite);
     ispublic = ispublic || pl.public;
     playlistname = playlistname || pl.name;
-    var data = { 'action':'saveplaylist',
-                'value':JSON.stringify({
-                            'playlist':pl.jplayerplaylist.playlist,
-                            'public':ispublic,
-                            'playlistname':playlistname,
-                            'overwrite':overwrite,
-                        })
-                };
     var success = function(){
         playlistManager.getPlaylistById(plid).name = playlistname;
         playlistManager.getPlaylistById(plid).public = ispublic;
@@ -360,11 +345,17 @@ function savePlaylist(plid,playlistname,ispublic,overwrite){
         playlistManager.refresh();
         playlistManager.showPlaylist(plid);
     }
-    busy('.playlist-panel').hide().fadeIn('fast');
-    api(data,
+    busy('#playlist-panel').hide().fadeIn('fast');
+    api('saveplaylist',
+        {
+            'playlist':pl.jplayerplaylist.playlist,
+            'public':ispublic,
+            'playlistname':playlistname,
+            'overwrite':overwrite,
+        },
         success,
         errorFunc('error saving playlist'),
-        function(){busy('.playlist-panel').fadeOut('fast')});
+        function(){busy('#playlist-panel').fadeOut('fast')});
 }
 function getAddrPort(){
     m = (window.location+"").match(/(https?):\/\/([^/:]+)(?::(\d+))?/);   // won't work for URLs with "user:passw@host"
@@ -377,120 +368,20 @@ function ord(c)
 {
   return c.charCodeAt(0);
 }
-function dec2Hex(dec){
-    var hexChars = "0123456789ABCDEF";
-    var a = dec % 16;
-    var b = (dec - a)/16;
-    hex = hexChars.charAt(b) + hexChars.charAt(a);
-    return hex;
-}
-
-function userNameToColor(username){
-    username = username.toUpperCase();
-    username+='AAA';
-    var g = ((ord(username[0])-65)*255)/30;
-    var b = ((ord(username[1])-65)*255)/30;
-    var r = ((ord(username[2])-65)*255)/30;
-    return '#'+dec2Hex(r)+dec2Hex(g)+dec2Hex(b);
-}
 
 function showPlaylists(){
     "use strict";
     var success = function(data){
-            var addressAndPort = getAddrPort();
-            var pls = '<ul>';
-            $.each($.parseJSON(data),function(i,e){
-                pls += Mustache.render([
-                '<li id="playlist{{playlistid}}">',
-                    '<div class="remoteplaylist">',
-                        '<div class="playlisttitle">',
-                            '<a href="javascript:;" onclick="loadPlaylist({{playlistid}}, \'{{playlistlabel}}\')">',
-                            '{{playlistlabel}}',
-                            '</a>',
-                        '</div>',
-                    
-                        '{{#isowner}}',
-                            '<div class="ispublic">',
-                                '<span class="label {{publiclabelclass}}">',
-                                    '{{publicorprivate}}',
-                                    '<input onchange="changePlaylist({{playlistid}},\'public\',$(this).is(\':checked\'))" type="checkbox" {{publicchecked}}>',
-                                    '</span>',
-                            '</div>',
-                        '{{/isowner}}',                   
-                        
-                        '{{{usernamelabel}}}',
-                        
-                        '{{#candelete}}',
-                            '<div class="deletebutton">',
-                                '<a href="javascript:;" class="btn btn-mini btn-danger" onclick="confirmDeletePlaylist({{playlistid}}, \'{{playlistlabel}}\')">x</a>',
-                            '</div>',
-                        '{{/candelete}}',
-                        
-                        '{{#showdownloadbuttons}}',
-                            '<div class="dlbutton">',
-                                '<a class="btn btn-mini" href="/api/downloadpls?value={{dlval}}">',
-                                '&darr;&nbsp;PLS',
-                                '</a>',
-                            '</div>',
-                            '<div class="dlbutton">',
-                                '<a class="btn btn-mini" href="/api/downloadm3u?value={{dlval}}">',
-                                '&darr;&nbsp;M3U',
-                                '</a>',
-                            '</div>',
-                        '{{/showdownloadbuttons}}',
-                        
-                    '</div>',
-                    '<div class="playlistcontent">',
-                    '</div>',
-                '</li>'
-                ].join(''),
-                    {
-                    playlistid: e['plid'],
-                    isowner: e.owner,
-                    candelete: e.owner || isAdmin, 
-                    showdownloadbuttons: userOptions.misc.show_playlist_download_buttons,
-                    playlistlabel:e['title'],
-                    dlval : JSON.stringify({ 'plid' : e['plid'],
-                        'addr' : addressAndPort
-                        }),
-                    username: e['username'],
-                    usernamelabel: renderUserNameLabel(e['username']),
-                    publicchecked: e['public'] ? 'checked="checked"' : '',
-                    publicorprivate: e['public'] ? 'public' : 'private',
-                    publiclabelclass : e['public'] ? 'label-success' : 'label-info',
-                    }
-                );
-            });
-            pls += '</ul>';
-            $('.available-playlists').html(pls);
-            $('.hideplayliststab').slideDown('fast');
-            $('.showplayliststab').slideUp('fast');
-            $('.available-playlists').slideDown();
-        };
-
+        var addressAndPort = getAddrPort();
+        new MediaBrowser('.search-results', data, 'Playlist browser');
+    };
     var error = errorFunc('error loading external playlists');
 
-    $('.available-playlists').slideUp('fast');
-    busy('.playlist-panel').hide().fadeIn('fast');
+    busy('#playlist-panel').hide().fadeIn('fast');
     api('showplaylists',
         success,
         error,
-        function(){busy('.playlist-panel').fadeOut('fast')}
-    );
-}
-
-renderUserNameLabel = function(username){
-    return Mustache.render([
-        '<div class="usernamelabel">',
-            '<span class="badge" style="background-color: {{hexcolor}}">',
-                '{{username}}',
-            '</span>',
-        '</div>'
-    ].join(''),
-    {
-        hexcolor: userNameToColor(username),
-        username: username,
-    }
+        function(){busy('#playlist-panel').fadeOut('fast')}
     );
 }
 
@@ -498,32 +389,30 @@ function changePlaylist(plid,attrname,value){
     window.console.log(plid);
     window.console.log(attrname);
     window.console.log(value);
-    busy('.playlist-panel').hide().fadeIn('fast');
-    api(
+    busy('#playlist-panel').hide().fadeIn('fast');
+    api('changeplaylist',
         {
-            action:'changeplaylist',
-            value: JSON.stringify({
-                    'plid' : plid,
-                    'attribute' : attrname,
-                    'value' : value
-                    }),
+            'plid' : plid,
+            'attribute' : attrname,
+            'value' : value
         },
         function(){
             showPlaylists();
         },
         errorFunc('error changing playlist attribute'),
-        function(){busy('.playlist-panel').fadeOut('fast')}
+        function(){busy('#playlist-panel').fadeOut('fast')}
     );
 }
 
 function confirmDeletePlaylist(id,title){
     $('#deletePlaylistConfirmButton').off();
     $('#deletePlaylistConfirmButton').on('click', function(){
-        busy('.playlist-panel').hide().fadeIn('fast');
-        api({action:'deleteplaylist', value: id},
+        busy('#playlist-panel').hide().fadeIn('fast');
+        api('deleteplaylist',
+            {'playlistid':  id},
             false,
             errorFunc('error deleting playlist'),
-            function(){busy('.playlist-panel').fadeOut('fast')}
+            function(){busy('#playlist-panel').fadeOut('fast')}
         );
         $('#dialog').fadeOut('fast');
         showPlaylists();
@@ -533,20 +422,40 @@ function confirmDeletePlaylist(id,title){
 }
 
 function loadPlaylist(playlistid, playlistlabel){
+    var success = function(data){
+        var tracklist = data;
+        //transform tracks to jplayer format:
+        //TODO rewrite jplayer playlist to support CM-music entry format
+        var jplayerplaylist = [];
+        for(var i=0; i<tracklist.length; i++){
+            jplayerplaylist.push({
+                'title':tracklist[i].label,
+                'url':  tracklist[i].urlpath
+            });
+        }
+        var pl = playlistManager.newPlaylist(jplayerplaylist, playlistlabel);
+    }
+    api('loadplaylist',
+        {'playlistid': playlistid},
+        success,
+        errorFunc('error loading external playlist'),
+        function(){busy('#playlist-panel').fadeOut('fast')}
+    )
+}
+
+function loadPlaylistContent(playlistid, playlistlabel){
     "use strict";
     var pldomid = "#playlist"+playlistid+' .playlistcontent';
-
     if('' === $(pldomid).html().trim()){
-        var data = {'action':'loadplaylist',
-                    'value': playlistid };
         var success = function(data){
-            MediaBrowser(pldomid, jQuery.parseJSON(data), true, playlistlabel);
+            new MediaBrowser(pldomid, data, playlistlabel, false);
         };
-        busy('.playlist-panel').hide().fadeIn('fast');
-        api(data,
+        busy('#playlist-panel').hide().fadeIn('fast');
+        api('loadplaylist',
+            {'playlistid': playlistid},
             success,
             errorFunc('error loading external playlist'),
-            function(){busy('.playlist-panel').fadeOut('fast')}
+            function(){busy('#playlist-panel').fadeOut('fast')}
         );
     } else {
         $(pldomid).slideToggle('slow');
@@ -556,19 +465,17 @@ function loadPlaylist(playlistid, playlistlabel){
 function randomPlaylist() {
     "use strict";
     playlistManager.clearQueue();
-    var data = {'action':'generaterandomplaylist'};
-    var success = function(data){
-        var tracks = jQuery.parseJSON(data);
+    var success = function(tracks){
         for (var i = 0; i < tracks.length; i++) {
             var track = tracks[i];
             playlistManager.addSong(track.urlpath, track.label)
         }
     };
-    busy('.playlist-panel').hide().fadeIn('fast');
-    api(data,
+    busy('#jplayer').hide().fadeIn('fast');
+    api('generaterandomplaylist',
         success,
         errorFunc('error loading random playlist'),
-        function(){busy('.playlist-panel').fadeOut('fast')}
+        function(){busy('#jplayer').fadeOut('fast')}
     );
 }
 
@@ -586,14 +493,14 @@ function download_editing_playlist(){
     var p = pl.jplayerplaylist.playlist;
     var track_urls = []
     for(i=0; i<p.length; i++){
-        track_urls.push(htmldecode(p[i].url.slice(6)));
+        track_urls.push(decodeURIComponent(p[i].url));
     }
-    var tracks_json = JSON.stringify(track_urls)
-    api({action: 'downloadcheck', value: tracks_json},
+    api('downloadcheck',
+        {'filelist': track_urls},
         function(msg){
             if(msg == 'ok'){
                 //add tracks to hidden form and call to call download using post data
-                $('#download-redirect-files').val(tracks_json);
+                $('#download-redirect-files').val(encodeURIComponent(JSON.stringify(track_urls)));
                 $('#download-redirect').submit();
             } else {
                 alert(msg);
@@ -615,11 +522,52 @@ function reloadPage(){
 
 function logout(){
     "use strict";
-    var success = reloadPage;
-    api('logout',success);
+    api('logout', reloadPage);
 }
 
-
+/** TEMPLATES **/
+function TemplateLoader(template_path){
+    this.template_path = template_path;
+    this.loaded_templates = {};
+    var self = this;
+    this.get = function(template_name, callback){
+        if(this.loaded_templates.hasOwnProperty(template_name)){
+            callback(this.loaded_templates[template_name]);
+        } else {
+            $.get(
+                this.template_path+'/'+template_name+'.html',
+                function(data){
+                    self.loaded_templates[template_name] = data;
+                    if(typeof callback === 'undefined'){
+                        window.console.log('preloaded template '+template_name);
+                    } else {
+                        callback(self.loaded_templates[template_name]);
+                    }
+                }
+            );
+        }
+    }
+    this.render = function(template_name, content, $jqobj){
+        this.get(template_name, function(template){
+            $jqobj.html(Mustache.render(template, content));
+        });
+    }
+    this.cached = function(template_name){
+        if(this.loaded_templates.hasOwnProperty(template_name)){
+            return this.loaded_templates[template_name];
+        } else {
+            window.console.error('Can not return unloaded template '+template_name+'!');
+            return '';
+        }
+    }
+}
+var templateLoader = new TemplateLoader('res/templates');
+//preload templates for mediabrowser
+templateLoader.get('mediabrowser-directory');
+templateLoader.get('mediabrowser-file');
+templateLoader.get('mediabrowser-compact');
+templateLoader.get('mediabrowser-message');
+templateLoader.get('mediabrowser-playlist');
 /***
 ADMIN PANEL
 ***/
@@ -630,46 +578,24 @@ function updateUserList(){
         var htmllist = "";
         var response = $.parseJSON(data);
         var time = response['time'];
+        var template_user_data = {'users': []};
         $.each(response['userlist'],function(i,e){           
             var reltime = time - e.last_time_online;
-            htmllist += Mustache.render([
-                '<li {{#isadmin}}class="admin"{{/isadmin}}>',
-                    '<div class="row-fluid">',
-                        '<div class="span1">',
-                            '<span class="badge ',
-                                '{{#isonline}}badge-success{{/isonline}}',
-                                '{{^isonline}}badge-important{{/isonline}}',
-                                '">&#x2022;',
-                            '</span>',
-                        '</div>',
-                        '<div class="span3">{{{usernamelabel}}}</div>',
-                        '<div class="span3"> last seen: {{fuzzytime}}</div>',
-                        '<div class="span3">',
-                            '{{#isnotadmin}}',
-                            'permit download<input type="checkbox" ',
-                            'onchange="userSetPermitDownload({{userid}}, $(this).is(\':checked\'))" id="misc-autoplay_on_add" value="option1" ',
-                            '{{#may_download}}checked="checked"{{/may_download}}>',
-                            '{{/isnotadmin}}',
-                        '</div>',
-                        '<div class="span1">',
-                            '{{#isdeletable}}',
-                                '<a class="btn btn-mini btn-danger" href="javascript:;" onclick="userDelete({{userid}})">delete</a>',
-                            '{{/isdeletable}}',
-                        '</div>',
-                    '</div>',
-                '</li>',
-            ].join(''),{
+            template_user_data['users'].push({
                 isadmin: e.admin,
                 may_download: e.may_download,
                 isnotadmin: !e.admin,
                 isdeletable: e.deletable,
                 userid: e.id,
                 isonline: reltime < HEARTBEAT_INTERVAL_MS/500,
-                usernamelabel: renderUserNameLabel(e.username),
+                username: e.username,
+                username_color: userNameToColor(e.username),
                 fuzzytime: time2text(reltime),
             });
         });
-        $('#adminuserlist').html(htmllist);
+        templateLoader.get('user-list', function(template){
+            $('#adminuserlist').html(Mustache.render(template, template_user_data));
+        });
     };
     busy('#adminuserlist').hide().fadeIn('fast');
     api('getuserlist',
@@ -686,12 +612,6 @@ function addNewUser(){
     if(newusername.trim() === '' || newpassword.trim() === ''){
         return;
     }
-    var data = {'action':'adduser',
-                'value' : JSON.stringify({
-                    'username':newusername,
-                    'password':newpassword,
-                    'isadmin':newisadmin
-                })};
     var success = function(data){
         $('#newusername').val('');
         $('#newpassword').val('');
@@ -699,7 +619,12 @@ function addNewUser(){
         updateUserList();
     };
     busy('#adminpanel').hide().fadeIn('fast');
-    api(data,
+    api('adduser',
+        {
+            'username':newusername,
+            'password':newpassword,
+            'isadmin':newisadmin
+        },
         success,
         errorFunc('failed to add new user'),
         function(){busy('#adminpanel').fadeOut('fast')}
@@ -707,33 +632,29 @@ function addNewUser(){
 }
 
 function userDelete(userid){
-    var data = {'action': 'userdelete',
-                'value' : JSON.stringify({
-                    'userid':userid
-                })};
     var success = function(data){
         updateUserList();
     };
     busy('#adminuserlist').hide().fadeIn('fast');
-    api(data,
+    api('setuseroptionfor',
+        { 'userid':userid },
         success,
         errorFunc('failed to delete user'),
-        function(){busy('#adminuserlist').fadeOut('fast')}
+        function(){ busy('#adminuserlist').fadeOut('fast') }
     );
 }
 
 function userSetPermitDownload(userid, allow_download){
-    var data = {'action':'setuseroptionfor',
-                'value' : JSON.stringify({
-                    'optionkey': 'media.may_download',
-                    'optionval': allow_download,
-                    'userid': userid,
-                })};
     var success = function(data){
         updateUserList();
     };
     busy('#adminuserlist').hide().fadeIn('fast');
-    api(data,
+    api('setuseroptionfor',
+        {
+            'optionkey': 'media.may_download',
+            'optionval': allow_download,
+            'userid': userid,
+        },
         success,
         errorFunc('Failed to set user download state'),
         function(){busy('#adminuserlist').fadeOut('fast')}
@@ -744,27 +665,26 @@ function userChangePassword(){
     if (! validateNewPassword($('#newpassword-change'), $('#repeatpassword-change'))) {
         return false;
     }
-    var data = {'action':'userchangepassword',
-                'value' : JSON.stringify({
-                    'oldpassword':$('#oldpassword-change').val(),
-                    'newpassword':$('#newpassword-change').val()
-                })};
-    $('#oldpassword-change').val('');
     var success = function(data){
         $('#changePassword').find('input').each(function(idx, el) { $(el).val(''); } )
         $('#changePassword').modal('hide');
         $('#userOptions').modal('hide');
         successNotify('Password changed successfully!')();
     };
-    busy('#adminpanel').hide().fadeIn('fast');
     var error = function(){
+        $('#oldpassword-change').val('');
         $('#oldpassword-change').focus();
         $("#changePassword").modal('attention');
     }
-    api(data,
+    busy('#changePassword').hide().fadeIn('fast');
+    api('userchangepassword',
+        {
+            'oldpassword':$('#oldpassword-change').val(),
+            'newpassword':$('#newpassword-change').val()
+        },
         success,
         error,
-        function(){busy('#adminpanel').fadeOut('fast')}
+        function(){busy('#changePassword').fadeOut('fast')}
     );
 }
 function validateNewPassword($newpwfield, $repeatpwfield){
@@ -786,40 +706,20 @@ function enableJplayerDebugging(){
 }
 
 function loadBrowser(){
-    var data = { 'action' : 'listdir' };
     var success = function(data){
-        MediaBrowser('#searchresults', jQuery.parseJSON(data));
+        new MediaBrowser('.search-results', data, 'Root');
     };
     busy('#searchfield').hide().fadeIn('fast');
-    api(data,
+    api('listdir',
         success,
         errorFunc('failed to load file browser'),
         function(){busy('#searchfield').fadeOut('fast')});
-}
-var origcolors = {};
-function pulse(selector){
-    "use strict";
-    var elem = $(selector);
-    if(typeof origcolors[selector] === 'undefined'){
-        origcolors[selector] = elem.css('background-color');
-    }
-    elem.stop(true, true);
-    elem.animate({backgroundColor: '#ffffff'+' !important'},100);
-    elem.animate({backgroundColor: origcolors[selector]+' !important'},100);
-    elem.animate({backgroundColor: '#ffffff'+' !important'},100);
-    elem.animate({backgroundColor: origcolors[selector]+' !important'},100);
-    elem.animate({backgroundColor: '#ffffff'+' !important'},100);
-    elem.animate({backgroundColor: origcolors[selector]+' !important'},100);
 }
 
 /***
 HELPER
 ***/
 
-function reload(){
-    "use strict";
-    window.location = "http://"+window.location.host;
-}
 function endsWith(str, suffix) {
     "use strict";
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
@@ -840,18 +740,6 @@ function detectBrowser(){
         }
     }
     return 'unknown';
-}
-/********************
-STYLE TRANSFORMATIONS
-*********************/
-//returns the size of the browser window
-function viewport() {
-    var e = window, a = 'inner';
-    if ( !( 'innerWidth' in window ) ){
-        a = 'client';
-        e = document.documentElement || document.body;
-    }
-    return { width : e[ a+'Width' ] , height : e[ a+'Height' ] }
 }
 
 /*****
@@ -898,6 +786,23 @@ function time2text(sec){
         return sec > 0 ? t+' ago' : 'in '+t;
     }
 }
+
+function dec2Hex(dec){
+    var hexChars = "0123456789ABCDEF";
+    var a = dec % 16;
+    var b = (dec - a)/16;
+    hex = hexChars.charAt(b) + hexChars.charAt(a);
+    return hex;
+}
+
+function userNameToColor(username){
+    username = username.toUpperCase();
+    username+='AAA';
+    var g = ((ord(username[0])-65)*255)/30;
+    var b = ((ord(username[1])-65)*255)/30;
+    var r = ((ord(username[2])-65)*255)/30;
+    return '#'+dec2Hex(r)+dec2Hex(g)+dec2Hex(b);
+} 
 
 /*****************
  * KEYBOARD SHORTCUTS
@@ -947,77 +852,16 @@ function keyboardShortcuts(e){
 
 function sendHeartBeat(){
     api('heartbeat',
-        function(){ removeError('connection to server lost')},
+        function(){ /*removeError('connection to server lost') */ },
         errorFunc('connection to server lost'),
         true)
-}
-
-function enableMobileSwiping(){
-    var wrap = $('.swipe-panels>div');
-    var width = wrap.width();
-    var sp = $('.search-panel').get(0);
-    var pp = $('.playlist-panel').get(0);
-    //set up css rules for swiping:
-    $('body').css('overflow','hidden');
-    $('body').css('height','100%');
-    $('html').css('height','100%');
-    $('.search-panel').css('position', 'absolute');
-    $('.search-panel').css('top', '165px');
-    $('.search-panel').css('left', '0');
-    $('.playlist-panel').css('position', 'absolute');
-    $('.playlist-panel').css('top', '165px');
-    $('.playlist-panel').css('left', '100%');
-    var leftoffset = 0;
-    $('body')
-    .on('movestart', function(e) {
-        leftoffset = $('.search-panel').hasClass('active-swipe')? 0 : -100;
-        width = wrap.width();
-        // If the movestart heads off in a upwards or downwards
-        // direction, prevent it so that the browser scrolls normally.
-        if ((e.distX > e.distY && e.distX < -e.distY) ||
-            (e.distX < e.distY && e.distX > -e.distY)) {
-            e.preventDefault();
-            return;
-        }
-    })
-    .on('move', function(e){
-        var left = 100 * e.distX / width;
-        if (e.distX < 0) {
-            sp.style.left = (leftoffset+left) + '%';
-            sp.style.width = (100-leftoffset+left) + '%';
-            pp.style.left = (leftoffset+left+100)+'%';
-        }
-        if (e.distX > 0) {
-            sp.style.left = (leftoffset+left) + '%';
-            pp.style.left = (leftoffset+left+100)+'%';
-        }
-    })
-    .on('moveend', function(e) {
-       if(parseInt(pp.style.left) < 50){
-           $('.search-panel').animate({left: '-100%'});
-           $('.playlist-panel').animate({left: '0%'});
-           $('.search-panel').removeClass('active-swipe');
-           $('.playlist-panel').addClass('active-swipe');
-       } else {
-            $('.search-panel').animate({left: '0%'});
-            $('.playlist-panel').animate({left: '100%'});
-            $('.search-panel').addClass('active-swipe');
-            $('.playlist-panel').removeClass('active-swipe');
-       }
-    });
-}
-function disableMobileSwiping(){
-    $('body').off('movestart').off('move').off('moveend');
-    $('.search-panel').removeAttr('style');
-    $('.playlist-panel').removeAttr('style');
-    $('body').removeAttr('style');
-    $('html').removeAttr('style');
+    window.setTimeout('sendHeartBeat()', HEARTBEAT_INTERVAL_MS);
 }
 
 function userOptionCheckboxListener(htmlid, optionname){
     $(htmlid).on('change',function(){
         optionSetter(   optionname,
-                        $(this).attr('checked')=='checked',
+                        $(this).is(':checked'),
                         function(){
                             $(this).attr('checked',userOptions[optionname])
                         },
@@ -1073,22 +917,24 @@ $(document).ready(function(){
     loadUserOptions(initKeyboardshortcuts);    
     api('getmotd',function(data){$('#oneliner').text(data)},
         errorFunc('could not fetch message of the day'));
-    window.onscroll = MediaBrowser.static.albumArtLoader; //enable loading of images when in viewport
+    $('#search-panel').on('scroll', function(){
+        //enable loading of images when in viewport
+        MediaBrowser.static.albumArtLoader('#search-panel');
+    });
     
     //register top level directories
     $('div#progressscreen').fadeOut('slow');
-    window.setInterval("resizePlaylistSlowly()",2000);
+    //window.setInterval("resizePlaylistSlowly()",2000);
     $('#searchform .searchinput').focus();
     sendHeartBeat();
-    window.setInterval("sendHeartBeat()",HEARTBEAT_INTERVAL_MS);
-    $('#adminpanel').on('shown', function (e) {
+    $('#adminpanel').on('shown.bs.modal', function (e) {
         updateUserList();
     });
     $('#save-playlist-from-queue').on('click',function(){
         $('#playlisttitle').val('');
         $("#playlistpublic").attr("checked", true);
     });
-    $('#saveplaylistmodal').on('shown',function(){
+    $('#saveplaylistmodal').on('shown.bs.modal',function(){
         $('#playlisttitle').focus();
         $('#playlisttitle').bind('keyup',function(e){
             if(e.which === 13) { //enter
@@ -1101,13 +947,12 @@ $(document).ready(function(){
     $('#saveplaylistmodal').on('hide', function(){
         $('#playlisttitle').unbind('keyup');
     });
-    $('#changePassword').on('show', function(){
-        $('#changePassword').data('modal').options.focusOn = '#oldpassword-change';
+    $('#changePassword').on('show.bs.modal', function(){
+        //$('#changePassword').data('modal').options.focusOn = '#oldpassword-change';
     });
     
     userOptionCheckboxListener('#misc-show_playlist_download_buttons',
                                'misc.show_playlist_download_buttons');
     userOptionCheckboxListener('#misc-autoplay_on_add',
                                'misc.autoplay_on_add');
-    //enableMobileSwiping();
 });
