@@ -51,19 +51,25 @@ def compile_jsmin(instr, outfile):
         compiler = sp.Popen([JSMIN], stdin=sp.PIPE, stdout=sp.PIPE)
         stout, sterr = compiler.communicate(instr)
         fw.write(stout)
-        print(" compressed to %s bytes."% fw.tell())
+        print("compressed to %s bytes."% fw.tell())
+        print("that's %d%% less" % (100 - fw.tell()/len(instr)*100) )
 
 def match_js_concat_min(match):
     args = parse_args(match.group(1))
     jsstr = b''
     for scriptpath in re.findall('<script.*src="([^"]+)"', match.group(2)):
-        print('concatenating %s' % scriptpath)
         with open(scriptpath, 'rb') as script:
             jsstr += script.read()
             jsstr += b';\n'
     print('js scripts uncompressed %d bytes' % len(jsstr))
     compile_jsmin(jsstr, args['out'])
     return '<script type="text/javascript" src="%s"></script>' % args['out']
+
+def remove_whitespace(html):
+    no_white = re.sub('\s+', ' ', html, flags=re.MULTILINE)
+    print('removed whitespace. before %d bytes, after %d bytes.' % (len(html), len(no_white)))
+    print("that's %d%% less" % (100 - len(no_white)/len(html)*100) )
+    return no_white
 
 html = None
 with open('res/devel.html', 'r') as develhtml:
@@ -81,7 +87,7 @@ html = re.sub('<!--COMPRESS-JS-BEGIN([^>]*)-->(.*)<!--COMPRESS-JS-END-->',
               match_js_concat_min,
               html,
               flags=re.MULTILINE | re.DOTALL)
-
+html = remove_whitespace(html)
 
 with open('res/main.html', 'w') as mainhtml:
     mainhtml.write(html)
