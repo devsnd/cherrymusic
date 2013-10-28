@@ -119,7 +119,7 @@ class CherryMusic:
 
     def stopAndCleanUp(self, signal, stackframe):
         self.delete_pid_file()
-        print('Shutting down cherrypy server...')
+        print('Exiting...')
         sys.exit(0)
 
     def create_pid_file(self):
@@ -189,7 +189,7 @@ I've you are sure that cherrymusic is not running, you can delete this file and 
             cacheupdate.start()
             # self._update_if_necessary(update)
             if not setup:
-                sys.exit(0)
+                self.stopAndCleanUp()
 
     @staticmethod
     def _get_user_consent_for_db_schema_update(reasons):
