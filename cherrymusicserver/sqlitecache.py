@@ -52,6 +52,12 @@ from cherrymusicserver.util import Performance
 from cherrymusicserver.progress import ProgressTree, ProgressReporter
 import random
 
+UNIDECODE_AVAILABLE = True
+try:
+    import unidecode
+except ImportError:
+    UNIDECODE_AVAILABLE = False
+
 scanreportinterval = 1
 AUTOSAVEINTERVAL = 100
 debug = False
@@ -93,7 +99,12 @@ class SQLiteCache(object):
     @classmethod
     def searchterms(cls, searchterm):
         words = re.findall('(\w+|[^\s\w]+)',searchterm.replace('_', ' ').replace('%',' '),re.UNICODE)
-        return [word.lower() for word in words]
+        words = [word.lower() for word in words]
+        if UNIDECODE_AVAILABLE:
+            unidecoded = [unidecode.unidecode(word) for word in words]
+            words += unidecoded
+            words = set(words)
+        return words
 
     def fetchFileIds(self, terms, maxFileIdsPerTerm, mode):
         """returns list of ids each packed in a tuple containing the id"""
