@@ -429,7 +429,8 @@
     <ul class="nav navbar-nav">
         <li class="hidden-xs">
             <form class="navbar-form navbar-left" role="search" id="searchform" onsubmit="return search($(this))">
-                <div class="input-group">
+                <!--workaround for CHROME BUG  https://code.google.com/p/chromium/issues/detail?id=309483 -->
+                <div class="input-group" style="width: 300px">
                     <input type="text" name="searchinput" class="searchinput form-control" placeholder="Search">
                     <span class="input-group-btn">
                         <button type="submit" class="btn btn-primary">Search</button>
