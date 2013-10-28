@@ -142,6 +142,11 @@ def from_defaults():
         port.value = 8080
         port.doc = 'The port the server will listen to.'
 
+    with c['server.ipv6_enabled'] as ipv6:
+        ipv6.value = False
+        ipv6.doc = """When set to true, the server will listen on a IPv6
+                      socket instead of IPv4"""
+
     with c['server.localhost_only'] as localhost_only:
         localhost_only.value = False
         localhost_only.doc = '''

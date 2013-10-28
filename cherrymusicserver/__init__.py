@@ -295,7 +295,13 @@ Have fun!
         sys.exit(0)
 
     def start(self, httphandler):
-        socket_host = "127.0.0.1" if config['server.localhost_only'] else "0.0.0.0"
+        if config['server.localhost_only']:
+            socket_host = "localhost"
+        else:
+            if config['server.ipv6_enabled']:
+                socket_host = "::"
+            else:
+                socket_host = "0.0.0.0"
 
         resourcedir = os.path.abspath(pathprovider.getResourcePath('res'))
 
