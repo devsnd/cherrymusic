@@ -5188,7 +5188,7 @@ body {
 .cm-media-list-busy {
   overflow: hidden;
   background-image: url("../../cherrymusic_loader.gif");
-  background-position: 50% 40px;
+  background-position: 50% 120px;
   background-repeat: no-repeat;
 }
 .cm-media-list-category {
