@@ -1,9 +1,26 @@
+#!/usr/bin/python3
+
 import subprocess as sp
 import re
 import os
 
 LESSC = 'lessc'
 JSMIN = 'jsmin'
+
+def prog_exists(exe):
+    try:
+        with open(os.devnull,'w') as devnull:
+            prog = sp.Popen([exe], stdin=devnull, stdout=devnull)
+            stout, sterr = prog.communicate('')
+    except IOError:
+        return False
+    return True
+    
+if not (prog_exists(LESSC) and prog_exists(JSMIN)):
+    print('''=== WARNING: CANNOT DEPLOY ===
+For automatic deployment, please install jsmin and the less-css compiler
+and make sure they are in your $PATH.''')
+    exit(0)
 
 def compile_less(in_less_file, out_css_file):
     LESSC_OPTS = ['--include-path='+os.path.dirname(in_less_file),'-'] #['--yui-compress', '-']
