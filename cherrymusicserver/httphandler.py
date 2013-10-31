@@ -260,7 +260,7 @@ everybody has to relogin now.''')
         if is_binary:
             return handler(**handler_args)
         else:
-            return json.dumps({'data': handler(**handler_args)}) 
+            return json.dumps({'data': handler(**handler_args)})
 
     api.exposed = True
 
@@ -442,10 +442,6 @@ everybody has to relogin now.''')
 
     def api_generaterandomplaylist(self):
         return [entry.to_dict() for entry in self.model.randomMusicEntries(50)]
-
-    def api_generaterandomplaylist(self, value):
-        files = self.model.randomMusicEntries(50)
-        return self.jsonrenderer.render(files)
 
     def api_changeplaylist(self, value):
         params = json.loads(value)

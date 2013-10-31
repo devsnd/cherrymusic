@@ -103,8 +103,7 @@ class SQLiteCache(object):
         if UNIDECODE_AVAILABLE:
             unidecoded = [unidecode.unidecode(word) for word in words]
             words += unidecoded
-            words = set(words)
-        return words
+        return set(words)
 
     def fetchFileIds(self, terms, maxFileIdsPerTerm, mode):
         """returns list of ids each packed in a tuple containing the id"""

@@ -203,12 +203,9 @@ class AddFilesToDatabaseTest(unittest.TestCase):
 
         ids = self.Cache.add_to_dictionary_table(filename)
 
-        wordset = set(words)
-        self.assertTrue(len(wordset) < len(words), "there must be duplicate words in the test, \nset: %s \nlist: %s"
-            % (wordset, words) )
         idset = set(ids)
         self.assertTrue(len(ids) == len(idset), "there must be no duplicate ids")
-        for word in wordset:
+        for word in words:
             cursor = self.Cache.conn.execute('SELECT rowid FROM dictionary WHERE word=?', (word,))
             res = cursor.fetchall()
             self.assertTrue(len(res) == 1, "there must be exactly one matching row per word")
