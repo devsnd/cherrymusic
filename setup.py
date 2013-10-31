@@ -84,7 +84,7 @@ setup(
         'cherrymusicserver.database.defs': packagedata('cherrymusicserver/database/defs'),
     },
     #startup script
-    scripts = ['cherrymusic','cherrymusicd'],
+    scripts = ['cherrymusic','cherrymusicd','cherrymusic-tray'],
     
     #py2exe specific
     console = [

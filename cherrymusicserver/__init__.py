@@ -110,19 +110,21 @@ class CherryMusic:
                  setup=False, cfg_override={}):
         self.setup_services()
         self.setup_config(createNewConfig, setup, cfg_override)
-        signal.signal(signal.SIGTERM, self.stopAndCleanUp)
-        signal.signal(signal.SIGINT, self.stopAndCleanUp)
-        self.create_pid_file()
+        signal.signal(signal.SIGTERM, CherryMusic.stopAndCleanUp)
+        signal.signal(signal.SIGINT, CherryMusic.stopAndCleanUp)
+        CherryMusic.create_pid_file()
         self.setup_databases(update, dropfiledb, setup)
         self.server(httphandler.HTTPHandler(config))
-        self.delete_pid_file()
+        CherryMusic.delete_pid_file()
 
-    def stopAndCleanUp(self, signal, stackframe):
-        self.delete_pid_file()
+    @classmethod
+    def stopAndCleanUp(cls, signal=None, stackframe=None):
+        CherryMusic.delete_pid_file()
         print('Exiting...')
         sys.exit(0)
 
-    def create_pid_file(self):
+    @classmethod
+    def create_pid_file(cls):
         if pathprovider.pidFileExists():
             sys.exit("""============================================
 Process id file %s already exists.
@@ -132,7 +134,8 @@ I've you are sure that cherrymusic is not running, you can delete this file and 
             with open(pathprovider.pidFile(), 'w') as pidfile:
                 pidfile.write(str(os.getpid()))
 
-    def delete_pid_file(self):
+    @classmethod
+    def delete_pid_file(cls):
         if pathprovider.pidFileExists():
             os.remove(pathprovider.pidFile())
         else:
@@ -189,7 +192,7 @@ I've you are sure that cherrymusic is not running, you can delete this file and 
             cacheupdate.start()
             # self._update_if_necessary(update)
             if not setup:
-                self.stopAndCleanUp()
+                CherryMusic.stopAndCleanUp()
 
     @staticmethod
     def _get_user_consent_for_db_schema_update(reasons):
