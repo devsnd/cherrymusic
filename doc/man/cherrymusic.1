@@ -1,7 +1,7 @@
 .\" Manpage for CherryMusic.
 .\" Contact us on github.com/devsnd/cherrymusic to correct errors or typos.
 
-.TH "CHERRYMUSIC" "1" "2013\-05\-16" "CherryMusic" "CherryMusic man page"
+.TH "CHERRYMUSIC" "1" "2013\-11\-02" "CherryMusic" "CherryMusic man page"
 
 .SH "NAME"
 cherrymusic \- a standalone HTML5 (with Flash fallback) music streaming server written in Python
@@ -35,7 +35,7 @@ If invoked with this switch, CherryMusic will walk you through the basic configu
 Overrides the port specified in \fBcherrymusic.conf\fP(5).
 
 .IP "\fB\-\-conf, -c KEY=VALUE [KEY=VALUE ...]\fP"
-Overrides options specified in \fBcherrymusic.conf\fP(5) with a given VALUE. KEY consists of the configurations section name and the option name of the section that is to be overridden, seperated by a dot. e.g., to override the ssl option (section "server", option "ssl_enabled") in the configuration file: "--conf server.ssl_enabled=True".
+Overrides options specified in \fBcherrymusic.conf\fP(5) with a given VALUE. KEY consists of the configurations section name and the option name of the section that is to be overridden, seperated by a dot. E.g., to override the SSL option (section "server", option "ssl_enabled") in the configuration file: "--conf server.ssl_enabled=True".
 
 .SH "FILES"
 According to XDG Base Directory Specification, CherryMusic honors $XDG_DATA_HOME and $XDG_CONFIG_HOME. If these variables are empty or not set, files are stored using the standard path:
