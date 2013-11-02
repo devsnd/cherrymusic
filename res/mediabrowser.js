@@ -179,6 +179,18 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs){
     $(cssSelector).on('click', '.list-dir', listdirclick);
     $(cssSelector).on('click', '.compact-list-dir', listdirclick);
     $(cssSelector).on('click', '.musicfile', MediaBrowser.static.addThisTrackToPlaylist);
+    $(cssSelector).on('click', '.cm-media-list-wrench', function(){
+        var popOverSettings = {
+            placement: 'bottom',
+            container: 'body',
+            html: true,
+            content: function () {
+                return 'deine mama'
+            }
+        }
+        $(this).popover(popOverSettings);
+        $(this).popover('show');
+    });
     $(cssSelector).on('click', '.addAllToPlaylist', function() {
         if(isplaylist){
             var pl = playlistManager.newPlaylist([], playlistlabel);
@@ -192,9 +204,10 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs){
         $(this).blur();
         return false;
     });
-    
-   
 }
+
+
+
 MediaBrowser.static = {
     _renderList: function (l){
         "use strict";

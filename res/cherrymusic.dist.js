@@ -810,7 +810,161 @@ if(typeof option=='string')data[option].call($this)})}
 $.fn.dropdown.Constructor=Dropdown
 $.fn.dropdown.noConflict=function(){$.fn.dropdown=old
 return this}
-$(document).on('click.bs.dropdown.data-api',clearMenus).on('click.bs.dropdown.data-api','.dropdown form',function(e){e.stopPropagation()}).on('click.bs.dropdown.data-api',toggle,Dropdown.prototype.toggle).on('keydown.bs.dropdown.data-api',toggle+', [role=menu]',Dropdown.prototype.keydown)}(window.jQuery);;+function($){"use strict";var dismiss='[data-dismiss="alert"]'
+$(document).on('click.bs.dropdown.data-api',clearMenus).on('click.bs.dropdown.data-api','.dropdown form',function(e){e.stopPropagation()}).on('click.bs.dropdown.data-api',toggle,Dropdown.prototype.toggle).on('keydown.bs.dropdown.data-api',toggle+', [role=menu]',Dropdown.prototype.keydown)}(window.jQuery);;+function($){"use strict";var Tooltip=function(element,options){this.type=this.options=this.enabled=this.timeout=this.hoverState=this.$element=null
+this.init('tooltip',element,options)}
+Tooltip.DEFAULTS={animation:true,placement:'top',selector:false,template:'<div class="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>',trigger:'hover focus',title:'',delay:0,html:false,container:false}
+Tooltip.prototype.init=function(type,element,options){this.enabled=true
+this.type=type
+this.$element=$(element)
+this.options=this.getOptions(options)
+var triggers=this.options.trigger.split(' ')
+for(var i=triggers.length;i--;){var trigger=triggers[i]
+if(trigger=='click'){this.$element.on('click.'+this.type,this.options.selector,$.proxy(this.toggle,this))}else if(trigger!='manual'){var eventIn=trigger=='hover'?'mouseenter':'focus'
+var eventOut=trigger=='hover'?'mouseleave':'blur'
+this.$element.on(eventIn+'.'+this.type,this.options.selector,$.proxy(this.enter,this))
+this.$element.on(eventOut+'.'+this.type,this.options.selector,$.proxy(this.leave,this))}}
+this.options.selector?(this._options=$.extend({},this.options,{trigger:'manual',selector:''})):this.fixTitle()}
+Tooltip.prototype.getDefaults=function(){return Tooltip.DEFAULTS}
+Tooltip.prototype.getOptions=function(options){options=$.extend({},this.getDefaults(),this.$element.data(),options)
+if(options.delay&&typeof options.delay=='number'){options.delay={show:options.delay,hide:options.delay}}
+return options}
+Tooltip.prototype.getDelegateOptions=function(){var options={}
+var defaults=this.getDefaults()
+this._options&&$.each(this._options,function(key,value){if(defaults[key]!=value)options[key]=value})
+return options}
+Tooltip.prototype.enter=function(obj){var self=obj instanceof this.constructor?obj:$(obj.currentTarget)[this.type](this.getDelegateOptions()).data('bs.'+this.type)
+clearTimeout(self.timeout)
+self.hoverState='in'
+if(!self.options.delay||!self.options.delay.show)return self.show()
+self.timeout=setTimeout(function(){if(self.hoverState=='in')self.show()},self.options.delay.show)}
+Tooltip.prototype.leave=function(obj){var self=obj instanceof this.constructor?obj:$(obj.currentTarget)[this.type](this.getDelegateOptions()).data('bs.'+this.type)
+clearTimeout(self.timeout)
+self.hoverState='out'
+if(!self.options.delay||!self.options.delay.hide)return self.hide()
+self.timeout=setTimeout(function(){if(self.hoverState=='out')self.hide()},self.options.delay.hide)}
+Tooltip.prototype.show=function(){var e=$.Event('show.bs.'+this.type)
+if(this.hasContent()&&this.enabled){this.$element.trigger(e)
+if(e.isDefaultPrevented())return
+var $tip=this.tip()
+this.setContent()
+if(this.options.animation)$tip.addClass('fade')
+var placement=typeof this.options.placement=='function'?this.options.placement.call(this,$tip[0],this.$element[0]):this.options.placement
+var autoToken=/\s?auto?\s?/i
+var autoPlace=autoToken.test(placement)
+if(autoPlace)placement=placement.replace(autoToken,'')||'top'
+$tip.detach().css({top:0,left:0,display:'block'}).addClass(placement)
+this.options.container?$tip.appendTo(this.options.container):$tip.insertAfter(this.$element)
+var pos=this.getPosition()
+var actualWidth=$tip[0].offsetWidth
+var actualHeight=$tip[0].offsetHeight
+if(autoPlace){var $parent=this.$element.parent()
+var orgPlacement=placement
+var docScroll=document.documentElement.scrollTop||document.body.scrollTop
+var parentWidth=this.options.container=='body'?window.innerWidth:$parent.outerWidth()
+var parentHeight=this.options.container=='body'?window.innerHeight:$parent.outerHeight()
+var parentLeft=this.options.container=='body'?0:$parent.offset().left
+placement=placement=='bottom'&&pos.top+pos.height+actualHeight-docScroll>parentHeight?'top':placement=='top'&&pos.top-docScroll-actualHeight<0?'bottom':placement=='right'&&pos.right+actualWidth>parentWidth?'left':placement=='left'&&pos.left-actualWidth<parentLeft?'right':placement
+$tip.removeClass(orgPlacement).addClass(placement)}
+var calculatedOffset=this.getCalculatedOffset(placement,pos,actualWidth,actualHeight)
+this.applyPlacement(calculatedOffset,placement)
+this.$element.trigger('shown.bs.'+this.type)}}
+Tooltip.prototype.applyPlacement=function(offset,placement){var replace
+var $tip=this.tip()
+var width=$tip[0].offsetWidth
+var height=$tip[0].offsetHeight
+var marginTop=parseInt($tip.css('margin-top'),10)
+var marginLeft=parseInt($tip.css('margin-left'),10)
+if(isNaN(marginTop))marginTop=0
+if(isNaN(marginLeft))marginLeft=0
+offset.top=offset.top+marginTop
+offset.left=offset.left+marginLeft
+$tip.offset(offset).addClass('in')
+var actualWidth=$tip[0].offsetWidth
+var actualHeight=$tip[0].offsetHeight
+if(placement=='top'&&actualHeight!=height){replace=true
+offset.top=offset.top+height-actualHeight}
+if(/bottom|top/.test(placement)){var delta=0
+if(offset.left<0){delta=offset.left* -2
+offset.left=0
+$tip.offset(offset)
+actualWidth=$tip[0].offsetWidth
+actualHeight=$tip[0].offsetHeight}
+this.replaceArrow(delta-width+actualWidth,actualWidth,'left')}else{this.replaceArrow(actualHeight-height,actualHeight,'top')}
+if(replace)$tip.offset(offset)}
+Tooltip.prototype.replaceArrow=function(delta,dimension,position){this.arrow().css(position,delta?(50*(1-delta/dimension)+"%"):'')}
+Tooltip.prototype.setContent=function(){var $tip=this.tip()
+var title=this.getTitle()
+$tip.find('.tooltip-inner')[this.options.html?'html':'text'](title)
+$tip.removeClass('fade in top bottom left right')}
+Tooltip.prototype.hide=function(){var that=this
+var $tip=this.tip()
+var e=$.Event('hide.bs.'+this.type)
+function complete(){if(that.hoverState!='in')$tip.detach()}
+this.$element.trigger(e)
+if(e.isDefaultPrevented())return
+$tip.removeClass('in')
+$.support.transition&&this.$tip.hasClass('fade')?$tip.one($.support.transition.end,complete).emulateTransitionEnd(150):complete()
+this.$element.trigger('hidden.bs.'+this.type)
+return this}
+Tooltip.prototype.fixTitle=function(){var $e=this.$element
+if($e.attr('title')||typeof($e.attr('data-original-title'))!='string'){$e.attr('data-original-title',$e.attr('title')||'').attr('title','')}}
+Tooltip.prototype.hasContent=function(){return this.getTitle()}
+Tooltip.prototype.getPosition=function(){var el=this.$element[0]
+return $.extend({},(typeof el.getBoundingClientRect=='function')?el.getBoundingClientRect():{width:el.offsetWidth,height:el.offsetHeight},this.$element.offset())}
+Tooltip.prototype.getCalculatedOffset=function(placement,pos,actualWidth,actualHeight){return placement=='bottom'?{top:pos.top+pos.height,left:pos.left+pos.width/2-actualWidth/2}:placement=='top'?{top:pos.top-actualHeight,left:pos.left+pos.width/2-actualWidth/2}:placement=='left'?{top:pos.top+pos.height/2-actualHeight/2,left:pos.left-actualWidth}:{top:pos.top+pos.height/2-actualHeight/2,left:pos.left+pos.width}}
+Tooltip.prototype.getTitle=function(){var title
+var $e=this.$element
+var o=this.options
+title=$e.attr('data-original-title')||(typeof o.title=='function'?o.title.call($e[0]):o.title)
+return title}
+Tooltip.prototype.tip=function(){return this.$tip=this.$tip||$(this.options.template)}
+Tooltip.prototype.arrow=function(){return this.$arrow=this.$arrow||this.tip().find('.tooltip-arrow')}
+Tooltip.prototype.validate=function(){if(!this.$element[0].parentNode){this.hide()
+this.$element=null
+this.options=null}}
+Tooltip.prototype.enable=function(){this.enabled=true}
+Tooltip.prototype.disable=function(){this.enabled=false}
+Tooltip.prototype.toggleEnabled=function(){this.enabled=!this.enabled}
+Tooltip.prototype.toggle=function(e){var self=e?$(e.currentTarget)[this.type](this.getDelegateOptions()).data('bs.'+this.type):this
+self.tip().hasClass('in')?self.leave(self):self.enter(self)}
+Tooltip.prototype.destroy=function(){this.hide().$element.off('.'+this.type).removeData('bs.'+this.type)}
+var old=$.fn.tooltip
+$.fn.tooltip=function(option){return this.each(function(){var $this=$(this)
+var data=$this.data('bs.tooltip')
+var options=typeof option=='object'&&option
+if(!data)$this.data('bs.tooltip',(data=new Tooltip(this,options)))
+if(typeof option=='string')data[option]()})}
+$.fn.tooltip.Constructor=Tooltip
+$.fn.tooltip.noConflict=function(){$.fn.tooltip=old
+return this}}(window.jQuery);;+function($){"use strict";var Popover=function(element,options){this.init('popover',element,options)}
+if(!$.fn.tooltip)throw new Error('Popover requires tooltip.js')
+Popover.DEFAULTS=$.extend({},$.fn.tooltip.Constructor.DEFAULTS,{placement:'right',trigger:'click',content:'',template:'<div class="popover"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'})
+Popover.prototype=$.extend({},$.fn.tooltip.Constructor.prototype)
+Popover.prototype.constructor=Popover
+Popover.prototype.getDefaults=function(){return Popover.DEFAULTS}
+Popover.prototype.setContent=function(){var $tip=this.tip()
+var title=this.getTitle()
+var content=this.getContent()
+$tip.find('.popover-title')[this.options.html?'html':'text'](title)
+$tip.find('.popover-content')[this.options.html?'html':'text'](content)
+$tip.removeClass('fade top bottom left right in')
+if(!$tip.find('.popover-title').html())$tip.find('.popover-title').hide()}
+Popover.prototype.hasContent=function(){return this.getTitle()||this.getContent()}
+Popover.prototype.getContent=function(){var $e=this.$element
+var o=this.options
+return $e.attr('data-content')||(typeof o.content=='function'?o.content.call($e[0]):o.content)}
+Popover.prototype.arrow=function(){return this.$arrow=this.$arrow||this.tip().find('.arrow')}
+Popover.prototype.tip=function(){if(!this.$tip)this.$tip=$(this.options.template)
+return this.$tip}
+var old=$.fn.popover
+$.fn.popover=function(option){return this.each(function(){var $this=$(this)
+var data=$this.data('bs.popover')
+var options=typeof option=='object'&&option
+if(!data)$this.data('bs.popover',(data=new Popover(this,options)))
+if(typeof option=='string')data[option]()})}
+$.fn.popover.Constructor=Popover
+$.fn.popover.noConflict=function(){$.fn.popover=old
+return this}}(window.jQuery);;+function($){"use strict";var dismiss='[data-dismiss="alert"]'
 var Alert=function(el){$(el).on('click',dismiss,this.close)}
 Alert.prototype.close=function(e){var $this=$(this)
 var selector=$this.attr('data-target')
@@ -1038,7 +1192,8 @@ if(self.listing_data_stack.length>1){var node=$('<div class="cm-media-list-item 
 if(enable_breadcrumbs){for(var i=0;i<self.listing_data_stack.length;i++){var title=self.listing_data_stack[i]['title'];var li='<li';if(i==self.listing_data_stack.length-1){li+=' class="active"';}
 li+='><a href="#">'+title+'</a></li>';var $li=$(li);$li.on('click',create_jump_func(i));$(this.cssSelector+' .breadcrumb').append($li);}}
 $(self.cssSelector).parent().parent().scrollTop(self.listing_data_stack[self.listing_data_stack.length-1].scroll);playlistManager.setTrackDestinationLabel();MediaBrowser.static.albumArtLoader(cssSelector);}
-this.render();$(cssSelector).off('click');$(cssSelector).on('click','.list-dir',listdirclick);$(cssSelector).on('click','.compact-list-dir',listdirclick);$(cssSelector).on('click','.musicfile',MediaBrowser.static.addThisTrackToPlaylist);$(cssSelector).on('click','.addAllToPlaylist',function(){if(isplaylist){var pl=playlistManager.newPlaylist([],playlistlabel);}else{var pl=playlistManager.getEditingPlaylist();}
+this.render();$(cssSelector).off('click');$(cssSelector).on('click','.list-dir',listdirclick);$(cssSelector).on('click','.compact-list-dir',listdirclick);$(cssSelector).on('click','.musicfile',MediaBrowser.static.addThisTrackToPlaylist);$(cssSelector).on('click','.cm-media-list-wrench',function(){var popOverSettings={placement:'bottom',container:'body',html:true,content:function(){return'deine mama'}}
+$(this).popover(popOverSettings);$(this).popover('show');});$(cssSelector).on('click','.addAllToPlaylist',function(){if(isplaylist){var pl=playlistManager.newPlaylist([],playlistlabel);}else{var pl=playlistManager.getEditingPlaylist();}
 MediaBrowser.static._addAllToPlaylist($(this),pl.id);if(isplaylist){pl.setSaved(true);}
 $(this).blur();return false;});}
 MediaBrowser.static={_renderList:function(l){"use strict";var self=this;var html="";$.each(l,function(i,e){switch(e.type){case'dir':html+=MediaBrowser.static._renderDirectory(e);break;case'file':html+=MediaBrowser.static._renderFile(e);break;case'compact':html+=MediaBrowser.static._renderCompactDirectory(e);break;case'playlist':html+=MediaBrowser.static._renderPlaylist(e);break;default:window.console.log('cannot render unknown type '+e.type);}});return html;},_renderMessage:function(msg){var template=templateLoader.cached('mediabrowser-message');return Mustache.render(template,{message:msg});},_renderFile:function(json){var template=templateLoader.cached('mediabrowser-file');var template_data={fileurl:json.urlpath,fullpath:json.path,label:json.label,};return Mustache.render(template,template_data);},_renderDirectory:function(json){var template=templateLoader.cached('mediabrowser-directory');var template_data={isrootdir:json.path&&!json.path.indexOf('/')>0,dirpath:json.path,label:json.label,coverarturl:encodeURIComponent(JSON.stringify({'directory':json.path}))};return Mustache.render(template,template_data);},_renderPlaylist:function(e){var template=templateLoader.cached('mediabrowser-playlist');var template_data={playlistid:e['plid'],isowner:e.owner,candelete:e.owner||isAdmin,playlistlabel:e['title'],username:e['username'],username_color:userNameToColor(e.username),publicchecked:e['public']?'checked="checked"':'',publiclabelclass:e['public']?'label-success':'label-default',};return Mustache.render(template,template_data);},_renderCompactDirectory:function(json){var template=templateLoader.cached('mediabrowser-compact');var template_data={filepath:json.urlpath,filter:json.label,filterUPPER:json.label.toUpperCase(),};return Mustache.render(template,template_data);},addThisTrackToPlaylist:function(){"use strict"
