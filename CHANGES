@@ -1,6 +1,29 @@
 Changelog
 ---------
 
+0.27.0 (2013-11-02)
+
+ - FEATURE: brand new UI using bootstrap 3:
+        panels can be scrolled independently
+        redesigned media browser (unified playlist manager)
+        unified navigation & search bar
+ - IMPROVEMENT: faster client load times (less-css-compilation & js minification)
+ - FEATURE: downloading all tracks of a playlists as zip file
+ - IMPROVEMENT: limiting maximum size of downloadable playlists
+ - FEATURE: creation of playlists containing random tracks
+ - FEATURE: IPv6 support
+ - FEATURE: improved search for non-ascii characters
+        requires optional dependency "unidecode"
+ - FEATURE: new tray icon program "cherrymusic-tray" to start/stop CM comfortably
+        requires optional dependency "gobject-python"
+ - IMPROVEMENT: browser setup now shows details for missing dependencies
+ - UPDATE: updated jPlayer to version 2.4.0
+ - FIX: playback problems when using firefox on windows
+ - FIX: fetching of local album art works now as it should
+ - FIX: playback works now when CM is run with another rootpath but '/'
+ - FIX: playback in chrome randomly stopped, works now
+ + a lot of other stuff, as always!
+
 0.26.0 (2013-07-15)
 
  - IMPROVEMENT: search quality, rare words are considered more important
