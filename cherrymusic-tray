@@ -113,7 +113,8 @@ def _get_license():
     except:
         import traceback
         traceback.print_exc()
-        license = 'unable to read license file {0!r}'.format(licenseFile)
+        license = 'Unable to read license file {0!r}.\nPlease see {1}'.format(
+            licenseFile, 'http://www.gnu.org/licenses/gpl-3.0.html')
     finally:
         return license
 
