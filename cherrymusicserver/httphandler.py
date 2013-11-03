@@ -305,7 +305,7 @@ everybody has to relogin now.''')
     def download(self, value):
         if not self.isAuthorized():
             raise cherrypy.HTTPError(401, 'Unauthorized')
-        filelist = [unquote(filepath) for filepath in json.loads(value)]
+        filelist = [filepath for filepath in json.loads(unquote(value))]
         dlstatus = self.download_check_files(filelist)
         if dlstatus == 'ok':
             cherrypy.session.release_lock()
