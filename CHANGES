@@ -1,6 +1,15 @@
 Changelog
 ---------
 
+0.27.2 (2013-11-03)
+
+ - UPDATE: man pages reflect recent changes
+
+0.27.1 (2013-11-03)
+
+ - HOTFIX: fixed download button not working
+ - FIX: shuffle and repeat buttons are visible now
+
 0.27.0 (2013-11-02)
 
  - FEATURE: brand new UI using bootstrap 3:
