@@ -51,7 +51,7 @@ def getUserDataPath():
         userdata = os.path.join(os.environ['APPDATA'],'cherrymusic')
     elif sys.platform.startswith('darwin'): # osx
         userdata = os.path.join(os.path.expanduser('~'),'Application Support',userDataFolderName)
-    
+
     if not userdata:
         userdata = fallbackPath()
     assureFolderExists(userdata,['db','albumart','sessions'])
@@ -63,7 +63,7 @@ def getConfigPath():
     else:
         configpath = ''
         if sys.platform.startswith('linux'):  # linux
-            if 'XDG_CONFIG_HOME' in os.environ: 
+            if 'XDG_CONFIG_HOME' in os.environ:
                 configpath = os.path.join(os.environ['XDG_CONFIG_HOME'], configFolderName)
             else:
                 configpath = os.path.join(os.path.expanduser('~'), '.config', configFolderName)
@@ -71,7 +71,7 @@ def getConfigPath():
             configpath = os.path.join(os.environ['APPDATA'],configFolderName)
         elif sys.platform.startswith('darwin'): #osx
             configpath = os.path.join(os.path.expanduser('~'),'Application Support',configFolderName)
-        
+
         if not configpath:
             configpath = fallbackPath()
         assureFolderExists(configpath)
@@ -104,7 +104,7 @@ def databaseFilePath(filename):
         os.makedirs(configdir)
     configpath = os.path.join(configdir, filename)
     return configpath
-    
+
 def albumArtFilePath(directorypath):
     albumartcachepath = os.path.join(getUserDataPath(), 'albumart')
     if not os.path.exists(albumartcachepath):
@@ -114,7 +114,7 @@ def albumArtFilePath(directorypath):
 
 def base64encode(s):
     return codecs.decode(base64.b64encode(codecs.encode(s,'UTF-8')),'UTF-8')
-    
+
 def base64decode(s):
     return codecs.decode(base64.b64decode(s),'UTF-8')
 
