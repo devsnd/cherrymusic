@@ -92,6 +92,12 @@ def pidFile():
 def pidFileExists():
     return os.path.exists(pidFile())
 
+def licenseFile():
+    owndir = os.path.dirname(__file__)
+    basedir = os.path.split(owndir)[0] or '.'
+    basedir = os.path.abspath(basedir)
+    return os.path.join(basedir, 'COPYING')
+
 def configurationFile():
     return os.path.join(getConfigPath(), configFileName)
 

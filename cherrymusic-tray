@@ -97,14 +97,27 @@ class CherryMusicTrayIcon:
         about_dialog.set_destroy_with_parent(True)
         about_dialog.set_program_name('cherrymusic-tray')
         about_dialog.set_comments("start/stop your CherryMusic server comfortably.")
-        with open('COPYING', 'r') as licensing:
-            about_dialog.set_license(licensing.read())
+        about_dialog.set_license(_get_license())
         about_dialog.set_version("0.1")
         about_dialog.set_authors(["Tom Wallroth"])
 
         about_dialog.run()
         about_dialog.destroy()
- 
+
+
+def _get_license():
+    licenseFile = pathprovider.licenseFile()
+    try:
+        with open(licenseFile, 'r') as licensing:
+            license = licensing.read()
+    except:
+        import traceback
+        traceback.print_exc()
+        license = 'unable to read license file {0!r}'.format(licenseFile)
+    finally:
+        return license
+
+
 
 
 if __name__ == "__main__":
