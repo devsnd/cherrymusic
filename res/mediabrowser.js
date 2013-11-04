@@ -130,6 +130,20 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs){
         }
         if('' != playlisthtml){
             html += '<div class="cm-media-list-category"><h3>Playlists</h3>'+
+                    '<div class="btn-group input-group-sm">'+
+                        '<span class="input-group-addon">sort by</span>'+
+                        '<div class="input-group-btn">'+
+                        '<button type="button" class="btn btn-default" onclick="showPlaylists(\'title\')">'+
+                            '<span class="glyphicon glyphicon-sort-by-alphabet"></span> title'+
+                        '</button>'+
+                        '<button type="button" class="btn btn-default" onclick="showPlaylists(\'username\')">'+
+                            '<span class="glyphicon glyphicon-user"></span> user'+
+                        '</button>'+
+                        '<button type="button" class="btn btn-default" onclick="showPlaylists(\'age\')">'+
+                            '<span class="glyphicon glyphicon-time"></span> age'+
+                        '</button>'+
+                        '</div>'+
+                    '</div>'+
                     '<ul class="cm-media-list">'+playlisthtml+'</ul></div>';
         }
         if('' == html){
@@ -252,6 +266,7 @@ MediaBrowser.static = {
             candelete: e.owner || isAdmin, 
             playlistlabel:e['title'],
             username: e['username'],
+            age: time2text(e['age']),
             username_color: userNameToColor(e.username),
             publicchecked: e['public'] ? 'checked="checked"' : '',
             publiclabelclass : e['public'] ? 'label-success' : 'label-default',

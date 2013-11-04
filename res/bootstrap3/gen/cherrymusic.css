@@ -5191,7 +5191,7 @@ body {
 }
 .cm-media-list {
   position: relative;
-  padding: 0 0 0 10px;
+  padding: 0;
 }
 .cm-media-list-busy {
   overflow: hidden;
@@ -5296,6 +5296,9 @@ body {
   display: block;
   padding: 5px;
 }
+.playlist-age {
+  white-space: nowrap;
+}
 .playlist-title {
   width: 99%;
 }
@@ -5307,4 +5310,7 @@ body {
 }
 .playlist-deletebutton {
   width: 1%;
+}
+.playlist-content {
+  margin-left: 30px;
 }

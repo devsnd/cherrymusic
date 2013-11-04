@@ -509,12 +509,17 @@ everybody has to relogin now.''')
         else:
             return "You didn't think that would work, did you?"
 
-    def api_showplaylists(self):
+    def api_showplaylists(self, sortby="created"):
         playlists = self.playlistdb.showPlaylists(self.getUserId())
+        curr_time = int(time.time())
         #translate userids to usernames:
         for pl in playlists:
             pl['username'] = self.userdb.getNameById(pl['userid'])
             pl['type'] = 'playlist'
+            pl['age'] = curr_time - pl['created']
+        if not sortby in ('username', 'age', 'title'):
+            sortby = 'created'
+        playlists = sorted(playlists, key=lambda x: x[sortby])
         return playlists
 
     def api_logout(self):

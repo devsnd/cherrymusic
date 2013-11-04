@@ -375,7 +375,7 @@ function ord(c)
   return c.charCodeAt(0);
 }
 
-function showPlaylists(){
+function showPlaylists(sortby){
     "use strict";
     var success = function(data){
         var addressAndPort = getAddrPort();
@@ -385,6 +385,7 @@ function showPlaylists(){
 
     busy('#playlist-panel').hide().fadeIn('fast');
     api('showplaylists',
+        {'sortby': sortby},
         success,
         error,
         function(){busy('#playlist-panel').fadeOut('fast')}
@@ -451,10 +452,13 @@ function loadPlaylist(playlistid, playlistlabel){
 
 function loadPlaylistContent(playlistid, playlistlabel){
     "use strict";
-    var pldomid = "#playlist"+playlistid+' .playlistcontent';
+    var pldomid = "#playlist"+playlistid+' .playlist-content';
     if('' === $(pldomid).html().trim()){
         var success = function(data){
             new MediaBrowser(pldomid, data, playlistlabel, false);
+            $("#playlist"+playlistid+' .playlist-detail-switch .glyphicon')
+            .toggleClass('glyphicon-chevron-right')
+            .toggleClass('glyphicon-chevron-down');
         };
         busy('#playlist-panel').hide().fadeIn('fast');
         api('loadplaylist',
@@ -465,6 +469,9 @@ function loadPlaylistContent(playlistid, playlistlabel){
         );
     } else {
         $(pldomid).slideToggle('slow');
+        $("#playlist"+playlistid+' .playlist-detail-switch .glyphicon')
+            .toggleClass('glyphicon-chevron-right')
+            .toggleClass('glyphicon-chevron-down');
     }
 }
 
@@ -921,8 +928,6 @@ $(document).ready(function(){
         $('#username-label').text('('+loggedInUserName+')');
     });
     loadUserOptions(initKeyboardshortcuts);    
-    api('getmotd',function(data){$('#oneliner').text(data)},
-        errorFunc('could not fetch message of the day'));
     $('#search-panel').on('scroll', function(){
         //enable loading of images when in viewport
         MediaBrowser.static.albumArtLoader('#search-panel');
