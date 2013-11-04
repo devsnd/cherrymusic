@@ -1,4 +1,6 @@
 @mediaplayer-height: 70px;
+@main-color: @brand-primary;
+@main-color-bright: lighten(@main-color, 20%);
 
 .jp-jplayer{
     width: 1px !important;
@@ -34,12 +36,12 @@
 .jp{
 
     &-bar-seek{
-        .progress-bar-variant(lighten(@brand-primary, 20%));
+        .progress-bar-variant(@main-color-bright);
         cursor: pointer;
     }
     
     &-bar-played{
-        .progress-bar-variant(@brand-primary);
+        .progress-bar-variant(@main-color);
         cursor: pointer;
     }
     
