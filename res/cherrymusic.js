@@ -166,11 +166,17 @@ function loadConfig(executeAfter){
             'user_name': dictatedClientConfig.username,
             'serve_path': dictatedClientConfig.servepath,
             'transcode_path': dictatedClientConfig.transcodepath,
+            'auto_login': dictatedClientConfig.auto_login,
         }
         
         executeAfter();
         if(isAdmin){
             $('a[href="#adminpanel"]').show();
+        }
+        if(SERVER_CONFIG.auto_login){
+            $('#logout-menu-button').parent('li').addClass('disabled');
+            $('#logout-menu-button').attr('onclick', '');
+            $('#logout-menu-button').attr('title', 'Cannot logout: Auto-Login enabled');
         }
     };
     var error = errorFunc("Could not fetch client configuration, CherryMusic will not work. Clearing the browser cache might help.");

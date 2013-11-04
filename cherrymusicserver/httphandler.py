@@ -182,19 +182,22 @@ Dropping all sessions! Try not to change between python 2 and 3,
 everybody has to relogin now.''')
             cherrypy.session.delete()
             sessionUsername = None
-        if not sessionUsername:
-            return self.autoLoginIfPossible()
+        if sessionUsername is None:
+            if self.autoLoginActive():
+                cherrypy.session['username'] = self.userdb.getNameById(1)
+                cherrypy.session['userid'] = 1
+                cherrypy.session['admin'] = True
+                return True
+            else:
+                return False
         elif sessionUsername != nameById:
             self.api_logout(value=None)
             return False
         return True
 
-    def autoLoginIfPossible(self):
+    def autoLoginActive(self):
         is_loopback = cherrypy.request.remote.ip in ('127.0.0.1', '::1')
         if is_loopback and cherry.config['server.localhost_auto_login']:
-            cherrypy.session['username'] = self.userdb.getNameById(1)
-            cherrypy.session['userid'] = 1
-            cherrypy.session['admin'] = True
             return True
         return False
 
@@ -570,6 +573,7 @@ everybody has to relogin now.''')
             'username': cherrypy.session['username'],
             'servepath': 'serve/',
             'transcodepath': 'trans/',
+            'auto_login': self.autoLoginActive(),
         }
         if cherry.config['media.transcode']:
             decoders = self.model.transcoder.availableDecoderFormats()
