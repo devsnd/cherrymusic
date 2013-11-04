@@ -31,7 +31,7 @@
 RENDERING
 ********/
 
-MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs){
+MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
     "use strict";
     this.listing_data_stack = [{'title': title, 'data': json, 'scroll': 0}];
     this.cssSelector = cssSelector;
@@ -39,6 +39,7 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs){
     if(typeof enable_breadcrumbs === 'undefined'){
         enable_breadcrumbs = true;
     }
+    this.options = typeof options === 'undefined'? {} : options;
 
     var self = this;
     
@@ -128,20 +129,33 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs){
             html += '<div class="cm-media-list-category"><h3>Compact</h3>'+
                     '<ul class="cm-media-list">'+compacthtml+'</ul></div>';
         }
-        if('' != playlisthtml){
+        if('' != playlisthtml || self.options.showPlaylistPanel){
             html += '<div class="cm-media-list-category"><h3>Playlists</h3>'+
-                    '<div class="btn-group input-group-sm">'+
-                        '<span class="input-group-addon">sort by</span>'+
-                        '<div class="input-group-btn">'+
-                        '<button type="button" class="btn btn-default" onclick="showPlaylists(\'title\')">'+
-                            '<span class="glyphicon glyphicon-sort-by-alphabet"></span> title'+
-                        '</button>'+
-                        '<button type="button" class="btn btn-default" onclick="showPlaylists(\'username\')">'+
-                            '<span class="glyphicon glyphicon-user"></span> user'+
-                        '</button>'+
-                        '<button type="button" class="btn btn-default" onclick="showPlaylists(\'age\')">'+
-                            '<span class="glyphicon glyphicon-time"></span> age'+
-                        '</button>'+
+                    '<div class="row">'+
+                        '<div class="col-md-6">'+
+                            '<div class="btn-group input-group-sm">'+
+                                '<span class="input-group-addon">sort by</span>'+
+                                '<div class="input-group-btn">'+
+                                    '<button type="button" class="btn btn-default" onclick="showPlaylists(\'title\', $(\'.playlist-filter-input\').val())">'+
+                                        '<span class="glyphicon glyphicon-sort-by-alphabet"></span> title'+
+                                    '</button>'+
+                                    '<button type="button" class="btn btn-default" onclick="showPlaylists(\'username\', $(\'.playlist-filter-input\').val())">'+
+                                        '<span class="glyphicon glyphicon-user"></span> user'+
+                                    '</button>'+
+                                    '<button type="button" class="btn btn-default" onclick="showPlaylists(\'age\', $(\'.playlist-filter-input\').val())">'+
+                                        '<span class="glyphicon glyphicon-time"></span> age'+
+                                    '</button>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="col-md-6">'+
+                            '<div class="input-group input-group-sm">'+
+                              '<input type="text" class="playlist-filter-input form-control" placeholder="title or trackname"'+
+                              'onchange="showPlaylists(\'\', $(\'.playlist-filter-input\').val())">'+
+                              '<span class="input-group-btn">'+
+                                '<button type="submit" onclick="showPlaylists(\'\', $(\'.playlist-filter-input\').val())" class="btn btn-primary">Search</button>'+
+                              '</span>'+
+                            '</div>'+
                         '</div>'+
                     '</div>'+
                     '<ul class="cm-media-list">'+playlisthtml+'</ul></div>';

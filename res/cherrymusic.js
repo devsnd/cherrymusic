@@ -375,20 +375,23 @@ function ord(c)
   return c.charCodeAt(0);
 }
 
-function showPlaylists(sortby){
+function showPlaylists(sortby, filterby){
     "use strict";
     var success = function(data){
         var addressAndPort = getAddrPort();
-        new MediaBrowser('.search-results', data, 'Playlist browser');
+        var value_before = $('.playlist-filter-input').val();
+        new MediaBrowser('.search-results', data, 'Playlist browser', false, {showPlaylistPanel: true});
+        $('.playlist-filter-input').val(value_before);
     };
     var error = errorFunc('error loading external playlists');
 
-    busy('#playlist-panel').hide().fadeIn('fast');
+    busy('.search-results').hide().fadeIn('fast');
     api('showplaylists',
-        {'sortby': sortby},
+        {'sortby': sortby,
+         'filterby': filterby},
         success,
         error,
-        function(){busy('#playlist-panel').fadeOut('fast')}
+        function(){busy('.search-results').fadeOut('fast')}
     );
 }
 

@@ -509,8 +509,8 @@ everybody has to relogin now.''')
         else:
             return "You didn't think that would work, did you?"
 
-    def api_showplaylists(self, sortby="created"):
-        playlists = self.playlistdb.showPlaylists(self.getUserId())
+    def api_showplaylists(self, sortby="created", filterby=''):
+        playlists = self.playlistdb.showPlaylists(self.getUserId(), filterby)
         curr_time = int(time.time())
         #translate userids to usernames:
         for pl in playlists:

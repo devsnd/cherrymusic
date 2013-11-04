@@ -882,7 +882,7 @@ pre code {
     margin-left: 91.66666666666666%;
   }
 }
-@media (min-width: 992px) {
+@media (min-width: 950px) {
   .container {
     max-width: 940px;
   }
@@ -4462,7 +4462,7 @@ td.visible-xs {
     display: table-cell !important;
   }
 }
-@media (min-width: 768px) and (max-width: 991px) {
+@media (min-width: 768px) and (max-width: 949px) {
   .visible-xs.visible-sm {
     display: block !important;
   }
@@ -4474,7 +4474,7 @@ td.visible-xs {
     display: table-cell !important;
   }
 }
-@media (min-width: 992px) and (max-width: 1199px) {
+@media (min-width: 950px) and (max-width: 1199px) {
   .visible-xs.visible-md {
     display: block !important;
   }
@@ -4520,7 +4520,7 @@ td.visible-sm {
     display: table-cell !important;
   }
 }
-@media (min-width: 768px) and (max-width: 991px) {
+@media (min-width: 768px) and (max-width: 949px) {
   .visible-sm {
     display: block !important;
   }
@@ -4532,7 +4532,7 @@ td.visible-sm {
     display: table-cell !important;
   }
 }
-@media (min-width: 992px) and (max-width: 1199px) {
+@media (min-width: 950px) and (max-width: 1199px) {
   .visible-sm.visible-md {
     display: block !important;
   }
@@ -4578,7 +4578,7 @@ td.visible-md {
     display: table-cell !important;
   }
 }
-@media (min-width: 768px) and (max-width: 991px) {
+@media (min-width: 768px) and (max-width: 949px) {
   .visible-md.visible-sm {
     display: block !important;
   }
@@ -4590,7 +4590,7 @@ td.visible-md {
     display: table-cell !important;
   }
 }
-@media (min-width: 992px) and (max-width: 1199px) {
+@media (min-width: 950px) and (max-width: 1199px) {
   .visible-md {
     display: block !important;
   }
@@ -4636,7 +4636,7 @@ td.visible-lg {
     display: table-cell !important;
   }
 }
-@media (min-width: 768px) and (max-width: 991px) {
+@media (min-width: 768px) and (max-width: 949px) {
   .visible-lg.visible-sm {
     display: block !important;
   }
@@ -4648,7 +4648,7 @@ td.visible-lg {
     display: table-cell !important;
   }
 }
-@media (min-width: 992px) and (max-width: 1199px) {
+@media (min-width: 950px) and (max-width: 1199px) {
   .visible-lg.visible-md {
     display: block !important;
   }
@@ -4694,7 +4694,7 @@ td.hidden-xs {
     display: none !important;
   }
 }
-@media (min-width: 768px) and (max-width: 991px) {
+@media (min-width: 768px) and (max-width: 949px) {
   .hidden-xs.hidden-sm {
     display: none !important;
   }
@@ -4706,7 +4706,7 @@ td.hidden-xs {
     display: none !important;
   }
 }
-@media (min-width: 992px) and (max-width: 1199px) {
+@media (min-width: 950px) and (max-width: 1199px) {
   .hidden-xs.hidden-md {
     display: none !important;
   }
@@ -4752,7 +4752,7 @@ td.hidden-sm {
     display: none !important;
   }
 }
-@media (min-width: 768px) and (max-width: 991px) {
+@media (min-width: 768px) and (max-width: 949px) {
   .hidden-sm {
     display: none !important;
   }
@@ -4764,7 +4764,7 @@ td.hidden-sm {
     display: none !important;
   }
 }
-@media (min-width: 992px) and (max-width: 1199px) {
+@media (min-width: 950px) and (max-width: 1199px) {
   .hidden-sm.hidden-md {
     display: none !important;
   }
@@ -4810,7 +4810,7 @@ td.hidden-md {
     display: none !important;
   }
 }
-@media (min-width: 768px) and (max-width: 991px) {
+@media (min-width: 768px) and (max-width: 949px) {
   .hidden-md.hidden-sm {
     display: none !important;
   }
@@ -4822,7 +4822,7 @@ td.hidden-md {
     display: none !important;
   }
 }
-@media (min-width: 992px) and (max-width: 1199px) {
+@media (min-width: 950px) and (max-width: 1199px) {
   .hidden-md {
     display: none !important;
   }
@@ -4868,7 +4868,7 @@ td.hidden-lg {
     display: none !important;
   }
 }
-@media (min-width: 768px) and (max-width: 991px) {
+@media (min-width: 768px) and (max-width: 949px) {
   .hidden-lg.hidden-sm {
     display: none !important;
   }
@@ -4880,7 +4880,7 @@ td.hidden-lg {
     display: none !important;
   }
 }
-@media (min-width: 992px) and (max-width: 1199px) {
+@media (min-width: 950px) and (max-width: 1199px) {
   .hidden-lg.hidden-md {
     display: none !important;
   }
@@ -5127,7 +5127,7 @@ body {
 #playlist-panel {
   box-shadow: -5px 0px 5px rgba(0, 0, 0, 0.4);
 }
-@media (min-width: 992px) {
+@media (min-width: 950px) {
   .playlist-container-parent {
     position: fixed;
     bottom: 70px;
