@@ -5168,6 +5168,7 @@ body {
 .playlist-container-list > li {
   list-style-type: none;
   margin: 5px 0;
+  padding: 0 5px;
 }
 .playlist-container .jp-playlist-item {
   display: block;
@@ -5179,6 +5180,10 @@ body {
   float: right;
   padding: 0px 5px;
   display: block;
+}
+.playlist-container .jp-playlist-current {
+  background-color: #92bce0;
+  color: #000000;
 }
 .playlist-container .jp-playlist-playtime {
   float: left;
