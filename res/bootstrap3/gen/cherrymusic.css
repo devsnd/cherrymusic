@@ -5064,6 +5064,18 @@ body {
   min-height: 50px;
   margin: 0 5px;
 }
+#motd {
+  left: 50%;
+  position: relative;
+  width: 300px;
+  margin-left: -150px;
+  top: 20px;
+  text-align: center;
+  background-color: #f7f7f7;
+  border-radius: 15px;
+  padding: 10px;
+  color: #aaa;
+}
 #searchresults {
   overflow: hidden;
 }

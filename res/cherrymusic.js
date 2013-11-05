@@ -947,6 +947,10 @@ $(document).ready(function(){
     //window.setInterval("resizePlaylistSlowly()",2000);
     $('#searchform .searchinput').focus();
     sendHeartBeat();
+    api('getmotd',
+        function(data){ $('#motd').html('useless wisdom:<br><br>'+htmlencode(data)) },
+        errorFunc('could not fetch message of the day')
+    );
     $('#adminpanel').on('shown.bs.modal', function (e) {
         updateUserList();
     });
