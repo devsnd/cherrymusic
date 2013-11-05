@@ -948,7 +948,7 @@ $(document).ready(function(){
     $('#searchform .searchinput').focus();
     sendHeartBeat();
     api('getmotd',
-        function(data){ $('#motd').html('useless wisdom:<br><br>'+htmlencode(data)) },
+        function(data){ $('#motd').html('useless wisdom:<hr>'+htmlencode(data)) },
         errorFunc('could not fetch message of the day')
     );
     $('#adminpanel').on('shown.bs.modal', function (e) {
