@@ -206,6 +206,7 @@ function loadUserOptions(onSuccess){
         
         $('#misc-show_playlist_download_buttons').attr('checked',userOptions.misc.show_playlist_download_buttons);
         $('#misc-autoplay_on_add').attr('checked',userOptions.misc.autoplay_on_add);
+        $('#ui-confirm_quit_dialog').attr('checked',userOptions.ui.confirm_quit_dialog);
     }
     api('getuseroptions', success);
 }
@@ -882,11 +883,17 @@ function sendHeartBeat(){
 }
 
 function userOptionCheckboxListener(htmlid, optionname){
+    REQUIRES_RELOAD_ON_ENABLE = ['#ui-confirm_quit_dialog'];
     $(htmlid).on('change',function(){
+        var self = this;
         optionSetter(   optionname,
                         $(this).is(':checked'),
                         function(){
-                            $(this).attr('checked',userOptions[optionname])
+                            if($(self).is(':checked')){
+                                if(REQUIRES_RELOAD_ON_ENABLE.indexOf(htmlid) != -1){
+                                    alert('You need to reload the page for this setting to take effect.')
+                                }
+                            }
                         },
                         errorFunc('Error setting option! '+optionname)
         );
@@ -927,18 +934,23 @@ function show_ui_conditionally(selectors, conditions_table){
 }
 
 function dontCloseWindowIfMusicPlays(){
-    if(!$('#jquery_jplayer_1').data().jPlayer.status.paused){
-        if(window.onbeforeunload === null){
-            // register close dialog if music is playing
-            window.onbeforeunload = function() {
-              return "This will stop the playback. Do you really want to close CherryMusic?";
+    if(userOptions.ui.confirm_quit_dialog){
+        if(!$('#jquery_jplayer_1').data().jPlayer.status.paused){
+            if(window.onbeforeunload === null){
+                // register close dialog if music is playing
+                window.onbeforeunload = function() {
+                  return "This will stop the playback. Do you really want to close CherryMusic?";
+                }
+            }
+        } else {
+            if(window.onbeforeunload !== null){
+                // remove close dialog if no music is playing
+                window.onbeforeunload = null;
             }
         }
+        window.setTimeout("dontCloseWindowIfMusicPlays()", CHECK_MUSIC_PLAYING_INTERVAL)
     } else {
-        if(window.onbeforeunload !== null){
-            // remove close dialog if no music is playing
-            window.onbeforeunload = null;
-        }
+        window.onbeforeunload = null;
     }
 }
 
@@ -953,7 +965,10 @@ $(document).ready(function(){
         playlistManager = new PlaylistManager();
         $('#username-label').text('('+loggedInUserName+')');
     });
-    loadUserOptions(initKeyboardshortcuts);    
+    loadUserOptions(function(){
+        initKeyboardshortcuts();
+        dontCloseWindowIfMusicPlays();
+    });
     $('#search-panel').on('scroll', function(){
         //enable loading of images when in viewport
         MediaBrowser.static.albumArtLoader('#search-panel');
@@ -991,9 +1006,10 @@ $(document).ready(function(){
     $('#changePassword').on('show.bs.modal', function(){
         //$('#changePassword').data('modal').options.focusOn = '#oldpassword-change';
     });
-    window.setInterval("dontCloseWindowIfMusicPlays()", CHECK_MUSIC_PLAYING_INTERVAL)
     userOptionCheckboxListener('#misc-show_playlist_download_buttons',
                                'misc.show_playlist_download_buttons');
     userOptionCheckboxListener('#misc-autoplay_on_add',
                                'misc.autoplay_on_add');
+    userOptionCheckboxListener('#ui-confirm_quit_dialog',
+                               'ui.confirm_quit_dialog');
 });
