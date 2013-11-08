@@ -140,6 +140,11 @@ def getResourcePath(path):
     respath = os.path.join(resourceprefix, path)
     if not os.path.exists(respath):
         #log.w("Couldn't find " + respath + ". Trying local install path.")
+        #otherwise check local/share
+        resourceprefix = os.path.join(sys.prefix, 'local', 'share', sharedFolderName)
+        respath = os.path.join(resourceprefix, path)
+    if not os.path.exists(respath):
+        #log.w("Couldn't find " + respath + ". Trying local install path.")
         #otherwise check local install
         resourceprefix = os.path.dirname(os.path.dirname(__file__))
         respath = os.path.join(resourceprefix, path)
