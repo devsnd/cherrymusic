@@ -44,6 +44,7 @@ var userOptions = undefined;
 var isAdmin = undefined;
 var loggedInUserName = undefined;
 var REMEMBER_PLAYLIST_INTERVAL = 3000;
+var CHECK_MUSIC_PLAYING_INTERVAL = 2000;
 var HEARTBEAT_INTERVAL_MS = 30*1000;
 
 var playlistSelector = '.jp-playlist';
@@ -925,6 +926,22 @@ function show_ui_conditionally(selectors, conditions_table){
     }
 }
 
+function dontCloseWindowIfMusicPlays(){
+    if(!$('#jquery_jplayer_1').data().jPlayer.status.paused){
+        if(window.onbeforeunload === null){
+            // register close dialog if music is playing
+            window.onbeforeunload = function() {
+              return "This will stop the playback. Do you really want to close CherryMusic?";
+            }
+        }
+    } else {
+        if(window.onbeforeunload !== null){
+            // remove close dialog if no music is playing
+            window.onbeforeunload = null;
+        }
+    }
+}
+
 /***
 ON DOCUMENT READY... STEADY... GO!
 ***/
@@ -974,7 +991,7 @@ $(document).ready(function(){
     $('#changePassword').on('show.bs.modal', function(){
         //$('#changePassword').data('modal').options.focusOn = '#oldpassword-change';
     });
-    
+    window.setInterval("dontCloseWindowIfMusicPlays()", CHECK_MUSIC_PLAYING_INTERVAL)
     userOptionCheckboxListener('#misc-show_playlist_download_buttons',
                                'misc.show_playlist_download_buttons');
     userOptionCheckboxListener('#misc-autoplay_on_add',
