@@ -446,14 +446,13 @@ everybody has to relogin now.''')
     def api_generaterandomplaylist(self):
         return [entry.to_dict() for entry in self.model.randomMusicEntries(50)]
 
-    def api_changeplaylist(self, value):
-        params = json.loads(value)
-        is_public = params['attribute'] == 'public'
-        is_valid = type(params['value']) == bool and type(params['plid']) == int
-        if is_public and is_valid:
-            return self.playlistdb.setPublic(userid=self.getUserId(),
-                                             plid=params['plid'],
-                                             value=params['value'])
+    def api_changeplaylist(self, plid, attribute, value):
+        if attribute == 'public':
+            is_valid = type(value) == bool and type(plid) == int
+            if is_valid:
+                return self.playlistdb.setPublic(userid=self.getUserId(),
+                                                 plid=plid,
+                                                 public=value)
 
     def api_getmotd(self):
         return self.model.motd()

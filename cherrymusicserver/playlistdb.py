@@ -116,8 +116,8 @@ class PlaylistDB:
             return result[0][1]
         return 'playlist'
 
-    def setPublic(self, userid, plid, value):
-        ispublic = 1 if value else 0
+    def setPublic(self, userid, plid, public):
+        ispublic = 1 if public else 0
         cur = self.conn.cursor()
         cur.execute("""UPDATE playlists SET public = ? WHERE rowid = ? AND userid = ?""", (ispublic, plid, userid))
 
