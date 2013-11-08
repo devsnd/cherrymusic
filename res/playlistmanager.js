@@ -47,12 +47,15 @@ ManagedPlaylist.prototype = {
         );
         self.jplayerplaylist._init();
 
-        $(playlistSelector+" ul").sortable({
+        $(self.playlistSelector+" ul").sortable({
+            axis: "y",
+            delay: 150,
+            helper : 'clone',
             update: function(e,ui){
                 self.jplayerplaylist.scan();
             }
         });
-        $(playlistSelector+" ul").disableSelection();
+        $(self.playlistSelector+" ul").disableSelection();
 
         //event handler for clicked tracks in jplayer playlist
         $(this.playlistSelector).bind('requestPlay', function(event,playlistSelector) {
