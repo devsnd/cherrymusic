@@ -98,7 +98,10 @@ try:
             return ValueError(msg)
 
 except ImportError:
-    #python 3.1 and 2.6 workaround
+    # python 3.1 and 2.6 workaround
+    # since python 3.1 and python 2.6 don't have argparse, but only optparse.
+    # our backport module tries to keep them compatible, but some features
+    # are missing (e.g. arguments for options)
     from backport import argparse
 
     class ConfigOptions(ConfigOptionsBase):
