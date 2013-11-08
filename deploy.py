@@ -3,6 +3,7 @@
 import subprocess as sp
 import re
 import os
+import hashlib
 
 LESSC = 'lessc'
 JSMIN = 'jsmin'
@@ -61,9 +62,14 @@ def match_js_concat_min(match):
         with open(scriptpath, 'rb') as script:
             jsstr += script.read()
             jsstr += b';\n'
+    jshash = hashlib.md5(jsstr).hexdigest()
+    print('calculated hash %s' % jshash)
     print('js scripts uncompressed %d bytes' % len(jsstr))
-    compile_jsmin(jsstr, args['out'])
-    return '<script type="text/javascript" src="%s"></script>' % args['out']
+    outfilename = args['out']
+    dotpos = outfilename.rindex('.')
+    outfilename = outfilename[:dotpos]+jshash+outfilename[dotpos:]
+    compile_jsmin(jsstr, outfilename)
+    return '<script type="text/javascript" src="%s"></script>' % outfilename
 
 def remove_whitespace(html):
     no_white = re.sub('\s+', ' ', html, flags=re.MULTILINE)
