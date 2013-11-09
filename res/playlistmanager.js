@@ -791,11 +791,17 @@ PlaylistManager.prototype = {
     removePlayedFromPlaylist : function (){
         var mediaPlaylist = this.getEditingPlaylist().jplayerplaylist;
         for(var i=0; i<mediaPlaylist.playlist.length; i++){
-            if(mediaPlaylist.playlist[i].wasPlayed>0){
+            var wasPlayed = mediaPlaylist.playlist[i].wasPlayed>0;
+            var isCurrentTrack = i == mediaPlaylist.current;
+            var isBeforeCurrent = i < mediaPlaylist.current;
+            if(wasPlayed && !isCurrentTrack){
                 mediaPlaylist.playlist.splice(i,1);
                 i--;
+                if(isBeforeCurrent){
+                    mediaPlaylist.current--;
+                }
             }
         }
-        mediaPlaylist._refresh(false);
+        mediaPlaylist._refresh(true);
     }
 }
