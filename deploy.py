@@ -66,8 +66,8 @@ def match_js_concat_min(match):
     print('calculated hash %s' % jshash)
     print('js scripts uncompressed %d bytes' % len(jsstr))
     outfilename = args['out']
-    dotpos = outfilename.rindex('.')
-    outfilename = outfilename[:dotpos]+jshash+outfilename[dotpos:]
+    #dotpos = outfilename.rindex('.')
+    #outfilename = outfilename[:dotpos]+jshash+outfilename[dotpos:]
     compile_jsmin(jsstr, outfilename)
     return '<script type="text/javascript" src="%s"></script>' % outfilename
 

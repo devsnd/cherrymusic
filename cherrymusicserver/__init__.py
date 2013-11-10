@@ -94,7 +94,7 @@ from cherrymusicserver import userdb
 from cherrymusicserver import useroptiondb
 import cherrymusicserver.browsersetup
 
-VERSION = "0.28.0"
+VERSION = "0.29.0"
 __version__ = VERSION
 DESCRIPTION = "an mp3 server for your browser"
 LONG_DESCRIPTION = """CherryMusic is a music streaming

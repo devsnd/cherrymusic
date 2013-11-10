@@ -455,7 +455,24 @@ everybody has to relogin now.''')
                                                  public=value)
 
     def api_getmotd(self):
-        return self.model.motd()
+        if cherrypy.session['admin'] and cherry.config['general.update_notification']:
+            new_versions = self.model.check_for_updates()
+            if new_versions:
+                newest_version = new_versions[0]['version']
+                features = []
+                fixes = []
+                for version in new_versions:
+                    for update in version['features']:
+                        if update.startswith('FEATURE:'):
+                            features.append(update[len('FEATURE:'):])
+                        elif update.startswith('FIX:'):
+                            fixes.append(update[len('FIX:'):])
+                retdata = {'type': 'update', 'data': {}}
+                retdata['data']['version'] = newest_version
+                retdata['data']['features'] = features
+                retdata['data']['fixes'] = fixes
+                return retdata
+        return {'type': 'wisdom', 'data': self.model.motd()}
 
     def api_restoreplaylist(self):
         session_playlist = cherrypy.session.get('playlist', [])
