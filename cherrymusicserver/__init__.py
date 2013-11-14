@@ -113,7 +113,8 @@ class CherryMusic:
         self.setup_config(createNewConfig, setup, cfg_override)
         signal.signal(signal.SIGTERM, CherryMusic.stopAndCleanUp)
         signal.signal(signal.SIGINT, CherryMusic.stopAndCleanUp)
-        signal.signal(signal.SIGHUP, CherryMusic.stopAndCleanUp)
+        if os.name == 'posix':
+            signal.signal(signal.SIGHUP, CherryMusic.stopAndCleanUp)
         CherryMusic.create_pid_file()
         self.setup_databases(update, dropfiledb, setup)
         self.start_server(httphandler.HTTPHandler(config))
