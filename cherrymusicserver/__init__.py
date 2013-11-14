@@ -71,11 +71,11 @@ cherrypy.lib.static.__serve_file = cherrypy.lib.static.serve_file
 
 def serve_file_utf8_fix(path, content_type=None, disposition=None,
                         name=None, debug=False):
-    if sys.version_info > (2,):
+    if sys.version_info >= (3,):
         #python3+
         path = codecs.decode(codecs.encode(path, 'latin-1'), 'utf-8')
     return cherrypy.lib.static.__serve_file(path, content_type,
-                                            disposition, name, True)
+                                            disposition, name, debug)
 cherrypy.lib.static.serve_file = serve_file_utf8_fix
 # end of unicode workaround
 
@@ -382,7 +382,9 @@ Have fun!
                 'tools.sessions.storage_type': "file",
                 'tools.sessions.storage_path': sessiondir,
             })
-
+        basedirpath = config['media.basedir']
+        if sys.version_info < (3,0):
+            basedirpath = codecs.encode(basedirpath, 'utf-8')
         cherrypy.tree.mount(
             httphandler, config['server.rootpath'],
             config={
@@ -394,7 +396,7 @@ Have fun!
                 },
                 '/serve': {
                     'tools.staticdir.on': True,
-                    'tools.staticdir.dir': config['media.basedir'],
+                    'tools.staticdir.dir': basedirpath,
                     'tools.staticdir.index': 'index.html',
                     'tools.encode.on': True,
                     'tools.encode.encoding': 'utf-8',
