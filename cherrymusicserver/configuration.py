@@ -96,7 +96,7 @@ def from_defaults():
                     They will be shown next to folders that qualify as a possible
                     album.
                     """
-                    
+
     with c['media.maximum_download_size'] as maxdl:
         maxdl.value = 1024*1024*250
         maxdl.doc = """
@@ -209,9 +209,20 @@ def from_defaults():
 
     with c['server.ssl_certificate'] as ssl_certificate:
         ssl_certificate.value = 'certs/server.crt'
+        ssl_certificate.doc = '''
+                    The SSL certiticate sent to the client to verify the
+                    server's authenticity. A relative path is relative to the
+                    location of the CherryMusic configuration file.
+                    '''
 
     with c['server.ssl_private_key'] as ssl_private_key:
         ssl_private_key.value = 'certs/server.key'
+        ssl_private_key.doc = '''
+                    SSL private key file used by the server to decrypt and sign
+                    secure communications. Keep this one secret!  A relative
+                    path is relative to the location of the CherryMusic
+                    configuration file.
+                    '''
 
     with c['general.update_notification'] as update_notification:
         update_notification.value = True

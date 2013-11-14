@@ -104,6 +104,13 @@ def configurationFile():
 def configurationFileExists():
     return os.path.exists(configurationFile())
 
+def absOrConfigPath(filepath):
+    if os.path.isabs(filepath):
+        path = filepath
+    else:
+        path = os.path.join(getConfigPath(), filepath)
+    return os.path.normpath(path)
+
 def databaseFilePath(filename):
     configdir = os.path.join(getUserDataPath(), 'db')
     if not os.path.exists(configdir):

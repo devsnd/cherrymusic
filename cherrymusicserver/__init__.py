@@ -347,9 +347,11 @@ Have fun!
         resourcedir = os.path.abspath(pathprovider.getResourcePath('res'))
 
         if config['server.ssl_enabled']:
+            cert = pathprovider.absOrConfigPath(config['server.ssl_certificate'])
+            pkey = pathprovider.absOrConfigPath(config['server.ssl_private_key'])
             cherrypy.config.update({
-                'server.ssl_certificate': config['server.ssl_certificate'],
-                'server.ssl_private_key': config['server.ssl_private_key'],
+                'server.ssl_certificate': cert,
+                'server.ssl_private_key': pkey,
                 'server.socket_port': config['server.ssl_port'],
             })
             # Create second server for redirecting http to https:
