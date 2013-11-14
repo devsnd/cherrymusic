@@ -20,7 +20,7 @@
             <div class="col-md-3">
                 {{#isnotadmin}}
                     permit download<input type="checkbox" 
-                    onchange="userSetPermitDownload({{userid}}, $(this).is(\':checked\'))" id="misc-autoplay_on_add" value="option1" 
+                    onchange="userSetPermitDownload({{userid}}, $(this).is(':checked'))" id="misc-autoplay_on_add" value="option1" 
                     {{#may_download}}checked="checked"{{/may_download}}>
                 {{/isnotadmin}}
             </div>
