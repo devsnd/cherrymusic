@@ -31,7 +31,7 @@
 
 import nose
 
-from mock import *
+#from mock import *
 from nose.tools import *
 
 import os.path
