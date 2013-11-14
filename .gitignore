@@ -29,6 +29,7 @@ pip-log.txt
 .mr.developer.cfg
 
 # Local deployment
+stagger/
 cherrypy/
 cherrymusic/site.log
 /cherry.cache.db
