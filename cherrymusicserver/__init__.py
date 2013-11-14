@@ -65,18 +65,19 @@ def fake_wait_for_occupied_port(host, port):
 cherrypy.process.servers.wait_for_occupied_port = fake_wait_for_occupied_port
 # end of port patch
 
-if sys.version_info < (3, 0):
-    # workaround for cherrypy not using unicode strings for URI, see:
-    # https://bitbucket.org/cherrypy/cherrypy/issue/1148/wrong-encoding-for-urls-containing-utf-8
-    cherrypy.lib.static.__serve_file = cherrypy.lib.static.serve_file
+# workaround for cherrypy not using unicode strings for URI, see:
+# https://bitbucket.org/cherrypy/cherrypy/issue/1148/wrong-encoding-for-urls-containing-utf-8
+cherrypy.lib.static.__serve_file = cherrypy.lib.static.serve_file
 
-    def serve_file_utf8_fix(path, content_type=None, disposition=None,
-                            name=None, debug=False):
+def serve_file_utf8_fix(path, content_type=None, disposition=None,
+                        name=None, debug=False):
+    if sys.version_info > (2,):
+        #python3+
         path = codecs.decode(codecs.encode(path, 'latin-1'), 'utf-8')
-        return cherrypy.lib.static.__serve_file(path, content_type,
-                                                disposition, name, debug)
-    cherrypy.lib.static.serve_file = serve_file_utf8_fix
-    # end of unicode workaround
+    return cherrypy.lib.static.__serve_file(path, content_type,
+                                            disposition, name, True)
+cherrypy.lib.static.serve_file = serve_file_utf8_fix
+# end of unicode workaround
 
 from cherrymusicserver import configuration as cfg
 config = None
