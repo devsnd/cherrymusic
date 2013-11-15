@@ -31,6 +31,17 @@
 
 #python 2.6+ backward compability
 from __future__ import unicode_literals
+
+VERSION = "0.29.0"
+__version__ = VERSION
+DESCRIPTION = "an mp3 server for your browser"
+LONG_DESCRIPTION = """CherryMusic is a music streaming
+    server written in python. It's based on cherrypy and jPlayer.
+    You can search your collection, create and share playlists with
+    other users. It's able to play music on almost all devices since
+    it happens in your browser and uses HTML5 for audio playback.
+    """
+
 from backport import input
 
 import sys
@@ -45,6 +56,45 @@ if sys.version_info >= (3, 3):
 import os
 import codecs
 import cherrypy
+
+def info():
+    import locale
+    import platform
+    return """CherryMusic Server {cm_version}
+
+CherryPy: {cp_version}
+Python: {py_version}
+Platform: {platform}
+
+configuration dir:
+    {confdir}
+server data dir:
+    {datadir}
+static resources dir:
+    {resourcedir}
+server package dir:
+    {packdir}
+process working dir:
+    {workdir}
+
+locale: {locale}, default: {deflocale}
+filesystem encoding: {fs_encoding}
+
+(Do not parse this output.)""".format(
+    cm_version=VERSION,
+    cp_version=cherrypy.__version__,
+    py_version=platform.python_implementation() + ' ' + platform.python_version(),
+    platform=platform.platform(),
+    workdir=os.path.abspath(os.curdir),
+    packdir=os.path.abspath(__path__[0]),
+    confdir=pathprovider.getConfigPath(),
+    datadir=pathprovider.getUserDataPath(),
+    resourcedir=pathprovider.getResourcePath(''),
+    locale=str(locale.getlocale()),
+    deflocale=str(locale.getdefaultlocale()),
+    fs_encoding=sys.getfilesystemencoding(),
+)
+
 
 cherrypyReqVersion = '3'
 cherrypyCurrVersion = str(cherrypy.__version__)
@@ -94,16 +144,6 @@ from cherrymusicserver import sqlitecache
 from cherrymusicserver import userdb
 from cherrymusicserver import useroptiondb
 import cherrymusicserver.browsersetup
-
-VERSION = "0.29.0"
-__version__ = VERSION
-DESCRIPTION = "an mp3 server for your browser"
-LONG_DESCRIPTION = """CherryMusic is a music streaming
-    server written in python. It's based on cherrypy and jPlayer.
-    You can search your collection, create and share playlists with
-    other users. It's able to play music on almost all devices since
-    it happens in your browser and uses HTML5 for audio playback.
-    """
 
 
 class CherryMusic:
