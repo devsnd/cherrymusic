@@ -971,7 +971,11 @@ function displayMessageOfTheDay(){
                     '<ul class="feature-list">'+
                     '   {{#fixes}}<li>{{.}}</li>{{/fixes}}'+
                     '</ul><hr>'+
-                    '<p>And a lot of other stuff, see the CHANGELOG</p>',
+                    '<p>'+
+                    '   And a lot of other stuff, see the'+
+                    '   <a href="https://github.com/devsnd/cherrymusic/blob/{{version}}/CHANGES" target="_blank">'+
+                    '   CHANGELOG</a>.'+
+                    '</p>',
                     {
                         version: resp.data.version,
                         features: resp.data.features,
