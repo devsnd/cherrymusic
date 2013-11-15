@@ -467,6 +467,8 @@ everybody has to relogin now.''')
                             features.append(update[len('FEATURE:'):])
                         elif update.startswith('FIX:'):
                             fixes.append(update[len('FIX:'):])
+                        elif update.startswith('FIXED:'):
+                            fixes.append(update[len('FIXED:'):])
                 retdata = {'type': 'update', 'data': {}}
                 retdata['data']['version'] = newest_version
                 retdata['data']['features'] = features
