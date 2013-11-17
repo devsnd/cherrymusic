@@ -123,6 +123,7 @@ def serve_file_utf8_fix(path, content_type=None, disposition=None,
                         name=None, debug=False):
     if sys.version_info >= (3,):
         #python3+
+        # see also below: mirrored mangling of basedir for '/serve' static dir
         path = codecs.decode(codecs.encode(path, 'latin-1'), 'utf-8')
     return cherrypy.lib.static.__serve_file(path, content_type,
                                             disposition, name, debug)
@@ -427,6 +428,11 @@ Have fun!
         basedirpath = config['media.basedir']
         if sys.version_info < (3,0):
             basedirpath = codecs.encode(basedirpath, 'utf-8')
+        else:
+            # fix cherrypy unicode issue (only for Python3)
+            # see patch to cherrypy.lib.static.serve_file way above and
+            # https://bitbucket.org/cherrypy/cherrypy/issue/1148/wrong-encoding-for-urls-containing-utf-8
+            basedirpath = codecs.decode(codecs.encode(basedirpath, 'utf-8'), 'latin-1')
         cherrypy.tree.mount(
             httphandler, config['server.rootpath'],
             config={
