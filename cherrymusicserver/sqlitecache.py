@@ -278,19 +278,6 @@ class SQLiteCache(object):
                             )
         return musicEntries
 
-    def fullpath(self, filerowid):
-        """DEPRECATED, musicEntryFromFileId is used instead"""
-        path = ''
-        parent = None
-        while(not parent == -1):
-            #print(self.conn.execute('''EXPLAIN QUERY PLAN SELECT parent, filename, filetype FROM files WHERE rowid=? LIMIT 0,1''', (filerowid,)).fetchall())
-            cursor = self.conn.cursor()
-            cursor.execute('''SELECT parent, filename, filetype FROM files WHERE rowid=? LIMIT 0,1''', (filerowid,))
-            parent, filename, fileext = cursor.fetchone()
-            path = os.path.join(filename + fileext, path)
-            filerowid = parent
-        return os.path.dirname(path)
-
     def register_file_with_db(self, fileobj):
         """add data in File object to relevant tables in media database"""
         try:
