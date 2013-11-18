@@ -428,13 +428,15 @@ Have fun!
         basedirpath = config['media.basedir']
         if sys.version_info < (3,0):
             basedirpath = codecs.encode(basedirpath, 'utf-8')
+            scriptname = codecs.encode(config['server.rootpath'], 'utf-8')
         else:
             # fix cherrypy unicode issue (only for Python3)
             # see patch to cherrypy.lib.static.serve_file way above and
             # https://bitbucket.org/cherrypy/cherrypy/issue/1148/wrong-encoding-for-urls-containing-utf-8
             basedirpath = codecs.decode(codecs.encode(basedirpath, 'utf-8'), 'latin-1')
+            scriptname = config['server.rootpath']
         cherrypy.tree.mount(
-            httphandler, config['server.rootpath'],
+            httphandler, scriptname,
             config={
                 '/res': {
                     'tools.staticdir.on': True,
@@ -445,7 +447,7 @@ Have fun!
                 '/serve': {
                     'tools.staticdir.on': True,
                     'tools.staticdir.dir': basedirpath,
-                    'tools.staticdir.index': 'index.html',
+                    # 'tools.staticdir.index': 'index.html',    if ever needed: in py2 MUST utf-8 encode
                     'tools.encode.on': True,
                     'tools.encode.encoding': 'utf-8',
                     'tools.caching.on': False,
