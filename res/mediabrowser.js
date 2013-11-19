@@ -208,16 +208,7 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
     $(cssSelector).on('click', '.compact-list-dir', listdirclick);
     $(cssSelector).on('click', '.musicfile', MediaBrowser.static.addThisTrackToPlaylist);
     $(cssSelector).on('click', '.cm-media-list-wrench', function(){
-        var popOverSettings = {
-            placement: 'bottom',
-            container: 'body',
-            html: true,
-            content: function () {
-                return 'deine mama'
-            }
-        }
-        $(this).popover(popOverSettings);
-        $(this).popover('show');
+	alert('kaboosh!');
     });
     $(cssSelector).on('click', '.addAllToPlaylist', function() {
         if(isplaylist){
