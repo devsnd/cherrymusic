@@ -1,5 +1,7 @@
 <li class="list-dir-item cm-media-list-item">
+    {{#maychangecoverart}}
     <span class="cm-media-list-wrench glyphicon glyphicon-wrench" data-dirname="{{directoryname}}"></span>
+    {{/maychangecoverart}}
     <a dir="{{dirpath}}" href="javascript:;" class="list-dir">
         {{^isrootdir}}
             <div class="list-dir-albumart unloaded" search-data="{{coverarturl}}">

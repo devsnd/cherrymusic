@@ -62,21 +62,16 @@ class AlbumArtFetcher:
         self.methods = {
             'amazon': {
                 'url': "http://www.amazon.com/s/ref=sr_nr_i_0?rh=k:",
-                'regex': '<img  src="([^"]*)" class="productImage"'
-            },
-            'music.ovi.com': {
-                'url': 'http://music.ovi.com/gb/en/pc/Search/?display=detail&text=',
-                'regex': 'class="prod-sm"><img src="([^"]*)"',
-                #improve image quality:
-                'urltransformer': lambda x: x[:x.rindex('/')]+'/?w=200&q=100',
+                'regexes': ['<img  src="([^"]*)" class="productImage"',
+                            '<img.+?src="([^"]*)" class="productImage"'],
             },
             'bestbuy.com': {
                 'url': 'http://www.bestbuy.com/site/searchpage.jsp?_dyncharset=ISO-8859-1&id=pcat17071&type=page&ks=960&sc=Global&cp=1&sp=&qp=crootcategoryid%23%23-1%23%23-1~~q6a616d657320626c616b65206a616d657320626c616b65~~nccat02001%23%230%23%23e&list=y&usc=All+Categories&nrp=15&iht=n&st=',
-                'regex': '<img itemprop="image" class="thumb" src="([^"]*)"'
+                'regexes': ['<img itemprop="image" class="thumb" src="([^"]*)"']
             },
             'buy.com': {
                 'url': "http://www.buy.com/sr/srajax.aspx?from=2&qu=",
-                'regex': ' class="productImageLink"><img src="([^"]*)"'
+                'regexes': [' class="productImageLink"><img src="([^"]*)"']
             },
         }
         if not method in self.methods:
@@ -129,15 +124,17 @@ class AlbumArtFetcher:
         # choose the webservice to retrieve the images from
         method = self.methods[self.method]
         # use unidecode if it's available
-        searchterm = unidecode(searchterms).lower()
+        searchterm = unidecode(searchterm).lower()
         # make sure the searchterms are only letters and spaces
-        searchterm = re.sub('[^a-z\s]', '', searchterms)
+        searchterm = re.sub('[^a-z\s]', '', searchterm)
         # the keywords must always be appenable to the method-url
         url = method['url']+urllib.parse.quote(searchterm)
         #download the webpage and decode the data to utf-8
         html = codecs.decode(self.retrieveData(url)[0], 'UTF-8')
         # fetch all urls in the page
-        matches = re.findall(method['regex'], html)
+        matches = []
+        for regex in method['regexes']:
+            matches += re.findall(regex, html)
         return matches
 
     def fetch(self, searchterm):
@@ -149,18 +146,16 @@ class AlbumArtFetcher:
         Returns:
             an http header and binary data
         """
-        matches = fetchurls(searchterm)
+        matches = self.fetchurls(searchterm)
         if matches:
             imgurl = matches[0]
-            if 'urltransformer' in method:
+            if 'urltransformer' in self.method:
                 imgurl = method['urltransformer'](imgurl)
             if imgurl.startswith('//'):
                 imgurl = 'http:'+imgurl
-            raw_data, header = self.retrieveData(url)
+            raw_data, header = self.retrieveData(imgurl)
             return header, raw_data
         else:
-            if urlonly:
-                return ''
             return None, ''
 
     def retrieveData(self, url):

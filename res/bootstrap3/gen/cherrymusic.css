@@ -5204,6 +5204,14 @@ body {
   float: left;
   margin: 0 5px 0 0;
 }
+.album-art-choice {
+  display: inline-block;
+  padding: 5px;
+  cursor: pointer;
+}
+.album-art-choice:hover {
+  background-color: #92bce0;
+}
 .cm-media-list {
   position: relative;
   padding: 0;

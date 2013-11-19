@@ -209,6 +209,7 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
     $(cssSelector).on('click', '.musicfile', MediaBrowser.static.addThisTrackToPlaylist);
     $(cssSelector).on('click', '.cm-media-list-wrench', function(){
         var dirname = decodeURIComponent($(this).attr('data-dirname'));
+        $('#changeAlbumArt').attr('data-dirname', $(this).attr('data-dirname'));
         $('#changeAlbumArt .foldername').text(dirname)
         $('#changeAlbumArt').modal('show');
     });
@@ -272,6 +273,7 @@ MediaBrowser.static = {
             isrootdir: json.path && !json.path.indexOf('/')>0,
             dirpath: json.path,
             label: json.label,
+            maychangecoverart: !!isAdmin,
             coverarturl: encodeURIComponent(JSON.stringify({'directory' : json.path})),
             directoryname: encodeURIComponent(json.path),
             

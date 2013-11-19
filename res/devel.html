@@ -241,10 +241,11 @@
                         <input type="text" class="form-control" id="albumart-search-term">  
                     </div>
                     <div class="col-lg-2">
-                        <div class="btn btn-default" onclick="$('#changeAlbumArt .coverart-tryout').attr('src', 'api/fetchalbumart/?data='+encodeURIComponent(JSON.stringify({'directory' : $('#albumart-search-term').val()})));">search</div>
+                        <div class="btn btn-default" onclick="searchAlbumArt()">search</div>
                     </div>
                 </div>
-                <img class="coverart-tryout" src="/res/img/folder.png" width="80" height="80" />
+                <div class="coverart-tryout">
+                </div>
             </div>
         </div>
         <div class="modal-footer">

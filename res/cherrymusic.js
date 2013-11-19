@@ -958,6 +958,46 @@ function dontCloseWindowIfMusicPlays(){
     }
 }
 
+function searchAlbumArt(){
+    busy('#changeAlbumArt .modal-body').hide().fadeIn('fast');
+    var success = function(urllist){
+        $('.coverart-tryout').html('');
+        for(var i=0; i<urllist.length; i++){
+            var html =  '<div class="album-art-choice">'+
+                            '<img width="80" height="80" src="'+urllist[i]+'"'+
+                            ' onclick="pickCoverArt($(this))" '+
+                            '" />'+
+                        '</div>';
+            $('.coverart-tryout').append(html);
+        }
+    }
+    api('fetchalbumarturls',
+        {'searchterm': $('#albumart-search-term').val()},
+        success,
+        errorFunc('Error fetching image urls'),
+        function(){busy('#changeAlbumArt .modal-body').fadeOut('fast')});
+}
+
+function pickCoverArt(img){
+    var imagesrc = $(img).attr('src');
+    var dirname = decodeURIComponent($('#changeAlbumArt').attr('data-dirname'));
+    var success = function(){
+        $('#changeAlbumArt').modal('hide');
+        //reload cover art:
+        var folder_div = $('.list-dir[dir="'+dirname+'"]')
+        //force reload image
+        var folder_image = folder_div.find('img');
+        folder_image.attr('src', folder_image.attr('src')+'&reload=1');
+    }
+    api('albumart_set',
+        {
+            'directory': dirname,
+            'imageurl': imagesrc,
+        },
+        success
+    );
+}
+
 function displayMessageOfTheDay(){
     api('getmotd',
         function(resp){
