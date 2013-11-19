@@ -207,6 +207,12 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
     $(cssSelector).on('click', '.list-dir', listdirclick);
     $(cssSelector).on('click', '.compact-list-dir', listdirclick);
     $(cssSelector).on('click', '.musicfile', MediaBrowser.static.addThisTrackToPlaylist);
+    $(cssSelector).on('click', '.cm-media-list-wrench', function(){
+        var dirname = decodeURIComponent($(this).attr('data-dirname'));
+        $('#changeAlbumArt').attr('data-dirname', $(this).attr('data-dirname'));
+        $('#changeAlbumArt .foldername').text(dirname)
+        $('#changeAlbumArt').modal('show');
+    });
     $(cssSelector).on('click', '.addAllToPlaylist', function() {
         if(isplaylist){
             var pl = playlistManager.newPlaylist([], playlistlabel);
@@ -220,9 +226,8 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
         $(this).blur();
         return false;
     });
-    
-   
 }
+
 MediaBrowser.static = {
     _renderList: function (l){
         "use strict";
@@ -268,7 +273,10 @@ MediaBrowser.static = {
             isrootdir: json.path && !json.path.indexOf('/')>0,
             dirpath: json.path,
             label: json.label,
-            coverarturl: encodeURIComponent(JSON.stringify({'directory' : json.path}))
+            maychangecoverart: !!isAdmin,
+            coverarturl: encodeURIComponent(JSON.stringify({'directory' : json.path})),
+            directoryname: encodeURIComponent(json.path),
+            
         };
         return Mustache.render(template, template_data);
     },
@@ -329,3 +337,4 @@ MediaBrowser.static = {
         );
     }
 }
+

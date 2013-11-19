@@ -109,6 +109,8 @@ class HTTPHandler(object):
             'compactlistdir': self.api_compactlistdir,
             'listdir': self.api_listdir,
             'fetchalbumart': self.api_fetchalbumart,
+            'fetchalbumarturls': self.api_fetchalbumarturls,
+            'albumart_set': self.api_albumart_set,
             'heartbeat': self.api_heartbeat,
             'getuseroptions': self.api_getuseroptions,
             'setuseroption': self.api_setuseroption,
@@ -348,6 +350,23 @@ everybody has to relogin now.''')
             return "success"
         else:
             return "error: not permitted. Only admins can change other users options"
+
+    def api_fetchalbumarturls(self, searchterm):
+        if not cherrypy.session['admin']:
+            raise cherrypy.HTTPError(401, 'Unauthorized')
+        cherrypy.session.release_lock()
+        fetcher = albumartfetcher.AlbumArtFetcher()
+        imgurls = fetcher.fetchurls(searchterm)
+        # show no more than 10 images
+        return imgurls[:min(len(imgurls), 10)]
+
+    def api_albumart_set(self, directory, imageurl):
+        if not cherrypy.session['admin']:
+            raise cherrypy.HTTPError(401, 'Unauthorized')
+        b64imgpath = albumArtFilePath(directory)
+        fetcher = albumartfetcher.AlbumArtFetcher()
+        data, header = fetcher.retrieveData(imageurl)
+        self.albumartcache_save(b64imgpath, data)
 
     def api_fetchalbumart(self, directory):
         cherrypy.session.release_lock()

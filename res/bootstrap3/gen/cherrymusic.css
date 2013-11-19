@@ -5204,6 +5204,14 @@ body {
   float: left;
   margin: 0 5px 0 0;
 }
+.album-art-choice {
+  display: inline-block;
+  padding: 5px;
+  cursor: pointer;
+}
+.album-art-choice:hover {
+  background-color: #92bce0;
+}
 .cm-media-list {
   position: relative;
   padding: 0;
@@ -5224,6 +5232,14 @@ body {
   list-style-type: none;
   word-wrap: break-word;
   margin: 5px 5px 5px 0;
+}
+.cm-media-list-wrench {
+  position: relative;
+  float: left;
+  color: #ddd;
+}
+.cm-media-list-wrench:hover {
+  color: #444;
 }
 .cm-media-list > li:nth-child(odd) {
   background-color: #f9f9f9;
