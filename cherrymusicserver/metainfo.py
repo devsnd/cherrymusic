@@ -51,7 +51,7 @@ except ImportError:
     log.w('''python library "audioread" not found!
 -Audio file length can't be determined without it!''')
     has_audioread = False
-    
+
 class Metainfo():
     def __init__(self, artist, album, title, track, length):
         self.artist = artist
@@ -73,14 +73,14 @@ class Metainfo():
 #
 
 #stagger
-        
+
 class MockTag():
     def __init__(self):
         self.artist = '-'
         self.album = '-'
         self.title = '-'
         self.track = '-'
-       
+
 def getSongInfo(filepath):
     if has_stagger:
         try:
@@ -89,16 +89,17 @@ def getSongInfo(filepath):
             tag = MockTag()
     else:
         tag = MockTag()
-            
+
     if has_audioread:
         try:
             with audioread.audio_open(filepath) as f:
                 audiolength = f.duration
-        except Exception:
-            log.e('audioread failed! (%s)', filepath)
+        except Exception as e:
+            log.w("audioread fail: unable to fetch duration of '%s' (%s)",
+                filepath, type(e).__name__)
             audiolength = 0
     else:
         audiolength = 0
     return Metainfo(tag.artist, tag.album, tag.title, tag.track, audiolength)
 
-    
+

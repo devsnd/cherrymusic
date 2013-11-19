@@ -36,23 +36,13 @@
 <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
 
 
-<script type="text/javascript" src="res/js/jquery-1.8.3.min.js"></script>
-<script type="text/javascript" src="res/js/json2.min.js"></script>
-<script type="text/javascript" src="res/js/jquery.jplayer.js"></script>
-<script type="text/javascript" src="res/js/jplayer.playlist.js"></script>
-<script type="text/javascript" src="res/js/jquery.jplayer.inspector.js"></script>
-<script type="text/javascript" src="res/js/mustache-0.7.0.js"></script>
-<script type="text/javascript" src="res/js/jquery-color.js"></script>
-<!-- ui sortable -->
-<script type="text/javascript" src="res/js/jquery-ui-1.10.0.custom.min.js"></script> 
+<script type="text/javascript" src="res/js/jquery-1.10.2.js"></script>
+<script type="text/javascript" src="res/bootstrap3/js/button.js"></script>
+<script type="text/javascript" src="res/bootstrap3/js/modal.js"></script>
+<script type="text/javascript" src="res/bootstrap3/js/transition.js"></script>
 
 <!--bootstrap -->
-<link href="res/bootstrap/css/bootstrap.css" rel="stylesheet">
-<link href="res/bootstrap/css/bootstrap-modal.css" rel="stylesheet">
-<script src="res/bootstrap/js/bootstrap.min.js"></script>
-<script src="res/bootstrap/js/bootstrap-modal.js"></script>
-<script src="res/bootstrap/js/bootstrap-modalmanager.js"></script>
-<link href="res/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
+<link href="res/bootstrap3/gen/cherrymusic.css" rel="stylesheet">
 <script>
 <!-- 
 function submitConfiguration(){
@@ -126,10 +116,10 @@ function reloadIfReady(newip){
 }
 
 function renderFeature(name, installed, id, msg, explaination){
-    var labelClass = installed ? 'label-success' : 'label-important';
+    var labelClass = installed ? 'label-success' : 'label-warning';
     var labelText = installed ? 'installed' : 'not installed';
     var reason = installed ? '' : '<b>reason: '+explaination+'</b>';
-    return ['<div class="control-group">',
+    return ['<div class="form-group">',
      '   <label class="control-label" for="'+id+'">'+name+'</label>',
      '   <div class="controls">',
      '       <div id="'+id+'"><span class="label '+labelClass+'">'+labelText+'</span> '+msg+'</div>',
@@ -159,216 +149,261 @@ $(function(){
 </script>
 </head>
 <body>
-    <div id="serverRestartModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="serverRestartModalLabel" aria-hidden="true">
-        <div class="modal-header">
-            <h3 id="serverRestartModalLabel">Setup completed!</h3>
+    <div id="serverRestartModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="serverRestartModalLabel" aria-hidden="true">
+        <div class="modal-dialog"><div class="modal-content">
+            <div class="modal-header">
+                <h3 id="serverRestartModalLabel">Setup completed!</h3>
+            </div>
+            <div class="modal-body">
+                <p>CherryMusic is saving the configuration and preparing the first start.</p>
+                <img src="res/cherrymusic_loader.gif" style="position: relative; opacity: 0.3; margin: 0px 50%; left: -40px;"/>
+                <p></p>
+            </div>
+            <div class="modal-footer">
+            </div>
         </div>
-        <div class="modal-body">
-            <p>CherryMusic is saving the configuration and preparing the first start.</p>
-            <img src="res/cherrymusic_loader.gif" style="position: relative; opacity: 0.3; margin: 0px 50%; left: -40px;"/>
-            <p></p>
-        </div>
-        <div class="modal-footer">
         </div>
     </div>
     <div class="container">
         <h1>CherryMusic Setup<img src="res/favicon32.png"/></h1>
-        <div class="row-fluid">
+        <div class="row">
             <form class="form-horizontal" id="configurationForm">  
                 <fieldset>  
                     <legend>Basic Setup</legend>  
-                    <div class="control-group">  
+                    <div class="form-group">  
                         <label class="control-label" for="media-basedir">Media base directory</label>  
                         <div class="controls">  
-                            <input type="text" class="input-xlarge" id="media-basedir"  pattern="(/.*)|([A-Za-z]:\\.*)" required>
-                            <p class="help-block">The absolute path where your music is located. <a href="#baseDirModal" role="button" class="btn btn-mini" data-toggle="modal">?</a></p>                           
-                            <div id="baseDirModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="baseDirModalLabel" aria-hidden="true">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                    <h3 id="baseDirModalLabel">Media base directory</h3>
+                            <input type="text" class="form-control" id="media-basedir"  pattern="(/.*)|([A-Za-z]:\\.*)" required>
+                            <p class="help-block">The absolute path where your music is located. <a href="#baseDirModal" role="button" class="btn btn-default btn-xs" data-toggle="modal">?</a></p>                           
+                            <div id="baseDirModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="baseDirModalLabel" aria-hidden="true">
+                                <div class="modal-dialog"><div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                        <h3 id="baseDirModalLabel">Media base directory</h3>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>On Linux this could be <pre>/home/$USER/Music</pre>
+                                        On Windows it could be<pre>C:\Documents and Settings\[user name]\My Documents\My Music</pre>
+                                        On Mac it could be<pre>/Users/username/Music/</pre></p>
+                                        <p>Use a file browser to find the exact path and copy it here.</p>
+                                        </p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn" data-dismiss="modal" aria-hidden="true">Aight, thanks.</button>
+                                    </div>
                                 </div>
-                                <div class="modal-body">
-                                    <p>On Linux this could be <pre>/home/$USER/Music</pre>
-                                    On Windows it could be<pre>C:\Documents and Settings\[user name]\My Documents\My Music</pre>
-                                    On Mac it could be<pre>/Users/username/Music/</pre></p>
-                                    <p>Use a file browser to find the exact path and copy it here.</p>
-                                    </p>
-                                </div>
-                                <div class="modal-footer">
-                                    <button class="btn" data-dismiss="modal" aria-hidden="true">Aight, thanks.</button>
-                                </div>
-                            </div>
+                            </div></div>
                         </div>  
                     </div>
-                    <div class="control-group">  
+                    <div class="form-group">  
                         <label class="control-label" for="server-port">Server Port</label>  
                         <div class="controls">  
-                            <input type="number" disabled="disabled" class="input-xlarge" id="server-port" pattern="[0-6]?[0-9]{0,4}" required>
-                            <p class="help-block">This specifies the port on which CherryMusic will listen <a href="#serverPortModal" role="button" class="btn btn-mini" data-toggle="modal">?</a></p>                           
-                            <div id="serverPortModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="serverPortModalLabel" aria-hidden="true">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                    <h3 id="serverPortModalLabel">Server Port</h3>
-                                </div>
-                                <div class="modal-body">
-                                    <p>The server port specifies how to reach CherryMusic.<br>(a number between 1 and 65535)</p>
-                                    <p>You can reach CherryMusic then by typing in the <code>IP:PORT</code> address in the browser.
-                                    For example, if the Port you chose is <code>8080</code> and your machine has the IP <code>192.168.0.10</code>,
-                                    you will have to write <code>192.168.0.10:8080</code> in your browser.
-                                    You will need to pick a port above 1024 to run CherryMusic as non-super-user.
-                                    </p>
-                                </div>
-                                <div class="modal-footer">
-                                    <button class="btn" data-dismiss="modal" aria-hidden="true">Cool, I got it.</button>
-                                </div>
+                            <input type="number" disabled="disabled" class="form-control" id="server-port" pattern="[0-6]?[0-9]{0,4}" required>
+                            <p class="help-block">This specifies the port on which CherryMusic will listen <a href="#serverPortModal" role="button" class="btn btn-default btn-xs" data-toggle="modal">?</a></p>                           
+                            <div id="serverPortModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="serverPortModalLabel" aria-hidden="true">
+                                <div class="modal-dialog"><div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                        <h3 id="serverPortModalLabel">Server Port</h3>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>The server port specifies how to reach CherryMusic.<br>(a number between 1 and 65535)</p>
+                                        <p>You can reach CherryMusic then by typing in the <code>IP:PORT</code> address in the browser.
+                                        For example, if the Port you chose is <code>8080</code> and your machine has the IP <code>192.168.0.10</code>,
+                                        you will have to write <code>192.168.0.10:8080</code> in your browser.
+                                        You will need to pick a port above 1024 to run CherryMusic as non-super-user.
+                                        </p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn" data-dismiss="modal" aria-hidden="true">Cool, I got it.</button>
+                                    </div>
+                                </div></div>
                             </div>
                         </div>  
                     </div>
                 </fieldset>
                 <fieldset>
                     <legend>Security</legend>  
-                    <div class="control-group">  
+                    <div class="form-group">  
                         <label class="control-label" for="server-permit_remote_admin_login">Permit remote admin login</label>  
                         <div class="controls">  
-                            <input type="checkbox" checked="checked" class="input-xlarge" id="server-permit_remote_admin_login">
-                            <p class="help-block">Permit for admin users to log on from other machines in the network <a href="#serverPermitRemoteAdminLoginModal" role="button" class="btn btn-mini" data-toggle="modal">?</a></p>                           
-                            <div id="serverPermitRemoteAdminLoginModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="serverPermitRemoteAdminLoginModalLabel" aria-hidden="true">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                    <h3 id="serverPermitRemoteAdminLoginModalLabel">Automatic login on localhost</h3>
-                                </div>
-                                <div class="modal-body">
-                                    <p>When remote admin login is disabled, admin users
-                                        may only log in from the computer cherrymusic is currently
-                                        running on. This can improve security.
-                                    </p>
-                                </div>
-                                <div class="modal-footer">
-                                    <button class="btn" data-dismiss="modal" aria-hidden="true">Wow. I mean... ok</button>
-                                </div>
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" checked="checked" class="form-control" id="server-permit_remote_admin_login">
+                                    Permit for admin users to log on from other machines in the network
+                                </label>
+                                <a href="#serverPermitRemoteAdminLoginModal" role="button" class="btn btn-default btn-xs" data-toggle="modal">?</a>
+                            </div>
+                            <div id="serverPermitRemoteAdminLoginModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="serverPermitRemoteAdminLoginModalLabel" aria-hidden="true">
+                                <div class="modal-dialog"><div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                        <h3 id="serverPermitRemoteAdminLoginModalLabel">Automatic login on localhost</h3>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>When remote admin login is disabled, admin users
+                                            may only log in from the computer cherrymusic is currently
+                                            running on. This can improve security.
+                                        </p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn" data-dismiss="modal" aria-hidden="true">Wow. I mean... ok</button>
+                                    </div>
+                                </div></div>
                             </div>
                         </div>  
                     </div>
-                    <div class="control-group">  
+                    <div class="form-group">  
                         <label class="control-label" for="server-localhost_auto_login">Automatic login on localhost</label>  
                         <div class="controls">  
-                            <input type="checkbox" class="input-xlarge" id="server-localhost_auto_login">
-                            <p class="help-block">Automatic login when accessing CherryMusic from the same computer it is running on. <a href="#serverLocalhostAutoLoginModal" role="button" class="btn btn-mini" data-toggle="modal">?</a></p>                           
-                            <div id="serverLocalhostAutoLoginModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="serverLocalhostAutoLoginModalLabel" aria-hidden="true">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                    <h3 id="serverLocalhostAutoLoginModalLabel">Automatic login on localhost</h3>
-                                </div>
-                                <div class="modal-body">
-                                    <p>Normally, you will only login once; Your session will stay for a while. This feature is therefore
-                                    especially useful for people that automatically delete their cookies when they close their browser.
-                                    If you're one of them, this option will save you 2 seconds per day.
-                                    </p>
-                                </div>
-                                <div class="modal-footer">
-                                    <button class="btn" data-dismiss="modal" aria-hidden="true">Beam me up, scotty!</button>
-                                </div>
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="form-control" id="server-localhost_auto_login">
+                                    Automatic login when accessing CherryMusic from the same computer it is running on.
+                                </label>
+                                <a href="#serverLocalhostAutoLoginModal" role="button" class="btn btn-default btn-xs" data-toggle="modal">?</a>
+                            </div>
+                            <div id="serverLocalhostAutoLoginModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="serverLocalhostAutoLoginModalLabel" aria-hidden="true">
+                                <div class="modal-dialog"><div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                        <h3 id="serverLocalhostAutoLoginModalLabel">Automatic login on localhost</h3>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Normally, you will only login once; Your session will stay for a while. This feature is therefore
+                                        especially useful for people that automatically delete their cookies when they close their browser.
+                                        If you're one of them, this option will save you 2 seconds per day.
+                                        </p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn" data-dismiss="modal" aria-hidden="true">Beam me up, scotty!</button>
+                                    </div>
+                                </div></div>
                             </div>
                         </div>  
                     </div>
-                    <div class="control-group">  
+                    <div class="form-group">  
                         <label class="control-label" for="server-localhost_only">Localhost only</label>  
                         <div class="controls">  
-                            <input type="checkbox" class="input-xlarge" id="server-localhost_only">
-                            <p class="help-block">This will disable any access from remote computers to CherryMusic. <a href="#serverLocalhostOnlyModal" role="button" class="btn btn-mini" data-toggle="modal">?</a></p>                           
-                            <div id="serverLocalhostOnlyModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="serverLocalhostOnlyModalLabel" aria-hidden="true">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                    <h3 id="serverLocalhostOnlyModalLabel">Localhost only</h3>
-                                </div>
-                                <div class="modal-body">
-                                    <p>Normally you want to keep this unchecked. When enabled, you won't be able to access
-                                    CherryMusic with any other device, neither in the local network nor from the internet.
-                                    It is only useful for paranoid people using CherryMusic as their preferred local music player.
-                                    </p>
-                                </div>
-                                <div class="modal-footer">
-                                    <button class="btn" data-dismiss="modal" aria-hidden="true">Chill on</button>
-                                </div>
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="form-control" id="server-localhost_only">
+                                    This will disable any access from remote computers to CherryMusic.
+                                </label>
+                                <a href="#serverLocalhostOnlyModal" role="button" class="btn btn-default btn-xs" data-toggle="modal">?</a>
+                            </div>
+                            <div id="serverLocalhostOnlyModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="serverLocalhostOnlyModalLabel" aria-hidden="true">
+                                <div class="modal-dialog"><div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                        <h3 id="serverLocalhostOnlyModalLabel">Localhost only</h3>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Normally you want to keep this unchecked. When enabled, you won't be able to access
+                                        CherryMusic with any other device, neither in the local network nor from the internet.
+                                        It is only useful for paranoid people using CherryMusic as their preferred local music player.
+                                        </p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn" data-dismiss="modal" aria-hidden="true">Chill on</button>
+                                    </div>
+                                </div></div>
                             </div>
                         </div>  
                     </div>
                 </fieldset>
                 <fieldset>
                     <legend>Extras</legend>
-                    <div class="control-group">  
+                    <div class="form-group">  
                         <label class="control-label" for="media-fetch_album_art">Fetch Album Cover Art from Web</label>  
-                        <div class="controls">  
-                            <input type="checkbox" checked="checked" class="input-xlarge" id="media-fetch_album_art">
-                            <p class="help-block">Automatic fetch album cover art from the web <a href="#serverAlbumArtModal" role="button" class="btn btn-mini" data-toggle="modal">?</a></p>                           
-                            <div id="serverAlbumArtModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="serverAlbumArtModalLabel" aria-hidden="true">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                    <h3 id="serverAlbumArtModalLabel">Automatic login on localhost</h3>
-                                </div>
-                                <div class="modal-body">
-                                    <p>Tries to fetch the album cover from various locations in the web,
-                                    if no image is found locally. By default it will be fetched from amazon.
-                                    They will be shown next to folders that qualify as an album.
-                                    </p>
-                                </div>
-                                <div class="modal-footer">
-                                    <button class="btn" data-dismiss="modal" aria-hidden="true">These explaination boxes are damn helpful</button>
-                                </div>
+                        <div class="controls">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" checked="checked" class="form-control" id="media-fetch_album_art">
+                                    Automatic fetch album cover art from the web
+                                </label>
+                                <a href="#serverAlbumArtModal" role="button" class="btn btn-default btn-xs" data-toggle="modal">?</a>
+                            </div>
+                            <div id="serverAlbumArtModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="serverAlbumArtModalLabel" aria-hidden="true">
+                                <div class="modal-dialog"><div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                        <h3 id="serverAlbumArtModalLabel">Automatic login on localhost</h3>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Tries to fetch the album cover from various locations in the web,
+                                        if no image is found locally. By default it will be fetched from amazon.
+                                        They will be shown next to folders that qualify as an album.
+                                        </p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn" data-dismiss="modal" aria-hidden="true">These explaination boxes are damn helpful</button>
+                                    </div>
+                                </div></div>
                             </div>
                         </div>  
                     </div>  
-                    <div class="control-group">  
+                    <div class="form-group">  
                         <label class="control-label" for="media-transcode">On-the-fly transcoding</label>  
                         <div class="controls">  
-                            <input type="checkbox" checked="checked" class="input-xlarge" id="media-transcode">
-                            <p class="help-block">Automatically convert music while streaming for better compability <a href="#mediaTranscodeModal" role="button" class="btn btn-mini" data-toggle="modal">?</a></p>                           
-                            <div id="mediaTranscodeModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="mediaTranscodeModalLabel" aria-hidden="true">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                    <h3 id="mediaTranscodeModalLabel">On-the-fly transcoding</h3>
-                                </div>
-                                <div class="modal-body">
-                                    <p>Since not all browsers have the same playback capabilities or some files are not
-                                    suitable for streaming, this feature allows the server to transcode (convert) the music
-                                    into another format before being send to the client. If the machine you are using as
-                                    server isn't from the '80s, therefore a slow machine, you should enable this feature
-                                    to support as many playback devices/browser as possible.
-                                    </p>
-                                </div>
-                                <div class="modal-footer">
-                                    <button class="btn" data-dismiss="modal" aria-hidden="true">LOL!</button>
-                                </div>
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" checked="checked" class="form-control" id="media-transcode">
+                                    Automatically convert music while streaming for better compability
+                                </label>                           
+                                <a href="#mediaTranscodeModal" role="button" class="btn btn-default btn-xs" data-toggle="modal">?</a>
+                            </div>
+                            <div id="mediaTranscodeModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mediaTranscodeModalLabel" aria-hidden="true">
+                                <div class="modal-dialog"><div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                        <h3 id="mediaTranscodeModalLabel">On-the-fly transcoding</h3>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Since not all browsers have the same playback capabilities or some files are not
+                                        suitable for streaming, this feature allows the server to transcode (convert) the music
+                                        into another format before being send to the client. If the machine you are using as
+                                        server isn't from the '80s, therefore a slow machine, you should enable this feature
+                                        to support as many playback devices/browser as possible.
+                                        </p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn" data-dismiss="modal" aria-hidden="true">LOL!</button>
+                                    </div>
+                                </div></div>
                             </div>
                         </div>  
                     </div>
                 </fieldset>
                 <fieldset>
-                    <legend>System capabilities <a href="#systemCapabilityModal" role="button" class="btn btn-mini" data-toggle="modal">?</a></legend>
-                    <div id="systemCapabilityModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="systemCapabilityModalLabel" aria-hidden="true">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                            <h3 id="systemCapabilityModalLabel">System capabilities</h3>
+                    <legend>System capabilities <a href="#systemCapabilityModal" role="button" class="btn btn-default btn-xs" data-toggle="modal">?</a></legend>
+                    <div id="systemCapabilityModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="systemCapabilityModalLabel" aria-hidden="true">
+                        <div class="modal-dialog"><div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                <h3 id="systemCapabilityModalLabel">System capabilities</h3>
+                            </div>
+                            <div class="modal-body">
+                                <p>The <span class="label label-success">installed</span>
+                                label shows which optional programs have been installed and which feature was therefore enabled. 
+                                All programs that show <span class="label label-danger">not installed</span>, don't need to be installed for
+                                CherryMusic to work, but each of them adds extra functionality, you might miss otherwise.
+                                The grey <span class="label label-default">not installed</span> labels
+                                show you, that a certain program has not been installed, but it wouldn't lead to any additional
+                                features if you did, since other programs already took their job.
+                                </p>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn" data-dismiss="modal" aria-hidden="true">Okeydonkey!</button>
+                            </div>
                         </div>
-                        <div class="modal-body">
-                            <p>The <span class="label label-success">installed</span>
-                            label shows which optional programs have been installed and which feature was therefore enabled. 
-                            All programs that show <span class="label label-important">not installed</span>, don't need to be installed for
-                            CherryMusic to work, but each of them adds extra functionality, you might miss otherwise.
-                            The grey <span class="label">not installed</span> labels
-                            show you, that a certain program has not been installed, but it wouldn't lead to any additional
-                            features if you did, since other programs already took their job.
-                            </p>
-                        </div>
-                        <div class="modal-footer">
-                            <button class="btn" data-dismiss="modal" aria-hidden="true">Okeydonkey!</button>
                         </div>
                     </div>
                     <div id="feature-check">
                     </div>
                 </fieldset>
                     <div class="form-actions">  
-                        <button onclick="submitConfiguration(); return false;" type="submit" class="btn btn-primary">Save Configuration and start CherryMusic</button>  
+                        <button onclick="submitConfiguration(); return false;" type="submit" class="btn btn-default btn-primary">Save Configuration and start CherryMusic</button>  
                     </div>  
             </form>
         </div>

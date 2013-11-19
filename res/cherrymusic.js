@@ -44,6 +44,7 @@ var userOptions = undefined;
 var isAdmin = undefined;
 var loggedInUserName = undefined;
 var REMEMBER_PLAYLIST_INTERVAL = 3000;
+var CHECK_MUSIC_PLAYING_INTERVAL = 2000;
 var HEARTBEAT_INTERVAL_MS = 30*1000;
 
 var playlistSelector = '.jp-playlist';
@@ -166,11 +167,17 @@ function loadConfig(executeAfter){
             'user_name': dictatedClientConfig.username,
             'serve_path': dictatedClientConfig.servepath,
             'transcode_path': dictatedClientConfig.transcodepath,
+            'auto_login': dictatedClientConfig.auto_login,
         }
         
         executeAfter();
         if(isAdmin){
             $('a[href="#adminpanel"]').show();
+        }
+        if(SERVER_CONFIG.auto_login){
+            $('#logout-menu-button').parent('li').addClass('disabled');
+            $('#logout-menu-button').attr('onclick', '');
+            $('#logout-menu-button').attr('title', 'Cannot logout: Auto-Login enabled');
         }
     };
     var error = errorFunc("Could not fetch client configuration, CherryMusic will not work. Clearing the browser cache might help.");
@@ -199,6 +206,7 @@ function loadUserOptions(onSuccess){
         
         $('#misc-show_playlist_download_buttons').attr('checked',userOptions.misc.show_playlist_download_buttons);
         $('#misc-autoplay_on_add').attr('checked',userOptions.misc.autoplay_on_add);
+        $('#ui-confirm_quit_dialog').attr('checked',userOptions.ui.confirm_quit_dialog);
     }
     api('getuseroptions', success);
 }
@@ -375,19 +383,23 @@ function ord(c)
   return c.charCodeAt(0);
 }
 
-function showPlaylists(){
+function showPlaylists(sortby, filterby){
     "use strict";
     var success = function(data){
         var addressAndPort = getAddrPort();
-        new MediaBrowser('.search-results', data, 'Playlist browser');
+        var value_before = $('.playlist-filter-input').val();
+        new MediaBrowser('.search-results', data, 'Playlist browser', false, {showPlaylistPanel: true});
+        $('.playlist-filter-input').val(value_before);
     };
     var error = errorFunc('error loading external playlists');
 
-    busy('#playlist-panel').hide().fadeIn('fast');
+    busy('.search-results').hide().fadeIn('fast');
     api('showplaylists',
+        {'sortby': sortby,
+         'filterby': filterby},
         success,
         error,
-        function(){busy('#playlist-panel').fadeOut('fast')}
+        function(){busy('.search-results').fadeOut('fast')}
     );
 }
 
@@ -451,10 +463,13 @@ function loadPlaylist(playlistid, playlistlabel){
 
 function loadPlaylistContent(playlistid, playlistlabel){
     "use strict";
-    var pldomid = "#playlist"+playlistid+' .playlistcontent';
+    var pldomid = "#playlist"+playlistid+' .playlist-content';
     if('' === $(pldomid).html().trim()){
         var success = function(data){
             new MediaBrowser(pldomid, data, playlistlabel, false);
+            $("#playlist"+playlistid+' .playlist-detail-switch .glyphicon')
+            .toggleClass('glyphicon-chevron-right')
+            .toggleClass('glyphicon-chevron-down');
         };
         busy('#playlist-panel').hide().fadeIn('fast');
         api('loadplaylist',
@@ -465,6 +480,9 @@ function loadPlaylistContent(playlistid, playlistlabel){
         );
     } else {
         $(pldomid).slideToggle('slow');
+        $("#playlist"+playlistid+' .playlist-detail-switch .glyphicon')
+            .toggleClass('glyphicon-chevron-right')
+            .toggleClass('glyphicon-chevron-down');
     }
 }
 
@@ -865,11 +883,17 @@ function sendHeartBeat(){
 }
 
 function userOptionCheckboxListener(htmlid, optionname){
+    REQUIRES_RELOAD_ON_ENABLE = ['#ui-confirm_quit_dialog'];
     $(htmlid).on('change',function(){
+        var self = this;
         optionSetter(   optionname,
                         $(this).is(':checked'),
                         function(){
-                            $(this).attr('checked',userOptions[optionname])
+                            if($(self).is(':checked')){
+                                if(REQUIRES_RELOAD_ON_ENABLE.indexOf(htmlid) != -1){
+                                    alert('You need to reload the page for this setting to take effect.')
+                                }
+                            }
                         },
                         errorFunc('Error setting option! '+optionname)
         );
@@ -909,6 +933,73 @@ function show_ui_conditionally(selectors, conditions_table){
     }
 }
 
+function jPlayerIsPlaying(){
+    return !$('#jquery_jplayer_1').data().jPlayer.status.paused;
+}
+
+function dontCloseWindowIfMusicPlays(){
+    if(userOptions.ui.confirm_quit_dialog){
+        if(jPlayerIsPlaying()){
+            if(window.onbeforeunload === null){
+                // register close dialog if music is playing
+                window.onbeforeunload = function() {
+                  return "This will stop the playback. Do you really want to close CherryMusic?";
+                }
+            }
+        } else {
+            if(window.onbeforeunload !== null){
+                // remove close dialog if no music is playing
+                window.onbeforeunload = null;
+            }
+        }
+        window.setTimeout("dontCloseWindowIfMusicPlays()", CHECK_MUSIC_PLAYING_INTERVAL)
+    } else {
+        window.onbeforeunload = null;
+    }
+}
+
+function displayMessageOfTheDay(){
+    api('getmotd',
+        function(resp){
+            if(resp.type == 'update'){
+                html = Mustache.render(
+                    '<a href="http://fomori.org/cherrymusic/">'+
+                        'CherryMusic {{version}} is available!'+
+                        '<h2>download now →</h2>'+
+                    '</a><hr>'+
+                    '<h3>{{features_count}} new {{feature_title}}:</h3>'+
+                    '<ul class="feature-list">'+
+                    '   {{#features}}<li>{{.}}</li>{{/features}}'+
+                    '</ul>'+
+                    '<h3>{{fixes_count}} {{fixes_title}}:</h3>'+
+                    '<ul class="feature-list">'+
+                    '   {{#fixes}}<li>{{.}}</li>{{/fixes}}'+
+                    '</ul><hr>'+
+                    '<p>'+
+                    '   And a lot of other stuff, see the'+
+                    '   <a href="https://github.com/devsnd/cherrymusic/blob/{{version}}/CHANGES" target="_blank">'+
+                    '   CHANGELOG</a>.'+
+                    '</p>',
+                    {
+                        version: resp.data.version,
+                        features: resp.data.features,
+                        features_count: resp.data.features.length,
+                        feature_title: resp.data.features.length > 1 ? 'features' : 'feature',
+                        fixes: resp.data.fixes,
+                        fixes_count: resp.data.fixes.length,
+                        fixes_title: resp.data.fixes.length > 1 ? 'fixes' : 'fix',
+                    });
+                $('#motd').html(html);
+            } else if(resp.type == 'wisdom'){
+                $('#motd').html('useless wisdom<hr>'+resp.data);
+            } else {
+                window.console.error('unknown motd type '+resp.type);
+            }
+        },
+        errorFunc('could not fetch message of the day')
+    );
+}
+
 /***
 ON DOCUMENT READY... STEADY... GO!
 ***/
@@ -920,9 +1011,10 @@ $(document).ready(function(){
         playlistManager = new PlaylistManager();
         $('#username-label').text('('+loggedInUserName+')');
     });
-    loadUserOptions(initKeyboardshortcuts);    
-    api('getmotd',function(data){$('#oneliner').text(data)},
-        errorFunc('could not fetch message of the day'));
+    loadUserOptions(function(){
+        initKeyboardshortcuts();
+        dontCloseWindowIfMusicPlays();
+    });
     $('#search-panel').on('scroll', function(){
         //enable loading of images when in viewport
         MediaBrowser.static.albumArtLoader('#search-panel');
@@ -933,6 +1025,7 @@ $(document).ready(function(){
     //window.setInterval("resizePlaylistSlowly()",2000);
     $('#searchform .searchinput').focus();
     sendHeartBeat();
+    displayMessageOfTheDay();
     $('#adminpanel').on('shown.bs.modal', function (e) {
         updateUserList();
     });
@@ -956,9 +1049,10 @@ $(document).ready(function(){
     $('#changePassword').on('show.bs.modal', function(){
         //$('#changePassword').data('modal').options.focusOn = '#oldpassword-change';
     });
-    
     userOptionCheckboxListener('#misc-show_playlist_download_buttons',
                                'misc.show_playlist_download_buttons');
     userOptionCheckboxListener('#misc-autoplay_on_add',
                                'misc.autoplay_on_add');
+    userOptionCheckboxListener('#ui-confirm_quit_dialog',
+                               'ui.confirm_quit_dialog');
 });

@@ -37,6 +37,8 @@ from __future__ import unicode_literals
 import os
 import sys
 from random import choice
+import codecs
+import json
 import cherrypy
 import audiotranscode
 from imp import reload
@@ -45,6 +47,10 @@ try:
     from urllib.parse import quote
 except ImportError:
     from backport.urllib.parse import quote
+try:
+    import urllib.request
+except ImportError:
+    import backport.urllib as urllib
 
 import cherrymusicserver as cherry
 from cherrymusicserver import service
@@ -68,10 +74,22 @@ class CherryModel:
     def abspath(self, path):
         return os.path.join(cherry.config['media.basedir'], path)
 
+    @classmethod
+    def fileSortFunc(cls, filepath):
+        upper = pathprovider.filename(filepath).upper()
+        if ' ' in upper:
+            part_part = upper[:upper.index(' ')]
+            # make sure that numbers are sorted correctly by evening out
+            # the number in the filename 0-padding to 5 digits.
+            if part_part.isdigit():
+                return '0'*(5 - len(part_part)) + upper
+        return upper
+
     def sortFiles(self, files, fullpath=''):
         upper_case_filename = lambda x: pathprovider.filename(x).upper()
-        #sort alphabetically (case insensitive)
-        sortedfiles = sorted(files, key=upper_case_filename)
+        # sort alphabetically (case insensitive, make sure numbers are
+        # sorted correctly)
+        sortedfiles = sorted(files, key=CherryModel.fileSortFunc)
         if fullpath:
             #sort directories up
             isfile = lambda x: os.path.isfile(os.path.join(fullpath, x))
@@ -166,54 +184,77 @@ class CherryModel:
             results = list(filter(isValidMediaFile, results))
         return results
 
+    def check_for_updates(self):
+        url = 'http://fomori.org/cherrymusic/update_check.php?version='
+        url += cherry.__version__
+        urlhandler = urllib.request.urlopen(url)
+        jsondata = codecs.decode(urlhandler.read(), 'UTF-8')
+        versioninfo = json.loads(jsondata)
+        return versioninfo
+
     def motd(self):
         artist = ['Hendrix',
-                  'the Beatles',
+                  'Miles Davis',
                   'James Brown',
                   'Nina Simone',
                   'Mozart',
-                  'Einstein',
                   'Bach',
                   'John Coltraine',
-                  'Deep Purple',
+                  'Jim Morrison',
                   'Frank Sinatra',
                   'Django Reinhardt',
-                  'Radiohead',
-                  'The chemical brothers',
+                  'Kurt Cobain',
+                  'Thom Yorke',
                   'Vivaldi',
+                  'Bob Dylan',
+                  'Johnny Cash',
+                  'James Brown',
+                  'Bob Marley',
                   'Björk']
-        search = ['Wadda ya wanna hea-a?',
-                  'I would like to dance to',
-                  'Someone told me to listen to',
-                  'There is nothing better than',
-                  'The GEMA didnt let me hear',
-                  'Give me',
-                  'If only {artist} had played with',
-                  'My feet cant stop when I hear',
-                  '{artist} actually stole everything from',
-                  '{artist} really liked to listen to',
-                  '{artist} played backwards is actually',
-                  'Each Beatle had sex with',
-                  'Turn the volume up to 11, it\'s',
-                  'If {artist} made Reggae it sounded like',
-                  '{artist} backwards is "{revartist}"',
+        liquid = ['2 liters of olive oil',
+                  'a glass of crocodile tears',
+                  'a bowl of liquid cheese',
+                  'some battery acid',
+                  'cup of grog',
+                  ]
+        search = ['{artist} can turn diamonds into jelly-beans.',
+                  'The french have some really stinky cheese. It\'s true.',
+                  '{artist} used to eat squids for breakfast.',
+                  'The GEMA wont let me hear {artist}.',
+                  'If {artist} had played with {artist}, they would have made bazillions!',
+                  '{artist} actually stole everything from {artist}.',
+                  '{artist} really liked to listen to {artist}.',
+                  '{artist}\'s music played backwards is actually the same as {artist}. This is how they increased their profit margin!',
+                  '{artist} always turned the volume up to 11.',
+                  'If {artist} made Reggae it sounded like {artist}.',
+                  '{artist} backwards is "{revartist}".',
                   '2 songs of {artist} are only composed of haikus.',
-                  '{artist} used to sing with',
-                  '{artist} had a dog the size of',
-                  '{artist} was once sued by',
-                  '{artist} named his dog after',
-                  '{artist} claimed to be funkier than',
-                  '{artist} could never stand the music of',
-                  '{artist} could not stop listening to',
-                  '{artist} was once interviewed by',
-                  '{artist} actually has 2 noses.',
+                  '{artist} drank {liquid} each morning, sometimes even twice a day.',
+                  'Instead of soap, {artist} used {liquid} to shower.',
+                  '{artist} had a dog the size of {artist}.',
+                  '{artist} was once sued by {artist} for eating all the cake.',
+                  '{artist} named his cat after {artist}. It died two years later by drowning in {liquid}.',
+                  '{artist} once founded a gang, but then had to quit becaus of the pirates. All former gang members became squirrels.',
+                  '{artist}, a.k.a. "Quadnostril" actually had 2 noses. This meant that it was quite hard to be taken seriously.',
+                  'Never put {liquid} and {artist} in the same room. Never ever!',
+                  '{artist} lived twice, once as a human, once as a duck.',
+                  'Nobody ever thought {artist} would still be famous after the great goat-cheese-fiasco.',
+                  'For a long time, nobody knew that {artist} secretly loved wall sockets.',
+                  'In the beginning {artist} was very poor and had to auction off a pinky toe. It is still exhibited in the "museum of disgusting stuff" in paris.',
+                  '{artist} did never mind if somebody made weird noises. Occasionally this was the inspiration for a new song.',
+                  'While creating a huge camp fire {artist} lost all hair. It took years for it to regrow.',
+                  'A rooster isn\'t necessarily better than a balloon. However, {artist} found out that balloons are less heavy.',
+                  'Instead of cars, snow mobiles are often used to move around in the alps. This information has no relevance whatsoever.',
+                  'Creating new life-forms always was a hobby of {artist}. The greatest success was the creation of {artist}.',
                   ]
         oneliner = choice(search)
-        if '{artist}' in oneliner:
+        while '{artist}' in oneliner:
             a = choice(artist)
-            oneliner = oneliner.replace('{artist}', a)
+            oneliner = oneliner.replace('{artist}', a, 1)
             if '{revartist}' in oneliner:
                 oneliner = oneliner.replace('{revartist}', a.lower()[::-1])
+        if '{liquid}' in oneliner:
+            oneliner = oneliner.replace('{liquid}', choice(liquid))
         return oneliner
 
     def randomMusicEntries(self, count):
@@ -222,6 +263,7 @@ class CherryModel:
         filteredEntries = list(filter(isValidMediaFile, entries))
 
         return filteredEntries[:count]
+
 
 def isValidMediaFile(file):
     file.path = strippath(file.path)
@@ -264,6 +306,7 @@ def strippath(path):
         return path[len(cherry.config['media.basedir']) + 1:]
     return path
 
+
 class MusicEntry:
     def __init__(self, path, compact=False, dir=False, repr=None):
         self.path = path
@@ -280,17 +323,17 @@ class MusicEntry:
         elif self.dir:
             #dir
             simplename = pathprovider.filename(self.path)
-            return {'type':'dir',
-                    'path':self.path,
-                    'label':simplename }
+            return {'type': 'dir',
+                    'path': self.path,
+                    'label': simplename}
         else:
             #file
             simplename = pathprovider.filename(self.path)
-            urlpath = quote(self.path.encode('utf8'));
-            return {'type':'file',
-                    'urlpath':urlpath,
-                    'path':self.path,
-                    'label':simplename}
+            urlpath = quote(self.path.encode('utf8'))
+            return {'type': 'file',
+                    'urlpath': urlpath,
+                    'path': self.path,
+                    'label': simplename}
 
     def __repr__(self):
         return "<MusicEntry path:%s, dir:%s>" % (self.path, self.dir)

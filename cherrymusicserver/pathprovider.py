@@ -51,7 +51,7 @@ def getUserDataPath():
         userdata = os.path.join(os.environ['APPDATA'],'cherrymusic')
     elif sys.platform.startswith('darwin'): # osx
         userdata = os.path.join(os.path.expanduser('~'),'Application Support',userDataFolderName)
-    
+
     if not userdata:
         userdata = fallbackPath()
     assureFolderExists(userdata,['db','albumart','sessions'])
@@ -63,7 +63,7 @@ def getConfigPath():
     else:
         configpath = ''
         if sys.platform.startswith('linux'):  # linux
-            if 'XDG_CONFIG_HOME' in os.environ: 
+            if 'XDG_CONFIG_HOME' in os.environ:
                 configpath = os.path.join(os.environ['XDG_CONFIG_HOME'], configFolderName)
             else:
                 configpath = os.path.join(os.path.expanduser('~'), '.config', configFolderName)
@@ -71,7 +71,7 @@ def getConfigPath():
             configpath = os.path.join(os.environ['APPDATA'],configFolderName)
         elif sys.platform.startswith('darwin'): #osx
             configpath = os.path.join(os.path.expanduser('~'),'Application Support',configFolderName)
-        
+
         if not configpath:
             configpath = fallbackPath()
         assureFolderExists(configpath)
@@ -92,11 +92,24 @@ def pidFile():
 def pidFileExists():
     return os.path.exists(pidFile())
 
+def licenseFile():
+    owndir = os.path.dirname(__file__)
+    basedir = os.path.split(owndir)[0] or '.'
+    basedir = os.path.abspath(basedir)
+    return os.path.join(basedir, 'COPYING')
+
 def configurationFile():
     return os.path.join(getConfigPath(), configFileName)
 
 def configurationFileExists():
     return os.path.exists(configurationFile())
+
+def absOrConfigPath(filepath):
+    if os.path.isabs(filepath):
+        path = filepath
+    else:
+        path = os.path.join(getConfigPath(), filepath)
+    return os.path.normpath(path)
 
 def databaseFilePath(filename):
     configdir = os.path.join(getUserDataPath(), 'db')
@@ -104,7 +117,7 @@ def databaseFilePath(filename):
         os.makedirs(configdir)
     configpath = os.path.join(configdir, filename)
     return configpath
-    
+
 def albumArtFilePath(directorypath):
     albumartcachepath = os.path.join(getUserDataPath(), 'albumart')
     if not os.path.exists(albumartcachepath):
@@ -114,7 +127,7 @@ def albumArtFilePath(directorypath):
 
 def base64encode(s):
     return codecs.decode(base64.b64encode(codecs.encode(s,'UTF-8')),'UTF-8')
-    
+
 def base64decode(s):
     return codecs.decode(base64.b64decode(s),'UTF-8')
 
@@ -132,6 +145,11 @@ def getResourcePath(path):
     #check share first
     resourceprefix = os.path.join(sys.prefix, 'share', sharedFolderName)
     respath = os.path.join(resourceprefix, path)
+    if not os.path.exists(respath):
+        #log.w("Couldn't find " + respath + ". Trying local install path.")
+        #otherwise check local/share
+        resourceprefix = os.path.join(sys.prefix, 'local', 'share', sharedFolderName)
+        respath = os.path.join(resourceprefix, path)
     if not os.path.exists(respath):
         #log.w("Couldn't find " + respath + ". Trying local install path.")
         #otherwise check local install

@@ -116,18 +116,42 @@ class PlaylistDB:
             return result[0][1]
         return 'playlist'
 
-    def setPublic(self, userid, plid, value):
-        ispublic = 1 if value else 0
+    def setPublic(self, userid, plid, public):
+        ispublic = 1 if public else 0
         cur = self.conn.cursor()
         cur.execute("""UPDATE playlists SET public = ? WHERE rowid = ? AND userid = ?""", (ispublic, plid, userid))
 
-    def showPlaylists(self, userid):
+    def _searchPlaylist(self, searchterm):
+        q = '''SELECT DISTINCT playlists.rowid FROM playlists, tracks
+               WHERE ( tracks.playlistid = playlists.rowid
+                       AND tracks.title LIKE ? )
+                     OR
+                       playlists.title LIKE ?'''
         cur = self.conn.cursor()
+        res = cur.execute(q, ('%'+searchterm+'%', '%'+searchterm+'%'))
+        return [row[0] for row in res.fetchall()]
+
+    def showPlaylists(self, userid, filterby=''):
+        filtered = None
+        if filterby != '':
+            filtered = self._searchPlaylist(filterby)
         #change rowid to id to match api
-        cur.execute("""SELECT rowid as id,title, userid, public FROM playlists WHERE
+        cur = self.conn.cursor()
+        cur.execute("""SELECT rowid as id, title, userid, public, _created FROM playlists WHERE
             public = 1 OR userid = ?""", (userid,));
-        res = cur.fetchall()
-        return list(map(lambda x: {'plid':x[0], 'title':x[1], 'userid':x[2],'public':bool(x[3]), 'owner':bool(userid==x[2])}, res))
+        results = cur.fetchall()
+        playlists = []
+        for result in results:
+            if not filtered is None and result[0] not in filtered:
+                continue
+            playlists.append({'plid': result[0],
+                              'title': result[1],
+                              'userid': result[2],
+                              'public': bool(result[3]),
+                              'owner': bool(userid==result[2]),
+                              'created': result[4]
+                              })
+        return playlists
 
     def createPLS(self,userid,plid, addrstr):
         pl = self.loadPlaylist(userid, plid)

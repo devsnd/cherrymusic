@@ -182,19 +182,22 @@ Dropping all sessions! Try not to change between python 2 and 3,
 everybody has to relogin now.''')
             cherrypy.session.delete()
             sessionUsername = None
-        if not sessionUsername:
-            return self.autoLoginIfPossible()
+        if sessionUsername is None:
+            if self.autoLoginActive():
+                cherrypy.session['username'] = self.userdb.getNameById(1)
+                cherrypy.session['userid'] = 1
+                cherrypy.session['admin'] = True
+                return True
+            else:
+                return False
         elif sessionUsername != nameById:
             self.api_logout(value=None)
             return False
         return True
 
-    def autoLoginIfPossible(self):
+    def autoLoginActive(self):
         is_loopback = cherrypy.request.remote.ip in ('127.0.0.1', '::1')
         if is_loopback and cherry.config['server.localhost_auto_login']:
-            cherrypy.session['username'] = self.userdb.getNameById(1)
-            cherrypy.session['userid'] = 1
-            cherrypy.session['admin'] = True
             return True
         return False
 
@@ -305,7 +308,7 @@ everybody has to relogin now.''')
     def download(self, value):
         if not self.isAuthorized():
             raise cherrypy.HTTPError(401, 'Unauthorized')
-        filelist = [unquote(filepath) for filepath in json.loads(value)]
+        filelist = [filepath for filepath in json.loads(unquote(value))]
         dlstatus = self.download_check_files(filelist)
         if dlstatus == 'ok':
             cherrypy.session.release_lock()
@@ -443,17 +446,35 @@ everybody has to relogin now.''')
     def api_generaterandomplaylist(self):
         return [entry.to_dict() for entry in self.model.randomMusicEntries(50)]
 
-    def api_changeplaylist(self, value):
-        params = json.loads(value)
-        is_public = params['attribute'] == 'public'
-        is_valid = type(params['value']) == bool and type(params['plid']) == int
-        if is_public and is_valid:
-            return self.playlistdb.setPublic(userid=self.getUserId(),
-                                             plid=params['plid'],
-                                             value=params['value'])
+    def api_changeplaylist(self, plid, attribute, value):
+        if attribute == 'public':
+            is_valid = type(value) == bool and type(plid) == int
+            if is_valid:
+                return self.playlistdb.setPublic(userid=self.getUserId(),
+                                                 plid=plid,
+                                                 public=value)
 
     def api_getmotd(self):
-        return self.model.motd()
+        if cherrypy.session['admin'] and cherry.config['general.update_notification']:
+            new_versions = self.model.check_for_updates()
+            if new_versions:
+                newest_version = new_versions[0]['version']
+                features = []
+                fixes = []
+                for version in new_versions:
+                    for update in version['features']:
+                        if update.startswith('FEATURE:'):
+                            features.append(update[len('FEATURE:'):])
+                        elif update.startswith('FIX:'):
+                            fixes.append(update[len('FIX:'):])
+                        elif update.startswith('FIXED:'):
+                            fixes.append(update[len('FIXED:'):])
+                retdata = {'type': 'update', 'data': {}}
+                retdata['data']['version'] = newest_version
+                retdata['data']['features'] = features
+                retdata['data']['fixes'] = fixes
+                return retdata
+        return {'type': 'wisdom', 'data': self.model.motd()}
 
     def api_restoreplaylist(self):
         session_playlist = cherrypy.session.get('playlist', [])
@@ -509,12 +530,17 @@ everybody has to relogin now.''')
         else:
             return "You didn't think that would work, did you?"
 
-    def api_showplaylists(self):
-        playlists = self.playlistdb.showPlaylists(self.getUserId())
+    def api_showplaylists(self, sortby="created", filterby=''):
+        playlists = self.playlistdb.showPlaylists(self.getUserId(), filterby)
+        curr_time = int(time.time())
         #translate userids to usernames:
         for pl in playlists:
             pl['username'] = self.userdb.getNameById(pl['userid'])
             pl['type'] = 'playlist'
+            pl['age'] = curr_time - pl['created']
+        if not sortby in ('username', 'age', 'title'):
+            sortby = 'created'
+        playlists = sorted(playlists, key=lambda x: x[sortby])
         return playlists
 
     def api_logout(self):
@@ -565,6 +591,7 @@ everybody has to relogin now.''')
             'username': cherrypy.session['username'],
             'servepath': 'serve/',
             'transcodepath': 'trans/',
+            'auto_login': self.autoLoginActive(),
         }
         if cherry.config['media.transcode']:
             decoders = self.model.transcoder.availableDecoderFormats()

@@ -48,13 +48,13 @@ from cherrymusicserver import log as logging
 
 def _validate_basedir(basedir):
     if not basedir:
-        raise ValueError('basedir is not set')
+        raise ValueError('basedir must be set')
     if not os.path.isabs(basedir):
         raise ValueError('basedir must be absolute path: %s' % basedir)
     if not os.path.exists(basedir):
-        raise ValueError("basedir doesn't exist: %s" % basedir)
+        raise ValueError("basedir must exist: %s" % basedir)
     if not os.path.isdir(basedir):
-        raise ValueError("basedir is not a directory: %s" % basedir)
+        raise ValueError("basedir must be a directory: %s" % basedir)
     return True
 
 
@@ -96,7 +96,7 @@ def from_defaults():
                     They will be shown next to folders that qualify as a possible
                     album.
                     """
-                    
+
     with c['media.maximum_download_size'] as maxdl:
         maxdl.value = 1024*1024*250
         maxdl.doc = """
@@ -209,9 +209,26 @@ def from_defaults():
 
     with c['server.ssl_certificate'] as ssl_certificate:
         ssl_certificate.value = 'certs/server.crt'
+        ssl_certificate.doc = '''
+                    The SSL certiticate sent to the client to verify the
+                    server's authenticity. A relative path is relative to the
+                    location of the CherryMusic configuration file.
+                    '''
 
     with c['server.ssl_private_key'] as ssl_private_key:
         ssl_private_key.value = 'certs/server.key'
+        ssl_private_key.doc = '''
+                    SSL private key file used by the server to decrypt and sign
+                    secure communications. Keep this one secret!  A relative
+                    path is relative to the location of the CherryMusic
+                    configuration file.
+                    '''
+
+    with c['general.update_notification'] as update_notification:
+        update_notification.value = True
+        update_notification.doc = '''
+                    Notify admins about available security and feature updates.
+                    '''
 
     return c.to_configuration()
 
@@ -232,7 +249,8 @@ def from_configparser(filepath):
     except ImportError:
         from backport.configparser import ConfigParser
     cfgp = ConfigParser()
-    cfgp.read(filepath)
+    with open(filepath, encoding='utf-8') as fp:
+        cfgp.readfp(fp)
     dic = OrderedDict()
     for section_name in cfgp.sections():
         if 'DEFAULT' == section_name:
@@ -305,7 +323,10 @@ class ConfigError(Exception):
         )
 
     def __str__(self):
-        return '{0}: {1}'.format(self.__class__.__name__, self.msg)
+        detail = self.detail.strip() if hasattr(self, 'detail') else ''
+        if detail:
+            detail = ' ({0})'.format(detail)
+        return '{0}: {1}{2}'.format(self.__class__.__name__, self.msg, detail)
 
 
 class ConfigNamingError(ConfigError):

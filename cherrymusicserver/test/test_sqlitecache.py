@@ -48,6 +48,8 @@ from cherrymusicserver import log
 from cherrymusicserver import sqlitecache
 from cherrymusicserver import service
 
+sqlitecache.debug = True
+
 from cherrymusicserver.database.sql import MemConnector
 
 log.setTest()

@@ -31,6 +31,17 @@
 
 #python 2.6+ backward compability
 from __future__ import unicode_literals
+
+VERSION = "0.29.0"
+__version__ = VERSION
+DESCRIPTION = "an mp3 server for your browser"
+LONG_DESCRIPTION = """CherryMusic is a music streaming
+    server written in python. It's based on cherrypy and jPlayer.
+    You can search your collection, create and share playlists with
+    other users. It's able to play music on almost all devices since
+    it happens in your browser and uses HTML5 for audio playback.
+    """
+
 from backport import input
 
 import sys
@@ -45,6 +56,45 @@ if sys.version_info >= (3, 3):
 import os
 import codecs
 import cherrypy
+
+def info():
+    import locale
+    import platform
+    return """CherryMusic Server {cm_version}
+
+CherryPy: {cp_version}
+Python: {py_version}
+Platform: {platform}
+
+configuration dir:
+    {confdir}
+server data dir:
+    {datadir}
+static resources dir:
+    {resourcedir}
+server package dir:
+    {packdir}
+process working dir:
+    {workdir}
+
+locale: {locale}, default: {deflocale}
+filesystem encoding: {fs_encoding}
+
+(Do not parse this output.)""".format(
+    cm_version=VERSION,
+    cp_version=cherrypy.__version__,
+    py_version=platform.python_implementation() + ' ' + platform.python_version(),
+    platform=platform.platform(),
+    workdir=os.path.abspath(os.curdir),
+    packdir=os.path.abspath(__path__[0]),
+    confdir=pathprovider.getConfigPath(),
+    datadir=pathprovider.getUserDataPath(),
+    resourcedir=pathprovider.getResourcePath(''),
+    locale=str(locale.getlocale()),
+    deflocale=str(locale.getdefaultlocale()),
+    fs_encoding=sys.getfilesystemencoding(),
+)
+
 
 cherrypyReqVersion = '3'
 cherrypyCurrVersion = str(cherrypy.__version__)
@@ -65,18 +115,20 @@ def fake_wait_for_occupied_port(host, port):
 cherrypy.process.servers.wait_for_occupied_port = fake_wait_for_occupied_port
 # end of port patch
 
-if sys.version_info < (3,0):
-    # workaround for cherrypy not using unicode strings for URI, see:
-    # https://bitbucket.org/cherrypy/cherrypy/issue/1148/wrong-encoding-for-urls-containing-utf-8
-    cherrypy.lib.static.__serve_file = cherrypy.lib.static.serve_file
+# workaround for cherrypy not using unicode strings for URI, see:
+# https://bitbucket.org/cherrypy/cherrypy/issue/1148/wrong-encoding-for-urls-containing-utf-8
+cherrypy.lib.static.__serve_file = cherrypy.lib.static.serve_file
 
-    def serve_file_utf8_fix(path, content_type=None, disposition=None,
-                            name=None, debug=False):
+def serve_file_utf8_fix(path, content_type=None, disposition=None,
+                        name=None, debug=False):
+    if sys.version_info >= (3,):
+        #python3+
+        # see also below: mirrored mangling of basedir for '/serve' static dir
         path = codecs.decode(codecs.encode(path, 'latin-1'), 'utf-8')
-        return cherrypy.lib.static.__serve_file(path, content_type, disposition,
-                                                name, debug)
-    cherrypy.lib.static.serve_file = serve_file_utf8_fix
-    # end of unicode workaround
+    return cherrypy.lib.static.__serve_file(path, content_type,
+                                            disposition, name, debug)
+cherrypy.lib.static.serve_file = serve_file_utf8_fix
+# end of unicode workaround
 
 from cherrymusicserver import configuration as cfg
 config = None
@@ -94,38 +146,32 @@ from cherrymusicserver import userdb
 from cherrymusicserver import useroptiondb
 import cherrymusicserver.browsersetup
 
-VERSION = "0.27.0"
-__version__ = VERSION
-DESCRIPTION = "an mp3 server for your browser"
-LONG_DESCRIPTION = """CherryMusic is a music streaming
-    server written in python. It's based on cherrypy and jPlayer.
-    You can search your collection, create and share playlists with
-    other users. It's able to play music on almost all devices since
-    it happens in your browser and uses HTML5 for audio playback.
-    """
-
 
 class CherryMusic:
-
+    """Sets up services (configuration, database, etc) and starts the server"""
     def __init__(self, update=None, createNewConfig=False, dropfiledb=False,
                  setup=False, cfg_override={}):
         self.setup_services()
         self.setup_config(createNewConfig, setup, cfg_override)
         signal.signal(signal.SIGTERM, CherryMusic.stopAndCleanUp)
         signal.signal(signal.SIGINT, CherryMusic.stopAndCleanUp)
+        if os.name == 'posix':
+            signal.signal(signal.SIGHUP, CherryMusic.stopAndCleanUp)
         CherryMusic.create_pid_file()
         self.setup_databases(update, dropfiledb, setup)
-        self.server(httphandler.HTTPHandler(config))
+        self.start_server(httphandler.HTTPHandler(config))
         CherryMusic.delete_pid_file()
 
     @classmethod
     def stopAndCleanUp(cls, signal=None, stackframe=None):
+        """Delete the process id file and exit"""
         CherryMusic.delete_pid_file()
         print('Exiting...')
         sys.exit(0)
 
     @classmethod
     def create_pid_file(cls):
+        """create a process id file, exit if it already exists"""
         if pathprovider.pidFileExists():
             sys.exit("""============================================
 Process id file %s already exists.
@@ -137,6 +183,7 @@ I've you are sure that cherrymusic is not running, you can delete this file and 
 
     @classmethod
     def delete_pid_file(cls):
+        """Delete the process id file, if it exists"""
         if pathprovider.pidFileExists():
             os.remove(pathprovider.pidFile())
         else:
@@ -144,6 +191,10 @@ I've you are sure that cherrymusic is not running, you can delete this file and 
 
     @classmethod
     def setup_services(cls):
+        """setup services: they can be used by other parts of the program
+        to easily access different functions of cherrymusic by registering
+        themselves as service.user
+        """
         service.provide('filecache', sqlitecache.SQLiteCache)
         service.provide('cherrymodel', cherrymodel.CherryModel)
         service.provide('playlist', playlistdb.PlaylistDB)
@@ -156,6 +207,12 @@ I've you are sure that cherrymusic is not running, you can delete this file and 
         })
 
     def setup_config(self, createNewConfig, browsersetup, cfg_override):
+        """start the in-browser configuration server, create a config if
+        no configuration is found or provide migration help for old CM
+        versions
+
+        initialize the configuration if no config setup is needed/requested
+        """
         if browsersetup:
             port = cfg_override.pop('server.port', False)
             cherrymusicserver.browsersetup.configureAndStartCherryPy(port)
@@ -176,6 +233,9 @@ I've you are sure that cherrymusic is not running, you can delete this file and 
         self._init_config(cfg_override)
 
     def setup_databases(self, update, dropfiledb, setup):
+        """ delete or update the file db if so requested.
+        check if the db schema is up to date
+        """
         if dropfiledb:
             update = ()
             database.resetdb(sqlitecache.DBNAME)
@@ -197,6 +257,8 @@ I've you are sure that cherrymusic is not running, you can delete this file and 
 
     @staticmethod
     def _get_user_consent_for_db_schema_update(reasons):
+        """Ask the user if the database schema update should happen now
+        """
         import textwrap
         wrap = lambda r: os.linesep.join(
             textwrap.wrap(r, initial_indent=' - ', subsequent_indent="   "))
@@ -220,6 +282,10 @@ Run schema update? [y/N]: """.format(
         return input(msg).lower().strip() in ('y',)
 
     def _update_if_necessary(self, update):
+        """perform a database update if update (a list of paths to update is
+        not None. If update is an empty list, perform a full update instead
+        of a partial update
+        """
         cache = sqlitecache.SQLiteCache()
         if update:
             cache.partial_update(*update)
@@ -227,6 +293,12 @@ Run schema update? [y/N]: """.format(
             cache.full_update()
 
     def _init_config(self, override_dict):
+        """update the internal configuration using the following hierarchy:
+        command_line_config > file_config > default_config
+
+        check if there are new or deprecated configuration keys in the config
+        file
+        """
         defaults = cfg.from_defaults()
         filecfg = cfg.from_configparser(pathprovider.configurationFile())
         custom = defaults.replace(filecfg, on_error=log.e)
@@ -235,6 +307,9 @@ Run schema update? [y/N]: """.format(
         self._check_for_config_updates(defaults, filecfg)
 
     def _check_for_config_updates(self, default, known_config):
+        """check if there are new or deprecated configuration keys in
+        the config file
+        """
         new = []
         deprecated = []
         transform = lambda s: '[{0}]: {2}'.format(*(s.partition('.')))
@@ -298,7 +373,10 @@ Have fun!
 """)
         sys.exit(0)
 
-    def start(self, httphandler):
+    def start_server(self, httphandler):
+        """use the configuration to setup and start the cherrypy server
+        """
+        cherrypy.config.update({'log.screen': True})
         if config['server.localhost_only']:
             socket_host = "localhost"
         else:
@@ -310,12 +388,14 @@ Have fun!
         resourcedir = os.path.abspath(pathprovider.getResourcePath('res'))
 
         if config['server.ssl_enabled']:
+            cert = pathprovider.absOrConfigPath(config['server.ssl_certificate'])
+            pkey = pathprovider.absOrConfigPath(config['server.ssl_private_key'])
             cherrypy.config.update({
-                'server.ssl_certificate': config['server.ssl_certificate'],
-                'server.ssl_private_key': config['server.ssl_private_key'],
+                'server.ssl_certificate': cert,
+                'server.ssl_private_key': pkey,
                 'server.socket_port': config['server.ssl_port'],
             })
-            # Create second server for http redirect:
+            # Create second server for redirecting http to https:
             redirecter = cherrypy._cpserver.Server()
             redirecter.socket_port = config['server.port']
             redirecter._socket_host = socket_host
@@ -345,9 +425,18 @@ Have fun!
                 'tools.sessions.storage_type': "file",
                 'tools.sessions.storage_path': sessiondir,
             })
-
+        basedirpath = config['media.basedir']
+        if sys.version_info < (3,0):
+            basedirpath = codecs.encode(basedirpath, 'utf-8')
+            scriptname = codecs.encode(config['server.rootpath'], 'utf-8')
+        else:
+            # fix cherrypy unicode issue (only for Python3)
+            # see patch to cherrypy.lib.static.serve_file way above and
+            # https://bitbucket.org/cherrypy/cherrypy/issue/1148/wrong-encoding-for-urls-containing-utf-8
+            basedirpath = codecs.decode(codecs.encode(basedirpath, 'utf-8'), 'latin-1')
+            scriptname = config['server.rootpath']
         cherrypy.tree.mount(
-            httphandler, config['server.rootpath'],
+            httphandler, scriptname,
             config={
                 '/res': {
                     'tools.staticdir.on': True,
@@ -357,8 +446,8 @@ Have fun!
                 },
                 '/serve': {
                     'tools.staticdir.on': True,
-                    'tools.staticdir.dir': config['media.basedir'],
-                    'tools.staticdir.index': 'index.html',
+                    'tools.staticdir.dir': basedirpath,
+                    # 'tools.staticdir.index': 'index.html',    if ever needed: in py2 MUST utf-8 encode
                     'tools.encode.on': True,
                     'tools.encode.encoding': 'utf-8',
                     'tools.caching.on': False,
@@ -372,7 +461,3 @@ Have fun!
         cherrypy.lib.caching.expires(0)  # disable expiry caching
         cherrypy.engine.start()
         cherrypy.engine.block()
-
-    def server(self, httphandler):
-        cherrypy.config.update({'log.screen': True})
-        self.start(httphandler)

@@ -170,7 +170,9 @@
                 <div class="control-group">  
                     Show playlist download button <input type="checkbox" onchange="" id="misc-show_playlist_download_buttons" value="option1">  
                 </div> 
-                
+                <div class="control-group">
+                    Confirm closing if music is playing <input type="checkbox" onchange="" id="ui-confirm_quit_dialog" value="option1">
+                </div>
                 <h3>change password</h3>
                 <a class="btn btn-default" href="#changePassword" role="button" data-toggle="modal">change password</a>
             </div>
@@ -391,10 +393,18 @@
                     <div class="cm-playlistplaytime"></div>
                     
                     <ul class="jp-toggles">
-                        <li><a href="javascript:;" class="jp-shuffle" tabindex="1" title="turn shuffle on"><i class="icon-random"></i></a></li>
-                        <li><a href="javascript:;" class="jp-shuffle-off" tabindex="1" title="turn shuffle off"><i class="icon-arrow-right"></i></a></li>
-                        <li><a href="javascript:;" class="jp-repeat" tabindex="1" title="activate repeat"><i class="icon-retweet"></i></a></li>
-                        <li><a href="javascript:;" class="jp-repeat-off" tabindex="1" title="deactivate repeat off"><i class="icon-arrow-down"></i></a></li>
+                        <li><a href="javascript:;" class="jp-shuffle btn btn-default btn-xs" tabindex="1" title="turn shuffle on">
+                            <span class="glyphicon glyphicon-random"></span>
+                        </a></li>
+                        <li><a href="javascript:;" class="jp-shuffle-off btn btn-default btn-xs" tabindex="1" title="turn shuffle off">
+                            <span class="glyphicon glyphicon-arrow-right"></span>
+                        </a></li>
+                        <li><a href="javascript:;" class="jp-repeat btn btn-default btn-xs" tabindex="1" title="activate repeat">
+                            <span class="glyphicon glyphicon-retweet"></span>
+                        </a></li>
+                        <li><a href="javascript:;" class="jp-repeat-off btn btn-default btn-xs" tabindex="1" title="deactivate repeat off">
+                            <span class="glyphicon glyphicon-arrow-down"></span>
+                        </a></li>
                     </ul>
                 </div>
             </div>
@@ -456,7 +466,7 @@
                 <li><a href="#userOptions" role="button" data-toggle="modal">Options</a></li>
                 <li><a style="display: none;" href="#adminpanel" role="button" data-toggle="modal">Admin</a></li>
                 <li class="divider"></li>
-                <li><a href="javascript:;" onclick="logout()">Logout <span id="username-label"></span></a></li>
+                <li><a href="javascript:;" id="logout-menu-button" onclick="logout()">Logout <span id="username-label"></span></a></li>
             </ul>
         </li>
     </ul>
@@ -474,7 +484,9 @@
         <div id="search-panel" class="col-md-6 row">
             <!--SEARCH TAB START -->
             <div class="search">
-                <div class="search-results"></div>
+                <div class="search-results">
+                    <div id="motd"></div>
+                </div>
             </div>
             <!--SEARCH TAB END -->
         </div>

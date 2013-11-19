@@ -51,7 +51,7 @@ class CherryMusicTrayIcon:
         if event.type == Gdk.EventType._2BUTTON_PRESS:
             if self.is_running():
                 self.show_cherrymusic(None)
-        
+
     def right_click_event(self, icon, button, time):
         self.menu = Gtk.Menu()
         running = self.is_running()
@@ -67,12 +67,12 @@ class CherryMusicTrayIcon:
         btn_start.connect('activate', self.start_cherrymusic)
         btn_start.set_sensitive(0 if running else 1)
         self.menu.append(btn_start)
-                
+
         btn_stop = Gtk.ImageMenuItem('Stop server')
         btn_stop.connect('activate', self.stop_cherrymusic)
         btn_stop.set_sensitive(1 if running else 0)
         self.menu.append(btn_stop)
-        
+
         self.menu.append(Gtk.SeparatorMenuItem())
 
         btn_about = Gtk.MenuItem("About")
@@ -83,28 +83,42 @@ class CherryMusicTrayIcon:
         btn_quit.set_use_stock(True)
         btn_quit.connect("activate", Gtk.main_quit)
         self.menu.append(btn_quit)
- 
+
         self.menu.show_all()
- 
+
         def pos(menu, icon):
                 return (Gtk.StatusIcon.position_menu(menu, icon))
- 
+
         self.menu.popup(None, None, pos, self.statusicon, button, time)
- 
+
     def show_about_dialog(self, widget):
         about_dialog = Gtk.AboutDialog()
- 
+
         about_dialog.set_destroy_with_parent(True)
         about_dialog.set_program_name('cherrymusic-tray')
         about_dialog.set_comments("start/stop your CherryMusic server comfortably.")
-        with open('COPYING', 'r') as licensing:
-            about_dialog.set_license(licensing.read())
+        about_dialog.set_license(_get_license())
         about_dialog.set_version("0.1")
         about_dialog.set_authors(["Tom Wallroth"])
- 
+
         about_dialog.run()
         about_dialog.destroy()
- 
+
+
+def _get_license():
+    licenseFile = pathprovider.licenseFile()
+    try:
+        with open(licenseFile, 'r') as licensing:
+            license = licensing.read()
+    except:
+        import traceback
+        traceback.print_exc()
+        license = 'Unable to read license file {0!r}.\nPlease see {1}'.format(
+            licenseFile, 'http://www.gnu.org/licenses/gpl-3.0.html')
+    finally:
+        return license
+
+
 
 
 if __name__ == "__main__":

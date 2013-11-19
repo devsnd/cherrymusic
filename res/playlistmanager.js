@@ -47,12 +47,15 @@ ManagedPlaylist.prototype = {
         );
         self.jplayerplaylist._init();
 
-        $(playlistSelector+" ul").sortable({
+        $(self.playlistSelector+" ul").sortable({
+            axis: "y",
+            delay: 150,
+            helper : 'clone',
             update: function(e,ui){
                 self.jplayerplaylist.scan();
             }
         });
-        $(playlistSelector+" ul").disableSelection();
+        $(self.playlistSelector+" ul").disableSelection();
 
         //event handler for clicked tracks in jplayer playlist
         $(this.playlistSelector).bind('requestPlay', function(event,playlistSelector) {
@@ -511,10 +514,12 @@ PlaylistManager.prototype = {
         $('#playlistContainerParent').show();
         $('#playlistBrowser').hide();
         var self = this;
-        var showpl = $('#'+this.plid2htmlid(playlistid));
+        var plhtmlid = '#'+this.plid2htmlid(playlistid);
+        var showpl = $(plhtmlid);
         this.hideAll();
         $('#playlistChooser ul li:last').removeClass('active');
         if(showpl.length<1){
+            window.console.warn("tried showing playlist with htmlid "+plhtmlid+" which doesn't exist!");
             this.setEditingPlaylist(this.managedPlaylists[0].id);
             showpl = $('#'+this.plid2htmlid(this.getEditingPlaylist().id));
         } else {
@@ -567,11 +572,13 @@ PlaylistManager.prototype = {
     closePlaylist : function(plid){
         for(var i=0; i<this.managedPlaylists.length; i++){
             if(this.managedPlaylists[i].id == plid){
+                window.console.log('closing PL '+plid)
                 this.managedPlaylists.splice(i,1);
+                $('#'+this.plid2htmlid(plid)).remove()
                 var otherId = this.managedPlaylists[i<this.managedPlaylists.length?i:0].id;
-                this.setEditingPlaylist(otherId);
-                this.playingPlaylist = otherId;
-                break;
+                window.console.log('showing '+otherId+' and using it as editing PL')
+                this.showPlaylist(otherId)
+                return false;
             }
         }
         this.refresh();
@@ -584,13 +591,14 @@ PlaylistManager.prototype = {
       $(this).blur();
       return false;
     },
-    setEditingPlaylist : function (plid){
-        var plist = this.getPlaylistById(plid);
+    setEditingPlaylist : function (editingplid){
+        var plist = this.getPlaylistById(editingplid);
         var plname = '';
         if (typeof plist !== 'undefined') {
-            this.editingPlaylist = plid;
+            this.editingPlaylist = editingplid;
             plname = plist.name;
         } else {
+            window.console.error('Tried setting editing playlist to unknown id '+editingplid);
             this.editingPlaylist = 0;
             plname = 'unknown playlist'
         }
@@ -661,8 +669,9 @@ PlaylistManager.prototype = {
         playlist.addTrack(track);
         
         //directly play/select first added track
-        if(this.getPlayingPlaylist() == playlist && playlist.jplayerplaylist.playlist.length == 1){
+        if(!jPlayerIsPlaying() && playlist.jplayerplaylist.playlist.length == 1){
             if(userOptions.misc.autoplay_on_add){
+                playlist.makeThisPlayingPlaylist();
                 playlist.jplayerplaylist.play(0);
             } else {
                 playlist.jplayerplaylist.select(0);
@@ -783,11 +792,17 @@ PlaylistManager.prototype = {
     removePlayedFromPlaylist : function (){
         var mediaPlaylist = this.getEditingPlaylist().jplayerplaylist;
         for(var i=0; i<mediaPlaylist.playlist.length; i++){
-            if(mediaPlaylist.playlist[i].wasPlayed>0){
+            var wasPlayed = mediaPlaylist.playlist[i].wasPlayed>0;
+            var isCurrentTrack = i == mediaPlaylist.current;
+            var isBeforeCurrent = i < mediaPlaylist.current;
+            if(wasPlayed && !isCurrentTrack){
                 mediaPlaylist.playlist.splice(i,1);
                 i--;
+                if(isBeforeCurrent){
+                    mediaPlaylist.current--;
+                }
             }
         }
-        mediaPlaylist._refresh(false);
+        mediaPlaylist._refresh(true);
     }
 }
