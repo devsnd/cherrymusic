@@ -933,9 +933,13 @@ function show_ui_conditionally(selectors, conditions_table){
     }
 }
 
+function jPlayerIsPlaying(){
+    return !$('#jquery_jplayer_1').data().jPlayer.status.paused;
+}
+
 function dontCloseWindowIfMusicPlays(){
     if(userOptions.ui.confirm_quit_dialog){
-        if(!$('#jquery_jplayer_1').data().jPlayer.status.paused){
+        if(jPlayerIsPlaying()){
             if(window.onbeforeunload === null){
                 // register close dialog if music is playing
                 window.onbeforeunload = function() {

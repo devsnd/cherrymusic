@@ -669,8 +669,9 @@ PlaylistManager.prototype = {
         playlist.addTrack(track);
         
         //directly play/select first added track
-        if(this.getPlayingPlaylist() == playlist && playlist.jplayerplaylist.playlist.length == 1){
+        if(!jPlayerIsPlaying() && playlist.jplayerplaylist.playlist.length == 1){
             if(userOptions.misc.autoplay_on_add){
+                playlist.makeThisPlayingPlaylist();
                 playlist.jplayerplaylist.play(0);
             } else {
                 playlist.jplayerplaylist.select(0);
