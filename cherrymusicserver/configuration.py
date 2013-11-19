@@ -48,13 +48,13 @@ from cherrymusicserver import log as logging
 
 def _validate_basedir(basedir):
     if not basedir:
-        raise ValueError('basedir is not set')
+        raise ValueError('basedir must be set')
     if not os.path.isabs(basedir):
         raise ValueError('basedir must be absolute path: %s' % basedir)
     if not os.path.exists(basedir):
-        raise ValueError("basedir doesn't exist: %s" % basedir)
+        raise ValueError("basedir must exist: %s" % basedir)
     if not os.path.isdir(basedir):
-        raise ValueError("basedir is not a directory: %s" % basedir)
+        raise ValueError("basedir must be a directory: %s" % basedir)
     return True
 
 
@@ -249,7 +249,8 @@ def from_configparser(filepath):
     except ImportError:
         from backport.configparser import ConfigParser
     cfgp = ConfigParser()
-    cfgp.read(filepath)
+    with open(filepath, encoding='utf-8') as fp:
+        cfgp.readfp(fp)
     dic = OrderedDict()
     for section_name in cfgp.sections():
         if 'DEFAULT' == section_name:
@@ -322,7 +323,10 @@ class ConfigError(Exception):
         )
 
     def __str__(self):
-        return '{0}: {1}'.format(self.__class__.__name__, self.msg)
+        detail = self.detail.strip() if hasattr(self, 'detail') else ''
+        if detail:
+            detail = ' ({0})'.format(detail)
+        return '{0}: {1}{2}'.format(self.__class__.__name__, self.msg, detail)
 
 
 class ConfigNamingError(ConfigError):
