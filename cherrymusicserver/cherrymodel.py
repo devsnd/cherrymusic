@@ -303,7 +303,7 @@ def isplayable(filename):
 
 def strippath(path):
     if path.startswith(cherry.config['media.basedir']):
-        return path[len(cherry.config['media.basedir']) + 1:]
+        return os.path.relpath(path, cherry.config['media.basedir'])
     return path
 
 
