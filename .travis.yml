@@ -21,6 +21,8 @@ install:
 # prepare test run; test local install
 before_script:
   - python setup.py -q install
+  - ls -la
+  - command -v nosetests
 
 # command to run tests
 script:
