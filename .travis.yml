@@ -14,8 +14,7 @@ python:
 
 # command to install dependencies
 install:
-  - "pip install cherrypy --use-mirrors"
-  - "pip install coveralls"
+  - "pip install cherrypy coveralls --use-mirrors"
   - "if [[ $TRAVIS_PYTHON_VERSION = 2.6 ]]; then pip install unittest2 --use-mirrors; fi"
 
 # prepare test run; test local install
@@ -24,7 +23,7 @@ before_script:
 
 # command to run tests
 script:
-  coverage run --source=cherrymusicserver $(command -v nosetests)
+  coverage run --source=cherrymusicserver,cmbootstrap,audiotranscode $(command -v nosetests)
 
 after_success:
   coveralls
