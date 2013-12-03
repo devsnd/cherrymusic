@@ -227,7 +227,17 @@ everybody has to relogin now.''')
             raise cherrypy.HTTPRedirect(self.getBaseUrl(), 302)
         cherrypy.session.release_lock()
         if cherry.config['media.transcode'] and len(args):
-            newformat = args[-1][4:]  # get.format
+             # transcoder parameters are encoded as filename, e.g.
+             # 'get.192.mp3' request the file to be a 192kbit mp3
+            trans_params = args[-1].split('.')
+            if len(trans_params) == 2:
+                bitrate = None # use default bitrate
+                newformat =  trans_params[1]
+            elif len(trans_params) == 3:
+                bitrate = int(trans_params[1])
+                newformat =  trans_params[2]
+            else:
+                raise cherrypy.HTTPError(400, 'Bad Request')
             path = os.path.sep.join(args[:-1])
             """ugly workaround for #273, should be handled somewhere in
             cherrypy, but don't know where...
@@ -240,7 +250,7 @@ everybody has to relogin now.''')
             transcoder = audiotranscode.AudioTranscode()
             mimetype = transcoder.mimeType(newformat)
             cherrypy.response.headers["Content-Type"] = mimetype
-            return transcoder.transcodeStream(fullpath, newformat)
+            return transcoder.transcodeStream(fullpath, newformat, bitrate=bitrate)
     trans.exposed = True
     trans._cp_config = {'response.stream': True}
 
