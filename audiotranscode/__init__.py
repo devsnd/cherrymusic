@@ -11,6 +11,7 @@ MimeTypes = {
     'aac' : 'audio/aac',
     'm4a' : 'audio/m4a',
     'wav' : 'audio/wav',
+    'wma' : 'audio/x-ms-wma',
 }
 
 class Transcoder(object):
@@ -100,6 +101,7 @@ class AudioTranscode:
         #filepath must be appendable!
         Decoder('mp3'  , ['mpg123', '-w', '-', 'INPUT']),
         Decoder('mp3'  , ['ffmpeg', '-i', 'INPUT', '-f', 'wav', '-acodec', 'pcm_s16le', '-']),
+        Decoder('wma'  , ['ffmpeg', '-i', 'INPUT', '-f', 'wav', '-acodec', 'pcm_s16le', '-']),
         Decoder('ogg'  , ['oggdec', '-Q','-b', '16', '-o', '-', 'INPUT']),
         Decoder('ogg'  , ['ffmpeg', '-i', 'INPUT', '-f', 'wav', '-acodec', 'pcm_s16le', '-']),
         Decoder('flac' , ['flac', '-F','-d', '-c', 'INPUT']),
