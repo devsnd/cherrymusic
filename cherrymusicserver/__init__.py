@@ -41,7 +41,11 @@ import signal
 
 import gettext
 from cherrymusicserver import pathprovider
-gettext.install('cherrymusic', localedir=pathprovider.getResourcePath('i18n/po'))
+
+if sys.version_info < (3,):
+    gettext.install('cherrymusic', unicode=True, localedir=pathprovider.getResourcePath('i18n/po'))
+else:
+    gettext.install('cherrymusic', localedir=pathprovider.getResourcePath('i18n/po'))
 
 
 # woraround for cherrypy 3.2.2:
