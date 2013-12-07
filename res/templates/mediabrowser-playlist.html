@@ -2,12 +2,12 @@
     <div class="playlist-browser-list-item-container">
         <div>
             <div class="playlist-detail-switch">
-                <a href="javascript:;" onclick="loadPlaylistContent({{playlistid}}, '{{playlistlabel}}')">
+                <a href="javascript:;" onclick="loadPlaylistContent({{playlistid}}, &quot;{{playlistlabel}}&quot;)">
                     <span class="glyphicon glyphicon-chevron-right"></span>
                 </a>
             </div>
             <div class="playlist-title">
-                <a href="javascript:;" onclick="loadPlaylist({{playlistid}}, '{{playlistlabel}}')">
+                <a href="javascript:;" onclick="loadPlaylist({{playlistid}}, &quot;{{playlistlabel}}&quot;)">
                     {{playlistlabel}}
                 </a>
             </div>
@@ -29,7 +29,7 @@
             {{#candelete}}
             <div class="playlist-deletebutton">
                 <a href="javascript:;" class="btn btn-xs btn-danger"
-                   onclick="confirmDeletePlaylist({{playlistid}}, '{{playlistlabel}}')">&times;</a>
+                   onclick="confirmDeletePlaylist({{playlistid}}, &quot;{{playlistlabel}}&quot;)">&times;</a>
             </div>
             {{/candelete}}
         </div>
