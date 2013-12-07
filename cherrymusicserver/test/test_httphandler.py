@@ -28,7 +28,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
+from mock import *
 import unittest
+
 import json
 
 import cherrymusicserver as cherry
@@ -64,12 +66,8 @@ class CherryPyMock:
     def __init__(self):
         self.session = {'admin': False}
 
-class MockPlaylistDB:
-    def __init__(self):
-        pass
-
-    def getName(self, val, userid):
-        return str(val)+str(userid)
+from cherrymusicserver.playlistdb import PlaylistDB
+MockPlaylistDB = Mock(spec=PlaylistDB)
 service.provide('playlist', MockPlaylistDB)
 
 
@@ -84,6 +82,15 @@ class TestHTTPHandler(unittest.TestCase):
 
     def tearDown(self):
         pass
+
+    def call_api(self, action, **data):
+        always_auth = lambda _: True
+        root_id = lambda _: 1
+        with patch('cherrymusicserver.httphandler.HTTPHandler.isAuthorized', always_auth):
+            with patch('cherrymusicserver.httphandler.HTTPHandler.getUserId', root_id):
+                return self.http.api(action, data=json.dumps(data))
+
+
 
     def test_api_search(self):
         """when attribute error is raised, this means that cherrypy
@@ -104,9 +111,13 @@ class TestHTTPHandler(unittest.TestCase):
         """when attribute error is raised, this means that cherrypy
         session is used to authenticate the http request."""
         self.assertRaises(AttributeError, self.http.api, 'saveplaylist')
-        
+
     def test_api_deleteplaylist(self):
-        pass #needs to be tested in playlistdb
+        try:
+            print(self.call_api('deleteplaylist', playlistid=13))
+        except httphandler.cherrypy.HTTPError as e:
+            print(e)
+        MockPlaylistDB.deletePlaylist.assert_called_with(13, ANY, override_owner=False)
 
     def test_api_loadplaylist(self):
         pass #needs to be tested in playlistdb

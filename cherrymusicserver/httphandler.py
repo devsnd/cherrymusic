@@ -455,8 +455,8 @@ everybody has to relogin now.''')
         else:
             raise cherrypy.HTTPError(400, res)
 
-    def api_deleteplaylist(self):
-        res = self.playlistdb.deletePlaylist(value,
+    def api_deleteplaylist(self, playlistid):
+        res = self.playlistdb.deletePlaylist(playlistid,
                                              self.getUserId(),
                                              override_owner=False)
         if res == "success":
