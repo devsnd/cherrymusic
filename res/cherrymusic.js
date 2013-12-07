@@ -660,7 +660,7 @@ function userDelete(userid){
         updateUserList();
     };
     busy('#adminuserlist').hide().fadeIn('fast');
-    api('setuseroptionfor',
+    api('userdelete',
         { 'userid':userid },
         success,
         errorFunc('failed to delete user'),

@@ -207,10 +207,19 @@ class TestHTTPHandler(unittest.TestCase):
         session is used to authenticate the http request."""
         self.assertRaises(AttributeError, self.http.api, 'getuseroptions')
 
-    def test_api_userdelete(self):
+    def test_api_userdelete_needs_auth(self):
         """when attribute error is raised, this means that cherrypy
         session is used to authenticate the http request."""
         self.assertRaises(AttributeError, self.http.api, 'userdelete')
+
+    def test_api_userdelete_call(self):
+        session = {'userid': 1, 'admin': True}
+        userdb = Mock()
+        with patch('cherrypy.session', session, create=True):
+            with patch('cherrymusicserver.service.get') as service:
+                service.return_value = userdb
+                self.call_api('userdelete', userid=13)
+        userdb.deleteUser.assert_called_with(13)
 
     def test_api_heartbeat(self):
         """when attribute error is raised, this means that cherrypy

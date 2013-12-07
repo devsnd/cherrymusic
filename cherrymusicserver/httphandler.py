@@ -550,11 +550,10 @@ everybody has to relogin now.''')
         else:
             raise cherrypy.HTTPError(403, "Forbidden")
 
-    def api_userdelete(self):
-        params = json.loads(value)
-        is_self = cherrypy.session['userid'] == params['userid']
+    def api_userdelete(self, userid):
+        is_self = cherrypy.session['userid'] == userid
         if cherrypy.session['admin'] and not is_self:
-            deleted = self.userdb.deleteUser(params['userid'])
+            deleted = self.userdb.deleteUser(userid)
             return 'success' if deleted else 'failed'
         else:
             return "You didn't think that would work, did you?"
