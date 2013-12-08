@@ -222,28 +222,26 @@ everybody has to relogin now.''')
             cherrypy.HTTPRedirect(cherrypy.url(), 302)
             return ''
 
-    def trans(self, *args):
+    def trans(self, newformat, *path, **params):
         if not self.isAuthorized():
             raise cherrypy.HTTPRedirect(self.getBaseUrl(), 302)
         cherrypy.session.release_lock()
-        if cherry.config['media.transcode'] and len(args):
-             # transcoder parameters are encoded as filename, e.g.
-             # 'get.192.mp3' request the file to be a 192kbit mp3
-            trans_params = args[-1].split('.')
-            if len(trans_params) == 2:
-                bitrate = None # use default bitrate
-                newformat =  trans_params[1]
-            elif len(trans_params) == 3:
-                bitrate = int(trans_params[1])
-                newformat =  trans_params[2]
-            else:
-                raise cherrypy.HTTPError(400, 'Bad Request')
-            path = os.path.sep.join(args[:-1])
+        if cherry.config['media.transcode'] and path:
+            bitrate = params.pop('bitrate', None) or None  # catch empty strings
+            if bitrate:
+                try:
+                    bitrate = int(bitrate)
+                    if bitrate < 1:
+                        raise ValueError()
+                except (TypeError, ValueError):
+                    raise cherrypy.HTTPError(400, "Bad query: "
+                        "bitrate ({0!r}) must be an integer > 0".format(str(bitrate)))
+            path = os.path.sep.join(path)
             """ugly workaround for #273, should be handled somewhere in
             cherrypy, but don't know where...
             """
             if sys.version_info < (3, 0):
-                path = path
+                path = path.decode('utf-8')     # make it work with non-ascii
             else:
                 path = codecs.decode(codecs.encode(path, 'latin1'), 'utf-8')
             fullpath = os.path.join(cherry.config['media.basedir'], path)
