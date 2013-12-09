@@ -302,11 +302,6 @@ function submitsearch(){
 INTERACTION
 ***/
 
-function showAlbumArtChangePopOver(jqobj){
-    // relative img paths so cherrymusic can run in subdir (#344)
-    jqobj.popover({selector: jqobj.siblings('img'), title: 'Change cover art', html: true, content: '<img src="res/img/folder.png" /><img src="res/img/folder.png" /><img src="res/img/folder.png" />'});
-}
-
 
 /* PLAYLIST CREATION AND MANAGEMENT END*/
 
@@ -1086,6 +1081,21 @@ $(document).ready(function(){
     $('#saveplaylistmodal').on('hide', function(){
         $('#playlisttitle').unbind('keyup');
     });
+
+    $('#changeAlbumArt').on('shown.bs.modal', function(){
+        //empty old search results
+        $('#changeAlbumArt .coverart-tryout').empty();
+        //set input field in modal
+        $("#albumart-search-term").val(decodeURIComponent($('#changeAlbumArt').attr('data-dirname')));
+        $("#albumart-search-term").focus();
+        //when pressing enter, the search should start:
+        $("#albumart-search-term").off('keypress').on('keypress', function(e){
+            if (e.keyCode == '13' || e.which == '13'){
+                searchAlbumArt();
+            }
+        });
+    });
+
     $('#changePassword').on('show.bs.modal', function(){
         //$('#changePassword').data('modal').options.focusOn = '#oldpassword-change';
     });
