@@ -33,6 +33,8 @@ import unittest
 
 import json
 
+from contextlib import contextmanager
+
 import cherrymusicserver as cherry
 
 from cherrymusicserver import configuration
@@ -71,6 +73,16 @@ MockPlaylistDB = Mock(spec=PlaylistDB)
 service.provide('playlist', MockPlaylistDB)
 
 
+@contextmanager
+def mock_auth():
+    ''' Context where user 1 is logged in '''
+    always_auth = lambda _: True
+    root_id = lambda _: 1
+    with patch('cherrymusicserver.httphandler.HTTPHandler.isAuthorized', always_auth):
+        with patch('cherrymusicserver.httphandler.HTTPHandler.getUserId', root_id):
+            yield
+
+
 class TestHTTPHandler(unittest.TestCase):
     def setUp(self):
         self.http = httphandler.HTTPHandler(cherry.config)
@@ -84,11 +96,8 @@ class TestHTTPHandler(unittest.TestCase):
         pass
 
     def call_api(self, action, **data):
-        always_auth = lambda _: True
-        root_id = lambda _: 1
-        with patch('cherrymusicserver.httphandler.HTTPHandler.isAuthorized', always_auth):
-            with patch('cherrymusicserver.httphandler.HTTPHandler.getUserId', root_id):
-                return self.http.api(action, data=json.dumps(data))
+        with mock_auth():
+            return self.http.api(action, data=json.dumps(data))
 
 
 
@@ -253,6 +262,19 @@ class TestHTTPHandler(unittest.TestCase):
         session is used to authenticate the http request."""
         self.assertRaises(AttributeError, self.http.api, 'userchangepassword')
 
+    def test_trans(self):
+        import os
+        config = {'media.basedir': 'BASEDIR', 'media.transcode': True}
+        with mock_auth():
+            with patch('cherrymusicserver.httphandler.cherry.config', config):
+                with patch('cherrymusicserver.httphandler.cherrypy'):
+                    with patch('cherrymusicserver.httphandler.audiotranscode.AudioTranscode') as transcoder:
+                        transcoder.return_value = transcoder
+                        expectPath = os.path.join(config['media.basedir'], 'path')
+
+                        httphandler.HTTPHandler(config).trans('newformat', 'path', bitrate=111)
+
+                        transcoder.transcodeStream.assert_called_with(expectPath, 'newformat', bitrate=111)
 
 
 if __name__ == "__main__":
