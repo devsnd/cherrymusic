@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-11-04 16:46+0100\n"
+"POT-Creation-Date: 2013-12-15 17:37+0100\n"
 "PO-Revision-Date: 2013-12-04 12:29+0100\n"
 "Last-Translator: til <tilman.boerner@gmx.net>\n"
 "Language-Team: Spanish\n"
@@ -17,15 +17,19 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: cherrymusicserver/i18n_client.py:3
+#: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/metainfo.py:42
+msgid "python library \"stagger\" not found: There will be no ID-tag support!"
+msgstr ""
+
+#: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/i18n_client.py:3
 msgid "track has no path set!"
 msgstr ""
 
-#: cherrymusicserver/i18n_client.py:4
+#: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/i18n_client.py:4
 msgid "track has no label set!"
 msgstr ""
 
-#: cherrymusicserver/__init__.py:55
+#: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/__init__.py:111
 #, python-format
 msgid ""
 "\n"
@@ -34,7 +38,7 @@ msgid ""
 "Required version: %(required_version)s or higher\n"
 msgstr ""
 
-#: cherrymusicserver/__init__.py:134
+#: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/__init__.py:185
 #, python-format
 msgid ""
 "============================================\n"
@@ -44,20 +48,20 @@ msgid ""
 "============================================"
 msgstr ""
 
-#: cherrymusicserver/__init__.py:147
+#: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/__init__.py:199
 msgid "Error removing pid file, doesn't exist!"
 msgstr ""
 
-#: cherrymusicserver/__init__.py:169
+#: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/__init__.py:231
 #, python-brace-format
 msgid "New configuration file was written to:{br}{path}"
 msgstr ""
 
-#: cherrymusicserver/__init__.py:191
+#: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/__init__.py:256
 msgid "database schema update aborted. quitting."
 msgstr ""
 
-#: cherrymusicserver/__init__.py:207
+#: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/__init__.py:274
 #, python-brace-format
 msgid ""
 "\n"
@@ -77,7 +81,7 @@ msgid ""
 "Run schema update? [y/N]: "
 msgstr ""
 
-#: cherrymusicserver/__init__.py:254
+#: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/__init__.py:334
 #, python-format
 msgid ""
 "New configuration options available:\n"
@@ -85,20 +89,20 @@ msgid ""
 "                    Using default values for now."
 msgstr ""
 
-#: cherrymusicserver/__init__.py:259
+#: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/__init__.py:339
 #, python-format
 msgid ""
 "The following configuration options are not used anymore:\n"
 "                        %s"
 msgstr ""
 
-#: cherrymusicserver/__init__.py:263
+#: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/__init__.py:343
 msgid ""
 "Start with --newconfig to generate a new default config file next to your "
 "current one."
 msgstr ""
 
-#: cherrymusicserver/__init__.py:267
+#: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/__init__.py:347
 #, python-brace-format
 msgid ""
 "\n"
@@ -113,14 +117,14 @@ msgid ""
 "    $ mv {src} {tgt}"
 msgstr ""
 
-#: cherrymusicserver/__init__.py:290
+#: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/__init__.py:370
 msgid ""
 "\n"
 "==========================================================================\n"
 "Welcome to CherryMusic "
 msgstr ""
 
-#: cherrymusicserver/__init__.py:374
+#: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/__init__.py:468
 #, python-format
 msgid "Starting server on port %s ..."
 msgstr ""
