@@ -799,7 +799,7 @@ class MemoryDB:
         log.i(_("Loading files database into memory..."))
         self.db = sqlite3.connect(':memory:', check_same_thread=False)
         cu = self.db.cursor()
-        cu.execute(_('attach database "%s" as attached_db') % db_file)
+        cu.execute('attach database "%s" as attached_db' % db_file)
         cu.execute("select sql from attached_db.sqlite_master "
                    "where type='table' and name='" + table_to_dump + "'")
         sql_create_table = cu.fetchone()[0]

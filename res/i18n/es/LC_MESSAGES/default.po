@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-12-15 21:56+0100\n"
+"POT-Creation-Date: 2013-12-15 22:23+0100\n"
 "PO-Revision-Date: 2013-12-04 12:29+0100\n"
 "Last-Translator: til <tilman.boerner@gmx.net>\n"
 "Language-Team: Spanish\n"
@@ -198,11 +198,6 @@ msgstr ""
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:799
 msgid "Loading files database into memory..."
-msgstr ""
-
-#: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:802
-#, python-format
-msgid "attach database \"%s\" as attached_db"
 msgstr ""
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/i18n_client.py:3

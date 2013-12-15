@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CherryMusic 0.27.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-12-15 21:56+0100\n"
-"PO-Revision-Date: 2013-12-15 17:40+0100\n"
+"POT-Creation-Date: 2013-12-15 22:23+0100\n"
+"PO-Revision-Date: 2013-12-15 22:23+0100\n"
 "Last-Translator: \n"
 "Language-Team:  <tomwallroth@gmail.com>\n"
 "Language: de_DE\n"
@@ -21,192 +21,190 @@ msgstr ""
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/metainfo.py:42
 msgid "python library \"stagger\" not found: There will be no ID-tag support!"
 msgstr ""
-"python bibliothek \"stagger\" nicht gefunden: keine Unterstuetzung von ID-"
+"Python Bibliothek \"stagger\" nicht gefunden: keine Unterstuetzung von ID-"
 "tags!"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:111
 msgid "terms must not contain ''"
-msgstr ""
+msgstr "begriffe duerfen '' nicht enthalten"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:150
 #, python-format
 msgid "searching for a maximum of %s files"
-msgstr ""
+msgstr "suche nach maximal %s dateien"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:157
 msgid "file id fetching"
-msgstr ""
+msgstr "holen der file ids"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:162
 msgid "sorting results by fileid occurrences"
-msgstr ""
+msgstr "sortiere Ergebnisse nach Anzahl der Vorkommnisse"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:175
 #, python-format
 msgid "querying fullpaths for %s fileIds"
-msgstr ""
+msgstr "Abfragen des vollen Pfades fuer %s fileIds"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:178
 #, python-format
 msgid "querying fullpaths for %s fileIds, files only"
-msgstr ""
+msgstr "Abfragen des vollen Pfades fuer %s fileIds, nur Dateien"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:191
 #, python-format
 msgid "media cache cannot listdir %r: path not in database"
 msgstr ""
+"media cache kann Verzeichnis %r nicht listen: Pfad nicht in Datenbank "
+"gefunden"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:289
 #, python-format
 msgid "wrong encoding for filename '%s' (%s)"
-msgstr ""
+msgstr "Falsche Dateinamen-Enkodierung fuer '%s' (%s)"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:322
 #, python-format
 msgid "removing dead reference(s): %s \"%s\""
-msgstr ""
+msgstr "Entferne obsolete Referenzen: %s \"%s\""
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:342
 #, python-format
 msgid "error while removing dead reference(s): %s"
-msgstr ""
+msgstr "Fehler beim entfernen obsoleter Referenzen: %s"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:343
 msgid "rolled back to safe state."
-msgstr ""
+msgstr "Zu sicherem Status zurueckgekehrt."
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:360
 #, python-format
 msgid "error removing entry for %s"
-msgstr ""
+msgstr "Fehler beim entfernen des Eintrages %s"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:438
 #, python-format
 msgid "media base directory: %r"
-msgstr ""
+msgstr "Medien Ober-Ordner: %r"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:446
 msgid "running full update..."
-msgstr ""
+msgstr "Starte volles Update..."
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:450
 msgid "error during media update. database update incomplete."
-msgstr ""
+msgstr "Fehler beim Medien-Update. Datenbank-Update nicht abgeschlossen."
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:453
 msgid "media database update complete."
-msgstr ""
+msgstr "Medien-Datenbank Update abgeschlossen."
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:459
 #, python-format
 msgid "updating paths: %s"
-msgstr ""
+msgstr "Aktualisiere Pfade: %s"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:465
 #, python-format
 msgid "path is not in basedir. skipping %r"
-msgstr ""
+msgstr "Pfad ist nicht im \"basedir\". ueberspringe: %r"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:467
 #, python-format
 msgid "updating %r..."
-msgstr ""
+msgstr "aktualisiere %r..."
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:471
 #, python-format
 msgid "update incomplete: %r"
-msgstr ""
+msgstr "Aktualisierung unvollstaendig: %r"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:473
 msgid "done updating paths."
-msgstr ""
+msgstr "Pfadaktualisierung abgeschlossen."
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:492
 #, python-format
 msgid "recursive update for %s"
-msgstr ""
+msgstr "Rekursive Aktualisierung von %s"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:528
 #, python-format
 msgid "error while updating media: %s %s"
-msgstr ""
+msgstr "Fehler beim Aktualisieren der Medien: %s %s"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:529
 msgid "rollback to previous commit."
-msgstr ""
+msgstr "Wiederherstellung der zuvorigen Zustands."
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:534
 #, python-format
 msgid "items added %d, removed %d"
-msgstr ""
+msgstr "Eintraege hinzugefuegt %d, geloescht %d"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:538
 msgid "updating word occurrences..."
-msgstr ""
+msgstr "Aktualisiere Wortvorkommnisse..."
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:582
 #, python-format
 msgid "argument must be an abolute path: \"%s\""
-msgstr ""
+msgstr "Argument muss ein absoluter Pfad sein! \"%s\""
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:583
 #, python-format
 msgid "argument must be a path in basedir (%s): \"%s\""
-msgstr ""
+msgstr "Argument muss ein Pfad im \"basedir\" (%s) sein! \"%s\""
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:592
 #, python-format
 msgid "parent path not in database: %r"
-msgstr ""
+msgstr "Ueberliegender Pfad nicht in Datenbank: %r"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:596
 msgid "shouldn't get here! (argument path not in basedir)"
-msgstr ""
+msgstr "shouldn't get here! (argument path not in basedir)"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:649
 #, python-format
 msgid "creating database entry for %r"
-msgstr ""
+msgstr "Erstelle Datenbankeintrag fuer %r"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:666
 #, python-format
 msgid "unable to decode filename %r in %r; skipping."
-msgstr ""
+msgstr "Kann den Dateinamen %r nicht in in %r dekodieren; ueberspringe."
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:674
 #, python-format
 msgid "expecting unicode path, got %s"
-msgstr ""
+msgstr "Erwartete unicode Pfad, erhielt %s"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:684
 #, python-format
 msgid ""
 "non-root filepaths must be direct relative to parent: path: %s, parent: %s"
 msgstr ""
+"non-root filepaths must be direct relative to parent: path: %s, parent: %s"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:766
 #, python-format
 msgid "cannot list directory: %s"
-msgstr ""
+msgstr "Kann Veryeichnis nicht listen: %s"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:775
 #, python-format
 msgid "file not found: %s. skipping."
-msgstr ""
+msgstr "Datei nicht gefunden: %s. ueberspringe."
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:778
 #, python-format
 msgid "file not in basedir: %s. skipping."
-msgstr ""
+msgstr "Datei ist nicht im \"basedir\": %s. ueberspringe."
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:799
 msgid "Loading files database into memory..."
-msgstr ""
-
-#: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/sqlitecache.py:802
-#, python-format
-msgid "attach database \"%s\" as attached_db"
-msgstr ""
+msgstr "Lade Datenbank in den Arbeitsspeicher..."
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/i18n_client.py:3
 msgid "track has no path set!"
@@ -218,147 +216,147 @@ msgstr "Track hat kein Titel!"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/userdb.py:52
 msgid "empty username or password!"
-msgstr ""
+msgstr "Benutzername oder Passwort leer!"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/userdb.py:73
 msgid "not a valid password"
-msgstr ""
+msgstr "kein gueltiges Passwort"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/userdb.py:153
 msgid "name must not be empty"
-msgstr ""
+msgstr "Name darf nicht leer sein"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/userdb.py:155
 msgid "password must not be empty"
-msgstr ""
+msgstr "Passwort darf nicht leer sein"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:215
 #, python-format
 msgid "%d years ago"
-msgstr ""
+msgstr "vor %d Jahren"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:217
 msgid "a year ago"
-msgstr ""
+msgstr "vor einem Jahr"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:220
 #, python-format
 msgid "%d months ago"
-msgstr ""
+msgstr "vor %d Monaten"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:222
 msgid "a month ago"
-msgstr ""
+msgstr "vor einem Monat"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:225
 #, python-format
 msgid "%d weeks ago"
-msgstr ""
+msgstr "vor %d Wochen"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:227
 msgid "a week ago"
-msgstr ""
+msgstr "vor einer Woche"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:230
 #, python-format
 msgid "%d days ago"
-msgstr ""
+msgstr "vor %d Tagen"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:232
 msgid "a day ago"
-msgstr ""
+msgstr "Gestern"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:235
 #, python-format
 msgid "%d hours ago"
-msgstr ""
+msgstr "vor %d Stunden"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:237
 msgid "an hour ago"
-msgstr ""
+msgstr "vor einer Stunde"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:239
 msgid "half an hour ago"
-msgstr ""
+msgstr "vor einer halben Stunde"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:242
 #, python-format
 msgid "%d minutes ago"
-msgstr ""
+msgstr "vor %d Minuten"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:244
 msgid "a minute ago"
-msgstr ""
+msgstr "vor einer Minute"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:246
 msgid "a few seconds ago"
-msgstr ""
+msgstr "vor ein paar Sekunden"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:250
 #, python-format
 msgid "in %d years"
-msgstr ""
+msgstr "in %d Jahren"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:252
 msgid "in a year"
-msgstr ""
+msgstr "in einem Jahr"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:255
 #, python-format
 msgid "in %d months"
-msgstr ""
+msgstr "in %d Monaten"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:257
 msgid "in a month"
-msgstr ""
+msgstr "in einem Monat"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:260
 #, python-format
 msgid "in %d weeks"
-msgstr ""
+msgstr "in %d Wochen"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:262
 msgid "in a week"
-msgstr ""
+msgstr "in einer Woche"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:265
 #, python-format
 msgid "in %d days"
-msgstr ""
+msgstr "in %d Tagen"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:267
 msgid "in a day"
-msgstr ""
+msgstr "Morgen"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:270
 #, python-format
 msgid "in %d hours"
-msgstr ""
+msgstr "in %d Stunden"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:272
 msgid "in an hour"
-msgstr ""
+msgstr "in einer Stunde"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:274
 msgid "in half an hour"
-msgstr ""
+msgstr "in einer halben Stunde"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:277
 #, python-format
 msgid "in %d minutes"
-msgstr ""
+msgstr "in %d Minuten"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:279
 msgid "in a minute"
-msgstr ""
+msgstr "in einer Minute"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:281
 msgid "in a few seconds"
-msgstr ""
+msgstr "in ein paar Sekunden"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/util.py:283
 msgid "just now"
-msgstr ""
+msgstr "jetzt gerade"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/__init__.py:111
 #, python-format
@@ -508,16 +506,19 @@ msgstr "Starte Server auf Port %s ..."
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/playlistdb.py:54
 msgid "This playlist doesn't exist! Nothing deleted!"
-msgstr ""
+msgstr "Playlist existiert nicht, nichts geloescht!"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/playlistdb.py:56
 msgid "This playlist belongs to another user! Nothing deleted."
-msgstr ""
+msgstr "Playlist gehoert einem anderen Benutzer, nichts geloescht!"
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/playlistdb.py:63
 msgid "I will not create an empty playlist. sorry."
-msgstr ""
+msgstr "Ich kann keine leere Playlist erstellen, sorry."
 
 #: /home/tom/project/cherrymusic/cherrymusic/res/i18n/../../cherrymusicserver/playlistdb.py:84
 msgid "This playlist name already exists! Nothing saved."
-msgstr ""
+msgstr "Dieser Playlistname existiert bereits! Nichts gespeichert."
+
+#~ msgid "attach database \"%s\" as attached_db"
+#~ msgstr "attach database \"%s\" as attached_db"
