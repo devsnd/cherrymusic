@@ -75,8 +75,8 @@ class AlbumArtFetcher:
             },
         }
         if not method in self.methods:
-            log.e('unknown album art fetch method: %s, using default.'
-                  % self.method)
+            log.e(_('''unknown album art fetch method: '%(method)s', using default.'''),
+                  {'method': method})
             method = 'amazon'
         self.method = method
         self.timeout = timeout
@@ -117,7 +117,7 @@ class AlbumArtFetcher:
 
     def fetchurls(self, searchterm):
         """fetch image urls based on the provided searchterms
-        
+
         Returns:
             list of urls
         """
@@ -142,7 +142,7 @@ class AlbumArtFetcher:
         fetch an image using the provided search term
         encode the searchterms and retrieve an image from one of the
         image providers
-        
+
         Returns:
             an http header and binary data
         """

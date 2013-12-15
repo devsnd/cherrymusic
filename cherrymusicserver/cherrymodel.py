@@ -54,7 +54,6 @@ except ImportError:
 
 import cherrymusicserver as cherry
 from cherrymusicserver import service
-from cherrymusicserver import util
 from cherrymusicserver import pathprovider
 from cherrymusicserver.util import Performance
 from cherrymusicserver import resultorder
@@ -86,7 +85,6 @@ class CherryModel:
         return upper
 
     def sortFiles(self, files, fullpath=''):
-        upper_case_filename = lambda x: pathprovider.filename(x).upper()
         # sort alphabetically (case insensitive, make sure numbers are
         # sorted correctly)
         sortedfiles = sorted(files, key=CherryModel.fileSortFunc)
@@ -165,10 +163,10 @@ class CherryModel:
         tweaks = cherry.tweak.CherryModelTweaks
         user = cherrypy.session.get('username', None)
         if user:
-            log.d(user+' searched for "'+term+'"')
+            log.d(_("%(user)s searched for '%(term)s'"), {'user': user, 'term': term})
         max_search_results = cherry.config['search.maxresults']
         results = self.cache.searchfor(term, maxresults=max_search_results)
-        with Performance('sorting DB results using ResultOrder'):
+        with Performance(_('sorting DB results using ResultOrder')):
             debug = tweaks.result_order_debug
             order_function = resultorder.ResultOrder(term, debug=debug)
             results = sorted(results, key=order_function, reverse=True)
@@ -180,7 +178,7 @@ class CherryModel:
                 for sortedResults in results:
                     sortedResults.debugOutputSort = None  # free ram
 
-        with Performance('checking and classifying results:'):
+        with Performance(_('checking and classifying results:')):
             results = list(filter(isValidMediaFile, results))
         return results
 
@@ -271,27 +269,6 @@ def isValidMediaFile(file):
     if not isplayable(file.path) and not file.dir:
         return False
     return True
-
-
-def createMusicEntryByFilePath(file):
-    """DEPRECATED, files are checked using isValidMediaFile(MusicEntry) now"""
-    strippedpath = strippath(file)
-    #let only playable files appear in the search results
-    playable = isplayable(strippedpath)
-    fullpath = os.path.join(cherry.config['media.basedir'], file)
-
-    if not os.path.exists(fullpath):
-        log.w('search found inexistent file: %r', file)
-        return []
-
-    isfile = os.path.isfile(fullpath)
-    if isfile and not playable:
-        return []
-
-    if isfile:
-        return [MusicEntry(strippedpath)]
-    else:
-        return [MusicEntry(strippedpath, dir=True)]
 
 
 def isplayable(filename):
