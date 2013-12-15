@@ -51,16 +51,16 @@ class PlaylistDB:
         ownerid = cursor.execute(
             "SELECT userid FROM playlists WHERE rowid = ?", (plid,)).fetchone()
         if not ownerid:
-            return "This playlist doesn't exist! Nothing deleted!"
+            return _("This playlist doesn't exist! Nothing deleted!")
         if userid != ownerid[0] and not override_owner:
-            return "This playlist belongs to another user! Nothing deleted."
+            return _("This playlist belongs to another user! Nothing deleted.")
         cursor.execute("""DELETE FROM playlists WHERE rowid = ?""", (plid,))
         self.conn.commit()
         return 'success'
 
     def savePlaylist(self, userid, public, playlist, playlisttitle, overwrite=False):
         if not len(playlist):
-            return 'I will not create an empty playlist. sorry.'
+            return _('I will not create an empty playlist. sorry.')
         duplicateplaylistid = self.conn.execute("""SELECT rowid FROM playlists
             WHERE userid = ? AND title = ?""",(userid,playlisttitle)).fetchone()
         if duplicateplaylistid and overwrite:
@@ -81,7 +81,7 @@ class PlaylistDB:
             self.conn.commit()
             return "success"
         else:
-            return "This playlist name already exists! Nothing saved."
+            return _("This playlist name already exists! Nothing saved.")
 
     def loadPlaylist(self, playlistid, userid):
         cursor = self.conn.cursor()

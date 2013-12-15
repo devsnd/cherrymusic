@@ -108,7 +108,7 @@ class SQLiteCache(object):
     def fetchFileIds(self, terms, maxFileIdsPerTerm, mode):
         """returns list of ids each packed in a tuple containing the id"""
 
-        assert '' not in terms, "terms must not contain ''"
+        assert '' not in terms, _("terms must not contain ''")
         resultlist = []
 
         for term in terms:
@@ -147,19 +147,19 @@ class SQLiteCache(object):
             value = value[:-3]
 
         terms = SQLiteCache.searchterms(value)
-        with Performance('searching for a maximum of %s files' % str(NORMAL_FILE_SEARCH_LIMIT * len(terms))):
+        with Performance(_('searching for a maximum of %s files') % str(NORMAL_FILE_SEARCH_LIMIT * len(terms))):
             if debug:
                 log.d('searchterms')
                 log.d(terms)
             results = []
 
             maxFileIdsPerTerm = NORMAL_FILE_SEARCH_LIMIT
-            with Performance('file id fetching'):
+            with Performance(_('file id fetching')):
                 #unpack tuples
                 fileids = [t[0] for t in self.fetchFileIds(terms, maxFileIdsPerTerm, mode)]
 
             if len(fileids) > NORMAL_FILE_SEARCH_LIMIT:
-                with Performance('sorting results by fileid occurrences'):
+                with Performance(_('sorting results by fileid occurrences')):
                     resultfileids = {}
                     for fileid in fileids:
                         if fileid in resultfileids:
@@ -172,10 +172,10 @@ class SQLiteCache(object):
                     fileids = fileids[:min(len(fileids), NORMAL_FILE_SEARCH_LIMIT)]
 
             if mode == 'normal':
-                with Performance('querying fullpaths for %s fileIds' % len(fileids)):
+                with Performance(_('querying fullpaths for %s fileIds') % len(fileids)):
                     results += self.musicEntryFromFileIds(fileids)
             else:
-                with Performance('querying fullpaths for %s fileIds, files only' % len(fileids)):
+                with Performance(_('querying fullpaths for %s fileIds, files only') % len(fileids)):
                     results += self.musicEntryFromFileIds(fileids,mode=mode)
 
             if debug:
@@ -188,8 +188,8 @@ class SQLiteCache(object):
         targetpath = os.path.join(basedir, path)
         targetdir = self.db_find_file_by_path(targetpath)
         if targetdir is None:
-                        log.e('media cache cannot listdir %r: path not in database', path)
-                        return []
+            log.e(_('media cache cannot listdir %r: path not in database'), path)
+            return []
         return list(map(lambda f: f.basename, self.fetch_child_files(targetdir)))
 
     def randomFileEntries(self, count):
@@ -286,7 +286,7 @@ class SQLiteCache(object):
             self.add_to_search_table(fileobj.uid, word_ids)
             return fileobj
         except UnicodeEncodeError as e:
-            log.e("wrong encoding for filename '%s' (%s)", fileobj.relpath, e.__class__.__name__)
+            log.e(_("wrong encoding for filename '%s' (%s)"), fileobj.relpath, e.__class__.__name__)
 
 
     def add_to_file_table(self, fileobj):
@@ -319,7 +319,7 @@ class SQLiteCache(object):
 
         if progress is None:
             log.i(
-                  'removing dead reference(s): %s "%s"',
+                  _('removing dead reference(s): %s "%s"'),
                   'directory' if fileobj.isdir else 'file',
                   fileobj.relpath,
                   )
@@ -339,8 +339,8 @@ class SQLiteCache(object):
                     remove(item)
                     deld += 1
         except Exception as e:
-            log.e('error while removing dead reference(s): %s', e)
-            log.e('rolled back to safe state.')
+            log.e(_('error while removing dead reference(s): %s'), e)
+            log.e(_('rolled back to safe state.'))
             return 0
         else:
             return deld
@@ -357,7 +357,7 @@ class SQLiteCache(object):
             self.remove_from_files(fileobj.uid)
         except Exception as exception:
             log.ex(exception)
-            log.e('error removing entry for %s', fileobj.relpath)
+            log.e(_('error removing entry for %s'), fileobj.relpath)
             raise exception
 
 
@@ -435,7 +435,7 @@ class SQLiteCache(object):
         if len(basedir) > 1:
             basedir = basedir.rstrip(os.path.sep)
         cherry.config = cherry.config.replace({'media.basedir': basedir})
-        log.d('media base directory: %r' % basedir)
+        log.d(_('media base directory: %r') % basedir)
 
 
     @util.timed
@@ -443,34 +443,34 @@ class SQLiteCache(object):
         '''verify complete media database against the filesystem and make
         necesary changes.'''
 
-        log.i('running full update...')
+        log.i(_('running full update...'))
         try:
             self.update_db_recursive(cherry.config['media.basedir'], skipfirst=True)
         except:
-            log.e('error during media update. database update incomplete.')
+            log.e(_('error during media update. database update incomplete.'))
         finally:
             self.update_word_occurrences()
-            log.i('media database update complete.')
+            log.i(_('media database update complete.'))
 
 
     def partial_update(self, path, *paths):
         basedir = cherry.config['media.basedir']
         paths = (path,) + paths
-        log.i('updating paths: %s' % (paths,))
+        log.i(_('updating paths: %s') % (paths,))
         for path in paths:
             path = os.path.normcase(path)
             abspath = path if os.path.isabs(path) else os.path.join(basedir, path)
             normpath = os.path.normpath(abspath)
             if not normpath.startswith(basedir):
-                log.e('path is not in basedir. skipping %r' % abspath)
+                log.e(_('path is not in basedir. skipping %r') % abspath)
                 continue
-            log.i('updating %r...' % path)
+            log.i(_('updating %r...') % path)
             try:
                 self.update_db_recursive(normpath, skipfirst=False)
             except Exception as exception:
-                log.e('update incomplete: %r', exception)
+                log.e(_('update incomplete: %r'), exception)
         self.update_word_occurrences()
-        log.i('done updating paths.')
+        log.i(_('done updating paths.'))
 
 
     def update_db_recursive(self, fullpath, skipfirst=False):
@@ -489,7 +489,7 @@ class SQLiteCache(object):
                 progress = parent.progress.spawnchild(name)
             return Item(fs, db, parent, progress)
 
-        log.d('recursive update for %s', fullpath)
+        log.d(_('recursive update for %s'), fullpath)
         generator = self.enumerate_fs_with_db(fullpath, itemfactory=factory)
         skipfirst and generator.send(None)
         adds_without_commit = 0
@@ -525,17 +525,17 @@ class SQLiteCache(object):
                         adds_without_commit = 0
                     progress.tick()
         except Exception as exc:
-            log.e("error while updating media: %s %s", exc.__class__.__name__, exc)
-            log.e("rollback to previous commit.")
+            log.e(_("error while updating media: %s %s"), exc.__class__.__name__, exc)
+            log.e(_("rollback to previous commit."))
             traceback.print_exc()
             raise exc
         finally:
             add += adds_without_commit
-            log.i('items added %d, removed %d', add, deld)
+            log.i(_('items added %d, removed %d'), add, deld)
             self.load_db_to_memory()
 
     def update_word_occurrences(self):
-        log.i('updating word occurrences...')
+        log.i(_('updating word occurrences...'))
         self.conn.execute('''UPDATE dictionary SET occurrences = (
                 select count(*) from search WHERE search.drowid = dictionary.rowid
             )''')
@@ -579,8 +579,8 @@ class SQLiteCache(object):
         if Item is None:
             from collections import namedtuple
             Item = namedtuple('Item', 'infs indb parent')
-        assert os.path.isabs(startpath), 'argument must be an abolute path: "%s"' % startpath
-        assert startpath.startswith(basedir), 'argument must be a path in basedir (%s): "%s"' % (basedir, startpath)
+        assert os.path.isabs(startpath), _('argument must be an abolute path: "%s"') % startpath
+        assert startpath.startswith(basedir), _('argument must be a path in basedir (%s): "%s"') % (basedir, startpath)
 
         if not os.path.exists(startpath):
             fsobj = None
@@ -589,11 +589,11 @@ class SQLiteCache(object):
         elif startpath > basedir:
             pathparent, pathbase = os.path.split(startpath)
             fsparent = self.db_find_file_by_path(pathparent, create=True)
-            assert fsparent is not None, 'parent path not in database: %r' % pathparent
+            assert fsparent is not None, _('parent path not in database: %r') % pathparent
             fsobj = File(pathbase, fsparent)
             del pathparent, pathbase, fsparent
         else:
-            assert False, "shouldn't get here! (argument path not in basedir)"
+            assert False, _("shouldn't get here! (argument path not in basedir)")
 
         dbobj = self.db_find_file_by_path(startpath)
         stack = deque()
@@ -646,7 +646,7 @@ class SQLiteCache(object):
             if not found:
                 if create:
                     file = File(part, parent=file)
-                    log.i('creating database entry for %r', file.relpath)
+                    log.i(_('creating database entry for %r'), file.relpath)
                     self.register_file_with_db(file)
                 else:
                     return None
@@ -663,7 +663,7 @@ if sys.version_info < (3,):
             try:
                 yield (name if is_unicode(name) else decode(name, encoding))
             except UnicodeError:
-                log.e('unable to decode filename %r in %r; skipping.',
+                log.e(_('unable to decode filename %r in %r; skipping.'),
                     name, dirname)
 else:
     _unicode_listdir = os.listdir
@@ -671,7 +671,7 @@ else:
 
 class File():
     def __init__(self, path, parent=None, isdir=None, uid= -1):
-        assert isinstance(path, type('')), 'expecting unicode path, got %s' % type(path)
+        assert isinstance(path, type('')), _('expecting unicode path, got %s') % type(path)
 
         if len(path) > 1:
             path = path.rstrip(os.path.sep)
@@ -681,7 +681,7 @@ class File():
             self.basename = os.path.basename(path)
         else:
             if os.path.sep in path:
-                raise ValueError('non-root filepaths must be direct relative to parent: path: %s, parent: %s' % (path, parent))
+                raise ValueError(_('non-root filepaths must be direct relative to parent: path: %s, parent: %s') % (path, parent))
             self.root = parent.root
             self.basename = path
         self.uid = uid
@@ -763,7 +763,7 @@ class File():
                 content = sorted(content, reverse=reverse)
             return (File(name, parent=self) for name in content)
         except OSError as error:
-            log.e('cannot listdir: %s', error)
+            log.e(_('cannot list directory: %s'), error)
             return ()
 
 
@@ -772,10 +772,10 @@ class File():
         basedir = cherry.config['media.basedir']
         for f in files_iter:
             if not f.exists:
-                log.e('file not found: ' + f.fullpath + ' . skipping.')
+                log.e(_('file not found: %s. skipping.' % f.fullpath))
                 continue
             if not f.fullpath.startswith(basedir):
-                log.e('file not in basedir: ' + f.fullpath + ' . skipping.')
+                log.e(_('file not in basedir: %s. skipping.') % f.fullpath)
                 continue
             if f.islink:
                 rp = os.path.realpath(f.fullpath)
@@ -783,23 +783,23 @@ class File():
                     or (os.path.islink(basedir)
                         and
                         os.path.realpath(basedir).startswith(rp)):
-                    log.e("Cyclic symlink found: " + f.relpath +
-                          " creates a circle if followed. Skipping.")
+                    log.e(_(("Cyclic symlink found: %s creates a circle "
+                             "if followed. Skipping.")) % f.relpath)
                     continue
                 if not (f.parent is None or f.parent.parent is None):
-                    log.e("Deeply nested symlink found: " + f.relpath +
-                          " All links must be directly in your basedir (" +
-                          os.path.abspath(basedir) + "). The program cannot"
-                          " safely handle them otherwise. Skipping.")
+                    log.e(_(("Deeply nested symlink found: %s . All links "
+                          "must be directly in your basedir (%s). The "
+                          "program cannot safely handle them otherwise."
+                          " Skipping.")) % (f.relpath, os.path.abspath(basedir)))
                     continue
             yield f
 
 class MemoryDB:
     def __init__(self, db_file, table_to_dump):
-        log.i("Loading files database into memory...")
+        log.i(_("Loading files database into memory..."))
         self.db = sqlite3.connect(':memory:', check_same_thread=False)
         cu = self.db.cursor()
-        cu.execute("attach database '" + db_file + "' as attached_db")
+        cu.execute(_('attach database "%s" as attached_db') % db_file)
         cu.execute("select sql from attached_db.sqlite_master "
                    "where type='table' and name='" + table_to_dump + "'")
         sql_create_table = cu.fetchone()[0]
