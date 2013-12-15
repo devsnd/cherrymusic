@@ -223,34 +223,46 @@ everybody has to relogin now.''')
             return ''
 
     def trans(self, newformat, *path, **params):
+        ''' Transcodes the track given as ``path`` into ``newformat``.
+
+            Streams the response of the corresponding
+            ``audiotranscode.AudioTranscode().transcodeStream()`` call.
+
+            params:
+                bitrate: int for kbps. None or < 1 for default
+        '''
         if not self.isAuthorized():
             raise cherrypy.HTTPRedirect(self.getBaseUrl(), 302)
         cherrypy.session.release_lock()
         if cherry.config['media.transcode'] and path:
+
+            # bitrate
             bitrate = params.pop('bitrate', None) or None  # catch empty strings
             if bitrate:
                 try:
-                    bitrate = int(bitrate)
-                    if bitrate < 1:
-                        raise ValueError()
+                    bitrate = max(0, int(bitrate)) or None  # None if < 1
                 except (TypeError, ValueError):
                     raise cherrypy.HTTPError(400, "Bad query: "
-                        "bitrate ({0!r}) must be an integer > 0".format(str(bitrate)))
+                        "bitrate ({0!r}) must be an integer".format(str(bitrate)))
+
+            # path
             path = os.path.sep.join(path)
-            """ugly workaround for #273, should be handled somewhere in
-            cherrypy, but don't know where...
-            """
-            if sys.version_info < (3, 0):
+            if sys.version_info < (3, 0):       # workaround for #327 (cherrypy issue)
                 path = path.decode('utf-8')     # make it work with non-ascii
             else:
                 path = codecs.decode(codecs.encode(path, 'latin1'), 'utf-8')
             fullpath = os.path.join(cherry.config['media.basedir'], path)
+
             transcoder = audiotranscode.AudioTranscode()
             mimetype = transcoder.mimeType(newformat)
             cherrypy.response.headers["Content-Type"] = mimetype
-            return transcoder.transcodeStream(fullpath, newformat, bitrate=bitrate)
+            try:
+                return transcoder.transcodeStream(fullpath, newformat, bitrate=bitrate)
+            except audiotranscode.TranscodeError as e:
+                raise cherrypy.HTTPError(404, e.value)
     trans.exposed = True
     trans._cp_config = {'response.stream': True}
+
 
     def api(self, *args, **kwargs):
         """calls the appropriate handler from the handlers
