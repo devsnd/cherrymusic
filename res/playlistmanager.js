@@ -638,7 +638,7 @@ PlaylistManager.prototype = {
                 for(var i=0; i<availablejPlayerFormats.length; i++){
                     if(availableEncoders.indexOf(availablejPlayerFormats[i]) !== -1){
                         formats.push(availablejPlayerFormats[i]);
-                        var transurl = SERVER_CONFIG.transcode_path + path + '/get.'+availablejPlayerFormats[i];
+                        var transurl = SERVER_CONFIG.transcode_path + availablejPlayerFormats[i] + '/' + path;
                         track[ext2jPlayerFormat(availablejPlayerFormats[i])] = transurl;
                         window.console.log('added live transcoding '+ext+' --> '+availablejPlayerFormats[i]+' @ '+transurl);
                     }
