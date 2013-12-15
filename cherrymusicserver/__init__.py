@@ -43,9 +43,9 @@ import gettext
 from cherrymusicserver import pathprovider
 
 if sys.version_info < (3,):
-    gettext.install('cherrymusic', unicode=True, localedir=pathprovider.getResourcePath('res/i18n/po'))
+    gettext.install('default', unicode=True, localedir=pathprovider.getResourcePath('res/i18n'))
 else:
-    gettext.install('cherrymusic', localedir=pathprovider.getResourcePath('res/i18n/po'))
+    gettext.install('default', localedir=pathprovider.getResourcePath('res/i18n'))
 
 
 # woraround for cherrypy 3.2.2:
@@ -258,12 +258,12 @@ Run schema update? [y/N]: """).format(
         if new:
             log.i(_('''New configuration options available:
                         %s
-                    Using default values for now.''',
-                  '\n\t\t\t').join(new))
+                    Using default values for now.'''),
+                  '\n\t\t\t'.join(new))
         if deprecated:
             log.i(_('''The following configuration options are not used anymore:
-                        %s''',
-                  '\n\t\t\t').join(deprecated))
+                        %s'''),
+                  '\n\t\t\t'.join(deprecated))
         if new or deprecated:
             log.i(_('Start with --newconfig to generate a new default config'
                     ' file next to your current one.'))
