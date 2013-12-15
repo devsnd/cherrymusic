@@ -12,6 +12,23 @@ body{
     margin: 0 5px;
 }
 
+#motd{
+    left: 50%;
+    position: relative;
+    width: 350px;
+    margin-left: -175px;
+    top: 20px;
+    text-align: center;
+    background-color: #f7f7f7;
+    border-radius: 15px;
+    padding: 10px;
+    color: #aaa;
+}
+
+.feature-list{
+    text-align: left;
+}
+
 #searchresults{
     & ul li{
         border-top: 1px solid @gray-lighter;
@@ -153,6 +170,18 @@ body{
         &-playtime{
             float: left;
             margin: 0 5px 0 0;
+        }
+    }
+}
+
+.album-art{
+    &-choice{
+        display: inline-block;
+        padding: 5px;
+        cursor: pointer;
+
+        &:hover{
+            background-color: @main-color-bright;
         }
     }
 }

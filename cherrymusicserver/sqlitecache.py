@@ -278,19 +278,6 @@ class SQLiteCache(object):
                             )
         return musicEntries
 
-    def fullpath(self, filerowid):
-        """DEPRECATED, musicEntryFromFileId is used instead"""
-        path = ''
-        parent = None
-        while(not parent == -1):
-            #print(self.conn.execute('''EXPLAIN QUERY PLAN SELECT parent, filename, filetype FROM files WHERE rowid=? LIMIT 0,1''', (filerowid,)).fetchall())
-            cursor = self.conn.cursor()
-            cursor.execute('''SELECT parent, filename, filetype FROM files WHERE rowid=? LIMIT 0,1''', (filerowid,))
-            parent, filename, fileext = cursor.fetchone()
-            path = os.path.join(filename + fileext, path)
-            filerowid = parent
-        return os.path.dirname(path)
-
     def register_file_with_db(self, fileobj):
         """add data in File object to relevant tables in media database"""
         try:
@@ -666,15 +653,32 @@ class SQLiteCache(object):
         return file
 
 
+if sys.version_info < (3,):
+    from codecs import decode
+    encoding = sys.getfilesystemencoding()
+    is_unicode = lambda s: isinstance(s, type(''))  # from unicode_literals import
+
+    def _unicode_listdir(dirname):
+        for name in os.listdir(dirname):
+            try:
+                yield (name if is_unicode(name) else decode(name, encoding))
+            except UnicodeError:
+                log.e('unable to decode filename %r in %r; skipping.',
+                    name, dirname)
+else:
+    _unicode_listdir = os.listdir
+
+
 class File():
     def __init__(self, path, parent=None, isdir=None, uid= -1):
+        assert isinstance(path, type('')), 'expecting unicode path, got %s' % type(path)
+
         if len(path) > 1:
             path = path.rstrip(os.path.sep)
         if parent is None:
             self.root = self
-            #python 2.6 workaround, add '' to string to convert to unicode
-            self.basepath = os.path.dirname(path)+''
-            self.basename = os.path.basename(path)+''
+            self.basepath = os.path.dirname(path)
+            self.basename = os.path.basename(path)
         else:
             if os.path.sep in path:
                 raise ValueError('non-root filepaths must be direct relative to parent: path: %s, parent: %s' % (path, parent))
@@ -751,15 +755,15 @@ class File():
     def children(self, sort=True, reverse=True):
         '''If self.isdir and self.exists, return an iterable of fileobjects
         corresponding to its direct content (non-recursive).
-        Otherwise, log a warning and return ().
+        Otherwise, log an error and return ().
         '''
         try:
-            content = os.listdir(self.fullpath)
+            content = _unicode_listdir(self.fullpath)
             if sort:
                 content = sorted(content, reverse=reverse)
             return (File(name, parent=self) for name in content)
         except OSError as error:
-            log.w('cannot listdir: %s', error)
+            log.e('cannot listdir: %s', error)
             return ()
 
 

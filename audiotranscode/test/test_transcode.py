@@ -45,6 +45,7 @@ testfiles = {
     'ogg': os.path.join(inputdir, 'test.ogg'),
     'flac': os.path.join(inputdir, 'test.flac'),
     'wav': os.path.join(inputdir, 'test.wav'),
+    'wma': os.path.join(inputdir, 'test.wma'),
 }
 
 
@@ -85,7 +86,7 @@ def test_generator():
             continue
         for dec in transcoder.Decoders:
             if not dec.filetype in transcoder.availableDecoderFormats():
-                print('Encoder %s not installed!' % (dec.command[0],))
+                print('Decoder %s not installed!' % (dec.command[0],))
                 continue
             if dec.filetype in testfiles:
                 filename = testfiles[dec.filetype]

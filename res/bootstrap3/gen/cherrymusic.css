@@ -450,10 +450,8 @@ dd {
   .dl-horizontal dd:after {
     content: " ";
     /* 1 */
-  
     display: table;
     /* 2 */
-  
   }
   .dl-horizontal dd:after {
     clear: both;
@@ -462,10 +460,8 @@ dd {
   .dl-horizontal dd:after {
     content: " ";
     /* 1 */
-  
     display: table;
     /* 2 */
-  
   }
   .dl-horizontal dd:after {
     clear: both;
@@ -579,10 +575,8 @@ pre code {
 .container:after {
   content: " ";
   /* 1 */
-
   display: table;
   /* 2 */
-
 }
 .container:after {
   clear: both;
@@ -591,10 +585,8 @@ pre code {
 .container:after {
   content: " ";
   /* 1 */
-
   display: table;
   /* 2 */
-
 }
 .container:after {
   clear: both;
@@ -607,10 +599,8 @@ pre code {
 .row:after {
   content: " ";
   /* 1 */
-
   display: table;
   /* 2 */
-
 }
 .row:after {
   clear: both;
@@ -619,10 +609,8 @@ pre code {
 .row:after {
   content: " ";
   /* 1 */
-
   display: table;
   /* 2 */
-
 }
 .row:after {
   clear: both;
@@ -1442,7 +1430,6 @@ input[type="checkbox"] {
   margin: 4px 0 0;
   margin-top: 1px \9;
   /* IE8-9 */
-
   line-height: normal;
 }
 input[type="file"] {
@@ -1704,10 +1691,8 @@ textarea.input-lg {
 .form-horizontal .form-group:after {
   content: " ";
   /* 1 */
-
   display: table;
   /* 2 */
-
 }
 .form-horizontal .form-group:after {
   clear: both;
@@ -1716,10 +1701,8 @@ textarea.input-lg {
 .form-horizontal .form-group:after {
   content: " ";
   /* 1 */
-
   display: table;
   /* 2 */
-
 }
 .form-horizontal .form-group:after {
   clear: both;
@@ -2878,10 +2861,8 @@ input[type="button"].btn-block {
 .btn-toolbar:after {
   content: " ";
   /* 1 */
-
   display: table;
   /* 2 */
-
 }
 .btn-toolbar:after {
   clear: both;
@@ -2890,10 +2871,8 @@ input[type="button"].btn-block {
 .btn-toolbar:after {
   content: " ";
   /* 1 */
-
   display: table;
   /* 2 */
-
 }
 .btn-toolbar:after {
   clear: both;
@@ -2993,10 +2972,8 @@ input[type="button"].btn-block {
 .btn-group-vertical > .btn-group:after {
   content: " ";
   /* 1 */
-
   display: table;
   /* 2 */
-
 }
 .btn-group-vertical > .btn-group:after {
   clear: both;
@@ -3005,10 +2982,8 @@ input[type="button"].btn-block {
 .btn-group-vertical > .btn-group:after {
   content: " ";
   /* 1 */
-
   display: table;
   /* 2 */
-
 }
 .btn-group-vertical > .btn-group:after {
   clear: both;
@@ -3202,10 +3177,8 @@ textarea.input-group-sm > .input-group-btn > .btn {
 .nav:after {
   content: " ";
   /* 1 */
-
   display: table;
   /* 2 */
-
 }
 .nav:after {
   clear: both;
@@ -3214,10 +3187,8 @@ textarea.input-group-sm > .input-group-btn > .btn {
 .nav:after {
   content: " ";
   /* 1 */
-
   display: table;
   /* 2 */
-
 }
 .nav:after {
   clear: both;
@@ -3360,10 +3331,8 @@ textarea.input-group-sm > .input-group-btn > .btn {
 .tabbable:after {
   content: " ";
   /* 1 */
-
   display: table;
   /* 2 */
-
 }
 .tabbable:after {
   clear: both;
@@ -3372,10 +3341,8 @@ textarea.input-group-sm > .input-group-btn > .btn {
 .tabbable:after {
   content: " ";
   /* 1 */
-
   display: table;
   /* 2 */
-
 }
 .tabbable:after {
   clear: both;
@@ -3412,10 +3379,8 @@ textarea.input-group-sm > .input-group-btn > .btn {
 .navbar:after {
   content: " ";
   /* 1 */
-
   display: table;
   /* 2 */
-
 }
 .navbar:after {
   clear: both;
@@ -3424,10 +3389,8 @@ textarea.input-group-sm > .input-group-btn > .btn {
 .navbar:after {
   content: " ";
   /* 1 */
-
   display: table;
   /* 2 */
-
 }
 .navbar:after {
   clear: both;
@@ -3441,10 +3404,8 @@ textarea.input-group-sm > .input-group-btn > .btn {
 .navbar-header:after {
   content: " ";
   /* 1 */
-
   display: table;
   /* 2 */
-
 }
 .navbar-header:after {
   clear: both;
@@ -3453,10 +3414,8 @@ textarea.input-group-sm > .input-group-btn > .btn {
 .navbar-header:after {
   content: " ";
   /* 1 */
-
   display: table;
   /* 2 */
-
 }
 .navbar-header:after {
   clear: both;
@@ -3479,10 +3438,8 @@ textarea.input-group-sm > .input-group-btn > .btn {
 .navbar-collapse:after {
   content: " ";
   /* 1 */
-
   display: table;
   /* 2 */
-
 }
 .navbar-collapse:after {
   clear: both;
@@ -3491,10 +3448,8 @@ textarea.input-group-sm > .input-group-btn > .btn {
 .navbar-collapse:after {
   content: " ";
   /* 1 */
-
   display: table;
   /* 2 */
-
 }
 .navbar-collapse:after {
   clear: both;
@@ -4348,10 +4303,8 @@ body.modal-open,
 .modal-footer:after {
   content: " ";
   /* 1 */
-
   display: table;
   /* 2 */
-
 }
 .modal-footer:after {
   clear: both;
@@ -4360,10 +4313,8 @@ body.modal-open,
 .modal-footer:after {
   content: " ";
   /* 1 */
-
   display: table;
   /* 2 */
-
 }
 .modal-footer:after {
   clear: both;
@@ -4395,10 +4346,8 @@ body.modal-open,
 .clearfix:after {
   content: " ";
   /* 1 */
-
   display: table;
   /* 2 */
-
 }
 .clearfix:after {
   clear: both;
@@ -5053,7 +5002,6 @@ td.visible-print {
 }
 body {
   /*padding for the fixed navbar and the fixed player*/
-
   margin: 50px 0 70px 0;
 }
 .navbar-brand {
@@ -5063,6 +5011,21 @@ body {
   min-width: 30px;
   min-height: 50px;
   margin: 0 5px;
+}
+#motd {
+  left: 50%;
+  position: relative;
+  width: 350px;
+  margin-left: -175px;
+  top: 20px;
+  text-align: center;
+  background-color: #f7f7f7;
+  border-radius: 15px;
+  padding: 10px;
+  color: #aaa;
+}
+.feature-list {
+  text-align: left;
 }
 #searchresults {
   overflow: hidden;
@@ -5084,16 +5047,12 @@ body {
   background-color: #ffffff;
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
   /* IE 5-7 */
-
   filter: alpha(opacity=60);
   /* Netscape */
-
   -moz-opacity: 0.6;
   /* Safari 1.x */
-
   -khtml-opacity: 0.6;
   /* Good browsers */
-
   opacity: 0.6;
 }
 .user-list-item {
@@ -5148,12 +5107,10 @@ body {
     overflow: auto;
     direction: rtl;
     /*scrollbar on the left*/
-  
   }
   #search-panel > div {
     direction: ltr;
     /*back to normal*/
-  
   }
 }
 .playlist-container {
@@ -5189,6 +5146,14 @@ body {
   float: left;
   margin: 0 5px 0 0;
 }
+.album-art-choice {
+  display: inline-block;
+  padding: 5px;
+  cursor: pointer;
+}
+.album-art-choice:hover {
+  background-color: #92bce0;
+}
 .cm-media-list {
   position: relative;
   padding: 0;
@@ -5209,6 +5174,14 @@ body {
   list-style-type: none;
   word-wrap: break-word;
   margin: 5px 5px 5px 0;
+}
+.cm-media-list-wrench {
+  position: relative;
+  float: left;
+  color: #ddd;
+}
+.cm-media-list-wrench:hover {
+  color: #444;
 }
 .cm-media-list > li:nth-child(odd) {
   background-color: #f9f9f9;

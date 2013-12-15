@@ -1,7 +1,7 @@
 .\" Manpage for CherryMusic.
 .\" Contact us on github.com/devsnd/cherrymusic to correct errors or typos.
 
-.TH "CHERRYMUSIC.CONF" "5" "2013\-11\-02" "CherryMusic" "cherrymusic.conf man page"
+.TH "CHERRYMUSIC.CONF" "5" "2013\-11\-19" "CherryMusic" "cherrymusic.conf man page"
 
 .SH "NAME"
 cherrymusic.conf \- configuration file of CherryMusic, see \fBcherrymusic\fP(1)
@@ -40,7 +40,7 @@ This will load parts of the database into memory for improved performance. This 
 
 .IP "[browser]"
 
-." .IP "\fB    pure_database_lookup = True | False\fP"
+.IP "\fB    pure_database_lookup = True | False\fP"
 ." If this option is enabled, CherryMusic will only use the media database \-\- never the filesystem \-\- for content lookups in the file browser and search function. This can be useful if the media files reside on an external hard drive or behind a slow network connection.
 
 .IP "\fB    maxshowfiles = NUMBER\fP"
@@ -80,6 +80,11 @@ This is the path to the SSL certificate that CherryMusic will use for SSL encryp
 
 .IP "\fB    ssl_private_key = /path/to/server.key\fP"
 This is the path to the SSL key that CherryMusic will use for SSL encryption. To take effect, this option needs "ssl_enabled" to be set to "True".
+
+.IP "[general]"
+
+.IP "\fB    update_notification = True | False\fP"
+If enabled, admins are notified about available security and feature updates when logging on in the web interface.
 
 .SH "FILES"
 According to XDG Base Directory Specification, CherryMusic honors $XDG_CONFIG_HOME. If this variable is empty or not set, the configuration file is stored using the standard path:

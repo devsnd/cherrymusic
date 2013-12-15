@@ -98,7 +98,10 @@ try:
             return ValueError(msg)
 
 except ImportError:
-    #python 3.1 and 2.6 workaround
+    # python 3.1 and 2.6 workaround
+    # since python 3.1 and python 2.6 don't have argparse, but only optparse.
+    # our backport module tries to keep them compatible, but some features
+    # are missing (e.g. arguments for options)
     from backport import argparse
 
     class ConfigOptions(ConfigOptionsBase):
@@ -134,6 +137,7 @@ except ImportError:
 parser = argparse.ArgumentParser(description='''CherryMusic Server
 Version ''' + cherrymusicserver.VERSION)
 
+parser.add_argument('--version', dest='info', action='store_true', help='print version info and exit')
 if 'OptionParser' in dir(argparse):
     parser.add_argument('--update', dest='update', nargs=0, default=None, help='update the media database (get Python >= 3.2 or the argparse module to choose paths)')
 else:
@@ -146,12 +150,18 @@ parser.add_argument('--setup', dest='setup', action='store_true', help='Configur
 ConfigOptions.addShortcutOption(parser, ('--port', '-p'), key='server.port', type=int, help='The port the server will listen to.')
 ConfigOptions.addGeneralOption(parser, ('--conf', '-c'), help='Override configuration values')
 
-args = parser.parse_args()
-
-if args.downloadstagger:
-    cmbootstrap.DependencyInstaller().install_stagger()
 
 if __name__ == "__main__":
+    args = parser.parse_args()
+
+    if args.info:
+        print(cherrymusicserver.info())
+        import sys
+        sys.exit(0)
+
+    if args.downloadstagger:
+        cmbootstrap.DependencyInstaller().install_stagger()
+
     cherrymusicserver.CherryMusic(
         update=args.update,
         createNewConfig=args.newconfig,

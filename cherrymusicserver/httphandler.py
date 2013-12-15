@@ -109,6 +109,8 @@ class HTTPHandler(object):
             'compactlistdir': self.api_compactlistdir,
             'listdir': self.api_listdir,
             'fetchalbumart': self.api_fetchalbumart,
+            'fetchalbumarturls': self.api_fetchalbumarturls,
+            'albumart_set': self.api_albumart_set,
             'heartbeat': self.api_heartbeat,
             'getuseroptions': self.api_getuseroptions,
             'setuseroption': self.api_setuseroption,
@@ -225,7 +227,17 @@ everybody has to relogin now.''')
             raise cherrypy.HTTPRedirect(self.getBaseUrl(), 302)
         cherrypy.session.release_lock()
         if cherry.config['media.transcode'] and len(args):
-            newformat = args[-1][4:]  # get.format
+             # transcoder parameters are encoded as filename, e.g.
+             # 'get.192.mp3' request the file to be a 192kbit mp3
+            trans_params = args[-1].split('.')
+            if len(trans_params) == 2:
+                bitrate = None # use default bitrate
+                newformat =  trans_params[1]
+            elif len(trans_params) == 3:
+                bitrate = int(trans_params[1])
+                newformat =  trans_params[2]
+            else:
+                raise cherrypy.HTTPError(400, 'Bad Request')
             path = os.path.sep.join(args[:-1])
             """ugly workaround for #273, should be handled somewhere in
             cherrypy, but don't know where...
@@ -238,7 +250,7 @@ everybody has to relogin now.''')
             transcoder = audiotranscode.AudioTranscode()
             mimetype = transcoder.mimeType(newformat)
             cherrypy.response.headers["Content-Type"] = mimetype
-            return transcoder.transcodeStream(fullpath, newformat)
+            return transcoder.transcodeStream(fullpath, newformat, bitrate=bitrate)
     trans.exposed = True
     trans._cp_config = {'response.stream': True}
 
@@ -349,6 +361,23 @@ everybody has to relogin now.''')
         else:
             return "error: not permitted. Only admins can change other users options"
 
+    def api_fetchalbumarturls(self, searchterm):
+        if not cherrypy.session['admin']:
+            raise cherrypy.HTTPError(401, 'Unauthorized')
+        cherrypy.session.release_lock()
+        fetcher = albumartfetcher.AlbumArtFetcher()
+        imgurls = fetcher.fetchurls(searchterm)
+        # show no more than 10 images
+        return imgurls[:min(len(imgurls), 10)]
+
+    def api_albumart_set(self, directory, imageurl):
+        if not cherrypy.session['admin']:
+            raise cherrypy.HTTPError(401, 'Unauthorized')
+        b64imgpath = albumArtFilePath(directory)
+        fetcher = albumartfetcher.AlbumArtFetcher()
+        data, header = fetcher.retrieveData(imageurl)
+        self.albumartcache_save(b64imgpath, data)
+
     def api_fetchalbumart(self, directory):
         cherrypy.session.release_lock()
 
@@ -426,8 +455,8 @@ everybody has to relogin now.''')
         else:
             raise cherrypy.HTTPError(400, res)
 
-    def api_deleteplaylist(self):
-        res = self.playlistdb.deletePlaylist(value,
+    def api_deleteplaylist(self, playlistid):
+        res = self.playlistdb.deletePlaylist(playlistid,
                                              self.getUserId(),
                                              override_owner=False)
         if res == "success":
@@ -446,17 +475,35 @@ everybody has to relogin now.''')
     def api_generaterandomplaylist(self):
         return [entry.to_dict() for entry in self.model.randomMusicEntries(50)]
 
-    def api_changeplaylist(self, value):
-        params = json.loads(value)
-        is_public = params['attribute'] == 'public'
-        is_valid = type(params['value']) == bool and type(params['plid']) == int
-        if is_public and is_valid:
-            return self.playlistdb.setPublic(userid=self.getUserId(),
-                                             plid=params['plid'],
-                                             value=params['value'])
+    def api_changeplaylist(self, plid, attribute, value):
+        if attribute == 'public':
+            is_valid = type(value) == bool and type(plid) == int
+            if is_valid:
+                return self.playlistdb.setPublic(userid=self.getUserId(),
+                                                 plid=plid,
+                                                 public=value)
 
     def api_getmotd(self):
-        return self.model.motd()
+        if cherrypy.session['admin'] and cherry.config['general.update_notification']:
+            new_versions = self.model.check_for_updates()
+            if new_versions:
+                newest_version = new_versions[0]['version']
+                features = []
+                fixes = []
+                for version in new_versions:
+                    for update in version['features']:
+                        if update.startswith('FEATURE:'):
+                            features.append(update[len('FEATURE:'):])
+                        elif update.startswith('FIX:'):
+                            fixes.append(update[len('FIX:'):])
+                        elif update.startswith('FIXED:'):
+                            fixes.append(update[len('FIXED:'):])
+                retdata = {'type': 'update', 'data': {}}
+                retdata['data']['version'] = newest_version
+                retdata['data']['features'] = features
+                retdata['data']['fixes'] = fixes
+                return retdata
+        return {'type': 'wisdom', 'data': self.model.motd()}
 
     def api_restoreplaylist(self):
         session_playlist = cherrypy.session.get('playlist', [])
@@ -503,11 +550,10 @@ everybody has to relogin now.''')
         else:
             raise cherrypy.HTTPError(403, "Forbidden")
 
-    def api_userdelete(self):
-        params = json.loads(value)
-        is_self = cherrypy.session['userid'] == params['userid']
+    def api_userdelete(self, userid):
+        is_self = cherrypy.session['userid'] == userid
         if cherrypy.session['admin'] and not is_self:
-            deleted = self.userdb.deleteUser(params['userid'])
+            deleted = self.userdb.deleteUser(userid)
             return 'success' if deleted else 'failed'
         else:
             return "You didn't think that would work, did you?"

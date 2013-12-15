@@ -1,6 +1,29 @@
 Changelog
 ---------
 
+0.29.0 (2013-11-10)
+
+ - FEATURE: confirm dialog when closing browser while music is playing
+        can be disabled in the options dialog
+ - FEATURE: tracks names with a leading number are now always ordered correctly
+ - FEATURE: update notifications for server admins
+ - FIXED: resources not found after distutils install on debian based distros
+ - FIXED: tracks playing accidentally after sorting a playlist
+ - FIXED: playlists not being closed properly
+ - FIXED: playlists public/private state not changable
+ - FIXED: remove-played-tracks button resulting in jumping over tracks
+ - IMPROVEMENT: more code documentation
+
+0.28.0 (2013-11-05)
+
+ - FEATURE: playlists can be searched by title or contained tracks
+ - FEATURE: playlists can be sorted by age, user or name
+ - FIXED: playing track not bein highlighted in playlist
+ - FIXED: in browser setup works with new bootstrap 3 layout
+ - FIXED: message of the day is bein displayed again
+ - FIXED: tray icon app crashing when displaying about dialog
+ - IMPROVEMENT: logout button is disabled when using auto-login (less confusing)
+
 0.27.2 (2013-11-03)
 
  - UPDATE: man pages reflect recent changes

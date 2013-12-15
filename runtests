@@ -77,7 +77,7 @@ if [ $SPECIFIC_TEST ]; then
 else
     TEST_LOCATION=""
     COVERAGE_TARGET="audiotranscode,cherrymusicserver,cmbootstrap"
-    COVERAGE_OPTIONS="${COVERAGE_OPTIONS} --cover-package=${COVERAGE_TARGET} --cover-min-percentage=54"
+    COVERAGE_OPTIONS="${COVERAGE_OPTIONS} --cover-package=${COVERAGE_TARGET} --cover-min-percentage=55"
 
     echo
     echo "[distribution]: setup.py check"

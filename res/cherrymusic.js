@@ -44,6 +44,7 @@ var userOptions = undefined;
 var isAdmin = undefined;
 var loggedInUserName = undefined;
 var REMEMBER_PLAYLIST_INTERVAL = 3000;
+var CHECK_MUSIC_PLAYING_INTERVAL = 2000;
 var HEARTBEAT_INTERVAL_MS = 30*1000;
 
 var playlistSelector = '.jp-playlist';
@@ -205,6 +206,7 @@ function loadUserOptions(onSuccess){
         
         $('#misc-show_playlist_download_buttons').attr('checked',userOptions.misc.show_playlist_download_buttons);
         $('#misc-autoplay_on_add').attr('checked',userOptions.misc.autoplay_on_add);
+        $('#ui-confirm_quit_dialog').attr('checked',userOptions.ui.confirm_quit_dialog);
     }
     api('getuseroptions', success);
 }
@@ -299,11 +301,6 @@ function submitsearch(){
 /***
 INTERACTION
 ***/
-
-function showAlbumArtChangePopOver(jqobj){
-    // relative img paths so cherrymusic can run in subdir (#344)
-    jqobj.popover({selector: jqobj.siblings('img'), title: 'Change cover art', html: true, content: '<img src="res/img/folder.png" /><img src="res/img/folder.png" /><img src="res/img/folder.png" />'});
-}
 
 
 /* PLAYLIST CREATION AND MANAGEMENT END*/
@@ -658,7 +655,7 @@ function userDelete(userid){
         updateUserList();
     };
     busy('#adminuserlist').hide().fadeIn('fast');
-    api('setuseroptionfor',
+    api('userdelete',
         { 'userid':userid },
         success,
         errorFunc('failed to delete user'),
@@ -881,11 +878,17 @@ function sendHeartBeat(){
 }
 
 function userOptionCheckboxListener(htmlid, optionname){
+    REQUIRES_RELOAD_ON_ENABLE = ['#ui-confirm_quit_dialog'];
     $(htmlid).on('change',function(){
+        var self = this;
         optionSetter(   optionname,
                         $(this).is(':checked'),
                         function(){
-                            $(this).attr('checked',userOptions[optionname])
+                            if($(self).is(':checked')){
+                                if(REQUIRES_RELOAD_ON_ENABLE.indexOf(htmlid) != -1){
+                                    alert('You need to reload the page for this setting to take effect.')
+                                }
+                            }
                         },
                         errorFunc('Error setting option! '+optionname)
         );
@@ -925,6 +928,113 @@ function show_ui_conditionally(selectors, conditions_table){
     }
 }
 
+function jPlayerIsPlaying(){
+    return !$('#jquery_jplayer_1').data().jPlayer.status.paused;
+}
+
+function dontCloseWindowIfMusicPlays(){
+    if(userOptions.ui.confirm_quit_dialog){
+        if(jPlayerIsPlaying()){
+            if(window.onbeforeunload === null){
+                // register close dialog if music is playing
+                window.onbeforeunload = function() {
+                  return "This will stop the playback. Do you really want to close CherryMusic?";
+                }
+            }
+        } else {
+            if(window.onbeforeunload !== null){
+                // remove close dialog if no music is playing
+                window.onbeforeunload = null;
+            }
+        }
+        window.setTimeout("dontCloseWindowIfMusicPlays()", CHECK_MUSIC_PLAYING_INTERVAL)
+    } else {
+        window.onbeforeunload = null;
+    }
+}
+
+function searchAlbumArt(){
+    busy('#changeAlbumArt .modal-body').hide().fadeIn('fast');
+    var success = function(urllist){
+        $('.coverart-tryout').html('');
+        for(var i=0; i<urllist.length; i++){
+            var html =  '<div class="album-art-choice">'+
+                            '<img width="80" height="80" src="'+urllist[i]+'"'+
+                            ' onclick="pickCoverArt($(this))" '+
+                            '" />'+
+                        '</div>';
+            $('.coverart-tryout').append(html);
+        }
+    }
+    api('fetchalbumarturls',
+        {'searchterm': $('#albumart-search-term').val()},
+        success,
+        errorFunc('Error fetching image urls'),
+        function(){busy('#changeAlbumArt .modal-body').fadeOut('fast')});
+}
+
+function pickCoverArt(img){
+    var imagesrc = $(img).attr('src');
+    var dirname = decodeURIComponent($('#changeAlbumArt').attr('data-dirname'));
+    var success = function(){
+        $('#changeAlbumArt').modal('hide');
+        //reload cover art:
+        var folder_div = $('.list-dir[dir="'+dirname+'"]')
+        //force reload image
+        var folder_image = folder_div.find('img');
+        folder_image.attr('src', folder_image.attr('src')+'&reload=1');
+    }
+    api('albumart_set',
+        {
+            'directory': dirname,
+            'imageurl': imagesrc,
+        },
+        success
+    );
+}
+
+function displayMessageOfTheDay(){
+    api('getmotd',
+        function(resp){
+            if(resp.type == 'update'){
+                html = Mustache.render(
+                    '<a href="http://fomori.org/cherrymusic/">'+
+                        'CherryMusic {{version}} is available!'+
+                        '<h2>download now →</h2>'+
+                    '</a><hr>'+
+                    '<h3>{{features_count}} new {{feature_title}}:</h3>'+
+                    '<ul class="feature-list">'+
+                    '   {{#features}}<li>{{.}}</li>{{/features}}'+
+                    '</ul>'+
+                    '<h3>{{fixes_count}} {{fixes_title}}:</h3>'+
+                    '<ul class="feature-list">'+
+                    '   {{#fixes}}<li>{{.}}</li>{{/fixes}}'+
+                    '</ul><hr>'+
+                    '<p>'+
+                    '   And a lot of other stuff, see the'+
+                    '   <a href="https://github.com/devsnd/cherrymusic/blob/{{version}}/CHANGES" target="_blank">'+
+                    '   CHANGELOG</a>.'+
+                    '</p>',
+                    {
+                        version: resp.data.version,
+                        features: resp.data.features,
+                        features_count: resp.data.features.length,
+                        feature_title: resp.data.features.length > 1 ? 'features' : 'feature',
+                        fixes: resp.data.fixes,
+                        fixes_count: resp.data.fixes.length,
+                        fixes_title: resp.data.fixes.length > 1 ? 'fixes' : 'fix',
+                    });
+                $('#motd').html(html);
+            } else if(resp.type == 'wisdom'){
+                $('#motd').html('useless wisdom<hr>'+resp.data);
+            } else {
+                window.console.error('unknown motd type '+resp.type);
+            }
+        },
+        errorFunc('could not fetch message of the day')
+    );
+}
+
 /***
 ON DOCUMENT READY... STEADY... GO!
 ***/
@@ -936,7 +1046,10 @@ $(document).ready(function(){
         playlistManager = new PlaylistManager();
         $('#username-label').text('('+loggedInUserName+')');
     });
-    loadUserOptions(initKeyboardshortcuts);    
+    loadUserOptions(function(){
+        initKeyboardshortcuts();
+        dontCloseWindowIfMusicPlays();
+    });
     $('#search-panel').on('scroll', function(){
         //enable loading of images when in viewport
         MediaBrowser.static.albumArtLoader('#search-panel');
@@ -947,6 +1060,7 @@ $(document).ready(function(){
     //window.setInterval("resizePlaylistSlowly()",2000);
     $('#searchform .searchinput').focus();
     sendHeartBeat();
+    displayMessageOfTheDay();
     $('#adminpanel').on('shown.bs.modal', function (e) {
         updateUserList();
     });
@@ -967,12 +1081,28 @@ $(document).ready(function(){
     $('#saveplaylistmodal').on('hide', function(){
         $('#playlisttitle').unbind('keyup');
     });
+
+    $('#changeAlbumArt').on('shown.bs.modal', function(){
+        //empty old search results
+        $('#changeAlbumArt .coverart-tryout').empty();
+        //set input field in modal
+        $("#albumart-search-term").val(decodeURIComponent($('#changeAlbumArt').attr('data-dirname')));
+        $("#albumart-search-term").focus();
+        //when pressing enter, the search should start:
+        $("#albumart-search-term").off('keypress').on('keypress', function(e){
+            if (e.keyCode == '13' || e.which == '13'){
+                searchAlbumArt();
+            }
+        });
+    });
+
     $('#changePassword').on('show.bs.modal', function(){
         //$('#changePassword').data('modal').options.focusOn = '#oldpassword-change';
     });
-    
     userOptionCheckboxListener('#misc-show_playlist_download_buttons',
                                'misc.show_playlist_download_buttons');
     userOptionCheckboxListener('#misc-autoplay_on_add',
                                'misc.autoplay_on_add');
+    userOptionCheckboxListener('#ui-confirm_quit_dialog',
+                               'ui.confirm_quit_dialog');
 });

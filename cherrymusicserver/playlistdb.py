@@ -74,9 +74,7 @@ class PlaylistDB:
             playlistid = cursor.lastrowid;
             #put tracknumber to each track
             numberedplaylist = []
-            for entry in zip(range(len(playlist)), playlist):
-                track = entry[0]
-                song = entry[1]
+            for track, song in enumerate(playlist):
                 numberedplaylist.append((playlistid, track, song['url'], song['title']))
             cursor.executemany("""INSERT INTO tracks (playlistid, track, url, title)
                 VALUES (?,?,?,?)""", numberedplaylist)
@@ -116,10 +114,11 @@ class PlaylistDB:
             return result[0][1]
         return 'playlist'
 
-    def setPublic(self, userid, plid, value):
-        ispublic = 1 if value else 0
+    def setPublic(self, userid, plid, public):
+        ispublic = 1 if public else 0
         cur = self.conn.cursor()
         cur.execute("""UPDATE playlists SET public = ? WHERE rowid = ? AND userid = ?""", (ispublic, plid, userid))
+        self.conn.commit()
 
     def _searchPlaylist(self, searchterm):
         q = '''SELECT DISTINCT playlists.rowid FROM playlists, tracks

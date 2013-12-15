@@ -104,6 +104,13 @@ def configurationFile():
 def configurationFileExists():
     return os.path.exists(configurationFile())
 
+def absOrConfigPath(filepath):
+    if os.path.isabs(filepath):
+        path = filepath
+    else:
+        path = os.path.join(getConfigPath(), filepath)
+    return os.path.normpath(path)
+
 def databaseFilePath(filename):
     configdir = os.path.join(getUserDataPath(), 'db')
     if not os.path.exists(configdir):
@@ -138,6 +145,11 @@ def getResourcePath(path):
     #check share first
     resourceprefix = os.path.join(sys.prefix, 'share', sharedFolderName)
     respath = os.path.join(resourceprefix, path)
+    if not os.path.exists(respath):
+        #log.w("Couldn't find " + respath + ". Trying local install path.")
+        #otherwise check local/share
+        resourceprefix = os.path.join(sys.prefix, 'local', 'share', sharedFolderName)
+        respath = os.path.join(resourceprefix, path)
     if not os.path.exists(respath):
         #log.w("Couldn't find " + respath + ". Trying local install path.")
         #otherwise check local install

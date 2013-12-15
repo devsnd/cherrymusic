@@ -158,7 +158,7 @@ import cherrymusicserver
 
 class CherryMusicDaemon(daemon):
     def run(self):
-        cherrymusicserver.CherryMusic(update=False,createNewConfig=False)
+        cherrymusicserver.CherryMusic()
 
 def usage():
     print("usage: %s start|stop|restart" % sys.argv[0])
