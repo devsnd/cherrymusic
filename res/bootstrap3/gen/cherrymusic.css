@@ -5182,6 +5182,7 @@ body {
 }
 .cm-media-list-wrench:hover {
   color: #444;
+  cursor: pointer;
 }
 .cm-media-list > li:nth-child(odd) {
   background-color: #f9f9f9;
