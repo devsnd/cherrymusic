@@ -424,7 +424,7 @@ class Key(object):
         elif not self._re.match(name):
             raise ConfigNamingError(
                 name, 'Key parts must only contain the characters [A-Za-z0-9_],'
-                            ' start with a letter and be separated by a {seperator}'.format(seperator=self.sep))
+                            ' start with a letter and be separated by a {seperator}'.format(seperator=self._sep))
         name += ''   # inner workaround for python 2.6+
                     # transforms ascii str to unicode because
                     # of unicode_literals import
