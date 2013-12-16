@@ -8,28 +8,28 @@ msgstr ""
 "Project-Id-Version: CherryMusic 0.27.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-12-16 23:10+0100\n"
-"PO-Revision-Date: 2013-12-15 22:23+0100\n"
-"Last-Translator: \n"
+"PO-Revision-Date: 2013-12-17 00:10+0200\n"
+"Last-Translator: til <tilman.boerner@gmx.net>\n"
 "Language-Team:  <tomwallroth@gmail.com>\n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.5.7\n"
+"X-Generator: Virtaal 0.7.1\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
 #: cherrymusicserver/cherrymodel.py:166
 #, python-format
 msgid "%(user)s searched for '%(term)s'"
-msgstr ""
+msgstr "%(user)s hat gesucht nach '%(term)s'"
 
 #: cherrymusicserver/cherrymodel.py:169
 msgid "sorting DB results using ResultOrder"
-msgstr ""
+msgstr "sortiere DB-Ergebnisse mit ResultOrder"
 
 #: cherrymusicserver/cherrymodel.py:181
 msgid "checking and classifying results:"
-msgstr ""
+msgstr "prüfe und klassifiziere Ergebnisse:"
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
 #: cherrymusicserver/configuration.py:70
@@ -47,6 +47,15 @@ msgid ""
 "                    effects of link cycles.\n"
 "                            "
 msgstr ""
+"BASEDIR gibt das Basisverzeichnis an, in dem sich die Mediendateien "
+"befinden. Ein absoluter Pfad wird benötigt, z.B. "
+"BASEDIR=/absoluter/pfad/zu/medien.\n"
+"\n"
+"Links: Falls vom Betriebssystem unterstützt, können symbolische Links direkt "
+"im BASEDIR platziert werden. Links zu übergeordneten Verzeichnissen zu "
+"BASEDIR werden ignoriert; ebenso alle Links, die sich nicht direkt im "
+"BASEDIR, sondern in Unterverzeichnissen befinden. Das ist notwendig, um den "
+"schaurigen Konsequenzen zirkulärer Verlinkungen vorzubeugen."
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
 #: cherrymusicserver/configuration.py:86
@@ -62,6 +71,14 @@ msgid ""
 "the stress on the CPU!\n"
 "                            "
 msgstr ""
+"TRANSCODE (experimentelles Feature!) ermöglicht es, auf Serverseite live in "
+"unterstützte Formate zu transcodieren. Dadurch lassen sich alle möglichen "
+"Formate auf verschiedenen Geräten und mit verschiedenen Browsern abspielen, "
+"die sonst auf dieser (Client-)Seite nicht unterstützt werden. Dazu müssen "
+"auf dem Server die entsprechenden Codecs (Binaries) installiert sein.\n"
+"\n"
+"Achtung, Transcoding stellt deutlich höhere Anforderungen an die "
+"Rechenleistung!"
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
 #: cherrymusicserver/configuration.py:96
@@ -76,11 +93,15 @@ msgid ""
 "                    album.\n"
 "                            "
 msgstr ""
+"Coverbilder automatisch von verschiedenen Webseiten laden, wenn lokal kein "
+"Bild gefunden werden kann. Standardmäßig muss der Amazon-Katalog herhalten. "
+"Diese Bilder werden im Client neben Ordnern angezeigt, die vom Server als "
+"Album eingestuft werden."
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
 #: cherrymusicserver/configuration.py:109
 msgid "megabytes"
-msgstr ""
+msgstr "Megabytes"
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
 #: cherrymusicserver/configuration.py:106
@@ -92,6 +113,8 @@ msgid ""
 "                    Defaults to {default_value} {default_unit}.\n"
 "                            "
 msgstr ""
+"Maximalgröße (in Bytes) für den Download von Dateien in einer zip-Datei. "
+"Standardwert ist {default_value} {default_unit}."
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
 #: cherrymusicserver/configuration.py:114
@@ -104,6 +127,8 @@ msgid ""
 "accurate.\n"
 "                            "
 msgstr ""
+"MAXRESULTS gibt an, wieviele Suchergebnisse höchstens angezeigt werden. Ein "
+"höherer Wert verlangsamt die Suche, führt aber zu genaueren Ergebnissen."
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
 #: cherrymusicserver/configuration.py:123
@@ -117,6 +142,10 @@ msgid ""
 "otherwise.\n"
 "                            "
 msgstr ""
+"Teile der Datenbank werden in den Hauptspeicher geladen, um die "
+"Geschwindigkeit der Anfragen zu steigern. Nur auf Systemen anschalten, die "
+"über genug freien Speicher verfügen -- sonst passiert das Gegenteil und "
+"alles wird wirklich langsam."
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
 #: cherrymusicserver/configuration.py:132
@@ -130,6 +159,9 @@ msgid ""
 "                    100 is a good value, as a CD can have up to 99 tracks.\n"
 "                            "
 msgstr ""
+"MAXSHOWFILES legt fest, wieviele Ordner und Dateien höchstens angezeigt "
+"werden. Längere Listen werden nach Anfangsbuchstaben gruppiert. 100 ist ein "
+"guter Wert, weil eine CD bis zu 99 Titel enthalten kann."
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
 #: cherrymusicserver/configuration.py:143
@@ -143,11 +175,15 @@ msgid ""
 "connection.\n"
 "                            "
 msgstr ""
+"Lässt den Server für Dateisuche und den Dateibrowser nur die Mediendatenbank "
+"benutzen, statt möglicherweise im Dateisystem nachzusehen. Nützlich, falls "
+"das BASEDIR sich auf einer externen Festplatte oder am anderen Ende einer "
+"langsamen Netzwerkverbindung befindet."
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
 #: cherrymusicserver/configuration.py:152
 msgid "The port the server will listen to."
-msgstr ""
+msgstr "Der Port, auf den der Server reagieren soll."
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
 #: cherrymusicserver/configuration.py:157
@@ -155,6 +191,8 @@ msgid ""
 "When set to true, the server will listen on a IPv6\n"
 "                          socket instead of IPv4"
 msgstr ""
+"\"True\" setzen, damit der Server einen IPv6 Socket benutzt statt (wie sonst) "
+"IPv4."
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
 #: cherrymusicserver/configuration.py:163
@@ -165,6 +203,8 @@ msgid ""
 "                    same computer it is running on.\n"
 "                            "
 msgstr ""
+"Auf \"True\" setzen, damit der Server nicht auf Anfragen aus dem Netzwerk "
+"reagiert und Musik nur auf dem gleichen Rechner abspielt, auf dem er läuft."
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
 #: cherrymusicserver/configuration.py:172
