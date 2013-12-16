@@ -66,6 +66,7 @@ def from_defaults():
     with c['media.basedir'] as basedir:
         basedir.value = None
         basedir.valid = _validate_basedir
+        # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
         basedir.doc = _("""
                     BASEDIR specifies where the media that should be
                     served is located. It must be an absolute path, e.g.
@@ -81,6 +82,7 @@ def from_defaults():
 
     with c['media.transcode'] as transcode:
         transcode.value = False
+        # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
         transcode.doc = _("""
                     TRANSCODE (experimental!) enables automatic live transcoding
                     of the media to be able to listen to every format on every device.
@@ -90,6 +92,7 @@ def from_defaults():
 
     with c['media.fetch_album_art'] as fetch:
         fetch.value = False
+        # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
         fetch.doc = _("""
                     Tries to fetch the album cover from various locations in the web,
                     if no image is found locally. By default it will be fetched from amazon.
@@ -99,6 +102,7 @@ def from_defaults():
 
     with c['media.maximum_download_size'] as maxdl:
         maxdl.value = 1024*1024*250
+        # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
         maxdl.doc = _("""
                     Maximum size in bytes of all files to be downloaded in one zipfile.
                     Defaults to {default_value} {default_unit}.
@@ -106,6 +110,7 @@ def from_defaults():
 
     with c['search.maxresults'] as maxresults:
         maxresults.value = 20
+        # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
         maxresults.doc = _("""
                     MAXRESULTS sets the maximum amount of search results
                     to be displayed. If MAXRESULTS is set to a higher value,
@@ -114,6 +119,7 @@ def from_defaults():
 
     with c['search.load_file_db_into_memory'] as memory:
         memory.value = False
+        # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
         memory.doc = _("""
                     This will load parts of the database into memory for improved
                     performance. This option should only be used on systems with
@@ -122,6 +128,7 @@ def from_defaults():
 
     with c['browser.maxshowfiles'] as maxshowfiles:
         maxshowfiles.value = 100
+        # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
         maxshowfiles.doc = _('''
                     MAXSHOWFILES specifies how many files and folders should
                     be shown at the same time. E.g. if you open a folder
@@ -132,6 +139,7 @@ def from_defaults():
 
     with c['browser.pure_database_lookup'] as pure_database_lookup:
         pure_database_lookup.value = False
+        # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
         pure_database_lookup.doc = _("""
                     Only use the media database, never the filesystem, for content
                     lookups in browser and search. Useful if the media files reside
@@ -140,15 +148,18 @@ def from_defaults():
 
     with c['server.port'] as port:
         port.value = 8080
+        # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
         port.doc = _('The port the server will listen to.')
 
     with c['server.ipv6_enabled'] as ipv6:
         ipv6.value = False
+        # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
         ipv6.doc = _("""When set to true, the server will listen on a IPv6
                           socket instead of IPv4""")
 
     with c['server.localhost_only'] as localhost_only:
         localhost_only.value = False
+        # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
         localhost_only.doc = _('''
                     when localhost_only is set to true, the server will not
                     be visible in the network and only play music on the
@@ -157,6 +168,7 @@ def from_defaults():
 
     with c['server.rootpath'] as rootpath:
         rootpath.value = '/'
+        # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
         rootpath.doc = _('''
                     The path cherrymusic will be available on. Normally
                     you'll want to leave it as '/', so that CherryMusic is
@@ -169,6 +181,7 @@ def from_defaults():
 
     with c['server.localhost_auto_login'] as localhost_auto_login:
         localhost_auto_login.value = False
+        # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
         localhost_auto_login.doc = _('''
                     When localhost_auto_login is set to "True", the server will
                     not ask for credentials when using it locally. The user will
@@ -177,6 +190,7 @@ def from_defaults():
 
     with c['server.permit_remote_admin_login'] as permit_remote_admin_login:
         permit_remote_admin_login.value = True
+        # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
         permit_remote_admin_login.doc = _('''
                     When permit_remote_admin_login is set to "False", admin users
                     may only log in from the computer cherrymusic is currently
@@ -185,6 +199,7 @@ def from_defaults():
 
     with c['server.keep_session_in_ram'] as keep_session_in_ram:
         keep_session_in_ram.value = False
+        # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
         keep_session_in_ram.doc = _('''
                     Will keep the user sessions in RAM instead of a file in the
                     configuration directory. This means, that any unsaved
@@ -193,6 +208,7 @@ def from_defaults():
 
     with c['server.ssl_enabled'] as ssl_enabled:
         ssl_enabled.value = False
+        # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
         ssl_enabled.doc = _('''
                     The following options allow you to use cherrymusic with
                     https encryption. If ssl_enabled is set to "False", all other
@@ -201,6 +217,7 @@ def from_defaults():
 
     with c['server.ssl_port'] as ssl_port:
         ssl_port.value = 8443
+        # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
         ssl_port.doc = _('''
                     The port that will listen to SSL encrypted requests. If
                     ssl_enabled is set to "True", all unencrypted HTTP requests
@@ -209,6 +226,7 @@ def from_defaults():
 
     with c['server.ssl_certificate'] as ssl_certificate:
         ssl_certificate.value = 'certs/server.crt'
+        # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
         ssl_certificate.doc = _('''
                     The SSL certiticate sent to the client to verify the
                     server's authenticity. A relative path is relative to the
@@ -217,6 +235,7 @@ def from_defaults():
 
     with c['server.ssl_private_key'] as ssl_private_key:
         ssl_private_key.value = 'certs/server.key'
+        # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
         ssl_private_key.doc = _('''
                     SSL private key file used by the server to decrypt and sign
                     secure communications. Keep this one secret!  A relative
@@ -226,6 +245,7 @@ def from_defaults():
 
     with c['general.update_notification'] as update_notification:
         update_notification.value = True
+        # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
         update_notification.doc = _('''
                     Notify admins about available security and feature updates.
                             ''')

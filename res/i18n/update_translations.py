@@ -6,7 +6,7 @@ currdir = os.path.dirname(__file__)
 sourcedir = os.path.normpath(os.path.join(currdir, '..', '..', 'cherrymusicserver'))
 
 print('updating pot file')
-subprocess.call('xgettext --language=Python --keyword=_ --output='+currdir+'/cherrymusic.pot --from-code=UTF-8 `find '+sourcedir+' -name "*.py"`', shell=True)
+subprocess.call('xgettext --language=Python --keyword=_ --add-comments=i18n --output='+currdir+'/cherrymusic.pot --from-code=UTF-8 `find '+sourcedir+' -name "*.py"`', shell=True)
 print('updating all translations')
 for translation in os.listdir(currdir):
     transfile = os.path.join(currdir, translation)

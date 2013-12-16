@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-12-16 22:36+0100\n"
+"POT-Creation-Date: 2013-12-16 23:10+0100\n"
 "PO-Revision-Date: 2013-12-04 12:29+0100\n"
 "Last-Translator: til <tilman.boerner@gmx.net>\n"
 "Language-Team: Spanish\n"
@@ -30,7 +30,8 @@ msgstr ""
 msgid "checking and classifying results:"
 msgstr ""
 
-#: cherrymusicserver/configuration.py:69
+#. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+#: cherrymusicserver/configuration.py:70
 msgid ""
 "\n"
 "                    BASEDIR specifies where the media that should be\n"
@@ -46,7 +47,8 @@ msgid ""
 "                            "
 msgstr ""
 
-#: cherrymusicserver/configuration.py:84
+#. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+#: cherrymusicserver/configuration.py:86
 msgid ""
 "\n"
 "                    TRANSCODE (experimental!) enables automatic live "
@@ -60,7 +62,8 @@ msgid ""
 "                            "
 msgstr ""
 
-#: cherrymusicserver/configuration.py:93
+#. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+#: cherrymusicserver/configuration.py:96
 msgid ""
 "\n"
 "                    Tries to fetch the album cover from various locations in "
@@ -73,11 +76,13 @@ msgid ""
 "                            "
 msgstr ""
 
-#: cherrymusicserver/configuration.py:105
+#. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+#: cherrymusicserver/configuration.py:109
 msgid "megabytes"
 msgstr ""
 
-#: cherrymusicserver/configuration.py:102
+#. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+#: cherrymusicserver/configuration.py:106
 #, python-brace-format
 msgid ""
 "\n"
@@ -87,7 +92,8 @@ msgid ""
 "                            "
 msgstr ""
 
-#: cherrymusicserver/configuration.py:109
+#. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+#: cherrymusicserver/configuration.py:114
 msgid ""
 "\n"
 "                    MAXRESULTS sets the maximum amount of search results\n"
@@ -98,7 +104,8 @@ msgid ""
 "                            "
 msgstr ""
 
-#: cherrymusicserver/configuration.py:117
+#. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+#: cherrymusicserver/configuration.py:123
 msgid ""
 "\n"
 "                    This will load parts of the database into memory for "
@@ -110,7 +117,8 @@ msgid ""
 "                            "
 msgstr ""
 
-#: cherrymusicserver/configuration.py:125
+#. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+#: cherrymusicserver/configuration.py:132
 msgid ""
 "\n"
 "                    MAXSHOWFILES specifies how many files and folders "
@@ -122,7 +130,8 @@ msgid ""
 "                            "
 msgstr ""
 
-#: cherrymusicserver/configuration.py:135
+#. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+#: cherrymusicserver/configuration.py:143
 msgid ""
 "\n"
 "                    Only use the media database, never the filesystem, for "
@@ -134,17 +143,20 @@ msgid ""
 "                            "
 msgstr ""
 
-#: cherrymusicserver/configuration.py:143
+#. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+#: cherrymusicserver/configuration.py:152
 msgid "The port the server will listen to."
 msgstr ""
 
-#: cherrymusicserver/configuration.py:147
+#. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+#: cherrymusicserver/configuration.py:157
 msgid ""
 "When set to true, the server will listen on a IPv6\n"
 "                          socket instead of IPv4"
 msgstr ""
 
-#: cherrymusicserver/configuration.py:152
+#. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+#: cherrymusicserver/configuration.py:163
 msgid ""
 "\n"
 "                    when localhost_only is set to true, the server will not\n"
@@ -153,7 +165,8 @@ msgid ""
 "                            "
 msgstr ""
 
-#: cherrymusicserver/configuration.py:160
+#. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+#: cherrymusicserver/configuration.py:172
 msgid ""
 "\n"
 "                    The path cherrymusic will be available on. Normally\n"
@@ -166,7 +179,8 @@ msgid ""
 "                                "
 msgstr ""
 
-#: cherrymusicserver/configuration.py:172
+#. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+#: cherrymusicserver/configuration.py:185
 msgid ""
 "\n"
 "                    When localhost_auto_login is set to \"True\", the server "
@@ -177,7 +191,8 @@ msgid ""
 "                            "
 msgstr ""
 
-#: cherrymusicserver/configuration.py:180
+#. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+#: cherrymusicserver/configuration.py:194
 msgid ""
 "\n"
 "                    When permit_remote_admin_login is set to \"False\", "
@@ -188,7 +203,8 @@ msgid ""
 "                            "
 msgstr ""
 
-#: cherrymusicserver/configuration.py:188
+#. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+#: cherrymusicserver/configuration.py:203
 msgid ""
 "\n"
 "                    Will keep the user sessions in RAM instead of a file in "
@@ -198,7 +214,8 @@ msgid ""
 "                            "
 msgstr ""
 
-#: cherrymusicserver/configuration.py:196
+#. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+#: cherrymusicserver/configuration.py:212
 msgid ""
 "\n"
 "                    The following options allow you to use cherrymusic with\n"
@@ -208,7 +225,8 @@ msgid ""
 "                            "
 msgstr ""
 
-#: cherrymusicserver/configuration.py:204
+#. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+#: cherrymusicserver/configuration.py:221
 msgid ""
 "\n"
 "                    The port that will listen to SSL encrypted requests. If\n"
@@ -218,7 +236,8 @@ msgid ""
 "                            "
 msgstr ""
 
-#: cherrymusicserver/configuration.py:212
+#. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+#: cherrymusicserver/configuration.py:230
 msgid ""
 "\n"
 "                    The SSL certiticate sent to the client to verify the\n"
@@ -228,7 +247,8 @@ msgid ""
 "                            "
 msgstr ""
 
-#: cherrymusicserver/configuration.py:220
+#. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+#: cherrymusicserver/configuration.py:239
 msgid ""
 "\n"
 "                    SSL private key file used by the server to decrypt and "
@@ -240,7 +260,8 @@ msgid ""
 "                            "
 msgstr ""
 
-#: cherrymusicserver/configuration.py:229
+#. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+#: cherrymusicserver/configuration.py:249
 msgid ""
 "\n"
 "                    Notify admins about available security and feature "
@@ -248,12 +269,12 @@ msgid ""
 "                            "
 msgstr ""
 
-#: cherrymusicserver/configuration.py:241
+#: cherrymusicserver/configuration.py:261
 #, python-format
 msgid "configuration file not found: %(filepath)s"
 msgstr ""
 
-#: cherrymusicserver/configuration.py:244
+#: cherrymusicserver/configuration.py:264
 #, python-format
 msgid "configuration path is not a file: %(filepath)s"
 msgstr ""
