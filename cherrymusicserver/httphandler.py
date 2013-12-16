@@ -38,7 +38,6 @@ import json
 import cherrypy
 import codecs
 import sys
-import re
 try:
     from urllib.parse import unquote
 except ImportError:
@@ -55,8 +54,7 @@ from cherrymusicserver import userdb
 from cherrymusicserver import log
 from cherrymusicserver import albumartfetcher
 from cherrymusicserver import service
-from cherrymusicserver.cherrymodel import MusicEntry
-from cherrymusicserver.pathprovider import databaseFilePath, readRes
+from cherrymusicserver.pathprovider import readRes
 from cherrymusicserver.pathprovider import albumArtFilePath
 import cherrymusicserver as cherry
 import cherrymusicserver.metainfo as metainfo
@@ -127,7 +125,7 @@ class HTTPHandler(object):
         is_secure_connection = self.issecure(cherrypy.url())
         ssl_enabled = cherry.config['server.ssl_enabled']
         if ssl_enabled and not is_secure_connection:
-            log.d('Not secure, redirecting...')
+            log.d(_('Not secure, redirecting...'))
             ip = ipAndPort[:ipAndPort.rindex(':')]
             url = 'https://' + ip + ':' + str(cherry.config['server.ssl_port'])
             if redirect_unencrypted:
@@ -153,7 +151,7 @@ class HTTPHandler(object):
                 self.session_auth(username, password)
                 if cherrypy.session['username']:
                     username = cherrypy.session['username']
-                    log.i('user %s just logged in.' % username)
+                    log.i(_('user {name} just logged in.').format(name=username))
             elif login_action == 'create admin user':
                 if firstrun:
                     if username.strip() and password.strip():
@@ -179,9 +177,9 @@ class HTTPHandler(object):
         except (UnicodeDecodeError, ValueError) as e:
             # workaround for python2/python3 jump, filed bug in cherrypy
             # https://bitbucket.org/cherrypy/cherrypy/issue/1216/sessions-python2-3-compability-unsupported
-            log.w('''
-Dropping all sessions! Try not to change between python 2 and 3,
-everybody has to relogin now.''')
+            log.w(_('''
+            Dropping all sessions! Try not to change between python 2 and 3,
+            everybody has to relogin now.'''))
             cherrypy.session.delete()
             sessionUsername = None
         if sessionUsername is None:
@@ -208,7 +206,7 @@ everybody has to relogin now.''')
         allow_remote = cherry.config['server.permit_remote_admin_login']
         is_loopback = cherrypy.request.remote.ip in ('127.0.0.1', '::1')
         if not is_loopback and user.isadmin and not allow_remote:
-            log.i('Rejected remote admin login from user: %s' % user.name)
+            log.i(_('Rejected remote admin login from user: {name}').format(name=user.name))
             user = userdb.User.nobody()
         cherrypy.session['username'] = user.name
         cherrypy.session['userid'] = user.uid
@@ -296,7 +294,7 @@ everybody has to relogin now.''')
                 return 'ok'
             else:
                 return 'too_big'
-        except FileNotFoundError as e:
+        except OSError as e:        # use OSError for python2 compatibility
             return str(e)
 
     def api_downloadcheck(self, filelist):
@@ -304,16 +302,16 @@ everybody has to relogin now.''')
         if status == 'not_permitted':
             return """You are not allowed to download files."""
         elif status == 'invalid_file':
-            return """Error: File has invalid filename""" % f
+            return "Error: invalid filename found in {list}".format(list=filelist)
         elif status == 'too_big':
             size_limit = cherry.config['media.maximum_download_size']
-            return """Can't download: Playlist is bigger than %s mB.
-            The server administrator can change this configuration.
-            """ % (size_limit/1024/1024)
+            return """Can't download: Playlist is bigger than {maxsize} mB.
+                        The server administrator can change this configuration.
+                        """.format(maxsize=size_limit/1024/1024)
         elif status == 'ok':
             return status
         else:
-            message = "Error status check for download: '%s'" % status
+            message = "Error status check for download: {status!r}".format(status=status)
             log.e(message)
             return message
 
@@ -404,7 +402,7 @@ everybody has to relogin now.''')
             album = os.path.basename(directory)
             artist = os.path.basename(os.path.dirname(directory))
             keywords = artist+' '+album
-            log.i("Fetching album art for keywords '%s'" % keywords)
+            log.i(_("Fetching album art for keywords {keywords!r}").format(keywords=keywords))
             header, data = fetcher.fetch(keywords)
             if header:
                 cherrypy.response.headers.update(header)
@@ -434,9 +432,9 @@ everybody has to relogin now.''')
         if not searchstring.strip():
             jsonresults = '[]'
         else:
-            with Performance('processing whole search request'):
+            with Performance(_('processing whole search request')):
                 searchresults = self.model.search(searchstring.strip())
-                with Performance('rendering search results as json'):
+                with Performance(_('rendering search results as json')):
                     jsonresults = [entry.to_dict() for entry in searchresults]
         return jsonresults
 

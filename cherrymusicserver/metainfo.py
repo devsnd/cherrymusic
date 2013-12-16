@@ -48,8 +48,8 @@ try:
     import audioread
     has_audioread = True
 except ImportError:
-    log.w('''python library "audioread" not found!
--Audio file length can't be determined without it!''')
+    log.w(_('''python library "audioread" not found!
+    -Audio file length can't be determined without it!'''))
     has_audioread = False
 
 class Metainfo():
@@ -95,8 +95,8 @@ def getSongInfo(filepath):
             with audioread.audio_open(filepath) as f:
                 audiolength = f.duration
         except Exception as e:
-            log.w("audioread fail: unable to fetch duration of '%s' (%s)",
-                filepath, type(e).__name__)
+            log.w("audioread fail: unable to fetch duration of %(file)r (%(exception)s)",
+                {'file': filepath, 'exception': type(e).__name__})
             audiolength = 0
     else:
         audiolength = 0

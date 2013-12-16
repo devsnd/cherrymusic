@@ -50,11 +50,11 @@ def _validate_basedir(basedir):
     if not basedir:
         raise ValueError('basedir must be set')
     if not os.path.isabs(basedir):
-        raise ValueError('basedir must be absolute path: %s' % basedir)
+        raise ValueError('basedir must be absolute path: {basedir}'.format(basedir=basedir))
     if not os.path.exists(basedir):
-        raise ValueError("basedir must exist: %s" % basedir)
+        raise ValueError("basedir must exist: {basedir}".format(basedir=basedir))
     if not os.path.isdir(basedir):
-        raise ValueError("basedir must be a directory: %s" % basedir)
+        raise ValueError("basedir must be a directory: {basedir}".format(basedir=basedir))
     return True
 
 
@@ -66,7 +66,7 @@ def from_defaults():
     with c['media.basedir'] as basedir:
         basedir.value = None
         basedir.valid = _validate_basedir
-        basedir.doc = """
+        basedir.doc = _("""
                     BASEDIR specifies where the media that should be
                     served is located. It must be an absolute path, e.g.
                     BASEDIR=/absolute/path/to/media.
@@ -77,158 +77,158 @@ def from_defaults():
                     just like all links not directly in, but in sublevels
                     of BASEDIR. This is to guard against the adverse
                     effects of link cycles.
-                    """
+                            """)
 
     with c['media.transcode'] as transcode:
         transcode.value = False
-        transcode.doc = """
+        transcode.doc = _("""
                     TRANSCODE (experimental!) enables automatic live transcoding
                     of the media to be able to listen to every format on every device.
                     This requires you to have the appropriate codecs installed.
                     Please note that transcoding will significantly increase the stress on the CPU!
-                    """
+                            """)
 
     with c['media.fetch_album_art'] as fetch:
         fetch.value = False
-        fetch.doc = """
+        fetch.doc = _("""
                     Tries to fetch the album cover from various locations in the web,
                     if no image is found locally. By default it will be fetched from amazon.
                     They will be shown next to folders that qualify as a possible
                     album.
-                    """
+                            """)
 
     with c['media.maximum_download_size'] as maxdl:
         maxdl.value = 1024*1024*250
-        maxdl.doc = """
+        maxdl.doc = _("""
                     Maximum size in bytes of all files to be downloaded in one zipfile.
-                    Defaults to 250 megabytes.
-                    """
+                    Defaults to {default_value} {default_unit}.
+                            """.format(default_value='250', default_unit=_('megabytes')))
 
     with c['search.maxresults'] as maxresults:
         maxresults.value = 20
-        maxresults.doc = """
+        maxresults.doc = _("""
                     MAXRESULTS sets the maximum amount of search results
                     to be displayed. If MAXRESULTS is set to a higher value,
                     the search will take longer, but will also be more accurate.
-                    """
+                            """)
 
     with c['search.load_file_db_into_memory'] as memory:
         memory.value = False
-        memory.doc = """
+        memory.doc = _("""
                     This will load parts of the database into memory for improved
                     performance. This option should only be used on systems with
                     sufficient memory, because it will hurt the performance otherwise.
-                    """
+                            """)
 
     with c['browser.maxshowfiles'] as maxshowfiles:
         maxshowfiles.value = 100
-        maxshowfiles.doc = '''
+        maxshowfiles.doc = _('''
                     MAXSHOWFILES specifies how many files and folders should
                     be shown at the same time. E.g. if you open a folder
                     with more than MAXSHOWFILES, the files will be grouped
                     according to the first letter in their name.
-                    100 is a good value, as a cd can have up to 99 tracks.
-                    '''
+                    100 is a good value, as a CD can have up to 99 tracks.
+                            ''')
 
     with c['browser.pure_database_lookup'] as pure_database_lookup:
         pure_database_lookup.value = False
-        pure_database_lookup.doc = """
+        pure_database_lookup.doc = _("""
                     Only use the media database, never the filesystem, for content
                     lookups in browser and search. Useful if the media files reside
                     on an external hard drive or behind a slow network connection.
-                    """
+                            """)
 
     with c['server.port'] as port:
         port.value = 8080
-        port.doc = 'The port the server will listen to.'
+        port.doc = _('The port the server will listen to.')
 
     with c['server.ipv6_enabled'] as ipv6:
         ipv6.value = False
-        ipv6.doc = """When set to true, the server will listen on a IPv6
-                      socket instead of IPv4"""
+        ipv6.doc = _("""When set to true, the server will listen on a IPv6
+                          socket instead of IPv4""")
 
     with c['server.localhost_only'] as localhost_only:
         localhost_only.value = False
-        localhost_only.doc = '''
+        localhost_only.doc = _('''
                     when localhost_only is set to true, the server will not
                     be visible in the network and only play music on the
                     same computer it is running on.
-                    '''
+                            ''')
 
     with c['server.rootpath'] as rootpath:
         rootpath.value = '/'
-        rootpath.doc = '''
+        rootpath.doc = _('''
                     The path cherrymusic will be available on. Normally
                     you'll want to leave it as '/', so that CherryMusic is
                     available under e.g. localhost:8080. You might want to
                     change the path if CherryMusic runs behind a reverse
                     proxy. Changing it to '/cherrymusic' will make it available
                     under e.g. localhost:8080/cherrymusic
-                        '''
+                                ''')
 
 
     with c['server.localhost_auto_login'] as localhost_auto_login:
         localhost_auto_login.value = False
-        localhost_auto_login.doc = '''
+        localhost_auto_login.doc = _('''
                     When localhost_auto_login is set to "True", the server will
                     not ask for credentials when using it locally. The user will
                     be automatically logged in as admin.
-                    '''
+                            ''')
 
     with c['server.permit_remote_admin_login'] as permit_remote_admin_login:
         permit_remote_admin_login.value = True
-        permit_remote_admin_login.doc = '''
+        permit_remote_admin_login.doc = _('''
                     When permit_remote_admin_login is set to "False", admin users
                     may only log in from the computer cherrymusic is currently
                     running on. This can improve security.
-                    '''
+                            ''')
 
     with c['server.keep_session_in_ram'] as keep_session_in_ram:
         keep_session_in_ram.value = False
-        keep_session_in_ram.doc = '''
+        keep_session_in_ram.doc = _('''
                     Will keep the user sessions in RAM instead of a file in the
                     configuration directory. This means, that any unsaved
                     playlists will be lost when the server is restarted.
-                    '''
+                            ''')
 
     with c['server.ssl_enabled'] as ssl_enabled:
         ssl_enabled.value = False
-        ssl_enabled.doc = '''
+        ssl_enabled.doc = _('''
                     The following options allow you to use cherrymusic with
-                    https encryption. If ssl_enabled is set to False, all other
+                    https encryption. If ssl_enabled is set to "False", all other
                     ssl options will be ommited.
-                    '''
+                            ''')
 
     with c['server.ssl_port'] as ssl_port:
         ssl_port.value = 8443
-        ssl_port.doc = '''
+        ssl_port.doc = _('''
                     The port that will listen to SSL encrypted requests. If
-                    ssl_enabled is set to True, all unencrypted HTTP requests
+                    ssl_enabled is set to "True", all unencrypted HTTP requests
                     will be redirected to this port.
-                    '''
+                            ''')
 
     with c['server.ssl_certificate'] as ssl_certificate:
         ssl_certificate.value = 'certs/server.crt'
-        ssl_certificate.doc = '''
+        ssl_certificate.doc = _('''
                     The SSL certiticate sent to the client to verify the
                     server's authenticity. A relative path is relative to the
                     location of the CherryMusic configuration file.
-                    '''
+                            ''')
 
     with c['server.ssl_private_key'] as ssl_private_key:
         ssl_private_key.value = 'certs/server.key'
-        ssl_private_key.doc = '''
+        ssl_private_key.doc = _('''
                     SSL private key file used by the server to decrypt and sign
                     secure communications. Keep this one secret!  A relative
                     path is relative to the location of the CherryMusic
                     configuration file.
-                    '''
+                            ''')
 
     with c['general.update_notification'] as update_notification:
         update_notification.value = True
-        update_notification.doc = '''
+        update_notification.doc = _('''
                     Notify admins about available security and feature updates.
-                    '''
+                            ''')
 
     return c.to_configuration()
 
@@ -238,10 +238,10 @@ def from_configparser(filepath):
     to this function, and a matching Configuration will magically be returned."""
 
     if not os.path.exists(filepath):
-        logging.error('configuration file not found: %s', filepath)
+        logging.error(_('configuration file not found: %(filepath)s'), {'filepath':filepath})
         return None
     if not os.path.isfile(filepath):
-        logging.error('configuration path is not a file: %s', filepath)
+        logging.error(_('configuration path is not a file: %(filepath)s'), {'filepath':filepath})
         return None
 
     try:
@@ -400,11 +400,11 @@ class Key(object):
         elif isinstance(name, Key):
             name = name._str
         elif not isinstance(name, (str, type(''))):
-            raise ConfigNamingError(name, 'name must be a Key, str or unicode (is %r)' % (type(name),))
+            raise ConfigNamingError(name, 'name must be a Key, str or unicode (is {type!r})'.format(type=type(name)))
         elif not self._re.match(name):
             raise ConfigNamingError(
                 name, 'Key parts must only contain the characters [A-Za-z0-9_],'
-                ' start with a letter and be separated by a ' + self._sep)
+                            ' start with a letter and be separated by a {seperator}'.format(seperator=self.sep))
         name += ''   # inner workaround for python 2.6+
                     # transforms ascii str to unicode because
                     # of unicode_literals import
@@ -612,10 +612,11 @@ class Property(namedtuple('PropertyTuple', 'key value type valid readonly hidden
         other = Property(**dic)
         if self.key and other.key and self.key != other.key:
             raise ConfigWriteError(self.key, other.key,
-                                   'new key must match old (%r)' % (self.key,))
+                'new key must match old ({newkey!r} != {oldkey!r})'.format(
+                newkey=other.key, oldkey=self.key))
         if self.readonly:
             raise ConfigWriteError(self.key, other.value,
-                                   'is readonly (%r)' % (self.value,))
+                'is readonly ({value!r})'.format(value=self.value))
         return Property(
             key=self.key or other.key,
             value=self._override_self('value', other),
@@ -668,7 +669,7 @@ class Property(namedtuple('PropertyTuple', 'key value type valid readonly hidden
         try:
             return Transformers[type_](value)
         except TransformError:
-            raise ValueError('cannot transform value to %s' % (type_,))
+            raise ValueError('cannot transform value to type %s' % (type_,))
 
     @classmethod
     def _validate(cls, valid, value, type_):
