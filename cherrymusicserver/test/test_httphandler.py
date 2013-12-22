@@ -167,6 +167,24 @@ class TestHTTPHandler(unittest.TestCase):
         session is used to authenticate the http request."""
         self.assertRaises(AttributeError, self.http.api, 'downloadm3u')
 
+    def test_api_downloadpls_call(self):
+        MockPlaylistDB.getName.return_value = 'some_playlist_name'
+        MockPlaylistDB.createPLS.return_value = 'some_pls_string'
+
+        self.call_api('downloadpls', plid=13, hostaddr='host')
+
+        MockPlaylistDB.createPLS.assert_called_with(userid=ANY, plid=13, addrstr='host')
+
+
+    def test_api_downloadm3u_call(self):
+        MockPlaylistDB.getName.return_value = 'some_playlist_name'
+        MockPlaylistDB.createM3U.return_value = 'some_m3u_string'
+
+        self.call_api('downloadm3u', plid=13, hostaddr='host')
+
+        MockPlaylistDB.createM3U.assert_called_with(userid=ANY, plid=13, addrstr='host')
+
+
     def test_api_getsonginfo(self):
         """when attribute error is raised, this means that cherrypy
         session is used to authenticate the http request."""

@@ -573,23 +573,21 @@ class HTTPHandler(object):
         cherrypy.lib.sessions.expire()
     api_logout.no_auth = True
 
-    def api_downloadpls(self):
-        dlval = json.loads(value)
-        pls = self.playlistdb.createPLS(dlval['plid'],
-                                        self.getUserId(),
-                                        dlval['addr'])
-        name = self.playlistdb.getName(value, self.getUserId())
+    def api_downloadpls(self, plid, hostaddr):
+        userid = self.getUserId()
+        pls = self.playlistdb.createPLS(plid=plid, userid=userid, addrstr=hostaddr)
+        name = self.playlistdb.getName(plid, userid)
         if pls and name:
             return self.serve_string_as_file(pls, name+'.pls')
+    api_downloadpls.binary = True
 
-    def api_downloadm3u(self):
-        dlval = json.loads(value)
-        pls = self.playlistdb.createM3U(dlval['plid'],
-                                        self.getUserId(),
-                                        dlval['addr'])
-        name = self.playlistdb.getName(value, self.getUserId())
+    def api_downloadm3u(self, plid, hostaddr):
+        userid = self.getUserId()
+        pls = self.playlistdb.createM3U(plid=plid, userid=userid, addrstr=hostaddr)
+        name = self.playlistdb.getName(plid, userid)
         if pls and name:
             return self.serve_string_as_file(pls, name+'.m3u')
+    api_downloadm3u.binary = True
 
     def api_getsonginfo(self, path):
         basedir = cherry.config['media.basedir']
