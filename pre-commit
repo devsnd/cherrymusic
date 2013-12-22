@@ -101,7 +101,7 @@ fi
 python3 deploy.py
 
 if hash xgettext 2>/dev/null; then
-    xgettext -L Python -o ${gitroot}/res/i18n/cherrymusic.pot `find ${gitroot}/cherrymusicserver -name "*.py"`
+    python3 ${gitroot}/res/i18n/update_translations.py
 fi
 
 # If there are whitespace errors, print the offending file names and fail.

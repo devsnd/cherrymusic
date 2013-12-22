@@ -2,7 +2,7 @@
 import subprocess
 import os
 
-currdir = os.path.dirname(__file__)
+currdir = os.path.relpath(os.path.dirname(__file__), start=os.getcwd())
 sourcedir = os.path.normpath(os.path.join(currdir, '..', '..', 'cherrymusicserver'))
 
 print('updating pot file')
