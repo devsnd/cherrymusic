@@ -218,11 +218,11 @@ PlaylistManager = function(){
 PlaylistManager.prototype = {
     initJPlayer : function(){
         "use strict";
-        
+
         //hack to use flash AND HTML solution in every case
         //https://github.com/happyworm/jPlayer/issues/136#issuecomment-12941923
         availablejPlayerFormats.push("m4v");
-        
+
         var usedSolution = "html, flash";
         if(detectBrowser() == 'midori'){
             //WORKAROUND: the midori falsely reports mp3 support
@@ -253,7 +253,7 @@ PlaylistManager.prototype = {
             $(this.cssSelectorjPlayer).bind($.jPlayer.event.ended, function(event) {
                 self.cmd_next();
             });
-            
+
             /* WORKAROUND FOR BUG #343 (playback stops sometimes in google chrome) */
             $(this.cssSelectorjPlayer).bind($.jPlayer.event.error, function(event) {
                 window.console.log("Playback failed! trying to resume from the point it failed.");
@@ -303,7 +303,7 @@ PlaylistManager.prototype = {
         } else {
             $(this.cssSelectorjPlayer).jPlayer("pause");
         }
-    },  
+    },
     cmd_stop : function(){
         $(this.cssSelectorjPlayer).jPlayer("stop");
     },
@@ -321,7 +321,7 @@ PlaylistManager.prototype = {
     },
     checkFlashBlock : function(){
         flashBlocked = false;
-        
+
         if(detectBrowser() == 'opera'){
             try {
                 window.document.getElementById('jp_flash_0').SetVariable("flashblock", "flashblock");
@@ -332,8 +332,8 @@ PlaylistManager.prototype = {
             //works for firefox (and chrome?)
             flashBlocked = $('#jquery_jplayer_1 > div').length > 0;
         }
-        
-        if(flashBlocked){ 
+
+        if(flashBlocked){
             $('#jquery_jplayer_1 div').css('background-color', '#fff');
             this.flashSize('100%','80px','10000');
             errorFunc('Flashblock is enabled. Please click on the flash symbol on top of the player to activate flash.')();
@@ -387,10 +387,10 @@ PlaylistManager.prototype = {
                     'user-may-download': userOptions.media.may_download,
                 }
             );
-            
+
             $('.save-current-playlist-button').off().on("click",function(){
                 var epl = playlistManager.getEditingPlaylist();
-                savePlaylist(epl.id, false,false,true);                       
+                savePlaylist(epl.id, false,false,true);
                 $(this).blur();
                 return false;
             });
@@ -402,9 +402,9 @@ PlaylistManager.prototype = {
                     $("#playlistpublic").attr("checked", true);
                 } else {
                     $("#playlistpublic").removeAttr("checked");
-                }                
+                }
             });
-            
+
             var remaintracks = epl.getRemainingTracks();
             var completetimesec = epl.getPlayTimeSec(epl.jplayerplaylist.playlist);
             var remaintimesec = epl.getPlayTimeSec(remaintracks);
@@ -413,7 +413,7 @@ PlaylistManager.prototype = {
                 remaintimesec -= $(this.cssSelectorjPlayer).data("jPlayer").status.currentTime;
             }
             remaintimesec = remaintimesec < 0 ? 0 : remaintimesec;
-            
+
             var littleTimeLeft = false;
             var remainingStr = '';
             var proc = 0;
@@ -443,7 +443,7 @@ PlaylistManager.prototype = {
                 $('.playlist-progress-bar .progress-bar').addClass('progress-bar-default');
                 $('.playlist-progress-bar .progress-bar').removeClass('progress-bar-danger');
             }
-            $('.remaining-tracks-or-time').html(remainingStr);           
+            $('.remaining-tracks-or-time').html(remainingStr);
             $('.playlist-progress-bar .progress-bar').css('width',parseInt(100-proc*100)+'%');
         }
     },
@@ -454,24 +454,24 @@ PlaylistManager.prototype = {
         var pltabs = '';
         for(var i=0; i<this.managedPlaylists.length; i++){
             var pl = this.managedPlaylists[i];
-            
+
             var isactive = ''
             if(pl.id == this.editingPlaylist){
                 isactive = ' class="active" ';
             }
             pltabs += '<li '+isactive+' id="'+this.tabid2htmlid(pl.id)+'">';
-            
+
             var isplaying = '';
             if(pl.id == this.playingPlaylist){
                 isplaying += '&#9654;';
             }
-            
+
             var isunsaved = '';
             if(!pl.saved && pl.reason_open !== 'queue'){
                 isunsaved += ' <em>(unsaved)</em>';
             }
-            
-            
+
+
             pltabs += '<a href="#" onclick="playlistManager.showPlaylist('+pl.id+')">'+isplaying+' '+pl.name+ isunsaved;
             if(pl.closable){
                 pltabs += '<span class="playlist-tab-closer pointer" href="#" onclick="playlistManager.closePlaylist('+pl.id+')">&times;</span>';
@@ -531,7 +531,7 @@ PlaylistManager.prototype = {
         this.refreshCommands();
     },
     setTrackDestinationLabel : function(){
-        $('#searchresults .add-track-destination').text('add all to '+this.getEditingPlaylist().name);        
+        $('#searchresults .add-track-destination').text('add all to '+this.getEditingPlaylist().name);
     },
     hideAll : function(){
         $(this.cssSelectorPlaylistContainerParent+'>div').hide();
@@ -568,7 +568,7 @@ PlaylistManager.prototype = {
     newPlaylistFromEditing : function(){
         return this.newPlaylist(this.getEditingPlaylist().jplayerplaylist.playlist);
     },
-    
+
     closePlaylist : function(plid){
         for(var i=0; i<this.managedPlaylists.length; i++){
             if(this.managedPlaylists[i].id == plid){
@@ -667,7 +667,7 @@ PlaylistManager.prototype = {
             playlist = this.getEditingPlaylist();
         }
         playlist.addTrack(track);
-        
+
         //directly play/select first added track
         if(!jPlayerIsPlaying() && playlist.jplayerplaylist.playlist.length == 1){
             if(userOptions.misc.autoplay_on_add){
