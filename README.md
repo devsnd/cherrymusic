@@ -64,5 +64,5 @@ Contribute
 ----------
 
 There's also a wiki section listing the 
-[1001 ways to lend a hand](https://github.com/devsnd/cherrymusic/wiki/Contribute).
+[101 ways to lend a hand](https://github.com/devsnd/cherrymusic/wiki/Contribute).
 
