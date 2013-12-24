@@ -329,8 +329,8 @@ PlaylistManager.prototype = {
                 flashBlocked = true;
             }
         } else {
-            //works for firefox and chrome    
-            flashBlocked = typeof $('#jquery_jplayer_1 div').attr('dataattribute') !== 'undefined';
+            //works for firefox (and chrome?)
+            flashBlocked = $('#jquery_jplayer_1 > div').length > 0;
         }
         
         if(flashBlocked){ 

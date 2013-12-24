@@ -587,6 +587,8 @@ templateLoader.get('mediabrowser-file');
 templateLoader.get('mediabrowser-compact');
 templateLoader.get('mediabrowser-message');
 templateLoader.get('mediabrowser-playlist');
+//preload templates for flash message
+templateLoader.get('flash-message');
 /***
 ADMIN PANEL
 ***/
