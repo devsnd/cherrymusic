@@ -73,6 +73,10 @@ class AlbumArtFetcher:
                 'url': "http://www.buy.com/sr/srajax.aspx?from=2&qu=",
                 'regexes': [' class="productImageLink"><img src="([^"]*)"']
             },
+            'google': {
+                'url': "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&imgsz=medium&rsz=8&q=",
+                'regexes': ['"url":"([^"]*)"']
+            },
         }
         if not method in self.methods:
             log.e(_('''unknown album art fetch method: '%(method)s', using default.'''),
