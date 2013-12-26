@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-12-22 19:35+0100\n"
+"POT-Creation-Date: 2013-12-26 16:10+0100\n"
 "PO-Revision-Date: 2013-12-04 12:29+0100\n"
 "Last-Translator: til <tilman.boerner@gmx.net>\n"
 "Language-Team: Spanish\n"
@@ -338,7 +338,7 @@ msgid ""
 "If you run the server locally, use: localhost:{port}.\n"
 msgstr ""
 
-#: cherrymusicserver/albumartfetcher.py:78
+#: cherrymusicserver/albumartfetcher.py:86
 #, python-format
 msgid "unknown album art fetch method: '%(method)s', using default."
 msgstr ""

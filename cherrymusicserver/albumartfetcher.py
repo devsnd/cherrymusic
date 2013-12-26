@@ -52,6 +52,29 @@ class AlbumArtFetcher:
     provide the means to fetch images from different web services by
     searching for certain keywords
     """
+
+    methods = {
+        'amazon': {
+            'url': "http://www.amazon.com/s/ref=sr_nr_i_0?rh=k:",
+            'regexes': ['<img  src="([^"]*)" class="productImage"',
+                        '<img.+?src="([^"]*)" class="productImage"'],
+        },
+        'bestbuy.com': {
+            'url': 'http://www.bestbuy.com/site/searchpage.jsp?_dyncharset=ISO-8859-1&id=pcat17071&type=page&ks=960&sc=Global&cp=1&sp=&qp=crootcategoryid%23%23-1%23%23-1~~q6a616d657320626c616b65206a616d657320626c616b65~~nccat02001%23%230%23%23e&list=y&usc=All+Categories&nrp=15&iht=n&st=',
+            'regexes': ['<img itemprop="image" class="thumb" src="([^"]*)"']
+        },
+        # buy.com is now rakuten.com
+        # with a new search API that nobody bothered to figure out yet
+        # 'buy.com': {
+        #     'url': "http://www.buy.com/sr/srajax.aspx?from=2&qu=",
+        #     'regexes': [' class="productImageLink"><img src="([^"]*)"']
+        # },
+        'google': {
+            'url': "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&imgsz=medium&rsz=8&q=",
+            'regexes': ['"url":"([^"]*)"']
+        },
+    }
+
     def __init__(self, method='amazon', timeout=10):
         """define the urls of the services and a regex to fetch images
         """
@@ -59,25 +82,6 @@ class AlbumArtFetcher:
         self.IMAGE_SIZE = 80
         # the GET parameter value of the searchterm must be appendable
         # to the urls defined in "methods".
-        self.methods = {
-            'amazon': {
-                'url': "http://www.amazon.com/s/ref=sr_nr_i_0?rh=k:",
-                'regexes': ['<img  src="([^"]*)" class="productImage"',
-                            '<img.+?src="([^"]*)" class="productImage"'],
-            },
-            'bestbuy.com': {
-                'url': 'http://www.bestbuy.com/site/searchpage.jsp?_dyncharset=ISO-8859-1&id=pcat17071&type=page&ks=960&sc=Global&cp=1&sp=&qp=crootcategoryid%23%23-1%23%23-1~~q6a616d657320626c616b65206a616d657320626c616b65~~nccat02001%23%230%23%23e&list=y&usc=All+Categories&nrp=15&iht=n&st=',
-                'regexes': ['<img itemprop="image" class="thumb" src="([^"]*)"']
-            },
-            'buy.com': {
-                'url': "http://www.buy.com/sr/srajax.aspx?from=2&qu=",
-                'regexes': [' class="productImageLink"><img src="([^"]*)"']
-            },
-            'google': {
-                'url': "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&imgsz=medium&rsz=8&q=",
-                'regexes': ['"url":"([^"]*)"']
-            },
-        }
         if not method in self.methods:
             log.e(_('''unknown album art fetch method: '%(method)s', using default.'''),
                   {'method': method})
