@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CherryMusic 0.27.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-12-26 16:10+0100\n"
+"POT-Creation-Date: 2013-12-26 18:00+0100\n"
 "PO-Revision-Date: 2013-12-17 17:29+0200\n"
 "Last-Translator: til <tilman.boerner@gmx.net>\n"
 "Language-Team: <tomwallroth@gmail.com>\n"
@@ -18,16 +18,16 @@ msgstr ""
 "X-Generator: Virtaal 0.7.1\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
-#: cherrymusicserver/cherrymodel.py:166
+#: cherrymusicserver/cherrymodel.py:168
 #, python-format
 msgid "%(user)s searched for '%(term)s'"
 msgstr "%(user)s hat gesucht nach '%(term)s'"
 
-#: cherrymusicserver/cherrymodel.py:169
+#: cherrymusicserver/cherrymodel.py:171
 msgid "sorting DB results using ResultOrder"
 msgstr "sortiere DB-Ergebnisse mit ResultOrder"
 
-#: cherrymusicserver/cherrymodel.py:181
+#: cherrymusicserver/cherrymodel.py:183
 msgid "checking and classifying results:"
 msgstr "prüfe und klassifiziere Ergebnisse:"
 

@@ -35,7 +35,6 @@ will delegate different calls between other classes.
 from __future__ import unicode_literals
 
 import os
-import sys
 from random import choice
 import codecs
 import json
@@ -106,6 +105,8 @@ class CherryModel:
             filterstr = filterstr.lower()
             allfilesindir = [f for f in allfilesindir
                              if f.lower().startswith(filterstr)]
+        else:
+            allfilesindir = [f for f in allfilesindir if not f.startswith('.')]
 
         musicentries = []
 
@@ -266,6 +267,8 @@ class CherryModel:
 def isValidMediaFile(file):
     file.path = strippath(file.path)
     #let only playable files appear in the search results
+    if file.path.startswith('.'):
+        return False
     if not isplayable(file.path) and not file.dir:
         return False
     return True
