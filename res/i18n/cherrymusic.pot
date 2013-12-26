@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-12-26 18:00+0100\n"
+"POT-Creation-Date: 2013-12-27 00:43+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,16 +17,16 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: cherrymusicserver/cherrymodel.py:168
+#: cherrymusicserver/cherrymodel.py:167
 #, python-format
 msgid "%(user)s searched for '%(term)s'"
 msgstr ""
 
-#: cherrymusicserver/cherrymodel.py:171
+#: cherrymusicserver/cherrymodel.py:170
 msgid "sorting DB results using ResultOrder"
 msgstr ""
 
-#: cherrymusicserver/cherrymodel.py:183
+#: cherrymusicserver/cherrymodel.py:182
 msgid "checking and classifying results:"
 msgstr ""
 
@@ -774,16 +774,16 @@ msgstr ""
 msgid "password must not be empty"
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:128
+#: cherrymusicserver/httphandler.py:129
 msgid "Not secure, redirecting..."
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:154
+#: cherrymusicserver/httphandler.py:155
 #, python-brace-format
 msgid "user {name} just logged in."
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:180
+#: cherrymusicserver/httphandler.py:181
 msgid ""
 "\n"
 "            Dropping all sessions! Try not to change between python 2 and "
@@ -791,20 +791,20 @@ msgid ""
 "            everybody has to relogin now."
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:209
+#: cherrymusicserver/httphandler.py:210
 #, python-brace-format
 msgid "Rejected remote admin login from user: {name}"
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:405
+#: cherrymusicserver/httphandler.py:406
 msgid "Fetching album art for keywords {keywords!r}"
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:435
+#: cherrymusicserver/httphandler.py:436
 msgid "processing whole search request"
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:437
+#: cherrymusicserver/httphandler.py:438
 msgid "rendering search results as json"
 msgstr ""
 

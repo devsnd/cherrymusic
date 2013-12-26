@@ -153,7 +153,7 @@ class PlaylistDB:
         return playlists
 
     def createPLS(self,userid,plid, addrstr):
-        pl = self.loadPlaylist(userid, plid)
+        pl = self.loadPlaylist(userid=userid, playlistid=plid)
         if pl:
             plsstr = '''[playlist]
     NumberOfEntries={}
@@ -172,7 +172,7 @@ class PlaylistDB:
             return plsstr
 
     def createM3U(self,userid,plid,addrstr):
-        pl = self.loadPlaylist(userid, plid)
+        pl = self.loadPlaylist(userid=userid, playlistid=plid)
         if pl:
             trackpaths = map(lambda x: addrstr+'/serve/'+x.path,pl)
             return '\n'.join(trackpaths)

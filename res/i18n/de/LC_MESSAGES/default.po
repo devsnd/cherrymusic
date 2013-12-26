@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CherryMusic 0.27.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-12-26 18:00+0100\n"
+"POT-Creation-Date: 2013-12-27 00:43+0100\n"
 "PO-Revision-Date: 2013-12-17 17:29+0200\n"
 "Last-Translator: til <tilman.boerner@gmx.net>\n"
 "Language-Team: <tomwallroth@gmail.com>\n"
@@ -18,16 +18,16 @@ msgstr ""
 "X-Generator: Virtaal 0.7.1\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
-#: cherrymusicserver/cherrymodel.py:168
+#: cherrymusicserver/cherrymodel.py:167
 #, python-format
 msgid "%(user)s searched for '%(term)s'"
 msgstr "%(user)s hat gesucht nach '%(term)s'"
 
-#: cherrymusicserver/cherrymodel.py:171
+#: cherrymusicserver/cherrymodel.py:170
 msgid "sorting DB results using ResultOrder"
 msgstr "sortiere DB-Ergebnisse mit ResultOrder"
 
-#: cherrymusicserver/cherrymodel.py:183
+#: cherrymusicserver/cherrymodel.py:182
 msgid "checking and classifying results:"
 msgstr "prüfe und klassifiziere Ergebnisse:"
 
@@ -909,16 +909,16 @@ msgstr "Name darf nicht leer sein"
 msgid "password must not be empty"
 msgstr "Passwort darf nicht leer sein"
 
-#: cherrymusicserver/httphandler.py:128
+#: cherrymusicserver/httphandler.py:129
 msgid "Not secure, redirecting..."
 msgstr "Keine sichere Verbindung. Weiterleiten auf sicheren Port..."
 
-#: cherrymusicserver/httphandler.py:154
+#: cherrymusicserver/httphandler.py:155
 #, python-brace-format
 msgid "user {name} just logged in."
 msgstr "Benutzer {name} hat sich eingeloggt."
 
-#: cherrymusicserver/httphandler.py:180
+#: cherrymusicserver/httphandler.py:181
 msgid ""
 "\n"
 "            Dropping all sessions! Try not to change between python 2 and "
@@ -928,20 +928,20 @@ msgstr ""
 "Setze alle Benutzersessions zurück! Möglichst nicht zwischen Python 2 und 3 "
 "wechseln, jeder Benutzer muss sich jetzt neu einloggen."
 
-#: cherrymusicserver/httphandler.py:209
+#: cherrymusicserver/httphandler.py:210
 #, python-brace-format
 msgid "Rejected remote admin login from user: {name}"
 msgstr "Admin-Login über Netzwerkverbindung abgewiesen für Benutzer: {name}"
 
-#: cherrymusicserver/httphandler.py:405
+#: cherrymusicserver/httphandler.py:406
 msgid "Fetching album art for keywords {keywords!r}"
 msgstr "Coverbild herunterladen für Schlüsselwörter {keywords!r}"
 
-#: cherrymusicserver/httphandler.py:435
+#: cherrymusicserver/httphandler.py:436
 msgid "processing whole search request"
 msgstr "Bearbeite vollständgige Suchanfrage"
 
-#: cherrymusicserver/httphandler.py:437
+#: cherrymusicserver/httphandler.py:438
 msgid "rendering search results as json"
 msgstr "Suchergebnisse als JSON rendern"
 

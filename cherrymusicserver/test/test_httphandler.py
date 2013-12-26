@@ -185,6 +185,23 @@ class TestHTTPHandler(unittest.TestCase):
         MockPlaylistDB.createM3U.assert_called_with(userid=ANY, plid=13, addrstr='host')
 
 
+    def test_api_export_playlists(self):
+        MockPlaylistDB.showPlaylists.return_value = [{'plid': 1}]
+        MockPlaylistDB.getName.return_value = 'some_playlist_name'
+        MockPlaylistDB.createM3U.return_value = 'some_m3u_string'
+
+        bytestr = self.call_api('exportplaylists', hostaddr='hostaddr', format='m3u')
+
+        import io, zipfile
+        with zipfile.ZipFile(io.BytesIO(bytestr), 'r') as zip:
+            badfile = zip.testzip()
+            assert badfile is None
+            filenames = zip.namelist()
+            assert ['some_playlist_name.m3u'] == filenames, filenames
+            content = zip.read('some_playlist_name.m3u')
+            assert 'some_m3u_string'.encode('ASCII') == content, content
+
+
     def test_api_getsonginfo(self):
         """when attribute error is raised, this means that cherrypy
         session is used to authenticate the http request."""
