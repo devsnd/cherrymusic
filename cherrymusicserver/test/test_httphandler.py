@@ -193,14 +193,16 @@ class TestHTTPHandler(unittest.TestCase):
         bytestr = self.call_api('exportplaylists', hostaddr='hostaddr', format='m3u')
 
         import io, zipfile
-        with zipfile.ZipFile(io.BytesIO(bytestr), 'r') as zip:
+        zip = zipfile.ZipFile(io.BytesIO(bytestr), 'r')
+        try:
             badfile = zip.testzip()
             assert badfile is None
             filenames = zip.namelist()
             assert ['some_playlist_name.m3u'] == filenames, filenames
             content = zip.read('some_playlist_name.m3u')
             assert 'some_m3u_string'.encode('ASCII') == content, content
-
+        finally:
+            zip.close()
 
     def test_api_getsonginfo(self):
         """when attribute error is raised, this means that cherrypy
