@@ -611,11 +611,14 @@ class HTTPHandler(object):
         import zipfile
         from io import BytesIO
         bytebuffer = BytesIO()
-        with zipfile.ZipFile(bytebuffer, 'w') as zip:
+        zip = zipfile.ZipFile(bytebuffer, 'w')
+        try:
             for plid in plids:
                 plstr = filemaker(plid=plid, userid=userid, addrstr=hostaddr)
                 name = self.playlistdb.getName(plid, userid) + '.' + format
                 zip.writestr(name, plstr)
+        finally:
+            zip.close()
         zipmime = 'application/x-zip-compressed'
         cherrypy.response.headers["Content-Type"] = zipmime
         zipname = 'attachment; filename="playlists.zip"'
