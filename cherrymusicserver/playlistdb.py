@@ -31,7 +31,6 @@
 
 from cherrymusicserver import database
 from cherrymusicserver import log
-from cherrymusicserver import service
 from cherrymusicserver.cherrymodel import MusicEntry
 from cherrymusicserver.database.connect import BoundConnector
 try:
@@ -110,7 +109,6 @@ class PlaylistDB:
             (public = 1 OR userid = ?) and rowid=?""", (userid,plid));
         result = cur.fetchall()
         if result:
-            print(result)
             return result[0][1]
         return 'playlist'
 
@@ -130,14 +128,17 @@ class PlaylistDB:
         res = cur.execute(q, ('%'+searchterm+'%', '%'+searchterm+'%'))
         return [row[0] for row in res.fetchall()]
 
-    def showPlaylists(self, userid, filterby=''):
+    def showPlaylists(self, userid, filterby='', include_public=True):
         filtered = None
         if filterby != '':
             filtered = self._searchPlaylist(filterby)
-        #change rowid to id to match api
         cur = self.conn.cursor()
-        cur.execute("""SELECT rowid as id, title, userid, public, _created FROM playlists WHERE
-            public = 1 OR userid = ?""", (userid,));
+        select = "SELECT rowid, title, userid, public, _created FROM playlists"
+        if include_public:
+            where = """ WHERE public=:public OR userid=:userid"""
+        else:
+            where = """ WHERE userid=:userid"""
+        cur.execute(select + where, {'public': True, 'userid': userid});
         results = cur.fetchall()
         playlists = []
         for result in results:
@@ -151,6 +152,7 @@ class PlaylistDB:
                               'created': result[4]
                               })
         return playlists
+
 
     def createPLS(self,userid,plid, addrstr):
         pl = self.loadPlaylist(userid=userid, playlistid=plid)
@@ -171,10 +173,9 @@ class PlaylistDB:
     '''.format(**trinfo)
             return plsstr
 
+
     def createM3U(self,userid,plid,addrstr):
         pl = self.loadPlaylist(userid=userid, playlistid=plid)
         if pl:
             trackpaths = map(lambda x: addrstr+'/serve/'+x.path,pl)
             return '\n'.join(trackpaths)
-
-

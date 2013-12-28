@@ -186,11 +186,13 @@ class TestHTTPHandler(unittest.TestCase):
 
 
     def test_api_export_playlists(self):
-        MockPlaylistDB.showPlaylists.return_value = [{'plid': 1}]
+        from collections import defaultdict
+        MockPlaylistDB.showPlaylists.return_value = [defaultdict(MagicMock)]
         MockPlaylistDB.getName.return_value = 'some_playlist_name'
         MockPlaylistDB.createM3U.return_value = 'some_m3u_string'
 
-        bytestr = self.call_api('exportplaylists', hostaddr='hostaddr', format='m3u')
+        with patch('cherrypy.session', {'userid': 1}, create=True):
+            bytestr = self.http.export_playlists(hostaddr='hostaddr', format='m3u')
 
         import io, zipfile
         zip = zipfile.ZipFile(io.BytesIO(bytestr), 'r')

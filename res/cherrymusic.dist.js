@@ -1109,13 +1109,10 @@ var success=function(data){$('#newusername').val('');$('#newpassword').val('');$
 function userDelete(userid){var success=function(data){updateUserList();};busy('#adminuserlist').hide().fadeIn('fast');api('userdelete',{'userid':userid},success,errorFunc('failed to delete user'),function(){busy('#adminuserlist').fadeOut('fast')});}
 function userSetPermitDownload(userid,allow_download){var success=function(data){updateUserList();};busy('#adminuserlist').hide().fadeIn('fast');api('setuseroptionfor',{'optionkey':'media.may_download','optionval':allow_download,'userid':userid,},success,errorFunc('Failed to set user download state'),function(){busy('#adminuserlist').fadeOut('fast')});}
 function userChangePassword(){if(!validateNewPassword($('#newpassword-change'),$('#repeatpassword-change'))){return false;}
-var success=function(data){$('#changePassword').find('input').each(function(idx,el){$(el).val('');})
-$('#changePassword').modal('hide');$('#userOptions').modal('hide');successNotify('Password changed successfully!')();};var error=function(){$('#oldpassword-change').val('');$('#oldpassword-change').focus();$("#changePassword").modal('attention');}
-busy('#changePassword').hide().fadeIn('fast');api('userchangepassword',{'oldpassword':$('#oldpassword-change').val(),'newpassword':$('#newpassword-change').val()},success,error,function(){busy('#changePassword').fadeOut('fast')});}
-function validateNewPassword($newpwfield,$repeatpwfield){var newpw=$newpwfield.val();var repeatpw=$repeatpwfield.val();if(newpw==repeatpw){$repeatpwfield.closest('.control-group').removeClass('error')
-return true;}
-$repeatpwfield.closest('.control-group').addClass('error')
-return false;}
+var success=function(data){$('#changePassword').find('input').each(function(idx,el){$(el).val('');});$('#changePassword').modal('hide');$('#userOptions').modal('hide');successNotify('Password changed successfully!')();};var error=function(){$('#oldpassword-change').val('');$('#oldpassword-change').focus();$("#changePassword").modal('attention');};busy('#changePassword').hide().fadeIn('fast');api('userchangepassword',{'oldpassword':$('#oldpassword-change').val(),'newpassword':$('#newpassword-change').val()},success,error,function(){busy('#changePassword').fadeOut('fast');});}
+function validateNewPassword($newpwfield,$repeatpwfield){var newpw=$newpwfield.val();var repeatpw=$repeatpwfield.val();if(newpw==repeatpw){$repeatpwfield.closest('.control-group').removeClass('error');return true;}
+$repeatpwfield.closest('.control-group').addClass('error');return false;}
+function userExportPlaylists(){var loc=window.location;var hostaddr=loc.protocol+'//'+loc.host;$('#exportPlaylists input[name=hostaddr]').val(hostaddr);$('#exportPlaylists form').submit();$('#exportPlaylists').modal('hide');$('#userOptions').modal('hide');}
 function enableJplayerDebugging(){$('#jplayer_inspector').jPlayerInspector({jPlayer:$('#jquery_jplayer_1'),visible:true});$('#jquery_jplayer_1').data().jPlayer.options.errorAlerts=true;$('#jquery_jplayer_1').data().jPlayer.options.warningAlerts=true;$('#jplayer_inspector_update_0').click();}
 function loadBrowser(){var success=function(data){new MediaBrowser('.search-results',data,'Root');};busy('#searchfield').hide().fadeIn('fast');api('listdir',success,errorFunc('failed to load file browser'),function(){busy('#searchfield').fadeOut('fast')});}
 function endsWith(str,suffix){"use strict";return str.indexOf(suffix,str.length-suffix.length)!==-1;}

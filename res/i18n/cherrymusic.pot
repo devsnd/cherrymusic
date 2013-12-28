@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-12-27 00:43+0100\n"
+"POT-Creation-Date: 2013-12-28 10:26+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -479,6 +479,11 @@ msgstr ""
 msgid "just now"
 msgstr ""
 
+#: cherrymusicserver/util.py:304
+#, python-format
+msgid "Error writing file %(name)r to memory zip"
+msgstr ""
+
 #: cherrymusicserver/sqlitecache.py:111
 msgid "terms must not contain ''"
 msgstr ""
@@ -774,16 +779,16 @@ msgstr ""
 msgid "password must not be empty"
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:129
+#: cherrymusicserver/httphandler.py:128
 msgid "Not secure, redirecting..."
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:155
+#: cherrymusicserver/httphandler.py:154
 #, python-brace-format
 msgid "user {name} just logged in."
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:181
+#: cherrymusicserver/httphandler.py:180
 msgid ""
 "\n"
 "            Dropping all sessions! Try not to change between python 2 and "
@@ -791,35 +796,47 @@ msgid ""
 "            everybody has to relogin now."
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:210
+#: cherrymusicserver/httphandler.py:209
 #, python-brace-format
 msgid "Rejected remote admin login from user: {name}"
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:406
+#: cherrymusicserver/httphandler.py:405
 msgid "Fetching album art for keywords {keywords!r}"
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:436
+#: cherrymusicserver/httphandler.py:435
 msgid "processing whole search request"
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:438
+#: cherrymusicserver/httphandler.py:437
 msgid "rendering search results as json"
 msgstr ""
 
-#: cherrymusicserver/playlistdb.py:54
+#: cherrymusicserver/httphandler.py:595
+msgid "Please log in"
+msgstr ""
+
+#: cherrymusicserver/httphandler.py:605
+msgid "Unknown playlist format: {format!r}"
+msgstr ""
+
+#: cherrymusicserver/httphandler.py:609
+msgid "No playlists found"
+msgstr ""
+
+#: cherrymusicserver/playlistdb.py:53
 msgid "This playlist doesn't exist! Nothing deleted!"
 msgstr ""
 
-#: cherrymusicserver/playlistdb.py:56
+#: cherrymusicserver/playlistdb.py:55
 msgid "This playlist belongs to another user! Nothing deleted."
 msgstr ""
 
-#: cherrymusicserver/playlistdb.py:63
+#: cherrymusicserver/playlistdb.py:62
 msgid "I will not create an empty playlist. sorry."
 msgstr ""
 
-#: cherrymusicserver/playlistdb.py:84
+#: cherrymusicserver/playlistdb.py:83
 msgid "This playlist name already exists! Nothing saved."
 msgstr ""

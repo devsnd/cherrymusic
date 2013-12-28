@@ -687,7 +687,7 @@ function userChangePassword(){
         return false;
     }
     var success = function(data){
-        $('#changePassword').find('input').each(function(idx, el) { $(el).val(''); } )
+        $('#changePassword').find('input').each(function(idx, el) { $(el).val(''); } );
         $('#changePassword').modal('hide');
         $('#userOptions').modal('hide');
         successNotify('Password changed successfully!')();
@@ -696,7 +696,7 @@ function userChangePassword(){
         $('#oldpassword-change').val('');
         $('#oldpassword-change').focus();
         $("#changePassword").modal('attention');
-    }
+    };
     busy('#changePassword').hide().fadeIn('fast');
     api('userchangepassword',
         {
@@ -705,18 +705,27 @@ function userChangePassword(){
         },
         success,
         error,
-        function(){busy('#changePassword').fadeOut('fast')}
+        function(){busy('#changePassword').fadeOut('fast');}
     );
 }
 function validateNewPassword($newpwfield, $repeatpwfield){
     var newpw = $newpwfield.val();
     var repeatpw = $repeatpwfield.val();
     if (newpw == repeatpw) {
-        $repeatpwfield.closest('.control-group').removeClass('error')
+        $repeatpwfield.closest('.control-group').removeClass('error');
         return true;
     }
-    $repeatpwfield.closest('.control-group').addClass('error')
+    $repeatpwfield.closest('.control-group').addClass('error');
     return false;
+}
+
+function userExportPlaylists() {
+    var loc = window.location;
+    var hostaddr = loc.protocol + '//' + loc.host;
+    $('#exportPlaylists input[name=hostaddr]').val(hostaddr);
+    $('#exportPlaylists form').submit();
+    $('#exportPlaylists').modal('hide');
+    $('#userOptions').modal('hide');
 }
 
 function enableJplayerDebugging(){

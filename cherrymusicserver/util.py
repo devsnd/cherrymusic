@@ -281,3 +281,31 @@ def time2text(sec):
                 return _('in a few seconds')
     else:
         return _('just now')
+
+
+class MemoryZipFile(object):
+
+    def __init__(self):
+        from io import BytesIO
+        from zipfile import ZipFile
+        self.buffer = BytesIO()
+        self.zip = ZipFile(self.buffer, 'w')
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+
+    def writestr(self, name, bytes):
+        try:
+            self.zip.writestr(name, bytes)
+        except:
+            log.x(_('Error writing file %(name)r to memory zip'), {'name': name})
+            raise
+
+    def getbytes(self):
+        return self.buffer.getvalue()
+
+    def close(self):
+        self.zip.close()

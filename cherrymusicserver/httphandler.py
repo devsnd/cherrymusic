@@ -58,7 +58,7 @@ from cherrymusicserver.pathprovider import readRes
 from cherrymusicserver.pathprovider import albumArtFilePath
 import cherrymusicserver as cherry
 import cherrymusicserver.metainfo as metainfo
-from cherrymusicserver.util import Performance
+from cherrymusicserver.util import Performance, MemoryZipFile
 
 from cherrymusicserver.ext import zipstream
 import time
@@ -115,7 +115,6 @@ class HTTPHandler(object):
             'changeplaylist': self.api_changeplaylist,
             'downloadcheck': self.api_downloadcheck,
             'setuseroptionfor': self.api_setuseroptionfor,
-            'exportplaylists': self.api_export_playlists,
         }
 
     def issecure(self, url):
@@ -590,42 +589,41 @@ class HTTPHandler(object):
             return self.serve_string_as_file(pls, name+'.m3u')
     api_downloadm3u.binary = True
 
+    def export_playlists(self, format, all=False, hostaddr=''):
+        userid = self.getUserId()
+        if not userid:
+            raise cherrypy.HTTPError(401, _("Please log in"))
+        hostaddr = (hostaddr.strip().rstrip('/') + cherry.config['server.rootpath']).rstrip('/')
 
-    def api_export_playlists(self, hostaddr, format, plids=()):
-        if format.lower() == 'm3u':
+        format = format.lower()
+        if format == 'm3u':
             filemaker = self.playlistdb.createM3U
-        elif format.lower() == 'pls':
+        elif format == 'pls':
             filemaker = self.playlistdb.createPLS
         else:
             raise cherrypy.HTTPError(400,
-                'Unknown playlist format: {format!r}'.format(format=format))
-        userid = self.getUserId()
-        visible_plids = set(pl['plid'] for pl in self.playlistdb.showPlaylists(userid))
-        if not plids:
-            plids = list(visible_plids)
-        else:
-            plids = visible_plids.intersection(plids)
-        if not plids:
-            raise cherrypy.HTTPError(404, 'No playlists found')
+                _('Unknown playlist format: {format!r}').format(format=format))
 
-        import zipfile
-        from io import BytesIO
-        bytebuffer = BytesIO()
-        zip = zipfile.ZipFile(bytebuffer, 'w')
-        try:
-            for plid in plids:
+        playlists = self.playlistdb.showPlaylists(userid, include_public=all)
+        if not playlists:
+            raise cherrypy.HTTPError(404, _('No playlists found'))
+
+        with MemoryZipFile() as zip:
+            for pl in playlists:
+                plid = pl['plid']
                 plstr = filemaker(plid=plid, userid=userid, addrstr=hostaddr)
                 name = self.playlistdb.getName(plid, userid) + '.' + format
+                if not pl['owner']:
+                    username = self.userdb.getNameById(pl['userid'])
+                    name =  username + '/' + name
                 zip.writestr(name, plstr)
-        finally:
-            zip.close()
-        zipmime = 'application/x-zip-compressed'
-        cherrypy.response.headers["Content-Type"] = zipmime
-        zipname = 'attachment; filename="playlists.zip"'
-        cherrypy.response.headers['Content-Disposition'] = zipname
-        return bytebuffer.getvalue()
-    api_export_playlists.binary = True
 
+        zipmime = 'application/x-zip-compressed'
+        zipname = 'attachment; filename="playlists.zip"'
+        cherrypy.response.headers["Content-Type"] = zipmime
+        cherrypy.response.headers['Content-Disposition'] = zipname
+        return zip.getbytes()
+    export_playlists.exposed = True
 
     def api_getsonginfo(self, path):
         basedir = cherry.config['media.basedir']

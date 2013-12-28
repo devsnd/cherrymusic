@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CherryMusic 0.27.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-12-27 00:43+0100\n"
+"POT-Creation-Date: 2013-12-28 10:26+0100\n"
 "PO-Revision-Date: 2013-12-17 17:29+0200\n"
 "Last-Translator: til <tilman.boerner@gmx.net>\n"
 "Language-Team: <tomwallroth@gmail.com>\n"
@@ -565,6 +565,11 @@ msgstr "in ein paar Sekunden"
 msgid "just now"
 msgstr "jetzt gerade"
 
+#: cherrymusicserver/util.py:304
+#, python-format
+msgid "Error writing file %(name)r to memory zip"
+msgstr ""
+
 #: cherrymusicserver/sqlitecache.py:111
 msgid "terms must not contain ''"
 msgstr "begriffe duerfen '' nicht enthalten"
@@ -909,16 +914,16 @@ msgstr "Name darf nicht leer sein"
 msgid "password must not be empty"
 msgstr "Passwort darf nicht leer sein"
 
-#: cherrymusicserver/httphandler.py:129
+#: cherrymusicserver/httphandler.py:128
 msgid "Not secure, redirecting..."
 msgstr "Keine sichere Verbindung. Weiterleiten auf sicheren Port..."
 
-#: cherrymusicserver/httphandler.py:155
+#: cherrymusicserver/httphandler.py:154
 #, python-brace-format
 msgid "user {name} just logged in."
 msgstr "Benutzer {name} hat sich eingeloggt."
 
-#: cherrymusicserver/httphandler.py:181
+#: cherrymusicserver/httphandler.py:180
 msgid ""
 "\n"
 "            Dropping all sessions! Try not to change between python 2 and "
@@ -928,36 +933,48 @@ msgstr ""
 "Setze alle Benutzersessions zurück! Möglichst nicht zwischen Python 2 und 3 "
 "wechseln, jeder Benutzer muss sich jetzt neu einloggen."
 
-#: cherrymusicserver/httphandler.py:210
+#: cherrymusicserver/httphandler.py:209
 #, python-brace-format
 msgid "Rejected remote admin login from user: {name}"
 msgstr "Admin-Login über Netzwerkverbindung abgewiesen für Benutzer: {name}"
 
-#: cherrymusicserver/httphandler.py:406
+#: cherrymusicserver/httphandler.py:405
 msgid "Fetching album art for keywords {keywords!r}"
 msgstr "Coverbild herunterladen für Schlüsselwörter {keywords!r}"
 
-#: cherrymusicserver/httphandler.py:436
+#: cherrymusicserver/httphandler.py:435
 msgid "processing whole search request"
 msgstr "Bearbeite vollständgige Suchanfrage"
 
-#: cherrymusicserver/httphandler.py:438
+#: cherrymusicserver/httphandler.py:437
 msgid "rendering search results as json"
 msgstr "Suchergebnisse als JSON rendern"
 
-#: cherrymusicserver/playlistdb.py:54
+#: cherrymusicserver/httphandler.py:595
+msgid "Please log in"
+msgstr ""
+
+#: cherrymusicserver/httphandler.py:605
+msgid "Unknown playlist format: {format!r}"
+msgstr ""
+
+#: cherrymusicserver/httphandler.py:609
+msgid "No playlists found"
+msgstr ""
+
+#: cherrymusicserver/playlistdb.py:53
 msgid "This playlist doesn't exist! Nothing deleted!"
 msgstr "Playlist existiert nicht, nichts geloescht!"
 
-#: cherrymusicserver/playlistdb.py:56
+#: cherrymusicserver/playlistdb.py:55
 msgid "This playlist belongs to another user! Nothing deleted."
 msgstr "Playlist gehoert einem anderen Benutzer, nichts geloescht!"
 
-#: cherrymusicserver/playlistdb.py:63
+#: cherrymusicserver/playlistdb.py:62
 msgid "I will not create an empty playlist. sorry."
 msgstr "Ich kann keine leere Playlist erstellen, sorry."
 
-#: cherrymusicserver/playlistdb.py:84
+#: cherrymusicserver/playlistdb.py:83
 msgid "This playlist name already exists! Nothing saved."
 msgstr "Dieser Playlistname existiert bereits! Nichts gespeichert."
 
