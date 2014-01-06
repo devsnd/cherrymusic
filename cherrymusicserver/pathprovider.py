@@ -161,7 +161,8 @@ def getResourcePath(path):
         resourceprefix = getUserDataPath()
         respath = os.path.join(resourceprefix, path)
     if not os.path.exists(respath):
-        raise ResourceNotFound("Couldn't locate '" + path + "'!")
+        raise ResourceNotFound("Couldn't locate {path!r} in {res!r}!".format(
+            path=path, res=resourceprefix))
     return os.path.join(resourceprefix, path)
 
 class ResourceNotFound(Exception):

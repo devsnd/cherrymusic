@@ -1,6 +1,24 @@
 Changelog
 ---------
 
+0.30.0 (2013-12-15)
+
+- FEATURE: Change album art in media browser
+- FEATURE: Play WMA files via live transcoding (needs ffmpeg)
+- FEATURE: Update notifications for admins in web client
+        config key `update_notifications = [True] | False`
+- FEATURE: `--version` switch for main script displays useful info
+- FIX: !!! SSL config: relative paths are now relative to location of config file
+- FIX: Resolve some unicode issues when playing tracks containing non-ASCII characters
+- FIX: autoplay when adding first track now works for all playlists
+- FIX: CherryMusic shuts down cleanly when parent process dies
+- FIX: `media.basedir` can now handle trailing path separator
+- FIX: Can change and delete playlists again
+- FIX: Can delete users again
+- FIX: Online indicator in admin dialog works again
+- IMPROVEMENT: online tracking of test coverage at https://coveralls.io/r/devsnd/cherrymusic
+- IMPROVEMENT: audioread failure no longer pretends to be a serious error
+
 0.29.0 (2013-11-10)
 
  - FEATURE: confirm dialog when closing browser while music is playing

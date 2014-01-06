@@ -65,13 +65,18 @@ def create_playlist(name, titles):
     assert playlist
     return playlist
 
+def test_delete_playlist():
+    pldb = PlaylistDB()
+    create_playlist('deleteme', ['delete', 'me'])
+    pl = get_playlist('deleteme')
+    assert pldb.deletePlaylist(pl['plid'], None, override_owner=True) == 'success'
+    assert pldb.deletePlaylist(pl['plid'], None, override_owner=True) == "This playlist doesn't exist! Nothing deleted!"
 
 def get_playlist(name):
     pldb = PlaylistDB()
     for p in pldb.showPlaylists(_DEFAULT_USERID):
         if p['title'] == name:
             return p
-
 
 def test_set_public():
     pl = create_playlist('some_title', list('abc'))

@@ -209,32 +209,103 @@ def time2text(sec):
     months = days/30
     years = months/12
     if abssec > 30:
-        if int(years) != 0:
-            t = str(int(years))+' years'
-        elif int(months) != 0:
-            t = str(int(months))+' months'
-        elif int(weeks) != 0:
-            t = str(int(weeks))+' weeks'
-        elif int(days) != 0:
-            t = str(int(days))+' days'
-        elif int(hours) != 0:
-            if int(hours) == 1:
-                t = 'an hour'
-            else:
-                t = str(int(hours))+' hours'
-        elif hours > 0.45:
-            t = 'half an hour'
-        elif int(minutes) != 0:
-            if int(minutes) == 1:
-                t = 'a minute'
-            else:
-                t = str(int(minutes))+' minutes'
-        else:
-            t = 'a few seconds'
         if sec > 0:
-            t = t+' ago'
+            if int(years) != 0:
+                if years > 1:
+                    return _('%d years ago') % years
+                else:
+                    return _('a year ago')
+            elif int(months) != 0:
+                if months > 1:
+                    return _('%d months ago') % months
+                else:
+                    return _('a month ago')
+            elif int(weeks) != 0:
+                if weeks > 1:
+                    return _('%d weeks ago') % weeks
+                else:
+                    return _('a week ago')
+            elif int(days) != 0:
+                if days > 1:
+                    return _('%d days ago') % days
+                else:
+                    return _('a day ago')
+            elif int(hours) != 0:
+                if hours > 1:
+                    return _('%d hours ago') % hours
+                else:
+                    return _('an hour ago')
+            elif hours > 0.45:
+                return _('half an hour ago')
+            elif int(minutes) != 0:
+                if minutes > 1:
+                    return _('%d minutes ago') % hours
+                else:
+                    return _('a minute ago')
+            else:
+                return _('a few seconds ago')
         else:
-            t = 'in '+t
+            if int(years) != 0:
+                if years > 1:
+                    return _('in %d years') % years
+                else:
+                    return _('in a year')
+            elif int(months) != 0:
+                if months > 1:
+                    return _('in %d months') % months
+                else:
+                    return _('in a month')
+            elif int(weeks) != 0:
+                if weeks > 1:
+                    return _('in %d weeks') % weeks
+                else:
+                    return _('in a week')
+            elif int(days) != 0:
+                if days > 1:
+                    return _('in %d days') % days
+                else:
+                    return _('in a day')
+            elif int(hours) != 0:
+                if hours > 1:
+                    return _('in %d hours') % hours
+                else:
+                    return _('in an hour')
+            elif hours > 0.45:
+                return _('in half an hour')
+            elif int(minutes) != 0:
+                if minutes > 1:
+                    return _('in %d minutes') % hours
+                else:
+                    return _('in a minute')
+            else:
+                return _('in a few seconds')
     else:
-        t = 'just now'
-    return t
+        return _('just now')
+
+
+class MemoryZipFile(object):
+
+    def __init__(self):
+        from io import BytesIO
+        from zipfile import ZipFile
+        self.buffer = BytesIO()
+        self.zip = ZipFile(self.buffer, 'w')
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+
+    def writestr(self, name, bytes):
+        try:
+            self.zip.writestr(name, bytes)
+        except:
+            log.x(_('Error writing file %(name)r to memory zip'), {'name': name})
+            raise
+
+    def getbytes(self):
+        return self.buffer.getvalue()
+
+    def close(self):
+        self.zip.close()

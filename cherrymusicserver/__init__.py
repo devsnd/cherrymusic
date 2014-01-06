@@ -32,7 +32,7 @@
 #python 2.6+ backward compability
 from __future__ import unicode_literals
 
-VERSION = "0.29.0"
+VERSION = "0.30.0"
 __version__ = VERSION
 DESCRIPTION = "an mp3 server for your browser"
 LONG_DESCRIPTION = """CherryMusic is a music streaming
@@ -44,17 +44,26 @@ LONG_DESCRIPTION = """CherryMusic is a music streaming
 
 from backport import input
 
+import os
+import codecs
 import sys
 import threading
 import signal
+
+import gettext
+from cherrymusicserver import pathprovider
+
+if sys.version_info < (3,):
+    gettext.install('default', unicode=True, localedir=pathprovider.getResourcePath('res/i18n'))
+else:
+    gettext.install('default', localedir=pathprovider.getResourcePath('res/i18n'))
+
 
 # woraround for cherrypy 3.2.2:
 # https://bitbucket.org/cherrypy/cherrypy/issue/1163/attributeerror-in-cherrypyprocessplugins
 if sys.version_info >= (3, 3):
     threading._Timer = threading.Timer
 
-import os
-import codecs
 import cherrypy
 
 def info():
@@ -99,11 +108,12 @@ filesystem encoding: {fs_encoding}
 cherrypyReqVersion = '3'
 cherrypyCurrVersion = str(cherrypy.__version__)
 if cherrypyCurrVersion < cherrypyReqVersion:
-    print("""
+    print(_("""
 cherrypy version is too old!
-Current version: %s
-Required version: %s or higher
-""" % (cherrypyCurrVersion, cherrypyReqVersion))
+Current version: %(current_version)s
+Required version: %(required_version)s or higher
+""") % {'current_version': cherrypyCurrVersion,
+        'required_version': cherrypyReqVersion})
     sys.exit(1)
 
 
@@ -138,7 +148,6 @@ from cherrymusicserver import cherrymodel
 from cherrymusicserver import database
 from cherrymusicserver import httphandler
 from cherrymusicserver import log
-from cherrymusicserver import pathprovider
 from cherrymusicserver import playlistdb
 from cherrymusicserver import service
 from cherrymusicserver import sqlitecache
@@ -173,10 +182,10 @@ class CherryMusic:
     def create_pid_file(cls):
         """create a process id file, exit if it already exists"""
         if pathprovider.pidFileExists():
-            sys.exit("""============================================
+            sys.exit(_("""============================================
 Process id file %s already exists.
 I've you are sure that cherrymusic is not running, you can delete this file and restart cherrymusic.
-============================================""" % pathprovider.pidFile())
+============================================""") % pathprovider.pidFile())
         else:
             with open(pathprovider.pidFile(), 'w') as pidfile:
                 pidfile.write(str(os.getpid()))
@@ -187,7 +196,7 @@ I've you are sure that cherrymusic is not running, you can delete this file and 
         if pathprovider.pidFileExists():
             os.remove(pathprovider.pidFile())
         else:
-            print("Error removing pid file, doesn't exist!")
+            print(_("Error removing pid file, doesn't exist!"))
 
     @classmethod
     def setup_services(cls):
@@ -219,7 +228,7 @@ I've you are sure that cherrymusic is not running, you can delete this file and 
         if createNewConfig:
             newconfigpath = pathprovider.configurationFile() + '.new'
             cfg.write_to_file(cfg.from_defaults(), newconfigpath)
-            log.i('New configuration file was written to:{br}{path}'.format(
+            log.i(_('New configuration file was written to:{br}{path}').format(
                 path=newconfigpath,
                 br=os.linesep
             ))
@@ -244,7 +253,7 @@ I've you are sure that cherrymusic is not running, you can delete this file and 
         db_is_ready = database.ensure_current_version(
             consentcallback=self._get_user_consent_for_db_schema_update)
         if not db_is_ready:
-            log.i("database schema update aborted. quitting.")
+            log.i(_("database schema update aborted. quitting."))
             sys.exit(1)
         if update is not None:
             cacheupdate = threading.Thread(name="Updater",
@@ -262,7 +271,7 @@ I've you are sure that cherrymusic is not running, you can delete this file and 
         import textwrap
         wrap = lambda r: os.linesep.join(
             textwrap.wrap(r, initial_indent=' - ', subsequent_indent="   "))
-        msg = """
+        msg = _("""
 ==========================================================================
 A database schema update is needed and requires your consent.
 
@@ -276,7 +285,7 @@ To backup your database files first, abort for now and find them here:
 {dblocation}
 
 ==========================================================================
-Run schema update? [y/N]: """.format(
+Run schema update? [y/N]: """).format(
             reasons=(2 * os.linesep).join(wrap(r) for r in reasons),
             dblocation='\t' + pathprovider.databaseFilePath(''))
         return input(msg).lower().strip() in ('y',)
@@ -322,20 +331,20 @@ Run schema update? [y/N]: """.format(
                 deprecated.append(transform(property.key))
 
         if new:
-            log.i('''New configuration options available:
+            log.i(_('''New configuration options available:
                         %s
-                    Using default values for now.''',
+                    Using default values for now.'''),
                   '\n\t\t\t'.join(new))
         if deprecated:
-            log.i('''The following configuration options are not used anymore:
-                        %s''',
+            log.i(_('''The following configuration options are not used anymore:
+                        %s'''),
                   '\n\t\t\t'.join(deprecated))
         if new or deprecated:
-            log.i('Start with --newconfig to generate a new default config'
-                  ' file next to your current one.')
+            log.i(_('Start with --newconfig to generate a new default config'
+                    ' file next to your current one.'))
 
     def printMigrationNoticeAndExit(self):  # temp. remove @ v0.30 or so
-        print("""
+        print(_("""
 ==========================================================================
 Oops!
 
@@ -354,11 +363,11 @@ To continue, please move the following:
 
 Thank you, and enjoy responsibly. :)
 ==========================================================================
-""")
+"""))
         sys.exit(1)
 
     def printWelcomeAndExit(self):
-        print("""
+        print(_("""
 ==========================================================================
 Welcome to CherryMusic """ + VERSION + """!
 
@@ -370,7 +379,7 @@ resides under the following path:
 Then you can start the server and listen to whatever you like.
 Have fun!
 ==========================================================================
-""")
+"""))
         sys.exit(0)
 
     def start_server(self, httphandler):
@@ -456,7 +465,7 @@ Have fun!
                     'tools.staticfile.on': True,
                     'tools.staticfile.filename': resourcedir + '/favicon.ico',
                 }})
-        log.i('Starting server on port %s ...' % config['server.port'])
+        log.i(_('Starting server on port %s ...') % config['server.port'])
 
         cherrypy.lib.caching.expires(0)  # disable expiry caching
         cherrypy.engine.start()

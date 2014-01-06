@@ -49,7 +49,7 @@ class UserDB:
 
     def addUser(self, username, password, admin):
         if not (username.strip() or password.strip()):
-            log.d('empty username or password!')
+            log.d(_('empty username or password!'))
             return
         user = User.create(username, password, admin)
         self.conn.execute('''
@@ -70,7 +70,7 @@ class UserDB:
 
     def changePassword(self, username, newpassword):
         if not newpassword.strip():
-            return "not a valid password"
+            return _("not a valid password")
         else:
             newuser = User.create(username, newpassword, False) #dummy user for salt
             self.conn.execute('''
@@ -150,9 +150,9 @@ class User(namedtuple('User_', 'uid name isadmin password salt')):
         will add a random salt.'''
 
         if not name.strip():
-            raise ValueError('name must not be empty')
+            raise ValueError(_('name must not be empty'))
         if not password.strip():
-            raise ValueError('password must not be empty')
+            raise ValueError(_('password must not be empty'))
 
         salt = Crypto.generate_salt()
         password = Crypto.scramble(password, salt)

@@ -31,7 +31,6 @@
 
 from cherrymusicserver import database
 from cherrymusicserver import log
-from cherrymusicserver import service
 from cherrymusicserver.cherrymodel import MusicEntry
 from cherrymusicserver.database.connect import BoundConnector
 try:
@@ -51,16 +50,16 @@ class PlaylistDB:
         ownerid = cursor.execute(
             "SELECT userid FROM playlists WHERE rowid = ?", (plid,)).fetchone()
         if not ownerid:
-            return "This playlist doesn't exist! Nothing deleted!"
+            return _("This playlist doesn't exist! Nothing deleted!")
         if userid != ownerid[0] and not override_owner:
-            return "This playlist belongs to another user! Nothing deleted."
+            return _("This playlist belongs to another user! Nothing deleted.")
         cursor.execute("""DELETE FROM playlists WHERE rowid = ?""", (plid,))
         self.conn.commit()
         return 'success'
 
     def savePlaylist(self, userid, public, playlist, playlisttitle, overwrite=False):
         if not len(playlist):
-            return 'I will not create an empty playlist. sorry.'
+            return _('I will not create an empty playlist. sorry.')
         duplicateplaylistid = self.conn.execute("""SELECT rowid FROM playlists
             WHERE userid = ? AND title = ?""",(userid,playlisttitle)).fetchone()
         if duplicateplaylistid and overwrite:
@@ -81,7 +80,7 @@ class PlaylistDB:
             self.conn.commit()
             return "success"
         else:
-            return "This playlist name already exists! Nothing saved."
+            return _("This playlist name already exists! Nothing saved.")
 
     def loadPlaylist(self, playlistid, userid):
         cursor = self.conn.cursor()
@@ -110,7 +109,6 @@ class PlaylistDB:
             (public = 1 OR userid = ?) and rowid=?""", (userid,plid));
         result = cur.fetchall()
         if result:
-            print(result)
             return result[0][1]
         return 'playlist'
 
@@ -130,14 +128,17 @@ class PlaylistDB:
         res = cur.execute(q, ('%'+searchterm+'%', '%'+searchterm+'%'))
         return [row[0] for row in res.fetchall()]
 
-    def showPlaylists(self, userid, filterby=''):
+    def showPlaylists(self, userid, filterby='', include_public=True):
         filtered = None
         if filterby != '':
             filtered = self._searchPlaylist(filterby)
-        #change rowid to id to match api
         cur = self.conn.cursor()
-        cur.execute("""SELECT rowid as id, title, userid, public, _created FROM playlists WHERE
-            public = 1 OR userid = ?""", (userid,));
+        select = "SELECT rowid, title, userid, public, _created FROM playlists"
+        if include_public:
+            where = """ WHERE public=:public OR userid=:userid"""
+        else:
+            where = """ WHERE userid=:userid"""
+        cur.execute(select + where, {'public': True, 'userid': userid});
         results = cur.fetchall()
         playlists = []
         for result in results:
@@ -152,8 +153,9 @@ class PlaylistDB:
                               })
         return playlists
 
+
     def createPLS(self,userid,plid, addrstr):
-        pl = self.loadPlaylist(userid, plid)
+        pl = self.loadPlaylist(userid=userid, playlistid=plid)
         if pl:
             plsstr = '''[playlist]
     NumberOfEntries={}
@@ -171,10 +173,9 @@ class PlaylistDB:
     '''.format(**trinfo)
             return plsstr
 
+
     def createM3U(self,userid,plid,addrstr):
-        pl = self.loadPlaylist(userid, plid)
+        pl = self.loadPlaylist(userid=userid, playlistid=plid)
         if pl:
             trackpaths = map(lambda x: addrstr+'/serve/'+x.path,pl)
             return '\n'.join(trackpaths)
-
-

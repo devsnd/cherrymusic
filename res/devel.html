@@ -164,15 +164,19 @@
                 <h3>misc</h3>
                 <div class="control-group">  
                     Autoplay when adding first track <input type="checkbox" onchange="" id="misc-autoplay_on_add" value="option1">  
-                </div> 
-                <div class="control-group">  
-                    Show playlist download button <input type="checkbox" onchange="" id="misc-show_playlist_download_buttons" value="option1">  
-                </div> 
+                </div>
+                <!-- Temporalily removed until issue #387 is resolved. Label reworded for issue #388.
+                <div class="control-group">
+                    Show buttons for m3u/pls download <input type="checkbox" onchange="" id="misc-show_playlist_download_buttons" value="option1">
+                </div>
+                -->
                 <div class="control-group">
                     Confirm closing if music is playing <input type="checkbox" onchange="" id="ui-confirm_quit_dialog" value="option1">
                 </div>
                 <h3>change password</h3>
                 <a class="btn btn-default" href="#changePassword" role="button" data-toggle="modal">change password</a>
+                <h3>export playlists</h3>
+                <a class="btn btn-default" href="#exportPlaylists" role="button" data-toggle="modal">create archive</a>
             </div>
         </div>
         <div class="modal-footer">
@@ -222,6 +226,54 @@
     </div>
     </div>
 </div>
+<!-- export playlists -->
+<div id="exportPlaylists" class="modal fade">
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3>create playlist archive</h3>
+        </div>
+        <div class="modal-body">
+            <div class="content">
+            <form class="" action="export_playlists" method="GET" target="_blank">
+                <div class="form-group">
+                    Playlist file format:
+                    <div class="radio-inline">
+                        <label class="radio-inline">
+                            <input type="radio" name="format" value="m3u" checked/> m3u
+                        </label>
+                    </div>
+                    <div class="radio-inline">
+                        <label class="radio-inline">
+                            <input type="radio" name="format" value="pls"/> pls
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" name="all" value="True"/>
+                            include other people's public playlists
+                        </label>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <input type="hidden" name="hostaddr" value=""/>
+                    <a href="javascript:;" onclick="userExportPlaylists()" class="btn btn-default">
+                        export playlists as ZIP file
+                    </a>
+                </div>
+            </form>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+        </div>
+    </div>
+    </div>
+</div>
+<!-- export playlists end -->
 <!-- change password end -->
 <!-- change albumart -->
 <div id="changeAlbumArt" class="modal fade">
@@ -544,7 +596,7 @@
                                 <li><a class="toggle-public-private-playlist" tabindex="-1" href="#"></a></li>
                             </ul>
                         </div>
-                        <a class="btn btn-xs btn-default" show-cond="user-may-download" onclick="download_editing_playlist()">download</a>
+                        <a class="btn btn-xs btn-default pull-left" show-cond="user-may-download" onclick="download_editing_playlist()">download</a>
                         <form style="display: none" id="download-redirect" method="post" action="download">
                             <input id="download-redirect-files" type="text" name="value" value="" />
                         </form>

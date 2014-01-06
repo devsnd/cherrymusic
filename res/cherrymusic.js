@@ -71,10 +71,10 @@ function api(){
     var successfunc = arguments[has_data?2:1];
     var errorfunc = arguments[has_data?3:2];
     var completefunc = arguments[has_data?4:3];
-    
+
     if(!successfunc) successfunc = function(){};
     if(!completefunc) completefunc = function(){};
-    
+
     var successFuncWrapper = function(successFunc){
         return function handler(json){
             var result = $.parseJSON(json);
@@ -84,7 +84,7 @@ function api(){
             successFunc(result.data);
         }
     }
-    
+
     //wrapper for all error handlers:
     var errorFuncWrapper = function(errorFunc){
         return function(httpstatus){
@@ -135,7 +135,7 @@ function successNotify(msg){
 
 function displayNotification(msg,type){
     templateLoader.render(
-        'flash-message', 
+        'flash-message',
         {
             msg : msg,
             cssclass: type=='error'?'alert-danger':type=='success'?'alert-success':''
@@ -157,7 +157,7 @@ function loadConfig(executeAfter){
         transcodingEnabled = dictatedClientConfig.transcodingenabled;
         isAdmin = dictatedClientConfig.isadmin;
         loggedInUserName = dictatedClientConfig.username;
-        
+
         /** USE SERVER CONFIG INSTEAD **/
         SERVER_CONFIG = {
             'available_encoders': dictatedClientConfig.getencoders,
@@ -169,7 +169,7 @@ function loadConfig(executeAfter){
             'transcode_path': dictatedClientConfig.transcodepath,
             'auto_login': dictatedClientConfig.auto_login,
         }
-        
+
         executeAfter();
         if(isAdmin){
             $('a[href="#adminpanel"]').show();
@@ -203,7 +203,7 @@ function loadUserOptions(onSuccess){
         $('#keyboard_shortcuts-play').html(String.fromCharCode(userOptions.keyboard_shortcuts.play));
         $('#keyboard_shortcuts-pause').html(String.fromCharCode(userOptions.keyboard_shortcuts.pause));
         $('#keyboard_shortcuts-search').html(String.fromCharCode(userOptions.keyboard_shortcuts.search));
-        
+
         $('#misc-show_playlist_download_buttons').attr('checked',userOptions.misc.show_playlist_download_buttons);
         $('#misc-autoplay_on_add').attr('checked',userOptions.misc.autoplay_on_add);
         $('#ui-confirm_quit_dialog').attr('checked',userOptions.ui.confirm_quit_dialog);
@@ -256,14 +256,14 @@ function busy(selector, rect){
         $(selector).append(domelem);
     }
     var top, left, width, height;
-    
+
     var pos = $(selector).position();
     top = 'top: '+pos.top+'px;';
     left = 'left: '+pos.left+'px;';
     width = 'width: '+$(selector).width()+'px;';
     height = 'height: '+$(selector).height()+'px;';
-    
-    domelem.attr('style','position: absolute;'+top+left+width+height);   
+
+    domelem.attr('style','position: absolute;'+top+left+width+height);
     return domelem;
 }
 
@@ -297,15 +297,10 @@ function submitsearch(){
     search();
     return false;
 }
-    
+
 /***
 INTERACTION
 ***/
-
-function showAlbumArtChangePopOver(jqobj){
-    // relative img paths so cherrymusic can run in subdir (#344)
-    jqobj.popover({selector: jqobj.siblings('img'), title: 'Change cover art', html: true, content: '<img src="res/img/folder.png" /><img src="res/img/folder.png" /><img src="res/img/folder.png" />'});
-}
 
 
 /* PLAYLIST CREATION AND MANAGEMENT END*/
@@ -320,7 +315,7 @@ ext2jPlayerFormat = function(ext){
         case "m4a":
         case "mp4":
         case "aac": return "m4a";
-        
+
         case "flac" : return "flac"
 
         case "wav": return "wav";
@@ -515,7 +510,7 @@ function resizePlaylistSlowly(){
 function download_editing_playlist(){
     var pl = playlistManager.getEditingPlaylist();
     var p = pl.jplayerplaylist.playlist;
-    var track_urls = []
+    var track_urls = [];
     for(i=0; i<p.length; i++){
         track_urls.push(decodeURIComponent(p[i].url));
     }
@@ -592,6 +587,8 @@ templateLoader.get('mediabrowser-file');
 templateLoader.get('mediabrowser-compact');
 templateLoader.get('mediabrowser-message');
 templateLoader.get('mediabrowser-playlist');
+//preload templates for flash message
+templateLoader.get('flash-message');
 /***
 ADMIN PANEL
 ***/
@@ -603,7 +600,7 @@ function updateUserList(){
         var response = $.parseJSON(data);
         var time = response['time'];
         var template_user_data = {'users': []};
-        $.each(response['userlist'],function(i,e){           
+        $.each(response['userlist'],function(i,e){
             var reltime = time - e.last_time_online;
             template_user_data['users'].push({
                 isadmin: e.admin,
@@ -690,7 +687,7 @@ function userChangePassword(){
         return false;
     }
     var success = function(data){
-        $('#changePassword').find('input').each(function(idx, el) { $(el).val(''); } )
+        $('#changePassword').find('input').each(function(idx, el) { $(el).val(''); } );
         $('#changePassword').modal('hide');
         $('#userOptions').modal('hide');
         successNotify('Password changed successfully!')();
@@ -699,7 +696,7 @@ function userChangePassword(){
         $('#oldpassword-change').val('');
         $('#oldpassword-change').focus();
         $("#changePassword").modal('attention');
-    }
+    };
     busy('#changePassword').hide().fadeIn('fast');
     api('userchangepassword',
         {
@@ -708,18 +705,27 @@ function userChangePassword(){
         },
         success,
         error,
-        function(){busy('#changePassword').fadeOut('fast')}
+        function(){busy('#changePassword').fadeOut('fast');}
     );
 }
 function validateNewPassword($newpwfield, $repeatpwfield){
     var newpw = $newpwfield.val();
     var repeatpw = $repeatpwfield.val();
     if (newpw == repeatpw) {
-        $repeatpwfield.closest('.control-group').removeClass('error')
+        $repeatpwfield.closest('.control-group').removeClass('error');
         return true;
     }
-    $repeatpwfield.closest('.control-group').addClass('error')
+    $repeatpwfield.closest('.control-group').addClass('error');
     return false;
+}
+
+function userExportPlaylists() {
+    var loc = window.location;
+    var hostaddr = loc.protocol + '//' + loc.host;
+    $('#exportPlaylists input[name=hostaddr]').val(hostaddr);
+    $('#exportPlaylists form').submit();
+    $('#exportPlaylists').modal('hide');
+    $('#userOptions').modal('hide');
 }
 
 function enableJplayerDebugging(){
@@ -826,7 +832,7 @@ function userNameToColor(username){
     var b = ((ord(username[1])-65)*255)/30;
     var r = ((ord(username[2])-65)*255)/30;
     return '#'+dec2Hex(r)+dec2Hex(g)+dec2Hex(b);
-} 
+}
 
 /*****************
  * KEYBOARD SHORTCUTS
@@ -901,7 +907,7 @@ function userOptionCheckboxListener(htmlid, optionname){
 }
 
 /*****************************
-CONDITIONAL USER INTERFACE 
+CONDITIONAL USER INTERFACE
  *****************************/
 
 function show_ui_conditionally(selectors, conditions_table){
@@ -1059,7 +1065,7 @@ $(document).ready(function(){
         //enable loading of images when in viewport
         MediaBrowser.static.albumArtLoader('#search-panel');
     });
-    
+
     //register top level directories
     $('div#progressscreen').fadeOut('slow');
     //window.setInterval("resizePlaylistSlowly()",2000);
@@ -1086,6 +1092,21 @@ $(document).ready(function(){
     $('#saveplaylistmodal').on('hide', function(){
         $('#playlisttitle').unbind('keyup');
     });
+
+    $('#changeAlbumArt').on('shown.bs.modal', function(){
+        //empty old search results
+        $('#changeAlbumArt .coverart-tryout').empty();
+        //set input field in modal
+        $("#albumart-search-term").val(decodeURIComponent($('#changeAlbumArt').attr('data-dirname')));
+        $("#albumart-search-term").focus();
+        //when pressing enter, the search should start:
+        $("#albumart-search-term").off('keypress').on('keypress', function(e){
+            if (e.keyCode == '13' || e.which == '13'){
+                searchAlbumArt();
+            }
+        });
+    });
+
     $('#changePassword').on('show.bs.modal', function(){
         //$('#changePassword').data('modal').options.focusOn = '#oldpassword-change';
     });
