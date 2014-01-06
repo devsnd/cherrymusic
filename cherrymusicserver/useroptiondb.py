@@ -68,6 +68,9 @@ class UserOptionDB:
             white_on_black.value = False
         with c['media.may_download'] as may_download:
             may_download.value = False
+        with c['media.force_transcode_to_bitrate'] as force_transcode:
+            force_transcode.value = 0
+            force_transcode.valid = '0|96|128'
         with c['ui.confirm_quit_dialog'] as confirm_quit_dialog:
             confirm_quit_dialog.value = True
         with c['last_time_online'] as last_time_online:

@@ -165,13 +165,26 @@
                 <div class="control-group">  
                     Autoplay when adding first track <input type="checkbox" onchange="" id="misc-autoplay_on_add" value="option1">  
                 </div>
-                <!-- Temporalily removed until issue #387 is resolved. Label reworded for issue #388.
-                <div class="control-group">
-                    Show buttons for m3u/pls download <input type="checkbox" onchange="" id="misc-show_playlist_download_buttons" value="option1">
-                </div>
-                -->
                 <div class="control-group">
                     Confirm closing if music is playing <input type="checkbox" onchange="" id="ui-confirm_quit_dialog" value="option1">
+                </div>
+                <div class="control-group">
+                    Limit audio bitrate
+                    <div class="radio-inline">
+                        <label class="radio-inline">
+                            <input type="radio" id="media-force_transcode_to_bitrate0" name="bitrate" value="0"/> Unlimited
+                        </label>
+                    </div>
+                    <div class="radio-inline">
+                        <label class="radio-inline">
+                            <input type="radio" id="media-force_transcode_to_bitrate96" name="bitrate" value="96"/> Low (96kbps)
+                        </label>
+                    </div>
+                    <div class="radio-inline">
+                        <label class="radio-inline">
+                            <input type="radio" id="media-force_transcode_to_bitrate128" name="bitrate" value="128"/> Medium (128kbps)
+                        </label>
+                    </div>
                 </div>
                 <h3>change password</h3>
                 <a class="btn btn-default" href="#changePassword" role="button" data-toggle="modal">change password</a>

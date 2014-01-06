@@ -204,10 +204,18 @@ function loadUserOptions(onSuccess){
         $('#keyboard_shortcuts-pause').html(String.fromCharCode(userOptions.keyboard_shortcuts.pause));
         $('#keyboard_shortcuts-search').html(String.fromCharCode(userOptions.keyboard_shortcuts.search));
 
-        $('#misc-show_playlist_download_buttons').attr('checked',userOptions.misc.show_playlist_download_buttons);
         $('#misc-autoplay_on_add').attr('checked',userOptions.misc.autoplay_on_add);
         $('#ui-confirm_quit_dialog').attr('checked',userOptions.ui.confirm_quit_dialog);
-    }
+
+        var forced_bitrate = userOptions.media.force_transcode_to_bitrate;
+        if([0, 96, 128].indexOf(forced_bitrate) < 0) {
+            console.log("Unknown bitrate value: ", forced_bitrate, typeof forced_bitrate);
+            console.log("Using default.");
+            forced_bitrate = 0;
+        }
+        var id = '#media-force_transcode_to_bitrate' + forced_bitrate;
+        $(id).attr('checked','checked');
+    };
     api('getuseroptions', success);
 }
 
@@ -906,6 +914,18 @@ function userOptionCheckboxListener(htmlid, optionname){
     });
 }
 
+function userOptionMultivalListener(htmlid, optionname) {
+    $(htmlid).on('change',function(){
+        var self = this;
+        optionSetter(   optionname,
+                        $(this).val(),
+                        function(){
+                        },
+                        errorFunc('Error setting option! '+optionname)
+        );
+    });
+}
+
 /*****************************
 CONDITIONAL USER INTERFACE
  *****************************/
@@ -1116,4 +1136,10 @@ $(document).ready(function(){
                                'misc.autoplay_on_add');
     userOptionCheckboxListener('#ui-confirm_quit_dialog',
                                'ui.confirm_quit_dialog');
+    userOptionMultivalListener('#media-force_transcode_to_bitrate0',
+                                'media.force_transcode_to_bitrate');
+    userOptionMultivalListener('#media-force_transcode_to_bitrate96',
+                                'media.force_transcode_to_bitrate');
+    userOptionMultivalListener('#media-force_transcode_to_bitrate128',
+                                'media.force_transcode_to_bitrate');
 });

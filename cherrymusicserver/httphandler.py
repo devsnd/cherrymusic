@@ -348,9 +348,9 @@ class HTTPHandler(object):
         uo = self.useroptions.forUser(self.getUserId())
         uco = uo.getChangableOptions()
         if cherrypy.session['admin']:
-            uco['media'] = {'may_download': True}
+            uco['media'].update({'may_download': True})
         else:
-            uco['media'] = {'may_download': uo.getOptionValue('media.may_download')}
+            uco['media'].update({'may_download': uo.getOptionValue('media.may_download')})
         return uco
 
     def api_heartbeat(self):
