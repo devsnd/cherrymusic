@@ -134,7 +134,7 @@ function successNotify(msg){
 }
 
 function displayNotification(msg,type){
-    templateLoader.render(
+    templateLoader.render_append(
         'flash-message',
         {
             msg : msg,
@@ -581,6 +581,11 @@ function TemplateLoader(template_path){
             $jqobj.html(Mustache.render(template, content));
         });
     }
+    this.render_append = function(template_name, content, $jqobj){
+        this.get(template_name, function(template){
+            $jqobj.append(Mustache.render(template, content));
+        });
+    };
     this.cached = function(template_name){
         if(this.loaded_templates.hasOwnProperty(template_name)){
             return this.loaded_templates[template_name];
