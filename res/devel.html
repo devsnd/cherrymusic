@@ -168,24 +168,32 @@
                 <div class="control-group">
                     Confirm closing if music is playing <input type="checkbox" onchange="" id="ui-confirm_quit_dialog" value="option1">
                 </div>
-                <div class="control-group">
-                    Limit audio bitrate
-                    <div class="radio-inline">
-                        <label class="radio-inline">
-                            <input type="radio" name="media-force_transcode_to_bitrate" value="0"/> Unlimited
-                        </label>
+                <div id="media-force_transcode_to_bitrate-container" class="control-group">
+                    <div class="success">
+                        Limit audio bitrate
+                        <div class="radio-inline">
+                            <label class="radio-inline">
+                                <input type="radio" name="media-force_transcode_to_bitrate" value="0"/> Unlimited
+                            </label>
+                        </div>
+                        <div class="radio-inline">
+                            <label class="radio-inline">
+                                <input type="radio" name="media-force_transcode_to_bitrate" value="96"/> Low
+                            </label>
+                        </div>
+                        <div class="radio-inline">
+                            <label class="radio-inline">
+                                <input type="radio" name="media-force_transcode_to_bitrate" value="128"/> Medium
+                            </label>
+                        </div>
+                        &nbsp;<input id="media-force_transcode_to_bitrate-display" type="text" disabled value="" size="3" style="text-align:right;"/>&nbsp;kbps
                     </div>
-                    <div class="radio-inline">
-                        <label class="radio-inline">
-                            <input type="radio" name="media-force_transcode_to_bitrate" value="96"/> Low
-                        </label>
+                    <div class="error" style="display: none; text-align: center; margin: 5px;">
+                        <span class="msg"></span>
+                        <button id="media-force_transcode_to_bitrate-disable" class="btn btn-danger">
+                            Remove personal bitrate limit
+                        </button>
                     </div>
-                    <div class="radio-inline">
-                        <label class="radio-inline">
-                            <input type="radio" name="media-force_transcode_to_bitrate" value="128"/> Medium
-                        </label>
-                    </div>
-                    &nbsp;<input id="media-force_transcode_to_bitrate-display" type="text" disabled value="" size="3" style="text-align:right;"/>&nbsp;kbps
                 </div>
                 <h3>change password</h3>
                 <a class="btn btn-default" href="#changePassword" role="button" data-toggle="modal">change password</a>

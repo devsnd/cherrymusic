@@ -208,14 +208,28 @@ function loadUserOptions(onSuccess){
         $('#ui-confirm_quit_dialog').attr('checked',userOptions.ui.confirm_quit_dialog);
 
         var forced_bitrate = userOptions.media.force_transcode_to_bitrate;
-        var radios = "input[name='media-force_transcode_to_bitrate']";
-        var selected = radios + "[value='x']".replace(/x/, forced_bitrate);
-        var deselected = selected.replace(/value=/, 'value!=');
-        $(selected).attr('checked', 'checked');
-        $(deselected).removeAttr('checked');
-        $('#media-force_transcode_to_bitrate-display').val(forced_bitrate);
-        if([0, 96, 128].indexOf(forced_bitrate) < 0) {
-            console.log("Unknown bitrate value:", forced_bitrate);
+        if (SERVER_CONFIG['transcoding_enabled']) {
+            var radios = "input[name='media-force_transcode_to_bitrate']";
+            var selected = radios + "[value='x']".replace(/x/, forced_bitrate);
+            var deselected = selected.replace(/value=/, 'value!=');
+            $(selected).attr('checked', 'checked');
+            $(deselected).removeAttr('checked');
+            $("#media-force_transcode_to_bitrate input[name='display']").val(forced_bitrate);
+            if([0, 96, 128].indexOf(forced_bitrate) < 0) {
+                console.log("Unknown bitrate value:", forced_bitrate);
+            }
+        } else {
+            var optionContainer = $("#media-force_transcode_to_bitrate-container");
+            optionContainer.find(".success").hide();
+            if(forced_bitrate) {
+                userOptions.media.force_transcode_to_bitrate = false;
+                var msg = 'WARNING Cannot enforce bitrate limit of :value kbps: server does not transcode!';
+                msg = msg.replace(/:value/, forced_bitrate);
+                displayNotification(msg, 'error');
+                var errorArea = optionContainer.find(".error");
+                errorArea.find(".msg").html(msg);
+                errorArea.show();
+            }
         }
     };
     api('getuseroptions', success);
@@ -1145,4 +1159,9 @@ $(document).ready(function(){
                                'ui.confirm_quit_dialog');
     userOptionMultivalListener("input[name='media-force_transcode_to_bitrate']",
                                 'media.force_transcode_to_bitrate');
+    $('#media-force_transcode_to_bitrate-disable').click(function(){
+        optionSetter('media.force_transcode_to_bitrate', 0, function(){
+            $('#media-force_transcode_to_bitrate-disable').closest('.error').hide();
+        });
+    });
 });
