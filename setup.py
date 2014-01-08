@@ -1,8 +1,9 @@
-from distutils.core import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 import os
 import cherrymusicserver
-import subprocess
-import codecs
 from cherrymusicserver import pathprovider
 try:
     import py2exe
@@ -77,7 +78,7 @@ setup(
     author = "Tom Wallroth & Tilman Boerner",
     author_email="tomwallroth@gmail.com, tilman.boerner@gmx.net",
     url = "http://www.fomori.org/cherrymusic/",
-    license = 'GPL',
+    license = 'GPLv3',
     install_requires=["CherryPy >= 3.2.2"],
     packages = module('cherrymusicserver')+module('audioread')+module('audiotranscode')+module('cmbootstrap')+module('backport'),
     package_data = {
@@ -93,5 +94,22 @@ setup(
             "script":'cherrymusic'
         }
     ],
+    classifiers = [
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Development Status :: 4 - Beta",
+        "Environment :: Console",
+        "Environment :: Web Environment",
+        "Framework :: CherryPy",
+        "Intended Audience :: End Users/Desktop",
+        "Intended Audience :: Developers",
+        "Intended Audience :: System Administrators",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "Operating System :: OS Independent",
+        "Natural Language :: English",
+        "Topic :: Internet :: WWW/HTTP",
+        "Topic :: Multimedia",
+        "Topic :: Multimedia :: Sound/Audio :: Players",
+        ],
     data_files=data_files
 )
