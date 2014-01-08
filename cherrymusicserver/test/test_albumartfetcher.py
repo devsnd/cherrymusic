@@ -44,7 +44,7 @@ def test_methods():
     for method in albumartfetcher.AlbumArtFetcher.methods:
         yield try_method, method
 
-def try_method(method, timeout=2):
+def try_method(method, timeout=5):
     fetcher = albumartfetcher.AlbumArtFetcher(method=method, timeout=timeout)
     results = fetcher.fetchurls('best of')
     ok_(results, "method {0!r} results: {1}".format(method, results))
