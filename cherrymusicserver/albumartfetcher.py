@@ -60,7 +60,7 @@ class AlbumArtFetcher:
                         '<img.+?src="([^"]*)" class="productImage"'],
         },
         'bestbuy.com': {
-            'url': 'http://www.bestbuy.com/site/searchpage.jsp?_dyncharset=ISO-8859-1&id=pcat17071&type=page&ks=960&sc=Global&cp=1&sp=&qp=crootcategoryid%23%23-1%23%23-1~~q6a616d657320626c616b65206a616d657320626c616b65~~nccat02001%23%230%23%23e&list=y&usc=All+Categories&nrp=15&iht=n&st=',
+            'url': 'http://www.bestbuy.com/site/searchpage.jsp?_dyncharset=ISO-8859-1&_dynSessConf=-1844839118144877442&id=pcat17071&type=page&ks=960&sc=Global&cp=1&sp=&qp=category_facet%3DMovies+%26+Music~abcat0600000^category_facet%3DSAAS~Music~cat02001&list=y&usc=All+Categories&nrp=15&fs=saas&iht=n&seeAll=&st=',
             'regexes': ['<img itemprop="image" class="thumb" src="([^"]*)"']
         },
         # buy.com is now rakuten.com
