@@ -618,15 +618,18 @@ PlaylistManager.prototype = {
             title: title,
             wasPlayed : 0,
         }
+        var forced_bitrate = userOptions.media.force_transcode_to_bitrate;
         var formats = [];
-        if(availablejPlayerFormats.indexOf(ext) !== -1){
+        if(!(forced_bitrate) && availablejPlayerFormats.indexOf(ext) !== -1){
             //add natively supported path
             track[ext2jPlayerFormat(ext)] = SERVER_CONFIG.serve_path + path;
             formats.push(ext);
             window.console.log('added native format '+ext);
         } else if(!transcodingEnabled){
-            //not natively supported and no transcoding
-            window.console.log("browser doesn't support filetype "+ext+'and transcoding is disabled. Transcoding can be enabled in the server configuration.');
+            //not natively supported (or bitrate limited) but no transcoding
+            var msg = forced_bitrate ? "bitrate limit requested" : ("browser doesn't support filetype "+ext);
+            msg += ' and transcoding is disabled. Transcoding can be enabled in the server configuration.';
+            window.console.log(msg);
             return;
         } else {
             //try transcoding
@@ -638,7 +641,8 @@ PlaylistManager.prototype = {
                 for(var i=0; i<availablejPlayerFormats.length; i++){
                     if(availableEncoders.indexOf(availablejPlayerFormats[i]) !== -1){
                         formats.push(availablejPlayerFormats[i]);
-                        var transurl = SERVER_CONFIG.transcode_path + path + '/get.'+availablejPlayerFormats[i];
+                        var transurl = SERVER_CONFIG.transcode_path + availablejPlayerFormats[i] + '/' + path;
+                        transurl += '?bitrate=' + forced_bitrate;
                         track[ext2jPlayerFormat(availablejPlayerFormats[i])] = transurl;
                         window.console.log('added live transcoding '+ext+' --> '+availablejPlayerFormats[i]+' @ '+transurl);
                     }

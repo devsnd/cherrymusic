@@ -220,37 +220,47 @@ class HTTPHandler(object):
             cherrypy.HTTPRedirect(cherrypy.url(), 302)
             return ''
 
-    def trans(self, *args):
+    def trans(self, newformat, *path, **params):
+        ''' Transcodes the track given as ``path`` into ``newformat``.
+
+            Streams the response of the corresponding
+            ``audiotranscode.AudioTranscode().transcodeStream()`` call.
+
+            params:
+                bitrate: int for kbps. None or < 1 for default
+        '''
         if not self.isAuthorized():
             raise cherrypy.HTTPRedirect(self.getBaseUrl(), 302)
         cherrypy.session.release_lock()
-        if cherry.config['media.transcode'] and len(args):
-             # transcoder parameters are encoded as filename, e.g.
-             # 'get.192.mp3' request the file to be a 192kbit mp3
-            trans_params = args[-1].split('.')
-            if len(trans_params) == 2:
-                bitrate = None # use default bitrate
-                newformat =  trans_params[1]
-            elif len(trans_params) == 3:
-                bitrate = int(trans_params[1])
-                newformat =  trans_params[2]
-            else:
-                raise cherrypy.HTTPError(400, 'Bad Request')
-            path = os.path.sep.join(args[:-1])
-            """ugly workaround for #273, should be handled somewhere in
-            cherrypy, but don't know where...
-            """
-            if sys.version_info < (3, 0):
-                path = path
+        if cherry.config['media.transcode'] and path:
+
+            # bitrate
+            bitrate = params.pop('bitrate', None) or None  # catch empty strings
+            if bitrate:
+                try:
+                    bitrate = max(0, int(bitrate)) or None  # None if < 1
+                except (TypeError, ValueError):
+                    raise cherrypy.HTTPError(400, "Bad query: "
+                        "bitrate ({0!r}) must be an integer".format(str(bitrate)))
+
+            # path
+            path = os.path.sep.join(path)
+            if sys.version_info < (3, 0):       # workaround for #327 (cherrypy issue)
+                path = path.decode('utf-8')     # make it work with non-ascii
             else:
                 path = codecs.decode(codecs.encode(path, 'latin1'), 'utf-8')
             fullpath = os.path.join(cherry.config['media.basedir'], path)
+
             transcoder = audiotranscode.AudioTranscode()
             mimetype = transcoder.mimeType(newformat)
             cherrypy.response.headers["Content-Type"] = mimetype
-            return transcoder.transcodeStream(fullpath, newformat, bitrate=bitrate)
+            try:
+                return transcoder.transcodeStream(fullpath, newformat, bitrate=bitrate)
+            except audiotranscode.TranscodeError as e:
+                raise cherrypy.HTTPError(404, e.value)
     trans.exposed = True
     trans._cp_config = {'response.stream': True}
+
 
     def api(self, *args, **kwargs):
         """calls the appropriate handler from the handlers
@@ -338,9 +348,9 @@ class HTTPHandler(object):
         uo = self.useroptions.forUser(self.getUserId())
         uco = uo.getChangableOptions()
         if cherrypy.session['admin']:
-            uco['media'] = {'may_download': True}
+            uco['media'].update({'may_download': True})
         else:
-            uco['media'] = {'may_download': uo.getOptionValue('media.may_download')}
+            uco['media'].update({'may_download': uo.getOptionValue('media.may_download')})
         return uco
 
     def api_heartbeat(self):
