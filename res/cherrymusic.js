@@ -214,7 +214,7 @@ function loadUserOptions(onSuccess){
             var deselected = selected.replace(/value=/, 'value!=');
             $(selected).attr('checked', 'checked');
             $(deselected).removeAttr('checked');
-            $("#media-force_transcode_to_bitrate input[name='display']").val(forced_bitrate);
+            $("#media-force_transcode_to_bitrate-display").val(forced_bitrate);
             if([0, 96, 128].indexOf(forced_bitrate) < 0) {
                 console.log("Unknown bitrate value:", forced_bitrate);
             }
@@ -224,8 +224,9 @@ function loadUserOptions(onSuccess){
             if(forced_bitrate) {
                 userOptions.media.force_transcode_to_bitrate = false;
                 var msg = 'WARNING Cannot enforce bitrate limit of :value kbps: server does not transcode!';
+                var extra = ' <a href="#userOptions" role="button" class="btn btn-info" data-toggle="modal">Disable limit in options menu</a>';
                 msg = msg.replace(/:value/, forced_bitrate);
-                displayNotification(msg, 'error');
+                displayNotification(msg + extra, 'error');
                 var errorArea = optionContainer.find(".error");
                 errorArea.find(".msg").html(msg);
                 errorArea.show();
