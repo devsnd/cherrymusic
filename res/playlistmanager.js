@@ -799,7 +799,8 @@ PlaylistManager.prototype = {
             var wasPlayed = mediaPlaylist.playlist[i].wasPlayed>0;
             var isCurrentTrack = i == mediaPlaylist.current;
             var isBeforeCurrent = i < mediaPlaylist.current;
-            if(wasPlayed && !isCurrentTrack){
+            var clearCurrent = !jPlayerIsPlaying();
+            if(wasPlayed && (!isCurrentTrack || clearCurrent)){
                 mediaPlaylist.playlist.splice(i,1);
                 i--;
                 if(isBeforeCurrent){
