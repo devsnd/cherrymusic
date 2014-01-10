@@ -134,7 +134,7 @@ function successNotify(msg){
 }
 
 function displayNotification(msg,type){
-    templateLoader.render(
+    templateLoader.render_append(
         'flash-message',
         {
             msg : msg,
@@ -204,10 +204,35 @@ function loadUserOptions(onSuccess){
         $('#keyboard_shortcuts-pause').html(String.fromCharCode(userOptions.keyboard_shortcuts.pause));
         $('#keyboard_shortcuts-search').html(String.fromCharCode(userOptions.keyboard_shortcuts.search));
 
-        $('#misc-show_playlist_download_buttons').attr('checked',userOptions.misc.show_playlist_download_buttons);
         $('#misc-autoplay_on_add').attr('checked',userOptions.misc.autoplay_on_add);
         $('#ui-confirm_quit_dialog').attr('checked',userOptions.ui.confirm_quit_dialog);
-    }
+
+        var forced_bitrate = userOptions.media.force_transcode_to_bitrate;
+        if (SERVER_CONFIG['transcoding_enabled']) {
+            var radios = "input[name='media-force_transcode_to_bitrate']";
+            var selected = radios + "[value='x']".replace(/x/, forced_bitrate);
+            var deselected = selected.replace(/value=/, 'value!=');
+            $(selected).attr('checked', 'checked');
+            $(deselected).removeAttr('checked');
+            $("#media-force_transcode_to_bitrate-display").val(forced_bitrate);
+            if([0, 96, 128].indexOf(forced_bitrate) < 0) {
+                console.log("Unknown bitrate value:", forced_bitrate);
+            }
+        } else {
+            var optionContainer = $("#media-force_transcode_to_bitrate-container");
+            optionContainer.find(".success").hide();
+            if(forced_bitrate) {
+                userOptions.media.force_transcode_to_bitrate = false;
+                var msg = 'WARNING Cannot enforce bitrate limit of :value kbps: server does not transcode!';
+                var extra = ' <a href="#userOptions" role="button" class="btn btn-info" data-toggle="modal">Disable limit in options menu</a>';
+                msg = msg.replace(/:value/, forced_bitrate);
+                displayNotification(msg + extra, 'error');
+                var errorArea = optionContainer.find(".error");
+                errorArea.find(".msg").html(msg);
+                errorArea.show();
+            }
+        }
+    };
     api('getuseroptions', success);
 }
 
@@ -571,6 +596,11 @@ function TemplateLoader(template_path){
             $jqobj.html(Mustache.render(template, content));
         });
     }
+    this.render_append = function(template_name, content, $jqobj){
+        this.get(template_name, function(template){
+            $jqobj.append(Mustache.render(template, content));
+        });
+    };
     this.cached = function(template_name){
         if(this.loaded_templates.hasOwnProperty(template_name)){
             return this.loaded_templates[template_name];
@@ -906,6 +936,18 @@ function userOptionCheckboxListener(htmlid, optionname){
     });
 }
 
+function userOptionMultivalListener(selector, optionname) {
+    $(selector).on('change',function(){
+        var self = this;
+        optionSetter(   optionname,
+                        $(this).val(),
+                        function(){
+                        },
+                        errorFunc('Error setting option! '+optionname)
+        );
+    });
+}
+
 /*****************************
 CONDITIONAL USER INTERFACE
  *****************************/
@@ -1116,4 +1158,11 @@ $(document).ready(function(){
                                'misc.autoplay_on_add');
     userOptionCheckboxListener('#ui-confirm_quit_dialog',
                                'ui.confirm_quit_dialog');
+    userOptionMultivalListener("input[name='media-force_transcode_to_bitrate']",
+                                'media.force_transcode_to_bitrate');
+    $('#media-force_transcode_to_bitrate-disable').click(function(){
+        optionSetter('media.force_transcode_to_bitrate', 0, function(){
+            $('#media-force_transcode_to_bitrate-disable').closest('.error').hide();
+        });
+    });
 });
