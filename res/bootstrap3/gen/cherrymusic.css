@@ -3617,7 +3617,7 @@ textarea.input-group-sm > .input-group-btn > .btn {
 .navbar-form {
   margin-left: 0px;
   margin-right: 0px;
-  padding: 10px 0px;
+  padding: 0px 0px;
   border-top: 1px solid transparent;
   border-bottom: 1px solid transparent;
   -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -5004,6 +5004,11 @@ body {
   /*padding for the fixed navbar and the fixed player*/
   margin: 50px 0 70px 0;
 }
+/* preload progress indicator images, so they show up on first search */
+body:after {
+  display: none;
+  content: url(../../cherrymusic_loader.gif) url(res/progress-bars.gif);
+}
 .navbar-brand {
   background-image: url("../../favicon32glow.png");
   background-position: 49% 14px;
@@ -5234,7 +5239,7 @@ body {
 }
 .list-dir-item {
   display: inline-block;
-  width: 120px;
+  width: 105px;
   height: 120px;
   overflow: hidden;
 }

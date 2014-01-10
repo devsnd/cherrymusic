@@ -3,6 +3,12 @@ body{
     margin: @navbar-height 0 @mediaplayer-height 0;
 }
 
+/* preload progress indicator images, so they show up on first search */
+body:after{
+    display:none;
+    content: url(../../cherrymusic_loader.gif) url(res/progress-bars.gif);
+}
+
 .navbar-brand{
     background-image: url("../../favicon32glow.png");
     background-position: 49% 14px;
