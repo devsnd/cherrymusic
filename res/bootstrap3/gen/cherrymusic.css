@@ -5207,6 +5207,10 @@ body:after {
 .cm-media-list-parent-item {
   margin-bottom: 20px;
 }
+.cm-media-list-view-change-buttons {
+  display: inline-block;
+  margin: -10px 0 0px 5px;
+}
 .musicfile {
   display: block;
 }
@@ -5241,6 +5245,30 @@ body:after {
   display: inline-block;
   width: 105px;
   height: 120px;
+  overflow: hidden;
+}
+.list-dir-item-listview {
+  /* overrides normal coverview to display folders as list */
+  display: block;
+  width: 100%;
+  height: 30px;
+}
+.list-dir-item-listview .list-dir-albumart {
+  margin: 0;
+  display: inline-block;
+  width: 30px;
+}
+.list-dir-item-listview .list-dir-albumart img {
+  width: 30px;
+  height: 30px;
+}
+.list-dir-item-listview .list-dir-name {
+  text-align: left;
+}
+.list-dir-item-listview .list-dir-name-wrap {
+  display: inline-block;
+  position: absolute;
+  height: 30px;
   overflow: hidden;
 }
 .list-dir:hover {
