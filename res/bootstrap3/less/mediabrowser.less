@@ -1,3 +1,8 @@
+@list-view-item-height:         30px;
+@list-view-img-size:            30px;
+@cover-view-item-height:        120px;
+@cover-view-item-width:         105px;
+
 .media-browser{
     
 }
@@ -56,6 +61,11 @@
             margin-bottom: 20px;
         }
     }
+    
+    &-view-change-buttons{
+        display: inline-block;
+        margin: -10px 0 0px 5px;
+    }
 }
 
 .musicfile{
@@ -96,9 +106,37 @@
     
     &-item{
         display: inline-block;
-        width: 105px;
-        height: 120px;
+        width: @cover-view-item-width;
+        height: @cover-view-item-height;
         overflow: hidden;
+        
+        &-listview {
+            /* overrides normal coverview to display folders as list */
+            display: block;
+            width: 100%;
+            height: @list-view-item-height;
+            
+            & .list-dir-albumart {
+                margin: 0;
+                display: inline-block;
+                width: @list-view-img-size;
+                
+                & img{
+                    width: @list-view-img-size;
+                    height: @list-view-img-size;
+                }
+            }
+            & .list-dir-name{
+                text-align: left;
+                
+                &-wrap {
+                    display: inline-block;
+                    position: absolute;
+                    height: @list-view-item-height;
+                    overflow: hidden;
+                }
+            }
+        }
     }
     
     &:hover{

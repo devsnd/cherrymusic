@@ -33,7 +33,7 @@ RENDERING
 
 MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
     "use strict";
-    this.listing_data_stack = [{'title': title, 'data': json, 'scroll': 0}];
+    this.listing_data_stack = [{'title': title, 'data': json, 'scroll': 0, 'listview': false}];
     this.cssSelector = cssSelector;
     $(this.cssSelector).css('left', 0);
     if(typeof enable_breadcrumbs === 'undefined'){
@@ -63,8 +63,9 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
         var currdir = this;
         var success = function(json){
             $(self.cssSelector).removeClass('cm-media-list-busy');
-            self.listing_data_stack[self.listing_data_stack.length-1].scroll = $(self.cssSelector).parent().parent().scrollTop();
-            self.listing_data_stack.push({'title': next_mb_title, 'data': json, 'scroll': 0});
+            var last_stack_top = self.listing_data_stack[self.listing_data_stack.length-1];
+            last_stack_top.scroll = $(self.cssSelector).parent().parent().scrollTop();
+            self.listing_data_stack.push({'title': next_mb_title, 'data': json, 'scroll': 0, 'listview': last_stack_top.listview});
             self.render();
         };
         var error = function(){
@@ -79,6 +80,16 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
         return false;
     }
     
+    var view_list_enable = function(){
+        self.listing_data_stack[self.listing_data_stack.length-1].listview = true;
+        self.render();
+    }
+    
+    var view_cover_enable = function(){
+        self.listing_data_stack[self.listing_data_stack.length-1].listview = false;
+        self.render();
+    }
+    
     this.go_to_parent = function(levels){
         if(typeof levels === 'undefined'){
             levels = 1;
@@ -90,6 +101,7 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
     
     this.render = function(){
         var stack_top = self.listing_data_stack[self.listing_data_stack.length-1]['data'];
+        var listview_enabled = self.listing_data_stack[self.listing_data_stack.length-1].listview;
         //split into categories:
         var folders = [];
         var files = [];
@@ -109,15 +121,24 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
                 window.console.error('unknown media browser item '+e.type);
             }
         }
-        var filehtml = MediaBrowser.static._renderList(files);
-        var folderhtml = MediaBrowser.static._renderList(folders);
-        var compacthtml = MediaBrowser.static._renderList(compact);
-        var playlisthtml = MediaBrowser.static._renderList(playlist);
-        
+        var filehtml = MediaBrowser.static._renderList(files, listview_enabled);
+        var folderhtml = MediaBrowser.static._renderList(folders, listview_enabled);
+        var compacthtml = MediaBrowser.static._renderList(compact, listview_enabled);
+        var playlisthtml = MediaBrowser.static._renderList(playlist, listview_enabled);
+               
         var html = '';
         if('' != folderhtml){
-            html += '<div class="cm-media-list-category"><h3>Collections</h3>'+
-                    '<ul class="cm-media-list">'+folderhtml+'</ul></div>';
+            html += '<div class="cm-media-list-category"><h3>Collections'+
+            '<div class="input-group-btn btn-group-xs cm-media-list-view-change-buttons">'+
+            '    <button type="button" class="mb-view-cover-enable btn btn-default">'+
+            '        <span class="glyphicon glyphicon-th-large"></span>'+
+            '    </button>'+
+            '    <button type="button" class="mb-view-list-enable btn btn-default">'+
+            '        <span class="glyphicon glyphicon-th-list"></span>'+
+            '    </button>'+
+            '</div>'+
+            '</h3>'+
+            '<ul class="cm-media-list">'+folderhtml+'</ul></div>';
         }
         if('' != filehtml){
             html += '<div class="cm-media-list-category"><h3>Tracks <a href="#" class="btn btn-default" '+
@@ -203,7 +224,9 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
     }
     
     this.render();
+    // remove all old click handlers
     $(cssSelector).off('click');
+    // register current click handlers for all list items
     $(cssSelector).on('click', '.list-dir', listdirclick);
     $(cssSelector).on('click', '.compact-list-dir', listdirclick);
     $(cssSelector).on('click', '.musicfile', MediaBrowser.static.addThisTrackToPlaylist);
@@ -213,6 +236,10 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
         $('#changeAlbumArt .foldername').text(dirname)
         $('#changeAlbumArt').modal('show');
     });
+    // register list and cover view buttons
+    $(cssSelector).on('click', '.mb-view-list-enable', view_list_enable);
+    $(cssSelector).on('click', '.mb-view-cover-enable', view_cover_enable);
+    
     $(cssSelector).on('click', '.addAllToPlaylist', function() {
         if(isplaylist){
             var pl = playlistManager.newPlaylist([], playlistlabel);
@@ -229,14 +256,14 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
 }
 
 MediaBrowser.static = {
-    _renderList: function (l){
+    _renderList: function (l, listview){
         "use strict";
         var self = this;
         var html = "";
         $.each(l, function(i, e) {
             switch(e.type){
                 case 'dir': 
-                    html += MediaBrowser.static._renderDirectory(e);
+                    html += MediaBrowser.static._renderDirectory(e, listview);
                     break;
                 case 'file':
                     html += MediaBrowser.static._renderFile(e);
@@ -267,12 +294,13 @@ MediaBrowser.static = {
         };
         return Mustache.render(template, template_data);            
     },
-    _renderDirectory : function(json){
+    _renderDirectory : function(json, listview){
         var template = templateLoader.cached('mediabrowser-directory');
         var template_data = {
             isrootdir: json.path && !json.path.indexOf('/')>0,
             dirpath: json.path,
             label: json.label,
+            listview: listview,
             maychangecoverart: !!isAdmin,
             coverarturl: encodeURIComponent(JSON.stringify({'directory' : json.path})),
             directoryname: encodeURIComponent(json.path),
