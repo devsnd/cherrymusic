@@ -134,11 +134,16 @@ function successNotify(msg){
 }
 
 function displayNotification(msg,type){
+    var selector = '#errormessage:contains(' + msg + ')';
+    var notificationExists = Boolean($(selector).length);
+    if(notificationExists) {
+        return;
+    }
     templateLoader.render_append(
         'flash-message',
         {
             msg : msg,
-            cssclass: type=='error'?'alert-danger':type=='success'?'alert-success':''
+            cssclass: type=='error'?'alert-danger':type=='success'?'alert-success':'alert-info'
         },
         $('#errormessage')
     );
