@@ -212,34 +212,52 @@ function loadUserOptions(onSuccess){
         $('#misc-autoplay_on_add').attr('checked',userOptions.misc.autoplay_on_add);
         $('#ui-confirm_quit_dialog').attr('checked',userOptions.ui.confirm_quit_dialog);
 
-        var forced_bitrate = userOptions.media.force_transcode_to_bitrate;
-        if (SERVER_CONFIG['transcoding_enabled']) {
-            var radios = "input[name='media-force_transcode_to_bitrate']";
-            var selected = radios + "[value='x']".replace(/x/, forced_bitrate);
-            var deselected = selected.replace(/value=/, 'value!=');
-            $(selected).attr('checked', 'checked');
-            $(deselected).removeAttr('checked');
-            $("#media-force_transcode_to_bitrate-display").val(forced_bitrate);
-            if([0, 96, 128].indexOf(forced_bitrate) < 0) {
-                console.log("Unknown bitrate value:", forced_bitrate);
-            }
-        } else {
-            var optionContainer = $("#media-force_transcode_to_bitrate-container");
-            optionContainer.find(".success").hide();
-            if(forced_bitrate) {
-                userOptions.media.force_transcode_to_bitrate = false;
-                var msg = 'WARNING Cannot enforce bitrate limit of :value kbps: server does not transcode!';
-                var extra = ' <a href="#userOptions" role="button" class="btn btn-info" data-toggle="modal">Disable limit in options menu</a>';
-                msg = msg.replace(/:value/, forced_bitrate);
-                displayNotification(msg + extra, 'error');
-                var errorArea = optionContainer.find(".error");
-                errorArea.find(".msg").html(msg);
-                errorArea.show();
-            }
-        }
+        handle_useroption_force_transcode_bitrate();
     };
     api('getuseroptions', success);
 }
+
+var waitForServerOptions = function(callback) {
+    var serverOptionsAreLoaded = Boolean(Object.keys(SERVER_CONFIG).length);
+    if(!serverOptionsAreLoaded) {
+        var timeout = 500;
+        setTimeout(callback, timeout);
+        return true;
+    }
+    return false;
+};
+
+var handle_useroption_force_transcode_bitrate = function() {
+    if(waitForServerOptions(handle_useroption_force_transcode_bitrate)) {
+        console.info('useroption handler waiting for server options...');
+        return;
+    }
+    var forced_bitrate = userOptions.media.force_transcode_to_bitrate;
+    if (SERVER_CONFIG['transcoding_enabled']) {
+        var radios = "input[name='media-force_transcode_to_bitrate']";
+        var selected = radios + "[value='x']".replace(/x/, forced_bitrate);
+        var deselected = selected.replace(/value=/, 'value!=');
+        $(selected).attr('checked', 'checked');
+        $(deselected).removeAttr('checked');
+        $("#media-force_transcode_to_bitrate-display").val(forced_bitrate);
+        if([0, 96, 128].indexOf(forced_bitrate) < 0) {
+            console.log("Unknown bitrate value:", forced_bitrate);
+        }
+    } else {
+        var optionContainer = $("#media-force_transcode_to_bitrate-container");
+        optionContainer.find(".success").hide();
+        if(forced_bitrate) {
+            userOptions.media.force_transcode_to_bitrate = false;
+            var msg = 'WARNING Cannot enforce bitrate limit of :value kbps: server does not transcode!';
+            var extra = ' <a href="#userOptions" role="button" class="btn btn-info" data-toggle="modal">Disable limit in options menu</a>';
+            msg = msg.replace(/:value/, forced_bitrate);
+            displayNotification(msg + extra, 'error');
+            var errorArea = optionContainer.find(".error");
+            errorArea.find(".msg").html(msg);
+            errorArea.show();
+        }
+    }
+};
 
 var optionSetter = function(name, val, success, error){
     busy('#userOptions .content').hide().fadeIn();
