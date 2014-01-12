@@ -38,11 +38,13 @@ ManagedPlaylist.prototype = {
             {   playlistOptions: {
                     'enableRemoveControls': true,
                     'playlistSelector': this.playlistSelector,
-                    'playlistController' : this
+                    'playlistController' : this,
+                    'loopOnPrevious': true
                 },
                 hooks: {
                     "setMedia": playlistManager.transcodeURL
-                }
+                },
+                loop: self.playlistManager.loop
             }
         );
         self.jplayerplaylist._init();
@@ -243,6 +245,7 @@ PlaylistManager.prototype = {
                 wmode: "window",
                 cssSelectorAncestor: self.cssSelectorJPlayerControls,
                 errorAlerts: false,
+                repeat: self._getRepeatHandler()
             });
             this.cssSelector.next = this.cssSelectorJPlayerControls + " .jp-next";
             this.cssSelector.previous = this.cssSelectorJPlayerControls + " .jp-previous";
@@ -809,5 +812,16 @@ PlaylistManager.prototype = {
             }
         }
         mediaPlaylist._refresh(true);
+    },
+    _getRepeatHandler : function() {
+        var playlistManager = this;
+        var _handleRepeat = function(event) {
+            var repeatState = event.jPlayer.options.loop;
+            playlistManager.loop = repeatState;
+            $.each(playlistManager.managedPlaylists, function(i, playlist) {
+                playlist.jplayerplaylist.loop = repeatState;
+            });
+        }
+        return _handleRepeat;
     }
 }
