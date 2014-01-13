@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # CherryMusic - a standalone music server
-# Copyright (c) 2012 Tom Wallroth & Tilman Boerner
+# Copyright (c) 2012 - 2014 Tom Wallroth & Tilman Boerner
 #
 # Project page:
 #   http://fomori.org/cherrymusic/
@@ -70,7 +70,7 @@ formatter_brief = logging.Formatter(fmt='[%(asctime)s] %(levelname)-8s: %(messag
 formatter_full = logging.Formatter(fmt=('-'*80)+ '\n%(levelname)-8s [%(asctime)s] : %(name)-20s : from line (%(lineno)d) at\n\t%(pathname)s\n\t--\n\t%(message)s\n')
 
 handler_console = logging.StreamHandler(stream=sys.stdout)
-    
+
 handler_console.formatter = formatter_briefest
 handler_console.level = DEBUG
 handler_console.addFilter(LowPass(WARNING))

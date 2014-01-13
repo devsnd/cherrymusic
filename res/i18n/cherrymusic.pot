@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-12-28 10:26+0100\n"
+"POT-Creation-Date: 2014-01-13 02:48+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -801,27 +801,27 @@ msgstr ""
 msgid "Rejected remote admin login from user: {name}"
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:405
+#: cherrymusicserver/httphandler.py:415
 msgid "Fetching album art for keywords {keywords!r}"
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:435
+#: cherrymusicserver/httphandler.py:445
 msgid "processing whole search request"
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:437
+#: cherrymusicserver/httphandler.py:447
 msgid "rendering search results as json"
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:595
+#: cherrymusicserver/httphandler.py:605
 msgid "Please log in"
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:605
+#: cherrymusicserver/httphandler.py:615
 msgid "Unknown playlist format: {format!r}"
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:609
+#: cherrymusicserver/httphandler.py:619
 msgid "No playlists found"
 msgstr ""
 

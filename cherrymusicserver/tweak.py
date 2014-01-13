@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # CherryMusic - a standalone music server
-# Copyright (c) 2012 Tom Wallroth & Tilman Boerner
+# Copyright (c) 2012 - 2014 Tom Wallroth & Tilman Boerner
 #
 # Project page:
 #   http://fomori.org/cherrymusic/
@@ -29,7 +29,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
-"""This file contains all static values that can be used to tweak the 
+"""This file contains all static values that can be used to tweak the
 program execution. All classes are static and only contain simple values.
 To use this class, please import it using the fully classified module name, e.g
 
@@ -39,7 +39,7 @@ To account for changes while the server is running, reload the module
 before using it:
 
     reload(cherrymusicserver.tweak)
-    
+
 make sure to have reload imported as well:
 
     from imp import reload

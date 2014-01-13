@@ -43,7 +43,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'CherryMusic'
-copyright = '2013, Tom Wallroth, with Tilman Boerner'
+copyright = '2012 - 2014, Tom Wallroth, with Tilman Boerner'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -258,7 +258,7 @@ texinfo_documents = [
 epub_title = 'CherryMusic'
 epub_author = 'Author'
 epub_publisher = 'Author'
-epub_copyright = '2013, Author'
+epub_copyright = '2012 - 2014, Author'
 
 # The language of the text. It defaults to the language option
 # or en if the language is not set.
