@@ -90,7 +90,7 @@ locale: {locale}, default: {deflocale}
 filesystem encoding: {fs_encoding}
 
 (Do not parse this output.)""".format(
-    cm_version=VERSION,
+    cm_version=REPO_VERSION or VERSION,
     cp_version=cherrypy.__version__,
     py_version=platform.python_implementation() + ' ' + platform.python_version(),
     platform=platform.platform(),
@@ -470,3 +470,30 @@ Have fun!
         cherrypy.lib.caching.expires(0)  # disable expiry caching
         cherrypy.engine.start()
         cherrypy.engine.block()
+
+
+def _get_version_from_git():
+    import re
+    from subprocess import check_output
+    cmd = {
+        'branch': ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+        'version': ['git', 'describe', '--tags'],
+        'date': ['git', 'log', '-1', '--format=%cd'],
+    }
+    unwanted_characters = re.compile('[^\w.-]+')
+    try:
+        with open(os.devnull, 'w') as devnull:
+            branch = check_output(cmd['branch'], stderr=devnull)
+            version = check_output(cmd['version'], stderr=devnull)
+        branch = branch.decode('ascii', 'ignore').strip()
+        branch = unwanted_characters.sub('', branch)
+        version = version.decode('ascii', 'ignore').strip()
+        version = unwanted_characters.sub('', version)
+        version, patchlevel = version.split('-', 1)     # must fail if no patchlevel
+        assert version == VERSION
+    except:
+        return None
+    else:
+        return '{0}+{1}-{2}'.format(version, branch, patchlevel)
+
+REPO_VERSION = _get_version_from_git()

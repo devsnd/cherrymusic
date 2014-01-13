@@ -662,6 +662,7 @@ class HTTPHandler(object):
             'servepath': 'serve/',
             'transcodepath': 'trans/',
             'auto_login': self.autoLoginActive(),
+            'version': cherry.REPO_VERSION or cherry.VERSION,
         }
         if cherry.config['media.transcode']:
             decoders = self.model.transcoder.availableDecoderFormats()

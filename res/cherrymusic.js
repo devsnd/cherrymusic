@@ -173,6 +173,7 @@ function loadConfig(executeAfter){
             'serve_path': dictatedClientConfig.servepath,
             'transcode_path': dictatedClientConfig.transcodepath,
             'auto_login': dictatedClientConfig.auto_login,
+            'version': dictatedClientConfig.version,
         }
 
         executeAfter();
@@ -184,6 +185,7 @@ function loadConfig(executeAfter){
             $('#logout-menu-button').attr('onclick', '');
             $('#logout-menu-button').attr('title', 'Cannot logout: Auto-Login enabled');
         }
+        $('#aboutModal #cherrymusic-version').html(SERVER_CONFIG.version)
     };
     var error = errorFunc("Could not fetch client configuration, CherryMusic will not work. Clearing the browser cache might help.");
     api('getconfiguration', {}, success, error);
