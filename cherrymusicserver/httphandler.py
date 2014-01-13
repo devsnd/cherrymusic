@@ -251,11 +251,14 @@ class HTTPHandler(object):
                 path = codecs.decode(codecs.encode(path, 'latin1'), 'utf-8')
             fullpath = os.path.join(cherry.config['media.basedir'], path)
 
+            starttime = int(params.pop('starttime', 0))
+
             transcoder = audiotranscode.AudioTranscode()
             mimetype = transcoder.mimeType(newformat)
             cherrypy.response.headers["Content-Type"] = mimetype
             try:
-                return transcoder.transcodeStream(fullpath, newformat, bitrate=bitrate)
+                return transcoder.transcodeStream(fullpath, newformat,
+                            bitrate=bitrate, starttime=starttime)
             except audiotranscode.TranscodeError as e:
                 raise cherrypy.HTTPError(404, e.value)
     trans.exposed = True

@@ -313,7 +313,7 @@ class TestHTTPHandler(unittest.TestCase):
 
                         httphandler.HTTPHandler(config).trans('newformat', 'path', bitrate=111)
 
-                        transcoder.transcodeStream.assert_called_with(expectPath, 'newformat', bitrate=111)
+                        transcoder.transcodeStream.assert_called_with(expectPath, 'newformat', bitrate=111, starttime=0)
 
 
 if __name__ == "__main__":
