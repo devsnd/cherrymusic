@@ -480,19 +480,16 @@ def _get_version_from_git():
         'version': ['git', 'describe', '--tags'],
         'date': ['git', 'log', '-1', '--format=%cd'],
     }
-    unwanted_characters = re.compile('[^\w.-]+')
     def fetch(cmdname):
+        unwanted_characters = re.compile('[^\w.-]+')
         with open(os.devnull, 'w') as devnull:
             with Popen(cmd[cmdname], stdout=PIPE, stderr=devnull) as p:
                 out, err = p.communicate()
-        return out
+        out = out.decode('ascii', 'ignore').strip()
+        return unwanted_characters.sub('', out)
     try:
         branch = fetch('branch')
         version = fetch('version')
-        branch = branch.decode('ascii', 'ignore').strip()
-        branch = unwanted_characters.sub('', branch)
-        version = version.decode('ascii', 'ignore').strip()
-        version = unwanted_characters.sub('', version)
         version, patchlevel = version.split('-', 1)     # must fail if no patchlevel
         assert version == VERSION
     except:
