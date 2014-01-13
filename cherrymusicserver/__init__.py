@@ -474,17 +474,21 @@ Have fun!
 
 def _get_version_from_git():
     import re
-    from subprocess import check_output
+    from subprocess import Popen, PIPE
     cmd = {
         'branch': ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
         'version': ['git', 'describe', '--tags'],
         'date': ['git', 'log', '-1', '--format=%cd'],
     }
     unwanted_characters = re.compile('[^\w.-]+')
-    try:
+    def fetch(cmdname):
         with open(os.devnull, 'w') as devnull:
-            branch = check_output(cmd['branch'], stderr=devnull)
-            version = check_output(cmd['version'], stderr=devnull)
+            with Popen(cmd[cmdname], stdout=PIPE, stderr=devnull) as p:
+                out, err = p.communicate()
+        return out
+    try:
+        branch = fetch('branch')
+        version = fetch('version')
         branch = branch.decode('ascii', 'ignore').strip()
         branch = unwanted_characters.sub('', branch)
         version = version.decode('ascii', 'ignore').strip()
