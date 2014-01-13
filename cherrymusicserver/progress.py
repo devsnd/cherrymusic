@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # CherryMusic - a standalone music server
-# Copyright (c) 2012 Tom Wallroth & Tilman Boerner
+# Copyright (c) 2012 - 2014 Tom Wallroth & Tilman Boerner
 #
 # Project page:
 #   http://fomori.org/cherrymusic/
@@ -36,8 +36,8 @@ from cherrymusicserver import util
 
 
 class Progress(object):
-    """Simple, timed progress tracking. 
-    Based on the notion the time to complete a task can be broken up into 
+    """Simple, timed progress tracking.
+    Based on the notion the time to complete a task can be broken up into
     evenly spaced ticks, when a good estimate of total ticks
     is known. Estimates time remaining from the time taken for past ticks.
     The timer starts on the first tick."""
@@ -234,17 +234,17 @@ class ProgressTree(Progress):
 class ProgressReporter(object):
     '''
     Customizable progress reporter. Can report on every object with the
-    following attributes or properties: 
-    
+    following attributes or properties:
+
     name : str
         a descriptive name of this progress
-        
+
     eta : float
         estimated time to completion in seconds. negative values mean overtime
-        
+
     level : int >= 0
         for nested progress: the nesting depth, with 0 being top
-        
+
     root : progress not None
         for nested progress: the origin (super parent) progress; can be == this
     '''
@@ -309,30 +309,30 @@ class ProgressReporter(object):
     def __init__(self, lvl= -1, dly=1, timefmt=None, namefmt=None, repf=None):
         '''
         Creates a progress reporter with the following customization options:
-        
+
         lvl : int (default -1)
             The maximum level in the progress hierarchy that will trigger a
             report. When a report is triggered, it will contain all progress
             events up to this level that have occurred since the last report. A
             negative value will use the time trigger (see ``dly``) to report the
             newest progress event with the upmost available level.
-            
+
         dly : float (default 1)
             The target maximum delay between reports, in seconds. Triggers a
             report conforming with ``lvl`` if ``dly`` seconds have passed
-            since the last report. Set to 0 to turn off timed reporting; 
+            since the last report. Set to 0 to turn off timed reporting;
             set to a value < 0 for a time trigger without delay.
-            
+
         timefmt : callable(float) -> str (default ProgressReport.timefmt)
             A function that turns the number for the estimated completion time
             into a string. That number is provided by ``progress.root.eta``.
-            Per default, it interpreted as seconds until completion, with 
+            Per default, it interpreted as seconds until completion, with
             negative values meaning overtime since estimated completion.
-            
+
         namefmt : callable(str) -> str (default: no conversion)
             A function that converts the name given by ``progress.name`` into
             a more suitable format.
-            
+
         repf : callable(dict) (default: log '%(eta) %(nam) (%(tix))' as info)
            Function callback to handle the actual reporting. The dict argument
            contains the following items::
@@ -369,7 +369,7 @@ class ProgressReporter(object):
 
     def reportlast(self):
         '''
-        Report progress events since the last report. 
+        Report progress events since the last report.
         '''
         lvl = 0
         while lvl <= self._maxlevel:

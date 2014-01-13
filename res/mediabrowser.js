@@ -1,6 +1,6 @@
 //
 // CherryMusic - a standalone music server
-// Copyright (c) 2012 Tom Wallroth & Tilman Boerner
+// Copyright (c) 2012 - 2014 Tom Wallroth & Tilman Boerner
 //
 // Project page:
 //   http://fomori.org/cherrymusic/
@@ -42,9 +42,9 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
     this.options = typeof options === 'undefined'? {} : options;
 
     var self = this;
-    
+
     var listdirclick = function(){
-        
+
         "use strict";
         $(self.cssSelector+' .cm-media-list-category').animate({left: '-100%'}, {duration: 1000, queue: false});
         $(self.cssSelector).addClass('cm-media-list-busy');
@@ -79,17 +79,17 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
         $(this).blur();
         return false;
     }
-    
+
     var view_list_enable = function(){
         self.listing_data_stack[self.listing_data_stack.length-1].listview = true;
         self.render();
     }
-    
+
     var view_cover_enable = function(){
         self.listing_data_stack[self.listing_data_stack.length-1].listview = false;
         self.render();
     }
-    
+
     this.go_to_parent = function(levels){
         if(typeof levels === 'undefined'){
             levels = 1;
@@ -98,7 +98,7 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
             self.listing_data_stack.pop();
         }
     }
-    
+
     this.render = function(){
         var stack_top = self.listing_data_stack[self.listing_data_stack.length-1]['data'];
         var listview_enabled = self.listing_data_stack[self.listing_data_stack.length-1].listview;
@@ -125,7 +125,7 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
         var folderhtml = MediaBrowser.static._renderList(folders, listview_enabled);
         var compacthtml = MediaBrowser.static._renderList(compact, listview_enabled);
         var playlisthtml = MediaBrowser.static._renderList(playlist, listview_enabled);
-               
+
         var html = '';
         if('' != folderhtml){
             html += '<div class="cm-media-list-category"><h3>Collections'+
@@ -184,12 +184,12 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
         if('' == html){
             html = '<div class="cm-media-list-category"><ul class="cm-media-list">'+MediaBrowser.static._renderMessage('No playable media files here.')+'</ul></div>';
         }
-        
+
         if(enable_breadcrumbs){
             html = '<ol class="breadcrumb"></ol>' + html;
         }
         $(self.cssSelector).html(html);
-        
+
         var create_jump_func = function(i){
             return function(){
                 self.go_to_parent(self.listing_data_stack.length - 1 - i);
@@ -218,11 +218,11 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
             }
         }
         $(self.cssSelector).parent().parent().scrollTop(self.listing_data_stack[self.listing_data_stack.length-1].scroll);
-        
+
         playlistManager.setTrackDestinationLabel();
         MediaBrowser.static.albumArtLoader(cssSelector);
     }
-    
+
     this.render();
     // remove all old click handlers
     $(cssSelector).off('click');
@@ -239,7 +239,7 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
     // register list and cover view buttons
     $(cssSelector).on('click', '.mb-view-list-enable', view_list_enable);
     $(cssSelector).on('click', '.mb-view-cover-enable', view_cover_enable);
-    
+
     $(cssSelector).on('click', '.addAllToPlaylist', function() {
         if(isplaylist){
             var pl = playlistManager.newPlaylist([], playlistlabel);
@@ -262,7 +262,7 @@ MediaBrowser.static = {
         var html = "";
         $.each(l, function(i, e) {
             switch(e.type){
-                case 'dir': 
+                case 'dir':
                     html += MediaBrowser.static._renderDirectory(e, listview);
                     break;
                 case 'file':
@@ -280,10 +280,10 @@ MediaBrowser.static = {
         });
         return html;
     },
-    
+
     _renderMessage : function(msg){
         var template = templateLoader.cached('mediabrowser-message');
-        return Mustache.render(template, {message: msg});    
+        return Mustache.render(template, {message: msg});
     },
     _renderFile : function(json){
         var template = templateLoader.cached('mediabrowser-file');
@@ -292,7 +292,7 @@ MediaBrowser.static = {
             fullpath: json.path,
             label: json.label,
         };
-        return Mustache.render(template, template_data);            
+        return Mustache.render(template, template_data);
     },
     _renderDirectory : function(json, listview){
         var template = templateLoader.cached('mediabrowser-directory');
@@ -304,7 +304,7 @@ MediaBrowser.static = {
             maychangecoverart: !!isAdmin,
             coverarturl: encodeURIComponent(JSON.stringify({'directory' : json.path})),
             directoryname: encodeURIComponent(json.path),
-            
+
         };
         return Mustache.render(template, template_data);
     },
@@ -313,7 +313,7 @@ MediaBrowser.static = {
         var template_data = {
             playlistid: e['plid'],
             isowner: e.owner,
-            candelete: e.owner || isAdmin, 
+            candelete: e.owner || isAdmin,
             playlistlabel:e['title'],
             username: e['username'],
             age: time2text(e['age']),
@@ -332,21 +332,21 @@ MediaBrowser.static = {
         };
         return Mustache.render(template, template_data);
     },
-        
+
     addThisTrackToPlaylist : function(){
         "use strict"
         playlistManager.addSong( $(this).attr("path"), $(this).attr("title") );
         $(this).blur();
         return false;
     },
-    
+
     _addAllToPlaylist : function($source, plid){
         "use strict";
         $source.find('li .musicfile').each(function(){
             playlistManager.addSong( $(this).attr("path"), $(this).attr("title"), plid );
         });
     },
-    
+
     albumArtLoader: function(cssSelector){
         "use strict";
         var winheight = $(window).height();

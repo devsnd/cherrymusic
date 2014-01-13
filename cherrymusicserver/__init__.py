@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # CherryMusic - a standalone music server
-# Copyright (c) 2012 Tom Wallroth & Tilman Boerner
+# Copyright (c) 2012 - 2014 Tom Wallroth & Tilman Boerner
 #
 # Project page:
 #   http://fomori.org/cherrymusic/
@@ -90,7 +90,7 @@ locale: {locale}, default: {deflocale}
 filesystem encoding: {fs_encoding}
 
 (Do not parse this output.)""".format(
-    cm_version=VERSION,
+    cm_version=REPO_VERSION or VERSION,
     cp_version=cherrypy.__version__,
     py_version=platform.python_implementation() + ' ' + platform.python_version(),
     platform=platform.platform(),
@@ -470,3 +470,31 @@ Have fun!
         cherrypy.lib.caching.expires(0)  # disable expiry caching
         cherrypy.engine.start()
         cherrypy.engine.block()
+
+
+def _get_version_from_git():
+    import re
+    from subprocess import Popen, PIPE
+    cmd = {
+        'branch': ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+        'version': ['git', 'describe', '--tags'],
+        'date': ['git', 'log', '-1', '--format=%cd'],
+    }
+    def fetch(cmdname):
+        unwanted_characters = re.compile('[^\w.-]+')
+        with open(os.devnull, 'w') as devnull:
+            with Popen(cmd[cmdname], stdout=PIPE, stderr=devnull) as p:
+                out, err = p.communicate()
+        out = out.decode('ascii', 'ignore').strip()
+        return unwanted_characters.sub('', out)
+    try:
+        branch = fetch('branch')
+        version = fetch('version')
+        version, patchlevel = version.split('-', 1)     # must fail if no patchlevel
+        assert version == VERSION
+    except:
+        return None
+    else:
+        return '{0}+{1}-{2}'.format(version, branch, patchlevel)
+
+REPO_VERSION = _get_version_from_git()

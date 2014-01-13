@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # CherryMusic - a standalone music server
-# Copyright (c) 2012 Tom Wallroth & Tilman Boerner
+# Copyright (c) 2012 - 2014 Tom Wallroth & Tilman Boerner
 #
 # Project page:
 #   http://fomori.org/cherrymusic/
@@ -665,6 +665,7 @@ class HTTPHandler(object):
             'servepath': 'serve/',
             'transcodepath': 'trans/',
             'auto_login': self.autoLoginActive(),
+            'version': cherry.REPO_VERSION or cherry.VERSION,
         }
         if cherry.config['media.transcode']:
             decoders = self.model.transcoder.availableDecoderFormats()

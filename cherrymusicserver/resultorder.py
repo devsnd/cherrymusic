@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # CherryMusic - a standalone music server
-# Copyright (c) 2012 Tom Wallroth & Tilman Boerner
+# Copyright (c) 2012 - 2014 Tom Wallroth & Tilman Boerner
 #
 # Project page:
 #   http://fomori.org/cherrymusic/
@@ -44,8 +44,8 @@ class ResultOrder:
         self.debug = debug
         self.fullsearchterm = searchword.lower()
         self.searchwords = searchword.lower().split(' ')
-        
-        reload(cherrymusicserver.tweak)        
+
+        reload(cherrymusicserver.tweak)
         self.perfect_match_bonus = cherrymusicserver.tweak.ResultOrderTweaks.perfect_match_bonus
         self.partial_perfect_match_bonus = cherrymusicserver.tweak.ResultOrderTweaks.partial_perfect_match_bonus
         self.starts_with_bonus = cherrymusicserver.tweak.ResultOrderTweaks.starts_with_bonus
@@ -60,7 +60,7 @@ class ResultOrder:
         fullpath = file.lower()
         filename = pathprovider.filename(file).lower()
         filename_words = filename.split(' ')
-        
+
         bias = 0
         occurences_bias = 0
         perfect_match_bias = 0
@@ -68,7 +68,7 @@ class ResultOrder:
         folder_bias = 0
         starts_with_bias = 0
         starts_with_no_track_number_bias = 0
-        
+
         #count occurences of searchwords
         occurences=0
         for searchword in self.searchwords:
@@ -126,7 +126,7 @@ total bias                       %d
         self.fullsearchterm,
         self.searchwords,
         filename,
-        fullpath, 
+        fullpath,
         occurences_bias,
         perfect_match_bias,
         partial_perfect_match_bias,
