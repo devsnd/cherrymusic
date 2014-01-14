@@ -70,31 +70,23 @@ shareFolder = os.path.join('share',pathprovider.sharedFolderName)
 # files to put in /usr/share
 data_files = listFilesRec('res',shareFolder)
 
-setup( 
-    name = "CherryMusic",
-    version = cherrymusicserver.VERSION,
-    description=cherrymusicserver.DESCRIPTION,
-    long_description=cherrymusicserver.LONG_DESCRIPTION,
-    author = "Tom Wallroth & Tilman Boerner",
-    author_email="tomwallroth@gmail.com, tilman.boerner@gmx.net",
-    url = "http://www.fomori.org/cherrymusic/",
-    license = 'GPLv3',
-    install_requires=["CherryPy >= 3.2.2"],
-    packages = module('cherrymusicserver')+module('audioread')+module('audiotranscode')+module('cmbootstrap')+module('backport'),
-    package_data = {
+setup_options = {
+    'name': "CherryMusic",
+    'version': cherrymusicserver.VERSION,
+    'description': cherrymusicserver.DESCRIPTION,
+    'long_description': cherrymusicserver.LONG_DESCRIPTION,
+    'author': "Tom Wallroth & Tilman Boerner",
+    'author_email': "tomwallroth@gmail.com, tilman.boerner@gmx.net",
+    'url': "http://www.fomori.org/cherrymusic/",
+    'license': 'GPLv3',
+    'install_requires': ["CherryPy >= 3.2.2"],
+    'packages': module('cherrymusicserver')+module('audioread')+module('audiotranscode')+module('cmbootstrap')+module('backport'),
+    'package_data': {
         'cherrymusicserver.database.defs': packagedata('cherrymusicserver/database/defs'),
     },
     #startup script
-    scripts = ['cherrymusic','cherrymusicd','cherrymusic-tray'],
-    
-    #py2exe specific
-    console = [
-        {
-            "icon_resources": [(1, "res/favicon.ico")],
-            "script":'cherrymusic'
-        }
-    ],
-    classifiers = [
+    'scripts': ['cherrymusic','cherrymusicd','cherrymusic-tray'],
+    'classifiers': [
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Development Status :: 4 - Beta",
@@ -111,5 +103,16 @@ setup(
         "Topic :: Multimedia",
         "Topic :: Multimedia :: Sound/Audio :: Players",
         ],
-    data_files=data_files
-)
+    'data_files': data_files
+}
+
+if os.name == 'nt':
+    #py2exe specific
+    setup_options['console'] = [
+        {
+            "icon_resources": [(1, "res/favicon.ico")],
+            "script":'cherrymusic'
+        }
+    ]
+
+setup(**setup_options)
