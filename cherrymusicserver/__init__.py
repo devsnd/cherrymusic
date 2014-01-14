@@ -153,6 +153,7 @@ from cherrymusicserver import service
 from cherrymusicserver import sqlitecache
 from cherrymusicserver import userdb
 from cherrymusicserver import useroptiondb
+from cherrymusicserver import api
 import cherrymusicserver.browsersetup
 
 
@@ -465,6 +466,15 @@ Have fun!
                     'tools.staticfile.on': True,
                     'tools.staticfile.filename': resourcedir + '/favicon.ico',
                 }})
+        #rest_v1_mount_path = '/api/v1'
+        #cherrypy.tree.mount(
+        #    api.v1.RestV1Root(config, httphandler, rest_v1_mount_path),
+        #    rest_v1_mount_path,
+        #    config={'/':
+        #        {
+        #            'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+        #        }
+        #    })
         log.i(_('Starting server on port %s ...') % config['server.port'])
 
         cherrypy.lib.caching.expires(0)  # disable expiry caching
