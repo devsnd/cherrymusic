@@ -5143,6 +5143,9 @@ body:after {
   padding: 0px 5px;
   display: block;
 }
+.playlist-container .jp-playlist-item-action {
+  float: left;
+}
 .playlist-container .jp-playlist-current {
   background-color: #92bce0;
   color: #000000;
@@ -5158,6 +5161,10 @@ body:after {
 }
 .album-art-choice:hover {
   background-color: #92bce0;
+}
+.btn-transparent {
+  background-color: transparent;
+  border: 0;
 }
 .cm-media-list {
   position: relative;

@@ -115,6 +115,8 @@
 				freeGroupClass: "jp-free-media",
 				freeItemClass: "jp-playlist-item-free",
 				removeItemClass: "jp-playlist-item-remove",
+				actionItemClass: "jp-playlist-item-action",
+				parentFolderItemClass: "jp-playlist-item-show-parent-folder",
 				playlistSelector: false,
 				playtimeClass: "jp-playlist-playtime",
 			},
@@ -247,12 +249,23 @@
 			// Wrap the <li> contents in a <div>
 			var listItem = "<li><div>";
 
+            // create track action menu
+			listItem += '<div class="btn-group ' + this.options.playlistOptions.actionItemClass + '">'+
+            '  <button type="button" class="btn-transparent btn-xs dropdown-toggle" data-toggle="dropdown">'+
+            '    <span class="caret"></span>'+
+            '  </button>'+
+            '  <ul class="dropdown-menu" role="menu">'+
+            '    <li><a class="'+this.options.playlistOptions.parentFolderItemClass+'" href="#">Show parent folder</a></li>'+
+            '  </ul>'+
+            '</div>';
+            
 			// Create Playtime
             if(media.duration){
                 listItem += "<span href='javascript:;' class='" + this.options.playlistOptions.playtimeClass + "'>"+self._formatTime(media.duration)+"</span>";
             }
 			// Create remove control
 			listItem += "<a href='javascript:;' class='" + this.options.playlistOptions.removeItemClass + "'>&times;</a>";
+            
 
 			// Create links to free media
 			if(media.free) {
@@ -307,6 +320,14 @@
 				$(this).blur();
 				return false;
 			});
+            
+            // create handlers for showing the parent folder of a file
+            $(self.cssSelector.playlist + " a." + this.options.playlistOptions.parentFolderItemClass).off('click').on("click", function(event) {
+                var index = $(this).parent().parent().parent().parent().parent().index();
+                var folder = decodeURIComponent(self.playlist[index].url);
+                folder = folder.slice(0, folder.lastIndexOf('/'));
+                loadBrowser(folder, folder);
+            });
 		},
 		_updateControls: function() {
 			if(this.options.playlistOptions.enableRemoveControls) {

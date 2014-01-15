@@ -790,12 +790,16 @@ function enableJplayerDebugging(){
     $('#jplayer_inspector_update_0').click();
 }
 
-function loadBrowser(){
+function loadBrowser(directory, title){
+    if(typeof title === 'undefined'){
+        title = 'Root';
+    }
     var success = function(data){
-        new MediaBrowser('.search-results', data, 'Root');
+        new MediaBrowser('.search-results', data, title);
     };
     busy('#searchfield').hide().fadeIn('fast');
     api('listdir',
+        {'directory' : directory},
         success,
         errorFunc('failed to load file browser'),
         function(){busy('#searchfield').fadeOut('fast')});
