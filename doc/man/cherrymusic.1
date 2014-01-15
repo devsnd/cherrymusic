@@ -1,7 +1,7 @@
 .\" Manpage for CherryMusic.
 .\" Contact us on github.com/devsnd/cherrymusic to correct errors or typos.
 
-.TH "CHERRYMUSIC" "1" "2013\-11\-02" "CherryMusic" "CherryMusic man page"
+.TH "CHERRYMUSIC" "1" "2014\-01\-15" "CherryMusic" "CherryMusic man page"
 
 .SH "NAME"
 cherrymusic \- a standalone HTML5 (with Flash fallback) music streaming server written in Python
@@ -14,10 +14,13 @@ CherryMusic is a standalone music streaming server based on CherryPy and jPlayer
 
 .SH "OPTIONS"
 .IP "\fB\-h, \-\-help\fP"
-Show a help message and exit.
+Shows a help message and exits.
+
+.IP "\fB\-\-version\fP"
+Prints Information about the current version and exits.
 
 .IP "\fB\-\-update [PATH [PATH ...]]\fP"
-Update the media database. PATH must start with basedir or be relative to basedir.
+Updates the media database. PATH must start with basedir or be relative to basedir.
 
 .IP "\fB\-\-newconfig\fP"
 Creates a new config file in your home directory, e.g. "~/.config/cherrymusic/cherrymusic.conf.new".
@@ -30,6 +33,9 @@ Downloads the Python module "stagger" \-\- an ID3-tag library \-\- into the dire
 
 .IP "\fB\-\-setup\fP"
 If invoked with this switch, CherryMusic will walk you through the basic configuration setup in your browser on first startup. Use this if you just want to get things running without going through the configuration file yourself. CherryMusic will ask you about the most important options and configure everything for you. Note that if you want to enable more advanced features, you still need to edit the configuration file yourself. Please see \fBcherrymusic.conf\fP(5).
+
+.IP "\fB\-\-adduser USER PASSWORD\fP"
+Creates a new USER with the given PASSWORD.
 
 .IP "\fB\-\-port PORT\fP"
 Overrides the port specified in \fBcherrymusic.conf\fP(5).
