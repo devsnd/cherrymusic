@@ -137,19 +137,19 @@ except ImportError:
 parser = argparse.ArgumentParser(description='''CherryMusic Server
 Version ''' + cherrymusicserver.VERSION)
 
-parser.add_argument('--version', dest='info', action='store_true', help='print version info and exit')
+parser.add_argument('--version', dest='info', action='store_true', help='Print version information and exit.')
 if 'OptionParser' in dir(argparse):
-    parser.add_argument('--update', dest='update', nargs=0, default=None, help='update the media database (get Python >= 3.2 or the argparse module to choose paths)')
+    parser.add_argument('--update', dest='update', nargs=0, default=None, help='Update the media database (get Python >= 3.2 or the argparse module to choose paths).')
 else:
-    parser.add_argument('--update', dest='update', nargs='*', metavar='PATH', help='update the media database. PATH must start with basedir or be relative to basedir.')
-parser.add_argument('--newconfig', dest='newconfig', action='store_true', help='creates a new config file next to your current one, e.g. ~/.config/cherrymusic/cherrymusic.conf.new')
-parser.add_argument('--dropfiledb', dest='dropfiledb', action='store_true', help='Clears the file database. This might be necessary after a version jump.')
-parser.add_argument('--download-stagger', dest='downloadstagger', action='store_true', help='downloads the python module "stagger", an ID3-tag library, so that your music can be indexed more precisely. (should only be used when not installed using a package manager!)')
-parser.add_argument('--setup', dest='setup', action='store_true', help='Configure CherryMusic in your browser')
-parser.add_argument('--adduser', dest='adduser', nargs=2, default=None, help='create a new user with the given password')
+    parser.add_argument('--update', dest='update', nargs='*', metavar='PATH', help='Update the media database. PATH must start with basedir or be relative to basedir.')
+parser.add_argument('--newconfig', dest='newconfig', action='store_true', help='Create a new config file next to your current one, e.g. ~/.config/cherrymusic/cherrymusic.conf.new.')
+parser.add_argument('--dropfiledb', dest='dropfiledb', action='store_true', help='Clear the file database. This might be necessary after a version jump.')
+parser.add_argument('--download-stagger', dest='downloadstagger', action='store_true', help='Download the Python module "stagger", an ID3-tag library, so that your music can be indexed more precisely. (Should only be used when not installed using a package manager!)')
+parser.add_argument('--setup', dest='setup', action='store_true', help='Configure CherryMusic in your browser.')
+parser.add_argument('--adduser', dest='adduser', nargs=2, default=None, help='Create a new user with the given password.')
 
-ConfigOptions.addShortcutOption(parser, ('--port', '-p'), key='server.port', type=int, help='The port the server will listen to.')
-ConfigOptions.addGeneralOption(parser, ('--conf', '-c'), help='Override configuration values')
+ConfigOptions.addShortcutOption(parser, ('--port', '-p'), key='server.port', type=int, help='Set the port the server will listen to.')
+ConfigOptions.addGeneralOption(parser, ('--conf', '-c'), help='Override configuration values.')
 
 
 if __name__ == "__main__":
