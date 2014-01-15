@@ -31,6 +31,7 @@
 
 import hashlib
 import uuid
+import sqlite3
 
 from collections import namedtuple
 
@@ -50,17 +51,20 @@ class UserDB:
     def addUser(self, username, password, admin):
         if not (username.strip() or password.strip()):
             log.d(_('empty username or password!'))
-            return
+            return False
         user = User.create(username, password, admin)
-        self.conn.execute('''
-        INSERT INTO users
-        (username, admin, password, salt)
-        VALUES (?,?,?,?)''',
-        (user.name, 1 if user.isadmin else 0, user.password, user.salt))
+        try:
+            self.conn.execute('''
+            INSERT INTO users
+            (username, admin, password, salt)
+            VALUES (?,?,?,?)''',
+            (user.name, 1 if user.isadmin else 0, user.password, user.salt))
+        except sqlite3.IntegrityError:
+            log.e('cannot create user "%s", already exists!' % user.name)
+            return False
         self.conn.commit()
-        msg = 'added user: ' + user.name
-        log.d(msg)
-        return msg
+        log.d('added user: ' + user.name)
+        return True
 
     def isDeletable(self, userid):
         #cant delete 1st admin

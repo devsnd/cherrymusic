@@ -542,9 +542,10 @@ class HTTPHandler(object):
 
     def api_adduser(self, username, password, isadmin):
         if cherrypy.session['admin']:
-            return self.userdb.addUser(username,
-                                       password,
-                                       isadmin)
+            if self.userdb.addUser(username, password, isadmin):
+                return 'added new user: %s' % username
+            else:
+                return 'error, cannot add new user!' % username
         else:
             return "You didn't think that would work, did you?"
 

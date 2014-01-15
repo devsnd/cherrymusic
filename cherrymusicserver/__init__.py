@@ -44,6 +44,7 @@ LONG_DESCRIPTION = """CherryMusic is a music streaming
 
 from backport import input
 
+import re
 import os
 import codecs
 import sys
@@ -160,17 +161,30 @@ import cherrymusicserver.browsersetup
 class CherryMusic:
     """Sets up services (configuration, database, etc) and starts the server"""
     def __init__(self, update=None, createNewConfig=False, dropfiledb=False,
-                 setup=False, cfg_override={}):
+                 setup=False, cfg_override={}, adduser=None):
         self.setup_services()
         self.setup_config(createNewConfig, setup, cfg_override)
         signal.signal(signal.SIGTERM, CherryMusic.stopAndCleanUp)
         signal.signal(signal.SIGINT, CherryMusic.stopAndCleanUp)
         if os.name == 'posix':
             signal.signal(signal.SIGHUP, CherryMusic.stopAndCleanUp)
+        if adduser:
+            if CherryMusic.createUser(adduser):
+                sys.exit(0)
+            else:
+                sys.exit(1)
         CherryMusic.create_pid_file()
         self.setup_databases(update, dropfiledb, setup)
         self.start_server(httphandler.HTTPHandler(config))
         CherryMusic.delete_pid_file()
+
+    @classmethod
+    def createUser(cls, credentials):
+        username, password = credentials
+        alphanum = re.compile('[^a-z0-9]', re.IGNORECASE)
+        if alphanum.findall(username) or alphanum.findall(password):
+            return False
+        return service.get('users').addUser(username, password, False)
 
     @classmethod
     def stopAndCleanUp(cls, signal=None, stackframe=None):
