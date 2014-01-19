@@ -310,7 +310,7 @@ class ZipStream:
             zinfo.compress_size = compress_size
         else:
             zinfo.compress_size = file_size
-        zinfo.CRC = CRC
+        zinfo.CRC = CRC if CRC > 0 else CRC * -1
         zinfo.file_size = file_size
         yield self.update_data_ptr(zinfo.DataDescriptor())
         self.filelist.append(zinfo)
