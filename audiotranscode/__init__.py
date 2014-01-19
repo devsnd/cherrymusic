@@ -17,8 +17,8 @@ MimeTypes = {
 class Transcoder(object):
     devnull = open(os.devnull,'w')
     
-    def __init__(self):
-        self.command = ['']
+    def __init__(self, command):
+        self.command = command
         
     def available(self):
         try:
@@ -28,10 +28,10 @@ class Transcoder(object):
             return False
 
 class Encoder(Transcoder):
-    def __init__(self,filetype,command):
+    def __init__(self, filetype, command):
+        Transcoder.__init__(self, command)
         self.filetype = filetype
         self.mimetype = MimeTypes[filetype]
-        self.command = command
         
     def encode(self, decoder_process, bitrate):
         cmd = self.command[:]
@@ -47,10 +47,10 @@ class Encoder(Transcoder):
         return "<Encoder type='%s' cmd='%s'>"%(self.filetype,str(' '.join(self.command)))
 
 class Decoder(Transcoder):
-    def __init__(self,filetype,command):
+    def __init__(self, filetype, command):
+        Transcoder.__init__(self, command)
         self.filetype = filetype
         self.mimetype = MimeTypes[filetype]
-        self.command = command        
         
     def decode(self, filepath, starttime=0):
         cmd = self.command[:]
@@ -76,15 +76,11 @@ class TranscodeError(Exception):
 
 class EncodeError(TranscodeError):
     def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
+        TranscodeError.__init__(self, value)
 
 class DecodeError(TranscodeError):
     def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
+        TranscodeError.__init__(self, value)
 
 class AudioTranscode:
     READ_BUFFER = 1024
@@ -182,9 +178,9 @@ class AudioTranscode:
                     time.sleep(0.1) #wait for new data...
                     break               
                 yield data
-        except Exception as e:
+        except Exception:
             #pass on exception, but clean up
-            raise e
+            raise
         finally:
             if decoder_process and decoder_process.poll() == None:
                 if decoder_process.stderr:

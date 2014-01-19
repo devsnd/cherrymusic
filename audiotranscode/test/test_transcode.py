@@ -37,6 +37,14 @@ import audiotranscode as transcode
 
 CAPTURE_OUTPUT = True
 
+# inject unavailable encoder
+unavailable_enc = transcode.Encoder('mp3', ['notavailable'])
+transcode.AudioTranscode.Encoders.append(unavailable_enc)
+
+# inject unavailable decoder
+unavailable_enc = transcode.Decoder('mp3', ['notavailable'])
+transcode.AudioTranscode.Decoders.append(unavailable_enc)
+
 transcoder = transcode.AudioTranscode(debug=True)
 inputdir = os.path.dirname(__file__)
 outputpath = tempfile.mkdtemp(prefix='test.cherrymusic.audiotranscode.')
@@ -81,13 +89,45 @@ def generictestfunc(filepath, newformat, encoder, decoder):
 
 def test_generator():
     for enc in transcoder.Encoders:
-        if not enc.filetype in transcoder.availableEncoderFormats():
-            print('Encoder %s not installed!' % (enc.command[0],))
+        if not enc.available():
+            print('Encoder %s not installed!' % (str(enc),))
             continue
         for dec in transcoder.Decoders:
-            if not dec.filetype in transcoder.availableDecoderFormats():
-                print('Decoder %s not installed!' % (dec.command[0],))
+            if not dec.available():
+                print('Decoder %s not installed!' % (str(dec)))
                 continue
             if dec.filetype in testfiles:
                 filename = testfiles[dec.filetype]
                 yield generictestfunc, filename, enc.filetype, enc, dec
+
+@raises(transcode.DecodeError)
+def test_file_not_found():
+    try:
+        for a in transcoder.transcodeStream('nosuchfile', 'mp3'):
+            pass
+    except Exception as e:
+        #print exception for coverage
+        print(e)
+        raise
+
+@raises(transcode.DecodeError)
+def test_no_decoder_available():
+    noaudio = os.path.join(inputdir,'test.noaudio')
+    for a in transcoder.transcodeStream(noaudio, 'mp3'):
+        pass
+
+@raises(transcode.EncodeError)
+def test_no_encoder_available():
+    for a in transcoder.transcodeStream(testfiles['mp3'], 'foobar'):
+        pass
+
+def test_automatically_find_encoder():
+    for a in transcoder.transcodeStream(testfiles['mp3'], 'wav'):
+        pass
+
+def test_transcode_file():
+    outfile = os.path.join(outputpath, 'test_file.mp3')
+    transcoder.transcode(testfiles['mp3'], outfile)
+
+def test_mimetype():
+    assert transcoder.mimeType('mp3') == 'audio/mpeg'
