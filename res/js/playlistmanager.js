@@ -709,9 +709,11 @@ PlaylistManager.prototype = {
         var jPlaylist = pl.jplayerplaylist;
         if(jPlaylist.playlist && typeof jPlaylist.current !== 'undefined' && jPlaylist.playlist.length>0){
             $('.cm-songtitle').text(jPlaylist.playlist[jPlaylist.current].title);
-            return
+            $('title').text(jPlaylist.playlist[jPlaylist.current].title);
+        } else {
+            $('.cm-songtitle').html('');
+            $('title').text('CherryMusic');
         }
-        $('.cm-songtitle').html('');
     },
     rememberPlaylist : function(){
         "use strict";
