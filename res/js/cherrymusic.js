@@ -329,17 +329,14 @@ function search($form){
     }
     var searchstring = $input.val();
     var success = function(json){
-        $('.searchinput').css('background-image', '');
-        $('.searchinput').css('color', '');
+        $('.searchinput').removeClass('searchinput-busy');
         new MediaBrowser('.search-results', json, 'Search: '+htmlencode(searchstring));
     };
     var error = function(){
-        $('.searchinput').css('background-image', '');
-        $('.searchinput').css('color', '');
+        $('.searchinput').removeClass('searchinput-busy');
         errorFunc('failed loading search results')();
     };
-    $('.searchinput').css('background-image', 'url(res/progress-bars.gif)');
-    $('.searchinput').css('color', '#ffffff');
+    $('.searchinput').addClass('searchinput-busy');
     api('search', {'searchstring': searchstring}, success, error);
     return false;
 }

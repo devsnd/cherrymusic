@@ -478,7 +478,7 @@ Have fun!
                 },
                 '/favicon.ico': {
                     'tools.staticfile.on': True,
-                    'tools.staticfile.filename': resourcedir + '/favicon.ico',
+                    'tools.staticfile.filename': resourcedir + '/img/favicon.ico',
                 }})
         #rest_v1_mount_path = '/api/v1'
         #cherrypy.tree.mount(

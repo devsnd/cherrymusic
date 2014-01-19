@@ -18,7 +18,7 @@ class CherryMusicTrayIcon:
     def __init__(self):
         self.statusicon = Gtk.StatusIcon()
         self.execpath = os.path.dirname(__file__)
-        self.icon_path = pathprovider.getResourcePath('res/tray-icon.png')
+        self.icon_path = pathprovider.getResourcePath('res/img/tray-icon.png')
         self.cherry_image = Gtk.Image.new_from_file(self.icon_path)
         self.icon_set = Gtk.IconSet(self.cherry_image.get_pixbuf())
         self.statusicon.set_from_file(self.icon_path)

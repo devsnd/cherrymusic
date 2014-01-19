@@ -1,3 +1,7 @@
+"""
+This script is used to download cherrymusic dependencies on first startup.
+"""
+
 try:
     import urllib.request
 except ImportError:

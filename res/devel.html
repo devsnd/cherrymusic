@@ -32,7 +32,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 -->
-<link rel="icon" href="res/favicon32.png" type="image/png">
+<link rel="icon" href="res/img/favicon32.png" type="image/png">
 <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
 
 <!--LESS-TO-CSS-BEGIN out=res/bootstrap3/gen/cherrymusic.css-->
@@ -40,31 +40,31 @@
 <!--LESS-TO-CSS-END-->
 
 <!--REMOVE-BEGIN-->
+    <!-- live lesscss compiler for developement. will be removed by deploy.py -->
     <script type="text/javascript">var less=less||{};less.env='development';</script>
     <script type="text/javascript" src="res/bootstrap3/assets/less.js"></script>
 <!--REMOVE-END-->
 
-<!--COMPRESS-JS-BEGIN out=res/cherrymusic.dist.js-->
-    <script type="text/javascript" src="res/js/jquery-1.10.2.js"></script>
+<!--COMPRESS-JS-BEGIN out=res/dist/cherrymusic.dist.js-->
+    <script type="text/javascript" src="res/js/ext/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="res/js/ext/json2.min.js"></script>
+    <script type="text/javascript" src="res/js/ext/jquery.jplayer.min.js"></script>
+    <script type="text/javascript" src="res/js/ext/jplayer.playlist.js"></script>
+    <script type="text/javascript" src="res/js/ext/jquery.jplayer.inspector.js"></script>
+    <script type="text/javascript" src="res/js/ext/mustache-0.7.0.js"></script>
+    <!-- ui sortable -->
+    <script type="text/javascript" src="res/js/ext/jquery-ui-1.10.0.custom.min.js"></script> 
+
     <script type="text/javascript" src="res/bootstrap3/js/modal.js"></script>
     <script type="text/javascript" src="res/bootstrap3/js/collapse.js"></script>
     <script type="text/javascript" src="res/bootstrap3/js/transition.js"></script>
     <script type="text/javascript" src="res/bootstrap3/js/dropdown.js"></script>
     <script type="text/javascript" src="res/bootstrap3/js/alert.js"></script>
 
-    <script type="text/javascript" src="res/js/json2.min.js"></script>
-    <script type="text/javascript" src="res/js/jquery.jplayer.min.js"></script>
-    <script type="text/javascript" src="res/js/jplayer.playlist.js"></script>
-    <script type="text/javascript" src="res/js/jquery.jplayer.inspector.js"></script>
-    <script type="text/javascript" src="res/js/mustache-0.7.0.js"></script>
-
-    <!-- ui sortable -->
-    <script type="text/javascript" src="res/js/jquery-ui-1.10.0.custom.min.js"></script> 
-
     <!-- cherrymusic -->
-    <script type="text/javascript" src="res/playlistmanager.js"></script>
-    <script type="text/javascript" src="res/mediabrowser.js"></script>
-    <script type="text/javascript" src="res/cherrymusic.js"></script>
+    <script type="text/javascript" src="res/js/playlistmanager.js"></script>
+    <script type="text/javascript" src="res/js/mediabrowser.js"></script>
+    <script type="text/javascript" src="res/js/cherrymusic.js"></script>
 <!--COMPRESS-JS-END-->
 
 <title>CherryMusic</title>
@@ -80,7 +80,7 @@
         </div>
         <div class="modal-body">
             <div class="content">
-                <img src="res/cherry_music_web_notext.png" style="float: right;"/>
+                <img src="res/img/cherrymusic_logo_big.png" style="float: right;"/>
                 <p>CherryMusic was created by <a href="http://github.com/devsnd">Tom Wallroth</a>
                 and is currently developed together with <a href="http://github.com/tilboerner">Tilman B&ouml;rner</a>.</p>
                 <p>Visit the <a href="http://www.fomori.org/cherrymusic">CherryMusic website</a> or get the <a href="http://www.github.com/devsnd/cherrymusic">source-code directly from github</a></p>

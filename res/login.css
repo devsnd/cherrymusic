@@ -41,7 +41,7 @@ html,body{
 }
 
 .logo{
-    background-image: url("cherry_music_web_notext.png");
+    background-image: url("img/cherrymusic_logo_big.png");
     background-repeat: no-repeat;
     position:relative;
     height: 100%;

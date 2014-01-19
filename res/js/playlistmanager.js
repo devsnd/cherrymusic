@@ -238,7 +238,7 @@ PlaylistManager.prototype = {
             }
             // Instance jPlayer
             self.jPlayerInstance = $(self.cssSelectorjPlayer).jPlayer({
-                swfPath: "res/js",
+                swfPath: "res/js/ext",
                 solution: usedSolution,
                 preload: 'metadata',
                 supplied: "mp3,oga,m4v",

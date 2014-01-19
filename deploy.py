@@ -95,5 +95,5 @@ html = re.sub('<!--COMPRESS-JS-BEGIN([^>]*)-->(.*)<!--COMPRESS-JS-END-->',
               flags=re.MULTILINE | re.DOTALL)
 html = remove_whitespace(html)
 
-with open('res/main.html', 'w') as mainhtml:
+with open('res/dist/main.html', 'w') as mainhtml:
     mainhtml.write(html)

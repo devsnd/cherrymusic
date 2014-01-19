@@ -5007,10 +5007,10 @@ body {
 /* preload progress indicator images, so they show up on first search */
 body:after {
   display: none;
-  content: url(../../cherrymusic_loader.gif) url(res/progress-bars.gif);
+  content: url("../../img/cherrymusic_loader.gif") url("../../img/progress-bars.gif");
 }
 .navbar-brand {
-  background-image: url("../../favicon32glow.png");
+  background-image: url("../../img/favicon32glow.png");
   background-position: 49% 14px;
   background-repeat: no-repeat;
   min-width: 30px;
@@ -5046,7 +5046,7 @@ body:after {
   bottom: 70px;
 }
 .busy-indicator {
-  background-image: url(../../cherrymusic_loader.gif);
+  background-image: url("../../img/cherrymusic_loader.gif");
   background-position: center center;
   background-repeat: no-repeat;
   background-color: #ffffff;
@@ -5166,13 +5166,18 @@ body:after {
   background-color: transparent;
   border: 0;
 }
+.searchinput-busy {
+  background-image: url("../../img/progress-bars.gif");
+  color: #ffffff;
+  background-color: #3071a9;
+}
 .cm-media-list {
   position: relative;
   padding: 0;
 }
 .cm-media-list-busy {
   overflow: hidden;
-  background-image: url("../../cherrymusic_loader.gif");
+  background-image: url("../../img/cherrymusic_loader.gif");
   background-position: 50% 120px;
   background-repeat: no-repeat;
 }

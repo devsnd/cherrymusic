@@ -3,14 +3,18 @@ body{
     margin: @navbar-height 0 @mediaplayer-height 0;
 }
 
+@spinning-loader:   url("../../img/cherrymusic_loader.gif");
+@progress-bar-ani:  url("../../img/progress-bars.gif");
+@favicon:           url("../../img/favicon32glow.png");
+
 /* preload progress indicator images, so they show up on first search */
 body:after{
     display:none;
-    content: url(../../cherrymusic_loader.gif) url(res/progress-bars.gif);
+    content: @spinning-loader @progress-bar-ani;
 }
 
 .navbar-brand{
-    background-image: url("../../favicon32glow.png");
+    background-image: @favicon;
     background-position: 49% 14px;
     background-repeat: no-repeat;
     min-width: 30px;
@@ -51,7 +55,7 @@ body:after{
 }
 
 .busy-indicator{
-    background-image: url(../../cherrymusic_loader.gif);
+    background-image: @spinning-loader;
     background-position: center center;
     background-repeat: no-repeat;
     background-color: #ffffff;
@@ -199,4 +203,10 @@ body:after{
 .btn-transparent{
     background-color: transparent;
     border: 0;
+}
+
+.searchinput-busy{
+    background-image: @progress-bar-ani;
+    color: #ffffff;
+    background-color: darken(@brand-primary, 10%);
 }

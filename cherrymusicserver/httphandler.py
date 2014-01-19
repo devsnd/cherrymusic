@@ -38,6 +38,7 @@ import json
 import cherrypy
 import codecs
 import sys
+
 try:
     from urllib.parse import unquote
 except ImportError:
@@ -72,7 +73,7 @@ class HTTPHandler(object):
     def __init__(self, config):
         self.config = config
 
-        template_main = 'res/main.html'
+        template_main = 'res/dist/main.html'
         template_login = 'res/login.html'
         template_firstrun = 'res/firstrun.html'
 
