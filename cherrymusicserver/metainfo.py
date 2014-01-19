@@ -32,6 +32,8 @@
 from cherrymusicserver import log
 import sys
 
+has_stagger = has_mutagen = has_audioread = False
+
 #check for meta info libraries
 if sys.version_info >= (3,):
     #stagger is only for python 3
@@ -40,9 +42,13 @@ if sys.version_info >= (3,):
         has_stagger = True
     except ImportError:
         log.w(_('''python library "stagger" not found: There will be no ID-tag support!'''))
-        has_stagger = False
+
 else:
-    has_stagger = False
+    try:
+        import mutagen
+        has_mutagen = True
+    except ImportError:
+        log.w(_('''python library "mutagen" not found: There will be no ID-tag support!'''))
 
 try:
     import audioread
@@ -50,7 +56,6 @@ try:
 except ImportError:
     log.w(_('''python library "audioread" not found!
     -Audio file length can't be determined without it!'''))
-    has_audioread = False
 
 class Metainfo():
     def __init__(self, artist, album, title, track, length):
@@ -87,6 +92,23 @@ def getSongInfo(filepath):
             tag = stagger.read_tag(filepath)
         except Exception:
             tag = MockTag()
+    elif has_mutagen:
+        try:
+            tag = MockTag()
+            file_info = mutagen.File(filepath, easy=True)
+
+            # NOTE: Joining in order to emulate stagger's formatting of
+            #       multiple frames.
+            tag.artist = " / ".join(file_info.get('artist', [tag.artist]))
+            tag.album = " / ".join(file_info.get('album', [tag.album]))
+            tag.title = " / ".join(file_info.get('title', [tag.title]))
+
+            # NOTE: Splitting out the actual track number since mutagen returns
+            #       a total as well.
+            tag.track = file_info.get('tracknumber',
+                                      [tag.track])[0].split('/')[0]
+        except Exception:
+            tag = MockTag()
     else:
         tag = MockTag()
 
@@ -101,5 +123,3 @@ def getSongInfo(filepath):
     else:
         audiolength = 0
     return Metainfo(tag.artist, tag.album, tag.title, tag.track, audiolength)
-
-
