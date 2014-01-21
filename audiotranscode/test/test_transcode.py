@@ -118,15 +118,15 @@ def test_no_decoder_available():
 
 @raises(transcode.EncodeError)
 def test_no_encoder_available():
-    for a in transcoder.transcodeStream(testfiles['mp3'], 'foobar'):
+    for a in transcoder.transcodeStream(testfiles['wav'], 'foobar'):
         pass
 
 def test_automatically_find_encoder():
-    for a in transcoder.transcodeStream(testfiles['mp3'], 'wav'):
+    for a in transcoder.transcodeStream(testfiles['wav'], 'wav'):
         pass
 
 def test_transcode_file():
-    outfile = os.path.join(outputpath, 'test_file.mp3')
+    outfile = os.path.join(outputpath, 'test_file.wav')
     transcoder.transcode(testfiles['mp3'], outfile)
 
 def test_mimetype():
