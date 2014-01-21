@@ -167,7 +167,7 @@ class CherryModel:
             log.d(_("%(user)s searched for '%(term)s'"), {'user': user, 'term': term})
         max_search_results = cherry.config['search.maxresults']
         results = self.cache.searchfor(term, maxresults=max_search_results)
-        with Performance(_('sorting DB results using ResultOrder')):
+        with Performance(_('sorting DB results using ResultOrder')) as perf:
             debug = tweaks.result_order_debug
             order_function = resultorder.ResultOrder(term, debug=debug)
             results = sorted(results, key=order_function, reverse=True)
@@ -175,7 +175,7 @@ class CherryModel:
             if debug:
                 n = tweaks.result_order_debug_files
                 for sortedResults in results[:n]:
-                    Performance.log(sortedResults.debugOutputSort)
+                    perf.log(sortedResults.debugOutputSort)
                 for sortedResults in results:
                     sortedResults.debugOutputSort = None  # free ram
 

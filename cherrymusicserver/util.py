@@ -186,6 +186,7 @@ class Performance:
             Performance.indentation += 1
             log.w('|   ' * (Performance.indentation - 1)
                   + '/ˉˉ' + self.text)
+            return self
 
     def __exit__(self, type, value, traceback):
         global PERFORMANCE_TEST
@@ -195,9 +196,11 @@ class Performance:
                   + '\__ %g ms' % (duration,))
             Performance.indentation -= 1
 
-    def log(text):
-        for line in text.split('\n'):
-            log.w('|   ' * (Performance.indentation) + line)
+    def log(self, text):
+        global PERFORMANCE_TEST
+        if PERFORMANCE_TEST:
+            for line in text.split('\n'):
+                log.w('|   ' * (Performance.indentation) + line)
 
 
 def time2text(sec):

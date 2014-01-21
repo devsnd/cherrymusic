@@ -69,7 +69,7 @@ def test_time2text():
 
 def test_performance_logger():
     with util.Performance('potato head') as p:
-        util.Performance.log('elephant')
+        p.log('elephant')
 
 if __name__ == '__main__':
     nose.runmodule()
