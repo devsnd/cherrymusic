@@ -127,7 +127,7 @@ def test_automatically_find_encoder():
 
 def test_transcode_file():
     outfile = os.path.join(outputpath, 'test_file.wav')
-    transcoder.transcode(testfiles['mp3'], outfile)
+    transcoder.transcode(testfiles['wav'], outfile)
 
 def test_mimetype():
     assert transcoder.mimeType('mp3') == 'audio/mpeg'
