@@ -88,7 +88,7 @@
 		}
 
 		// Remove the empty <li> from the page HTML. Allows page to be valid HTML, while not interfereing with display animations
-		$(this.cssSelector.playlist + " ul").empty();
+		$(this.cssSelector.playlist + " ul.playlist-container-list").empty();
 
 		// Create .live() handlers for the playlist items along with the free media and remove controls.
 		this._createItemHandlers();
@@ -183,23 +183,23 @@
 			var self = this;
 
 			if(instant && !$.isFunction(instant)) {
-				$(this.cssSelector.playlist + " ul").empty();
+				$(this.cssSelector.playlist + " ul.playlist-container-list").empty();
 				$.each(this.playlist, function(i,v) {
-					$(self.cssSelector.playlist + " ul").append(self._createListItem(self.playlist[i]));
+					$(self.cssSelector.playlist + " ul.playlist-container-list").append(self._createListItem(self.playlist[i]));
                     var litem = $(self.cssSelector.playlist + " ul li:last");
                     litem.attr('name', litem.index());
 				});
 				this._updateControls();
 			} else {
-				var displayTime = $(this.cssSelector.playlist + " ul").children().length ? this.options.playlistOptions.displayTime : 0;
+				var displayTime = $(this.cssSelector.playlist + " ul.playlist-container-list").children().length ? this.options.playlistOptions.displayTime : 0;
 
-				$(this.cssSelector.playlist + " ul").slideUp(displayTime, function() {
+				$(this.cssSelector.playlist + " ul.playlist-container-list").slideUp(displayTime, function() {
 					var $this = $(this);
 					$(this).empty();
 					
 					$.each(self.playlist, function(i,v) {
                         $this.append(self._createListItem(self.playlist[i]));
-						var litem = $(self.cssSelector.playlist + " ul li:last");
+						var litem = $(self.cssSelector.playlist + " ul.playlist-container-list li:last");
                         litem.attr('name', litem.index());
 					});
 					self._updateControls();
@@ -356,7 +356,7 @@
 		},
 		add: function(media, playNow) {
             var self = this;
-			$(this.cssSelector.playlist + " ul").append(this._createListItem(media)).find("li:last-child").hide().slideDown(this.options.playlistOptions.addTime);
+			$(this.cssSelector.playlist + " ul.playlist-container-list").append(this._createListItem(media)).find("li:last-child").hide().slideDown(this.options.playlistOptions.addTime);
 			this._updateControls();
             this._createItemHandlers();
 			this.original.push(media);
@@ -504,7 +504,7 @@
             var isAdjusted = false;
 
             var replace = [];
-            $.each($(this.cssSelector.playlist + " ul li"), function(index, value) {
+            $.each($(this.cssSelector.playlist + " ul.playlist-container-list > li"), function(index, value) {
                 replace[index] = self.original[$(value).attr('name')];
                 if(!isAdjusted && self.current === parseInt($(value).attr('name'), 10)) {
                     self.current = index;
