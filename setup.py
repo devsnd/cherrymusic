@@ -88,7 +88,11 @@ setup_options = {
     'scripts': ['cherrymusic','cherrymusicd','cherrymusic-tray'],
     'classifiers': [
         "Programming Language :: Python",
+        "Programming Language :: Python :: 2.6",
+        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.2",
+        "Programming Language :: Python :: 3.3",
         "Development Status :: 4 - Beta",
         "Environment :: Console",
         "Environment :: Web Environment",
