@@ -624,6 +624,7 @@ class SQLiteCache(object):
         children.
         '''
         basedir = cherry.config['media.basedir']
+        fullpath = os.path.normpath(fullpath)
         if os.path.isabs(fullpath):
             if not fullpath.startswith(basedir):
                 return None

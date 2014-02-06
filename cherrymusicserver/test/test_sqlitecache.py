@@ -32,6 +32,7 @@
 #python 2.6+ backward compability
 from __future__ import unicode_literals
 
+import nose
 import unittest
 from nose.tools import *
 
@@ -792,7 +793,56 @@ class UpdateTest(unittest.TestCase):
         self.assertEqual(None, self.Cache.db_find_file_by_path(path_to(newfiles[1])), msg)
         self.assertEqual(None, self.Cache.db_find_file_by_path(path_to(newfiles[2])), msg)
 
+from cherrymusicserver.test.helpers import cherrytest, tempdir
+
+def setup_cache(testfiles=()):
+    """ Sets up a SQLiteCache instance bound to current `media.basedir`.
+
+        The basedir is assumed to exist (as it must) and can be initialized
+        with directories and (empty) files.
+
+        :param list testfiles: Strings of filenames. Names ending in '/' are directories.
+    """
+    database.resetdb(sqlitecache.DBNAME)
+    database.ensure_current_version(sqlitecache.DBNAME, autoconsent=True)
+    cache = sqlitecache.SQLiteCache()
+
+    basedir = cherry.config['media.basedir']
+    assert not os.listdir(basedir)
+
+    for filename in testfiles:
+        fullpath = os.path.join(basedir, filename)
+        setupTestfile(TestFile(fullpath))
+
+    cache.full_update()
+    return cache
+
+
+def cachetest(func):
+    """ Function decorator that provides a basic CherryMusic context, complete
+        with a temporary `media.basedir`.
+    """
+    testname = '{0}.{1}'.format(func.__module__ , func.__name__)
+    def wrapper(*args, **kwargs):
+        with tempdir(testname, keep=True) as basedir:
+            testfunc = cherrytest({'media.basedir': basedir})(func)
+            testfunc(*args, **kwargs)
+    wrapper.__name__ = func.__name__
+    wrapper.__doc__ = func.__doc__
+    return wrapper
+
+@cachetest
+def test_listdir():
+    basedir_contents = ['some_file']
+    cache = setup_cache(basedir_contents)
+
+    assert basedir_contents == cache.listdir('')
+    assert basedir_contents == cache.listdir('.')
+    assert basedir_contents == cache.listdir('./.')
+
+    assert [] == cache.listdir('/.')
+    assert [] == cache.listdir('..')
+    assert [] == cache.listdir('./..')
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
-    unittest.main()
+    nose.runmodule()
