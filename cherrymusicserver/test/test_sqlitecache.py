@@ -824,7 +824,7 @@ def cachetest(func):
     """
     testname = '{0}.{1}'.format(func.__module__ , func.__name__)
     def wrapper(*args, **kwargs):
-        with tempdir(testname, keep=True) as basedir:
+        with tempdir(testname) as basedir:
             testfunc = cherrytest({'media.basedir': basedir})(func)
             testfunc(*args, **kwargs)
     wrapper.__name__ = func.__name__
