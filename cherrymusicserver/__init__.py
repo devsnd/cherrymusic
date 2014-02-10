@@ -179,8 +179,8 @@ class CherryMusic:
                 sys.exit(0)
             else:
                 sys.exit(1)
-        CherryMusic.create_pid_file()
         self.setup_databases(update, dropfiledb, setup)
+        CherryMusic.create_pid_file()
         self.start_server(httphandler.HTTPHandler(config))
         CherryMusic.delete_pid_file()
 
