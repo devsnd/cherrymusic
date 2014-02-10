@@ -186,7 +186,7 @@
 				$(this.cssSelector.playlist + " ul.playlist-container-list").empty();
 				$.each(this.playlist, function(i,v) {
 					$(self.cssSelector.playlist + " ul.playlist-container-list").append(self._createListItem(self.playlist[i]));
-                    var litem = $(self.cssSelector.playlist + " ul li:last");
+                    var litem = $(self.cssSelector.playlist + " > ul > li:last");
                     litem.attr('name', litem.index());
 				});
 				this._updateControls();
@@ -199,7 +199,7 @@
 					
 					$.each(self.playlist, function(i,v) {
                         $this.append(self._createListItem(self.playlist[i]));
-						var litem = $(self.cssSelector.playlist + " ul.playlist-container-list li:last");
+						var litem = $(self.cssSelector.playlist + " > ul.playlist-container-list > li:last");
                         litem.attr('name', litem.index());
 					});
 					self._updateControls();
@@ -346,7 +346,7 @@
 		_highlight: function(index) {
 			if(this.playlist.length && index !== undefined) {
 				$(this.cssSelector.playlist + " .jp-playlist-current").removeClass("jp-playlist-current");
-				$(this.cssSelector.playlist + " li:nth-child(" + (index + 1) + ")").addClass("jp-playlist-current").find(".jp-playlist-item").addClass("jp-playlist-current");
+				$(this.cssSelector.playlist + ">ul>li:nth-child(" + (index + 1) + ")").addClass("jp-playlist-current").find(".jp-playlist-item").addClass("jp-playlist-current");
 				$(this.cssSelector.title + " li").html(this.playlist[index].title + (this.playlist[index].artist ? " <span class='jp-artist'>by " + this.playlist[index].artist + "</span>" : ""));
 			}
 		},
@@ -504,7 +504,7 @@
             var isAdjusted = false;
 
             var replace = [];
-            $.each($(this.cssSelector.playlist + " ul.playlist-container-list > li"), function(index, value) {
+            $.each($(this.cssSelector.playlist + " > ul.playlist-container-list > li"), function(index, value) {
                 replace[index] = self.original[$(value).attr('name')];
                 if(!isAdjusted && self.current === parseInt($(value).attr('name'), 10)) {
                     self.current = index;
