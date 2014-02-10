@@ -67,6 +67,12 @@ if sys.version_info >= (3, 3):
 
 import cherrypy
 
+def version():
+    return """CherryMusic Server {cm_version}
+
+a standalone music server
+Copyright (c) 2012 - 2014 Tom Wallroth & Tilman Boerner""".format(cm_version=VERSION)
+
 def info():
     import locale
     import platform
