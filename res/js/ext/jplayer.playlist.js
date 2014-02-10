@@ -391,7 +391,7 @@
 					if(0 <= index && index < this.playlist.length) {
 						this.removing = true;
 
-						$(this.cssSelector.playlist + " li:nth-child(" + (index + 1) + ")").slideUp(this.options.playlistOptions.removeTime, function() {
+						$(this.cssSelector.playlist + ">ul>li:nth-child(" + (index + 1) + ")").slideUp(this.options.playlistOptions.removeTime, function() {
 							$(this).remove();
 
 							if(self.shuffled) {
