@@ -413,16 +413,19 @@ class HTTPHandler(object):
             return data
         elif cherry.config['media.fetch_album_art']:
             #fetch album art from online source
-            album = os.path.basename(directory)
-            artist = os.path.basename(os.path.dirname(directory))
-            keywords = artist+' '+album
-            log.i(_("Fetching album art for keywords {keywords!r}").format(keywords=keywords))
-            header, data = fetcher.fetch(keywords)
-            if header:
-                cherrypy.response.headers.update(header)
-                self.albumartcache_save(b64imgpath, data)
-                return data
-        cherrypy.HTTPRedirect("/res/img/folder.png", 302)
+            try:
+                album = os.path.basename(directory)
+                artist = os.path.basename(os.path.dirname(directory))
+                keywords = artist+' '+album
+                log.i(_("Fetching album art for keywords {keywords!r}").format(keywords=keywords))
+                header, data = fetcher.fetch(keywords)
+                if header:
+                    cherrypy.response.headers.update(header)
+                    self.albumartcache_save(b64imgpath, data)
+                    return data
+            except:
+                # albumart fetcher failed, so we serve a standard image
+                raise cherrypy.HTTPRedirect("/res/img/folder.png", 302)
     api_fetchalbumart.noauth = True
     api_fetchalbumart.binary = True
 
