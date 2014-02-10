@@ -378,7 +378,7 @@ PLAYLIST MANAGEMENT
 function savePlaylistAndHideDialog(){
     "use strict";
     var name = $('#playlisttitle').val();
-    var pub = $('#playlistpublic').attr('checked')?true:false;
+    var pub = $('#playlistpublic').prop('checked')?true:false;
     if(name.trim() !== ''){
         var pl = playlistManager.newPlaylistFromEditing();
         savePlaylist(pl.id,name,pub);
