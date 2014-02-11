@@ -4,13 +4,13 @@ Changelog
 0.31.0 (2014-02-11)
 
  - FEATURE: export all playlists at once in a zip file (pls or m3u)
- - FEATURE: force lower transcoding quality (nice for mobile users)
+ - FEATURE: force lower audio bitrate via transcoding (nice for mobile users)
  - FEATURE: switch between list and cover view of folders
  - FEATURE: Album art fetcher supports google image search (thanks to Lord-Simon!)
- - FEATURE: tag support for python 2 using mutagen (thanks to endlesscoil!)
+ - FEATURE: ready for tag support in python 2 using mutagen (thanks to endlesscoil!)
  - FEATURE: internationalization support for back-end
  - FEATURE: German translation for back-end
- - FEATURE: locate tracksfrom playlist in the file browser
+ - FEATURE: locate tracks from playlist in the file browser
  - FEATURE: showing current track title in title of the browser tab
  - FIXED: fixed zip export of playlist having wrong CRC (thanks to johnhe00!)
  - FIXED: playlists were always saved as public upon first save
