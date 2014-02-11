@@ -1,23 +1,42 @@
 Changelog
 ---------
 
+0.31.0 (2014-02-11)
+
+ - FEATURE: export all playlists at once in a zip file (pls or m3u)
+ - FEATURE: force lower transcoding quality (nice for mobile users)
+ - FEATURE: switch between list and cover view of folders
+ - FEATURE: Album art fetcher supports google image search (thanks to Lord-Simon!)
+ - FEATURE: tag support for python 2 using mutagen (thanks to endlesscoil!)
+ - FEATURE: internationalization support for back-end
+ - FEATURE: German translation for back-end
+ - FEATURE: locate tracksfrom playlist in the file browser
+ - FEATURE: showing current track title in title of the browser tab
+ - FIXED: fixed zip export of playlist having wrong CRC (thanks to johnhe00!)
+ - FIXED: playlists were always saved as public upon first save
+ - FIXED: not showing hidden files anymore in file listings
+ - FIXED: repeat mode now repeats the whole playlist, instead of last track
+ - FIXED: album art fetcher works again with images from amazon
+ - IMPROVEMENT: improved mobile layout (nav bar padding and cover size)
+ - IMPROVEMENT: showing default folder image, when fetching album art fails
+
 0.30.0 (2013-12-15)
 
-- FEATURE: Change album art in media browser
-- FEATURE: Play WMA files via live transcoding (needs ffmpeg)
-- FEATURE: Update notifications for admins in web client
-        config key `update_notifications = [True] | False`
-- FEATURE: `--version` switch for main script displays useful info
-- FIX: !!! SSL config: relative paths are now relative to location of config file
-- FIX: Resolve some unicode issues when playing tracks containing non-ASCII characters
-- FIX: autoplay when adding first track now works for all playlists
-- FIX: CherryMusic shuts down cleanly when parent process dies
-- FIX: `media.basedir` can now handle trailing path separator
-- FIX: Can change and delete playlists again
-- FIX: Can delete users again
-- FIX: Online indicator in admin dialog works again
-- IMPROVEMENT: online tracking of test coverage at https://coveralls.io/r/devsnd/cherrymusic
-- IMPROVEMENT: audioread failure no longer pretends to be a serious error
+ - FEATURE: Change album art in media browser
+ - FEATURE: Play WMA files via live transcoding (needs ffmpeg)
+ - FEATURE: Update notifications for admins in web client
+         config key `update_notifications = [True] | False`
+ - FEATURE: `--version` switch for main script displays useful info
+ - FIX: !!! SSL config: relative paths are now relative to location of config file
+ - FIX: Resolve some unicode issues when playing tracks containing non-ASCII characters
+ - FIX: autoplay when adding first track now works for all playlists
+ - FIX: CherryMusic shuts down cleanly when parent process dies
+ - FIX: `media.basedir` can now handle trailing path separator
+ - FIX: Can change and delete playlists again
+ - FIX: Can delete users again
+ - FIX: Online indicator in admin dialog works again
+ - IMPROVEMENT: online tracking of test coverage at https://coveralls.io/r/devsnd/cherrymusic
+ - IMPROVEMENT: audioread failure no longer pretends to be a serious error
 
 0.29.0 (2013-11-10)
 
