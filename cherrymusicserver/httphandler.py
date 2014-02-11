@@ -392,6 +392,7 @@ class HTTPHandler(object):
 
     def api_fetchalbumart(self, directory):
         cherrypy.session.release_lock()
+        default_folder_image = "/res/img/folder.png"
 
         #try getting a cached album art image
         b64imgpath = albumArtFilePath(directory)
@@ -423,9 +424,12 @@ class HTTPHandler(object):
                     cherrypy.response.headers.update(header)
                     self.albumartcache_save(b64imgpath, data)
                     return data
+                else:
+                    # albumart fetcher failed, so we serve a standard image
+                    raise cherrypy.HTTPRedirect(default_folder_image, 302)
             except:
-                # albumart fetcher failed, so we serve a standard image
-                raise cherrypy.HTTPRedirect("/res/img/folder.png", 302)
+                # albumart fetcher threw exception, so we serve a standard image
+                raise cherrypy.HTTPRedirect(default_folder_image, 302)
     api_fetchalbumart.noauth = True
     api_fetchalbumart.binary = True
 
