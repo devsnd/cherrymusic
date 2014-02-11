@@ -3,12 +3,15 @@ try:
 except ImportError:
     from distutils.core import setup
 import os
+import codecs
 import cherrymusicserver
 from cherrymusicserver import pathprovider
 try:
     import py2exe
 except ImportError:
     pass
+
+here = os.path.abspath(os.path.dirname(__file__))
 
 import gzip
 def gzipManPages():
@@ -48,6 +51,9 @@ def module(foldername):
 def _ispackage(foldername):
     return '__init__.py' in os.listdir(foldername)
 
+def read(*parts):
+    return codecs.open(os.path.join(here, *parts), 'r').read()
+
 def packagedata(pkgfolder, childpath=''):
     ret = []
     for n in os.listdir(os.path.join(pkgfolder, childpath)):
@@ -70,16 +76,18 @@ shareFolder = os.path.join('share',pathprovider.sharedFolderName)
 # files to put in /usr/share
 data_files = listFilesRec('res',shareFolder)
 
+long_description = "\n" + "\n".join([read('quickstart.rst')])
+
 setup_options = {
-    'name': "CherryMusic",
+    'name': 'CherryMusic',
     'version': cherrymusicserver.VERSION,
     'description': cherrymusicserver.DESCRIPTION,
-    'long_description': cherrymusicserver.LONG_DESCRIPTION,
-    'author': "Tom Wallroth & Tilman Boerner",
-    'author_email': "tomwallroth@gmail.com, tilman.boerner@gmx.net",
-    'url': "http://www.fomori.org/cherrymusic/",
+    'long_description': long_description,
+    'author': 'Tom Wallroth & Tilman Boerner',
+    'author_email': 'tomwallroth@gmail.com, tilman.boerner@gmx.net',
+    'url': 'http://www.fomori.org/cherrymusic/',
     'license': 'GPLv3',
-    'install_requires': ["CherryPy >= 3.2.2"],
+    'install_requires': ['CherryPy >= 3.2.2'],
     'packages': module('cherrymusicserver')+module('audioread')+module('audiotranscode')+module('cmbootstrap')+module('backport'),
     'package_data': {
         'cherrymusicserver.database.defs': packagedata('cherrymusicserver/database/defs'),
@@ -87,25 +95,25 @@ setup_options = {
     #startup script
     'scripts': ['cherrymusic','cherrymusicd','cherrymusic-tray'],
     'classifiers': [
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 2.6",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.2",
-        "Programming Language :: Python :: 3.3",
-        "Development Status :: 4 - Beta",
-        "Environment :: Console",
-        "Environment :: Web Environment",
-        "Framework :: CherryPy",
-        "Intended Audience :: End Users/Desktop",
-        "Intended Audience :: Developers",
-        "Intended Audience :: System Administrators",
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-        "Operating System :: OS Independent",
-        "Natural Language :: English",
-        "Topic :: Internet :: WWW/HTTP",
-        "Topic :: Multimedia",
-        "Topic :: Multimedia :: Sound/Audio :: Players",
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2.6',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.2',
+        'Programming Language :: Python :: 3.3',
+        'Development Status :: 4 - Beta',
+        'Environment :: Console',
+        'Environment :: Web Environment',
+        'Framework :: CherryPy',
+        'Intended Audience :: End Users/Desktop',
+        'Intended Audience :: Developers',
+        'Intended Audience :: System Administrators',
+        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+        'Operating System :: OS Independent',
+        'Natural Language :: English',
+        'Topic :: Internet :: WWW/HTTP',
+        'Topic :: Multimedia',
+        'Topic :: Multimedia :: Sound/Audio :: Players',
         ],
     'data_files': data_files
 }
@@ -114,8 +122,8 @@ if os.name == 'nt':
     #py2exe specific
     setup_options['console'] = [
         {
-            "icon_resources": [(1, "res/favicon.ico")],
-            "script":'cherrymusic'
+            'icon_resources': [(1, 'res/favicon.ico')],
+            'script':'cherrymusic'
         }
     ]
 
