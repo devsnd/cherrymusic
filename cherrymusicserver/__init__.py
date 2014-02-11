@@ -67,6 +67,12 @@ if sys.version_info >= (3, 3):
 
 import cherrypy
 
+def version():
+    return """CherryMusic Server {cm_version}
+
+a standalone music server
+Copyright (c) 2012 - 2014 Tom Wallroth & Tilman Boerner""".format(cm_version=VERSION)
+
 def info():
     import locale
     import platform
@@ -173,8 +179,8 @@ class CherryMusic:
                 sys.exit(0)
             else:
                 sys.exit(1)
-        CherryMusic.create_pid_file()
         self.setup_databases(update, dropfiledb, setup)
+        CherryMusic.create_pid_file()
         self.start_server(httphandler.HTTPHandler(config))
         CherryMusic.delete_pid_file()
 

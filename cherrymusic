@@ -137,7 +137,8 @@ except ImportError:
 parser = argparse.ArgumentParser(description='''CherryMusic Server
 Version ''' + cherrymusicserver.VERSION)
 
-parser.add_argument('--version', dest='info', action='store_true', help='Print version information and exit.')
+parser.add_argument('--version', dest='version', action='store_true', help='Print version information and exit.')
+parser.add_argument('--info', dest='info', action='store_true', help='Print extended program information and exit.')
 if 'OptionParser' in dir(argparse):
     parser.add_argument('--update', dest='update', nargs=0, default=None, help='Update the media database (get Python >= 3.2 or the argparse module to choose paths).')
 else:
@@ -157,6 +158,11 @@ if __name__ == "__main__":
 
     if args.info:
         print(cherrymusicserver.info())
+        import sys
+        sys.exit(0)
+
+    if args.version:
+        print(cherrymusicserver.version())
         import sys
         sys.exit(0)
 
