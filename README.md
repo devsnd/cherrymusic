@@ -57,7 +57,7 @@ See our [wiki](https://github.com/devsnd/cherrymusic/wiki) for user and develope
 Troubleshooting
 ---------------
 
-Please see the [Troubleshooting wiki page](https://github.com/devsnd/cherrymusic/wiki/Setup-Guide#troubleshooting).
+Please see the [Troubleshooting wiki page](https://github.com/devsnd/cherrymusic/wiki/Setup-Guide#wiki-troubleshooting).
 
 
 Contribute
