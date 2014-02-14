@@ -1,4 +1,4 @@
-include COPYING README.md quickstart.rst CHANGES
+include COPYING README.md CHANGES
 recursive-include res *
 recursive-include doc *
 recursive-include cherrymusicserver/database/defs *
