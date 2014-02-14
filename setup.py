@@ -76,7 +76,7 @@ shareFolder = os.path.join('share',pathprovider.sharedFolderName)
 # files to put in /usr/share
 data_files = listFilesRec('res',shareFolder)
 
-long_description = "\n" + "\n".join([read('quickstart.rst')])
+long_description = "\n" + "\n".join([read('README.md')])
 
 setup_options = {
     'name': 'CherryMusic',
