@@ -504,6 +504,7 @@ class HTTPHandler(object):
 
     def api_getmotd(self):
         if cherrypy.session['admin'] and cherry.config['general.update_notification']:
+            cherrypy.session.release_lock()
             new_versions = self.model.check_for_updates()
             if new_versions:
                 newest_version = new_versions[0]['version']
