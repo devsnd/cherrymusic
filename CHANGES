@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+0.31.1 (2014-02-15)
+
+ - FIXED: client not working when update check fails
+ - FIXED: album art shows default image when nothing was found in the web
+ - FEATURE: enabled meta-info/tag display on client
+
 0.31.0 (2014-02-11)
 
  - FEATURE: export all playlists at once in a zip file (pls or m3u)
