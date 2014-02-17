@@ -75,7 +75,7 @@ class AlbumArtFetcher:
         },
     }
 
-    def __init__(self, method='amazon', timeout=10):
+    def __init__(self, method='google', timeout=10):
         """define the urls of the services and a regex to fetch images
         """
         self.MAX_IMAGE_SIZE_BYTES = 100*1024
@@ -85,7 +85,7 @@ class AlbumArtFetcher:
         if not method in self.methods:
             log.e(_('''unknown album art fetch method: '%(method)s', using default.'''),
                   {'method': method})
-            method = 'amazon'
+            method = 'google'
         self.method = method
         self.timeout = timeout
         self.imageMagickAvailable = self.programAvailable('convert')
