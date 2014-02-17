@@ -1,6 +1,17 @@
 Changelog
 ---------
 
+0.31.2 (2014-02-16)
+
+- IMPROVEMENT: bump version number above 0.31.0
+- IMPROVEMENT: update changelog
+
+0.31.1 (2014-02-15)
+
+- FEATURE: display track metainfo in web client
+- FIXED: recover gracefully when update notifications can't be fetched
+- FIXED: display default image when no album art found
+
 0.31.0 (2014-02-11)
 
  - FEATURE: export all playlists at once in a zip file (pls or m3u)

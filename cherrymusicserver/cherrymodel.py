@@ -184,13 +184,16 @@ class CherryModel:
         return results
 
     def check_for_updates(self):
-        url = 'http://fomori.org/cherrymusic/update_check.php?version='
-        url += cherry.__version__
-        urlhandler = urllib.request.urlopen(url)
-        jsondata = codecs.decode(urlhandler.read(), 'UTF-8')
-        versioninfo = json.loads(jsondata)
-        return versioninfo
-
+        try:
+            url = 'http://fomori.org/cherrymusic/update_check.php?version='
+            url += cherry.__version__
+            urlhandler = urllib.request.urlopen(url, timeout=5)
+            jsondata = codecs.decode(urlhandler.read(), 'UTF-8')
+            versioninfo = json.loads(jsondata)
+            return versioninfo
+        except Exception as e:
+            log.e(_('Error fetching version info: %s') % str(e))
+            return []
     def motd(self):
         artist = ['Hendrix',
                   'Miles Davis',
