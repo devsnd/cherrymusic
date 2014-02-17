@@ -1008,9 +1008,10 @@ return track;},addSong:function(path,title,plid){"use strict";var self=this;var 
 var playlist;if(plid){playlist=this.getPlaylistById(plid);}
 if(typeof playlist=='undefined'){playlist=this.getEditingPlaylist();}
 playlist.addTrack(track);if(!jPlayerIsPlaying()&&playlist.jplayerplaylist.playlist.length==1){if(userOptions.misc.autoplay_on_add){playlist.makeThisPlayingPlaylist();playlist.jplayerplaylist.play(0);}else{playlist.jplayerplaylist.select(0);}}
-var success=function(data){var metainfo=$.parseJSON(data)
-if(metainfo.length){track.duration=metainfo.length;}
-self.getEditingPlaylist().jplayerplaylist._refresh(true);}
+var success=function(data){var metainfo=$.parseJSON(data);var any_info_received=false;if(metainfo.length){track.duration=metainfo.length;any_info_received=true;}
+if(metainfo.title.length>0&&metainfo.artist.length>0){track.title=metainfo.artist+' - '+metainfo.title;if(metainfo.track.length>0){track.title=metainfo.track+' '+track.title;if(metainfo.track.length<2){track.title='0'+track.title;}}
+any_info_received=true;}
+if(any_info_received){self.getEditingPlaylist().jplayerplaylist._refresh(true);}}
 api('getsonginfo',{'path':decodeURIComponent(path)},success,errorFunc('error getting song metainfo'),true);},clearPlaylist:function(){"use strict";this.getEditingPlaylist().remove();if(this.getEditingPlaylist()==this.getPlayingPlaylist()){$(this.cssSelectorjPlayer).jPlayer("clearMedia");}
 return false;},displayCurrentSong:function(){var pl=this.getPlayingPlaylist();if(typeof pl==='undefined'){return;}
 var jPlaylist=pl.jplayerplaylist;if(jPlaylist.playlist&&typeof jPlaylist.current!=='undefined'&&jPlaylist.playlist.length>0){$('.cm-songtitle').text(jPlaylist.playlist[jPlaylist.current].title);$('title').text(jPlaylist.playlist[jPlaylist.current].title+' | CherryMusic');}else{$('.cm-songtitle').html('');$('title').text('CherryMusic');}},rememberPlaylist:function(){"use strict";var self=this;var canonicalPlaylists=[]

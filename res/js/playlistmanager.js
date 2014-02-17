@@ -685,11 +685,27 @@ PlaylistManager.prototype = {
             }
         }
         var success = function(data){
-            var metainfo = $.parseJSON(data)
+            var metainfo = $.parseJSON(data);
+            var any_info_received = false;
             if (metainfo.length) {
                 track.duration = metainfo.length;
+                any_info_received = true;
             }
-            self.getEditingPlaylist().jplayerplaylist._refresh(true);
+            // only show id tags if at least artist and title are known
+            if (metainfo.title.length > 0 && metainfo.artist.length > 0) {
+                track.title = metainfo.artist+' - '+metainfo.title;
+                if(metainfo.track.length > 0){
+                    track.title = metainfo.track + ' ' + track.title;
+                    if(metainfo.track.length < 2){
+                        track.title = '0' + track.title;
+                    }
+                }
+                any_info_received = true;
+            }
+            if(any_info_received){
+                //only rerender playlist if it would visually change
+                self.getEditingPlaylist().jplayerplaylist._refresh(true);
+            }
         }
         api('getsonginfo', {'path': decodeURIComponent(path)}, success, errorFunc('error getting song metainfo'), true);
     },
