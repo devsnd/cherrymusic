@@ -134,7 +134,7 @@ class AlbumArtFetcher:
         # use unidecode if it's available
         searchterm = unidecode(searchterm).lower()
         # make sure the searchterms are only letters and spaces
-        searchterm = re.sub('[^a-z\s]', '', searchterm)
+        searchterm = re.sub('[^a-z\s]', ' ', searchterm)
         # the keywords must always be appenable to the method-url
         url = method['url']+urllib.parse.quote(searchterm)
         #download the webpage and decode the data to utf-8
