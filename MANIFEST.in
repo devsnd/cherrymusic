@@ -1,4 +1,5 @@
 include COPYING README.md CHANGES
 recursive-include res *
+recursive-include doc *
 recursive-include cherrymusicserver/database/defs *
 global-exclude *.pyc *.pyo
