@@ -544,6 +544,8 @@ class HTTPHandler(object):
                 may_download = user_options.getOptionValue('media.may_download')
                 user['last_time_online'] = t
                 user['may_download'] = may_download
+            sortfunc = lambda user: user['last_time_online']
+            userlist = sorted(userlist, key=sortfunc, reverse=True)
             return json.dumps({'time': int(time.time()),
                                'userlist': userlist})
         else:

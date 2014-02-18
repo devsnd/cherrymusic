@@ -75,7 +75,7 @@ class AlbumArtFetcher:
         },
     }
 
-    def __init__(self, method='amazon', timeout=10):
+    def __init__(self, method='google', timeout=10):
         """define the urls of the services and a regex to fetch images
         """
         self.MAX_IMAGE_SIZE_BYTES = 100*1024
@@ -85,7 +85,7 @@ class AlbumArtFetcher:
         if not method in self.methods:
             log.e(_('''unknown album art fetch method: '%(method)s', using default.'''),
                   {'method': method})
-            method = 'amazon'
+            method = 'google'
         self.method = method
         self.timeout = timeout
         self.imageMagickAvailable = self.programAvailable('convert')
@@ -134,7 +134,7 @@ class AlbumArtFetcher:
         # use unidecode if it's available
         searchterm = unidecode(searchterm).lower()
         # make sure the searchterms are only letters and spaces
-        searchterm = re.sub('[^a-z\s]', '', searchterm)
+        searchterm = re.sub('[^a-z\s]', ' ', searchterm)
         # the keywords must always be appenable to the method-url
         url = method['url']+urllib.parse.quote(searchterm)
         #download the webpage and decode the data to utf-8
