@@ -56,8 +56,8 @@ class AlbumArtFetcher:
     methods = {
         'amazon': {
             'url': "http://www.amazon.com/s/ref=sr_nr_i_0?rh=k:",
-            'regexes': ['<img  src="([^"]*)" class="productImage',
-                        '<img.+?src="([^"]*)" class="productImage'],
+            'regexes': ['<img  src="([^"]*)"\s+class="productImage',
+                        '<img.+?src="([^"]*)"\s+class="productImage'],
         },
         'bestbuy.com': {
             'url': 'http://www.bestbuy.com/site/searchpage.jsp?_dyncharset=ISO-8859-1&_dynSessConf=-1844839118144877442&id=pcat17071&type=page&ks=960&sc=Global&cp=1&sp=&qp=category_facet%3DMovies+%26+Music~abcat0600000^category_facet%3DSAAS~Music~cat02001&list=y&usc=All+Categories&nrp=15&fs=saas&iht=n&seeAll=&st=',
@@ -71,11 +71,11 @@ class AlbumArtFetcher:
         # },
         'google': {
             'url': "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&imgsz=medium&rsz=8&q=",
-            'regexes': ['"url":"([^"]*)"']
+            'regexes': ['"url":"([^"]*)"', '"unescapedUrl":"([^"]*)"']
         },
     }
 
-    def __init__(self, method='amazon', timeout=10):
+    def __init__(self, method='google', timeout=10):
         """define the urls of the services and a regex to fetch images
         """
         self.MAX_IMAGE_SIZE_BYTES = 100*1024
@@ -85,7 +85,7 @@ class AlbumArtFetcher:
         if not method in self.methods:
             log.e(_('''unknown album art fetch method: '%(method)s', using default.'''),
                   {'method': method})
-            method = 'amazon'
+            method = 'google'
         self.method = method
         self.timeout = timeout
         self.imageMagickAvailable = self.programAvailable('convert')
@@ -134,7 +134,7 @@ class AlbumArtFetcher:
         # use unidecode if it's available
         searchterm = unidecode(searchterm).lower()
         # make sure the searchterms are only letters and spaces
-        searchterm = re.sub('[^a-z\s]', '', searchterm)
+        searchterm = re.sub('[^a-z\s]', ' ', searchterm)
         # the keywords must always be appenable to the method-url
         url = method['url']+urllib.parse.quote(searchterm)
         #download the webpage and decode the data to utf-8

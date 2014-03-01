@@ -152,6 +152,16 @@ ManagedPlaylist.prototype = {
     },
     addTrack : function(track) {
         this.jplayerplaylist.add(track,false);
+        this.scrollToTrack(this.jplayerplaylist.playlist.length-1);
+    },
+    scrollToTrack: function(number){
+        var htmlid = '#'+playlistManager.plid2htmlid(this.id);
+        var yoffset = $($(htmlid + ' > ul > li')[number]).position().top;
+        var current_scroll = $('.playlist-container-parent').scrollTop();
+        $('.playlist-container-parent').scrollTop(current_scroll + yoffset);
+    },
+    scrollToCurrentTrack: function(){
+        this.scrollToTrack(this.jplayerplaylist.current);
     }
 }
 
@@ -318,7 +328,11 @@ PlaylistManager.prototype = {
             this.getPlayingPlaylist().jplayerplaylist.playRandomTrack();
             return false;
         } else {
-            this.getPlayingPlaylist().jplayerplaylist.next();
+            var currentPL = this.getPlayingPlaylist();
+            currentPL.jplayerplaylist.next();
+            if(currentPL.id == this.getEditingPlaylist().id){
+                currentPL.scrollToCurrentTrack();
+            }
             return false;
         }
     },
@@ -723,13 +737,17 @@ PlaylistManager.prototype = {
             return;
         }
         var jPlaylist = pl.jplayerplaylist;
-        if(jPlaylist.playlist && typeof jPlaylist.current !== 'undefined' && jPlaylist.playlist.length>0){
-            $('.cm-songtitle').text(jPlaylist.playlist[jPlaylist.current].title);
-            $('title').text(jPlaylist.playlist[jPlaylist.current].title+' | CherryMusic');
-        } else {
-            $('.cm-songtitle').html('');
-            $('title').text('CherryMusic');
+        var songtitle = '';
+        var tabtitle = 'CherryMusic';
+        if(typeof this.jPlayerInstance !== 'undefined'){
+            var currentTitle = this.jPlayerInstance.data().jPlayer.status.media.title;
+            if(typeof currentTitle !== 'undefined'){
+                songtitle = currentTitle;
+                tabtitle = currentTitle+' | CherryMusic';
+            }
         }
+        $('.cm-songtitle').html(songtitle);
+        $('title').text(tabtitle);
     },
     rememberPlaylist : function(){
         "use strict";

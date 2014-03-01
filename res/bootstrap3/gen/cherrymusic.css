@@ -5125,12 +5125,15 @@ body:after {
   padding: 0 10px;
 }
 .playlist-container-list {
-  padding: 0px;
+  /* leave room for one playlist item at the end, so that the
+        automatic scrolling does not need to be triggered twice */
+  padding: 0 0 20px 0;
 }
 .playlist-container-list > li {
   list-style-type: none;
   margin: 5px 0;
   padding: 0 5px;
+  height: 20px;
 }
 .playlist-container .jp-playlist-item {
   display: block;

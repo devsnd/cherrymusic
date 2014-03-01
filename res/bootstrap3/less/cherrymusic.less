@@ -3,6 +3,8 @@ body{
     margin: @navbar-height 0 @mediaplayer-height 0;
 }
 
+@playlist-item-height: 20px;
+
 @spinning-loader:   url("../../img/cherrymusic_loader.gif");
 @progress-bar-ani:  url("../../img/progress-bars.gif");
 @favicon:           url("../../img/favicon32glow.png");
@@ -149,12 +151,15 @@ body:after{
     }
 
     &-list{
-        padding: 0px;
+        /* leave room for one playlist item at the end, so that the
+        automatic scrolling does not need to be triggered twice */
+        padding: 0 0 @playlist-item-height 0;
 
         & > li{
             list-style-type: none;
             margin: 5px 0;
             padding: 0 5px;
+            height: @playlist-item-height;
         }
     }
     

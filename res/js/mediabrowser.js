@@ -48,6 +48,8 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
         "use strict";
         $(self.cssSelector+' .cm-media-list-category').animate({left: '-100%'}, {duration: 1000, queue: false});
         $(self.cssSelector).addClass('cm-media-list-busy');
+        var last_scroll_pos = $(self.cssSelector).parent().parent().scrollTop();
+        $(self.cssSelector).parent().parent().scrollTop(0);
         var next_mb_title = '';
         var directory = $(this).attr("dir");
         var compactlisting = $(this).is("[filter]");
@@ -64,7 +66,7 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
         var success = function(json){
             $(self.cssSelector).removeClass('cm-media-list-busy');
             var last_stack_top = self.listing_data_stack[self.listing_data_stack.length-1];
-            last_stack_top.scroll = $(self.cssSelector).parent().parent().scrollTop();
+            last_stack_top.scroll = last_scroll_pos;
             self.listing_data_stack.push({'title': next_mb_title, 'data': json, 'scroll': 0, 'listview': last_stack_top.listview});
             self.render();
         };
