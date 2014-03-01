@@ -71,7 +71,7 @@ class AlbumArtFetcher:
         # },
         'google': {
             'url': "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&imgsz=medium&rsz=8&q=",
-            'regexes': ['"url":"([^"]*)"']
+            'regexes': ['"url":"([^"]*)"', '"unescapedUrl":"([^"]*)"']
         },
     }
 
