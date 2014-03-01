@@ -27,10 +27,11 @@ import codecs
 import struct
 import os
 
-__version__ = '0.1.0'
+__version__ = '0.3.0'
 
 
 class TinyTag(object):
+    """Base class for all tag types"""
     def __init__(self):
         self.track = None
         self.track_total = None
@@ -41,16 +42,20 @@ class TinyTag(object):
         self.length = 0
 
     def has_all_tags(self):
+        """check if all tags are already defined. Useful for ID3 tags
+        since multiple kinds of tags can be in one audio file
+        """
         return all((self.track, self.track_total, self.title,
                     self.artist, self.album, self.year))
 
     @classmethod
     def get(cls, filename, tags=True, length=True):
+        """choose which tag reader should be used by file extension"""
         if not os.path.getsize(filename) > 0:
             return TinyTag()
         if filename.lower().endswith('.mp3'):
             with open(filename, 'rb') as af:
-                return ID3V2(af, tags=tags, length=length)
+                return ID3(af, tags=tags, length=length)
         elif filename.lower().endswith(('.oga', '.ogg')):
             with open(filename, 'rb') as af:
                 return Ogg(af, tags=tags, length=length)
@@ -67,6 +72,9 @@ class TinyTag(object):
         return str(self.__dict__)
 
     def load(self, filehandler, tags, length):
+        """default behavior of all tags. This method is called in the
+        constructors of all tag readers
+        """
         if tags:
             self._parse_tag(filehandler)
             filehandler.seek(0)
@@ -74,6 +82,8 @@ class TinyTag(object):
             self._determine_length(filehandler)
 
     def _set_field(self, fieldname, bytestring, transfunc=None):
+        """convienience function to set fields of the tinytag by name.
+        the payload (bytestring) can be changed using the transfunc"""
         if getattr(self, fieldname):
             return
         if transfunc:
@@ -88,13 +98,14 @@ class TinyTag(object):
         raise NotImplementedError()
 
     def update(self, other):
+        """update the values of this tag with the values from another tag"""
         for key in ['track', 'track_total', 'title', 'artist',
                     'album', 'year', 'length']:
             if not getattr(self, key) and getattr(other, key):
                 setattr(self, key, getattr(other, key))
 
 
-class ID3V2(TinyTag):
+class ID3(TinyTag):
     FID_TO_FIELD = {  # Mapping from Frame ID to a field of the TinyTag
         'TRCK': 'track',  'TRK': 'track',
         'TYER': 'year',   'TYE': 'year',
@@ -108,8 +119,9 @@ class ID3V2(TinyTag):
         self.load(filehandler, tags=tags, length=length)
 
     def _determine_length(self, fh):
-        estimation_frames = 3000
-        bitrate_mean = 0
+        max_estimation_sec = 30
+        max_estimation_frames = (max_estimation_sec*44100) // 1152
+        frame_size_mean = 0
         # set sample rate from first found frame later, default to 44khz
         file_sample_rate = 44100
         # see this page for the magic values used in mp3:
@@ -118,7 +130,7 @@ class ID3V2(TinyTag):
                     224, 256, 320]
         samplerates = [44100, 48000, 32000]
         header_bytes = 4
-        frames = 0
+        frames = 0  # count frames for determining mp3 length
         while True:
             # reading through garbage until 12 '1' bits are found
             b = fh.read(1)
@@ -135,16 +147,21 @@ class ID3V2(TinyTag):
                         #invalid frame! roll back to last position
                         fh.seek(-2, os.SEEK_CUR)
                         continue
+                    frames += 1  # it's most probably an mp3 frame
                     bitrate = bitrates[br_id]
                     samplerate = samplerates[sr_id]
-                    frames += 1  # it's most probably an mp3 frame
-                    bitrate_mean += bitrate
                     if frames == 1:
                         file_sample_rate = samplerate
-                    if frames == estimation_frames:
-                        print('mean bitrate: '+str(bitrate_mean/estimation_frames))
                     padding = 1 if bitrate_freq & 0x02 > 0 else 0
                     frame_length = (144000 * bitrate) // samplerate + padding
+                    frame_size_mean += frame_length
+                    if frames == max_estimation_frames:
+                        # try to estimate length
+                        fh.seek(-1, 2) # jump to last byte
+                        estimated_frame_count = fh.tell() / (frame_size_mean / frames)
+                        samples = estimated_frame_count * 1152
+                        self.length = samples/float(file_sample_rate)
+                        return
                     if frame_length > 1:
                         # jump over current frame body
                         fh.seek(frame_length - header_bytes, os.SEEK_CUR)
@@ -153,11 +170,12 @@ class ID3V2(TinyTag):
 
     def _parse_tag(self, fh):
         self._parse_id3v2(fh)
-        #if not self.has_all_tags():  # try to get more info using id3v1
-        #    fh.seek(-128, 2)
-        #    self._parse_id3v1(fh)
+        if not self.has_all_tags():  # try to get more info using id3v1
+            fh.seek(-128, 2)  # id3v1 occuppies the last 128 bytes
+            self._parse_id3v1(fh)
 
     def _parse_id3v2(self, fh):
+        # for info on the specs, see: http://id3.org/Developer%20Information
         header = struct.unpack('3sBBB4B', fh.read(10))
         tag = codecs.decode(header[0], 'ISO-8859-1')
         # check if there is an ID3v2 tag at the beginning of the file
@@ -174,7 +192,8 @@ class ID3V2(TinyTag):
                 extd_size = self._calc_size_7bit_bytes(size_bytes)
                 fh.read(extd_size - 6)
             while parsed_size < size:
-                frame_size = self._parse_frame(fh, is_v22=major == 2)
+                is_id3_v22 = major == 2
+                frame_size = self._parse_frame(fh, is_v22=is_id3_v22)
                 if frame_size == 0:
                     break
                 parsed_size += frame_size
@@ -191,7 +210,8 @@ class ID3V2(TinyTag):
                 self._set_field('track', str(ord(comment[-1:])))
 
     def _parse_frame(self, fh, is_v22=False):
-        encoding = 'ISO-8859-1'
+        encoding = 'ISO-8859-1'  # default encoding used in most mp3 tags
+        # ID3v2.2 especially ugly. see: http://id3.org/id3v2-00
         frame_header_size = 6 if is_v22 else 10
         frame_size_bytes = 3 if is_v22 else 4
         binformat = '3s3B' if is_v22 else '4s4B2B'
@@ -204,7 +224,7 @@ class ID3V2(TinyTag):
         if frame_size > 0:
             # flags = frame[1+frame_size_bytes:] # dont care about flags.
             content = fh.read(frame_size)
-            fieldname = ID3V2.FID_TO_FIELD.get(frame_id)
+            fieldname = ID3.FID_TO_FIELD.get(frame_id)
             if fieldname:
                 if fieldname == 'track':
                     self._parse_track(content)
@@ -218,10 +238,12 @@ class ID3V2(TinyTag):
         if b[:1] == b'\x00':
             return self._unpad(codecs.decode(b[1:], 'ISO-8859-1'))
         if b[0:3] == b'\x01\xff\xfe':
-            return self._unpad(codecs.decode(b[3:], 'UTF-16'))
+            bytestr = b[3:-1] if len(b) % 2 == 0 else b[3:]
+            return codecs.decode(bytestr, 'UTF-16')
         return self._unpad(codecs.decode(b, 'ISO-8859-1'))
 
     def _unpad(self, s):
+        # strings in mp3 _can_ be terminated with a zero byte at the end
         return s[:s.index('\x00')] if '\x00' in s else s
 
     def _parse_track(self, b):
@@ -232,14 +254,16 @@ class ID3V2(TinyTag):
         self._set_field('track', track)
         self._set_field('track_total', track_total)
 
-    def _calc_size_7bit_bytes(self, b):
-        if len(b) == 3:  # pad in first byte for id3 v2.2
-            b = (0, b[0], b[1], b[2])
-        return ((b[0] & 127) << 21) | ((b[1] & 127) << 14) | \
-               ((b[2] & 127) << 7) | (b[3] & 127)
+    def _calc_size_7bit_bytes(self, bytestr):
+        ret = 0             # length of mp3 header fields is described
+        for b in bytestr:   # by some "7-bit-bytes". The most significant
+            ret <<= 7       # bit is always set to zero, so it has to be
+            ret += b & 127  # removed.
+        return ret          #
 
 
 class StringWalker(object):
+    """file obj like string. probably there are buildins doing this already"""
     def __init__(self, string):
         self.string = string
 
@@ -272,6 +296,7 @@ class Ogg(TinyTag):
         self.length = self._max_samplenum / float(sample_rate)
 
     def _parse_vorbis_comment(self, fh):
+        # for the spec, see: http://xiph.org/vorbis/doc/v-comment.html
         mapping = {'album': 'album', 'title': 'title', 'artist': 'artist',
                    'date': 'year', 'tracknumber': 'track'}
         vendor_length = struct.unpack('I', fh.read(4))[0]
@@ -288,8 +313,9 @@ class Ogg(TinyTag):
                     self._set_field(fieldname, value)
 
     def _parse_pages(self, fh):
+        # for the spec, see: https://wiki.xiph.org/Ogg
         previous_page = b''  # contains data from previous (continuing) pages
-        header_data = fh.read(27)
+        header_data = fh.read(27)  # read ogg page header
         while len(header_data) != 0:
             header = struct.unpack('<4sBBqIIiB', header_data)
             oggs, version, flags, pos, serial, pageseq, crc, segments = header
@@ -320,6 +346,8 @@ class Wave(TinyTag):
         self.load(filename, tags=tags, length=length)
 
     def _determine_length(self, fh):
+        # see: https://ccrma.stanford.edu/courses/422/projects/WaveFormat/
+        # and: https://en.wikipedia.org/wiki/WAV
         riff, size, fformat = struct.unpack('4sI4s', fh.read(12))
         if riff != b'RIFF' or fformat != b'WAVE':
             print('not a wave file!')
@@ -334,7 +362,7 @@ class Wave(TinyTag):
                 self.length = subchunksize/channels/samplerate/(bitdepth/8)
                 fh.seek(subchunksize, 1)
             elif subchunkid == b'id3 ' or subchunkid == b'ID3 ':
-                id3 = ID3V2(fh, tags=False, length=False)
+                id3 = ID3(fh, tags=False, length=False)
                 id3._parse_id3v2(fh)
                 self.update(id3)
             else:  # some other chunk, just skip the data
@@ -362,6 +390,7 @@ class Flac(TinyTag):
             self._determine_length(filehandler)
 
     def _determine_length(self, fh):
+        # for spec, see https://xiph.org/flac/ogg_mapping.html
         header_data = fh.read(4)
         while len(header_data):
             meta_header = struct.unpack('B3B', header_data)
@@ -391,6 +420,7 @@ class Flac(TinyTag):
         return result
 
     def _parse_tag(self, fh):
+        # for spec, see https://xiph.org/flac/ogg_mapping.html
         header_data = fh.read(4)
         while len(header_data):
             meta_header = struct.unpack('B3B', header_data)
