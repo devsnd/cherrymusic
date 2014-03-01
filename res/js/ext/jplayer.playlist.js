@@ -325,7 +325,13 @@
             $(self.cssSelector.playlist + " a." + this.options.playlistOptions.parentFolderItemClass).off('click').on("click", function(event) {
                 var index = $(this).parent().parent().parent().parent().parent().index();
                 var folder = decodeURIComponent(self.playlist[index].url);
-                folder = folder.slice(0, folder.lastIndexOf('/'));
+                lastFolderSeparator = folder.lastIndexOf('/');
+                if(lastFolderSeparator == -1){
+                    // if there is no "/" in the path it is the basedir
+                    folder = '';
+                } else {
+                    folder = folder.slice(0, lastFolderSeparator);
+                }
                 loadBrowser(folder, folder);
             });
 		},
