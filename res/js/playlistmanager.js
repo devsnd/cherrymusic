@@ -42,7 +42,15 @@ ManagedPlaylist.prototype = {
                     'loopOnPrevious': true
                 },
                 hooks: {
-                    "setMedia": playlistManager.transcodeURL
+                    "setMedia": function(playlistitem){
+                        var playlistitem = playlistitem;
+                        if(playlistitem.is_lazy){
+                            playlistitem = playlistitem.lazy_func(self, playlistitem);
+                        } else {
+                            playlistitem = playlistManager.transcodeURL(playlistitem);
+                        }
+                        return playlistitem;
+                    }
                 },
                 loop: self.playlistManager.loop
             }
@@ -162,6 +170,40 @@ ManagedPlaylist.prototype = {
     },
     scrollToCurrentTrack: function(){
         this.scrollToTrack(this.jplayerplaylist.current);
+    },
+    lazyRandomTrack: function(){
+        var self = this;
+        // create the lazy function, that will be called once the track
+        // should be played.
+        lazy_func = function(playlist, playlistitem){
+            var pl = playlist.jplayerplaylist;
+            // remove the random func from the playlist
+            var lazy_index = playlist.jplayerplaylist.playlist.length - 1;
+            playlistitem.title = '&#9733; RETRIEVING RANDOM TRACK... &#9733;';
+            playlist.jplayerplaylist._refresh(true);
+            success = function(data){
+                // turn lazy track into a real track
+                playlistitem.url = data.path;
+                playlistitem.title = data.label;
+                playlistitem.is_lazy = false;
+                playlistitem = playlistManager.transcodeURL(playlistitem);
+                playlist.jplayerplaylist._refresh(true);
+                playlist.jplayerplaylist.play(lazy_index);
+                // add new random track at the end
+                self.addRandomTrackGenerator();
+            }
+            api('getrandomtrack', success);
+        }
+        // return the lazy track, which will turn into a real one,
+        // once it is being inserted into the jPlayer (setMedia hook)
+        return {
+            title: '&#9733; RANDOM TRACK GENERATOR &#9733;',
+            is_lazy: true,
+            lazy_func: lazy_func,
+        }
+    },
+    addRandomTrackGenerator: function(){
+        this.addTrack(this.lazyRandomTrack());
     }
 }
 

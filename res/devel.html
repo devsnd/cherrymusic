@@ -603,7 +603,7 @@
                 </div>
                 <div id="playlistCommands">
                     <div class="playlist-command-buttons row">
-                        <a show-cond="queue" class="pull-left btn btn-xs btn-default" onclick="randomPlaylist(); return false;" >random!</a>
+                        <a show-cond="queue" class="pull-left btn btn-xs btn-default" onclick="playlistManager.getEditingPlaylist().addRandomTrackGenerator(); return false;" >random!</a>
                         <a show-cond="queue" id="save-playlist-from-queue" href="#saveplaylistmodal"  data-toggle="modal" class="pull-left new-playlist-from-queue btn btn-xs btn-default">save as playlist</a>
                         <a show-cond="queue" class="pull-right clear-playlist btn btn-xs btn-default" onclick="playlistManager.clearQueue(); return false;">clear</a>
                         <a show-cond="queue" class="pull-right remove-played-tracks btn btn-xs btn-default" onclick="playlistManager.removePlayedFromPlaylist(); return false;" >remove played</a>

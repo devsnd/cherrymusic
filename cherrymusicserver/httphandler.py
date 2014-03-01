@@ -87,6 +87,7 @@ class HTTPHandler(object):
             'saveplaylist': self.api_saveplaylist,
             'loadplaylist': self.api_loadplaylist,
             'generaterandomplaylist': self.api_generaterandomplaylist,
+            'getrandomtrack': self.api_getrandomtrack,
             'deleteplaylist': self.api_deleteplaylist,
             'getmotd': self.api_getmotd,
             'restoreplaylist': self.api_restoreplaylist,
@@ -496,6 +497,9 @@ class HTTPHandler(object):
 
     def api_generaterandomplaylist(self):
         return [entry.to_dict() for entry in self.model.randomMusicEntries(50)]
+    
+    def api_getrandomtrack(self):
+        return self.model.randomMusicEntries(20)[0].to_dict()
 
     def api_changeplaylist(self, plid, attribute, value):
         if attribute == 'public':
