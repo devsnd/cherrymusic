@@ -737,9 +737,10 @@ PlaylistManager.prototype = {
             return;
         }
         var jPlaylist = pl.jplayerplaylist;
-        if(jPlaylist.playlist && typeof jPlaylist.current !== 'undefined' && jPlaylist.playlist.length>0){
-            $('.cm-songtitle').text(jPlaylist.playlist[jPlaylist.current].title);
-            $('title').text(jPlaylist.playlist[jPlaylist.current].title+' | CherryMusic');
+        if(typeof this.jPlayerInstance !== 'undefined'){
+            var currentTitle = this.jPlayerInstance.data().jPlayer.status.media.title;
+            $('.cm-songtitle').text(currentTitle);
+            $('title').text(currentTitle+' | CherryMusic');
         } else {
             $('.cm-songtitle').html('');
             $('title').text('CherryMusic');
