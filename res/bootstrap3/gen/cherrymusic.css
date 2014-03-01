@@ -5134,7 +5134,6 @@ body:after {
   margin: 5px 0;
   padding: 0 5px;
   height: 20px;
-  overflow: hidden;
 }
 .playlist-container .jp-playlist-item {
   display: block;
