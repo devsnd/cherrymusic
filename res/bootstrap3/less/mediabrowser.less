@@ -1,5 +1,6 @@
 @list-view-item-height:         30px;
 @list-view-img-size:            30px;
+@albumart-img-size:             80px;
 @cover-view-item-height:        120px;
 @cover-view-item-width:         105px;
 
@@ -96,6 +97,11 @@
     &-albumart{
         width: 80px;
         margin: 0 auto;
+        text-align: center;
+        & img {
+            max-width: @albumart-img-size;
+            max-height: @albumart-img-size;
+        }
     }
     
     &-name{
