@@ -75,6 +75,11 @@ class CherryModel:
     @classmethod
     def fileSortFunc(cls, filepath):
         upper = pathprovider.filename(filepath).upper()
+        return upper
+
+    @classmethod
+    def fileSortFuncNum(cls, filepath):
+        upper = CherryModel.fileSortFunc(filepath)
         if ' ' in upper:
             part_part = upper[:upper.index(' ')]
             # make sure that numbers are sorted correctly by evening out
@@ -83,10 +88,13 @@ class CherryModel:
                 return '0'*(5 - len(part_part)) + upper
         return upper
 
-    def sortFiles(self, files, fullpath=''):
-        # sort alphabetically (case insensitive, make sure numbers are
-        # sorted correctly)
-        sortedfiles = sorted(files, key=CherryModel.fileSortFunc)
+    def sortFiles(self, files, fullpath='', number_ordering=False):
+        # sort alphabetically (case insensitive)
+        if number_ordering:
+            # make sure numbers are sorted correctly
+            sortedfiles = sorted(files, key=CherryModel.fileSortFuncNum)
+        else:
+            sortedfiles = sorted(files, key=CherryModel.fileSortFunc)
         if fullpath:
             #sort directories up
             isfile = lambda x: os.path.isfile(os.path.join(fullpath, x))
@@ -117,7 +125,8 @@ class CherryModel:
             filterstr = os.path.commonprefix(upper_case_files)
             filterlength = len(filterstr)+1
             currentletter = '/'  # impossible first character
-            sortedfiles = self.sortFiles(allfilesindir)
+            # don't care about natural number order in compact listing
+            sortedfiles = self.sortFiles(allfilesindir, number_ordering=False)
             for dir in sortedfiles:
                 filter_match = dir.upper().startswith(currentletter.upper())
                 if filter_match and not len(currentletter) < filterlength:
@@ -134,7 +143,9 @@ class CherryModel:
                                        repr=currentletter,
                                        compact=True))
         else:
-            sortedfiles = self.sortFiles(allfilesindir, absdirpath)
+            # enable natural number ordering for real directories and files
+            sortedfiles = self.sortFiles(allfilesindir, absdirpath,
+                                         number_ordering=True)
             for dir in sortedfiles:
                 subpath = os.path.join(absdirpath, dir)
                 self.addMusicEntry(subpath, musicentries)
