@@ -145,7 +145,6 @@ else:
     parser.add_argument('--update', dest='update', nargs='*', metavar='PATH', help='Update the media database. PATH must start with basedir or be relative to basedir.')
 parser.add_argument('--newconfig', dest='newconfig', action='store_true', help='Create a new config file next to your current one, e.g. ~/.config/cherrymusic/cherrymusic.conf.new.')
 parser.add_argument('--dropfiledb', dest='dropfiledb', action='store_true', help='Clear the file database. This might be necessary after a version jump.')
-parser.add_argument('--download-stagger', dest='downloadstagger', action='store_true', help='Download the Python module "stagger", an ID3-tag library, so that your music can be indexed more precisely. (Should only be used when not installed using a package manager!)')
 parser.add_argument('--setup', dest='setup', action='store_true', help='Configure CherryMusic in your browser.')
 parser.add_argument('--adduser', dest='adduser', nargs=2, default=None, help='Create a new user with the given password.')
 
@@ -165,9 +164,6 @@ if __name__ == "__main__":
         print(cherrymusicserver.version())
         import sys
         sys.exit(0)
-
-    if args.downloadstagger:
-        cmbootstrap.DependencyInstaller().install_stagger()
 
     cherrymusicserver.CherryMusic(
         update=args.update,

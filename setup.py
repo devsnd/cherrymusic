@@ -88,7 +88,7 @@ setup_options = {
     'url': 'http://www.fomori.org/cherrymusic/',
     'license': 'GPLv3',
     'install_requires': ['CherryPy >= 3.2.2'],
-    'packages': module('cherrymusicserver')+module('audioread')+module('audiotranscode')+module('cmbootstrap')+module('backport'),
+    'packages': module('cherrymusicserver')+module('tinytag')+module('audiotranscode')+module('cmbootstrap')+module('backport'),
     'package_data': {
         'cherrymusicserver.database.defs': packagedata('cherrymusicserver/database/defs'),
     },
