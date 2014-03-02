@@ -2,10 +2,10 @@
     {{#maychangecoverart}}
     <span class="cm-media-list-wrench glyphicon glyphicon-wrench" data-dirname="{{directoryname}}"></span>
     {{/maychangecoverart}}
-    <a dir="{{dirpath}}" href="javascript:;" class="list-dir">
+    <a dir="{{dirpath}}" href="javascript:;" class="list-dir" title="{{dirpath}}">
         {{^isrootdir}}
             <div class="list-dir-albumart unloaded" search-data="{{coverarturl}}">
-                <img src="res/img/folder.png" width="80" height="80" />
+                <img src="res/img/folder.png" />
             </div>
         {{/isrootdir}}
         <div class="list-dir-name-wrap">

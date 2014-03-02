@@ -5134,7 +5134,6 @@ body:after {
   margin: 5px 0;
   padding: 0 5px;
   height: 20px;
-  overflow: hidden;
 }
 .playlist-container .jp-playlist-item {
   display: block;
@@ -5251,6 +5250,11 @@ body:after {
 .list-dir-albumart {
   width: 80px;
   margin: 0 auto;
+  text-align: center;
+}
+.list-dir-albumart img {
+  max-width: 80px;
+  max-height: 80px;
 }
 .list-dir-name {
   font-size: 12px;

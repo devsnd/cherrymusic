@@ -32,30 +32,7 @@
 from cherrymusicserver import log
 import sys
 
-has_stagger = has_mutagen = has_audioread = False
-
-#check for meta info libraries
-if sys.version_info >= (3,):
-    #stagger is only for python 3
-    try:
-        import stagger
-        has_stagger = True
-    except ImportError:
-        log.w(_('''python library "stagger" not found: There will be no ID-tag support!'''))
-
-else:
-    try:
-        import mutagen
-        has_mutagen = True
-    except ImportError:
-        log.w(_('''python library "mutagen" not found: There will be no ID-tag support!'''))
-
-try:
-    import audioread
-    has_audioread = True
-except ImportError:
-    log.w(_('''python library "audioread" not found!
-    -Audio file length can't be determined without it!'''))
+from tinytag import TinyTag
 
 class Metainfo():
     def __init__(self, artist, album, title, track, length):
@@ -72,54 +49,12 @@ class Metainfo():
         'track': self.track,
         'length': self.length
         }
-#
-# Mock implementation for faild import (might be handy if
-# multiple libs are used to determine metainfos)
-#
-
-#stagger
-
-class MockTag():
-    def __init__(self):
-        self.artist = ''
-        self.album = ''
-        self.title = ''
-        self.track = ''
 
 def getSongInfo(filepath):
-    if has_stagger:
-        try:
-            tag = stagger.read_tag(filepath)
-        except Exception:
-            tag = MockTag()
-    elif has_mutagen:
-        try:
-            tag = MockTag()
-            file_info = mutagen.File(filepath, easy=True)
+    tag = TinyTag.get(filepath)
+    # make sure everthing returned (except length) is a string
+    for attribute in ['artist','album','title','track']:
+        if getattr(tag, attribute) is None:
+            setattr(tag, attribute, '')
+    return Metainfo(tag.artist, tag.album, tag.title, str(tag.track), tag.length)
 
-            # NOTE: Joining in order to emulate stagger's formatting of
-            #       multiple frames.
-            tag.artist = " / ".join(file_info.get('artist', [tag.artist]))
-            tag.album = " / ".join(file_info.get('album', [tag.album]))
-            tag.title = " / ".join(file_info.get('title', [tag.title]))
-
-            # NOTE: Splitting out the actual track number since mutagen returns
-            #       a total as well.
-            tag.track = file_info.get('tracknumber',
-                                      [tag.track])[0].split('/')[0]
-        except Exception:
-            tag = MockTag()
-    else:
-        tag = MockTag()
-
-    if has_audioread:
-        try:
-            with audioread.audio_open(filepath) as f:
-                audiolength = f.duration
-        except Exception as e:
-            log.w("audioread fail: unable to fetch duration of %(file)r (%(exception)s)",
-                {'file': filepath, 'exception': type(e).__name__})
-            audiolength = 0
-    else:
-        audiolength = 0
-    return Metainfo(tag.artist, tag.album, tag.title, tag.track, audiolength)

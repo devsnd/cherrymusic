@@ -38,29 +38,6 @@ class DependencyInstaller:
         shutil.rmtree(cherrypytempdir)
         os.remove(cherrypytempfile)      
     
-    def install_stagger(self):
-        staggerfiles = [
-            "http://stagger.googlecode.com/svn/trunk/stagger/__init__.py",
-            "http://stagger.googlecode.com/svn/trunk/stagger/commandline.py",
-            "http://stagger.googlecode.com/svn/trunk/stagger/conversion.py",
-            "http://stagger.googlecode.com/svn/trunk/stagger/errors.py",
-            "http://stagger.googlecode.com/svn/trunk/stagger/fileutil.py",
-            "http://stagger.googlecode.com/svn/trunk/stagger/frames.py",
-            "http://stagger.googlecode.com/svn/trunk/stagger/id3.py",
-            "http://stagger.googlecode.com/svn/trunk/stagger/id3v1.py",
-            "http://stagger.googlecode.com/svn/trunk/stagger/specs.py",
-            "http://stagger.googlecode.com/svn/trunk/stagger/tags.py",
-            "http://stagger.googlecode.com/svn/trunk/stagger/util.py"
-        ]
-        print('Downloading stagger...')
-        staggerfolder = os.path.join(self.cherrymusicfolder,'stagger')
-        os.mkdir(staggerfolder)
-        for sta in staggerfiles:
-            filename = os.path.join(staggerfolder, sta[sta.rindex('/')+1:])
-            print('   '+filename)
-            self.dl(sta, filename)
-        print('done')
-    
     def tmpdir(self, name):
         tempdirpath = os.path.join(tempfile.gettempdir(),name)
         if os.path.exists(tempdirpath):
@@ -90,22 +67,7 @@ except ImportError:
     ''')
     if input("Download cherrypy now? (y/n)") == 'y':
         inst = DependencyInstaller()
-        install_stagger = False
-        #install stagger only for python 3
-        if sys.version_info >= (3,):
-            try:
-                import stagger
-            except ImportError:
-                print("""
-    You seem to be missing the optional module "stagger", an ID3-tag
-    library. You should install it using the package manager of your OS.
-    Alternatively cherrymusic can download it for you and put it in the
-    folder in which cherrymusic resides.
-    """)
-                install_stagger = bool(input("Download ID3-tag library stagger? (y/n)") == 'y')
         inst.install_cherrypy()
-        if install_stagger:
-            inst.install_stagger()
         print('Successfully installed cherrymusic dependencies! You can now start cherrymusic.')
     else:
         sys.exit(1)

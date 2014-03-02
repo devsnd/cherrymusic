@@ -779,14 +779,17 @@ PlaylistManager.prototype = {
             return;
         }
         var jPlaylist = pl.jplayerplaylist;
+        var songtitle = '';
+        var tabtitle = 'CherryMusic';
         if(typeof this.jPlayerInstance !== 'undefined'){
             var currentTitle = this.jPlayerInstance.data().jPlayer.status.media.title;
-            $('.cm-songtitle').text(currentTitle);
-            $('title').text(currentTitle+' | CherryMusic');
-        } else {
-            $('.cm-songtitle').html('');
-            $('title').text('CherryMusic');
+            if(typeof currentTitle !== 'undefined'){
+                songtitle = currentTitle;
+                tabtitle = currentTitle+' | CherryMusic';
+            }
         }
+        $('.cm-songtitle').html(songtitle);
+        $('title').text(tabtitle);
     },
     rememberPlaylist : function(){
         "use strict";

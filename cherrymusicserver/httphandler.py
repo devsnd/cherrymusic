@@ -416,9 +416,8 @@ class HTTPHandler(object):
         elif cherry.config['media.fetch_album_art']:
             #fetch album art from online source
             try:
-                album = os.path.basename(directory)
-                artist = os.path.basename(os.path.dirname(directory))
-                keywords = artist+' '+album
+                foldername = os.path.basename(directory)
+                keywords = foldername
                 log.i(_("Fetching album art for keywords {keywords!r}").format(keywords=keywords))
                 header, data = fetcher.fetch(keywords)
                 if header:
