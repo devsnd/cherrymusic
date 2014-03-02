@@ -171,6 +171,15 @@ ManagedPlaylist.prototype = {
     scrollToCurrentTrack: function(){
         this.scrollToTrack(this.jplayerplaylist.current);
     },
+    addRandomTrackGenerator: function(){
+        this.addTrack(TrackGenerators.lazyRandomTrack());
+    },
+    addRecursiveTrackGenerator: function(path, lazy_progress){
+        this.addTrack(TrackGenerators.lazyRecursiveTrack(path, lazy_progress));
+    }
+}
+
+var TrackGenerators = {
     lazyRandomTrack: function(){
         var self = this;
         // create the lazy function, that will be called once the track
@@ -190,7 +199,7 @@ ManagedPlaylist.prototype = {
                 playlist.jplayerplaylist._refresh(true);
                 playlist.jplayerplaylist.play(lazy_index);
                 // add new random track at the end
-                self.addRandomTrackGenerator();
+                playlist.addRandomTrackGenerator()
             }
             api('getrandomtrack', success);
         }
@@ -202,9 +211,48 @@ ManagedPlaylist.prototype = {
             lazy_func: lazy_func,
         }
     },
-    addRandomTrackGenerator: function(){
-        this.addTrack(this.lazyRandomTrack());
-    }
+    lazyRecursiveTrack: function(path, lazy_progress){
+        if(typeof lazy_progress === 'undefined'){
+            lazy_progress = 0;
+        }
+        var self = this;
+        // create the lazy function, that will be called once the track
+        // should be played.
+        lazy_func = function(playlist, playlistitem){
+            var pl = playlist.jplayerplaylist;
+            // remove the random func from the playlist
+            var lazy_index = playlist.jplayerplaylist.playlist.length - 1;
+            playlistitem.title = '&#9733; RETRIEVING NEXT TRACK... &#9733;';
+            playlist.jplayerplaylist._refresh(true);
+            var current_progress_count = lazy_progress;
+            success = function(data){
+                // turn lazy track into a real track
+                playlistitem.url = data.path;
+                playlistitem.title = data.label;
+                playlistitem.is_lazy = false;
+                playlistitem.lazy_progress++;
+                playlistitem = playlistManager.transcodeURL(playlistitem);
+                playlist.jplayerplaylist._refresh(true);
+                playlist.jplayerplaylist.play(lazy_index);
+                // add new recursive track track at the end
+                playlist.addRecursiveTrackGenerator(path, lazy_progress+1)
+            }
+            api('getrecursivetrack',
+                {
+                    'lazy_progress': current_progress_count,
+                    'directory': path
+                },
+                success);
+        }
+        // return the lazy track, which will turn into a real one,
+        // once it is being inserted into the jPlayer (setMedia hook)
+        return {
+            title: '&#9733; ALL TRACKS IN '+htmlencode(path)+' &#9733;',
+            is_lazy: true,
+            lazy_progress: lazy_progress,
+            lazy_func: lazy_func,
+        }
+    },
 }
 
 var NewplaylistProxy = function(playlistManager){
@@ -764,6 +812,10 @@ PlaylistManager.prototype = {
             }
         }
         api('getsonginfo', {'path': decodeURIComponent(path)}, success, errorFunc('error getting song metainfo'), true);
+    },
+    addRecursiveGenerator : function(path){
+        path = decodeURIComponent(path);
+        this.getEditingPlaylist().addRecursiveTrackGenerator(path)
     },
     clearPlaylist : function(){
         "use strict";

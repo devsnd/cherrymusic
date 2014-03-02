@@ -143,7 +143,8 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
             '<ul class="cm-media-list">'+folderhtml+'</ul></div>';
         }
         if('' != filehtml){
-            html += '<div class="cm-media-list-category"><h3>Tracks <a href="#" class="btn btn-default" '+
+            html += '<div class="cm-media-list-category"><h3>Tracks'+
+                    '<a href="#" class="btn btn-default" '+
                     'onclick="MediaBrowser.static._addAllToPlaylist($(this).parent().siblings(\'ul\'))">'+
                     'add all tracks to current playlist</a>'+
                     '</h3><ul class="cm-media-list">'+filehtml+'</ul></div>';

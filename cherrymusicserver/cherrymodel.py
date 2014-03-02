@@ -101,6 +101,27 @@ class CherryModel:
             sortedfiles = sorted(sortedfiles, key=isfile)
         return sortedfiles
 
+    def get_recursive_file(self, dirpath):
+        path = self.abspath(dirpath)
+        allfilesindir = [f for f in os.listdir(path) if not f.startswith('.')]
+        sortedfiles = self.sortFiles(allfilesindir)
+        for filename in sortedfiles:
+            fullpath = os.path.join(path, filename)
+            if os.path.isfile(fullpath):
+                if isplayable(fullpath):
+                    yield MusicEntry(strippath(fullpath))
+            else:
+                subfolderpath = os.path.join(dirpath, filename)
+                for music_entry in self.get_recursive_file(subfolderpath):
+                    yield music_entry
+
+    def get_specific_recursive_file(self, dirpath, number):
+        interated_music_entries = 0
+        for music_entry in self.get_recursive_file(dirpath):
+            if number == interated_music_entries:
+                return music_entry
+            interated_music_entries += 1
+
     def listdir(self, dirpath, filterstr=''):
         absdirpath = self.abspath(dirpath)
         if cherry.config['browser.pure_database_lookup']:

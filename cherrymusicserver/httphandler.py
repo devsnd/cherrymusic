@@ -88,6 +88,7 @@ class HTTPHandler(object):
             'loadplaylist': self.api_loadplaylist,
             'generaterandomplaylist': self.api_generaterandomplaylist,
             'getrandomtrack': self.api_getrandomtrack,
+            'getrecursivetrack': self.api_getrecursivetrack,
             'deleteplaylist': self.api_deleteplaylist,
             'getmotd': self.api_getmotd,
             'restoreplaylist': self.api_restoreplaylist,
@@ -499,6 +500,10 @@ class HTTPHandler(object):
     
     def api_getrandomtrack(self):
         return self.model.randomMusicEntries(20)[0].to_dict()
+
+    def api_getrecursivetrack(self, directory, lazy_progress):
+        me = self.model.get_specific_recursive_file(directory, lazy_progress)
+        return me.to_dict()
 
     def api_changeplaylist(self, plid, attribute, value):
         if attribute == 'public':

@@ -2,6 +2,11 @@
     {{#maychangecoverart}}
     <span class="cm-media-list-wrench glyphicon glyphicon-wrench" data-dirname="{{directoryname}}"></span>
     {{/maychangecoverart}}
+    <a onclick="playlistManager.addRecursiveGenerator('{{directoryname}}')">
+        <span class="glyphicon glyphicon-collapse-down">
+        Add all recursively
+        </span>
+    </a>
     <a dir="{{dirpath}}" href="javascript:;" class="list-dir" title="{{dirpath}}">
         {{^isrootdir}}
             <div class="list-dir-albumart unloaded" search-data="{{coverarturl}}">
