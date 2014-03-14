@@ -27,12 +27,14 @@ import codecs
 import struct
 import os
 
-__version__ = '0.3.0'
+__version__ = '0.4.0'
 
 
 class TinyTag(object):
     """Base class for all tag types"""
-    def __init__(self):
+    def __init__(self, filehandler, filesize):
+        self._filesize = filesize
+        self._filehandler = filehandler
         self.track = None
         self.track_total = None
         self.title = None
@@ -51,35 +53,35 @@ class TinyTag(object):
     @classmethod
     def get(cls, filename, tags=True, length=True):
         """choose which tag reader should be used by file extension"""
-        if not os.path.getsize(filename) > 0:
+        mapping = {
+            ('.mp3',): ID3,
+            ('.oga', '.ogg'): Ogg,
+            ('.wav'): Wave,
+            ('.flac'): Flac,
+        }
+        size = os.path.getsize(filename)
+        if not size > 0:
             return TinyTag()
-        if filename.lower().endswith('.mp3'):
-            with open(filename, 'rb') as af:
-                return ID3(af, tags=tags, length=length)
-        elif filename.lower().endswith(('.oga', '.ogg')):
-            with open(filename, 'rb') as af:
-                return Ogg(af, tags=tags, length=length)
-        elif filename.lower().endswith(('.wav')):
-            with open(filename, 'rb') as af:
-                return Wave(af, tags=tags, length=length)
-        elif filename.lower().endswith(('.flac')):
-            with open(filename, 'rb') as af:
-                return Flac(af, tags=tags, length=length)
-        else:
-            raise LookupError('No tag reader found to support filetype!')
+        for fileextension, tagclass in mapping.items():
+            if filename.lower().endswith(fileextension):
+                with open(filename, 'rb') as af:
+                    tag = tagclass(af, size)
+                    tag.load(tags=tags, length=length)
+                    return tag
+        raise LookupError('No tag reader found to support filetype!')
 
     def __str__(self):
         return str(self.__dict__)
 
-    def load(self, filehandler, tags, length):
+    def load(self, tags, length):
         """default behavior of all tags. This method is called in the
         constructors of all tag readers
         """
         if tags:
-            self._parse_tag(filehandler)
-            filehandler.seek(0)
+            self._parse_tag(self._filehandler)
+            self._filehandler.seek(0)
         if length:
-            self._determine_length(filehandler)
+            self._determine_length(self._filehandler)
 
     def _set_field(self, fieldname, bytestring, transfunc=None):
         """convienience function to set fields of the tinytag by name.
@@ -113,10 +115,6 @@ class ID3(TinyTag):
         'TPE1': 'artist', 'TP1': 'artist',
         'TIT2': 'title',  'TT2': 'title',
     }
-
-    def __init__(self, filehandler, tags=True, length=True):
-        TinyTag.__init__(self)
-        self.load(filehandler, tags=tags, length=length)
 
     def _determine_length(self, fh):
         max_estimation_sec = 30
@@ -157,7 +155,7 @@ class ID3(TinyTag):
                     frame_size_mean += frame_length
                     if frames == max_estimation_frames:
                         # try to estimate length
-                        fh.seek(-1, 2) # jump to last byte
+                        fh.seek(-1, 2)  # jump to last byte
                         estimated_frame_count = fh.tell() / (frame_size_mean / frames)
                         samples = estimated_frame_count * 1152
                         self.length = samples/float(file_sample_rate)
@@ -273,15 +271,30 @@ class StringWalker(object):
 
 
 class Ogg(TinyTag):
-    def __init__(self, filehandler, tags=True, length=True):
-        TinyTag.__init__(self)
+    def __init__(self, filehandler, filesize):
+        TinyTag.__init__(self, filehandler, filesize)
         self._tags_parsed = False
         self._max_samplenum = 0  # maximum sample position ever read
-        self.load(filehandler, tags=tags, length=length)
 
     def _determine_length(self, fh):
+        MAX_PAGE_SIZE = 65536  # https://xiph.org/ogg/doc/libogg/ogg_page.html
         if not self._tags_parsed:
-            self._parse_tag(fh)  # parse_whole file to determine length :(
+            self._parse_tag(fh)  # determine sample rate
+            fh.seek(0)           # and rewind to start
+        if self._filesize > MAX_PAGE_SIZE:
+            fh.seek(-MAX_PAGE_SIZE, 2)  # go to last possible page position
+        while True:
+            b = fh.read(1)
+            if len(b) == 0:
+                return  # EOF
+            if b == b'O':  # look for an ogg header
+                if fh.read(3) == b'ggS':
+                    fh.seek(-4, 1)  # parse the page header from start
+                    for packet in self._parse_pages(fh):
+                        pass  # parse all remaining pages
+                    self.length = self._max_samplenum / float(self._sample_rate)
+                else:
+                    fh.seek(-3, 1)  # oops, no header, rewind selectah!
 
     def _parse_tag(self, fh):
         sample_rate = 44100  # default samplerate 44khz, but update later
@@ -289,11 +302,12 @@ class Ogg(TinyTag):
             walker = StringWalker(packet)
             head = walker.read(7)
             if head == b"\x01vorbis":
-                (channels, sample_rate, max_bitrate, nominal_bitrate,
+                (channels, self._sample_rate, max_bitrate, nominal_bitrate,
                  min_bitrate) = struct.unpack("<B4i", packet[11:28])
             elif head == b"\x03vorbis":
                 self._parse_vorbis_comment(walker)
-        self.length = self._max_samplenum / float(sample_rate)
+            else:
+                break
 
     def _parse_vorbis_comment(self, fh):
         # for the spec, see: http://xiph.org/vorbis/doc/v-comment.html
@@ -340,10 +354,9 @@ class Ogg(TinyTag):
 
 
 class Wave(TinyTag):
-    def __init__(self, filename, tags=True, length=True):
-        TinyTag.__init__(self)
+    def __init__(self, filehandler, filesize):
+        TinyTag.__init__(self, filehandler, filesize)
         self._length_parsed = False
-        self.load(filename, tags=tags, length=length)
 
     def _determine_length(self, fh):
         # see: https://ccrma.stanford.edu/courses/422/projects/WaveFormat/
@@ -362,7 +375,7 @@ class Wave(TinyTag):
                 self.length = subchunksize/channels/samplerate/(bitdepth/8)
                 fh.seek(subchunksize, 1)
             elif subchunkid == b'id3 ' or subchunkid == b'ID3 ':
-                id3 = ID3(fh, tags=False, length=False)
+                id3 = ID3(fh, 0)
                 id3._parse_id3v2(fh)
                 self.update(id3)
             else:  # some other chunk, just skip the data
@@ -376,18 +389,14 @@ class Wave(TinyTag):
 
 
 class Flac(TinyTag):
-    def __init__(self, filename, tags=True, length=True):
-        TinyTag.__init__(self)
-        self.load(filename, tags=tags, length=length)
-
-    def load(self, filehandler, tags, length):
-        if filehandler.read(4) != b'fLaC':
+    def load(self, tags, length):
+        if self._filehandler.read(4) != b'fLaC':
             return  # not a flac file!
         if tags:
-            self._parse_tag(filehandler)
-            filehandler.seek(4)
+            self._parse_tag(self._filehandler)
+            self._filehandler.seek(4)
         if length:
-            self._determine_length(filehandler)
+            self._determine_length(self._filehandler)
 
     def _determine_length(self, fh):
         # for spec, see https://xiph.org/flac/ogg_mapping.html
@@ -426,7 +435,7 @@ class Flac(TinyTag):
             meta_header = struct.unpack('B3B', header_data)
             size = self._bytes_to_int(meta_header[1:4])
             if meta_header[0] == 4:
-                oggtag = Ogg(fh, False, False)
+                oggtag = Ogg(fh, 0)
                 oggtag._parse_vorbis_comment(fh)
                 self.update(oggtag)
                 return
