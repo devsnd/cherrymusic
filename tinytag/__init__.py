@@ -27,7 +27,7 @@ import codecs
 import struct
 import os
 
-__version__ = '0.4.0'
+__version__ = '0.5.0'
 
 
 class TinyTag(object):
@@ -61,7 +61,7 @@ class TinyTag(object):
         }
         size = os.path.getsize(filename)
         if not size > 0:
-            return TinyTag()
+            return TinyTag(None, 0)
         for fileextension, tagclass in mapping.items():
             if filename.lower().endswith(fileextension):
                 with open(filename, 'rb') as af:
@@ -115,10 +115,12 @@ class ID3(TinyTag):
         'TPE1': 'artist', 'TP1': 'artist',
         'TIT2': 'title',  'TT2': 'title',
     }
+    def __init__(self, filehandler, filesize, estimation_length_sec=30):
+        TinyTag.__init__(self, filehandler, filesize)
+        self.estimation_length_sec = estimation_length_sec
 
     def _determine_length(self, fh):
-        max_estimation_sec = 30
-        max_estimation_frames = (max_estimation_sec*44100) // 1152
+        max_estimation_frames = (self.estimation_length_sec*44100) // 1152
         frame_size_mean = 0
         # set sample rate from first found frame later, default to 44khz
         file_sample_rate = 44100
@@ -324,7 +326,12 @@ class Ogg(TinyTag):
                 key, value = keyvalpair[:splitidx], keyvalpair[splitidx+1:]
                 fieldname = mapping.get(key.lower())
                 if fieldname:
-                    self._set_field(fieldname, value)
+                    if fieldname == 'track' and '/' in value:
+                        track, tracktotal = value.split('/')
+                        self._set_field('track', track)
+                        self._set_field('track_total', tracktotal)
+                    else:
+                        self._set_field(fieldname, value)
 
     def _parse_pages(self, fh):
         # for the spec, see: https://wiki.xiph.org/Ogg
@@ -363,7 +370,7 @@ class Wave(TinyTag):
         # and: https://en.wikipedia.org/wiki/WAV
         riff, size, fformat = struct.unpack('4sI4s', fh.read(12))
         if riff != b'RIFF' or fformat != b'WAVE':
-            print('not a wave file!')
+            return  # not a valid wave file!
         channels, samplerate, bitdepth = 2, 44100, 16  # assume CD quality
         chunk_header = fh.read(8)
         while len(chunk_header) > 0:
@@ -434,7 +441,7 @@ class Flac(TinyTag):
         while len(header_data):
             meta_header = struct.unpack('B3B', header_data)
             size = self._bytes_to_int(meta_header[1:4])
-            if meta_header[0] == 4:
+            if (meta_header[0] & 7) == 4:  # VORBIS_COMMENT
                 oggtag = Ogg(fh, 0)
                 oggtag._parse_vorbis_comment(fh)
                 self.update(oggtag)
