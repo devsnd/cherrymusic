@@ -117,14 +117,21 @@ ManagedPlaylist.prototype = {
     },
     getPlayTimeSec : function(playlist){
         var durationsec = 0;
+        var tracks_with_duration = 0;
         for(var i=0; i<playlist.length; i++){
             if(typeof playlist[i].duration !== 'undefined'){
                 durationsec += playlist[i].duration;
-            } else {
-                return;
+                tracks_with_duration++;
             }
         }
-        return durationsec;
+        if(tracks_with_duration == 0){
+            // just show the number of track remaining
+            return;
+        } else {
+            // estimate the length of the playlist
+            return (durationsec / tracks_with_duration) * playlist.length;
+        }
+        
     },
     getRemainingTracks : function(){
         if(playlistManager.shuffled){
