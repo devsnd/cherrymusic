@@ -486,14 +486,11 @@ function loadPlaylist(playlistid, playlistlabel){
         var tracklist = data;
         //transform tracks to jplayer format:
         //TODO rewrite jplayer playlist to support CM-music entry format
-        var jplayerplaylist = [];
+        var pl = playlistManager.newPlaylist([], playlistlabel);
         for(var i=0; i<tracklist.length; i++){
-            jplayerplaylist.push({
-                'title':tracklist[i].label,
-                'url':  tracklist[i].urlpath
-            });
+            playlistManager.addSong(tracklist[i].urlpath, tracklist[i].label, pl.id);
         }
-        var pl = playlistManager.newPlaylist(jplayerplaylist, playlistlabel);
+        pl.setSaved(true);
     }
     api('loadplaylist',
         {'playlistid': playlistid},
