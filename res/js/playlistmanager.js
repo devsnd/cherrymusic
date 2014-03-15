@@ -728,7 +728,14 @@ PlaylistManager.prototype = {
                 self.getEditingPlaylist().jplayerplaylist._refresh(true);
             }
         }
-        api('getsonginfo', {'path': decodeURIComponent(path)}, success, errorFunc('error getting song metainfo'), true);
+        // WORKAROUND: delay the meta-data fetching, so that a request
+        // for the actual audio data comes through frist
+         window.setTimeout(
+            function(){
+                api('getsonginfo', {'path': decodeURIComponent(path)}, success, errorFunc('error getting song metainfo'), true);
+            },
+            1000
+        );
     },
     clearPlaylist : function(){
         "use strict";
