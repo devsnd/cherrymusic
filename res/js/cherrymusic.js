@@ -487,8 +487,9 @@ function loadPlaylist(playlistid, playlistlabel){
         //transform tracks to jplayer format:
         //TODO rewrite jplayer playlist to support CM-music entry format
         var pl = playlistManager.newPlaylist([], playlistlabel);
+        var animate = false;
         for(var i=0; i<tracklist.length; i++){
-            playlistManager.addSong(tracklist[i].urlpath, tracklist[i].label, pl.id);
+            playlistManager.addSong(tracklist[i].urlpath, tracklist[i].label, pl.id, animate);
         }
         pl.setSaved(true);
     }

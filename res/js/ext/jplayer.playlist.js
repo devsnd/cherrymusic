@@ -360,9 +360,16 @@
 			this._initPlaylist(playlist);
 			this._init();
 		},
-		add: function(media, playNow) {
+		add: function(media, playNow, animate) {
             var self = this;
-			$(this.cssSelector.playlist + " ul.playlist-container-list").append(this._createListItem(media)).find("li:last-child").hide().slideDown(this.options.playlistOptions.addTime);
+            if(typeof animate === 'undefined'){
+                animate = true;
+            }
+            if(animate){
+                $(this.cssSelector.playlist + " ul.playlist-container-list").append(this._createListItem(media)).find("li:last-child").hide().slideDown(this.options.playlistOptions.addTime);
+            } else {
+                $(this.cssSelector.playlist + " ul.playlist-container-list").append(this._createListItem(media));
+            }
 			this._updateControls();
             this._createItemHandlers();
 			this.original.push(media);

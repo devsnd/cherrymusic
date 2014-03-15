@@ -157,8 +157,11 @@ ManagedPlaylist.prototype = {
     makeThisPlayingPlaylist : function(){
         this.playlistManager.setPlayingPlaylist(this.id);
     },
-    addTrack : function(track) {
-        this.jplayerplaylist.add(track,false);
+    addTrack : function(track, animate) {
+        if(typeof animate === 'undefined'){
+            animate = true;
+        }
+        this.jplayerplaylist.add(track, false, animate);
         this.scrollToTrack(this.jplayerplaylist.playlist.length-1);
     },
     scrollToTrack: function(number){
@@ -679,9 +682,12 @@ PlaylistManager.prototype = {
         }
         return track;
     },
-    addSong : function(path,title, plid){
+    addSong : function(path, title, plid, animate){
         "use strict";
         var self = this;
+        if(typeof animate === 'undefined'){
+            animate = true;
+        }
         var track = {
             title: title,
             url: path,
@@ -694,7 +700,7 @@ PlaylistManager.prototype = {
         if (typeof playlist == 'undefined') {
             playlist = this.getEditingPlaylist();
         }
-        playlist.addTrack(track);
+        playlist.addTrack(track, animate);
 
         //directly play/select first added track
         if(!jPlayerIsPlaying() && playlist.jplayerplaylist.playlist.length == 1){
