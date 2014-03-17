@@ -96,8 +96,9 @@ class AlbumArtFetcher:
         """
         try:
             with open(os.devnull, 'w') as devnull:
-                subprocess.Popen([name], stdout=devnull, stderr=devnull)
-                return True
+                process = subprocess.Popen([name], stdout=subprocess.PIPE, stderr=devnull)
+                out, err = process.communicate()
+                return 'ImageMagick' in codecs.decode(out, 'UTF-8')
         except OSError:
             return False
 
