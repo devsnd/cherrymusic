@@ -47,11 +47,27 @@ except ImportError:
     unidecode = lambda x: x
 
 
+def programAvailable(name):
+        """
+        check if a program is available in the system PATH
+        """
+        try:
+            with open(os.devnull, 'w') as devnull:
+                process = subprocess.Popen([name], stdout=subprocess.PIPE,
+                                           stderr=devnull)
+                out, err = process.communicate()
+                return 'ImageMagick' in codecs.decode(out, 'UTF-8')
+        except OSError:
+            return False
+
+
 class AlbumArtFetcher:
     """
     provide the means to fetch images from different web services by
     searching for certain keywords
     """
+
+    imageMagickAvailable = programAvailable('convert')
 
     methods = {
         'amazon': {
@@ -75,7 +91,7 @@ class AlbumArtFetcher:
         },
     }
 
-    def __init__(self, method='google', timeout=10):
+    def __init__(self, method='amazon', timeout=10):
         """define the urls of the services and a regex to fetch images
         """
         self.MAX_IMAGE_SIZE_BYTES = 100*1024
@@ -83,24 +99,12 @@ class AlbumArtFetcher:
         # the GET parameter value of the searchterm must be appendable
         # to the urls defined in "methods".
         if not method in self.methods:
-            log.e(_('''unknown album art fetch method: '%(method)s', using default.'''),
+            log.e(_(('''unknown album art fetch method: '%(method)s', '''
+                     '''using default.''')),
                   {'method': method})
             method = 'google'
         self.method = method
         self.timeout = timeout
-        self.imageMagickAvailable = self.programAvailable('convert')
-
-    def programAvailable(self, name):
-        """
-        check if a program is available in the system PATH
-        """
-        try:
-            with open(os.devnull, 'w') as devnull:
-                process = subprocess.Popen([name], stdout=subprocess.PIPE, stderr=devnull)
-                out, err = process.communicate()
-                return 'ImageMagick' in codecs.decode(out, 'UTF-8')
-        except OSError:
-            return False
 
     def resize(self, imagepath, size):
         """
@@ -109,7 +113,7 @@ class AlbumArtFetcher:
         Returns:
             the binary data of the image and a matching http header
         """
-        if self.imageMagickAvailable:
+        if AlbumArtFetcher.imageMagickAvailable:
             with open(os.devnull, 'w') as devnull:
                 cmd = ['convert', imagepath,
                        '-resize', str(size[0])+'x'+str(size[1]),
@@ -174,7 +178,10 @@ class AlbumArtFetcher:
         Returns:
             the binary data and the http header of the request
         """
-        user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.19 (KHTML, like Gecko) Ubuntu/12.04 Chromium/18.0.1025.168 Chrome/18.0.1025.168 Safari/535.19'
+        user_agent = ('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.19 '
+                      '(KHTML, like Gecko) Ubuntu/12.04 '
+                      'Chromium/18.0.1025.168 Chrome/18.0.1025.168 '
+                      'Safari/535.19')
         req = urllib.request.Request(url, headers={'User-Agent': user_agent})
         urlhandler = urllib.request.urlopen(req, timeout=self.timeout)
         return urlhandler.read(), urlhandler.info()
