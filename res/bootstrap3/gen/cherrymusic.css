@@ -5133,7 +5133,7 @@ body:after {
   list-style-type: none;
   margin: 5px 0;
   padding: 0 5px;
-  height: 20px;
+  min-height: 20px;
 }
 .playlist-container .jp-playlist-item {
   display: block;
