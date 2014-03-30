@@ -5,6 +5,11 @@ import re
 import os
 import hashlib
 
+MAIN_CM_FOLDER = os.path.dirname(os.path.dirname(__file__))
+
+DEVEL_INPUT_HTML = os.path.join(MAIN_CM_FOLDER, 'res/devel.html')
+MAIN_OUTPUT_HTML = os.path.join(MAIN_CM_FOLDER, 'res/dist/main.html')
+
 LESSC = 'lessc'
 JSMIN = 'jsmin'
 
@@ -78,7 +83,7 @@ def remove_whitespace(html):
     return no_white
 
 html = None
-with open('res/devel.html', 'r') as develhtml:
+with open(DEVEL_INPUT_HTML, 'r') as develhtml:
     html = develhtml.read()
 
 html = re.sub('<!--LESS-TO-CSS-BEGIN([^>]*)-->(.*)<!--LESS-TO-CSS-END-->',
@@ -95,5 +100,5 @@ html = re.sub('<!--COMPRESS-JS-BEGIN([^>]*)-->(.*)<!--COMPRESS-JS-END-->',
               flags=re.MULTILINE | re.DOTALL)
 html = remove_whitespace(html)
 
-with open('res/dist/main.html', 'w') as mainhtml:
+with open(MAIN_OUTPUT_HTML, 'w') as mainhtml:
     mainhtml.write(html)
