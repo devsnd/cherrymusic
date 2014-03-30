@@ -126,7 +126,9 @@ def albumArtFilePath(directorypath):
     return configpath
 
 def base64encode(s):
-    return codecs.decode(base64.b64encode(codecs.encode(s,'UTF-8')),'UTF-8')
+    utf8_bytestr = codecs.encode(s, 'UTF-8')
+    utf8_altchar = codecs.encode('+-', 'UTF-8')
+    return codecs.decode(base64.b64encode(utf8_bytestr, utf8_altchar), 'UTF-8')
 
 def base64decode(s):
     return codecs.decode(base64.b64decode(s),'UTF-8')
