@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-01-13 02:48+0100\n"
+"POT-Creation-Date: 2014-03-30 19:08+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,17 +17,22 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: cherrymusicserver/cherrymodel.py:167
+#: cherrymusicserver/cherrymodel.py:178
 #, python-format
 msgid "%(user)s searched for '%(term)s'"
 msgstr ""
 
-#: cherrymusicserver/cherrymodel.py:170
+#: cherrymusicserver/cherrymodel.py:181
 msgid "sorting DB results using ResultOrder"
 msgstr ""
 
-#: cherrymusicserver/cherrymodel.py:182
+#: cherrymusicserver/cherrymodel.py:193
 msgid "checking and classifying results:"
+msgstr ""
+
+#: cherrymusicserver/cherrymodel.py:206
+#, python-format
+msgid "Error fetching version info: %s"
 msgstr ""
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
@@ -279,14 +284,15 @@ msgstr ""
 msgid "configuration path is not a file: %(filepath)s"
 msgstr ""
 
-#: cherrymusicserver/metainfo.py:42
-msgid "python library \"stagger\" not found: There will be no ID-tag support!"
+#: cherrymusicserver/database/sql.py:266
+msgid "Exception while updating database schema."
 msgstr ""
 
-#: cherrymusicserver/metainfo.py:51
+#: cherrymusicserver/database/sql.py:267
 msgid ""
-"python library \"audioread\" not found!\n"
-"    -Audio file length can't be determined without it!"
+"Database error. This is probably due to your version of sqlite being too "
+"old. Try updating sqlite3 and updating python. If the problem persists, you "
+"will need to delete the database at "
 msgstr ""
 
 #: cherrymusicserver/browsersetup.py:76
@@ -338,11 +344,6 @@ msgid ""
 "If you run the server locally, use: localhost:{port}.\n"
 msgstr ""
 
-#: cherrymusicserver/albumartfetcher.py:86
-#, python-format
-msgid "unknown album art fetch method: '%(method)s', using default."
-msgstr ""
-
 #: cherrymusicserver/i18n_client.py:3
 msgid "track has no path set!"
 msgstr ""
@@ -351,135 +352,135 @@ msgstr ""
 msgid "track has no label set!"
 msgstr ""
 
-#: cherrymusicserver/util.py:215
+#: cherrymusicserver/util.py:218
 #, python-format
 msgid "%d years ago"
 msgstr ""
 
-#: cherrymusicserver/util.py:217
+#: cherrymusicserver/util.py:220
 msgid "a year ago"
 msgstr ""
 
-#: cherrymusicserver/util.py:220
+#: cherrymusicserver/util.py:223
 #, python-format
 msgid "%d months ago"
 msgstr ""
 
-#: cherrymusicserver/util.py:222
+#: cherrymusicserver/util.py:225
 msgid "a month ago"
 msgstr ""
 
-#: cherrymusicserver/util.py:225
+#: cherrymusicserver/util.py:228
 #, python-format
 msgid "%d weeks ago"
 msgstr ""
 
-#: cherrymusicserver/util.py:227
+#: cherrymusicserver/util.py:230
 msgid "a week ago"
 msgstr ""
 
-#: cherrymusicserver/util.py:230
+#: cherrymusicserver/util.py:233
 #, python-format
 msgid "%d days ago"
 msgstr ""
 
-#: cherrymusicserver/util.py:232
+#: cherrymusicserver/util.py:235
 msgid "a day ago"
 msgstr ""
 
-#: cherrymusicserver/util.py:235
+#: cherrymusicserver/util.py:238
 #, python-format
 msgid "%d hours ago"
 msgstr ""
 
-#: cherrymusicserver/util.py:237
+#: cherrymusicserver/util.py:240
 msgid "an hour ago"
 msgstr ""
 
-#: cherrymusicserver/util.py:239
+#: cherrymusicserver/util.py:242
 msgid "half an hour ago"
 msgstr ""
 
-#: cherrymusicserver/util.py:242
+#: cherrymusicserver/util.py:245
 #, python-format
 msgid "%d minutes ago"
 msgstr ""
 
-#: cherrymusicserver/util.py:244
+#: cherrymusicserver/util.py:247
 msgid "a minute ago"
 msgstr ""
 
-#: cherrymusicserver/util.py:246
+#: cherrymusicserver/util.py:249
 msgid "a few seconds ago"
 msgstr ""
 
-#: cherrymusicserver/util.py:250
+#: cherrymusicserver/util.py:253
 #, python-format
 msgid "in %d years"
 msgstr ""
 
-#: cherrymusicserver/util.py:252
+#: cherrymusicserver/util.py:255
 msgid "in a year"
 msgstr ""
 
-#: cherrymusicserver/util.py:255
+#: cherrymusicserver/util.py:258
 #, python-format
 msgid "in %d months"
 msgstr ""
 
-#: cherrymusicserver/util.py:257
+#: cherrymusicserver/util.py:260
 msgid "in a month"
 msgstr ""
 
-#: cherrymusicserver/util.py:260
+#: cherrymusicserver/util.py:263
 #, python-format
 msgid "in %d weeks"
 msgstr ""
 
-#: cherrymusicserver/util.py:262
+#: cherrymusicserver/util.py:265
 msgid "in a week"
 msgstr ""
 
-#: cherrymusicserver/util.py:265
+#: cherrymusicserver/util.py:268
 #, python-format
 msgid "in %d days"
 msgstr ""
 
-#: cherrymusicserver/util.py:267
+#: cherrymusicserver/util.py:270
 msgid "in a day"
 msgstr ""
 
-#: cherrymusicserver/util.py:270
+#: cherrymusicserver/util.py:273
 #, python-format
 msgid "in %d hours"
 msgstr ""
 
-#: cherrymusicserver/util.py:272
+#: cherrymusicserver/util.py:275
 msgid "in an hour"
 msgstr ""
 
-#: cherrymusicserver/util.py:274
+#: cherrymusicserver/util.py:277
 msgid "in half an hour"
 msgstr ""
 
-#: cherrymusicserver/util.py:277
+#: cherrymusicserver/util.py:280
 #, python-format
 msgid "in %d minutes"
 msgstr ""
 
-#: cherrymusicserver/util.py:279
+#: cherrymusicserver/util.py:282
 msgid "in a minute"
 msgstr ""
 
-#: cherrymusicserver/util.py:281
+#: cherrymusicserver/util.py:284
 msgid "in a few seconds"
 msgstr ""
 
-#: cherrymusicserver/util.py:283
+#: cherrymusicserver/util.py:286
 msgid "just now"
 msgstr ""
 
-#: cherrymusicserver/util.py:304
+#: cherrymusicserver/util.py:307
 #, python-format
 msgid "Error writing file %(name)r to memory zip"
 msgstr ""
@@ -623,47 +624,47 @@ msgstr ""
 msgid "shouldn't get here! (argument path not in basedir)"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:649
+#: cherrymusicserver/sqlitecache.py:650
 #, python-format
 msgid "creating database entry for %r"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:666
+#: cherrymusicserver/sqlitecache.py:667
 #, python-format
 msgid "unable to decode filename %r in %r; skipping."
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:674
+#: cherrymusicserver/sqlitecache.py:675
 #, python-format
 msgid "expecting unicode path, got %s"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:684
+#: cherrymusicserver/sqlitecache.py:685
 #, python-format
 msgid ""
 "non-root filepaths must be direct relative to parent: path: %s, parent: %s"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:766
+#: cherrymusicserver/sqlitecache.py:767
 #, python-format
 msgid "cannot list directory: %s"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:775
+#: cherrymusicserver/sqlitecache.py:776
 #, python-format
 msgid "file not found: %s. skipping."
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:778
+#: cherrymusicserver/sqlitecache.py:779
 #, python-format
 msgid "file not in basedir: %s. skipping."
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:799
+#: cherrymusicserver/sqlitecache.py:800
 msgid "Loading files database into memory..."
 msgstr ""
 
-#: cherrymusicserver/__init__.py:111
+#: cherrymusicserver/__init__.py:118
 #, python-format
 msgid ""
 "\n"
@@ -672,7 +673,7 @@ msgid ""
 "Required version: %(required_version)s or higher\n"
 msgstr ""
 
-#: cherrymusicserver/__init__.py:185
+#: cherrymusicserver/__init__.py:206
 #, python-format
 msgid ""
 "============================================\n"
@@ -682,20 +683,20 @@ msgid ""
 "============================================"
 msgstr ""
 
-#: cherrymusicserver/__init__.py:199
+#: cherrymusicserver/__init__.py:220
 msgid "Error removing pid file, doesn't exist!"
 msgstr ""
 
-#: cherrymusicserver/__init__.py:231
+#: cherrymusicserver/__init__.py:252
 #, python-brace-format
 msgid "New configuration file was written to:{br}{path}"
 msgstr ""
 
-#: cherrymusicserver/__init__.py:256
+#: cherrymusicserver/__init__.py:277
 msgid "database schema update aborted. quitting."
 msgstr ""
 
-#: cherrymusicserver/__init__.py:274
+#: cherrymusicserver/__init__.py:295
 #, python-brace-format
 msgid ""
 "\n"
@@ -715,7 +716,7 @@ msgid ""
 "Run schema update? [y/N]: "
 msgstr ""
 
-#: cherrymusicserver/__init__.py:334
+#: cherrymusicserver/__init__.py:355
 #, python-format
 msgid ""
 "New configuration options available:\n"
@@ -723,20 +724,20 @@ msgid ""
 "                    Using default values for now."
 msgstr ""
 
-#: cherrymusicserver/__init__.py:339
+#: cherrymusicserver/__init__.py:360
 #, python-format
 msgid ""
 "The following configuration options are not used anymore:\n"
 "                        %s"
 msgstr ""
 
-#: cherrymusicserver/__init__.py:343
+#: cherrymusicserver/__init__.py:364
 msgid ""
 "Start with --newconfig to generate a new default config file next to your "
 "current one."
 msgstr ""
 
-#: cherrymusicserver/__init__.py:347
+#: cherrymusicserver/__init__.py:368
 #, python-brace-format
 msgid ""
 "\n"
@@ -751,44 +752,44 @@ msgid ""
 "    $ mv {src} {tgt}"
 msgstr ""
 
-#: cherrymusicserver/__init__.py:370
+#: cherrymusicserver/__init__.py:391
 msgid ""
 "\n"
 "==========================================================================\n"
 "Welcome to CherryMusic "
 msgstr ""
 
-#: cherrymusicserver/__init__.py:468
+#: cherrymusicserver/__init__.py:498
 #, python-format
 msgid "Starting server on port %s ..."
 msgstr ""
 
-#: cherrymusicserver/userdb.py:52
+#: cherrymusicserver/userdb.py:53
 msgid "empty username or password!"
 msgstr ""
 
-#: cherrymusicserver/userdb.py:73
+#: cherrymusicserver/userdb.py:77
 msgid "not a valid password"
 msgstr ""
 
-#: cherrymusicserver/userdb.py:153
+#: cherrymusicserver/userdb.py:157
 msgid "name must not be empty"
 msgstr ""
 
-#: cherrymusicserver/userdb.py:155
+#: cherrymusicserver/userdb.py:159
 msgid "password must not be empty"
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:128
+#: cherrymusicserver/httphandler.py:129
 msgid "Not secure, redirecting..."
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:154
+#: cherrymusicserver/httphandler.py:155
 #, python-brace-format
 msgid "user {name} just logged in."
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:180
+#: cherrymusicserver/httphandler.py:181
 msgid ""
 "\n"
 "            Dropping all sessions! Try not to change between python 2 and "
@@ -796,32 +797,32 @@ msgid ""
 "            everybody has to relogin now."
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:209
+#: cherrymusicserver/httphandler.py:210
 #, python-brace-format
 msgid "Rejected remote admin login from user: {name}"
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:415
+#: cherrymusicserver/httphandler.py:420
 msgid "Fetching album art for keywords {keywords!r}"
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:445
+#: cherrymusicserver/httphandler.py:458
 msgid "processing whole search request"
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:447
+#: cherrymusicserver/httphandler.py:460
 msgid "rendering search results as json"
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:605
+#: cherrymusicserver/httphandler.py:622
 msgid "Please log in"
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:615
+#: cherrymusicserver/httphandler.py:632
 msgid "Unknown playlist format: {format!r}"
 msgstr ""
 
-#: cherrymusicserver/httphandler.py:619
+#: cherrymusicserver/httphandler.py:636
 msgid "No playlists found"
 msgstr ""
 

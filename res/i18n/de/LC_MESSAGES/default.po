@@ -6,30 +6,35 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CherryMusic 0.27.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-01-13 02:48+0100\n"
-"PO-Revision-Date: 2013-12-17 17:29+0200\n"
-"Last-Translator: til <tilman.boerner@gmx.net>\n"
-"Language-Team: <tomwallroth@gmail.com>\n"
+"POT-Creation-Date: 2014-03-30 19:08+0200\n"
+"PO-Revision-Date: 2014-03-30 19:31+0100\n"
+"Last-Translator: tilboerner <tilman.boerner@gmx.net>\n"
+"Language-Team:  <tomwallroth@gmail.com>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Virtaal 0.7.1\n"
+"X-Generator: Poedit 1.6.4\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
-#: cherrymusicserver/cherrymodel.py:167
+#: cherrymusicserver/cherrymodel.py:178
 #, python-format
 msgid "%(user)s searched for '%(term)s'"
 msgstr "%(user)s hat gesucht nach '%(term)s'"
 
-#: cherrymusicserver/cherrymodel.py:170
+#: cherrymusicserver/cherrymodel.py:181
 msgid "sorting DB results using ResultOrder"
 msgstr "sortiere DB-Ergebnisse mit ResultOrder"
 
-#: cherrymusicserver/cherrymodel.py:182
+#: cherrymusicserver/cherrymodel.py:193
 msgid "checking and classifying results:"
 msgstr "prüfe und klassifiziere Ergebnisse:"
+
+#: cherrymusicserver/cherrymodel.py:206
+#, python-format
+msgid "Error fetching version info: %s"
+msgstr "Fehler beim Lesen der Versionsinfo: %s"
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
 #: cherrymusicserver/configuration.py:70
@@ -47,6 +52,7 @@ msgid ""
 "                    effects of link cycles.\n"
 "                            "
 msgstr ""
+"\n"
 "BASEDIR gibt das Basisverzeichnis an, in dem sich die Mediendateien "
 "befinden. Ein absoluter Pfad wird benötigt, z.B. BASEDIR=/absoluter/pfad/zu/"
 "medien.\n"
@@ -71,6 +77,7 @@ msgid ""
 "the stress on the CPU!\n"
 "                            "
 msgstr ""
+"\n"
 "TRANSCODE (experimentelles Feature!) ermöglicht es, auf Serverseite live in "
 "unterstützte Formate zu transcodieren. Dadurch lassen sich alle möglichen "
 "Formate auf verschiedenen Geräten und mit verschiedenen Browsern abspielen, "
@@ -93,6 +100,7 @@ msgid ""
 "                    album.\n"
 "                            "
 msgstr ""
+"\n"
 "Coverbilder automatisch von verschiedenen Webseiten laden, wenn lokal kein "
 "Bild gefunden werden kann. Standardmäßig muss der Amazon-Katalog herhalten. "
 "Diese Bilder werden im Client neben Ordnern angezeigt, die vom Server als "
@@ -113,6 +121,7 @@ msgid ""
 "                    Defaults to {default_value} {default_unit}.\n"
 "                            "
 msgstr ""
+"\n"
 "Maximalgröße (in Bytes) für den Download von Dateien in einer zip-Datei. "
 "Standardwert ist {default_value} {default_unit}."
 
@@ -127,6 +136,7 @@ msgid ""
 "accurate.\n"
 "                            "
 msgstr ""
+"\n"
 "MAXRESULTS gibt an, wieviele Suchergebnisse höchstens angezeigt werden. Ein "
 "höherer Wert verlangsamt die Suche, führt aber zu genaueren Ergebnissen."
 
@@ -142,6 +152,7 @@ msgid ""
 "otherwise.\n"
 "                            "
 msgstr ""
+"\n"
 "Teile der Datenbank werden in den Hauptspeicher geladen, um die "
 "Geschwindigkeit der Anfragen zu steigern. Nur auf Systemen anschalten, die "
 "über genug freien Speicher verfügen -- sonst passiert das Gegenteil und "
@@ -159,6 +170,7 @@ msgid ""
 "                    100 is a good value, as a CD can have up to 99 tracks.\n"
 "                            "
 msgstr ""
+"\n"
 "MAXSHOWFILES legt fest, wieviele Ordner und Dateien höchstens angezeigt "
 "werden. Längere Listen werden nach Anfangsbuchstaben gruppiert. 100 ist ein "
 "guter Wert, weil eine CD bis zu 99 Titel enthalten kann."
@@ -175,6 +187,7 @@ msgid ""
 "connection.\n"
 "                            "
 msgstr ""
+"\n"
 "Lässt den Server für Dateisuche und den Dateibrowser nur die Mediendatenbank "
 "benutzen, statt möglicherweise im Dateisystem nachzusehen. Nützlich, falls "
 "das BASEDIR sich auf einer externen Festplatte oder am anderen Ende einer "
@@ -203,6 +216,7 @@ msgid ""
 "                    same computer it is running on.\n"
 "                            "
 msgstr ""
+"\n"
 "Auf \"True\" setzen, damit der Server nicht auf Anfragen aus dem Netzwerk "
 "reagiert und Musik nur auf dem gleichen Rechner abspielt, auf dem er läuft."
 
@@ -219,6 +233,7 @@ msgid ""
 "                    under e.g. localhost:8080/cherrymusic\n"
 "                                "
 msgstr ""
+"\n"
 "Der URL-Pfad-Präfix, unter dem CherryMusic erreichbar ist. Normalerweise ist "
 "CherryMusic als Root-Ressource '/' eingebunden, und antwortet z.B. als "
 "localhost:8080. \n"
@@ -239,6 +254,7 @@ msgid ""
 "                    be automatically logged in as admin.\n"
 "                            "
 msgstr ""
+"\n"
 "Wenn localhost_auto_login auf \"True\" gesetzt ist, fragt der Server nicht "
 "nach Authentifizierung wenn er lokal angesprochen wird (als localhost o.ä.). "
 "Stattdessen wird automatisch der Admin-Benutzer eingeloggt, der beim Setup "
@@ -255,6 +271,7 @@ msgid ""
 "                    running on. This can improve security.\n"
 "                            "
 msgstr ""
+"\n"
 "Wenn permit_remote_admin_login auf \"False\" gesetzt ist, können sich Admin-"
 "Benutzer nur vom selben Rechner aus anmelden, auf dem CherryMusic läuft. Das "
 "kann die Sicherheit des Systems erhöhen."
@@ -269,6 +286,7 @@ msgid ""
 "                    playlists will be lost when the server is restarted.\n"
 "                            "
 msgstr ""
+"\n"
 "Benutzersessions werden im Arbeitsspeicher des Servers gehalten und nicht "
 "als Dateien angelegt. Ungespeicherte Playlisten der Benutzer gehen dann "
 "verloren, wenn der Server beendet oder neugestartet wird."
@@ -283,6 +301,7 @@ msgid ""
 "                    ssl options will be ommited.\n"
 "                            "
 msgstr ""
+"\n"
 "Die folgenden Einstellungen erlauben es, CherryMusic mit https-"
 "Verschlüsselung zu benutzen. Wenn ssl_enabled auf \"False\" gesetzt ist, "
 "werden alle weiteren ssl-Optionen ignoriert."
@@ -297,6 +316,7 @@ msgid ""
 "                    will be redirected to this port.\n"
 "                            "
 msgstr ""
+"\n"
 "Der Port für SSL/TLS-verschlüsselte Kommunikation. Wenn ssl_enabled auf "
 "\"True\" gesetzt ist, werden alle unverschlüsselten Anfragen auf diesen Port "
 "weitergeleitet."
@@ -311,6 +331,7 @@ msgid ""
 "                    location of the CherryMusic configuration file.\n"
 "                            "
 msgstr ""
+"\n"
 "Der Pfad zum SSL-Zertifikat, mit dem sich der Server bei Clients "
 "authentifiziert. Ein relativer Pfad wird interpretiert als relativ zum "
 "Verzeichnis der CherryMusic-Kofigurationsdatei cherrymusic.conf."
@@ -327,6 +348,7 @@ msgid ""
 "                    configuration file.\n"
 "                            "
 msgstr ""
+"\n"
 "Der Pfad zum privaten SSL-Schlüssel, mit dem der Server Nachrichten in "
 "gesicherten Verbindungen entschlüsselt und signiert. Der Schlüssel muss auf "
 "jeden Fall geheim bleiben!\n"
@@ -342,6 +364,7 @@ msgid ""
 "updates.\n"
 "                            "
 msgstr ""
+"\n"
 "Admin-Benutzer im Webclient über neue Features und Sicherheitsupdates "
 "benachrichtigen."
 
@@ -355,19 +378,19 @@ msgstr "Konfigurationsdatei nicht gefunden: %(filepath)s"
 msgid "configuration path is not a file: %(filepath)s"
 msgstr "Konfigurationspfad ist keine Datei: %(filepath)s"
 
-#: cherrymusicserver/metainfo.py:42
-msgid "python library \"stagger\" not found: There will be no ID-tag support!"
-msgstr ""
-"Python Bibliothek \"stagger\" nicht gefunden: keine Unterstuetzung von ID-"
-"tags!"
+#: cherrymusicserver/database/sql.py:266
+msgid "Exception while updating database schema."
+msgstr "Fehler beim Aktualisieren des Datenbankschemas."
 
-#: cherrymusicserver/metainfo.py:51
+#: cherrymusicserver/database/sql.py:267
 msgid ""
-"python library \"audioread\" not found!\n"
-"    -Audio file length can't be determined without it!"
+"Database error. This is probably due to your version of sqlite being too "
+"old. Try updating sqlite3 and updating python. If the problem persists, you "
+"will need to delete the database at "
 msgstr ""
-"Python-Bibliothek \"audioread\" nicht gefunden. Länge von Audiodateien kann "
-"nicht bestimmt werden!"
+"Datenbankfehler. Wahrscheinlich ist die Version von SQLite zu alt. sqlite3 "
+"und python aktualisieren. Wenn das nicht hilft, muss die folgende "
+"Datenbankdatei gelöscht werden:"
 
 #: cherrymusicserver/browsersetup.py:76
 msgid "resizing of album covers"
@@ -417,17 +440,11 @@ msgid ""
 "Open your browser and put the server IP:{port} in the address bar.\n"
 "If you run the server locally, use: localhost:{port}.\n"
 msgstr ""
+"\n"
 "Starte Setup-Server auf dem Port {port} ...\n"
 "Browser öffnen und SERVER_IP:{port} in die Adresszeile eingeben.\n"
 "Wenn der Server auf dem lokalen Rechner läuft, dann localhost:{port} "
-"benutzen."
-
-#: cherrymusicserver/albumartfetcher.py:86
-#, python-format
-msgid "unknown album art fetch method: '%(method)s', using default."
-msgstr ""
-"Unbekannte Methode zum Auffinden von Coverbildern: '%(method)s'. "
-"Standardmethode wird benutzt."
+"benutzen.\n"
 
 #: cherrymusicserver/i18n_client.py:3
 msgid "track has no path set!"
@@ -437,138 +454,138 @@ msgstr "Track hat keinen Dateipfad!"
 msgid "track has no label set!"
 msgstr "Track hat kein Titel!"
 
-#: cherrymusicserver/util.py:215
+#: cherrymusicserver/util.py:218
 #, python-format
 msgid "%d years ago"
 msgstr "vor %d Jahren"
 
-#: cherrymusicserver/util.py:217
+#: cherrymusicserver/util.py:220
 msgid "a year ago"
 msgstr "vor einem Jahr"
 
-#: cherrymusicserver/util.py:220
+#: cherrymusicserver/util.py:223
 #, python-format
 msgid "%d months ago"
 msgstr "vor %d Monaten"
 
-#: cherrymusicserver/util.py:222
+#: cherrymusicserver/util.py:225
 msgid "a month ago"
 msgstr "vor einem Monat"
 
-#: cherrymusicserver/util.py:225
+#: cherrymusicserver/util.py:228
 #, python-format
 msgid "%d weeks ago"
 msgstr "vor %d Wochen"
 
-#: cherrymusicserver/util.py:227
+#: cherrymusicserver/util.py:230
 msgid "a week ago"
 msgstr "vor einer Woche"
 
-#: cherrymusicserver/util.py:230
+#: cherrymusicserver/util.py:233
 #, python-format
 msgid "%d days ago"
 msgstr "vor %d Tagen"
 
-#: cherrymusicserver/util.py:232
+#: cherrymusicserver/util.py:235
 msgid "a day ago"
 msgstr "Gestern"
 
-#: cherrymusicserver/util.py:235
+#: cherrymusicserver/util.py:238
 #, python-format
 msgid "%d hours ago"
 msgstr "vor %d Stunden"
 
-#: cherrymusicserver/util.py:237
+#: cherrymusicserver/util.py:240
 msgid "an hour ago"
 msgstr "vor einer Stunde"
 
-#: cherrymusicserver/util.py:239
+#: cherrymusicserver/util.py:242
 msgid "half an hour ago"
 msgstr "vor einer halben Stunde"
 
-#: cherrymusicserver/util.py:242
+#: cherrymusicserver/util.py:245
 #, python-format
 msgid "%d minutes ago"
 msgstr "vor %d Minuten"
 
-#: cherrymusicserver/util.py:244
+#: cherrymusicserver/util.py:247
 msgid "a minute ago"
 msgstr "vor einer Minute"
 
-#: cherrymusicserver/util.py:246
+#: cherrymusicserver/util.py:249
 msgid "a few seconds ago"
 msgstr "vor ein paar Sekunden"
 
-#: cherrymusicserver/util.py:250
+#: cherrymusicserver/util.py:253
 #, python-format
 msgid "in %d years"
 msgstr "in %d Jahren"
 
-#: cherrymusicserver/util.py:252
+#: cherrymusicserver/util.py:255
 msgid "in a year"
 msgstr "in einem Jahr"
 
-#: cherrymusicserver/util.py:255
+#: cherrymusicserver/util.py:258
 #, python-format
 msgid "in %d months"
 msgstr "in %d Monaten"
 
-#: cherrymusicserver/util.py:257
+#: cherrymusicserver/util.py:260
 msgid "in a month"
 msgstr "in einem Monat"
 
-#: cherrymusicserver/util.py:260
+#: cherrymusicserver/util.py:263
 #, python-format
 msgid "in %d weeks"
 msgstr "in %d Wochen"
 
-#: cherrymusicserver/util.py:262
+#: cherrymusicserver/util.py:265
 msgid "in a week"
 msgstr "in einer Woche"
 
-#: cherrymusicserver/util.py:265
+#: cherrymusicserver/util.py:268
 #, python-format
 msgid "in %d days"
 msgstr "in %d Tagen"
 
-#: cherrymusicserver/util.py:267
+#: cherrymusicserver/util.py:270
 msgid "in a day"
 msgstr "Morgen"
 
-#: cherrymusicserver/util.py:270
+#: cherrymusicserver/util.py:273
 #, python-format
 msgid "in %d hours"
 msgstr "in %d Stunden"
 
-#: cherrymusicserver/util.py:272
+#: cherrymusicserver/util.py:275
 msgid "in an hour"
 msgstr "in einer Stunde"
 
-#: cherrymusicserver/util.py:274
+#: cherrymusicserver/util.py:277
 msgid "in half an hour"
 msgstr "in einer halben Stunde"
 
-#: cherrymusicserver/util.py:277
+#: cherrymusicserver/util.py:280
 #, python-format
 msgid "in %d minutes"
 msgstr "in %d Minuten"
 
-#: cherrymusicserver/util.py:279
+#: cherrymusicserver/util.py:282
 msgid "in a minute"
 msgstr "in einer Minute"
 
-#: cherrymusicserver/util.py:281
+#: cherrymusicserver/util.py:284
 msgid "in a few seconds"
 msgstr "in ein paar Sekunden"
 
-#: cherrymusicserver/util.py:283
+#: cherrymusicserver/util.py:286
 msgid "just now"
 msgstr "jetzt gerade"
 
-#: cherrymusicserver/util.py:304
+#: cherrymusicserver/util.py:307
 #, python-format
 msgid "Error writing file %(name)r to memory zip"
-msgstr ""
+msgstr "Fehler beim Schreiben der Datei %(name)r nach memory zip"
 
 #: cherrymusicserver/sqlitecache.py:111
 msgid "terms must not contain ''"
@@ -711,48 +728,48 @@ msgstr "Ueberliegender Pfad nicht in Datenbank: %r"
 msgid "shouldn't get here! (argument path not in basedir)"
 msgstr "shouldn't get here! (argument path not in basedir)"
 
-#: cherrymusicserver/sqlitecache.py:649
+#: cherrymusicserver/sqlitecache.py:650
 #, python-format
 msgid "creating database entry for %r"
 msgstr "Erstelle Datenbankeintrag fuer %r"
 
-#: cherrymusicserver/sqlitecache.py:666
+#: cherrymusicserver/sqlitecache.py:667
 #, python-format
 msgid "unable to decode filename %r in %r; skipping."
 msgstr "Kann den Dateinamen %r nicht in in %r dekodieren; ueberspringe."
 
-#: cherrymusicserver/sqlitecache.py:674
+#: cherrymusicserver/sqlitecache.py:675
 #, python-format
 msgid "expecting unicode path, got %s"
 msgstr "Erwartete unicode Pfad, erhielt %s"
 
-#: cherrymusicserver/sqlitecache.py:684
+#: cherrymusicserver/sqlitecache.py:685
 #, python-format
 msgid ""
 "non-root filepaths must be direct relative to parent: path: %s, parent: %s"
 msgstr ""
 "non-root filepaths must be direct relative to parent: path: %s, parent: %s"
 
-#: cherrymusicserver/sqlitecache.py:766
+#: cherrymusicserver/sqlitecache.py:767
 #, python-format
 msgid "cannot list directory: %s"
 msgstr "Kann Veryeichnis nicht listen: %s"
 
-#: cherrymusicserver/sqlitecache.py:775
+#: cherrymusicserver/sqlitecache.py:776
 #, python-format
 msgid "file not found: %s. skipping."
 msgstr "Datei nicht gefunden: %s. ueberspringe."
 
-#: cherrymusicserver/sqlitecache.py:778
+#: cherrymusicserver/sqlitecache.py:779
 #, python-format
 msgid "file not in basedir: %s. skipping."
 msgstr "Datei ist nicht im \"basedir\": %s. ueberspringe."
 
-#: cherrymusicserver/sqlitecache.py:799
+#: cherrymusicserver/sqlitecache.py:800
 msgid "Loading files database into memory..."
 msgstr "Lade Datenbank in den Arbeitsspeicher..."
 
-#: cherrymusicserver/__init__.py:111
+#: cherrymusicserver/__init__.py:118
 #, python-format
 msgid ""
 "\n"
@@ -765,7 +782,7 @@ msgstr ""
 "Gefundene Version: %(current_version)s\n"
 "Vorrausgesetzte Version %(required_version)s\n"
 
-#: cherrymusicserver/__init__.py:185
+#: cherrymusicserver/__init__.py:206
 #, python-format
 msgid ""
 "============================================\n"
@@ -780,20 +797,20 @@ msgstr ""
 "Datei gelöscht und cherrymusic neu gestartet werden.\n"
 "============================================"
 
-#: cherrymusicserver/__init__.py:199
+#: cherrymusicserver/__init__.py:220
 msgid "Error removing pid file, doesn't exist!"
 msgstr "Fehler beim löschen der PID Datei, sie existierte nicht!"
 
-#: cherrymusicserver/__init__.py:231
+#: cherrymusicserver/__init__.py:252
 #, python-brace-format
 msgid "New configuration file was written to:{br}{path}"
 msgstr "Eine neue Konfigurationsdatei wurde geschrieben: {br}{path}"
 
-#: cherrymusicserver/__init__.py:256
+#: cherrymusicserver/__init__.py:277
 msgid "database schema update aborted. quitting."
 msgstr "Datenbankschema Aktualisierung abgebrochen. Programm beendet."
 
-#: cherrymusicserver/__init__.py:274
+#: cherrymusicserver/__init__.py:295
 #, python-brace-format
 msgid ""
 "\n"
@@ -830,7 +847,7 @@ msgstr ""
 "==========================================================================\n"
 "Datenbank-Aktualisierung jetzt durchführen? [y/N]: "
 
-#: cherrymusicserver/__init__.py:334
+#: cherrymusicserver/__init__.py:355
 #, python-format
 msgid ""
 "New configuration options available:\n"
@@ -841,7 +858,7 @@ msgstr ""
 "                        %s\n"
 "                    Verwende vorerst die Standardwerte."
 
-#: cherrymusicserver/__init__.py:339
+#: cherrymusicserver/__init__.py:360
 #, python-format
 msgid ""
 "The following configuration options are not used anymore:\n"
@@ -850,7 +867,7 @@ msgstr ""
 "Folgende Konfigurationsoptionen werden  nicht mehr verwendet:\n"
 "                        %s"
 
-#: cherrymusicserver/__init__.py:343
+#: cherrymusicserver/__init__.py:364
 msgid ""
 "Start with --newconfig to generate a new default config file next to your "
 "current one."
@@ -858,7 +875,7 @@ msgstr ""
 "Starte mit --newconfig um eine neue Konfigurationsdatei neben der bereits "
 "vorhandenen zu erstellen."
 
-#: cherrymusicserver/__init__.py:347
+#: cherrymusicserver/__init__.py:368
 #, python-brace-format
 msgid ""
 "\n"
@@ -883,7 +900,7 @@ msgstr ""
 "\n"
 "    $ mv {src} {tgt}"
 
-#: cherrymusicserver/__init__.py:370
+#: cherrymusicserver/__init__.py:391
 msgid ""
 "\n"
 "==========================================================================\n"
@@ -893,74 +910,75 @@ msgstr ""
 "==========================================================================\n"
 "Willkommen bei CherryMusic "
 
-#: cherrymusicserver/__init__.py:468
+#: cherrymusicserver/__init__.py:498
 #, python-format
 msgid "Starting server on port %s ..."
 msgstr "Starte Server auf Port %s ..."
 
-#: cherrymusicserver/userdb.py:52
+#: cherrymusicserver/userdb.py:53
 msgid "empty username or password!"
 msgstr "Benutzername oder Passwort leer!"
 
-#: cherrymusicserver/userdb.py:73
+#: cherrymusicserver/userdb.py:77
 msgid "not a valid password"
 msgstr "kein gueltiges Passwort"
 
-#: cherrymusicserver/userdb.py:153
+#: cherrymusicserver/userdb.py:157
 msgid "name must not be empty"
 msgstr "Name darf nicht leer sein"
 
-#: cherrymusicserver/userdb.py:155
+#: cherrymusicserver/userdb.py:159
 msgid "password must not be empty"
 msgstr "Passwort darf nicht leer sein"
 
-#: cherrymusicserver/httphandler.py:128
+#: cherrymusicserver/httphandler.py:129
 msgid "Not secure, redirecting..."
 msgstr "Keine sichere Verbindung. Weiterleiten auf sicheren Port..."
 
-#: cherrymusicserver/httphandler.py:154
+#: cherrymusicserver/httphandler.py:155
 #, python-brace-format
 msgid "user {name} just logged in."
 msgstr "Benutzer {name} hat sich eingeloggt."
 
-#: cherrymusicserver/httphandler.py:180
+#: cherrymusicserver/httphandler.py:181
 msgid ""
 "\n"
 "            Dropping all sessions! Try not to change between python 2 and "
 "3,\n"
 "            everybody has to relogin now."
 msgstr ""
+"\n"
 "Setze alle Benutzersessions zurück! Möglichst nicht zwischen Python 2 und 3 "
 "wechseln, jeder Benutzer muss sich jetzt neu einloggen."
 
-#: cherrymusicserver/httphandler.py:209
+#: cherrymusicserver/httphandler.py:210
 #, python-brace-format
 msgid "Rejected remote admin login from user: {name}"
 msgstr "Admin-Login über Netzwerkverbindung abgewiesen für Benutzer: {name}"
 
-#: cherrymusicserver/httphandler.py:415
+#: cherrymusicserver/httphandler.py:420
 msgid "Fetching album art for keywords {keywords!r}"
 msgstr "Coverbild herunterladen für Schlüsselwörter {keywords!r}"
 
-#: cherrymusicserver/httphandler.py:445
+#: cherrymusicserver/httphandler.py:458
 msgid "processing whole search request"
 msgstr "Bearbeite vollständgige Suchanfrage"
 
-#: cherrymusicserver/httphandler.py:447
+#: cherrymusicserver/httphandler.py:460
 msgid "rendering search results as json"
 msgstr "Suchergebnisse als JSON rendern"
 
-#: cherrymusicserver/httphandler.py:605
+#: cherrymusicserver/httphandler.py:622
 msgid "Please log in"
-msgstr ""
+msgstr "Bitte einloggen"
 
-#: cherrymusicserver/httphandler.py:615
+#: cherrymusicserver/httphandler.py:632
 msgid "Unknown playlist format: {format!r}"
-msgstr ""
+msgstr "Unbekanntes Playlist-Format: {format!r}"
 
-#: cherrymusicserver/httphandler.py:619
+#: cherrymusicserver/httphandler.py:636
 msgid "No playlists found"
-msgstr ""
+msgstr "Keine Playlisten gefunden"
 
 #: cherrymusicserver/playlistdb.py:53
 msgid "This playlist doesn't exist! Nothing deleted!"
@@ -977,6 +995,24 @@ msgstr "Ich kann keine leere Playlist erstellen, sorry."
 #: cherrymusicserver/playlistdb.py:83
 msgid "This playlist name already exists! Nothing saved."
 msgstr "Dieser Playlistname existiert bereits! Nichts gespeichert."
+
+#~ msgid ""
+#~ "python library \"stagger\" not found: There will be no ID-tag support!"
+#~ msgstr ""
+#~ "Python Bibliothek \"stagger\" nicht gefunden: keine Unterstuetzung von ID-"
+#~ "tags!"
+
+#~ msgid ""
+#~ "python library \"audioread\" not found!\n"
+#~ "    -Audio file length can't be determined without it!"
+#~ msgstr ""
+#~ "Python-Bibliothek \"audioread\" nicht gefunden. Länge von Audiodateien "
+#~ "kann nicht bestimmt werden!"
+
+#~ msgid "unknown album art fetch method: '%(method)s', using default."
+#~ msgstr ""
+#~ "Unbekannte Methode zum Auffinden von Coverbildern: '%(method)s'. "
+#~ "Standardmethode wird benutzt."
 
 #~ msgid "attach database \"%s\" as attached_db"
 #~ msgstr "attach database \"%s\" as attached_db"
