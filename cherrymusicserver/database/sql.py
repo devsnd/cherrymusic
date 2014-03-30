@@ -235,7 +235,7 @@ class Updater(object):
         log.d('initializing database %r to version %s', self.name, vnum)
         cxn = self.db.connection()
         cxn.isolation_level = None  # autocommit
-        cxn.executescript(self.desc[vnum]['create.sql'])
+        self._runscript(vnum, 'create.sql', cxn)
         self._run_afterscript_if_exists(vnum, cxn)
         self._setversion(vnum, cxn)
         cxn.isolation_level = ''
@@ -245,7 +245,7 @@ class Updater(object):
         log.d('updating database %r to version %d', self.name, vnum)
         cxn = self.db.connection()
         cxn.isolation_level = None  # autocommit
-        cxn.executescript(self.desc[vnum]['update.sql'])
+        self._runscript(vnum, 'update.sql', cxn)
         self._run_afterscript_if_exists(vnum, cxn)
         self._setversion(vnum, cxn)
         cxn.isolation_level = ''
@@ -253,10 +253,23 @@ class Updater(object):
 
     def _run_afterscript_if_exists(self, vnum, conn):
         try:
-            conn.executescript(self.desc[vnum]['after.sql'])
+            self._runscript(vnum, 'after.sql', conn)
         except KeyError:
             pass
 
+    def _runscript(self, version, name, cxn):
+        try:
+            cxn.executescript(self.desc[version][name])
+        except sqlite3.OperationalError:
+            # update scripts are tested, so the problem's seems to be sqlite
+            # itself
+            log.x(_('Exception while updating database schema.'))
+            log.e(_('Database error. This is probably due to your version of'
+                    ' sqlite being too old. Try updating sqlite3 and'
+                    ' updating python. If the problem persists, you will need'
+                    ' to delete the database at ' + self.db.dblocation))
+            import sys
+            sys.exit(1)
 
 class TmpConnector(AbstractConnector):
     """Special SQLite Connector that uses its own temporary directory.
