@@ -1,0 +1,44 @@
+// 2 column display for the desktop
+@media (min-width: @screen-desktop) {
+    .playlist-container-parent{
+        position: fixed;
+        bottom: @mediaplayer-height;
+        top: 150px;
+        overflow: auto;
+        width: 50%;
+    }
+    #playlist-panel{
+        position: absolute;
+        top: @navbar-height;
+        bottom: 0;
+        left: 50%;
+    }
+
+    #search-panel{
+        position: fixed;
+        top: @navbar-height;
+        bottom: @mediaplayer-height;
+        overflow: auto;
+        direction: rtl; /*scrollbar on the left*/
+        & > div{
+            direction: ltr; /*back to normal*/
+        }
+    }
+}
+
+// move up playlist panel if there is enough space.
+@media (min-width: @screen-lg) {
+    div.navbar-fixed-top{
+        right: 50%; // make navbar only half it's size to make space for playlist tabs
+    }
+    #playlist-panel{
+        top: 0; //move panel to the top
+    }
+    .playlist-tab-list{
+        // leave some space a the top for giving the a more physical feeling
+        padding-top: 13px;
+    }
+    .playlist-container-parent{
+        top: 105px !important; //adjust scrollable inner playlist container
+    }
+}

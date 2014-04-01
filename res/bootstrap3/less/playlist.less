@@ -1,0 +1,87 @@
+#playlist-panel{
+   box-shadow: -5px 0px 5px rgba(0, 0, 0, 0.4);
+}
+
+.playlist-tab{
+    &-list{
+        background-color: @navbar-inverse-bg;
+        padding-top: 1px;
+    }
+    
+    &-inactive a{
+        background-color: @nav-tabs-border-color;
+    }
+    
+    &-closer{
+        font-size: 20px;
+        height: 0;
+        line-height: 0;
+        margin-left: 8px;
+        
+        &:hover{
+            font-weight: 900;
+        }
+    }
+    
+    &-new a{
+        height: 41px;
+    }
+    
+    &-border-left{
+        border-left: 1px solid @nav-tabs-border-color;
+    }
+}
+
+#playlistCommands{
+    padding: 5px;
+}
+
+.playlist-container{
+    padding: 0;
+    
+    &-parent{
+        padding: 0 10px;
+    }
+
+    &-list{
+        /* leave room for one playlist item at the end, so that the
+        automatic scrolling does not need to be triggered twice */
+        padding: 0 0 @playlist-item-height 0;
+
+        & > li{
+            list-style-type: none;
+            margin: 5px 0;
+            padding: 0 5px;
+            min-height: @playlist-item-height;
+        }
+    }
+    
+    .jp-playlist{
+        &-item{
+            display: block;
+            &:hover{
+                text-decoration: none;
+            }
+            
+            &-remove{
+                float: right;
+                padding: 0px 5px;
+                display: block;
+            }
+            
+            &-action{
+                float: left;
+            }
+        }
+
+        &-current{
+            background-color: @main-color-bright;
+            color: #000000;
+        }
+
+        &-playtime{
+            float: left;
+            margin: 0 5px 0 0;
+        }
+    }
+}
