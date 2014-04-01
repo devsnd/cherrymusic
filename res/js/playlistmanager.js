@@ -485,6 +485,8 @@ PlaylistManager.prototype = {
             var isactive = ''
             if(pl.id == this.editingPlaylist){
                 isactive = ' class="active" ';
+            } else {
+                isactive = ' class="playlist-tab-inactive" ';
             }
             pltabs += '<li '+isactive+' id="'+this.tabid2htmlid(pl.id)+'">';
 
@@ -505,7 +507,7 @@ PlaylistManager.prototype = {
             }
             pltabs += '</a></li>';
         }
-        pltabs += '<li><a href="#" onclick="playlistManager.newPlaylist()"><b>+</b></a></li>';
+        pltabs += '<li class="playlist-tab-inactive playlist-tab-new"><a href="#" onclick="playlistManager.newPlaylist()"><b>+</b></a></li>';
         $(self.cssSelectorPlaylistChooser+' ul').empty()
         $(self.cssSelectorPlaylistChooser+' ul').append(pltabs);
     },

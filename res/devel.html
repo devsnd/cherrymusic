@@ -547,7 +547,7 @@
         <li class="hidden-xs">
             <form class="navbar-form navbar-left" role="search" id="searchform" onsubmit="return search($(this))">
                 <!--workaround for CHROME BUG  https://code.google.com/p/chromium/issues/detail?id=309483 -->
-                <div class="input-group" style="width: 300px">
+                <div class="input-group" style="width: 260px">
                     <input type="text" name="searchinput" class="searchinput form-control" placeholder="Search">
                     <span class="input-group-btn">
                         <button type="submit" class="btn btn-primary">Search</button>
@@ -562,7 +562,7 @@
             <a href="#" onclick="showPlaylists()">load playlist</a>
         </li>
     </ul>
-    <ul class="nav navbar-nav navbar-right">
+    <ul class="nav navbar-nav">
         <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                 <b class="caret"></b><span class="glyphicon glyphicon-wrench"></span>
@@ -599,9 +599,9 @@
             <!-- PLAYLIST TAB START -->
             <div id="jplayer">
                 <div id="over-playlist-tabs">
-                    <div id="playlistChooser"><ul class="nav nav-tabs"></ul></div>
+                    <div id="playlistChooser"><ul class="playlist-tab-list nav nav-tabs"></ul></div>
                 </div>
-                <div id="playlistCommands">
+                <div id="playlistCommands" class="playlist-tab-border-left">
                     <div class="playlist-command-buttons row">
                         <a show-cond="queue" class="pull-left btn btn-xs btn-default" onclick="randomPlaylist(); return false;" >random!</a>
                         <a show-cond="queue" id="save-playlist-from-queue" href="#saveplaylistmodal"  data-toggle="modal" class="pull-left new-playlist-from-queue btn btn-xs btn-default">save as playlist</a>
@@ -631,7 +631,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="playlist-container-parent"></div>
+                <div class="playlist-container-parent playlist-tab-border-left"></div>
                 <div id="playlistBrowser">
                     <div class="available-playlists" style="display: none">
                     </div>        

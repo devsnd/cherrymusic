@@ -13,7 +13,10 @@
   z-index: @zindex-navbar;
   min-height: @navbar-height; // Ensure a navbar always shows (e.g., without a .navbar-brand in collapsed mode)
   margin-bottom: @navbar-margin-bottom;
-  border: 1px solid transparent;
+
+
+  // remove border so tablist bg and navbar unite
+  /* border: 1px solid transparent; */
 
   // Prevent floats from breaking the navbar
   .clearfix();
@@ -618,4 +621,10 @@
     }
   }
 
+}
+
+// make some space, so that the playlist can move up on +1200 pixel screens
+.navbar-nav > li > a{
+    padding-left: 7px;
+    padding-right: 7px;
 }

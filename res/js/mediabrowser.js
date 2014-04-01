@@ -176,7 +176,7 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
                               '<input type="text" class="playlist-filter-input form-control" placeholder="title or trackname"'+
                               'onchange="showPlaylists(\'\', $(\'.playlist-filter-input\').val())">'+
                               '<span class="input-group-btn">'+
-                                '<button type="submit" onclick="showPlaylists(\'\', $(\'.playlist-filter-input\').val())" class="btn btn-primary">Search</button>'+
+                                '<button type="submit" onclick="showPlaylists(\'\', $(\'.playlist-filter-input\').val())" class="btn btn-default">Search</button>'+
                               '</span>'+
                             '</div>'+
                         '</div>'+
