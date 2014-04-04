@@ -58,6 +58,8 @@ from cherrymusicserver.util import Performance
 from cherrymusicserver import resultorder
 from cherrymusicserver import log
 
+# used for sorting
+NUMBERS = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
 
 @service.user(cache='filecache')
 class CherryModel:
@@ -74,18 +76,24 @@ class CherryModel:
 
     @classmethod
     def fileSortFunc(cls, filepath):
-        upper = pathprovider.filename(filepath).upper()
+        upper = pathprovider.filename(filepath).upper().strip()
         return upper
 
     @classmethod
     def fileSortFuncNum(cls, filepath):
         upper = CherryModel.fileSortFunc(filepath)
-        if ' ' in upper:
-            part_part = upper[:upper.index(' ')]
+        # check if the filename starts with a number
+        if upper.startswith(NUMBERS):
+            # find index of the first non numerical character:
+            non_number_index = 0
+            for idx, char in enumerate(upper):
+                if not char in NUMBERS:
+                    break
+                else:
+                    non_number_index += 1
             # make sure that numbers are sorted correctly by evening out
-            # the number in the filename 0-padding to 5 digits.
-            if part_part.isdigit():
-                return '0'*(5 - len(part_part)) + upper
+            # the number in the filename 0-padding up to 5 digits.
+            return '0'*(5 - non_number_index) + upper
         return upper
 
     def sortFiles(self, files, fullpath='', number_ordering=False):
