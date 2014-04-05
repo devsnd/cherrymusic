@@ -6,7 +6,7 @@ import codecs
 import time
 
 usage = """
-%s --major 
+%s --major
     prepare a major release, e.g. 1.3.5 --> 2.3.5
 %s --minor
     prepare a minor release, e.g. 1.3.5 --> 1.4.5
@@ -14,7 +14,7 @@ usage = """
     prepare a patch release, e.g. 1.3.5 --> 1.3.6
 """ % (__file__,__file__,__file__,)
 
-if (2 > len(sys.argv) == 1) or not sys.argv[1] in ['--major','--minor','--patch']: 
+if (2 > len(sys.argv) == 1) or not sys.argv[1] in ['--major','--minor','--patch']:
     print(usage)
     sys.exit(1)
 else:
@@ -28,9 +28,9 @@ rawcmversion = codecs.decode(output, 'UTF-8')
 major, minor, patch = [int(v) for v in rawcmversion.split('.')]
 version_now = (major, minor, patch)
 if release_type == 'major':
-    version_next = (major+1, minor, patch)
+    version_next = (major+1, 0, 0)
 elif release_type == 'minor':
-    version_next = (major, minor+1, patch)
+    version_next = (major, minor+1, 0)
 elif release_type == 'patch':
     version_next = (major, minor, patch+1)
 
