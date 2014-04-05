@@ -71,6 +71,14 @@ FAST_FILE_SEARCH_LIMIT = 20
 
 DBNAME = 'cherry.cache'
 
+# unidecode will transform umlauts etc to their ASCII equivalent by
+# stripping the accents. This is a simple table for other common
+# transformations not performed by unidecode
+SPECIAL_LETTER_TRANSFORMS = {
+    'ä': 'ae',
+    'ö': 'oe',
+    'ü': 'ue',
+}
 
 class SQLiteCache(object):
 
@@ -103,6 +111,13 @@ class SQLiteCache(object):
         if UNIDECODE_AVAILABLE:
             unidecoded = [unidecode.unidecode(word) for word in words]
             words += unidecoded
+        special_transforms = []
+        for word in words:
+            if any(char in word for char in SPECIAL_LETTER_TRANSFORMS.keys()):
+                for char, substitute in SPECIAL_LETTER_TRANSFORMS.items():
+                    word = word.replace(char, substitute)
+                special_transforms.append(word)
+        words += special_transforms
         return set(words)
 
     def fetchFileIds(self, terms, maxFileIdsPerTerm, mode):
