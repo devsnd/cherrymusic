@@ -1,6 +1,18 @@
 Changelog
 ---------
 
+0.32.0 (2014-04-05)
+
+- FEATURE: built-in meta tag display in playlists for all platforms
+- FEATURE: playlist scrolls to follow added an newly playing tracks
+- FIXED: current track is always displayed in player area
+- FIXED: album art cache works reliably
+- IMPROVEMENT: better search for names containing umlauts
+- IMPROVEMENT: generally improved UI usability
+- IMPROVEMENT: stability and performance of album art fetching
+- IMPROVEMENT: faster playlist loading
+- IMPROVEMENT: faster loading of client through gzip compression
+
 0.31.2 (2014-02-16)
 
 - IMPROVEMENT: bump version number above 0.31.0
