@@ -473,6 +473,8 @@ Have fun!
                     'tools.staticdir.dir': resourcedir,
                     'tools.staticdir.index': 'index.html',
                     'tools.caching.on': False,
+                    'tools.gzip.mime_types': ['text/html', 'text/plain', 'text/javascript', 'text/css'],
+                    'tools.gzip.on': True,
                 },
                 '/serve': {
                     'tools.staticdir.on': True,
