@@ -222,7 +222,7 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
         $(self.cssSelector).parent().parent().scrollTop(self.listing_data_stack[self.listing_data_stack.length-1].scroll);
 
         playlistManager.setTrackDestinationLabel();
-        MediaBrowser.static.albumArtLoader(cssSelector);
+        MediaBrowser.static.albumArtLoader('#search-panel');
     }
 
     this.render();
@@ -353,7 +353,7 @@ MediaBrowser.static = {
         "use strict";
         var winheight = $(window).height();
         var scrolled_down = $(cssSelector).scrollTop();
-        var preload_threshold = 100; //pixels
+        var preload_threshold = 50; //pixels
         $(cssSelector).find('.list-dir-albumart.unloaded').each(
             function(idx){
                 var img_pos = $(this).position().top;
@@ -365,6 +365,53 @@ MediaBrowser.static = {
                 }
             }
         );
-    }
+        $(cssSelector).find('.meta-info.unloaded').each(
+            function(idx){
+                var track_pos = $(this).parent().position().top;
+                var above_screen = track_pos < scrolled_down - preload_threshold;
+                var below_screen = track_pos > winheight + scrolled_down + preload_threshold;
+                if(!above_screen && !below_screen){
+                    var self = this;
+                    var path_url_enc = $(this).attr('path');
+                    var success = function(data){
+                        $(self).show();
+                        var metainfo = $.parseJSON(data);
+                        // only use tag info if at least artist and title are known
+                        if (metainfo.artist.length > 0 && metainfo.title.length > 0) {
+                            $(self).find('.meta-info-artist').text(
+                                metainfo.artist
+                            );
+                            $(self).find('.meta-info-title').text(
+                                metainfo.title
+                            );
+                            if(metainfo.track.length > 0){
+                                if(metainfo.track.length < 2){
+                                    metainfo.track = '0' + metainfo.track;
+                                }
+                                $(self).find('.meta-info-track').text(
+                                    metainfo.track
+                                );
+                            }
+                            $(self).parent().find('.simplelabel').hide();
+                        }
+                        // show length anyway, if it was detemined.
+                        if(metainfo.length){
+                            $(self).find('.meta-info-length').text(
+                                '('+jPlayerPlaylist.prototype._formatTime(metainfo.length) + ')'
+                            );
+                        }
+                    }
+                    $(this).removeClass('unloaded');
+                    api(
+                        'getsonginfo',
+                        {'path': decodeURIComponent(path_url_enc)},
+                        success,
+                        errorFunc('error getting song metainfo'),
+                        true
+                    );
+                }
+            }
+        );
+    },
 }
 
