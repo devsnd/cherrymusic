@@ -5329,8 +5329,14 @@ body:after {
 }
 .playlist-container .jp-playlist-item-remove {
   float: right;
-  padding: 0px 5px;
+  font-size: 20px;
+  line-height: 15px;
   display: block;
+  color: #888;
+}
+.playlist-container .jp-playlist-item-remove:hover {
+  text-decoration: none;
+  color: #000;
 }
 .playlist-container .jp-playlist-item-action {
   float: left;
