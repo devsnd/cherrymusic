@@ -51,3 +51,5 @@ cherrymusic/site.log
 # Sphinx builds
 doc/sphinx/_build
 
+# pycharm
+.idea
