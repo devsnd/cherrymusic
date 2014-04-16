@@ -161,7 +161,7 @@ class CherryModel:
 
     def addMusicEntry(self, fullpath, list):
         if os.path.isfile(fullpath):
-            if isplayable(fullpath):
+            if self.isplayable(fullpath):
                 list.append(MusicEntry(strippath(fullpath)))
         else:
             list.append(MusicEntry(strippath(fullpath), dir=True))
@@ -199,7 +199,7 @@ class CherryModel:
                     sortedResults.debugOutputSort = None  # free ram
 
         with Performance(_('checking and classifying results:')):
-            results = list(filter(isValidMediaFile, results))
+            results = list(filter(self.isValidMediaFile, results))
         return results
 
     def check_for_updates(self):
@@ -281,26 +281,27 @@ class CherryModel:
     def randomMusicEntries(self, count):
         loadCount = int(count * 1.5) + 1           # expect 70% valid entries
         entries = self.cache.randomFileEntries(loadCount)
-        filteredEntries = list(filter(isValidMediaFile, entries))
+        filteredEntries = list(filter(self.isValidMediaFile, entries))
 
         return filteredEntries[:count]
 
+    def isValidMediaFile(self, file):
+        file.path = strippath(file.path)
+        #let only playable files appear in the search results
+        if file.path.startswith('.'):
+            return False
+        if not self.isplayable(file.path) and not file.dir:
+            return False
+        return True
 
-def isValidMediaFile(file):
-    file.path = strippath(file.path)
-    #let only playable files appear in the search results
-    if file.path.startswith('.'):
-        return False
-    if not isplayable(file.path) and not file.dir:
-        return False
-    return True
-
-
-def isplayable(filename):
-    '''checks to see if there's no extension or if the extension is in
-    the configured 'playable' list'''
-    ext = os.path.splitext(filename)[1]
-    return ext and ext[1:].lower() in CherryModel.supportedFormats
+    def isplayable(self, filename):
+        '''checks to see if there's no extension or if the extension is in
+        the configured 'playable' list'''
+        ext = os.path.splitext(filename)[1]
+        is_supported_ext = ext and ext[1:].lower() in CherryModel.supportedFormats
+        # listed files must not be empty
+        is_empty_file = os.path.getsize(self.abspath(filename)) == 0
+        return is_supported_ext and not is_empty_file
 
 
 def strippath(path):

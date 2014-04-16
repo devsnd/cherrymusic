@@ -30,6 +30,7 @@
 #
 
 import nose
+import os
 
 from mock import *
 from nose.tools import *
@@ -45,7 +46,7 @@ def cherryconfig(cfg=None):
     from cherrymusicserver import configuration
     cfg = cfg or {}
     c = configuration.from_defaults()
-    c = c.update({'media.basedir': '/'})
+    c = c.update({'media.basedir': os.path.join(os.path.dirname(__file__), 'data_files')})
     c = c.update(cfg)
     return c
 
@@ -74,11 +75,20 @@ def test_hidden_names_listdir(cache, os):
 def test_hidden_names_search(cherrypy, cache):
     model = cherrymodel.CherryModel()
 
-    cache.searchfor.return_value = [cherrymodel.MusicEntry('.hidden', dir=True)]
+    cache.searchfor.return_value = [cherrymodel.MusicEntry('.hidden.mp3', dir=True)]
     assert not model.search('something')
 
-    cache.searchfor.return_value = [cherrymodel.MusicEntry('nothidden', dir=True)]
+    cache.searchfor.return_value = [cherrymodel.MusicEntry('not_hidden.mp3', dir=True)]
     assert model.search('something')
+
+@patch('cherrymusicserver.cherrymodel.cherry.config', cherryconfig({'search.maxresults': 10}))
+@patch('cherrymusicserver.cherrymodel.CherryModel.cache')
+@patch('cherrymusicserver.cherrymodel.cherrypy')
+def test_hidden_names_listdir(cherrypy, cache):
+    model = cherrymodel.CherryModel()
+    dir_listing = model.listdir('')
+    assert len(dir_listing) == 1
+    assert dir_listing[0].path == 'not_hidden.mp3'
 
 
 if __name__ == '__main__':
