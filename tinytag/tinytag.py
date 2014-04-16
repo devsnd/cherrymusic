@@ -62,7 +62,7 @@ class TinyTag(object):
         }
         size = os.path.getsize(filename)
         if not size > 0:
-            return TinyTag()
+            return TinyTag(None, 0)
         for fileextension, tagclass in mapping.items():
             if filename.lower().endswith(fileextension):
                 with open(filename, 'rb') as af:
