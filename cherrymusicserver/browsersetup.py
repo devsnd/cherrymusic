@@ -39,11 +39,6 @@ from cherrymusicserver import pathprovider
 from cherrymusicserver import configuration as cfg
 
 
-def obj_hook(inp):
-    print(type(inp))
-    return inp
-
-
 class SetupHandler:
     def index(self):
         return pathprovider.readRes('res/setup.html')
