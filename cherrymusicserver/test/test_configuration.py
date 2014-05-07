@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 #
 # CherryMusic - a standalone music server
 # Copyright (c) 2012 - 2014 Tom Wallroth & Tilman Boerner
