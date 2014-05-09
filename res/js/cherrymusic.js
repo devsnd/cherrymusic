@@ -133,20 +133,43 @@ function successNotify(msg){
     };
 }
 
-function displayNotification(msg,type){
+function hideNotification(selector){
+    var notification = $(selector);
+    if(notification.length){
+        notification.fadeOut('slow', function(){
+            notification.remove();
+        });
+    }
+}
+
+function displayNotification(msg, type, duration){
+    if(typeof duration === 'undefined'){
+        duration = 5000;
+    }
     var selector = '#errormessage:contains(' + msg + ')';
     var notificationExists = Boolean($(selector).length);
     if(notificationExists) {
         return;
     }
+    var unique_class_id = 'notification-'+Math.floor(Math.random()*1000000);
+    var cssclass;
+    if(type == 'error'){
+        cssclass = 'alert-danger';
+    } else if(type == 'success'){
+        cssclass = 'alert-success';
+    } else {
+        cssclass = 'alert-info';
+    }
+    cssclass += ' '+unique_class_id;
     templateLoader.render_append(
         'flash-message',
         {
             msg : msg,
-            cssclass: type=='error'?'alert-danger':type=='success'?'alert-success':'alert-info'
+            cssclass: cssclass,
         },
         $('#errormessage')
     );
+    window.setTimeout('hideNotification(".'+unique_class_id+'")', duration)
 }
 
 /*******************
