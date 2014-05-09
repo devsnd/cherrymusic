@@ -75,10 +75,10 @@ def test_hidden_names_listdir(cache, os):
 def test_hidden_names_search(cherrypy, cache):
     model = cherrymodel.CherryModel()
 
-    cache.searchfor.return_value = [cherrymodel.MusicEntry('.hidden.mp3', dir=True)]
+    cache.searchfor.return_value = [cherrymodel.MusicEntry('.hidden.mp3', dir=False)]
     assert not model.search('something')
 
-    cache.searchfor.return_value = [cherrymodel.MusicEntry('not_hidden.mp3', dir=True)]
+    cache.searchfor.return_value = [cherrymodel.MusicEntry('not_hidden.mp3', dir=False)]
     assert model.search('something')
 
 @patch('cherrymusicserver.cherrymodel.cherry.config', cherryconfig({'search.maxresults': 10}))
