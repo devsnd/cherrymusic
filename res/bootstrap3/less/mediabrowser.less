@@ -34,12 +34,14 @@
     }
     &-wrench{
         position: relative;
+        display: inline;
         float: left;
-        color: #ddd;
+        color: #fff;
         &:hover{
             color: #444;
             cursor: pointer;
         }
+        padding: 0 2px;
     }
     
     & > li:nth-child(odd) {
@@ -103,13 +105,24 @@
             max-height: @albumart-img-size;
         }
     }
-    
+
+    &-info-bar{
+        background-color: #ddd;
+    }
+
     &-name{
         font-size: @font-size-small;
         display: block;
         text-align: center;
+        &-wrap{
+        }
     }
-    
+
+    &-folder-files-count{
+        color: #999;
+        display: inline;
+    }
+
     &-item{
         display: inline-block;
         width: @cover-view-item-width;

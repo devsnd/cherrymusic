@@ -5132,8 +5132,10 @@ body:after {
 }
 .cm-media-list-wrench {
   position: relative;
+  display: inline;
   float: left;
-  color: #ddd;
+  color: #fff;
+  padding: 0 2px;
 }
 .cm-media-list-wrench:hover {
   color: #444;
@@ -5191,10 +5193,17 @@ body:after {
   max-width: 80px;
   max-height: 80px;
 }
+.list-dir-info-bar {
+  background-color: #ddd;
+}
 .list-dir-name {
   font-size: 12px;
   display: block;
   text-align: center;
+}
+.list-dir-folder-files-count {
+  color: #999;
+  display: inline;
 }
 .list-dir-item {
   display: inline-block;

@@ -71,7 +71,8 @@ class CherryModel:
             CherryModel.supportedFormats += self.transcoder.availableDecoderFormats()
             CherryModel.supportedFormats = list(set(CherryModel.supportedFormats))
 
-    def abspath(self, path):
+    @classmethod
+    def abspath(cls, path):
         return os.path.join(cherry.config['media.basedir'], path)
 
     @classmethod
@@ -110,7 +111,7 @@ class CherryModel:
         return sortedfiles
 
     def listdir(self, dirpath, filterstr=''):
-        absdirpath = self.abspath(dirpath)
+        absdirpath = CherryModel.abspath(dirpath)
         if cherry.config['browser.pure_database_lookup']:
             allfilesindir = self.cache.listdir(dirpath)
         else:
@@ -144,7 +145,7 @@ class CherryModel:
                     #if the filter equals the foldername
                     if len(currentletter) == len(filterstr):
                         subpath = os.path.join(absdirpath, dir)
-                        self.addMusicEntry(subpath, musicentries)
+                        CherryModel.addMusicEntry(subpath, musicentries)
                     else:
                         musicentries.append(
                             MusicEntry(strippath(absdirpath),
@@ -156,12 +157,16 @@ class CherryModel:
                                          number_ordering=True)
             for dir in sortedfiles:
                 subpath = os.path.join(absdirpath, dir)
-                self.addMusicEntry(subpath, musicentries)
+                CherryModel.addMusicEntry(subpath, musicentries)
+        if cherry.config['media.show_subfolder_count']:
+            for musicentry in musicentries:
+                musicentry.count_subfolders_and_files()
         return musicentries
 
-    def addMusicEntry(self, fullpath, list):
+    @classmethod
+    def addMusicEntry(cls, fullpath, list):
         if os.path.isfile(fullpath):
-            if self.isplayable(fullpath):
+            if CherryModel.isplayable(fullpath):
                 list.append(MusicEntry(strippath(fullpath)))
         else:
             list.append(MusicEntry(strippath(fullpath), dir=True))
@@ -173,7 +178,7 @@ class CherryModel:
     def file_size_within_limit(self, filelist, maximum_download_size):
         acc_size = 0
         for f in filelist:
-            acc_size += os.path.getsize(self.abspath(f))
+            acc_size += os.path.getsize(CherryModel.abspath(f))
             if acc_size > maximum_download_size:
                 return False
         return True
@@ -199,7 +204,10 @@ class CherryModel:
                     sortedResults.debugOutputSort = None  # free ram
 
         with Performance(_('checking and classifying results:')):
-            results = list(filter(self.isValidMediaFile, results))
+            results = list(filter(CherryModel.isValidMediaFile, results))
+        if cherry.config['media.show_subfolder_count']:
+            for result in results:
+                result.count_subfolders_and_files()
         return results
 
     def check_for_updates(self):
@@ -281,26 +289,28 @@ class CherryModel:
     def randomMusicEntries(self, count):
         loadCount = int(count * 1.5) + 1           # expect 70% valid entries
         entries = self.cache.randomFileEntries(loadCount)
-        filteredEntries = list(filter(self.isValidMediaFile, entries))
+        filteredEntries = list(filter(CherryModel.isValidMediaFile, entries))
 
         return filteredEntries[:count]
 
-    def isValidMediaFile(self, file):
+    @classmethod
+    def isValidMediaFile(cls, file):
         file.path = strippath(file.path)
         #let only playable files appear in the search results
         if file.path.startswith('.'):
             return False
-        if not self.isplayable(file.path) and not file.dir:
+        if not CherryModel.isplayable(file.path) and not file.dir:
             return False
         return True
 
-    def isplayable(self, filename):
+    @classmethod
+    def isplayable(cls, filename):
         '''checks to see if there's no extension or if the extension is in
         the configured 'playable' list'''
         ext = os.path.splitext(filename)[1]
         is_supported_ext = ext and ext[1:].lower() in CherryModel.supportedFormats
         # listed files must not be empty
-        is_empty_file = os.path.getsize(self.abspath(filename)) == 0
+        is_empty_file = os.path.getsize(CherryModel.abspath(filename)) == 0
         return is_supported_ext and not is_empty_file
 
 
@@ -311,11 +321,26 @@ def strippath(path):
 
 
 class MusicEntry:
-    def __init__(self, path, compact=False, dir=False, repr=None):
+    def __init__(self, path, compact=False, dir=False, repr=None, subdircount=0, subfilescount=0):
         self.path = path
         self.compact = compact
         self.dir = dir
         self.repr = repr
+        self.subdircount = subdircount  # number of directories contained inside
+        self.subfilescount = subfilescount  # number of files contained inside
+
+    def count_subfolders_and_files(self):
+        if self.dir:
+            self.subdircount = 0
+            self.subfilescount = 0
+            fullpath = CherryModel.abspath(self.path)
+            for filename in os.listdir(fullpath):
+                subfilefullpath = os.path.join(fullpath, filename)
+                if os.path.isfile(subfilefullpath):
+                    if CherryModel.isplayable(subfilefullpath):
+                        self.subfilescount += 1
+                else:
+                    self.subdircount += 1
 
     def to_dict(self):
         if self.compact:
@@ -328,7 +353,9 @@ class MusicEntry:
             simplename = pathprovider.filename(self.path)
             return {'type': 'dir',
                     'path': self.path,
-                    'label': simplename}
+                    'label': simplename,
+                    'foldercount': self.subdircount,
+                    'filescount': self.subfilescount}
         else:
             #file
             simplename = pathprovider.filename(self.path)

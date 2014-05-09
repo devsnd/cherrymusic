@@ -306,6 +306,10 @@ MediaBrowser.static = {
             maychangecoverart: !!isAdmin,
             coverarturl: encodeURIComponent(JSON.stringify({'directory' : json.path})),
             directoryname: encodeURIComponent(json.path),
+            foldercount: json.foldercount,
+            showfoldercount: json.foldercount > 0,
+            filescount: json.filescount,
+            showfilescount: json.filescount > 0,
 
         };
         return Mustache.render(template, template_data);
