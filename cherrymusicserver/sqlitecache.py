@@ -135,7 +135,7 @@ class SQLiteCache(object):
             else:
                 where = ''' (dictionary.word >= ? AND dictionary.word < ?) '''
                 params = (term, tprefix + chr(1 + ord(tlast)))
-            order = ' ORDER BY dictionary.occurrences ASC '
+            order = ' ORDER BY dictionary.occurrences DESC '
             limit = ' LIMIT 0, ' + str(maxFileIdsPerTerm) #TODO add maximum db results as configuration parameter
             sql = query + where + order +limit
             if debug:
