@@ -321,20 +321,37 @@ def strippath(path):
 
 
 class MusicEntry:
+    # maximum number of files to be iterated inside of a folder to
+    # check if there are playable meadia files or other folders inside
+    MAX_SUB_FILES_ITER_COUNT = 100
+
     def __init__(self, path, compact=False, dir=False, repr=None, subdircount=0, subfilescount=0):
         self.path = path
         self.compact = compact
         self.dir = dir
         self.repr = repr
-        self.subdircount = subdircount  # number of directories contained inside
-        self.subfilescount = subfilescount  # number of files contained inside
+        # number of directories contained inside
+        self.subdircount = subdircount
+        # number of files contained inside
+        self.subfilescount = subfilescount
+        # True when the exact amount of files is too big and is estimated
+        self.subfilesestimate = False
 
     def count_subfolders_and_files(self):
         if self.dir:
             self.subdircount = 0
             self.subfilescount = 0
             fullpath = CherryModel.abspath(self.path)
-            for filename in os.listdir(fullpath):
+            diriectory_listing = os.listdir(fullpath)
+            for idx, filename in enumerate(diriectory_listing):
+                if idx > MusicEntry.MAX_SUB_FILES_ITER_COUNT:
+                    # estimate remaining file count
+                    self.subfilescount *= len(diriectory_listing)/float(idx+1)
+                    self.subfilescount = int(self.subfilescount)
+                    self.subdircount *= len(diriectory_listing)/float(idx+1)
+                    self.subdircount = int(self.subdircount)
+                    self.subfilesestimate = True
+                    return
                 subfilefullpath = os.path.join(fullpath, filename)
                 if os.path.isfile(subfilefullpath):
                     if CherryModel.isplayable(subfilefullpath):
@@ -355,7 +372,8 @@ class MusicEntry:
                     'path': self.path,
                     'label': simplename,
                     'foldercount': self.subdircount,
-                    'filescount': self.subfilescount}
+                    'filescount': self.subfilescount,
+                    'filescountestimate': self.subfilesestimate }
         else:
             #file
             simplename = pathprovider.filename(self.path)

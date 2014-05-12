@@ -5,10 +5,10 @@
         {{/maychangecoverart}}
         <div class="list-dir-folder-files-count">
             {{#showfoldercount}}
-                {{foldercount}} <span class="glyphicon glyphicon-folder-open"></span>
+                {{#filescountestimate}}~{{/filescountestimate}}{{foldercount}} <span class="glyphicon glyphicon-folder-open"></span>
             {{/showfoldercount}}
             {{#showfilescount}}
-                {{filescount}} <span class="glyphicon glyphicon-music"></span>
+                {{#filescountestimate}}~{{/filescountestimate}}{{filescount}} <span class="glyphicon glyphicon-music"></span>
             {{/showfilescount}}
             &nbsp;
         </div>

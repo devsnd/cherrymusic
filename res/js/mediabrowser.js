@@ -310,6 +310,7 @@ MediaBrowser.static = {
             showfoldercount: json.foldercount > 0,
             filescount: json.filescount,
             showfilescount: json.filescount > 0,
+            filescountestimate: json.filescountestimate,
 
         };
         return Mustache.render(template, template_data);
