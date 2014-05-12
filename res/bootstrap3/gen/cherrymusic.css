@@ -5213,9 +5213,19 @@ body:after {
 }
 .list-dir-item-listview {
   /* overrides normal coverview to display folders as list */
-  display: block;
+  display: table-row;
   width: 100%;
   height: 30px;
+}
+.list-dir-item-listview > div {
+  display: table-cell;
+}
+.list-dir-item-listview > .list-dir-info-bar {
+  min-width: 80px;
+}
+.list-dir-item-listview > .list-dir-cover-area {
+  height: 30px;
+  width: 100%;
 }
 .list-dir-item-listview .list-dir-albumart {
   margin: 0;
