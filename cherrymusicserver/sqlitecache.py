@@ -50,6 +50,8 @@ from cherrymusicserver.cherrymodel import MusicEntry
 from cherrymusicserver.database.connect import BoundConnector
 from cherrymusicserver.util import Performance
 from cherrymusicserver.progress import ProgressTree, ProgressReporter
+import cherrymusicserver.tweak
+from imp import reload
 import random
 
 UNIDECODE_AVAILABLE = True
@@ -62,9 +64,6 @@ scanreportinterval = 1
 AUTOSAVEINTERVAL = 100
 debug = False
 keepInRam = False
-
-NORMAL_FILE_SEARCH_LIMIT = 400
-FAST_FILE_SEARCH_LIMIT = 20
 
 #if debug:
 #    log.level(log.DEBUG)
@@ -161,19 +160,22 @@ class SQLiteCache(object):
             mode = 'dironly'
             value = value[:-3]
 
+        reload(cherrymusicserver.tweak)
+        file_search_limit = cherrymusicserver.tweak.SearchTweaks.normal_file_search_limit
+
         terms = SQLiteCache.searchterms(value)
-        with Performance(_('searching for a maximum of %s files') % str(NORMAL_FILE_SEARCH_LIMIT * len(terms))):
+        with Performance(_('searching for a maximum of %s files') % str(file_search_limit * len(terms))):
             if debug:
                 log.d('searchterms')
                 log.d(terms)
             results = []
 
-            maxFileIdsPerTerm = NORMAL_FILE_SEARCH_LIMIT
+            maxFileIdsPerTerm = file_search_limit
             with Performance(_('file id fetching')):
                 #unpack tuples
                 fileids = [t[0] for t in self.fetchFileIds(terms, maxFileIdsPerTerm, mode)]
 
-            if len(fileids) > NORMAL_FILE_SEARCH_LIMIT:
+            if len(fileids) > file_search_limit:
                 with Performance(_('sorting results by fileid occurrences')):
                     resultfileids = {}
                     for fileid in fileids:
@@ -184,7 +186,7 @@ class SQLiteCache(object):
                     # sort items by occurrences and only return maxresults
                     fileids = sorted(resultfileids.items(), key=itemgetter(1), reverse=True)
                     fileids = [t[0] for t in fileids]
-                    fileids = fileids[:min(len(fileids), NORMAL_FILE_SEARCH_LIMIT)]
+                    fileids = fileids[:min(len(fileids), file_search_limit)]
 
             if mode == 'normal':
                 with Performance(_('querying fullpaths for %s fileIds') % len(fileids)):
@@ -239,6 +241,9 @@ class SQLiteCache(object):
 
 
     def musicEntryFromFileIds(self, filerowids, incompleteMusicEntries=None, mode='normal'):
+        reload(cherrymusicserver.tweak)
+        file_search_limit = cherrymusicserver.tweak.SearchTweaks.normal_file_search_limit
+
         #incompleteMusicEntries maps db parentid to incomplete musicEntry
         assert mode in ('normal', 'dironly', 'fileonly'), mode
         if incompleteMusicEntries is None:
@@ -262,7 +267,7 @@ class SQLiteCache(object):
                 sqlquery += ' AND isdir = ?'
                 sqlparams += ('dironly' == mode,)
             sqlquery += ' LIMIT 0, ?'
-            sqlparams += (NORMAL_FILE_SEARCH_LIMIT,)
+            sqlparams += (file_search_limit,)
 
         cursor.execute(sqlquery, sqlparams)
         for id, parent_id, filename, fileext, isdir in cursor.fetchall():

@@ -59,3 +59,6 @@ class CherryModelTweaks:
     result_order_debug = False
     result_order_debug_files = 10
 
+class SearchTweaks:
+    normal_file_search_limit = 400
+
