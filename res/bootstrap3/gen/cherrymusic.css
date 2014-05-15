@@ -4915,7 +4915,7 @@ td.visible-print {
   position: fixed;
   left: 50%;
   bottom: 49px;
-  z-index: 3;
+  z-index: 1033;
   pointer-events: none;
 }
 .jp-bar-seek {
