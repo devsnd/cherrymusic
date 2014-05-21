@@ -322,6 +322,7 @@ MediaBrowser.static = {
             isowner: e.owner,
             candelete: e.owner || isAdmin,
             playlistlabel:e['title'],
+            encodedplaylistlabel:encodeURI(e['title']),
             username: e['username'],
             age: time2text(e['age']),
             username_color: userNameToColor(e.username),
