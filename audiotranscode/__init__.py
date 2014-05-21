@@ -12,6 +12,7 @@ MimeTypes = {
     'm4a' : 'audio/m4a',
     'wav' : 'audio/wav',
     'wma' : 'audio/x-ms-wma',
+    'cue': '', # FIXME: What should we put here? .cue doesn't actually contain any audio.
 }
 
 class Transcoder(object):
@@ -52,13 +53,44 @@ class Decoder(Transcoder):
         self.filetype = filetype
         self.mimetype = MimeTypes[filetype]
         
-    def decode(self, filepath, starttime=0):
+    def decode(self, filepath, starttime=0, track=None):
         cmd = self.command[:]
+        ext = os.path.splitext(filepath)[1]
+        if ext == '.cue':
+            if not track:
+                track = 1
+            else:
+                track = int(track)
+            from cherrymusicserver.cuesheet import Cuesheet
+            cue = Cuesheet(filepath)
+            audio_filepath = None
+            for cdtext in cue.info[0].cdtext:
+                if cdtext.type == 'FILE':
+                    # Set the actual filepath from the FILE field
+                    audio_filepath = os.path.join(os.path.dirname(filepath), cdtext.value[0])
+                    break
+            if audio_filepath is None or not os.path.exists(audio_filepath):
+                raise DecodeError('Audiofile not found for cuesheet %s'%filepath)
+            filepath = audio_filepath
+            track_n = track
+            track = cue.tracks[track-1]
+            if 'STARTTIME' in cmd:
+                cmd[cmd.index('STARTTIME')] = str(track.get_start_time())
+            if 'LENGTH' in cmd:
+                nexttrack = cue.get_next(track)
+                if nexttrack:
+                    track.nextstart = nexttrack.get_start_time()
+                    cmd[cmd.index('LENGTH')] = str(track.get_length())
+                else:
+                    # Last track doesn't have a next track
+                    # XXX: Actually we should remove the -t option altogether here
+                    cmd[cmd.index('LENGTH')] = '99999'
+        else:
+            if 'STARTTIME' in cmd:
+                hours, minutes, seconds = starttime//3600, starttime//60%60, starttime%60
+                cmd[cmd.index('STARTTIME')] = '%d:%d:%d' % (hours, minutes, seconds)
         if 'INPUT' in cmd:
             cmd[cmd.index('INPUT')] = filepath
-        if 'STARTTIME' in cmd:
-            hours, minutes, seconds = starttime//3600, starttime//60%60, starttime%60
-            cmd[cmd.index('STARTTIME')] = '%d:%d:%d' % (hours, minutes, seconds)
         return subprocess.Popen(cmd,
                                 stdout=subprocess.PIPE,
                                 stderr=Transcoder.devnull
@@ -107,6 +139,7 @@ class AudioTranscode:
         Decoder('aac'  , ['faad', '-w', 'INPUT']), 
         Decoder('m4a'  , ['faad', '-w', 'INPUT']), 
         Decoder('wav'  , ['cat', 'INPUT']), 
+        Decoder('cue'  , ['ffmpeg', '-ss', 'STARTTIME', '-t', 'LENGTH', '-i', 'INPUT', '-f', 'wav', '-']),
     ]
     
     def __init__(self,debug=False):
@@ -125,7 +158,7 @@ class AudioTranscode:
         if '.' in filepath:
             return filepath.lower()[filepath.rindex('.')+1:]
     
-    def _decode(self, filepath, decoder=None, starttime=0):
+    def _decode(self, filepath, decoder=None, starttime=0, track=None):
         if not os.path.exists(filepath):
             filepath = os.path.abspath(filepath)
             raise DecodeError('File not Found! Cannot decode "file" %s'%filepath)
@@ -139,7 +172,7 @@ class AudioTranscode:
                     break
             if self.debug:
                 print(decoder)
-        return decoder.decode(filepath, starttime=starttime)
+        return decoder.decode(filepath, starttime=starttime, track=track)
         
     def _encode(self, audio_format, decoder_process, bitrate=None,encoder=None):
         if not audio_format in self.availableEncoderFormats():
@@ -166,11 +199,11 @@ class AudioTranscode:
             fh.close()
 
     def transcodeStream(self, filepath, newformat, bitrate=None,
-            encoder=None, decoder=None, starttime=0):
+            encoder=None, decoder=None, starttime=0, track=None):
         decoder_process = None
         encoder_process = None
         try:
-            decoder_process = self._decode(filepath, decoder, starttime=starttime)
+            decoder_process = self._decode(filepath, decoder, starttime=starttime, track=track)
             encoder_process = self._encode(newformat, decoder_process,bitrate=bitrate,encoder=encoder)
             while encoder_process.poll() == None:
                 data = encoder_process.stdout.read(AudioTranscode.READ_BUFFER)

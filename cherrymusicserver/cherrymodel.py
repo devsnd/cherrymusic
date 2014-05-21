@@ -164,9 +164,18 @@ class CherryModel:
         return musicentries
 
     @classmethod
+    def addCueSheet(cls, filepath, list):
+        from cherrymusicserver.cuesheet import Cuesheet
+        cue = Cuesheet(filepath)
+        for track in range(len(cue.tracks)):
+            list.append(MusicEntry(strippath(filepath), track = track+1))
+
+    @classmethod
     def addMusicEntry(cls, fullpath, list):
         if os.path.isfile(fullpath):
-            if CherryModel.isplayable(fullpath):
+            if iscuesheet(fullpath):
+                CherryModel.addCueSheet(fullpath, list)
+            elif CherryModel.isplayable(fullpath):
                 list.append(MusicEntry(strippath(fullpath)))
         else:
             list.append(MusicEntry(strippath(fullpath), dir=True))
@@ -313,6 +322,9 @@ class CherryModel:
         is_empty_file = os.path.getsize(CherryModel.abspath(filename)) == 0
         return is_supported_ext and not is_empty_file
 
+def iscuesheet(filename):
+    ext = os.path.splitext(filename)[1]
+    return ext.lower() == '.cue'
 
 def strippath(path):
     if path.startswith(cherry.config['media.basedir']):
@@ -325,7 +337,7 @@ class MusicEntry:
     # check if there are playable meadia files or other folders inside
     MAX_SUB_FILES_ITER_COUNT = 100
 
-    def __init__(self, path, compact=False, dir=False, repr=None, subdircount=0, subfilescount=0):
+    def __init__(self, path, compact=False, dir=False, repr=None, subdircount=0, subfilescount=0, track=None):
         self.path = path
         self.compact = compact
         self.dir = dir
@@ -336,6 +348,8 @@ class MusicEntry:
         self.subfilescount = subfilescount
         # True when the exact amount of files is too big and is estimated
         self.subfilesestimate = False
+        # Track number for multi-track files
+        self.track = track
 
     def count_subfolders_and_files(self):
         if self.dir:
@@ -381,6 +395,7 @@ class MusicEntry:
             return {'type': 'file',
                     'urlpath': urlpath,
                     'path': self.path,
+                    'track': self.track,
                     'label': simplename}
 
     def __repr__(self):

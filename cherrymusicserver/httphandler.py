@@ -253,13 +253,17 @@ class HTTPHandler(object):
             fullpath = os.path.join(cherry.config['media.basedir'], path)
 
             starttime = int(params.pop('starttime', 0))
+            if 'track' in params:
+                track = params.pop('track')
+            else:
+                track = None
 
             transcoder = audiotranscode.AudioTranscode()
             mimetype = transcoder.mimeType(newformat)
             cherrypy.response.headers["Content-Type"] = mimetype
             try:
                 return transcoder.transcodeStream(fullpath, newformat,
-                            bitrate=bitrate, starttime=starttime)
+                            bitrate=bitrate, starttime=starttime, track=track)
             except audiotranscode.TranscodeError as e:
                 raise cherrypy.HTTPError(404, e.value)
     trans.exposed = True
@@ -652,10 +656,10 @@ class HTTPHandler(object):
         return zip.getbytes()
     export_playlists.exposed = True
 
-    def api_getsonginfo(self, path):
+    def api_getsonginfo(self, path, track = None):
         basedir = cherry.config['media.basedir']
         abspath = os.path.join(basedir, path)
-        return json.dumps(metainfo.getSongInfo(abspath).dict())
+        return json.dumps(metainfo.getSongInfo(abspath, track).dict())
 
     def api_getencoders(self):
         return json.dumps(audiotranscode.getEncoders())

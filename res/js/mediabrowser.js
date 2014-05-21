@@ -293,6 +293,7 @@ MediaBrowser.static = {
             fileurl : json.urlpath,
             fullpath: json.path,
             label: json.label,
+            track: json.track,
         };
         return Mustache.render(template, template_data);
     },
@@ -343,7 +344,7 @@ MediaBrowser.static = {
 
     addThisTrackToPlaylist : function(){
         "use strict"
-        playlistManager.addSong( $(this).attr("path"), $(this).attr("title") );
+        playlistManager.addSong( $(this).attr("path"), $(this).attr("title"), parseInt($(this).attr("track")) );
         $(this).blur();
         return false;
     },
@@ -351,7 +352,7 @@ MediaBrowser.static = {
     _addAllToPlaylist : function($source, plid){
         "use strict";
         $source.find('li .musicfile').each(function(){
-            playlistManager.addSong( $(this).attr("path"), $(this).attr("title"), plid );
+            playlistManager.addSong( $(this).attr("path"), $(this).attr("title"), parseInt($(this).attr("track")), plid );
         });
     },
 
@@ -410,7 +411,7 @@ MediaBrowser.static = {
                     $(this).removeClass('unloaded');
                     api(
                         'getsonginfo',
-                        {'path': decodeURIComponent(path_url_enc)},
+                        {'path': decodeURIComponent(path_url_enc), 'track': parseInt($(self).parent().attr('track'))},
                         success,
                         errorFunc('error getting song metainfo'),
                         true

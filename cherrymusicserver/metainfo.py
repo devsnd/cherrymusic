@@ -30,7 +30,7 @@
 #
 
 from cherrymusicserver import log
-import sys
+import sys, os
 
 from tinytag import TinyTag
 
@@ -50,7 +50,34 @@ class Metainfo():
         'length': self.length
         }
 
-def getSongInfo(filepath):
+def getSongInfo(filepath, _track=None):
+    ext = os.path.splitext(filepath)[1]
+    if ext == '.cue' and _track:
+        from cherrymusicserver.cuesheet import Cuesheet
+        cue = Cuesheet(filepath)
+        info = cue.info[0]
+        artist = info.performer or '-'
+        album = info.title or '-'
+        title = '-'
+        _track = int(_track)
+        track = cue.tracks[_track-1]
+        artist = track.performer or artist
+        title = track.title or title
+        if _track < len(cue.tracks):
+            track.nextstart = cue.get_next(track).get_start_time()
+            audiolength = track.get_length()
+        else:
+            # FIXME
+            try:
+                #with audioread.audio_open(info.file[0]) as f:
+                #    lasttrack.nextstart = f.duration
+                audiofilepath = os.path.join(os.path.dirname(filepath), info.file[0])
+                tag = TinyTag.get(audiofilepath)
+            except Exception:
+                audiolength = 0
+            else:
+                audiolength = tag.duration
+        return Metainfo(artist, album, title, _track, audiolength)
     try:
         tag = TinyTag.get(filepath)
     except LookupError:

@@ -102,6 +102,7 @@ ManagedPlaylist.prototype = {
                 title : elem.title,
                 duration : elem.duration,
                 url: elem.url,
+                track: elem.track,
             }
             canonical.push(track);
         }
@@ -642,10 +643,12 @@ PlaylistManager.prototype = {
         var self = this;
         var path = track.url;
         var title = track.title;
+        var track_ = track.track;
         var ext = getFileTypeByExt(path);
         var track = {
             title: title,
             wasPlayed : 0,
+            track: track_
         }
         var forced_bitrate = userOptions.media.force_transcode_to_bitrate;
         var formats = [];
@@ -672,6 +675,8 @@ PlaylistManager.prototype = {
                         formats.push(availablejPlayerFormats[i]);
                         var transurl = SERVER_CONFIG.transcode_path + availablejPlayerFormats[i] + '/' + path;
                         transurl += '?bitrate=' + forced_bitrate;
+                        if(track.track)
+                            transurl += '&track=' + track.track;
                         track[ext2jPlayerFormat(availablejPlayerFormats[i])] = transurl;
                         window.console.log('added live transcoding '+ext+' --> '+availablejPlayerFormats[i]+' @ '+transurl);
                     }
@@ -684,7 +689,7 @@ PlaylistManager.prototype = {
         }
         return track;
     },
-    addSong : function(path, title, plid, animate){
+    addSong : function(path, title, track_, plid, animate){
         "use strict";
         var self = this;
         if(typeof animate === 'undefined'){
@@ -693,6 +698,7 @@ PlaylistManager.prototype = {
         var track = {
             title: title,
             url: path,
+            track: track_,
             wasPlayed : 0,
         }
         var playlist;
@@ -740,7 +746,7 @@ PlaylistManager.prototype = {
         // for the actual audio data comes through frist
          window.setTimeout(
             function(){
-                api('getsonginfo', {'path': decodeURIComponent(path)}, success, errorFunc('error getting song metainfo'), true);
+                api('getsonginfo', {'path': decodeURIComponent(path), 'track': track_}, success, errorFunc('error getting song metainfo'), true);
             },
             1000
         );
