@@ -48,7 +48,11 @@ ManagedPlaylist.prototype = {
             }
         );
         self.jplayerplaylist._init();
-
+        // The following is a workaround to avoid jplayer to try to update the "shuffle" control
+        // This is needed because we are currently not using the "shuffle" option of jplayer
+        self.jplayerplaylist._updateControls = function() {
+            playlistManager.refreshCommands();
+        }
         $(self.playlistSelector+">ul.playlist-container-list").sortable({
             axis: "y",
             delay: 150,
