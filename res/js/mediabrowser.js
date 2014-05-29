@@ -293,7 +293,8 @@ MediaBrowser.static = {
             fileurl : json.urlpath,
             fullpath: json.path,
             label: json.label,
-            track: json.track,
+            starttime: json.starttime,
+            duration: json.duration
         };
         return Mustache.render(template, template_data);
     },
@@ -323,7 +324,6 @@ MediaBrowser.static = {
             isowner: e.owner,
             candelete: e.owner || isAdmin,
             playlistlabel:e['title'],
-            encodedplaylistlabel:encodeURI(e['title']),
             username: e['username'],
             age: time2text(e['age']),
             username_color: userNameToColor(e.username),
@@ -344,7 +344,7 @@ MediaBrowser.static = {
 
     addThisTrackToPlaylist : function(){
         "use strict"
-        playlistManager.addSong( $(this).attr("path"), $(this).attr("title"), parseInt($(this).attr("track")) );
+        playlistManager.addSong( $(this).attr("path"), $(this).attr("title"), $(this).attr("starttime"), $(this).attr("duration") );
         $(this).blur();
         return false;
     },
@@ -352,7 +352,7 @@ MediaBrowser.static = {
     _addAllToPlaylist : function($source, plid){
         "use strict";
         $source.find('li .musicfile').each(function(){
-            playlistManager.addSong( $(this).attr("path"), $(this).attr("title"), parseInt($(this).attr("track")), plid );
+            playlistManager.addSong( $(this).attr("path"), $(this).attr("title"), $(this).attr("starttime"), $(this).attr("duration"), plid );
         });
     },
 
@@ -411,7 +411,10 @@ MediaBrowser.static = {
                     $(this).removeClass('unloaded');
                     api(
                         'getsonginfo',
-                        {'path': decodeURIComponent(path_url_enc), 'track': parseInt($(self).parent().attr('track'))},
+                        {
+                            'path': decodeURIComponent(path_url_enc),
+                            'starttime': $(self).parent().attr('starttime')
+                        },
                         success,
                         errorFunc('error getting song metainfo'),
                         true

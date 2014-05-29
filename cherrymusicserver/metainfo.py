@@ -50,20 +50,21 @@ class Metainfo():
         'length': self.length
         }
 
-def getSongInfo(filepath, _track=None):
+def getSongInfo(filepath, starttime=None):
     ext = os.path.splitext(filepath)[1]
-    if ext == '.cue' and _track:
+    if ext == '.cue' and starttime is not None:
         from cherrymusicserver.cuesheet import Cuesheet
         cue = Cuesheet(filepath)
         info = cue.info[0]
         artist = info.performer or '-'
         album = info.title or '-'
         title = '-'
-        _track = int(_track)
-        track = cue.tracks[_track-1]
+        for track_n, track in enumerate(cue.tracks, 1):
+            if track.get_start_time() >= starttime:
+                break
         artist = track.performer or artist
         title = track.title or title
-        if _track < len(cue.tracks):
+        if track_n < len(cue.tracks):
             track.nextstart = cue.get_next(track).get_start_time()
             audiolength = track.get_length()
         else:
@@ -77,7 +78,7 @@ def getSongInfo(filepath, _track=None):
                 audiolength = 0
             else:
                 audiolength = tag.duration
-        return Metainfo(artist, album, title, _track, audiolength)
+        return Metainfo(artist, album, title, track_n, audiolength)
     try:
         tag = TinyTag.get(filepath)
     except LookupError:

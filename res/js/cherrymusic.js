@@ -512,7 +512,7 @@ function loadPlaylist(playlistid, playlistlabel){
         var pl = playlistManager.newPlaylist([], playlistlabel);
         var animate = false;
         for(var i=0; i<tracklist.length; i++){
-            playlistManager.addSong(tracklist[i].urlpath, tracklist[i].label, tracklist[i].track, pl.id, animate);
+            playlistManager.addSong(tracklist[i].urlpath, tracklist[i].label, tracklist[i].starttime, tracklist[i].duration, pl.id, animate);
         }
         pl.setSaved(true);
     }
@@ -555,7 +555,7 @@ function randomPlaylist() {
     var success = function(tracks){
         for (var i = 0; i < tracks.length; i++) {
             var track = tracks[i];
-            playlistManager.addSong(track.urlpath, track.label, track.track)
+            playlistManager.addSong(track.urlpath, track.label, track.starttime, track.duration)
         }
     };
     busy('#jplayer').hide().fadeIn('fast');

@@ -167,13 +167,31 @@ class CherryModel:
     def addCueSheet(cls, filepath, list):
         from cherrymusicserver.cuesheet import Cuesheet
         cue = Cuesheet(filepath)
-        for track in range(len(cue.tracks)):
-            list.append(MusicEntry(strippath(filepath), track = track+1))
+        audio_filepath = None
+        for cdtext in cue.info[0].cdtext:
+            if cdtext.type == 'FILE':
+                # Set the actual filepath from the FILE field
+                audio_filepath = os.path.join(os.path.dirname(filepath), cdtext.value[0])
+                break
+        if audio_filepath is None or not os.path.exists(audio_filepath):
+            log.info(_("Could not find a valid audio file path in cue sheet '%(filepath)'", {'filepath': filepath}))
+            return
+        for track in cue.tracks:
+            starttime = track.get_start_time()
+            print('starttime:', starttime)
+            # We need to know the length of the audio file to get the duration of the last track.
+            nexttrack = cue.get_next(track)
+            if nexttrack:
+                track.nextstart = nexttrack.get_start_time()
+                duration = track.get_length()
+            else:
+                duration = None
+            list.append(MusicEntry(strippath(filepath), starttime = starttime, duration = duration))
 
     @classmethod
     def addMusicEntry(cls, fullpath, list):
         if os.path.isfile(fullpath):
-            if iscuesheet(fullpath):
+            if CherryModel.iscuesheet(fullpath):
                 CherryModel.addCueSheet(fullpath, list)
             elif CherryModel.isplayable(fullpath):
                 list.append(MusicEntry(strippath(fullpath)))
@@ -322,9 +340,10 @@ class CherryModel:
         is_empty_file = os.path.getsize(CherryModel.abspath(filename)) == 0
         return is_supported_ext and not is_empty_file
 
-def iscuesheet(filename):
-    ext = os.path.splitext(filename)[1]
-    return ext.lower() == '.cue'
+    @staticmethod
+    def iscuesheet(filename):
+        ext = os.path.splitext(filename)[1]
+        return ext.lower() == '.cue'
 
 def strippath(path):
     if path.startswith(cherry.config['media.basedir']):
@@ -337,7 +356,7 @@ class MusicEntry:
     # check if there are playable meadia files or other folders inside
     MAX_SUB_FILES_ITER_COUNT = 100
 
-    def __init__(self, path, compact=False, dir=False, repr=None, subdircount=0, subfilescount=0, track=None):
+    def __init__(self, path, compact=False, dir=False, repr=None, subdircount=0, subfilescount=0, starttime=None, duration=None):
         self.path = path
         self.compact = compact
         self.dir = dir
@@ -348,8 +367,9 @@ class MusicEntry:
         self.subfilescount = subfilescount
         # True when the exact amount of files is too big and is estimated
         self.subfilesestimate = False
-        # Track number for multi-track files
-        self.track = track
+        # Times for start and length of the track
+        self.starttime = starttime
+        self.duration = duration
 
     def count_subfolders_and_files(self):
         if self.dir:
@@ -395,7 +415,8 @@ class MusicEntry:
             return {'type': 'file',
                     'urlpath': urlpath,
                     'path': self.path,
-                    'track': self.track,
+                    'starttime': self.starttime,
+                    'duration': self.duration,
                     'label': simplename}
 
     def __repr__(self):
