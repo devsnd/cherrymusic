@@ -161,7 +161,6 @@ from cherrymusicserver import sqlitecache
 from cherrymusicserver import userdb
 from cherrymusicserver import useroptiondb
 from cherrymusicserver import api
-from cherrymusicserver.migrations import Migrations
 import cherrymusicserver.browsersetup
 
 
@@ -170,7 +169,6 @@ class CherryMusic:
     def __init__(self, update=None, createNewConfig=False, dropfiledb=False,
                  setup=False, cfg_override={}, adduser=None):
         self.setup_services()
-        Migrations.check_and_perform_all()
         self.setup_config(createNewConfig, setup, cfg_override)
         signal.signal(signal.SIGTERM, CherryMusic.stopAndCleanUp)
         signal.signal(signal.SIGINT, CherryMusic.stopAndCleanUp)
