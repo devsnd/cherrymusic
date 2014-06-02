@@ -39,10 +39,12 @@ import sys
 from cherrymusicserver import log
 
 class Migrations(object):
-    def check_and_perform_all():
+    @classmethod
+    def check_and_perform_all(cls):
         Migrations._osx_move_config_folder()
 
-    def _osx_move_config_folder():
+    @classmethod
+    def _osx_move_config_folder(cls):
         # See issue #459 cherrymusic.conf location on OS X on github.
         # https://github.com/devsnd/cherrymusic/issues/459
         if not sys.platform.startswith('darwin'):
