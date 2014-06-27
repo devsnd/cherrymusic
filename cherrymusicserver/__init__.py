@@ -53,6 +53,7 @@ import signal
 
 import gettext
 from cherrymusicserver import pathprovider
+from audiotranscode import MimeTypes
 
 if sys.version_info < (3,):
     gettext.install('default', unicode=True, localedir=pathprovider.getResourcePath('res/i18n'))
@@ -480,6 +481,7 @@ Have fun!
                     'tools.staticdir.on': True,
                     'tools.staticdir.dir': basedirpath,
                     # 'tools.staticdir.index': 'index.html',    if ever needed: in py2 MUST utf-8 encode
+                    'tools.staticdir.content_types': MimeTypes,
                     'tools.encode.on': True,
                     'tools.encode.encoding': 'utf-8',
                     'tools.caching.on': False,
