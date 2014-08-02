@@ -247,7 +247,7 @@ PlaylistManager.prototype = {
 
         //hack to use flash AND HTML solution in every case
         //https://github.com/happyworm/jPlayer/issues/136#issuecomment-12941923
-        //availablejPlayerFormats.push("m4v");
+        availablejPlayerFormats.push("m4v");
 
         var usedSolution = "html, flash";
         if(detectBrowser() == 'midori'){
@@ -265,7 +265,7 @@ PlaylistManager.prototype = {
                 swfPath: "res/js/ext",
                 solution: usedSolution,
                 preload: 'metadata',
-                supplied: "mp3,oga",
+                supplied: "mp3, oga, m4v",
                 wmode: "window",
                 cssSelectorAncestor: self.cssSelectorJPlayerControls,
                 errorAlerts: false,
