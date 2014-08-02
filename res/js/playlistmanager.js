@@ -237,6 +237,18 @@ PlaylistManager = function(){
         // should be triggered by jplayer time update event in the future.
         window.setInterval('playlistManager.refreshCommands()',1000);
         self.flashSize('0px','0px',-10000);
+        //update formats that can be played:
+        availablejPlayerFormats = []
+        var jplayer = self.jPlayerInstance.data('jPlayer');
+        if(jplayer.html.canPlay.oga || jplayer.flash.canPlay.oga){
+            availablejPlayerFormats.push('ogg')
+        }
+        if(jplayer.html.canPlay.mp3 || jplayer.flash.canPlay.mp3){
+            availablejPlayerFormats.push('mp3')
+        }
+        if(availablejPlayerFormats.length == 0){
+            alert('Your browser does not support audio playback.');
+        }
 	});
     this.initJPlayer();
 }
@@ -256,10 +268,6 @@ PlaylistManager.prototype = {
         }
         var self = this;
         if (typeof self.jPlayerInstance === 'undefined'){
-            var usedjPlayerFormats = [];
-            for(var i=0; i<availablejPlayerFormats.length; i++){
-                usedjPlayerFormats.push(ext2jPlayerFormat(availablejPlayerFormats[i]));
-            }
             // Instance jPlayer
             self.jPlayerInstance = $(self.cssSelectorjPlayer).jPlayer({
                 swfPath: "res/js/ext",
