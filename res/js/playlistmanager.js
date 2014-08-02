@@ -247,7 +247,7 @@ PlaylistManager.prototype = {
 
         //hack to use flash AND HTML solution in every case
         //https://github.com/happyworm/jPlayer/issues/136#issuecomment-12941923
-        availablejPlayerFormats.push("m4v");
+        //availablejPlayerFormats.push("m4v");
 
         var usedSolution = "html, flash";
         if(detectBrowser() == 'midori'){
@@ -265,7 +265,7 @@ PlaylistManager.prototype = {
                 swfPath: "res/js/ext",
                 solution: usedSolution,
                 preload: 'metadata',
-                supplied: "mp3,oga,m4v",
+                supplied: "mp3,oga",
                 wmode: "window",
                 cssSelectorAncestor: self.cssSelectorJPlayerControls,
                 errorAlerts: false,
@@ -283,10 +283,23 @@ PlaylistManager.prototype = {
 
             /* WORKAROUND FOR BUG #343 (playback stops sometimes in google chrome) */
             $(this.cssSelectorjPlayer).bind($.jPlayer.event.error, function(event) {
-                window.console.log("Playback failed! trying to resume from the point it failed.");
-                // get current time where playback failed and resume from there
-                var current_playtime = self.jPlayerInstance.data("jPlayer").status.currentTime;
-                playlistManager.jPlayerInstance.data("jPlayer").play(current_playtime);
+                var now = new Date().getTime();
+                 // there must be at least 5 seconds between errors, so we don't retry 1000 times.
+                var min_error_gap_sec = 5;
+                if(typeof self.jPlayerInstance.data("jPlayer").status.media.last_error === 'undefined'){
+                    self.jPlayerInstance.data("jPlayer").status.media.last_error = 0;
+                }
+                var error_gap = now - self.jPlayerInstance.data("jPlayer").status.media.last_error;
+                if(error_gap > min_error_gap_sec){
+                    self.jPlayerInstance.data("jPlayer").status.media.last_error = now;
+                    window.console.log("Playback failed! trying to resume from the point it failed.");
+                    // get current time where playback failed and resume from there
+                    var current_playtime = self.jPlayerInstance.data("jPlayer").status.currentTime;
+                    playlistManager.jPlayerInstance.data("jPlayer").play(current_playtime);
+                } else {
+                    window.console.log("Playback failed too often! Trying next track.");
+                    self.cmd_next();
+                }
             });
             /* WORKAROUND END */
 
