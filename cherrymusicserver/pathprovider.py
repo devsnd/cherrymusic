@@ -50,7 +50,7 @@ def getUserDataPath():
     elif sys.platform.startswith('win'): # windows
         userdata = os.path.join(os.environ['APPDATA'],'cherrymusic')
     elif sys.platform.startswith('darwin'): # osx
-        userdata = os.path.join(os.path.expanduser('~'),'Application Support',userDataFolderName)
+        userdata = os.path.join(os.path.expanduser('~'), 'Library', 'Application Support',userDataFolderName)
 
     if not userdata:
         userdata = fallbackPath()
@@ -70,7 +70,7 @@ def getConfigPath():
         elif sys.platform.startswith('win'): #windows
             configpath = os.path.join(os.environ['APPDATA'],configFolderName)
         elif sys.platform.startswith('darwin'): #osx
-            configpath = os.path.join(os.path.expanduser('~'),'Application Support',configFolderName)
+            configpath = os.path.join(os.path.expanduser('~'), 'Library', 'Application Support', configFolderName)
 
         if not configpath:
             configpath = fallbackPath()

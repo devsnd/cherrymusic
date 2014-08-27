@@ -54,20 +54,63 @@ class DependencyInstaller:
          with open(target, 'wb') as f:
             urlhandler = urllib.request.urlopen(urllib.request.Request(url))
             f.write(urlhandler.read())
-        
-import sys
-try:
-    import cherrypy
-except ImportError:
-    print('''
-    CherryMusic needs the module "cherrypy" to run. You should install it 
-    using the package manager of your OS. Alternatively cherrymusic can 
-    download it for you and put it in the folder in which currently
-    CherryMusic resides.
-    ''')
-    if input("Download cherrypy now? (y/n)") == 'y':
-        inst = DependencyInstaller()
-        inst.install_cherrypy()
-        print('Successfully installed cherrymusic dependencies! You can now start cherrymusic.')
-    else:
-        sys.exit(1)
+
+class Migrations(object):
+    """
+    This class contains all the workarounds required to make migrations
+    from older versions of cherrymusic to another possible. For database
+    migrations, please see the database/defs.
+    """
+
+    @classmethod
+    def check_and_perform_all(cls):
+        Migrations._osx_move_config_folder()
+
+    @classmethod
+    def _osx_move_config_folder(cls):
+        # See issue #459 cherrymusic.conf location on OS X on github.
+        # https://github.com/devsnd/cherrymusic/issues/459
+        #if not sys.platform.startswith('darwin'):
+        #    # only a osx bug
+        #    return
+        import os
+        import shutil
+        oldpath = os.path.join(os.path.expanduser('~'), 'Application Support', 'cherrymusic')
+        newpath = os.path.join(os.path.expanduser('~'), 'Library', 'Application Support', 'cherrymusic')
+        oldpath_exists = os.path.exists(oldpath)
+        newpath_exists = os.path.exists(newpath)
+        if oldpath_exists:
+            if newpath_exists:
+                # two data/conf directories, just warn and skip.
+                print("""There are two different data/config directories,
+but normally that shouldn't happen. The old and unused one is here:
+    %s
+The currently used one is here:
+    %s
+You can keep either one, and cherrymusic will figure it out on the next
+start.""" % (oldpath, newpath))
+            else:
+                # standard migration case. old one exists, but new one
+                # does not
+                print('UPDATE: Moving config/data directory to new location...')
+                shutil.move(oldpath, newpath)
+                print('UPDATE: done.')
+
+def bootstrap_and_migrate():
+    import sys
+    try:
+        import cherrypy
+    except ImportError:
+        print('''
+        CherryMusic needs the module "cherrypy" to run. You should install it 
+        using the package manager of your OS. Alternatively cherrymusic can 
+        download it for you and put it in the folder in which currently
+        CherryMusic resides.
+        ''')
+        if input("Download cherrypy now? (y/n)") == 'y':
+            inst = DependencyInstaller()
+            inst.install_cherrypy()
+            print('Successfully installed cherrymusic dependencies! You can now start cherrymusic.')
+        else:
+            sys.exit(1)
+    Migrations.check_and_perform_all()

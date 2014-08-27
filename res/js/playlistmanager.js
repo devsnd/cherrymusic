@@ -48,7 +48,11 @@ ManagedPlaylist.prototype = {
             }
         );
         self.jplayerplaylist._init();
-
+        // The following is a workaround to avoid jplayer to try to update the "shuffle" control
+        // This is needed because we are currently not using the "shuffle" option of jplayer
+        self.jplayerplaylist._updateControls = function() {
+            playlistManager.refreshCommands();
+        }
         $(self.playlistSelector+">ul.playlist-container-list").sortable({
             axis: "y",
             delay: 150,
@@ -234,6 +238,18 @@ PlaylistManager = function(){
         // should be triggered by jplayer time update event in the future.
         window.setInterval('playlistManager.refreshCommands()',1000);
         self.flashSize('0px','0px',-10000);
+        //update formats that can be played:
+        availablejPlayerFormats = []
+        var jplayer = self.jPlayerInstance.data('jPlayer');
+        if(jplayer.html.canPlay.oga || jplayer.flash.canPlay.oga){
+            availablejPlayerFormats.push('ogg')
+        }
+        if(jplayer.html.canPlay.mp3 || jplayer.flash.canPlay.mp3){
+            availablejPlayerFormats.push('mp3')
+        }
+        if(availablejPlayerFormats.length == 0){
+            alert('Your browser does not support audio playback.');
+        }
 	});
     this.initJPlayer();
 }
@@ -253,16 +269,12 @@ PlaylistManager.prototype = {
         }
         var self = this;
         if (typeof self.jPlayerInstance === 'undefined'){
-            var usedjPlayerFormats = [];
-            for(var i=0; i<availablejPlayerFormats.length; i++){
-                usedjPlayerFormats.push(ext2jPlayerFormat(availablejPlayerFormats[i]));
-            }
             // Instance jPlayer
             self.jPlayerInstance = $(self.cssSelectorjPlayer).jPlayer({
                 swfPath: "res/js/ext",
                 solution: usedSolution,
                 preload: 'metadata',
-                supplied: "mp3,oga,m4v",
+                supplied: "mp3, oga, m4v",
                 wmode: "window",
                 cssSelectorAncestor: self.cssSelectorJPlayerControls,
                 errorAlerts: false,
@@ -280,10 +292,23 @@ PlaylistManager.prototype = {
 
             /* WORKAROUND FOR BUG #343 (playback stops sometimes in google chrome) */
             $(this.cssSelectorjPlayer).bind($.jPlayer.event.error, function(event) {
-                window.console.log("Playback failed! trying to resume from the point it failed.");
-                // get current time where playback failed and resume from there
-                var current_playtime = self.jPlayerInstance.data("jPlayer").status.currentTime;
-                playlistManager.jPlayerInstance.data("jPlayer").play(current_playtime);
+                var now = new Date().getTime();
+                 // there must be at least 5 seconds between errors, so we don't retry 1000 times.
+                var min_error_gap_sec = 5;
+                if(typeof self.jPlayerInstance.data("jPlayer").status.media.last_error === 'undefined'){
+                    self.jPlayerInstance.data("jPlayer").status.media.last_error = 0;
+                }
+                var error_gap = now - self.jPlayerInstance.data("jPlayer").status.media.last_error;
+                if(error_gap > min_error_gap_sec){
+                    self.jPlayerInstance.data("jPlayer").status.media.last_error = now;
+                    window.console.log("Playback failed! trying to resume from the point it failed.");
+                    // get current time where playback failed and resume from there
+                    var current_playtime = self.jPlayerInstance.data("jPlayer").status.currentTime;
+                    playlistManager.jPlayerInstance.data("jPlayer").play(current_playtime);
+                } else {
+                    window.console.log("Playback failed too often! Trying next track.");
+                    self.cmd_next();
+                }
             });
             /* WORKAROUND END */
 

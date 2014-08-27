@@ -29,6 +29,7 @@
 #
 
 import cmbootstrap
+cmbootstrap.bootstrap_and_migrate()
 import cherrymusicserver
 
 
