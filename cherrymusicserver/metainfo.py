@@ -50,35 +50,30 @@ class Metainfo():
         'length': self.length
         }
 
-def getSongInfo(filepath, starttime=None):
-    ext = os.path.splitext(filepath)[1]
-    if ext == '.cue' and starttime is not None:
-        from cherrymusicserver.cuesheet import Cuesheet
-        cue = Cuesheet(filepath)
-        info = cue.info[0]
-        artist = info.performer or '-'
-        album = info.title or '-'
-        title = '-'
-        for track_n, track in enumerate(cue.tracks, 1):
-            if track.get_start_time() >= starttime:
-                break
-        artist = track.performer or artist
-        title = track.title or title
-        if track_n < len(cue.tracks):
-            track.nextstart = cue.get_next(track).get_start_time()
-            audiolength = track.get_length()
+def getCueSongInfo(filepath, cue, track_n):
+    info = cue.info[0]
+    artist = info.performer or '-'
+    album = info.title or '-'
+    title = '-'
+    track = cue.tracks[track_n-1]
+    artist = track.performer or artist
+    title = track.title or title
+    if track_n < len(cue.tracks):
+        track.nextstart = cue.get_next(track).get_start_time()
+        audiolength = track.get_length()
+    else:
+        try:
+            audiofilepath = os.path.join(os.path.dirname(filepath), info.file[0])
+            tag = TinyTag.get(audiofilepath)
+        except Exception:
+            audiolength = 0
+            log.warn('Couldn\'t get length of "%s", setting 0', filepath)
         else:
-            # FIXME
-            try:
-                #with audioread.audio_open(info.file[0]) as f:
-                #    lasttrack.nextstart = f.duration
-                audiofilepath = os.path.join(os.path.dirname(filepath), info.file[0])
-                tag = TinyTag.get(audiofilepath)
-            except Exception:
-                audiolength = 0
-            else:
-                audiolength = tag.duration
-        return Metainfo(artist, album, title, track_n, audiolength)
+            audiolength = tag.duration
+    return Metainfo(artist, album, title, track_n, audiolength)
+
+def getSongInfo(filepath):
+    ext = os.path.splitext(filepath)[1]
     try:
         tag = TinyTag.get(filepath)
     except LookupError:

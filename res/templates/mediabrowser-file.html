@@ -1,13 +1,15 @@
 <li class="fileinlist cm-media-list-item">
     <a title="{{label}}" href="javascript:;" class="musicfile" path="{{fileurl}}" starttime="{{starttime}}" duration="{{duration}}">
         <span class="glyphicon glyphicon-music"></span>
+        {{^metainfo}}
         <span class="simplelabel">
             {{label}}
         </span>
-        <span class="meta-info unloaded" style="display: none" path="{{fileurl}}">
-            <span class="meta-info-track"></span>
-            <span class="meta-info-artist"></span> - <span class="meta-info-title"></span>
-            <span class="meta-info-length"></span>
+        {{/metainfo}}
+        <span class="meta-info{{#metainfo}} preloaded{{/metainfo}}{{^metainfo}} unloaded{{/metainfo}}"{{^metainfo}} style="display: none"{{/metainfo}} path="{{fileurl}}">
+            <span class="meta-info-track">{{metainfo.track}}</span>
+            <span class="meta-info-artist">{{metainfo.artist}}</span> - <span class="meta-info-title">{{metainfo.title}}</span>
+            <span class="meta-info-length">{{metainfo.length}}</span>
         </span>
         <span class="fullpathlabel">
             {{fullpath}}

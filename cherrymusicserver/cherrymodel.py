@@ -166,6 +166,7 @@ class CherryModel:
     @classmethod
     def addCueSheet(cls, filepath, list):
         from cherrymusicserver.cuesheet import Cuesheet
+        from cherrymusicserver.metainfo import getCueSongInfo
         cue = Cuesheet(filepath)
         audio_filepath = None
         for cdtext in cue.info[0].cdtext:
@@ -176,17 +177,19 @@ class CherryModel:
         if audio_filepath is None or not os.path.exists(audio_filepath):
             log.info(_("Could not find a valid audio file path in cue sheet '%(filepath)'", {'filepath': filepath}))
             return
-        for track in cue.tracks:
+        for track_n, track in enumerate(cue.tracks, 1):
             starttime = track.get_start_time()
-            print('starttime:', starttime)
             # We need to know the length of the audio file to get the duration of the last track.
             nexttrack = cue.get_next(track)
+            metainfo = getCueSongInfo(filepath, cue, track_n)
             if nexttrack:
                 track.nextstart = nexttrack.get_start_time()
                 duration = track.get_length()
+            elif metainfo and metainfo.length:
+                duration = metainfo.length
             else:
                 duration = None
-            list.append(MusicEntry(strippath(filepath), starttime = starttime, duration = duration))
+            list.append(MusicEntry(strippath(filepath), starttime = starttime, duration = duration, metainfo = metainfo))
 
     @classmethod
     def addMusicEntry(cls, fullpath, list):
@@ -356,7 +359,7 @@ class MusicEntry:
     # check if there are playable meadia files or other folders inside
     MAX_SUB_FILES_ITER_COUNT = 100
 
-    def __init__(self, path, compact=False, dir=False, repr=None, subdircount=0, subfilescount=0, starttime=None, duration=None):
+    def __init__(self, path, compact=False, dir=False, repr=None, subdircount=0, subfilescount=0, starttime=None, duration=None, metainfo=None):
         self.path = path
         self.compact = compact
         self.dir = dir
@@ -370,6 +373,7 @@ class MusicEntry:
         # Times for start and length of the track
         self.starttime = starttime
         self.duration = duration
+        self.metainfo = metainfo
 
     def count_subfolders_and_files(self):
         if self.dir:
@@ -417,6 +421,7 @@ class MusicEntry:
                     'path': self.path,
                     'starttime': self.starttime,
                     'duration': self.duration,
+                    'metainfo': self.metainfo.dict() if self.metainfo is not None else None,
                     'label': simplename}
 
     def __repr__(self):

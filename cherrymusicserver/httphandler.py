@@ -656,10 +656,10 @@ class HTTPHandler(object):
         return zip.getbytes()
     export_playlists.exposed = True
 
-    def api_getsonginfo(self, path, starttime=None):
+    def api_getsonginfo(self, path):
         basedir = cherry.config['media.basedir']
         abspath = os.path.join(basedir, path)
-        return json.dumps(metainfo.getSongInfo(abspath, starttime).dict())
+        return json.dumps(metainfo.getSongInfo(abspath).dict())
 
     def api_getencoders(self):
         return json.dumps(audiotranscode.getEncoders())
