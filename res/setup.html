@@ -49,11 +49,11 @@ function submitConfiguration(){
     var conf = {
         'media.basedir':        $('#media-basedir').val(),
         'server.port'  :        $('#server-port').val(),
-        'server.permit_remote_admin_login'  : ($('#server-permit_remote_admin_login').attr('checked')!==undefined),
-        'server.localhost_auto_login'       : ($('#server-localhost_auto_login').attr('checked')!==undefined),
-        'server.localhost_only'             : ($('#server-localhost_only').attr('checked')!==undefined),
-        'media.fetch_album_art'             : ($('#media-fetch_album_art').attr('checked')!==undefined),
-        'media.transcode'                   : ($('#media-transcode').attr('checked')!==undefined),
+        'server.permit_remote_admin_login'  : $('#server-permit_remote_admin_login').prop('checked'),
+        'server.localhost_auto_login'       : $('#server-localhost_auto_login').prop('checked'),
+        'server.localhost_only'             : $('#server-localhost_only').prop('checked'),
+        'media.fetch_album_art'             : $('#media-fetch_album_art').prop('checked'),
+        'media.transcode'                   : $('#media-transcode').prop('checked'),
     }
     $.ajax({
         url: '/saveconfig',
