@@ -1195,7 +1195,7 @@ playlistManager.addSong($(this).attr("path"),$(this).attr("title"),MediaBrowser.
 metainfo.track=metainfo.track.toString();if(metainfo.track.length>0){if(metainfo.track.length<2){metainfo.track='0'+metainfo.track;}
 $(self).find('.meta-info-track').text(metainfo.track);}
 $(self).parent().find('.simplelabel').hide();}
-if(metainfo.length){$(self).find('.meta-info-length').text('('+jPlayerPlaylist.prototype._formatTime(metainfo.length)+')');}}
+if(metainfo.length){$(self).parent().attr('duration',metainfo.length);$(self).find('.meta-info-length').text('('+jPlayerPlaylist.prototype._formatTime(metainfo.length)+')');}}
 $(this).removeClass('unloaded');api('getsonginfo',{'path':decodeURIComponent(path_url_enc)},success,errorFunc('error getting song metainfo'),true);}});$(cssSelector).find('.meta-info.preloaded').each(function(idx){$(this).removeClass('preloaded');var track=$(this).find('.meta-info-track').text();if(track.length>0){if(track.length<2){track='0'+track;}
 $(this).find('.meta-info-track').text(track);}
 var length=$(this).find('.meta-info-length').text();if(length.length>0){$(this).find('.meta-info-length').text('('+jPlayerPlaylist.prototype._formatTime(length)+')');}});},};var browser=detectBrowser();if(['msie','safari'].indexOf(browser)!=-1){var encoderPreferenceOrder=['mp3','ogg'];}else{var encoderPreferenceOrder=['ogg','mp3'];}

@@ -416,6 +416,7 @@ MediaBrowser.static = {
                         }
                         // show length anyway, if it was detemined.
                         if(metainfo.length){
+                            $(self).parent().attr('duration', metainfo.length);
                             $(self).find('.meta-info-length').text(
                                 '('+jPlayerPlaylist.prototype._formatTime(metainfo.length) + ')'
                             );
