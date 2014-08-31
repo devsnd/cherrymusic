@@ -175,7 +175,7 @@ class CherryModel:
                 audio_filepath = os.path.join(os.path.dirname(filepath), cdtext.value[0])
                 break
         if audio_filepath is None or not os.path.exists(audio_filepath):
-            log.info(_("Could not find a valid audio file path in cue sheet '%(filepath)'", {'filepath': filepath}))
+            log.info(_("Could not find a valid audio file path in cue sheet '%(filepath)s'"), {'filepath': filepath})
             return
         for track_n, track in enumerate(cue.tracks, 1):
             starttime = track.get_start_time()

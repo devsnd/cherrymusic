@@ -67,7 +67,7 @@ def getCueSongInfo(filepath, cue, track_n):
             tag = TinyTag.get(audiofilepath)
         except Exception:
             audiolength = 0
-            log.warn('Couldn\'t get length of "%s", setting 0', filepath)
+            log.warn(_("Couldn't get length of '%s', setting 0"), audiofilepath)
         else:
             audiolength = tag.duration
     return Metainfo(artist, album, title, track_n, audiolength)
