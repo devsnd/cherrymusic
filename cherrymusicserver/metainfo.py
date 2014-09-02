@@ -69,12 +69,7 @@ def getCueSongInfo(filepath, cue, track_n):
             audiolength = None
             log.warn(_("Couldn't get length of '%s', setting 0"), audiofilepath)
         else:
-            # XXX: TinyTag reports the wrong duration for some (FLAC) files, so do a sanity check.
-            # XXX: This will fail if the reported length is longer than the start time of the last track.
-            if tag.duration > 0 and track.get_start_time() < tag.duration:
-                audiolength = tag.duration - track.get_start_time()
-            else:
-                audiolength = None
+            audiolength = tag.duration - track.get_start_time()
     return Metainfo(artist, album, title, track_n, audiolength)
 
 def getSongInfo(filepath):
