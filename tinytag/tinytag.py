@@ -445,14 +445,32 @@ class Flac(TinyTag):
                 if len(stream_info_header) < 34:  # invalid streaminfo
                     break
                 header = struct.unpack('HH3s3s8B16s', stream_info_header)
+                # From the ciph documentation:
+                # py | <bits>
+                #----------------------------------------------
+                # H  | <16>  The minimum block size (in samples)
+                # H  | <16>  The maximum block size (in samples)
+                # 3s | <24>  The minimum frame size (in bytes)
+                # 3s | <24>  The maximum frame size (in bytes)
+                # 8B | <20>  Sample rate in Hz.
+                #    | <3>   (number of channels)-1.
+                #    | <5>   (bits per sample)-1.
+                #    | <36>  Total samples in stream.
+                # 16s| <128> MD5 signature
+                #
                 min_blk, max_blk, min_frm, max_frm = header[0:4]
                 min_frm = self._bytes_to_int(struct.unpack('3B', min_frm))
                 max_frm = self._bytes_to_int(struct.unpack('3B', max_frm))
+                #                 channels-
+                #                          `.  bits      total samples
+                # |----- samplerate -----| |-||----| |---------~   ~----|
+                # 0000 0000 0000 0000 0000 0000 0000 0000 0000      0000
+                # #---4---# #---5---# #---6---# #---7---# #--8-~   ~-12-# 
                 self.samplerate = self._bytes_to_int(header[4:7]) >> 4
-                channels = ((header[7] >> 1) & 7) + 1
-                bit_depth = ((header[7] & 1) << 4) + ((header[8] & 0xF0) >> 4)
+                channels = ((header[6] >> 1) & 0x07) + 1
+                bit_depth = ((header[6] & 1) << 4) + ((header[7] & 0xF0) >> 4)
                 bit_depth = (bit_depth + 1)
-                total_sample_bytes = [(header[8] >> 4)] + list(header[9:12])
+                total_sample_bytes = [(header[7] & 0x0F)] + list(header[8:12])
                 total_samples = self._bytes_to_int(total_sample_bytes)
                 md5 = header[12:]
                 self.duration = float(total_samples) / self.samplerate
