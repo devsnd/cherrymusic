@@ -1,6 +1,20 @@
 Changelog
 ---------
 
+0.33.0 (2014-09-15)
+ - FEATURE: showing audio meta-data in file browser
+ - FEATURE: showing the number of files and folders inside each folder
+ - IMPROVEMENT: automatically hiding notifications after 5 seconds
+ - IMPROVEMENT: updated jplayer to version 2.6
+ - IMPROVEMENT: sorting playlists by age by default
+ - FIXED: mp3 playback on newer versions of chrome
+ - FIXED: search engine bug that degraded search quality immensely
+ - FIXED: incorrect length reported for long flac files
+ - FIXED: special characters in playlist names (thanks to marianosimone)
+ - FIXED: in browser setup not properly saving all the settings
+ - FIXED: config and data location in OSX
+ - FIXED: playback failure leading to too much recursion
+
 0.32.0 (2014-04-05)
 
 - FEATURE: built-in meta tag display in playlists for all platforms
