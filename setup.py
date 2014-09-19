@@ -78,7 +78,7 @@ shareFolder = os.path.join('share',pathprovider.sharedFolderName)
 data_files = listFilesRec('res',shareFolder)
 
 long_description = None
-if 'upload' in sys.argv:
+if 'upload' in sys.argv or 'register' in sys.argv:
     readmemd = "\n" + "\n".join([read('README.md')])
     print("converting markdown to reStucturedText for upload to pypi.")
     from urllib.request import urlopen
