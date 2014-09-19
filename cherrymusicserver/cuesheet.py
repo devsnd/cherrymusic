@@ -132,7 +132,6 @@ class CueSheet(CueSheetCommon):
         lines = [codecs.decode(line.strip(), 'utf-8')
                     for line in fh.readlines() if line.strip()]
         for lineno, line in enumerate(lines):
-            print("'%s'" % line)
             matched = self.parse(line)
             if not matched:
                 match_track = CueSheetCommon.TRACK_REGEX.match(line)
