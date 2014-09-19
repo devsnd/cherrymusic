@@ -104,6 +104,7 @@ ManagedPlaylist.prototype = {
             var elem = this.jplayerplaylist.playlist[i];
             var track = {
                 title : elem.title,
+                starttime: elem.starttime,
                 duration : elem.duration,
                 url: elem.url,
             }
@@ -667,10 +668,14 @@ PlaylistManager.prototype = {
         var self = this;
         var path = track.url;
         var title = track.title;
+        var starttime = track.starttime;
+        var duration = track.duration;
         var ext = getFileTypeByExt(path);
         var track = {
             title: title,
             wasPlayed : 0,
+            starttime: starttime,
+            duration: duration
         }
         var forced_bitrate = userOptions.media.force_transcode_to_bitrate;
         var formats = [];
@@ -697,6 +702,10 @@ PlaylistManager.prototype = {
                         formats.push(availablejPlayerFormats[i]);
                         var transurl = SERVER_CONFIG.transcode_path + availablejPlayerFormats[i] + '/' + path;
                         transurl += '?bitrate=' + forced_bitrate;
+                        if(track.starttime)
+                            transurl += '&starttime=' + track.starttime;
+                        if(track.duration)
+                            transurl += '&duration=' + track.duration;
                         track[ext2jPlayerFormat(availablejPlayerFormats[i])] = transurl;
                         window.console.log('added live transcoding '+ext+' --> '+availablejPlayerFormats[i]+' @ '+transurl);
                     }
@@ -709,7 +718,7 @@ PlaylistManager.prototype = {
         }
         return track;
     },
-    addSong : function(path, title, plid, animate){
+    addSong : function(path, title, metainfo, starttime, duration, plid, animate){
         "use strict";
         var self = this;
         if(typeof animate === 'undefined'){
@@ -718,6 +727,8 @@ PlaylistManager.prototype = {
         var track = {
             title: title,
             url: path,
+            starttime: starttime,
+            duration: duration,
             wasPlayed : 0,
         }
         var playlist;
@@ -738,37 +749,26 @@ PlaylistManager.prototype = {
                 playlist.jplayerplaylist.select(0);
             }
         }
-        var success = function(data){
-            var metainfo = $.parseJSON(data);
-            var any_info_received = false;
-            if (metainfo.length) {
-                track.duration = metainfo.length;
-                any_info_received = true;
-            }
-            // only show id tags if at least artist and title are known
-            if (metainfo.title.length > 0 && metainfo.artist.length > 0) {
-                track.title = metainfo.artist+' - '+metainfo.title;
-                if(metainfo.track.length > 0){
-                    track.title = metainfo.track + ' ' + track.title;
-                    if(metainfo.track.length < 2){
-                        track.title = '0' + track.title;
-                    }
-                }
-                any_info_received = true;
-            }
-            if(any_info_received){
-                //only rerender playlist if it would visually change
-                self.getEditingPlaylist().jplayerplaylist._refresh(true);
-            }
+        var any_info_received = false;
+        if (metainfo.length) {
+            track.duration = metainfo.length;
+            any_info_received = true;
         }
-        // WORKAROUND: delay the meta-data fetching, so that a request
-        // for the actual audio data comes through frist
-         window.setTimeout(
-            function(){
-                api('getsonginfo', {'path': decodeURIComponent(path)}, success, errorFunc('error getting song metainfo'), true);
-            },
-            1000
-        );
+        // only show id tags if at least artist and title are known
+        if (metainfo.title.length > 0 && metainfo.artist.length > 0) {
+            track.title = metainfo.artist+' - '+metainfo.title;
+            if(metainfo.track.length > 0){
+                track.title = metainfo.track + ' ' + track.title;
+                if(metainfo.track.length < 2){
+                    track.title = '0' + track.title;
+                }
+            }
+            any_info_received = true;
+        }
+        if(any_info_received){
+            //only rerender playlist if it would visually change
+            self.getEditingPlaylist().jplayerplaylist._refresh(true);
+        }
     },
     clearPlaylist : function(){
         "use strict";

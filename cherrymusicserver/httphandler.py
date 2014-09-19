@@ -252,14 +252,18 @@ class HTTPHandler(object):
                 path = codecs.decode(codecs.encode(path, 'latin1'), 'utf-8')
             fullpath = os.path.join(cherry.config['media.basedir'], path)
 
-            starttime = int(params.pop('starttime', 0))
+            starttime = float(params.pop('starttime', 0))
+            if 'duration' in params:
+                duration = float(params.pop('duration'))
+            else:
+                duration = None
 
             transcoder = audiotranscode.AudioTranscode()
             mimetype = transcoder.mimeType(newformat)
             cherrypy.response.headers["Content-Type"] = mimetype
             try:
                 return transcoder.transcodeStream(fullpath, newformat,
-                            bitrate=bitrate, starttime=starttime)
+                            bitrate=bitrate, starttime=starttime, duration=duration)
             except audiotranscode.TranscodeError as e:
                 raise cherrypy.HTTPError(404, e.value)
     trans.exposed = True

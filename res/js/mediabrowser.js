@@ -293,6 +293,9 @@ MediaBrowser.static = {
             fileurl : json.urlpath,
             fullpath: json.path,
             label: json.label,
+            starttime: json.starttime,
+            duration: json.duration,
+            metainfo: json.metainfo
         };
         return Mustache.render(template, template_data);
     },
@@ -322,7 +325,6 @@ MediaBrowser.static = {
             isowner: e.owner,
             candelete: e.owner || isAdmin,
             playlistlabel:e['title'],
-            encodedplaylistlabel:encodeURI(e['title']),
             username: e['username'],
             age: time2text(e['age']),
             username_color: userNameToColor(e.username),
@@ -341,9 +343,19 @@ MediaBrowser.static = {
         return Mustache.render(template, template_data);
     },
 
+    getMetaInfo: function(el) {
+        var metainfo = {
+            track: $(el).find('.meta-info-track').text(),
+            artist: $(el).find('.meta-info-artist').text(),
+            title: $(el).find('.meta-info-title').text(),
+            length: $(el).attr('duration')
+        };
+        return metainfo;
+    },
+
     addThisTrackToPlaylist : function(){
         "use strict"
-        playlistManager.addSong( $(this).attr("path"), $(this).attr("title") );
+        playlistManager.addSong( $(this).attr("path"), $(this).attr("title"), MediaBrowser.static.getMetaInfo(this), $(this).attr("starttime"), $(this).attr("duration") );
         $(this).blur();
         return false;
     },
@@ -351,7 +363,7 @@ MediaBrowser.static = {
     _addAllToPlaylist : function($source, plid){
         "use strict";
         $source.find('li .musicfile').each(function(){
-            playlistManager.addSong( $(this).attr("path"), $(this).attr("title"), plid );
+            playlistManager.addSong( $(this).attr("path"), $(this).attr("title"), MediaBrowser.static.getMetaInfo(this), $(this).attr("starttime"), $(this).attr("duration"), plid );
         });
     },
 
@@ -390,6 +402,8 @@ MediaBrowser.static = {
                             $(self).find('.meta-info-title').text(
                                 metainfo.title
                             );
+                            if(metainfo.track && typeof metainfo.track === "number")
+                                metainfo.track = metainfo.track.toString();
                             if(metainfo.track.length > 0){
                                 if(metainfo.track.length < 2){
                                     metainfo.track = '0' + metainfo.track;
@@ -402,6 +416,7 @@ MediaBrowser.static = {
                         }
                         // show length anyway, if it was detemined.
                         if(metainfo.length){
+                            $(self).parent().attr('duration', metainfo.length);
                             $(self).find('.meta-info-length').text(
                                 '('+jPlayerPlaylist.prototype._formatTime(metainfo.length) + ')'
                             );
@@ -410,10 +425,33 @@ MediaBrowser.static = {
                     $(this).removeClass('unloaded');
                     api(
                         'getsonginfo',
-                        {'path': decodeURIComponent(path_url_enc)},
+                        {
+                            'path': decodeURIComponent(path_url_enc)
+                        },
                         success,
                         errorFunc('error getting song metainfo'),
                         true
+                    );
+                }
+            }
+        );
+        $(cssSelector).find('.meta-info.preloaded').each(
+            function(idx) {
+                $(this).removeClass('preloaded');
+                /* FIXME: Modified copy-paste of the success function above. */
+                var track = $(this).find('.meta-info-track').text();
+                if(track.length > 0){
+                    if(track.length < 2){
+                        track = '0' + track;
+                    }
+                    $(this).find('.meta-info-track').text(
+                        track
+                    );
+                }
+                var length = $(this).find('.meta-info-length').text();
+                if(length.length > 0) {
+                    $(this).find('.meta-info-length').text(
+                        '('+jPlayerPlaylist.prototype._formatTime(length)+')'
                     );
                 }
             }
