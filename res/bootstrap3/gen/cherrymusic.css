@@ -5248,6 +5248,9 @@ body:after {
 .list-dir:hover {
   background-color: #999999;
 }
+.list-dir-cover-area {
+  height: 100%;
+}
 .compact-list-dir {
   display: block;
   font-size: 120%;
