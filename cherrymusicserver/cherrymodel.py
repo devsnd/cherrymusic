@@ -57,6 +57,7 @@ from cherrymusicserver import pathprovider
 from cherrymusicserver.util import Performance
 from cherrymusicserver import resultorder
 from cherrymusicserver import log
+from cherrymusicserver.metainfo import Metainfo
 
 # used for sorting
 NUMBERS = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
@@ -70,6 +71,8 @@ class CherryModel:
             self.transcoder = audiotranscode.AudioTranscode()
             CherryModel.supportedFormats += self.transcoder.availableDecoderFormats()
             CherryModel.supportedFormats = list(set(CherryModel.supportedFormats))
+        # allow for cuesheets to be shown in mediabrowser
+        CherryModel.supportedFormats.append('cue')
 
     @classmethod
     def abspath(cls, path):
@@ -111,62 +114,69 @@ class CherryModel:
         return sortedfiles
 
     def listdir(self, dirpath, filterstr=''):
+        """ lists a directory or a collection of tracks (e.g. playlists)
+        """
         absdirpath = CherryModel.abspath(dirpath)
-        if cherry.config['browser.pure_database_lookup']:
-            allfilesindir = self.cache.listdir(dirpath)
-        else:
-            allfilesindir = os.listdir(absdirpath)
-
-        #remove all files not inside the filter
-        if filterstr:
-            filterstr = filterstr.lower()
-            allfilesindir = [f for f in allfilesindir
-                             if f.lower().startswith(filterstr)]
-        else:
-            allfilesindir = [f for f in allfilesindir if not f.startswith('.')]
-
         musicentries = []
-
-        maximum_shown_files = cherry.config['browser.maxshowfiles']
-        compactlisting = len(allfilesindir) > maximum_shown_files
-        if compactlisting:
-            upper_case_files = [x.upper() for x in allfilesindir]
-            filterstr = os.path.commonprefix(upper_case_files)
-            filterlength = len(filterstr)+1
-            currentletter = '/'  # impossible first character
-            # don't care about natural number order in compact listing
-            sortedfiles = self.sortFiles(allfilesindir, number_ordering=False)
-            for dir in sortedfiles:
-                filter_match = dir.upper().startswith(currentletter.upper())
-                if filter_match and not len(currentletter) < filterlength:
-                    continue
-                else:
-                    currentletter = dir[:filterlength]
-                    #if the filter equals the foldername
-                    if len(currentletter) == len(filterstr):
-                        subpath = os.path.join(absdirpath, dir)
-                        CherryModel.addMusicEntry(subpath, musicentries)
-                    else:
-                        musicentries.append(
-                            MusicEntry(strippath(absdirpath),
-                                       repr=currentletter,
-                                       compact=True))
+        if CherryModel.is_playlist(absdirpath):
+            musicentries = CherryModel.get_playlist_contents(dirpath)
         else:
-            # enable natural number ordering for real directories and files
-            sortedfiles = self.sortFiles(allfilesindir, absdirpath,
-                                         number_ordering=True)
-            for dir in sortedfiles:
-                subpath = os.path.join(absdirpath, dir)
-                CherryModel.addMusicEntry(subpath, musicentries)
-        if cherry.config['media.show_subfolder_count']:
-            for musicentry in musicentries:
-                musicentry.count_subfolders_and_files()
+            if cherry.config['browser.pure_database_lookup']:
+                allfilesindir = self.cache.listdir(dirpath)
+            else:
+                allfilesindir = os.listdir(absdirpath)
+
+            #remove all files not inside the filter
+            if filterstr:
+                filterstr = filterstr.lower()
+                allfilesindir = [f for f in allfilesindir
+                                 if f.lower().startswith(filterstr)]
+            else:
+                allfilesindir = [f for f in allfilesindir if not f.startswith('.')]
+
+            maximum_shown_files = cherry.config['browser.maxshowfiles']
+            compactlisting = len(allfilesindir) > maximum_shown_files
+            if compactlisting:
+                upper_case_files = [x.upper() for x in allfilesindir]
+                filterstr = os.path.commonprefix(upper_case_files)
+                filterlength = len(filterstr)+1
+                currentletter = '/'  # impossible first character
+                # don't care about natural number order in compact listing
+                sortedfiles = self.sortFiles(allfilesindir, number_ordering=False)
+                for dir in sortedfiles:
+                    filter_match = dir.upper().startswith(currentletter.upper())
+                    if filter_match and not len(currentletter) < filterlength:
+                        continue
+                    else:
+                        currentletter = dir[:filterlength]
+                        #if the filter equals the foldername
+                        if len(currentletter) == len(filterstr):
+                            subpath = os.path.join(absdirpath, dir)
+                            CherryModel.addMusicEntry(subpath, musicentries)
+                        else:
+                            musicentries.append(
+                                MusicEntry(strippath(absdirpath),
+                                           repr=currentletter,
+                                           compact=True))
+            else:
+                # enable natural number ordering for real directories and files
+                sortedfiles = self.sortFiles(allfilesindir, absdirpath,
+                                             number_ordering=True)
+                for dir in sortedfiles:
+                    subpath = os.path.join(absdirpath, dir)
+                    CherryModel.addMusicEntry(subpath, musicentries)
+            if cherry.config['media.show_subfolder_count']:
+                for musicentry in musicentries:
+                    musicentry.count_subfolders_and_files()
         return musicentries
 
     @classmethod
     def addMusicEntry(cls, fullpath, list):
         if os.path.isfile(fullpath):
-            if CherryModel.isplayable(fullpath):
+            if CherryModel.is_playlist(fullpath):
+                musicentry = CherryModel.parse_playlist_file(fullpath)
+                list.append(musicentry)
+            elif CherryModel.isplayable(fullpath):
                 list.append(MusicEntry(strippath(fullpath)))
         else:
             list.append(MusicEntry(strippath(fullpath), dir=True))
@@ -313,6 +323,46 @@ class CherryModel:
         is_empty_file = os.path.getsize(CherryModel.abspath(filename)) == 0
         return is_supported_ext and not is_empty_file
 
+    @classmethod
+    def is_playlist(cls, fullpath):
+        ext = os.path.splitext(fullpath)[1].lower()
+        return ext in ['.cue']
+
+    @classmethod
+    def parse_playlist_file(cls, playlist_fullpath):
+        """ read a playlist and return it as a MusicEntry that disguises as a folder
+        """
+        if playlist_fullpath.endswith('.cue'):
+            from cherrymusicserver.cuesheet import CueSheet
+            cuesheet = CueSheet(playlist_fullpath)
+            # playlists are handled as folders
+            return MusicEntry(
+                        playlist_fullpath,
+                        dir=True,
+                        subfilescount=len(cuesheet.tracks),
+                        subdircount=0,
+                    )
+
+    @classmethod
+    def get_playlist_contents(cls, playlist_fullpath):
+        """ read a playlist and return all contained songs as musicentries
+        """
+        musicentries = []
+        if playlist_fullpath.endswith('.cue'):
+            from cherrymusicserver.cuesheet import CueSheet
+            cuesheet = CueSheet(playlist_fullpath)
+            playlist_dir, playlist_file = os.path.split(playlist_fullpath)
+            for track in cuesheet.tracks:
+                track_file_path = strippath(os.path.join(playlist_dir, track.filename))
+                metainfo = Metainfo(
+                    artist= track.performer if track.performer else '',
+                    title= track.title if track.title else '',
+                    track= track.trackno if track.trackno else '',
+                    length=track.duration_sec
+                )
+                musicentries.append(MusicEntry(track_file_path, metainfo=metainfo))
+        return musicentries
+
 
 def strippath(path):
     if path.startswith(cherry.config['media.basedir']):
@@ -325,7 +375,7 @@ class MusicEntry:
     # check if there are playable meadia files or other folders inside
     MAX_SUB_FILES_ITER_COUNT = 100
 
-    def __init__(self, path, compact=False, dir=False, repr=None, subdircount=0, subfilescount=0):
+    def __init__(self, path, compact=False, dir=False, repr=None, subdircount=None, subfilescount=None, metainfo=None):
         self.path = path
         self.compact = compact
         self.dir = dir
@@ -336,9 +386,11 @@ class MusicEntry:
         self.subfilescount = subfilescount
         # True when the exact amount of files is too big and is estimated
         self.subfilesestimate = False
+        # preparsed meta-info (instead of getting it on demand)
+        self.metainfo = metainfo
 
     def count_subfolders_and_files(self):
-        if self.dir:
+        if self.dir and self.subdircount is None and self.subfilescount is None:
             self.subdircount = 0
             self.subfilescount = 0
             fullpath = CherryModel.abspath(self.path)
@@ -378,10 +430,15 @@ class MusicEntry:
             #file
             simplename = pathprovider.filename(self.path)
             urlpath = quote(self.path.encode('utf8'))
-            return {'type': 'file',
-                    'urlpath': urlpath,
-                    'path': self.path,
-                    'label': simplename}
+            file_info = {
+                'type': 'file',
+                'urlpath': urlpath,
+                'path': self.path,
+                'label': simplename,
+            }
+            if self.metainfo is not None:
+                file_info['metainfo'] = self.metainfo.dict()
+            return file_info
 
     def __repr__(self):
         return "<MusicEntry path:%s, dir:%s>" % (self.path, self.dir)
