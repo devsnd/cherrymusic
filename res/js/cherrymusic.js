@@ -236,6 +236,7 @@ function loadUserOptions(onSuccess){
 
         $('#misc-autoplay_on_add').attr('checked',userOptions.misc.autoplay_on_add);
         $('#ui-confirm_quit_dialog').attr('checked',userOptions.ui.confirm_quit_dialog);
+        $('#ui-display_album_art').attr('checked',userOptions.ui.display_album_art);
 
         handle_useroption_force_transcode_bitrate();
     };
@@ -1053,6 +1054,10 @@ function dontCloseWindowIfMusicPlays(){
     }
 }
 
+function initAlbumArtVisibility(){
+    $('#albumart').toggle(userOptions.ui.display_album_art)
+}
+
 function searchAlbumArt(){
     busy('#changeAlbumArt .modal-body').hide().fadeIn('fast');
     var success = function(urllist){
@@ -1149,6 +1154,7 @@ $(document).ready(function(){
     loadUserOptions(function(){
         initKeyboardshortcuts();
         dontCloseWindowIfMusicPlays();
+        initAlbumArtVisibility();
     });
     $('#search-panel').on('scroll', function(){
         //enable loading of images when in viewport
@@ -1205,11 +1211,16 @@ $(document).ready(function(){
                                'misc.autoplay_on_add');
     userOptionCheckboxListener('#ui-confirm_quit_dialog',
                                'ui.confirm_quit_dialog');
+    userOptionCheckboxListener('#ui-display_album_art',
+                               'ui.display_album_art');
     userOptionMultivalListener("input[name='media-force_transcode_to_bitrate']",
                                 'media.force_transcode_to_bitrate');
     $('#media-force_transcode_to_bitrate-disable').click(function(){
         optionSetter('media.force_transcode_to_bitrate', 0, function(){
             $('#media-force_transcode_to_bitrate-disable').closest('.error').hide();
         });
+    });
+    $('#ui-display_album_art').click(function() {
+        $('#albumart').toggle($('#ui-display_album_art').attr('checked'), 0);
     });
 });

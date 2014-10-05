@@ -73,6 +73,8 @@ class UserOptionDB:
             force_transcode.valid = '0|96|128'
         with c['ui.confirm_quit_dialog'] as confirm_quit_dialog:
             confirm_quit_dialog.value = True
+        with c['ui.display_album_art'] as display_album_art:
+            display_album_art.value = True
         with c['last_time_online'] as last_time_online:
             last_time_online.value = 0
             last_time_online.valid = '\\d+'
