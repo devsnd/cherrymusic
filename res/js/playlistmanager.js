@@ -251,6 +251,11 @@ PlaylistManager = function(){
             alert('Your browser does not support audio playback.');
         }
 	});
+    $(this.cssSelectorjPlayer).bind($.jPlayer.event.setmedia, function(event) {
+        var playlist = self.getPlayingPlaylist().jplayerplaylist;
+        var track = playlist.playlist[playlist.current];
+        self.setAlbumArtDisplay(track);
+    });
     this.initJPlayer();
 }
 
