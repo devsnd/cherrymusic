@@ -254,7 +254,9 @@ PlaylistManager = function(){
     $(this.cssSelectorjPlayer).bind($.jPlayer.event.setmedia, function(event) {
         var playlist = self.getPlayingPlaylist().jplayerplaylist;
         var track = playlist.playlist[playlist.current];
-        self.setAlbumArtDisplay(track);
+        if (track) {
+            self.setAlbumArtDisplay(track);
+        }
     });
     this.initJPlayer();
 }
