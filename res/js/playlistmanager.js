@@ -214,6 +214,7 @@ PlaylistManager = function(){
     this.cssSelectorPlaylistCommands = '#playlistCommands';
     this.cssSelectorJPlayerControls = '#jp_ancestor';
     this.cssSelectorjPlayer = "#jquery_jplayer_1";
+    this.cssSelectorAlbumArt = "#albumart";
     this.newplaylistProxy = new NewplaylistProxy(this);
     this.managedPlaylists = [] //hold instances of ManagedPlaylist
     this.playingPlaylist = 0;
@@ -708,6 +709,14 @@ PlaylistManager.prototype = {
             }
         }
         return track;
+    },
+    setAlbumArtDisplay : function(track) {
+        var directory = track.url.replace(/[^\/]*$/, ''); // strip filename from url
+        if (directory == '') // root directory
+            directory = '/';
+        var api_param = JSON.stringify({directory: directory});
+        var imgurl = 'api/fetchalbumart?data=' + api_param;
+        $(this.cssSelectorAlbumArt).attr('src', imgurl);
     },
     addSong : function(path, title, plid, animate){
         "use strict";
