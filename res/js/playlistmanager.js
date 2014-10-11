@@ -106,6 +106,7 @@ ManagedPlaylist.prototype = {
                 title : elem.title,
                 duration : elem.duration,
                 url: elem.url,
+                meta: elem.meta,
             }
             canonical.push(track);
         }
@@ -176,6 +177,28 @@ ManagedPlaylist.prototype = {
     },
     scrollToCurrentTrack: function(){
         this.scrollToTrack(this.jplayerplaylist.current);
+    },
+    sort_by: function(sort_by){
+        this.jplayerplaylist.playlist.sort(
+            function(a, b){
+                var value_a = '';
+                var value_b = '';
+                if(typeof a.meta !== 'undefined'){
+                    value_a = a.meta[sort_by];
+                }
+                if(typeof b.meta !== 'undefined'){
+                    value_b = b.meta[sort_by];
+                }
+                if(value_a > value_b){
+                    return 1;
+                } else if(value_a < value_b){
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }
+        );
+        this.jplayerplaylist._refresh(true);
     }
 }
 
@@ -741,6 +764,8 @@ PlaylistManager.prototype = {
         var success = function(data){
             var metainfo = $.parseJSON(data);
             var any_info_received = false;
+            // save all the meta-data in the track
+            track.meta = metainfo;
             if (metainfo.length) {
                 track.duration = metainfo.length;
                 any_info_received = true;

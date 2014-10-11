@@ -603,14 +603,39 @@
                 </div>
                 <div id="playlistCommands" class="playlist-tab-border-left">
                     <div class="playlist-command-buttons row">
+                        <div id="playlist-command-button-group" class="pull-left btn-group">
+                            <button class="btn dropdown-toggle btn-default btn-xs" data-toggle="dropdown">
+                                sort <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a tabindex="-1" href="javascript:void(0)"
+                                       onclick="playlistManager.getEditingPlaylist().sort_by('track')">by track number</a></li>
+                                <li><a tabindex="-1" href="javascript:void(0)"
+                                       onclick="playlistManager.getEditingPlaylist().sort_by('title')">by title</a></li>
+                                <li><a tabindex="-1" href="javascript:void(0)"
+                                       onclick="playlistManager.getEditingPlaylist().sort_by('artist')">by artist</a></li>
+                            </ul>
+                        </div>
                         <a show-cond="queue" class="pull-left btn btn-xs btn-default" onclick="randomPlaylist(); return false;" >random!</a>
                         <a show-cond="queue" id="save-playlist-from-queue" href="#saveplaylistmodal"  data-toggle="modal" class="pull-left new-playlist-from-queue btn btn-xs btn-default">save as playlist</a>
-                        <a show-cond="queue" class="pull-right clear-playlist btn btn-xs btn-default" onclick="playlistManager.clearQueue(); return false;">clear</a>
-                        <a show-cond="queue" class="pull-right remove-played-tracks btn btn-xs btn-default" onclick="playlistManager.removePlayedFromPlaylist(); return false;" >remove played</a>
+                        <div show-cond="queue" class="btn-group pull-right">
+                            <button class="clear-playlist btn btn-xs btn-default"
+                               onclick="playlistManager.clearQueue(); return false;">clear</button>
+                            <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                                <span class="caret"></span>
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li>
+                                    <a class="remove-played-tracks"
+                                       onclick="playlistManager.removePlayedFromPlaylist(); return false;" >remove played</a>
+                                </li>
+                            </ul>
+                        </div>
                         <div show-cond="playlist" id="playlist-command-button-group" class="pull-left btn-group">
                             <button show-cond="playlist not-saved" class="btn save-current-playlist-button btn btn-xs btn-default">save</button>
                             <button class="btn dropdown-toggle btn-default btn-xs" data-toggle="dropdown">
-                                <span class="caret"></span>
+                                edit <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
                                 <li><a href="#saveplaylistmodal" data-toggle="modal" class="save-as-new-playlist-button" tabindex="-1" href="#">Save as new playlist</a></li>
