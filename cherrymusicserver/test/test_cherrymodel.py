@@ -40,6 +40,8 @@ from collections import defaultdict
 from cherrymusicserver import log
 log.setTest()
 
+import cherrymusicserver as cherry
+
 from cherrymusicserver import cherrymodel
 
 def cherryconfig(cfg=None):
@@ -49,6 +51,7 @@ def cherryconfig(cfg=None):
     c = c.update({'media.basedir': os.path.join(os.path.dirname(__file__), 'data_files')})
     c = c.update(cfg)
     return c
+
 
 @patch('cherrymusicserver.cherrymodel.cherry.config', cherryconfig())
 @patch('cherrymusicserver.cherrymodel.os')
@@ -89,6 +92,65 @@ def test_hidden_names_listdir(cherrypy, cache):
     dir_listing = model.listdir('')
     assert len(dir_listing) == 1
     assert dir_listing[0].path == 'not_hidden.mp3'
+
+
+@patch('cherrymusicserver.cherrymodel.cherry.config', cherryconfig({'media.transcode': False}))
+def test_randomMusicEntries():
+    model = cherrymodel.CherryModel()
+
+    def makeMusicEntries(n):
+        return [cherrymodel.MusicEntry(str(i)) for i in range(n)]
+
+    with patch('cherrymusicserver.cherrymodel.CherryModel.cache') as mock_cache:
+        with patch('cherrymusicserver.cherrymodel.CherryModel.isplayable') as mock_playable:
+            mock_cache.randomFileEntries.side_effect = makeMusicEntries
+
+            mock_playable.return_value = True
+            eq_(2, len(model.randomMusicEntries(2)))
+
+            mock_playable.return_value = False
+            eq_(0, len(model.randomMusicEntries(2)))
+
+
+@patch('cherrymusicserver.cherrymodel.cherry.config', cherryconfig({'media.transcode': False}))
+def test_isplayable():
+    model = cherrymodel.CherryModel()
+
+    # can't use tempfile.TemporaryDirectory b/c Python2.6/3.1 compatibility
+    import os, shutil, tempfile
+    tempdir = tempfile.mkdtemp(suffix='_test_cherrymodel_isplayable')
+
+    def abspath(filename):
+        return os.path.join(tempdir, filename)
+
+    def model_abspath(cls, filename):
+        return abspath(filename)
+
+    def mkfile(filename, content=''):
+        fullpath = abspath(filename)
+        with open(fullpath, "w") as newfile:
+            if content:
+                newfile.write(content)
+        assert os.path.isfile(fullpath)
+        return filename
+
+    def mkdir(dirname):
+        fullpath = abspath(dirname)
+        os.mkdir(fullpath)
+        assert os.path.isdir(fullpath)
+        return dirname
+
+    with patch('cherrymusicserver.cherrymodel.CherryModel.supportedFormats', ['mp3']):
+        with patch('cherrymusicserver.cherrymodel.CherryModel.abspath', classmethod(model_abspath)):
+            try:
+                isplayable = model.isplayable
+                assert isplayable(mkfile('ok.mp3', 'content'))
+                assert not isplayable(mkfile('empty.mp3'))
+                assert not isplayable(mkfile('bla.unsupported', 'content'))
+                assert not isplayable(mkdir('directory.mp3'))
+                assert not isplayable('inexistant')
+            finally:
+                shutil.rmtree(tempdir)
 
 
 if __name__ == '__main__':

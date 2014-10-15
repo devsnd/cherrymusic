@@ -305,13 +305,16 @@ class CherryModel:
 
     @classmethod
     def isplayable(cls, filename):
-        '''checks to see if there's no extension or if the extension is in
-        the configured 'playable' list'''
-        ext = os.path.splitext(filename)[1]
-        is_supported_ext = ext and ext[1:].lower() in CherryModel.supportedFormats
-        # listed files must not be empty
-        is_empty_file = os.path.getsize(CherryModel.abspath(filename)) == 0
-        return is_supported_ext and not is_empty_file
+        '''Checks if the file extension is in the configured 'playable' list and
+            if the file exists, is indeed a file, and has content.
+        '''
+        ext = os.path.splitext(filename)[1][1:]
+        is_supported_ext = bool(ext) and ext.lower() in CherryModel.supportedFormats
+
+        path = CherryModel.abspath(filename)
+        is_nonempty_file = os.path.isfile(path) and bool(os.path.getsize(path))
+
+        return is_supported_ext and is_nonempty_file
 
 
 def strippath(path):
