@@ -171,6 +171,13 @@ class CherryMusic:
                  setup=False, cfg_override={}, adduser=None):
         self.setup_services()
         self.setup_config(createNewConfig, setup, cfg_override)
+
+        if config['media.basedir'] is None:
+            print(_("Invalid basedir. Please provide a valid basedir path."))
+            sys.exit(1)
+        else:
+            log.debug("Basedir is %r", config['media.basedir'])
+
         signal.signal(signal.SIGTERM, CherryMusic.stopAndCleanUp)
         signal.signal(signal.SIGINT, CherryMusic.stopAndCleanUp)
         if os.name == 'posix':
