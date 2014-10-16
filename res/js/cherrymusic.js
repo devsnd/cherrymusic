@@ -870,7 +870,7 @@ function time2text(sec){
         return 'just now'
     } else {
         if(years != 0){
-            years+' years';
+            t = years+' years';
             if(years > 20){
                 return 'never';
             }
