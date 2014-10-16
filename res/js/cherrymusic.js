@@ -864,22 +864,22 @@ function time2text(sec){
     var days = parseInt(hours/24);
     var weeks = parseInt(days/7);
     var months = parseInt(days/30);
-    var years = parseInt(months/12);
+    var years = parseInt(days/365);
     var t='';
     if(abssec < 30){
         return 'just now'
     } else {
         if(years != 0){
-            t = years+' years';
+            t = years == 1 ? 'a year' : years+' years';
             if(years > 20){
-                return 'never';
+                t = 'a long time';
             }
         } else if(months != 0){
-            t = months+' months';
+            t = months == 1 ? 'a month' : months+' months';
         } else if(weeks != 0){
-            t = weeks+' weeks';
+            t = weeks == 1 ? 'a week' : weeks+' weeks';
         } else if(days != 0){
-            t = days+' days';
+            t = days == 1 ? 'a day' : days+' days';
         } else if(hours != 0){
             t = hours == 1 ? 'an hour' : hours+' hours';
         } else if(minutes != 0){
