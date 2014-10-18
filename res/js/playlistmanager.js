@@ -667,10 +667,12 @@ PlaylistManager.prototype = {
         var self = this;
         var path = track.url;
         var title = track.title;
+        var duration = track.duration;
         var ext = getFileTypeByExt(path);
         var track = {
             title: title,
             wasPlayed : 0,
+            duration: duration,
         }
         var forced_bitrate = userOptions.media.force_transcode_to_bitrate;
         var formats = [];
