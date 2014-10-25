@@ -20,9 +20,11 @@ current features:
 You can find more information on the [CherryMusic website](http://www.fomori.org/cherrymusic)
 and in our [wiki](https://github.com/devsnd/cherrymusic/wiki).
 
-master | devel
---- | --- 
-[![Build Status](https://travis-ci.org/devsnd/cherrymusic.png?branch=master)](https://travis-ci.org/devsnd/cherrymusic) | [![Build Status](https://travis-ci.org/devsnd/cherrymusic.png?branch=devel)](https://travis-ci.org/devsnd/cherrymusic)
+master: [![Build Status Master](https://travis-ci.org/devsnd/cherrymusic.png?branch=master)](https://travis-ci.org/devsnd/cherrymusic)
+
+devel: [![Build Status Devel](https://travis-ci.org/devsnd/cherrymusic.png?branch=devel)](https://travis-ci.org/devsnd/cherrymusic)
+
+
  
 
 

@@ -3,6 +3,7 @@ try:
 except ImportError:
     from distutils.core import setup
 import os
+import sys
 import codecs
 import cherrymusicserver
 from cherrymusicserver import pathprovider
@@ -76,7 +77,21 @@ shareFolder = os.path.join('share',pathprovider.sharedFolderName)
 # files to put in /usr/share
 data_files = listFilesRec('res',shareFolder)
 
-long_description = "\n" + "\n".join([read('README.md')])
+long_description = None
+if 'upload' in sys.argv:
+    readmemd = "\n" + "\n".join([read('README.md')])
+    print("converting markdown to reStucturedText for upload to pypi.")
+    from urllib.request import urlopen
+    from urllib.parse import quote
+    import json
+
+    url = 'http://johnmacfarlane.net/cgi-bin/trypandoc?text=%s&from=markdown&to=rst'
+    urlhandler = urlopen(url % quote(readmemd))
+    result = json.loads(codecs.decode(urlhandler.read(), 'utf-8'))
+    
+    long_description = result['result']
+else:
+    long_description = "\n" + "\n".join([read('README.md')])
 
 setup_options = {
     'name': 'CherryMusic',
