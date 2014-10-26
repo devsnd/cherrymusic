@@ -71,7 +71,9 @@ if [ ! -d ${PROJECTDIR} -o ! -f ${PROJECTDIR}/cherrymusic ]; then
 fi
 
 if [ $SPECIFIC_TEST ]; then
-    TEST_LOCATION="cherrymusicserver.test.test_${SPECIFIC_TEST}"
+    # transform $SPECIFIC_TEST into TEST_LOCATION:
+    # (BLA.)*(BLUB) --> cherrymusicserver.BLA.BLA.test.test_BLUB
+    TEST_LOCATION=$( echo $SPECIFIC_TEST | sed "s/\(\([^.]\+[.]\)*\)\(\)/cherrymusicserver.\1test.test_\3/" )
     COVERAGE_TARGET="cherrymusicserver.${SPECIFIC_TEST}"
     COVERAGE_OPTIONS="${COVERAGE_OPTIONS} --cover-package=${COVERAGE_TARGET} --cover-branches --cover-min-percentage=100"
 else
