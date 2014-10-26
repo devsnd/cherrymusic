@@ -93,8 +93,12 @@ fi
 
 
 # nosetests
-for i in "" "2" "3"; do
-    TESTER="nosetests${i}"
+if [ ! "$TESTERS" ]; then
+    for i in "" "2" "3"; do
+        TESTERS="${TESTERS} nosetests${i}"
+    done
+fi
+for TESTER in $TESTERS; do
     if [ $(command -v $TESTER) ]; then
         RUN="${TESTER} -e ${TEST_EXCLUDE_REGEX} ${COVERAGE_OPTIONS} ${TEST_LOCATION}"
         echo
