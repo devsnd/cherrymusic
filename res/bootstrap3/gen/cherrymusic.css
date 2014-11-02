@@ -5036,6 +5036,10 @@ body:after {
 .feature-list {
   text-align: left;
 }
+#search-panel,
+.playlist-container-parent {
+  -webkit-overflow-scrolling: touch;
+}
 #searchresults {
   overflow: hidden;
 }
