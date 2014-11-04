@@ -169,6 +169,9 @@
                 <div class="control-group">
                     Confirm closing if music is playing <input type="checkbox" onchange="" id="ui-confirm_quit_dialog" value="option1">
                 </div>
+                <div class="control-group">
+                    Display album art when playing <input type="checkbox" onchange="" id="ui-display_album_art" value="option1">
+                </div>
                 <div id="media-force_transcode_to_bitrate-container" class="control-group">
                     <div class="success">
                         Limit audio bitrate
@@ -439,6 +442,7 @@
 </div>
 <div id="mediawrapper">
     <div id="mediaplayer">
+        <img id="albumart"/>
         <div id="jquery_jplayer_1" class="jp-jplayer">
         </div>
         <div id="jp_ancestor" class="jp-audio">
