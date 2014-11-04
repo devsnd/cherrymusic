@@ -743,13 +743,15 @@ PlaylistManager.prototype = {
         return track;
     },
     setAlbumArtDisplay : function(track) {
-        // strip filename from url
-        var directory = track.url.substring(0,track.url.lastIndexOf('/'))
-        if (directory == '') // root directory
-            directory = '/';
-        var api_param = JSON.stringify({directory: directory});
-        var imgurl = 'api/fetchalbumart?data=' + api_param;
-        $(this.cssSelectorAlbumArt).attr('src', imgurl);
+        if(userOptions.ui.display_album_art){
+            // strip filename from url
+            var directory = track.url.substring(0,track.url.lastIndexOf('/'))
+            if (directory == '') // root directory
+                directory = '/';
+            var api_param = JSON.stringify({directory: directory});
+            var imgurl = 'api/fetchalbumart?data=' + api_param;
+            $(this.cssSelectorAlbumArt).attr('src', imgurl);
+        }
     },
     addSong : function(path, title, plid, animate){
         "use strict";

@@ -1054,10 +1054,6 @@ function dontCloseWindowIfMusicPlays(){
     }
 }
 
-function initAlbumArtVisibility(){
-    $('#albumart').toggle(userOptions.ui.display_album_art)
-}
-
 function searchAlbumArt(){
     busy('#changeAlbumArt .modal-body').hide().fadeIn('fast');
     var success = function(urllist){
@@ -1154,7 +1150,7 @@ $(document).ready(function(){
     loadUserOptions(function(){
         initKeyboardshortcuts();
         dontCloseWindowIfMusicPlays();
-        initAlbumArtVisibility();
+        $('#albumart').toggle(userOptions.ui.display_album_art)
     });
     $('#search-panel').on('scroll', function(){
         //enable loading of images when in viewport
@@ -1221,6 +1217,6 @@ $(document).ready(function(){
         });
     });
     $('#ui-display_album_art').click(function() {
-        $('#albumart').toggle($('#ui-display_album_art').attr('checked'), 0);
+        $('#albumart').toggle($('#ui-display_album_art').prop('checked'));
     });
 });
