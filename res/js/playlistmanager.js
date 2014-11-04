@@ -237,6 +237,7 @@ PlaylistManager = function(){
     this.cssSelectorPlaylistCommands = '#playlistCommands';
     this.cssSelectorJPlayerControls = '#jp_ancestor';
     this.cssSelectorjPlayer = "#jquery_jplayer_1";
+    this.cssSelectorAlbumArt = "#albumart";
     this.newplaylistProxy = new NewplaylistProxy(this);
     this.managedPlaylists = [] //hold instances of ManagedPlaylist
     this.playingPlaylist = 0;
@@ -273,6 +274,13 @@ PlaylistManager = function(){
             alert('Your browser does not support audio playback.');
         }
 	});
+    $(this.cssSelectorjPlayer).bind($.jPlayer.event.setmedia, function(event) {
+        var playlist = self.getPlayingPlaylist().jplayerplaylist;
+        var track = playlist.playlist[playlist.current];
+        if (track) {
+            self.setAlbumArtDisplay(track);
+        }
+    });
     this.initJPlayer();
 }
 
@@ -733,6 +741,15 @@ PlaylistManager.prototype = {
             }
         }
         return track;
+    },
+    setAlbumArtDisplay : function(track) {
+        // strip filename from url
+        var directory = track.url.substring(0,track.url.lastIndexOf('/'))
+        if (directory == '') // root directory
+            directory = '/';
+        var api_param = JSON.stringify({directory: directory});
+        var imgurl = 'api/fetchalbumart?data=' + api_param;
+        $(this.cssSelectorAlbumArt).attr('src', imgurl);
     },
     addSong : function(path, title, plid, animate){
         "use strict";
