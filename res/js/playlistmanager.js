@@ -743,7 +743,8 @@ PlaylistManager.prototype = {
         return track;
     },
     setAlbumArtDisplay : function(track) {
-        var directory = track.url.replace(/[^\/]*$/, ''); // strip filename from url
+        // strip filename from url
+        var directory = track.url.substring(0,track.url.lastIndexOf('/'))
         if (directory == '') // root directory
             directory = '/';
         var api_param = JSON.stringify({directory: directory});
