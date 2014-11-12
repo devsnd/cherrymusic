@@ -35,14 +35,14 @@ log.setTest()
 from cherrymusicserver import database
 from cherrymusicserver import service
 from cherrymusicserver import userdb
-from cherrymusicserver.database.sql import MemConnector
+from cherrymusicserver.database.sql import MemConnector, TmpConnector
 
 
 class TestAuthenticate(unittest.TestCase):
     '''test authentication functions of userdb'''
 
-    def setUp(self):
-        service.provide('dbconnector', MemConnector)
+    def setUp(self, dbconnector=MemConnector):
+        service.provide('dbconnector', dbconnector)
         database.ensure_current_version(userdb.DBNAME)
         self.users = userdb.UserDB()
         self.users.addUser('user', 'password', False)
@@ -86,6 +86,8 @@ class TestAuthenticate(unittest.TestCase):
                          'authentication failure must return invalid user')
 
     def testChangePassword(self):
+        connector = TmpConnector()     # use different connections, don't share
+        self.setUp(connector)
         #create new user
         self.users.addUser('newpwuser', 'password', False)
         msg = self.users.changePassword('newpwuser', 'newpassword')
@@ -95,9 +97,10 @@ class TestAuthenticate(unittest.TestCase):
         self.assertTupleEqual(userdb.User.nobody(), authuser,
                          'authentication with old password after change must fail')
 
+        self.users = userdb.UserDB()    # force different DB connection
         authuser = self.users.auth('newpwuser', 'newpassword')
         self.assertEqual('newpwuser', authuser.name,
-                         'authentication with new passowrd failed')
+                         'authentication with new password failed')
 
 
 

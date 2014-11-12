@@ -80,6 +80,7 @@ class UserDB:
             self.conn.execute('''
             UPDATE users SET password = ?, salt = ? WHERE username = ?
             ''', (newuser.password, newuser.salt, newuser.name) )
+            self.conn.commit()
             return "success"
 
     def deleteUser(self, userid):
