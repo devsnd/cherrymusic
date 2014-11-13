@@ -56,3 +56,7 @@ doc/sphinx/_build
 
 # virtual envs
 .venv
+
+# ipython notebook
+*.ipynb
+.ipynb*
