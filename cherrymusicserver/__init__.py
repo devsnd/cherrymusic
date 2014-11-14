@@ -497,15 +497,7 @@ Have fun!
                     'tools.staticfile.on': True,
                     'tools.staticfile.filename': resourcedir + '/img/favicon.ico',
                 }})
-        #rest_v1_mount_path = '/api/v1'
-        #cherrypy.tree.mount(
-        #    api.v1.RestV1Root(config, httphandler, rest_v1_mount_path),
-        #    rest_v1_mount_path,
-        #    config={'/':
-        #        {
-        #            'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
-        #        }
-        #    })
+        api.v1.mount('/api/v1')
         log.i(_('Starting server on port %s ...') % config['server.port'])
 
         cherrypy.lib.caching.expires(0)  # disable expiry caching

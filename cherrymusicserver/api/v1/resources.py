@@ -1,7 +1,7 @@
-#!/usr/bin/env python3
+# -*- coding: utf-8 -*- #
 #
 # CherryMusic - a standalone music server
-# Copyright (c) 2012 Tom Wallroth & Tilman Boerner
+# Copyright (c) 2012-2014 Tom Wallroth & Tilman Boerner
 #
 # Project page:
 #   http://fomori.org/cherrymusic/
@@ -33,42 +33,7 @@ from __future__ import unicode_literals
 
 import cherrypy
 
-from cherrymusicserver.api.v1 import jsontools
-from cherrymusicserver.api.v1 import users
-from cherrymusicserver.api.v1.resources import Resource
-
-
-debug = True
-
-
-def get_resource():
-    root = ResourceRoot()
-    root.users = users.get_resource()
-    return root
-
-
-def get_config():
-    return {
-        '/': {
-            'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
-            'error_page.default': jsontools.json_error_handler,
-            'tools.json_out.on': True,
-            'tools.json_out.handler': jsontools.json_handler,
-            'tools.json_in.on': True,
-            'tools.sessions.on': False,
-        }
-    }
-
-
-def mount(mountpath):
-    cherrypy.tree.mount(get_resource(), mountpath, config=get_config())
-
-
-class ResourceRoot(Resource):
-
-    def GET(self):
-        resources = []
-        for name, member in self.__dict__.items():
-            if getattr(member, 'exposed', False):
-                resources.append(name)
-        return resources
+@cherrypy.expose()
+class Resource(object):
+    owner = None
+    model = None
