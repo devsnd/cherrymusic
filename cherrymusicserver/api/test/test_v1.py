@@ -162,7 +162,7 @@ class httpblock(object):
             body = None
         headers = [h for h in re.split('\r\n|\n', headers) if h.strip()]
         firstline = headers.pop(0)
-        word = re.split('\r\n|\n', firstline, maxsplit=1)[0].upper()
+        word = firstline.split(' ', 1)[0].upper()   # py2-compatible split
         if word.startswith('HTTP'):
             self.type="Server Response"
             self.status = int(firstline.split()[1])
@@ -203,6 +203,10 @@ def curl(url, **args):
     will use these additional arguments::
 
         ['--key', v1, '-k', v2, '--other-key', v3, '--switch', '']
+
+    List values are expanded by repeating the argument:
+
+        args['H'] = [a, b]  -->  ['-H', a, '-H', b]
 
     """
     cmd = ['/usr/bin/curl', '-i', '-s', '-S']
