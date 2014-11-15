@@ -28,6 +28,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
+""" Utilities for JSON encoding and decoding.
+    Hook into the CherryPy's handler tool chain.
+"""
+
 #python 2.6+ backward compability
 from __future__ import unicode_literals
 
@@ -37,13 +41,14 @@ import sys
 import cherrypy
 
 class JSONEncoder(json.JSONEncoder):
-
+    """ JSONEncoder with support for encoding model objects. """
     def default(self, obj):
         try:
             return obj.as_dict()
         except AttributeError:
             raise TypeError("can't JSON encode %s object %r" % (type(obj), obj))
 
+# see cherrypy._cpcompat.json_encode
 _json_encode = JSONEncoder().iterencode
 if sys.version_info > (3,):
     def json_encode(value):
@@ -54,11 +59,13 @@ else:
 
 
 def json_error_handler(status, message, traceback, version):
+    """ CherryPy error handler; turns errors into JSON objects """
     status = str(status)
     code = int(status.split()[0])
     return json_encode(dict(code=code, status=status, message=message, version=version))
 
 def json_handler(*args, **kwargs):
+    """ JSON handler that works with cherrypy.tools.json_out """
     value = cherrypy.serving.request._json_inner_handler(*args, **kwargs)
     if value is None:
         return None

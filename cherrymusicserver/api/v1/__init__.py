@@ -28,6 +28,28 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
+""" CherryMusic REST API version 1
+    (! under construction !)
+"""
+#                                      __________
+#                                     || .------.|
+#                                     ||/       [|
+#                                     |||      /||
+#                                     |||\    | [|
+#                  _     ________ _   |||.'___| |'---...__
+#                 /o)===|________(o\  ||========|         ``-..
+#                / /       _.----'\ \ |'=.====.='  ________    \
+#               / |     .-' ----. / | |  |____|  .'.-------.\   |
+#               \  \  .'_.----._ \  | _\_|____|.'.'_.----._ \\__|
+#         /\     \  .'.'   __   `.\ |-_| |____| /.'   __   '.\   |
+#        // \     \' /   /    \   \\|-_|_|____|//   /    \   \`--'
+#       //   \    / .|  |      |  |      |____| |  |      |  |
+#      //     \ .'.' |   \ __ /   |             |   \ __ /   |
+#     //      /'.'    '.        .'               '.        .'
+#    //_____.'-'        `-.__.-'                   `-.__.-' LGB
+# http://www.ascii-art.de/ascii/pqr/roadworks.txt (brought to you by the 90s)
+
+
 #python 2.6+ backward compability
 from __future__ import unicode_literals
 
@@ -42,31 +64,39 @@ debug = True
 
 
 def get_resource():
+    """ Assembles and return the API root resource """
     root = ResourceRoot()
     root.users = users.get_resource()
     return root
 
 
 def get_config():
+    """ Return the CherryPy config dict for the API mount point """
     return {
         '/': {
             'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
             'error_page.default': jsontools.json_error_handler,
+            'tools.json_in.on': True,
             'tools.json_out.on': True,
             'tools.json_out.handler': jsontools.json_handler,
-            'tools.json_in.on': True,
             'tools.sessions.on': False,
         }
     }
 
 
 def mount(mountpath):
+    """ Mount and configure API root resource to cherrypy.tree """
     cherrypy.tree.mount(get_resource(), mountpath, config=get_config())
 
 
 class ResourceRoot(Resource):
+    """ Defines the behavior of the API root resource;
+        subresources can define their own behavior and should be attached
+        dynamically.
+    """
 
     def GET(self):
+        """ Returns a list of available subresources """
         resources = []
         for name, member in self.__dict__.items():
             if getattr(member, 'exposed', False):

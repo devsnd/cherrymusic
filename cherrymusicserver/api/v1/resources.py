@@ -28,6 +28,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
+""" Abstract and common behavior of RESTlike resources """
+
 #python 2.6+ backward compability
 from __future__ import unicode_literals
 
@@ -35,5 +37,10 @@ import cherrypy
 
 @cherrypy.expose()
 class Resource(object):
+    """ Base class for API resources.
+
+        A resource wraps an underlying model, and can have an owner through
+        this model.
+    """
     owner = None
     model = None
