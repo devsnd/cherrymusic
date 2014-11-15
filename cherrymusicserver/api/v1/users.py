@@ -51,4 +51,4 @@ class users(Resource):
             if not name in _userdb:
                 raise cherrypy.NotFound(name)
             return _userdb[name]
-        return list(_userdb)
+        return sorted(_userdb)

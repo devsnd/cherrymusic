@@ -101,4 +101,4 @@ class ResourceRoot(Resource):
         for name, member in self.__dict__.items():
             if getattr(member, 'exposed', False):
                 resources.append(name)
-        return resources
+        return sorted(resources)
