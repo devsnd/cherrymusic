@@ -20,3 +20,13 @@ resources:
            200
 
            {"roles": "userbear", "id": 22, "name": "puh"}
+  root:
+    url: "/"
+    cases:
+      - request: |
+          GET /
+
+        response: |
+          200
+
+          ["users"]
