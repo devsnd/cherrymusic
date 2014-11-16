@@ -14,9 +14,36 @@ python:
   - "pypy"
   - "pypy3"
 
+env:
+  - CHERRYPY_VERSION=""
+
+matrix:
+  include:
+    - python: "2.7"
+      CHERRYPY_VERSION=">=3.2,<3.3"
+    - python: "2.7"
+      CHERRYPY_VERSION=">=3.3,<3.4"
+    - python: "2.7"
+      CHERRYPY_VERSION=">=3.4,<3.5"
+    - python: "2.7"
+      CHERRYPY_VERSION=">=3.5,<3.6"
+    - python: "3.3"
+      CHERRYPY_VERSION=">=3.2,<3.3"
+    - python: "3.3"
+      CHERRYPY_VERSION=">=3.3,<3.4"
+    - python: "3.3"
+      CHERRYPY_VERSION=">=3.4,<3.5"
+    - python: "3.3"
+      CHERRYPY_VERSION=">=3.5,<3.6"
+  allow_failures:
+    - CHERRYPY_VERSION=">=3.2,<3.3"
+    - CHERRYPY_VERSION=">=3.3,<3.4"
+    - CHERRYPY_VERSION=">=3.4,<3.5"
+    - CHERRYPY_VERSION=">=3.5,<3.6"
+
 # command to install dependencies
 install:
-  - "pip install cherrypy --use-mirrors"
+  - "pip install cherrypy${CHERRYPY_VERSION} --use-mirrors"
   - "pip install coveralls pyyaml"
   - "if [[ $TRAVIS_PYTHON_VERSION = 2.6 ]]; then pip install unittest2 --use-mirrors; fi"
 
