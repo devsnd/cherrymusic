@@ -53,6 +53,8 @@
 #python 2.6+ backward compability
 from __future__ import unicode_literals
 
+import sys
+
 import cherrypy
 
 from cherrymusicserver.api.v1 import jsontools
@@ -80,13 +82,22 @@ def get_config():
             'tools.json_out.on': True,
             'tools.json_out.handler': jsontools.json_handler,
             'tools.sessions.on': False,
-        }
+        },
     }
 
 
 def mount(mountpath):
     """ Mount and configure API root resource to cherrypy.tree """
     cherrypy.tree.mount(get_resource(), mountpath, config=get_config())
+
+    if sys.version_info < (3,):
+        # Disable a check that crashes the server in python2.
+        # Our config keys are unicode, and this check exposes them to an
+        # incompatible .translate() call in _cpdispatch.find_handler.
+        # (This setting must happen globally through config.update().)
+        cherrypy.config.update({
+            'checker.check_static_paths': False,
+        })
 
 
 class ResourceRoot(Resource):
