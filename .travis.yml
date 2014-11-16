@@ -34,7 +34,7 @@ matrix:
     - python: "3.3"
       env: "CHERRYPY_VERSION='>=3.4,<3.5'"
     - python: "3.3"
-      CHERRYPY_VERSION=>=3.5,<3.6
+      env: "CHERRYPY_VERSION='>=3.5,<3.6'"
   allow_failures:
     - env: "CHERRYPY_VERSION='>=3.2,<3.3'"
     - env: "CHERRYPY_VERSION='>=3.3,<3.4'"
