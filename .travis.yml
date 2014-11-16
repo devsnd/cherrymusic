@@ -20,26 +20,26 @@ env:
 matrix:
   include:
     - python: "2.7"
-      CHERRYPY_VERSION=">=3.2,<3.3"
+      env: "CHERRYPY_VERSION='>=3.2,<3.3'"
     - python: "2.7"
-      CHERRYPY_VERSION=">=3.3,<3.4"
+      env: "CHERRYPY_VERSION='>=3.3,<3.4'"
     - python: "2.7"
-      CHERRYPY_VERSION=">=3.4,<3.5"
+      env: "CHERRYPY_VERSION='>=3.4,<3.5'"
     - python: "2.7"
-      CHERRYPY_VERSION=">=3.5,<3.6"
+      env: "CHERRYPY_VERSION='>=3.5,<3.6'"
     - python: "3.3"
-      CHERRYPY_VERSION=">=3.2,<3.3"
+      env: "CHERRYPY_VERSION='>=3.2,<3.3'"
     - python: "3.3"
-      CHERRYPY_VERSION=">=3.3,<3.4"
+      env: "CHERRYPY_VERSION='>=3.3,<3.4'"
     - python: "3.3"
-      CHERRYPY_VERSION=">=3.4,<3.5"
+      env: "CHERRYPY_VERSION='>=3.4,<3.5'"
     - python: "3.3"
-      CHERRYPY_VERSION=">=3.5,<3.6"
+      CHERRYPY_VERSION=>=3.5,<3.6
   allow_failures:
-    - CHERRYPY_VERSION=">=3.2,<3.3"
-    - CHERRYPY_VERSION=">=3.3,<3.4"
-    - CHERRYPY_VERSION=">=3.4,<3.5"
-    - CHERRYPY_VERSION=">=3.5,<3.6"
+    - env: "CHERRYPY_VERSION='>=3.2,<3.3'"
+    - env: "CHERRYPY_VERSION='>=3.3,<3.4'"
+    - env: "CHERRYPY_VERSION='>=3.4,<3.5'"
+    - env: "CHERRYPY_VERSION='>=3.5,<3.6'"
 
 # command to install dependencies
 install:
