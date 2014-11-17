@@ -38,6 +38,8 @@ from contextlib import contextmanager
 from mock import *
 from nose.tools import *
 
+import cherrymusicserver
+
 from cherrymusicserver import configuration
 from cherrymusicserver import database
 from cherrymusicserver import service
@@ -52,7 +54,8 @@ def cherryconfig(override=None):
         :param dict override: The overridden config values
     """
     override = override or {}
-    config = _default_config.update(override)
+    config = cherrymusicserver.config or configuration.from_defaults()
+    config = config.update(override)
     with patch('cherrymusicserver.config', config):
         yield config
 
