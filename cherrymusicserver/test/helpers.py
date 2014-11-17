@@ -78,6 +78,12 @@ def tempdir(name_hint, keep=False):
 
 
 def mkpath(name, parent='.', content=''):
+    """ Creates a file or subdir in directory ``parent``.
+
+        If ``name.endswith('/')``, a directory is created, otherwise a file.
+        ``content`` will be written to created files; specifying content
+        when trying to create a directory will raise an AssertionError.
+    """
     mkdir = name.endswith('/')
     name = name.rstrip('/')
     assert not (mkdir and content)
