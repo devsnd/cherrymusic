@@ -57,7 +57,7 @@ def test_hidden_names_listdir():
 
     model = cherrymodel.CherryModel()
     dir_listing = model.listdir('')
-    assert len(dir_listing) == 1
+    assert len(dir_listing) == 1, str(dir_listing)
     assert dir_listing[0].path == 'not_hidden.mp3'
 
 
@@ -72,6 +72,27 @@ def test_hidden_names_search(cherrypy, cache):
 
     cache.searchfor.return_value = [cherrymodel.MusicEntry('not_hidden.mp3', dir=False)]
     assert model.search('something')
+
+
+@cherrytest(config({'browser.pure_database_lookup': True}))
+@patch('cherrymusicserver.cherrymodel.CherryModel.cache')
+def test_listdir_deleted_files(cache):
+    "cherrymodel.listdir should work when cached files don't exist anymore"
+    model = cherrymodel.CherryModel()
+
+    cache.listdir.return_value = ['not_hidden.mp3', 'deleted.mp3']
+    eq_('not_hidden.mp3', model.listdir('')[0].path)
+
+
+@cherrytest(config({'browser.pure_database_lookup': False}))
+def test_listdir_bad_symlinks():
+    "cherrymodel.listdir should work when cached files don't exist anymore"
+    model = cherrymodel.CherryModel()
+
+    with tempdir('test_listdir_bad_symlinks') as tmpdir:
+        with cherryconfig({'media.basedir': tmpdir}):
+            os.symlink('not_there', os.path.join(tmpdir, 'badlink'))
+            eq_([], model.listdir(''))
 
 
 @cherrytest(config({'media.transcode': False}))
