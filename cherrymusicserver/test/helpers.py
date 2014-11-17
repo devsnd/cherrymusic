@@ -30,6 +30,7 @@
 #
 """ Things that are helpful when testing the CherryMusic backend """
 
+import os
 import shutil
 import tempfile
 
@@ -74,6 +75,24 @@ def tempdir(name_hint, keep=False):
     finally:
         if not keep:
             shutil.rmtree(tmpdir, ignore_errors=False, onerror=None)
+
+
+def mkpath(name, parent='.', content=''):
+    mkdir = name.endswith('/')
+    name = name.rstrip('/')
+    assert not (mkdir and content)
+    abspath = os.path.abspath(os.path.join(parent, name))
+    if mkdir:
+        os.mkdir(abspath)
+        assert os.path.isdir(abspath)
+    else:
+        with open(abspath, "w") as newfile:
+            if content:
+                newfile.write(content)
+        assert os.path.isfile(abspath)
+        if content:
+            assert bool(os.path.getsize(abspath))
+    return abspath
 
 
 @contextmanager

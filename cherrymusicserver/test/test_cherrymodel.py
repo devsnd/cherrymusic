@@ -35,16 +35,14 @@ import os
 from mock import *
 from nose.tools import *
 
-from collections import defaultdict
+from cherrymusicserver.test.helpers import cherrytest, tempdir, mkpath, cherryconfig
 
 from cherrymusicserver import log
 log.setTest()
 
-import cherrymusicserver as cherry
-
 from cherrymusicserver import cherrymodel
 
-def cherryconfig(cfg=None):
+def config(cfg=None):
     from cherrymusicserver import configuration
     cfg = cfg or {}
     c = configuration.from_defaults()
@@ -53,7 +51,7 @@ def cherryconfig(cfg=None):
     return c
 
 
-@patch('cherrymusicserver.cherrymodel.cherry.config', cherryconfig())
+@patch('cherrymusicserver.cherrymodel.cherry.config', config())
 @patch('cherrymusicserver.cherrymodel.os')
 @patch('cherrymusicserver.cherrymodel.CherryModel.cache')
 @patch('cherrymusicserver.cherrymodel.isplayable', lambda _: True)
@@ -72,7 +70,7 @@ def test_hidden_names_listdir(cache, os):
     assert model.listdir('')
 
 
-@patch('cherrymusicserver.cherrymodel.cherry.config', cherryconfig({'search.maxresults': 10}))
+@patch('cherrymusicserver.cherrymodel.cherry.config', config({'search.maxresults': 10}))
 @patch('cherrymusicserver.cherrymodel.CherryModel.cache')
 @patch('cherrymusicserver.cherrymodel.cherrypy')
 def test_hidden_names_search(cherrypy, cache):
@@ -84,7 +82,7 @@ def test_hidden_names_search(cherrypy, cache):
     cache.searchfor.return_value = [cherrymodel.MusicEntry('not_hidden.mp3', dir=False)]
     assert model.search('something')
 
-@patch('cherrymusicserver.cherrymodel.cherry.config', cherryconfig({'search.maxresults': 10}))
+@patch('cherrymusicserver.cherrymodel.cherry.config', config({'search.maxresults': 10}))
 @patch('cherrymusicserver.cherrymodel.CherryModel.cache')
 @patch('cherrymusicserver.cherrymodel.cherrypy')
 def test_hidden_names_listdir(cherrypy, cache):
@@ -94,7 +92,7 @@ def test_hidden_names_listdir(cherrypy, cache):
     assert dir_listing[0].path == 'not_hidden.mp3'
 
 
-@patch('cherrymusicserver.cherrymodel.cherry.config', cherryconfig({'media.transcode': False}))
+@patch('cherrymusicserver.cherrymodel.cherry.config', config({'media.transcode': False}))
 def test_randomMusicEntries():
     model = cherrymodel.CherryModel()
 
@@ -112,8 +110,8 @@ def test_randomMusicEntries():
             eq_(0, len(model.randomMusicEntries(2)))
 
 
-@patch('cherrymusicserver.cherrymodel.cherry.config', cherryconfig({'media.transcode': False}))
-def test_isplayable():
+@patch('cherrymusicserver.cherrymodel.cherry.config', config({'media.transcode': False}))
+def test_isplayable_without_transcoding():
     model = cherrymodel.CherryModel()
 
     # can't use tempfile.TemporaryDirectory b/c Python2.6/3.1 compatibility
@@ -151,6 +149,21 @@ def test_isplayable():
                 assert not isplayable('inexistant')
             finally:
                 shutil.rmtree(tempdir)
+
+
+@cherrytest({'media.transcode': True})
+def test_is_playable_by_transcoding():
+
+    from audiotranscode import AudioTranscode
+
+    with patch('audiotranscode.AudioTranscode', spec=AudioTranscode) as ATMock:
+        ATMock.return_value = ATMock
+        ATMock.availableDecoderFormats.return_value = ['xxx']
+        with tempdir('test_isplayable_by_transcoding') as tmpdir:
+            with cherryconfig({'media.basedir': tmpdir}):
+                track = mkpath('track.xxx', parent=tmpdir, content='xy')
+                model = cherrymodel.CherryModel()
+                ok_(model.isplayable(track))
 
 
 if __name__ == '__main__':
