@@ -49,23 +49,16 @@ def config(cfg=None):
     return c
 
 
-@cherrytest(config())
-@patch('cherrymusicserver.cherrymodel.os')
-@patch('cherrymusicserver.cherrymodel.CherryModel.cache')
-@patch('cherrymusicserver.cherrymodel.isplayable', lambda _: True)
-def test_hidden_names_listdir(cache, os):
+@cherrytest(config({'browser.pure_database_lookup': False}))
+def test_hidden_names_listdir():
+    import cherrymusicserver as cherry
+    basedir_listing = sorted(os.listdir(cherry.config['media.basedir']))
+    eq_(['.hidden.mp3', 'empty_file.mp3', 'not_hidden.mp3'], basedir_listing)
+
     model = cherrymodel.CherryModel()
-    os.path.join = lambda *a: '/'.join(a)
-
-    content = ['.hidden']
-    cache.listdir.return_value = content
-    os.listdir.return_value = content
-    assert not model.listdir('')
-
-    content = ['not_hidden.mp3']
-    cache.listdir.return_value = content
-    os.listdir.return_value = content
-    assert model.listdir('')
+    dir_listing = model.listdir('')
+    assert len(dir_listing) == 1
+    assert dir_listing[0].path == 'not_hidden.mp3'
 
 
 @cherrytest(config({'search.maxresults': 10}))
@@ -79,15 +72,6 @@ def test_hidden_names_search(cherrypy, cache):
 
     cache.searchfor.return_value = [cherrymodel.MusicEntry('not_hidden.mp3', dir=False)]
     assert model.search('something')
-
-@cherrytest(config({'search.maxresults': 10}))
-@patch('cherrymusicserver.cherrymodel.CherryModel.cache')
-@patch('cherrymusicserver.cherrymodel.cherrypy')
-def test_hidden_names_listdir(cherrypy, cache):
-    model = cherrymodel.CherryModel()
-    dir_listing = model.listdir('')
-    assert len(dir_listing) == 1
-    assert dir_listing[0].path == 'not_hidden.mp3'
 
 
 @cherrytest(config({'media.transcode': False}))
@@ -110,7 +94,7 @@ def test_randomMusicEntries():
 
 @cherrytest({'media.transcode': False})
 def test_isplayable():
-    """ files of supported types should be playable if they exist and have content """
+    """ existing, nonempty files of supported types should be playable """
     model = cherrymodel.CherryModel()
 
     with patch(
