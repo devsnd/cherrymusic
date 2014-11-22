@@ -118,9 +118,7 @@ class CherryModel:
             allfilesindir = os.listdir(absdirpath)
 
         # filter bad symlinks, deleted files that are still in cache, ...
-        allfilesindir = filter(
-            lambda p: os.path.exists(CherryModel.abspath(p)),
-            allfilesindir)
+        allfilesindir = [f for f in allfilesindir if os.path.exists(os.path.join(absdirpath, f))]
 
         #remove all files not inside the filter
         if filterstr:
