@@ -703,7 +703,7 @@ function addNewUser(){
     "use strict";
     var newusername = $('#newusername').val();
     var newpassword = $('#newpassword').val();
-    var newisadmin = $('#newisadmin').attr('checked')?1:0;
+    var newisadmin = $('#newisadmin').prop('checked')?1:0;
     if(newusername.trim() === '' || newpassword.trim() === ''){
         return;
     }
