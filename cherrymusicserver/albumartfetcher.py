@@ -71,13 +71,14 @@ class AlbumArtFetcher:
 
     methods = {
         'amazon': {
-            'url': "http://www.amazon.com/s/ref=sr_nr_i_0?rh=k:",
-            'regexes': ['<img  src="([^"]*)"\s+class="productImage',
-                        '<img.+?src="([^"]*)"\s+class="productImage'],
+            'url': "http://www.amazon.com/s/?field-keywords=",
+            'regexes': [
+                '<img[^>]+?alt="Product Details"[^>]+?src="([^"]+)"',
+                '<img[^>]+?src="([^"]+)"[^>]+?alt="Product Details"'],
         },
         'bestbuy.com': {
-            'url': 'http://www.bestbuy.com/site/searchpage.jsp?_dyncharset=ISO-8859-1&_dynSessConf=-1844839118144877442&id=pcat17071&type=page&ks=960&sc=Global&cp=1&sp=&qp=category_facet%3DMovies+%26+Music~abcat0600000^category_facet%3DSAAS~Music~cat02001&list=y&usc=All+Categories&nrp=15&fs=saas&iht=n&seeAll=&st=',
-            'regexes': ['<img itemprop="image" class="thumb" src="([^"]*)"']
+            'url': 'http://www.bestbuy.com/site/searchpage.jsp?_dyncharset=UTF-8&id=pcat17071&st=',
+            'regexes': ['<div class="thumb".+?<img.+?src="([^"]+)"']
         },
         # buy.com is now rakuten.com
         # with a new search API that nobody bothered to figure out yet
@@ -147,7 +148,7 @@ class AlbumArtFetcher:
         # fetch all urls in the page
         matches = []
         for regex in method['regexes']:
-            matches += re.findall(regex, html)
+            matches += re.findall(regex, html, re.DOTALL)
         return matches
 
     def fetch(self, searchterm):

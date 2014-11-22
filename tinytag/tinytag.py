@@ -227,7 +227,7 @@ class ID3(TinyTag):
 
     def _parse_id3v1(self, fh):
         if fh.read(3) == b'TAG':  # check if this is an ID3 v1 tag
-            asciidecode = lambda x: self._unpad(codecs.decode(x, 'ASCII'))
+            asciidecode = lambda x: self._unpad(codecs.decode(x, 'latin1'))
             self._set_field('title', fh.read(30), transfunc=asciidecode)
             self._set_field('artist', fh.read(30), transfunc=asciidecode)
             self._set_field('album', fh.read(30), transfunc=asciidecode)

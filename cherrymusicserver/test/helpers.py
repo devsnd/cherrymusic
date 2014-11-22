@@ -30,6 +30,7 @@
 #
 """ Things that are helpful when testing the CherryMusic backend """
 
+import os
 import shutil
 import tempfile
 
@@ -37,6 +38,8 @@ from contextlib import contextmanager
 
 from mock import *
 from nose.tools import *
+
+import cherrymusicserver
 
 from cherrymusicserver import configuration
 from cherrymusicserver import database
@@ -52,7 +55,8 @@ def cherryconfig(override=None):
         :param dict override: The overridden config values
     """
     override = override or {}
-    config = _default_config.update(override)
+    config = cherrymusicserver.config or configuration.from_defaults()
+    config = config.update(override)
     with patch('cherrymusicserver.config', config):
         yield config
 
@@ -71,6 +75,30 @@ def tempdir(name_hint, keep=False):
     finally:
         if not keep:
             shutil.rmtree(tmpdir, ignore_errors=False, onerror=None)
+
+
+def mkpath(name, parent='.', content=''):
+    """ Creates a file or subdir in directory ``parent``.
+
+        If ``name.endswith('/')``, a directory is created, otherwise a file.
+        ``content`` will be written to created files; specifying content
+        when trying to create a directory will raise an AssertionError.
+    """
+    mkdir = name.endswith('/')
+    name = name.rstrip('/')
+    assert not (mkdir and content)
+    abspath = os.path.abspath(os.path.join(parent, name))
+    if mkdir:
+        os.mkdir(abspath)
+        assert os.path.isdir(abspath)
+    else:
+        with open(abspath, "w") as newfile:
+            if content:
+                newfile.write(content)
+        assert os.path.isfile(abspath)
+        if content:
+            assert bool(os.path.getsize(abspath))
+    return abspath
 
 
 @contextmanager

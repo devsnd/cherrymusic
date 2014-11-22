@@ -28,203 +28,88 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
-import json
-import cherrypy
-import codecs
+""" CherryMusic REST API version 1
+    (! under construction !)
+"""
+#                                      __________
+#                                     || .------.|
+#                                     ||/       [|
+#                                     |||      /||
+#                                     |||\    | [|
+#                  _     ________ _   |||.'___| |'---...__
+#                 /o)===|________(o\  ||========|         ``-..
+#                / /       _.----'\ \ |'=.====.='  ________    \
+#               / |     .-' ----. / | |  |____|  .'.-------.\   |
+#               \  \  .'_.----._ \  | _\_|____|.'.'_.----._ \\__|
+#         /\     \  .'.'   __   `.\ |-_| |____| /.'   __   '.\   |
+#        // \     \' /   /    \   \\|-_|_|____|//   /    \   \`--'
+#       //   \    / .|  |      |  |      |____| |  |      |  |
+#      //     \ .'.' |   \ __ /   |             |   \ __ /   |
+#     //      /'.'    '.        .'               '.        .'
+#    //_____.'-'        `-.__.-'                   `-.__.-' LGB
+# http://www.ascii-art.de/ascii/pqr/roadworks.txt (brought to you by the 90s)
+
+
+#python 2.6+ backward compability
+from __future__ import unicode_literals
+
 import sys
-try:
-    from urllib.parse import unquote
-except ImportError:
-    from backport.urllib.parse import unquote
-try:
-    from urllib import parse
-except ImportError:
-    from backport.urllib import parse
 
+import cherrypy
 
-import audiotranscode
+from cherrymusicserver.api.v1 import jsontools
+from cherrymusicserver.api.v1 import users
+from cherrymusicserver.api.v1.resources import Resource
 
-from cherrymusicserver import userdb
-from cherrymusicserver import log
-from cherrymusicserver import albumartfetcher
-from cherrymusicserver import service
-from cherrymusicserver.cherrymodel import MusicEntry
-from cherrymusicserver.pathprovider import databaseFilePath, readRes
-from cherrymusicserver.pathprovider import albumArtFilePath
-import cherrymusicserver as cherry
-import cherrymusicserver.metainfo as metainfo
-from cherrymusicserver.util import Performance
-import time
 
 debug = True
 
 
-class RESTResource(object):
-    def __init__(self, root):
-        self.root = root
-    
-    def url(components):
-        resourcename = self.__class__.__name__.lower()
-        return '/'.join([self.root.rootpath, resourcename] + components)
-    
-    exposed = True
-    #@cherrypy.expose
-    def default(self, *vpath, **params):
-        return cherrypy.request.method
-        try:
-            method = getattr(self, cherrypy.request.method)
-            return method(*vpath, **params)
-        except AttributeError:
-            raise cherrypy.HTTPError(405, "Method not implemented.")
-
-    def parsepath(self, vpath, numargs):
-        args = list(vpath)
-        args += [None] * (numargs - len(vpath))
-        return args
-    
-    def format_return(self, params, items):
-        retformat = params.get('format', 'json')
-        if retformat == 'html':
-            return self.to_html(items)
-        else: # default to json
-            return self.to_json(items)
-    
-    def to_html(self, items):
-        htmllist = ['<a href="'+i['url']+'">'+json.dumps(i['data'])+'</a>' for i in items]
-        return '<ul><li>'+'</li><li>'.join(htmllist)+'</li></ul>'
-    
-    def to_json(self, items):
-        itemtype = type(items)
-        if itemtype == filter or itemtype == map:
-            items = list(items)
-        return json.dumps(items)
+def get_resource():
+    """ Assembles and return the API root resource """
+    root = ResourceRoot()
+    root.users = users.get_resource()
+    return root
 
 
-class Media(RESTResource):
-    def GET(self, *vpath, **params):
-        pass
-
-@service.user(playlistdb='playlist', userdb='users')
-class Playlist(RESTResource):
-    
-    def GET(self, *vpath, **params):
-        self.root.requireAuth(params)
-        username, playlistid = self.parsepath(vpath, 2)
-        if username:
-            userid = self.userdb.getIdByName(username)
-            if userid == -1:
-                raise HTTPError(404, 'No such user.')
-            if playlistid:
-                # get specific playlist
-                playlistid = int(playlistid)
-                playlist = self.playlistdb.loadPlaylist(playlistid, userid)
-                simple_playlist = [track.to_dict() for track in playlist]
-                simple_playlist = map(self.playlist_legacy_to_rest, simple_playlist)
-                return self.format_return(params, simple_playlist)
-            else:
-                # get playlists by user
-                
-                # hack: replace legacy api later by proper db calls
-                all_playlists = self.oldapi.api_showplaylists()
-                all_playlists = map(self.listing_legacy_to_rest, all_playlists)
-                by_user = lambda pl: pl['data']['userid'] == userid
-                user_playlists = filter(by_user, all_playlists)
-                # hack end
-                return self.format_return(params, user_playlists)
-        else:
-            # hack: replace legacy api later by proper db calls
-            all_playlists = self.root.oldapi.api_showplaylists()
-            all_playlists = map(self.listing_legacy_to_rest, all_playlists)
-            # hack end
-            return self.format_return(params, all_playlists)
-
-    def playlist_legacy_to_rest(self, plitem):
-        """wrapper function to turn a legacy playlist into the new
-        style restful playlist"""
-        return {'data': plitem, 'url': '/serve/'+plitem['urlpath']}
-
-    def listing_legacy_to_rest(self, pl):
-        """wrapper function to turn a legacy listing of playlists into
-        the new style restful playlist"""
-        return {'data': pl, 'url': self.url([pl['username'], str(pl['plid'])])}
-
-class User(RESTResource):
-    def GET(self, *vpath, **params):
-        username = self.parsepath(vpath, 1)
-        if username:
-            return 'user info'
-        else:
-            return 'user list'
+def get_config():
+    """ Return the CherryPy config dict for the API mount point """
+    return {
+        '/': {
+            'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+            'error_page.default': jsontools.json_error_handler,
+            'tools.json_in.on': True,
+            'tools.json_out.on': True,
+            'tools.json_out.handler': jsontools.json_handler,
+            'tools.sessions.on': False,
+        },
+    }
 
 
-class Session(RESTResource):
-    def POST(self, *vpath, **params):
-        #login
-        pass
+def mount(mountpath):
+    """ Mount and configure API root resource to cherrypy.tree """
+    cherrypy.tree.mount(get_resource(), mountpath, config=get_config())
 
-    def PUT(self, *vpath, **params):
-        #save session
-        pass
-
-    def DELETE(self, *vpath, **params):
-        # logout
-        pass
-
-
-class Config(RESTResource):
-    def GET(self, *vpath, **params):
-        username = self.parsepath(vpath, 1)
-        if username:
-            # get server config and user options
-            pass
-        else:
-            # get server config
-            pass
+    if sys.version_info < (3,):
+        # Disable a check that crashes the server in python2.
+        # Our config keys are unicode, and this check exposes them to an
+        # incompatible .translate() call in _cpdispatch.find_handler.
+        # (This setting must happen globally through config.update().)
+        cherrypy.config.update({
+            'checker.check_static_paths': False,
+        })
 
 
-class Search(RESTResource):
-    def GET(self, *vpath, **params):
-        all_fields = ["playlist", "collection", "tracks"]
-        query = params.get('q', None)
-        fieldstrs = params.get('fields', '')
-        fields = [f.strip() for f in fieldstrs.split(',') if f in all_fields]
-        if len(fields) == 0:
-            fields = all_fields
-        pass
+class ResourceRoot(Resource):
+    """ Defines the behavior of the API root resource;
+        subresources can define their own behavior and should be attached
+        dynamically.
+    """
 
-
-class Heartbeat(RESTResource):
-    def GET(self, *vpath, **params):
-        pass
-
-
-class AlbumArt(RESTResource):
-    def GET(self, *vpath, **params):
-        pass
-
-@service.user(model='cherrymodel', playlistdb='playlist',
-              useroptions='useroptions', userdb='users')
-class RestV1Root(object):
-    exposed = True
-    def __init__(self, config, oldapi, rootpath):
-        self.config = config
-        # injecting old api for easier implementation
-        # should be handled less hackish later
-        self.oldapi = oldapi
-        self.rootpath = rootpath
-    
-        self.playlist = Playlist(self)
-        self.albumart = AlbumArt()
-        self.media = Media()
-        self.user = User()
-        self.session = Session()
-        self.config = Config()
-        self.search = Search()
-        self.heartbeat = Heartbeat()
-    
-    def requireAuth(params={}):
-        if 'token' in params:
-            if params['token'] != 5:
-                raise cherrypy.HTTPError(401, 'Unauthorized')
-        elif not self.oldapi.isAuthorized():
-            raise cherrypy.HTTPError(401, 'Unauthorized')
+    def GET(self):
+        """ Returns a list of available subresources """
+        resources = []
+        for name, member in self.__dict__.items():
+            if getattr(member, 'exposed', False):
+                resources.append(name)
+        return sorted(resources)

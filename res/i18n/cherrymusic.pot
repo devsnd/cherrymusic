@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-03-30 19:08+0200\n"
+"POT-Creation-Date: 2014-11-17 18:42+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,20 +17,20 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: cherrymusicserver/cherrymodel.py:178
+#: cherrymusicserver/cherrymodel.py:196
 #, python-format
 msgid "%(user)s searched for '%(term)s'"
 msgstr ""
 
-#: cherrymusicserver/cherrymodel.py:181
+#: cherrymusicserver/cherrymodel.py:199
 msgid "sorting DB results using ResultOrder"
 msgstr ""
 
-#: cherrymusicserver/cherrymodel.py:193
+#: cherrymusicserver/cherrymodel.py:211
 msgid "checking and classifying results:"
 msgstr ""
 
-#: cherrymusicserver/cherrymodel.py:206
+#: cherrymusicserver/cherrymodel.py:227
 #, python-format
 msgid "Error fetching version info: %s"
 msgstr ""
@@ -82,12 +82,24 @@ msgid ""
 msgstr ""
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:109
+#: cherrymusicserver/configuration.py:106
+msgid ""
+"\n"
+"                    Show the number of sub-folders and tracks contained\n"
+"                    in any folder. This will increase the stress for the\n"
+"                    server, so if you're running CherryMusic on a 386DX II\n"
+"                    or similar, it is recommended to deactivate this "
+"feature.\n"
+"                            "
+msgstr ""
+
+#. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+#: cherrymusicserver/configuration.py:120
 msgid "megabytes"
 msgstr ""
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:106
+#: cherrymusicserver/configuration.py:117
 #, python-brace-format
 msgid ""
 "\n"
@@ -98,7 +110,7 @@ msgid ""
 msgstr ""
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:114
+#: cherrymusicserver/configuration.py:125
 msgid ""
 "\n"
 "                    MAXRESULTS sets the maximum amount of search results\n"
@@ -110,7 +122,7 @@ msgid ""
 msgstr ""
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:123
+#: cherrymusicserver/configuration.py:134
 msgid ""
 "\n"
 "                    This will load parts of the database into memory for "
@@ -123,7 +135,7 @@ msgid ""
 msgstr ""
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:132
+#: cherrymusicserver/configuration.py:143
 msgid ""
 "\n"
 "                    MAXSHOWFILES specifies how many files and folders "
@@ -136,7 +148,7 @@ msgid ""
 msgstr ""
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:143
+#: cherrymusicserver/configuration.py:154
 msgid ""
 "\n"
 "                    Only use the media database, never the filesystem, for "
@@ -149,19 +161,19 @@ msgid ""
 msgstr ""
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:152
+#: cherrymusicserver/configuration.py:163
 msgid "The port the server will listen to."
 msgstr ""
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:157
+#: cherrymusicserver/configuration.py:168
 msgid ""
 "When set to true, the server will listen on a IPv6\n"
 "                          socket instead of IPv4"
 msgstr ""
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:163
+#: cherrymusicserver/configuration.py:174
 msgid ""
 "\n"
 "                    when localhost_only is set to true, the server will not\n"
@@ -171,7 +183,7 @@ msgid ""
 msgstr ""
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:172
+#: cherrymusicserver/configuration.py:183
 msgid ""
 "\n"
 "                    The path cherrymusic will be available on. Normally\n"
@@ -185,7 +197,7 @@ msgid ""
 msgstr ""
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:185
+#: cherrymusicserver/configuration.py:196
 msgid ""
 "\n"
 "                    When localhost_auto_login is set to \"True\", the server "
@@ -197,7 +209,7 @@ msgid ""
 msgstr ""
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:194
+#: cherrymusicserver/configuration.py:205
 msgid ""
 "\n"
 "                    When permit_remote_admin_login is set to \"False\", "
@@ -209,7 +221,7 @@ msgid ""
 msgstr ""
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:203
+#: cherrymusicserver/configuration.py:214
 msgid ""
 "\n"
 "                    Will keep the user sessions in RAM instead of a file in "
@@ -220,7 +232,7 @@ msgid ""
 msgstr ""
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:212
+#: cherrymusicserver/configuration.py:223
 msgid ""
 "\n"
 "                    The following options allow you to use cherrymusic with\n"
@@ -231,7 +243,7 @@ msgid ""
 msgstr ""
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:221
+#: cherrymusicserver/configuration.py:232
 msgid ""
 "\n"
 "                    The port that will listen to SSL encrypted requests. If\n"
@@ -242,7 +254,7 @@ msgid ""
 msgstr ""
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:230
+#: cherrymusicserver/configuration.py:241
 msgid ""
 "\n"
 "                    The SSL certiticate sent to the client to verify the\n"
@@ -253,7 +265,7 @@ msgid ""
 msgstr ""
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:239
+#: cherrymusicserver/configuration.py:250
 msgid ""
 "\n"
 "                    SSL private key file used by the server to decrypt and "
@@ -266,7 +278,7 @@ msgid ""
 msgstr ""
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:249
+#: cherrymusicserver/configuration.py:260
 msgid ""
 "\n"
 "                    Notify admins about available security and feature "
@@ -274,12 +286,12 @@ msgid ""
 "                            "
 msgstr ""
 
-#: cherrymusicserver/configuration.py:261
+#: cherrymusicserver/configuration.py:272
 #, python-format
 msgid "configuration file not found: %(filepath)s"
 msgstr ""
 
-#: cherrymusicserver/configuration.py:264
+#: cherrymusicserver/configuration.py:275
 #, python-format
 msgid "configuration path is not a file: %(filepath)s"
 msgstr ""
@@ -295,47 +307,47 @@ msgid ""
 "will need to delete the database at "
 msgstr ""
 
-#: cherrymusicserver/browsersetup.py:76
+#: cherrymusicserver/browsersetup.py:71
 msgid "resizing of album covers"
 msgstr ""
 
-#: cherrymusicserver/browsersetup.py:77
+#: cherrymusicserver/browsersetup.py:72
 msgid "The executable \"convert\" was not found in you PATH"
 msgstr ""
 
-#: cherrymusicserver/browsersetup.py:80
+#: cherrymusicserver/browsersetup.py:75
 msgid "encoding and decoding of OGGs"
 msgstr ""
 
-#: cherrymusicserver/browsersetup.py:81
+#: cherrymusicserver/browsersetup.py:76
 msgid "The executables \"oggenc\" and \"oggdec\" were not found in you PATH"
 msgstr ""
 
-#: cherrymusicserver/browsersetup.py:84
+#: cherrymusicserver/browsersetup.py:79
 msgid "encoding and decoding of MP3s"
 msgstr ""
 
-#: cherrymusicserver/browsersetup.py:85
+#: cherrymusicserver/browsersetup.py:80
 msgid "The executable \"lame\" was not found in you PATH"
 msgstr ""
 
-#: cherrymusicserver/browsersetup.py:88
+#: cherrymusicserver/browsersetup.py:83
 msgid "encoding and decoding of FLACs"
 msgstr ""
 
-#: cherrymusicserver/browsersetup.py:89
+#: cherrymusicserver/browsersetup.py:84
 msgid "The executable \"flac\" was not found in you PATH"
 msgstr ""
 
-#: cherrymusicserver/browsersetup.py:92
+#: cherrymusicserver/browsersetup.py:87
 msgid "decoding OGG, MP3, FLAC, WMA and AAC"
 msgstr ""
 
-#: cherrymusicserver/browsersetup.py:93
+#: cherrymusicserver/browsersetup.py:88
 msgid "The executable \"mplayer\" was not found in you PATH"
 msgstr ""
 
-#: cherrymusicserver/browsersetup.py:164
+#: cherrymusicserver/browsersetup.py:159
 #, python-brace-format
 msgid ""
 "\n"
@@ -485,186 +497,186 @@ msgstr ""
 msgid "Error writing file %(name)r to memory zip"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:111
+#: cherrymusicserver/sqlitecache.py:125
 msgid "terms must not contain ''"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:150
+#: cherrymusicserver/sqlitecache.py:167
 #, python-format
 msgid "searching for a maximum of %s files"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:157
+#: cherrymusicserver/sqlitecache.py:174
 msgid "file id fetching"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:162
+#: cherrymusicserver/sqlitecache.py:179
 msgid "sorting results by fileid occurrences"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:175
+#: cherrymusicserver/sqlitecache.py:192
 #, python-format
 msgid "querying fullpaths for %s fileIds"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:178
+#: cherrymusicserver/sqlitecache.py:195
 #, python-format
 msgid "querying fullpaths for %s fileIds, files only"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:191
+#: cherrymusicserver/sqlitecache.py:208
 #, python-format
 msgid "media cache cannot listdir %r: path not in database"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:289
+#: cherrymusicserver/sqlitecache.py:309
 #, python-format
 msgid "wrong encoding for filename '%s' (%s)"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:322
+#: cherrymusicserver/sqlitecache.py:342
 #, python-format
 msgid "removing dead reference(s): %s \"%s\""
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:342
+#: cherrymusicserver/sqlitecache.py:362
 #, python-format
 msgid "error while removing dead reference(s): %s"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:343
+#: cherrymusicserver/sqlitecache.py:363
 msgid "rolled back to safe state."
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:360
+#: cherrymusicserver/sqlitecache.py:380
 #, python-format
 msgid "error removing entry for %s"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:438
+#: cherrymusicserver/sqlitecache.py:458
 #, python-format
 msgid "media base directory: %r"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:446
+#: cherrymusicserver/sqlitecache.py:466
 msgid "running full update..."
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:450
+#: cherrymusicserver/sqlitecache.py:470
 msgid "error during media update. database update incomplete."
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:453
+#: cherrymusicserver/sqlitecache.py:473
 msgid "media database update complete."
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:459
+#: cherrymusicserver/sqlitecache.py:479
 #, python-format
 msgid "updating paths: %s"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:465
+#: cherrymusicserver/sqlitecache.py:485
 #, python-format
 msgid "path is not in basedir. skipping %r"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:467
+#: cherrymusicserver/sqlitecache.py:487
 #, python-format
 msgid "updating %r..."
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:471
+#: cherrymusicserver/sqlitecache.py:491
 #, python-format
 msgid "update incomplete: %r"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:473
+#: cherrymusicserver/sqlitecache.py:493
 msgid "done updating paths."
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:492
+#: cherrymusicserver/sqlitecache.py:512
 #, python-format
 msgid "recursive update for %s"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:528
+#: cherrymusicserver/sqlitecache.py:548
 #, python-format
 msgid "error while updating media: %s %s"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:529
+#: cherrymusicserver/sqlitecache.py:549
 msgid "rollback to previous commit."
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:534
+#: cherrymusicserver/sqlitecache.py:554
 #, python-format
 msgid "items added %d, removed %d"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:538
+#: cherrymusicserver/sqlitecache.py:558
 msgid "updating word occurrences..."
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:582
+#: cherrymusicserver/sqlitecache.py:602
 #, python-format
 msgid "argument must be an abolute path: \"%s\""
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:583
+#: cherrymusicserver/sqlitecache.py:603
 #, python-format
 msgid "argument must be a path in basedir (%s): \"%s\""
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:592
+#: cherrymusicserver/sqlitecache.py:612
 #, python-format
 msgid "parent path not in database: %r"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:596
+#: cherrymusicserver/sqlitecache.py:616
 msgid "shouldn't get here! (argument path not in basedir)"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:650
+#: cherrymusicserver/sqlitecache.py:670
 #, python-format
 msgid "creating database entry for %r"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:667
+#: cherrymusicserver/sqlitecache.py:687
 #, python-format
 msgid "unable to decode filename %r in %r; skipping."
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:675
+#: cherrymusicserver/sqlitecache.py:695
 #, python-format
 msgid "expecting unicode path, got %s"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:685
+#: cherrymusicserver/sqlitecache.py:705
 #, python-format
 msgid ""
 "non-root filepaths must be direct relative to parent: path: %s, parent: %s"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:767
+#: cherrymusicserver/sqlitecache.py:787
 #, python-format
 msgid "cannot list directory: %s"
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:776
+#: cherrymusicserver/sqlitecache.py:796
 #, python-format
 msgid "file not found: %s. skipping."
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:779
+#: cherrymusicserver/sqlitecache.py:799
 #, python-format
 msgid "file not in basedir: %s. skipping."
 msgstr ""
 
-#: cherrymusicserver/sqlitecache.py:800
+#: cherrymusicserver/sqlitecache.py:820
 msgid "Loading files database into memory..."
 msgstr ""
 
-#: cherrymusicserver/__init__.py:118
+#: cherrymusicserver/__init__.py:119
 #, python-format
 msgid ""
 "\n"
@@ -673,7 +685,11 @@ msgid ""
 "Required version: %(required_version)s or higher\n"
 msgstr ""
 
-#: cherrymusicserver/__init__.py:206
+#: cherrymusicserver/__init__.py:176
+msgid "Invalid basedir. Please provide a valid basedir path."
+msgstr ""
+
+#: cherrymusicserver/__init__.py:214
 #, python-format
 msgid ""
 "============================================\n"
@@ -683,20 +699,20 @@ msgid ""
 "============================================"
 msgstr ""
 
-#: cherrymusicserver/__init__.py:220
+#: cherrymusicserver/__init__.py:228
 msgid "Error removing pid file, doesn't exist!"
 msgstr ""
 
-#: cherrymusicserver/__init__.py:252
+#: cherrymusicserver/__init__.py:260
 #, python-brace-format
 msgid "New configuration file was written to:{br}{path}"
 msgstr ""
 
-#: cherrymusicserver/__init__.py:277
+#: cherrymusicserver/__init__.py:285
 msgid "database schema update aborted. quitting."
 msgstr ""
 
-#: cherrymusicserver/__init__.py:295
+#: cherrymusicserver/__init__.py:303
 #, python-brace-format
 msgid ""
 "\n"
@@ -716,7 +732,7 @@ msgid ""
 "Run schema update? [y/N]: "
 msgstr ""
 
-#: cherrymusicserver/__init__.py:355
+#: cherrymusicserver/__init__.py:363
 #, python-format
 msgid ""
 "New configuration options available:\n"
@@ -724,20 +740,20 @@ msgid ""
 "                    Using default values for now."
 msgstr ""
 
-#: cherrymusicserver/__init__.py:360
+#: cherrymusicserver/__init__.py:368
 #, python-format
 msgid ""
 "The following configuration options are not used anymore:\n"
 "                        %s"
 msgstr ""
 
-#: cherrymusicserver/__init__.py:364
+#: cherrymusicserver/__init__.py:372
 msgid ""
 "Start with --newconfig to generate a new default config file next to your "
 "current one."
 msgstr ""
 
-#: cherrymusicserver/__init__.py:368
+#: cherrymusicserver/__init__.py:376
 #, python-brace-format
 msgid ""
 "\n"
@@ -752,14 +768,14 @@ msgid ""
 "    $ mv {src} {tgt}"
 msgstr ""
 
-#: cherrymusicserver/__init__.py:391
+#: cherrymusicserver/__init__.py:399
 msgid ""
 "\n"
 "==========================================================================\n"
 "Welcome to CherryMusic "
 msgstr ""
 
-#: cherrymusicserver/__init__.py:498
+#: cherrymusicserver/__init__.py:501
 #, python-format
 msgid "Starting server on port %s ..."
 msgstr ""
@@ -772,11 +788,11 @@ msgstr ""
 msgid "not a valid password"
 msgstr ""
 
-#: cherrymusicserver/userdb.py:157
+#: cherrymusicserver/userdb.py:158
 msgid "name must not be empty"
 msgstr ""
 
-#: cherrymusicserver/userdb.py:159
+#: cherrymusicserver/userdb.py:160
 msgid "password must not be empty"
 msgstr ""
 

@@ -113,9 +113,14 @@ class CherryModel:
     def listdir(self, dirpath, filterstr=''):
         absdirpath = CherryModel.abspath(dirpath)
         if cherry.config['browser.pure_database_lookup']:
-            allfilesindir = self.cache.listdir(dirpath)
+            allfilesindir = self.cache.listdir(dirpath)     # NOT absdirpath!
         else:
             allfilesindir = os.listdir(absdirpath)
+
+        # filter bad symlinks, deleted files that are still in cache, ...
+        allfilesindir = filter(
+            lambda p: os.path.exists(CherryModel.abspath(p)),
+            allfilesindir)
 
         #remove all files not inside the filter
         if filterstr:
