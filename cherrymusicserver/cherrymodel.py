@@ -68,8 +68,9 @@ class CherryModel:
         CherryModel.supportedFormats = CherryModel.NATIVE_BROWSER_FORMATS[:]
         if cherry.config['media.transcode']:
             self.transcoder = audiotranscode.AudioTranscode()
-            CherryModel.supportedFormats += self.transcoder.availableDecoderFormats()
-            CherryModel.supportedFormats = list(set(CherryModel.supportedFormats))
+            formats = CherryModel.supportedFormats
+            formats += self.transcoder.available_decoder_formats()
+            CherryModel.supportedFormats = list(set(formats))
 
     @classmethod
     def abspath(cls, path):

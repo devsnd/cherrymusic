@@ -35,37 +35,17 @@ from nose.tools import *
 
 import audiotranscode as transcode
 
-CAPTURE_OUTPUT = True
-
-# inject unavailable encoder
-unavailable_enc = transcode.Encoder('mp3', ['notavailable'])
-transcode.AudioTranscode.Encoders.append(unavailable_enc)
-
-# inject unavailable decoder
-unavailable_enc = transcode.Decoder('mp3', ['notavailable'])
-transcode.AudioTranscode.Decoders.append(unavailable_enc)
-
 transcoder = transcode.AudioTranscode(debug=True)
-inputdir = os.path.dirname(__file__)
-outputpath = tempfile.mkdtemp(prefix='test.cherrymusic.audiotranscode.')
+testdir = os.path.dirname(__file__)
 testfiles = {
-    'mp3': os.path.join(inputdir, 'test.mp3'),
-    'ogg': os.path.join(inputdir, 'test.ogg'),
-    'flac': os.path.join(inputdir, 'test.flac'),
-    'wav': os.path.join(inputdir, 'test.wav'),
-    'wma': os.path.join(inputdir, 'test.wma'),
+    'mp3' : os.path.join(testdir,'test.mp3'),
+    'ogg' : os.path.join(testdir,'test.ogg'),
+    'flac': os.path.join(testdir,'test.flac'),
+    'wav': os.path.join(testdir,'test.wav'),
+    'm4a': os.path.join(testdir,'test.m4a'),
+    'wma': os.path.join(testdir,'test.wma'),
 }
-
-
-def setup_module():
-    if CAPTURE_OUTPUT:
-        print('writing transcoder output to %r' % (outputpath,))
-
-
-def teardown_module():
-    if not CAPTURE_OUTPUT:
-        os.rmdir(outputpath)
-
+outputpath = tempfile.mkdtemp(prefix='test.audiotranscode.output.')
 
 def generictestfunc(filepath, newformat, encoder, decoder):
     ident = "%s_%s_to_%s_%s" % (
@@ -73,61 +53,23 @@ def generictestfunc(filepath, newformat, encoder, decoder):
             os.path.basename(filepath),
             encoder.command[0],
             newformat
-    )
-    #print(ident)
+        )
     outdata = b''
-    transcoder_stream = transcoder.transcodeStream(
-        filepath, newformat, encoder=encoder, decoder=decoder)
-    for data in transcoder_stream:
+    for data in transcoder.transcode_stream(filepath, newformat, encoder=encoder, decoder=decoder):
         outdata += data
-    if CAPTURE_OUTPUT:
-        outname = os.path.join(outputpath, ident + '.' + newformat)
-        with open(outname, 'wb') as outfile:
-            outfile.write(outdata)
-    ok_(len(outdata) > 0, 'No data received: ' + ident)
+    ok_(len(outdata)>0, 'No data received: '+ident)
+    with open(os.path.join(outputpath,ident+'.'+newformat),'wb') as outfile:
+        outfile.write(outdata)
 
 
 def test_generator():
     for enc in transcoder.Encoders:
         if not enc.available():
-            print('Encoder %s not installed!' % (str(enc),))
+            print('Encoder %s not installed!'%enc.command[0])
             continue
         for dec in transcoder.Decoders:
             if not dec.available():
-                print('Decoder %s not installed!' % (str(dec)))
+                print('Encoder %s not installed!'%dec.command[0])
                 continue
             if dec.filetype in testfiles:
-                filename = testfiles[dec.filetype]
-                yield generictestfunc, filename, enc.filetype, enc, dec
-
-@raises(transcode.DecodeError)
-def test_file_not_found():
-    try:
-        for a in transcoder.transcodeStream('nosuchfile', 'mp3'):
-            pass
-    except Exception as e:
-        #print exception for coverage
-        print(e)
-        raise
-
-@raises(transcode.DecodeError)
-def test_no_decoder_available():
-    noaudio = os.path.join(inputdir,'test.noaudio')
-    for a in transcoder.transcodeStream(noaudio, 'mp3'):
-        pass
-
-@raises(transcode.EncodeError)
-def test_no_encoder_available():
-    for a in transcoder.transcodeStream(testfiles['wav'], 'foobar'):
-        pass
-
-def test_automatically_find_encoder():
-    for a in transcoder.transcodeStream(testfiles['wav'], 'wav'):
-        pass
-
-def test_transcode_file():
-    outfile = os.path.join(outputpath, 'test_file.wav')
-    transcoder.transcode(testfiles['wav'], outfile)
-
-def test_mimetype():
-    assert transcoder.mimeType('mp3') == 'audio/mpeg'
+                yield generictestfunc, testfiles[dec.filetype], enc.filetype, enc, dec
