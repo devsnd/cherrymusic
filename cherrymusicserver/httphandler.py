@@ -255,12 +255,12 @@ class HTTPHandler(object):
             starttime = int(params.pop('starttime', 0))
 
             transcoder = audiotranscode.AudioTranscode()
-            mimetype = transcoder.mimeType(newformat)
+            mimetype = audiotranscode.mime_type(newformat)
             cherrypy.response.headers["Content-Type"] = mimetype
             try:
-                return transcoder.transcodeStream(fullpath, newformat,
+                return transcoder.transcode_stream(fullpath, newformat,
                             bitrate=bitrate, starttime=starttime)
-            except audiotranscode.TranscodeError as e:
+            except (audiotranscode.TranscodeError, IOError) as e:
                 raise cherrypy.HTTPError(404, e.value)
     trans.exposed = True
     trans._cp_config = {'response.stream': True}
@@ -682,9 +682,9 @@ class HTTPHandler(object):
             'version': cherry.REPO_VERSION or cherry.VERSION,
         }
         if cherry.config['media.transcode']:
-            decoders = self.model.transcoder.availableDecoderFormats()
+            decoders = list(self.model.transcoder.available_decoder_formats())
             clientconfigkeys['getdecoders'] = decoders
-            encoders = self.model.transcoder.availableEncoderFormats()
+            encoders = list(self.model.transcoder.available_encoder_formats())
             clientconfigkeys['getencoders'] = encoders
         else:
             clientconfigkeys['getdecoders'] = []
