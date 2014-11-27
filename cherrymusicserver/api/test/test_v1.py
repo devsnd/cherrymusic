@@ -69,7 +69,7 @@ import cherrymusicserver as cms
 CHERRYMUSIC_URL = 'http://localhost:{port}/'
 
 def default_specpath():
-    filename = 'spec.yaml'
+    filename = 'spec.yml'
     apidir = os.path.dirname(cms.api.v1.__file__)
     return os.path.join(apidir, filename)
 
