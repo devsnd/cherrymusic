@@ -80,8 +80,8 @@ def test_listdir_deleted_files(cache):
     "cherrymodel.listdir should work when cached files don't exist anymore"
     model = cherrymodel.CherryModel()
 
-    cache.listdir.return_value = ['not_hidden.mp3', 'deleted.mp3']
-    eq_('not_hidden.mp3', model.listdir('')[0].path)
+    cache.listdir.return_value = ['deleted.mp3']
+    eq_([], model.listdir(''))
 
 
 @cherrytest(config({'browser.pure_database_lookup': False}))
