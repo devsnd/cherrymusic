@@ -19,7 +19,7 @@ resources:
         response: |
            200
 
-           {"roles": "userbear", "id": 22, "name": "puh"}
+           {"roles": "userbear", "id": 22, "name": "puh", "cls": "User"}
   root:
     url: "/"
     cases:

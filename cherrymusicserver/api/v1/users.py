@@ -33,15 +33,21 @@ from __future__ import unicode_literals
 
 import cherrypy
 
+from cherrymusicserver.api.v1.models import Model
 from cherrymusicserver.api.v1.resources import Resource
 
 def get_resource():
     return users()
 
+class User(Model):
+
+    name = Model.Field(None)
+    roles = Model.Field([])
+
 
 _userdb = {
-    'adm': dict(id=1, name='adm', roles=('admin' 'user')),
-    'puh': dict(id=22, name='puh', roles=('user' 'bear')),
+    'adm': User(id=1, name='adm', roles=('admin' 'user')),
+    'puh': User(id=22, name='puh', roles=('user' 'bear')),
 }
 
 class users(Resource):
