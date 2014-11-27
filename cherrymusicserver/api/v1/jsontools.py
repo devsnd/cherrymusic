@@ -45,17 +45,17 @@ class JSONEncoder(json.JSONEncoder):
     def default(self, obj):
         try:
             return obj.as_dict()
-        except AttributeError:
+        except AttributeError:                               # pragma: no cover
             raise TypeError("can't JSON encode %s object %r" % (type(obj), obj))
 
 # see cherrypy._cpcompat.json_encode
 _json_encode = JSONEncoder().iterencode
-if sys.version_info > (3,):
+if sys.version_info > (3,):                                  # pragma: no cover
     def json_encode(value):
         for chunk in _json_encode(value):
             yield chunk.encode('UTF-8')
 else:
-    json_encode = _json_encode
+    json_encode = _json_encode                               # pragma: no cover
 
 
 def json_error_handler(status, message, traceback, version):
@@ -68,5 +68,5 @@ def json_handler(*args, **kwargs):
     """ JSON handler that works with cherrypy.tools.json_out """
     value = cherrypy.serving.request._json_inner_handler(*args, **kwargs)
     if value is None:
-        return None
+        return None     # return empty body, not "null"
     return json_encode(value)

@@ -90,7 +90,7 @@ def mount(mountpath):
     """ Mount and configure API root resource to cherrypy.tree """
     cherrypy.tree.mount(get_resource(), mountpath, config=get_config())
 
-    if sys.version_info < (3,):
+    if sys.version_info < (3,):                               # pragma: no cover
         # Disable a check that crashes the server in python2.
         # Our config keys are unicode, and this check exposes them to an
         # incompatible .translate() call in _cpdispatch.find_handler.
