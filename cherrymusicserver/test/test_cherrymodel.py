@@ -41,6 +41,7 @@ from cherrymusicserver import log
 log.setTest()
 
 from cherrymusicserver import cherrymodel
+from cherrymusicserver import sqlitecache
 
 def config(cfg=None):
     c = {'media.basedir': os.path.join(os.path.dirname(__file__), 'data_files')}
@@ -147,6 +148,32 @@ def test_is_playable_by_transcoding():
                 track = mkpath('track.xxx', parent=tmpdir, content='xy')
                 model = cherrymodel.CherryModel()
                 ok_(model.isplayable(track))
+
+
+@cherrytest({'media.transcode': False})
+@patch('cherrymusicserver.cherrymodel.cherrypy')
+def test_search_results_missing_in_filesystem(cherrypy):
+    " inexistant search results returned by sqlitecache should be ignored "
+    cache_finds = [
+        cherrymodel.MusicEntry('i-dont-exist.dir', dir=True),
+        cherrymodel.MusicEntry('i-dont-exist.mp3', dir=False),
+        cherrymodel.MusicEntry('i-exist.dir', dir=True),
+        cherrymodel.MusicEntry('i-exist.mp3', dir=False),
+    ]
+    mock_cache = Mock(spec=sqlitecache.SQLiteCache)
+    mock_cache.searchfor.return_value = cache_finds
+    model = cherrymodel.CherryModel()
+    model.cache = mock_cache
+
+    with tempdir('test_cherrymodel_search_missing_results') as tmpdir:
+        mkpath('i-exist.dir/', tmpdir)
+        mkpath('i-exist.mp3', tmpdir, 'some content')
+        with cherryconfig({'media.basedir': tmpdir}) as cfg:
+            results = model.search('query')
+
+            eq_(set(cache_finds[2:]), set(results))
+            mock_cache.searchfor.assert_called_once_with(
+                'query', maxresults=cfg['search.maxresults'])
 
 
 if __name__ == '__main__':

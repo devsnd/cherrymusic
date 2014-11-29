@@ -117,9 +117,6 @@ class CherryModel:
         else:
             allfilesindir = os.listdir(absdirpath)
 
-        # filter bad symlinks, deleted files that are still in cache, ...
-        allfilesindir = [f for f in allfilesindir if os.path.exists(os.path.join(absdirpath, f))]
-
         #remove all files not inside the filter
         if filterstr:
             filterstr = filterstr.lower()
@@ -168,11 +165,12 @@ class CherryModel:
 
     @classmethod
     def addMusicEntry(cls, fullpath, list):
-        if os.path.isfile(fullpath):
-            if CherryModel.isplayable(fullpath):
-                list.append(MusicEntry(strippath(fullpath)))
+        relpath = strippath(fullpath)
+        if os.path.isdir(fullpath):
+            list.append(MusicEntry(relpath, dir=True))
         else:
-            list.append(MusicEntry(strippath(fullpath), dir=True))
+            if CherryModel.isplayable(fullpath):
+                list.append(MusicEntry(relpath))
 
     def updateLibrary(self):
         self.cache.full_update()
@@ -207,7 +205,7 @@ class CherryModel:
                     sortedResults.debugOutputSort = None  # free ram
 
         with Performance(_('checking and classifying results:')):
-            results = list(filter(CherryModel.isValidMediaFile, results))
+            results = list(filter(CherryModel.isValidMediaEntry, results))
         if cherry.config['media.show_subfolder_count']:
             for result in results:
                 result.count_subfolders_and_files()
@@ -292,32 +290,34 @@ class CherryModel:
     def randomMusicEntries(self, count):
         loadCount = int(count * 1.5) + 1           # expect 70% valid entries
         entries = self.cache.randomFileEntries(loadCount)
-        filteredEntries = list(filter(CherryModel.isValidMediaFile, entries))
-
+        filteredEntries = list(filter(CherryModel.isValidMediaEntry, entries))
         return filteredEntries[:count]
 
     @classmethod
-    def isValidMediaFile(cls, file):
+    def isValidMediaEntry(cls, file):
+        " only existing directories and playable files are valid"
         file.path = strippath(file.path)
-        #let only playable files appear in the search results
         if file.path.startswith('.'):
             return False
-        if not CherryModel.isplayable(file.path) and not file.dir:
-            return False
-        return True
+        abspath = CherryModel.abspath(file.path)
+        if file.dir:
+            return os.path.isdir(abspath)
+        else:
+            return CherryModel.isplayable(abspath)
 
     @classmethod
-    def isplayable(cls, filename):
+    def isplayable(cls, abspath):
         '''Checks if the file extension is in the configured 'playable' list and
             if the file exists, is indeed a file, and has content.
         '''
-        ext = os.path.splitext(filename)[1][1:]
-        is_supported_ext = bool(ext) and ext.lower() in CherryModel.supportedFormats
-
-        path = CherryModel.abspath(filename)
-        is_nonempty_file = os.path.isfile(path) and bool(os.path.getsize(path))
-
-        return is_supported_ext and is_nonempty_file
+        ext = os.path.splitext(abspath)[1][1:]
+        if not ext:
+            return False
+        if ext.lower() not in CherryModel.supportedFormats:
+            return False
+        if not os.path.isfile(abspath) or not bool(os.path.getsize(abspath)):
+            return False
+        return True
 
 
 def strippath(path):
@@ -348,13 +348,19 @@ class MusicEntry:
             self.subdircount = 0
             self.subfilescount = 0
             fullpath = CherryModel.abspath(self.path)
-            diriectory_listing = os.listdir(fullpath)
-            for idx, filename in enumerate(diriectory_listing):
+            if not os.path.isdir(fullpath):
+                # not a dir, or not even there: fail gracefully.
+                # There are 0 subfolders and 0 files by default.
+                log.error(
+                    "MusicEntry does not exist: %r", self.path)
+                return
+            directory_listing = os.listdir(fullpath)
+            for idx, filename in enumerate(directory_listing):
                 if idx > MusicEntry.MAX_SUB_FILES_ITER_COUNT:
                     # estimate remaining file count
-                    self.subfilescount *= len(diriectory_listing)/float(idx+1)
+                    self.subfilescount *= len(directory_listing)/float(idx+1)
                     self.subfilescount = int(self.subfilescount)
-                    self.subdircount *= len(diriectory_listing)/float(idx+1)
+                    self.subdircount *= len(directory_listing)/float(idx+1)
                     self.subdircount = int(self.subdircount)
                     self.subfilesestimate = True
                     return
