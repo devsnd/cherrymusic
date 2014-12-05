@@ -1,37 +1,37 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# til <tilman.boerner@gmx.net>, 2013.
+# til <tilman.boerner@gmx.net>, 2013, 2014.
 msgid ""
 msgstr ""
 "Project-Id-Version: CherryMusic 0.27.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-11-17 18:37+0100\n"
-"PO-Revision-Date: 2014-03-30 19:31+0100\n"
-"Last-Translator: tilboerner <tilman.boerner@gmx.net>\n"
-"Language-Team:  <tomwallroth@gmail.com>\n"
+"POT-Creation-Date: 2014-12-05 12:03+0100\n"
+"PO-Revision-Date: 2014-12-05 12:29+0200\n"
+"Last-Translator: til <tilman.boerner@gmx.net>\n"
+"Language-Team: <tomwallroth@gmail.com>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.6.4\n"
+"X-Generator: Virtaal 0.7.1\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
-#: cherrymusicserver/cherrymodel.py:196
+#: cherrymusicserver/cherrymodel.py:192
 #, python-format
 msgid "%(user)s searched for '%(term)s'"
 msgstr "%(user)s hat gesucht nach '%(term)s'"
 
-#: cherrymusicserver/cherrymodel.py:199
+#: cherrymusicserver/cherrymodel.py:195
 msgid "sorting DB results using ResultOrder"
 msgstr "sortiere DB-Ergebnisse mit ResultOrder"
 
-#: cherrymusicserver/cherrymodel.py:211
+#: cherrymusicserver/cherrymodel.py:207
 msgid "checking and classifying results:"
 msgstr "prüfe und klassifiziere Ergebnisse:"
 
-#: cherrymusicserver/cherrymodel.py:227
+#: cherrymusicserver/cherrymodel.py:223
 #, python-format
 msgid "Error fetching version info: %s"
 msgstr "Fehler beim Lesen der Versionsinfo: %s"
@@ -108,7 +108,6 @@ msgstr ""
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
 #: cherrymusicserver/configuration.py:106
-#, fuzzy
 msgid ""
 "\n"
 "                    Show the number of sub-folders and tracks contained\n"
@@ -119,12 +118,12 @@ msgid ""
 "                            "
 msgstr ""
 "\n"
-"Der Pfad zum privaten SSL-Schlüssel, mit dem der Server Nachrichten in "
-"gesicherten Verbindungen entschlüsselt und signiert. Der Schlüssel muss auf "
-"jeden Fall geheim bleiben!\n"
+"Im Browser die Anzahl der in einem Ordner enthaltenen Unterordner und Titel "
+"anzeigen.\n"
 "\n"
-"Ein relativer Pfad wird interpretiert als relativ zum Verzeichnis der "
-"CherryMusic-Konfigurationsdatei."
+"Diese Option erhöht die Belastung des Servers. Sollte CherryMusic auf deinem "
+"alten 386er oder einem sonswie leistungsschwachen System laufen, wird "
+"empfohlen, dieses Feature zu deaktivieren."
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
 #: cherrymusicserver/configuration.py:120
@@ -231,17 +230,29 @@ msgstr ""
 #: cherrymusicserver/configuration.py:174
 msgid ""
 "\n"
-"                    when localhost_only is set to true, the server will not\n"
+"                    When localhost_only is set to true, the server will not\n"
 "                    be visible in the network and only play music on the\n"
 "                    same computer it is running on.\n"
+"\n"
+"                    Activating this option binds the server to IP 127.0.0.1 "
+"or\n"
+"                    [::1], depending on whether server.ipv6_enabled is "
+"true.\n"
+"                    The server should also be reachable as \"localhost\" in "
+"any\n"
+"                    case.\n"
 "                            "
 msgstr ""
 "\n"
 "Auf \"True\" setzen, damit der Server nicht auf Anfragen aus dem Netzwerk "
-"reagiert und Musik nur auf dem gleichen Rechner abspielt, auf dem er läuft."
+"reagiert und Musik nur auf dem gleichen Rechner abspielt, auf dem er läuft.\n"
+"\n"
+"Diese Option bindet den Server an die IP 127.0.0.1 bzw. [::1], je nach "
+"Einstellung von server.ip6_enabled. Der Server sollte in jedem Fall auch als "
+"\"localhost\" erreichbar sein."
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:183
+#: cherrymusicserver/configuration.py:188
 msgid ""
 "\n"
 "                    The path cherrymusic will be available on. Normally\n"
@@ -264,7 +275,7 @@ msgstr ""
 "erreichbar ist."
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:196
+#: cherrymusicserver/configuration.py:201
 msgid ""
 "\n"
 "                    When localhost_auto_login is set to \"True\", the server "
@@ -281,7 +292,7 @@ msgstr ""
 "erzeugt wurde."
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:205
+#: cherrymusicserver/configuration.py:210
 msgid ""
 "\n"
 "                    When permit_remote_admin_login is set to \"False\", "
@@ -297,7 +308,7 @@ msgstr ""
 "kann die Sicherheit des Systems erhöhen."
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:214
+#: cherrymusicserver/configuration.py:219
 msgid ""
 "\n"
 "                    Will keep the user sessions in RAM instead of a file in "
@@ -312,7 +323,7 @@ msgstr ""
 "verloren, wenn der Server beendet oder neugestartet wird."
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:223
+#: cherrymusicserver/configuration.py:228
 msgid ""
 "\n"
 "                    The following options allow you to use cherrymusic with\n"
@@ -327,7 +338,7 @@ msgstr ""
 "werden alle weiteren ssl-Optionen ignoriert."
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:232
+#: cherrymusicserver/configuration.py:237
 msgid ""
 "\n"
 "                    The port that will listen to SSL encrypted requests. If\n"
@@ -342,7 +353,7 @@ msgstr ""
 "weitergeleitet."
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:241
+#: cherrymusicserver/configuration.py:246
 msgid ""
 "\n"
 "                    The SSL certiticate sent to the client to verify the\n"
@@ -357,7 +368,7 @@ msgstr ""
 "Verzeichnis der CherryMusic-Kofigurationsdatei cherrymusic.conf."
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:250
+#: cherrymusicserver/configuration.py:255
 msgid ""
 "\n"
 "                    SSL private key file used by the server to decrypt and "
@@ -377,7 +388,7 @@ msgstr ""
 "CherryMusic-Konfigurationsdatei."
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-#: cherrymusicserver/configuration.py:260
+#: cherrymusicserver/configuration.py:265
 msgid ""
 "\n"
 "                    Notify admins about available security and feature "
@@ -388,12 +399,12 @@ msgstr ""
 "Admin-Benutzer im Webclient über neue Features und Sicherheitsupdates "
 "benachrichtigen."
 
-#: cherrymusicserver/configuration.py:272
+#: cherrymusicserver/configuration.py:277
 #, python-format
 msgid "configuration file not found: %(filepath)s"
 msgstr "Konfigurationsdatei nicht gefunden: %(filepath)s"
 
-#: cherrymusicserver/configuration.py:275
+#: cherrymusicserver/configuration.py:280
 #, python-format
 msgid "configuration path is not a file: %(filepath)s"
 msgstr "Konfigurationspfad ist keine Datei: %(filepath)s"
@@ -804,7 +815,7 @@ msgstr ""
 
 #: cherrymusicserver/__init__.py:176
 msgid "Invalid basedir. Please provide a valid basedir path."
-msgstr ""
+msgstr "Ungültiges basedir. Bitte einen gültigen Pfad zum basedir angeben."
 
 #: cherrymusicserver/__init__.py:214
 #, python-format

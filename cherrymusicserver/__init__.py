@@ -415,13 +415,11 @@ Have fun!
         """use the configuration to setup and start the cherrypy server
         """
         cherrypy.config.update({'log.screen': True})
+        ipv6_enabled = config['server.ipv6_enabled']
         if config['server.localhost_only']:
-            socket_host = "localhost"
+            socket_host = "::1" if ipv6_enabled else "127.0.0.1"
         else:
-            if config['server.ipv6_enabled']:
-                socket_host = "::"
-            else:
-                socket_host = "0.0.0.0"
+            socket_host = "::" if ipv6_enabled else "0.0.0.0"
 
         resourcedir = os.path.abspath(pathprovider.getResourcePath('res'))
 

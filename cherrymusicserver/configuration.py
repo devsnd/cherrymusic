@@ -172,9 +172,14 @@ def from_defaults():
         localhost_only.value = False
         # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
         localhost_only.doc = _('''
-                    when localhost_only is set to true, the server will not
+                    When localhost_only is set to true, the server will not
                     be visible in the network and only play music on the
                     same computer it is running on.
+
+                    Activating this option binds the server to IP 127.0.0.1 or
+                    [::1], depending on whether server.ipv6_enabled is true.
+                    The server should also be reachable as "localhost" in any
+                    case.
                             ''')
 
     with c['server.rootpath'] as rootpath:
