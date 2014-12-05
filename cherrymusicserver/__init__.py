@@ -485,6 +485,8 @@ Have fun!
                     'tools.encode.on': True,
                     'tools.encode.encoding': 'utf-8',
                     'tools.caching.on': False,
+                    'tools.cm_auth.on': True,
+                    'tools.cm_auth.httphandler': httphandler,
                 },
                 '/favicon.ico': {
                     'tools.staticfile.on': True,
@@ -504,6 +506,14 @@ Have fun!
         cherrypy.lib.caching.expires(0)  # disable expiry caching
         cherrypy.engine.start()
         cherrypy.engine.block()
+
+
+def _cm_auth_tool(httphandler):
+    if not httphandler.isAuthorized():
+        raise cherrypy.HTTPError(403)
+cherrypy.tools.cm_auth = cherrypy.Tool(
+    'before_handler', _cm_auth_tool, priority=70)
+    # priority=70 -->> make tool run after session is locked (at 50)
 
 
 def _get_version_from_git():
