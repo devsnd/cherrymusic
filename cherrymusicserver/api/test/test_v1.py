@@ -87,7 +87,7 @@ def setup_module():
     _spec = load_spec()
     _server = APIServer()
     _server.start()
-    time.sleep(0.2)             # wait for server to start
+    time.sleep(0.3)             # wait for server to start
 
 
 def teardown_module():
