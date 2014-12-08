@@ -306,19 +306,15 @@ class CherryModel:
             return CherryModel.isplayable(abspath)
 
     @classmethod
-    def isplayable(cls, abspath):
+    def isplayable(cls, fullpath):
         '''Checks if the file extension is in the configured 'playable' list and
             if the file exists, is indeed a file, and has content.
         '''
-        ext = os.path.splitext(abspath)[1][1:]
-        if not ext:
-            return False
-        if ext.lower() not in CherryModel.supportedFormats:
-            return False
-        if not os.path.isfile(abspath) or not bool(os.path.getsize(abspath)):
-            return False
-        return True
-
+        path = fullpath
+        ext = os.path.splitext(path)[1][1:]
+        is_supported_ext = ext and ext.lower() in CherryModel.supportedFormats
+        is_nonempty_file = os.path.isfile(path) and bool(os.path.getsize(path))
+        return is_supported_ext and is_nonempty_file
 
 def strippath(path):
     if path.startswith(cherry.config['media.basedir']):
