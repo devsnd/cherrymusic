@@ -1,8 +1,7 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- #
 #
 # CherryMusic - a standalone music server
-# Copyright (c) 2012 - 2014 Tom Wallroth & Tilman Boerner
+# Copyright (c) 2012-2014 Tom Wallroth & Tilman Boerner
 #
 # Project page:
 #   http://fomori.org/cherrymusic/
@@ -29,27 +28,33 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
-import nose
+#python 2.6+ backward compability
+from __future__ import unicode_literals
 
-from mock import *
-from nose.tools import *
+import cherrypy
 
-from cherrymusicserver import log
-log.setTest()
+from cherrymusicserver.api.v1.models import Model
+from cherrymusicserver.api.v1.resources import Resource
 
+def get_resource():
+    return users()
 
-from cherrymusicserver import albumartfetcher
+class User(Model):
 
-def test_methods():
-    for method in albumartfetcher.AlbumArtFetcher.methods:
-        yield try_method, method
-
-def try_method(method, timeout=15):
-    fetcher = albumartfetcher.AlbumArtFetcher(method=method, timeout=timeout)
-    results = fetcher.fetchurls('best of')
-    results += fetcher.fetchurls('best of')    # once is not enough sometimes (?)
-    ok_(results, "method {0!r} results: {1}".format(method, results))
+    name = Model.Field(None)
+    roles = Model.Field([])
 
 
-if __name__ == '__main__':
-    nose.runmodule()
+_userdb = {
+    'adm': User(id=1, name='adm', roles=('admin' 'user')),
+    'puh': User(id=22, name='puh', roles=('user' 'bear')),
+}
+
+class users(Resource):
+
+    def GET(self, name=None):
+        if name:
+            if not name in _userdb:
+                raise cherrypy.NotFound(name)
+            return _userdb[name]
+        return sorted(_userdb)

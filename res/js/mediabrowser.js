@@ -371,53 +371,71 @@ MediaBrowser.static = {
                 }
             }
         );
-        $(cssSelector).find('.meta-info.unloaded').each(
-            function(idx){
-                var track_pos = $(this).parent().position().top;
-                var above_screen = track_pos < scrolled_down - preload_threshold;
-                var below_screen = track_pos > winheight + scrolled_down + preload_threshold;
-                if(!above_screen && !below_screen){
-                    var self = this;
-                    var path_url_enc = $(this).attr('path');
-                    var success = function(data){
-                        $(self).show();
-                        var metainfo = $.parseJSON(data);
-                        // only use tag info if at least artist and title are known
-                        if (metainfo.artist.length > 0 && metainfo.title.length > 0) {
-                            $(self).find('.meta-info-artist').text(
-                                metainfo.artist
-                            );
-                            $(self).find('.meta-info-title').text(
-                                metainfo.title
-                            );
-                            if(metainfo.track.length > 0){
-                                if(metainfo.track.length < 2){
-                                    metainfo.track = '0' + metainfo.track;
-                                }
-                                $(self).find('.meta-info-track').text(
-                                    metainfo.track
-                                );
-                            }
-                            $(self).parent().find('.simplelabel').hide();
-                        }
-                        // show length anyway, if it was detemined.
-                        if(metainfo.length){
-                            $(self).find('.meta-info-length').text(
-                                '('+jPlayerPlaylist.prototype._formatTime(metainfo.length) + ')'
-                            );
-                        }
+        var renderMetaData = function(selector, metainfo){
+            console.log('renderMetaData');
+            // only use tag info if at least artist and title are known
+            if (metainfo.artist.length > 0 && metainfo.title.length > 0) {
+                selector.find('.meta-info-artist').text(
+                    metainfo.artist
+                );
+                selector.find('.meta-info-title').text(
+                    metainfo.title
+                );
+                if(metainfo.track.length > 0){
+                    if(metainfo.track.length < 2){
+                        metainfo.track = '0' + metainfo.track;
                     }
-                    $(this).removeClass('unloaded');
-                    api(
-                        'getsonginfo',
-                        {'path': decodeURIComponent(path_url_enc)},
-                        success,
-                        errorFunc('error getting song metainfo'),
-                        true
+                    selector.find('.meta-info-track').text(
+                        metainfo.track
                     );
                 }
+                selector.parent().find('.simplelabel').hide();
             }
-        );
+            // show length anyway, if it was detemined.
+            if(metainfo.length){
+                selector.find('.meta-info-length').text(
+                    '('+jPlayerPlaylist.prototype._formatTime(metainfo.length) + ')'
+                );
+            }
+        }
+
+        var fetch_meta_data = function(elem){
+            var jqelem = $(elem);
+            console.log('fetch_meta_data');
+            var track_pos = jqelem.parent().position().top;
+            var above_screen = track_pos < scrolled_down - preload_threshold;
+            var below_screen = track_pos > winheight + scrolled_down + preload_threshold;
+            if(!above_screen && !below_screen){
+                var self = jqelem;
+                var path_url_enc = jqelem.attr('path');
+                var success = function(data){
+                    $(self).show();
+                    var metainfo = $.parseJSON(data);
+                    renderMetaData($(self), metainfo);
+                }
+                var complete = function(){
+                    jqelem.removeClass('unloaded');
+                    load_unloaded_meta_data(cssSelector);
+                }
+                api(
+                    'getsonginfo',
+                    {'path': decodeURIComponent(path_url_enc)},
+                    success,
+                    errorFunc('error getting song metainfo'),
+                    complete
+                );
+            }
+        }
+
+        var load_unloaded_meta_data = function(cssSelector){
+            console.log('load_unloaded_meta_data');
+            var unloaded_metadata = $(cssSelector).find('.meta-info.unloaded');
+            if(unloaded_metadata.length > 0){
+                fetch_meta_data(unloaded_metadata[0]);
+            }
+        }
+        load_unloaded_meta_data(cssSelector);
+
     },
 }
 

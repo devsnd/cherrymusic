@@ -53,3 +53,10 @@ doc/sphinx/_build
 
 # pycharm
 .idea
+
+# virtual envs
+.venv
+
+# ipython notebook
+*.ipynb
+.ipynb*

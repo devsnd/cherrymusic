@@ -32,7 +32,7 @@
 #python 2.6+ backward compability
 from __future__ import unicode_literals
 
-VERSION = "0.33.0"
+VERSION = "0.34.0"
 __version__ = VERSION
 DESCRIPTION = "an mp3 server for your browser"
 LONG_DESCRIPTION = """CherryMusic is a music streaming
@@ -171,6 +171,13 @@ class CherryMusic:
                  setup=False, cfg_override={}, adduser=None):
         self.setup_services()
         self.setup_config(createNewConfig, setup, cfg_override)
+
+        if config['media.basedir'] is None:
+            print(_("Invalid basedir. Please provide a valid basedir path."))
+            sys.exit(1)
+        else:
+            log.debug("Basedir is %r", config['media.basedir'])
+
         signal.signal(signal.SIGTERM, CherryMusic.stopAndCleanUp)
         signal.signal(signal.SIGINT, CherryMusic.stopAndCleanUp)
         if os.name == 'posix':
@@ -408,13 +415,11 @@ Have fun!
         """use the configuration to setup and start the cherrypy server
         """
         cherrypy.config.update({'log.screen': True})
+        ipv6_enabled = config['server.ipv6_enabled']
         if config['server.localhost_only']:
-            socket_host = "localhost"
+            socket_host = "::1" if ipv6_enabled else "127.0.0.1"
         else:
-            if config['server.ipv6_enabled']:
-                socket_host = "::"
-            else:
-                socket_host = "0.0.0.0"
+            socket_host = "::" if ipv6_enabled else "0.0.0.0"
 
         resourcedir = os.path.abspath(pathprovider.getResourcePath('res'))
 
@@ -485,25 +490,27 @@ Have fun!
                     'tools.encode.on': True,
                     'tools.encode.encoding': 'utf-8',
                     'tools.caching.on': False,
+                    'tools.cm_auth.on': True,
+                    'tools.cm_auth.httphandler': httphandler,
                 },
                 '/favicon.ico': {
                     'tools.staticfile.on': True,
                     'tools.staticfile.filename': resourcedir + '/img/favicon.ico',
                 }})
-        #rest_v1_mount_path = '/api/v1'
-        #cherrypy.tree.mount(
-        #    api.v1.RestV1Root(config, httphandler, rest_v1_mount_path),
-        #    rest_v1_mount_path,
-        #    config={'/':
-        #        {
-        #            'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
-        #        }
-        #    })
+        api.v1.mount('/api/v1')
         log.i(_('Starting server on port %s ...') % config['server.port'])
 
         cherrypy.lib.caching.expires(0)  # disable expiry caching
         cherrypy.engine.start()
         cherrypy.engine.block()
+
+
+def _cm_auth_tool(httphandler):
+    if not httphandler.isAuthorized():
+        raise cherrypy.HTTPError(403)
+cherrypy.tools.cm_auth = cherrypy.Tool(
+    'before_handler', _cm_auth_tool, priority=70)
+    # priority=70 -->> make tool run after session is locked (at 50)
 
 
 def _get_version_from_git():

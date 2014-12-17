@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 # CherryMusic - a standalone music server
-# Copyright (c) 2012 - 2014 Tom Wallroth & Tilman Boerner
+# Copyright (c) 2012-2014 Tom Wallroth & Tilman Boerner
 #
 # Project page:
 #   http://fomori.org/cherrymusic/
@@ -34,21 +34,44 @@ import nose
 from mock import *
 from nose.tools import *
 
-from cherrymusicserver import log
-log.setTest()
+from cherrymusicserver.api.v1.models import Model
+
+def test_model_constructor():
+    "Model(**kwargs) should initialize object attributes from kwargs"
+    m = Model(id=12, not_a_field=13)
+    eq_(12, m.id)
+    eq_(13, m.not_a_field)
 
 
-from cherrymusicserver import albumartfetcher
+def test_model_field_defaults():
+    "Fix behaviour of default fields and their default values"
+    eq_({'id': None, 'cls': 'Model'}, Model().as_dict())
 
-def test_methods():
-    for method in albumartfetcher.AlbumArtFetcher.methods:
-        yield try_method, method
+    class Test(Model):
+        pass
+    eq_('Test', Test().cls)
 
-def try_method(method, timeout=15):
-    fetcher = albumartfetcher.AlbumArtFetcher(method=method, timeout=timeout)
-    results = fetcher.fetchurls('best of')
-    results += fetcher.fetchurls('best of')    # once is not enough sometimes (?)
-    ok_(results, "method {0!r} results: {1}".format(method, results))
+
+def test_model_as_dict():
+    """ Model.as_dict() should only include field attributes and reflect their
+        current value"""
+    m = Model(a=11)
+    m.id = 12
+    m.b = 13
+    eq_({'id': 12, 'cls': 'Model'}, m.as_dict())
+
+
+def test_model_del_field():
+    """ Deleting a model object's field attribute should behave like deleting
+        a regular attribute without affecting the class or sister objects """
+    m = Model()
+    del m.cls
+
+    assert_raises(AttributeError, getattr, m, 'cls')
+    ok_('cls' not in m.as_dict())
+
+    ok_(Model.cls)
+    eq_('Model', Model().cls)
 
 
 if __name__ == '__main__':

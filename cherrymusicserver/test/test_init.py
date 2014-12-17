@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # CherryMusic - a standalone music server
-# Copyright (c) 2012 - 2014 Tom Wallroth & Tilman Boerner
+# Copyright (c) 2012-2014 Tom Wallroth & Tilman Boerner
 #
 # Project page:
 #   http://fomori.org/cherrymusic/
@@ -38,17 +38,28 @@ from cherrymusicserver import log
 log.setTest()
 
 
-from cherrymusicserver import albumartfetcher
+import cherrymusicserver as cherry
 
-def test_methods():
-    for method in albumartfetcher.AlbumArtFetcher.methods:
-        yield try_method, method
 
-def try_method(method, timeout=15):
-    fetcher = albumartfetcher.AlbumArtFetcher(method=method, timeout=timeout)
-    results = fetcher.fetchurls('best of')
-    results += fetcher.fetchurls('best of')    # once is not enough sometimes (?)
-    ok_(results, "method {0!r} results: {1}".format(method, results))
+def setup():
+    cherry.CherryMusic.setup_services()
+    cherry.service.provide('dbconnector', cherry.database.sql.MemConnector)
+
+
+def test_server_wont_start_without_valid_basedir():
+
+    target_cfg = {'media.basedir': None}    # invalid basedir defaults to None
+
+    class StopException(Exception):
+        pass
+
+    mock_stop = Mock(side_effect=StopException)
+
+    with patch('cherrymusicserver.config', target_cfg):
+        with patch('cherrymusicserver.CherryMusic.setup_config') as mock_setup:
+            with patch('sys.exit', mock_stop):
+                assert_raises(StopException, cherry.CherryMusic)
+                assert mock_setup.called
 
 
 if __name__ == '__main__':

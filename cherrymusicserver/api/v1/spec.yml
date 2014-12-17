@@ -1,0 +1,32 @@
+---
+name: CherryMusic Server API
+version: 0.1.0
+baseurl: api/v1/
+resources:
+  users:
+    url: "users/{name}"
+    cases:
+      - request: |
+          GET users/
+
+        response: |
+          200
+
+          ["adm", "puh"]
+      - request: |
+          GET users/puh
+
+        response: |
+           200
+
+           {"roles": "userbear", "id": 22, "name": "puh", "cls": "User"}
+  root:
+    url: "/"
+    cases:
+      - request: |
+          GET /
+
+        response: |
+          200
+
+          ["users"]

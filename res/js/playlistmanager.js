@@ -106,6 +106,7 @@ ManagedPlaylist.prototype = {
                 title : elem.title,
                 duration : elem.duration,
                 url: elem.url,
+                meta: elem.meta,
             }
             canonical.push(track);
         }
@@ -176,6 +177,28 @@ ManagedPlaylist.prototype = {
     },
     scrollToCurrentTrack: function(){
         this.scrollToTrack(this.jplayerplaylist.current);
+    },
+    sort_by: function(sort_by){
+        this.jplayerplaylist.playlist.sort(
+            function(a, b){
+                var value_a = '';
+                var value_b = '';
+                if(typeof a.meta !== 'undefined'){
+                    value_a = a.meta[sort_by];
+                }
+                if(typeof b.meta !== 'undefined'){
+                    value_b = b.meta[sort_by];
+                }
+                if(value_a > value_b){
+                    return 1;
+                } else if(value_a < value_b){
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }
+        );
+        this.jplayerplaylist._refresh(true);
     }
 }
 
@@ -214,6 +237,7 @@ PlaylistManager = function(){
     this.cssSelectorPlaylistCommands = '#playlistCommands';
     this.cssSelectorJPlayerControls = '#jp_ancestor';
     this.cssSelectorjPlayer = "#jquery_jplayer_1";
+    this.cssSelectorAlbumArt = "#albumart";
     this.newplaylistProxy = new NewplaylistProxy(this);
     this.managedPlaylists = [] //hold instances of ManagedPlaylist
     this.playingPlaylist = 0;
@@ -250,6 +274,13 @@ PlaylistManager = function(){
             alert('Your browser does not support audio playback.');
         }
 	});
+    $(this.cssSelectorjPlayer).bind($.jPlayer.event.setmedia, function(event) {
+        var playlist = self.getPlayingPlaylist().jplayerplaylist;
+        var track = playlist.playlist[playlist.current];
+        if (track) {
+            self.setAlbumArtDisplay(track);
+        }
+    });
     this.initJPlayer();
 }
 
@@ -667,10 +698,12 @@ PlaylistManager.prototype = {
         var self = this;
         var path = track.url;
         var title = track.title;
+        var duration = track.duration;
         var ext = getFileTypeByExt(path);
         var track = {
             title: title,
             wasPlayed : 0,
+            duration: duration,
         }
         var forced_bitrate = userOptions.media.force_transcode_to_bitrate;
         var formats = [];
@@ -709,6 +742,17 @@ PlaylistManager.prototype = {
         }
         return track;
     },
+    setAlbumArtDisplay : function(track) {
+        if(userOptions.ui.display_album_art){
+            // strip filename from url
+            var directory = track.url.substring(0,track.url.lastIndexOf('/'))
+            if (directory == '') // root directory
+                directory = '/';
+            var api_param = JSON.stringify({directory: directory});
+            var imgurl = 'api/fetchalbumart?data=' + api_param;
+            $(this.cssSelectorAlbumArt).attr('src', imgurl);
+        }
+    },
     addSong : function(path, title, plid, animate){
         "use strict";
         var self = this;
@@ -741,6 +785,8 @@ PlaylistManager.prototype = {
         var success = function(data){
             var metainfo = $.parseJSON(data);
             var any_info_received = false;
+            // save all the meta-data in the track
+            track.meta = metainfo;
             if (metainfo.length) {
                 track.duration = metainfo.length;
                 any_info_received = true;

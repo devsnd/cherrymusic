@@ -35,41 +35,34 @@ import os
 from mock import *
 from nose.tools import *
 
-from collections import defaultdict
+from cherrymusicserver.test.helpers import cherrytest, tempdir, mkpath, cherryconfig
 
 from cherrymusicserver import log
 log.setTest()
 
 from cherrymusicserver import cherrymodel
+from cherrymusicserver import sqlitecache
 
-def cherryconfig(cfg=None):
-    from cherrymusicserver import configuration
-    cfg = cfg or {}
-    c = configuration.from_defaults()
-    c = c.update({'media.basedir': os.path.join(os.path.dirname(__file__), 'data_files')})
-    c = c.update(cfg)
+def config(cfg=None):
+    c = {'media.basedir': os.path.join(os.path.dirname(__file__), 'data_files')}
+    if cfg:
+        c.update(cfg)
     return c
 
-@patch('cherrymusicserver.cherrymodel.cherry.config', cherryconfig())
-@patch('cherrymusicserver.cherrymodel.os')
-@patch('cherrymusicserver.cherrymodel.CherryModel.cache')
-@patch('cherrymusicserver.cherrymodel.isplayable', lambda _: True)
-def test_hidden_names_listdir(cache, os):
+
+@cherrytest(config({'browser.pure_database_lookup': False}))
+def test_hidden_names_listdir():
+    import cherrymusicserver as cherry
+    basedir_listing = sorted(os.listdir(cherry.config['media.basedir']))
+    eq_(['.hidden.mp3', 'empty_file.mp3', 'not_hidden.mp3'], basedir_listing)
+
     model = cherrymodel.CherryModel()
-    os.path.join = lambda *a: '/'.join(a)
-
-    content = ['.hidden']
-    cache.listdir.return_value = content
-    os.listdir.return_value = content
-    assert not model.listdir('')
-
-    content = ['not_hidden.mp3']
-    cache.listdir.return_value = content
-    os.listdir.return_value = content
-    assert model.listdir('')
+    dir_listing = model.listdir('')
+    assert len(dir_listing) == 1, str(dir_listing)
+    assert dir_listing[0].path == 'not_hidden.mp3'
 
 
-@patch('cherrymusicserver.cherrymodel.cherry.config', cherryconfig({'search.maxresults': 10}))
+@cherrytest(config({'search.maxresults': 10}))
 @patch('cherrymusicserver.cherrymodel.CherryModel.cache')
 @patch('cherrymusicserver.cherrymodel.cherrypy')
 def test_hidden_names_search(cherrypy, cache):
@@ -81,14 +74,104 @@ def test_hidden_names_search(cherrypy, cache):
     cache.searchfor.return_value = [cherrymodel.MusicEntry('not_hidden.mp3', dir=False)]
     assert model.search('something')
 
-@patch('cherrymusicserver.cherrymodel.cherry.config', cherryconfig({'search.maxresults': 10}))
+
+@cherrytest(config({'browser.pure_database_lookup': True}))
 @patch('cherrymusicserver.cherrymodel.CherryModel.cache')
-@patch('cherrymusicserver.cherrymodel.cherrypy')
-def test_hidden_names_listdir(cherrypy, cache):
+def test_listdir_deleted_files(cache):
+    "cherrymodel.listdir should work when cached files don't exist anymore"
     model = cherrymodel.CherryModel()
-    dir_listing = model.listdir('')
-    assert len(dir_listing) == 1
-    assert dir_listing[0].path == 'not_hidden.mp3'
+
+    cache.listdir.return_value = ['deleted.mp3']
+    eq_([], model.listdir(''))
+
+
+@cherrytest(config({'browser.pure_database_lookup': False}))
+def test_listdir_bad_symlinks():
+    "cherrymodel.listdir should work when cached files don't exist anymore"
+    model = cherrymodel.CherryModel()
+
+    with tempdir('test_listdir_bad_symlinks') as tmpdir:
+        with cherryconfig({'media.basedir': tmpdir}):
+            os.symlink('not_there', os.path.join(tmpdir, 'badlink'))
+            eq_([], model.listdir(''))
+
+
+@cherrytest(config({'media.transcode': False}))
+def test_randomMusicEntries():
+    model = cherrymodel.CherryModel()
+
+    def makeMusicEntries(n):
+        return [cherrymodel.MusicEntry(str(i)) for i in range(n)]
+
+    with patch('cherrymusicserver.cherrymodel.CherryModel.cache') as mock_cache:
+        with patch('cherrymusicserver.cherrymodel.CherryModel.isplayable') as mock_playable:
+            mock_cache.randomFileEntries.side_effect = makeMusicEntries
+
+            mock_playable.return_value = True
+            eq_(2, len(model.randomMusicEntries(2)))
+
+            mock_playable.return_value = False
+            eq_(0, len(model.randomMusicEntries(2)))
+
+
+@cherrytest({'media.transcode': False})
+def test_isplayable():
+    """ existing, nonempty files of supported types should be playable """
+    model = cherrymodel.CherryModel()
+
+    with patch(
+        'cherrymusicserver.cherrymodel.CherryModel.supportedFormats', ['mp3']):
+
+        with tempdir('test_isplayable') as tmpdir:
+            mkfile = lambda name, content='': mkpath(name, tmpdir, content)
+            mkdir = lambda name: mkpath(name + '/', tmpdir)
+
+            with cherryconfig({'media.basedir': tmpdir}):
+                isplayable = model.isplayable
+                assert isplayable(mkfile('ok.mp3', 'content'))
+                assert not isplayable(mkfile('empty.mp3'))
+                assert not isplayable(mkfile('bla.unsupported', 'content'))
+                assert not isplayable(mkdir('directory.mp3'))
+                assert not isplayable('inexistant')
+
+
+@cherrytest({'media.transcode': True})
+def test_is_playable_by_transcoding():
+    """ filetypes should still be playable if they can be transcoded """
+    from audiotranscode import AudioTranscode
+
+    with patch('audiotranscode.AudioTranscode', spec=AudioTranscode) as ATMock:
+        ATMock.return_value = ATMock
+        ATMock.availableDecoderFormats.return_value = ['xxx']
+        with tempdir('test_isplayable_by_transcoding') as tmpdir:
+            with cherryconfig({'media.basedir': tmpdir}):
+                track = mkpath('track.xxx', parent=tmpdir, content='xy')
+                model = cherrymodel.CherryModel()
+                ok_(model.isplayable(track))
+
+
+@cherrytest({'media.transcode': False})
+@patch('cherrymusicserver.cherrymodel.cherrypy', MagicMock())
+def test_search_results_missing_in_filesystem():
+    "inexistent MusicEntries returned by sqlitecache search should be ignored"
+    cache_finds = [
+        cherrymodel.MusicEntry('i-dont-exist.dir', dir=True),
+        cherrymodel.MusicEntry('i-dont-exist.mp3', dir=False),
+        cherrymodel.MusicEntry('i-exist.dir', dir=True),
+        cherrymodel.MusicEntry('i-exist.mp3', dir=False),
+    ]
+    mock_cache = Mock(spec=sqlitecache.SQLiteCache)
+    mock_cache.searchfor.return_value = cache_finds
+    model = cherrymodel.CherryModel()
+    model.cache = mock_cache
+
+    with tempdir('test_cherrymodel_search_missing_results') as tmpdir:
+        mkpath('i-exist.dir/', tmpdir)
+        mkpath('i-exist.mp3', tmpdir, 'some content')
+
+        with cherryconfig({'media.basedir': tmpdir}):
+            results = model.search('the query')
+            eq_(set(cache_finds[2:]), set(results))
 
 
 if __name__ == '__main__':

@@ -236,6 +236,7 @@ function loadUserOptions(onSuccess){
 
         $('#misc-autoplay_on_add').attr('checked',userOptions.misc.autoplay_on_add);
         $('#ui-confirm_quit_dialog').attr('checked',userOptions.ui.confirm_quit_dialog);
+        $('#ui-display_album_art').attr('checked',userOptions.ui.display_album_art);
 
         handle_useroption_force_transcode_bitrate();
     };
@@ -702,7 +703,7 @@ function addNewUser(){
     "use strict";
     var newusername = $('#newusername').val();
     var newpassword = $('#newpassword').val();
-    var newisadmin = $('#newisadmin').attr('checked')?1:0;
+    var newisadmin = $('#newisadmin').prop('checked')?1:0;
     if(newusername.trim() === '' || newpassword.trim() === ''){
         return;
     }
@@ -864,22 +865,22 @@ function time2text(sec){
     var days = parseInt(hours/24);
     var weeks = parseInt(days/7);
     var months = parseInt(days/30);
-    var years = parseInt(months/12);
+    var years = parseInt(days/365);
     var t='';
     if(abssec < 30){
         return 'just now'
     } else {
         if(years != 0){
-            years+' years';
+            t = years == 1 ? 'a year' : years+' years';
             if(years > 20){
-                return 'never';
+                t = 'a long time';
             }
         } else if(months != 0){
-            t = months+' months';
+            t = months == 1 ? 'a month' : months+' months';
         } else if(weeks != 0){
-            t = weeks+' weeks';
+            t = weeks == 1 ? 'a week' : weeks+' weeks';
         } else if(days != 0){
-            t = days+' days';
+            t = days == 1 ? 'a day' : days+' days';
         } else if(hours != 0){
             t = hours == 1 ? 'an hour' : hours+' hours';
         } else if(minutes != 0){
@@ -1149,6 +1150,7 @@ $(document).ready(function(){
     loadUserOptions(function(){
         initKeyboardshortcuts();
         dontCloseWindowIfMusicPlays();
+        $('#albumart').toggle(userOptions.ui.display_album_art)
     });
     $('#search-panel').on('scroll', function(){
         //enable loading of images when in viewport
@@ -1205,11 +1207,16 @@ $(document).ready(function(){
                                'misc.autoplay_on_add');
     userOptionCheckboxListener('#ui-confirm_quit_dialog',
                                'ui.confirm_quit_dialog');
+    userOptionCheckboxListener('#ui-display_album_art',
+                               'ui.display_album_art');
     userOptionMultivalListener("input[name='media-force_transcode_to_bitrate']",
                                 'media.force_transcode_to_bitrate');
     $('#media-force_transcode_to_bitrate-disable').click(function(){
         optionSetter('media.force_transcode_to_bitrate', 0, function(){
             $('#media-force_transcode_to_bitrate-disable').closest('.error').hide();
         });
+    });
+    $('#ui-display_album_art').click(function() {
+        $('#albumart').toggle($('#ui-display_album_art').prop('checked'));
     });
 });

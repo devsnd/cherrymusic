@@ -4905,6 +4905,13 @@ td.visible-print {
   -webkit-box-shadow: 2px 2px 3px rgba(0,0,0,.4), 0px 0px 5px rgba(0,0,0,.8);
   box-shadow: 2px 2px 3px rgba(0,0,0,.4), 0px 0px 5px rgba(0,0,0,.8);
 }
+#albumart {
+  background-color: #eee;
+  float: left;
+  width: 70px;
+  height: 70px;
+  left: 0px;
+}
 .cm-songtitle {
   float: left;
   left: -50%;
@@ -5035,6 +5042,10 @@ body:after {
 }
 .feature-list {
   text-align: left;
+}
+#search-panel,
+.playlist-container-parent {
+  -webkit-overflow-scrolling: touch;
 }
 #searchresults {
   overflow: hidden;
@@ -5247,6 +5258,9 @@ body:after {
 }
 .list-dir:hover {
   background-color: #999999;
+}
+.list-dir-cover-area {
+  height: 100%;
 }
 .compact-list-dir {
   display: block;

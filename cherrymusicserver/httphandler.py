@@ -335,7 +335,7 @@ class HTTPHandler(object):
         filelist = [filepath for filepath in json.loads(unquote(value))]
         dlstatus = self.download_check_files(filelist)
         if dlstatus == 'ok':
-            cherrypy.session.release_lock()
+            _save_and_release_session()
             zipmime = 'application/x-zip-compressed'
             cherrypy.response.headers["Content-Type"] = zipmime
             zipname = 'attachment; filename="music.zip"'
@@ -376,7 +376,7 @@ class HTTPHandler(object):
     def api_fetchalbumarturls(self, searchterm):
         if not cherrypy.session['admin']:
             raise cherrypy.HTTPError(401, 'Unauthorized')
-        cherrypy.session.release_lock()
+        _save_and_release_session()
         fetcher = albumartfetcher.AlbumArtFetcher()
         imgurls = fetcher.fetchurls(searchterm)
         # show no more than 10 images
@@ -391,7 +391,7 @@ class HTTPHandler(object):
         self.albumartcache_save(b64imgpath, data)
 
     def api_fetchalbumart(self, directory):
-        cherrypy.session.release_lock()
+        _save_and_release_session()
         default_folder_image = "/res/img/folder.png"
 
         #try getting a cached album art image
@@ -506,7 +506,7 @@ class HTTPHandler(object):
 
     def api_getmotd(self):
         if cherrypy.session['admin'] and cherry.config['general.update_notification']:
-            cherrypy.session.release_lock()
+            _save_and_release_session()
             new_versions = self.model.check_for_updates()
             if new_versions:
                 newest_version = new_versions[0]['version']
@@ -696,3 +696,28 @@ class HTTPHandler(object):
         cherrypy.response.headers["Content-Type"] = "application/x-download"
         cherrypy.response.headers["Content-Disposition"] = content_disposition
         return codecs.encode(string, "UTF-8")
+
+
+def _save_and_release_session():
+    """ workaround to cleanly release FileSessions in Cherrypy >= 3.3
+
+        From https://github.com/devsnd/cherrymusic/issues/483:
+
+        > CherryPy >=3.3.0 (up to current version, 3.6) makes it impossible to
+        > explicitly release FileSession locks, because:
+
+        > 1. FileSession.save() asserts that the session is locked; and
+
+        > 2. _cptools.SessionTool always adds a hook to call sessions.save
+        > before the response is finalized.
+
+        > If we still want to release the session in a controller, I guess the
+        > best way to work around this is to remove the hook before the
+        > controller returns:
+    """
+    cherrypy.session.save()
+    hooks = cherrypy.serving.request.hooks['before_finalize']
+    forbidden = cherrypy.lib.sessions.save
+    hooks[:] = [h for h in hooks if h.callback is not forbidden]
+    # there's likely only one hook, since a 2nd call to save would always fail;
+    # but let's be safe, and block all calls to save :)

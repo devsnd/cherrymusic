@@ -1,8 +1,7 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- #
 #
 # CherryMusic - a standalone music server
-# Copyright (c) 2012 - 2014 Tom Wallroth & Tilman Boerner
+# Copyright (c) 2012-2014 Tom Wallroth & Tilman Boerner
 #
 # Project page:
 #   http://fomori.org/cherrymusic/
@@ -29,27 +28,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
-import nose
+""" Abstract and common behavior of RESTlike resources """
 
-from mock import *
-from nose.tools import *
+#python 2.6+ backward compability
+from __future__ import unicode_literals
 
-from cherrymusicserver import log
-log.setTest()
+import cherrypy
 
+@cherrypy.expose()
+class Resource(object):
+    """ Base class for API resources.
 
-from cherrymusicserver import albumartfetcher
-
-def test_methods():
-    for method in albumartfetcher.AlbumArtFetcher.methods:
-        yield try_method, method
-
-def try_method(method, timeout=15):
-    fetcher = albumartfetcher.AlbumArtFetcher(method=method, timeout=timeout)
-    results = fetcher.fetchurls('best of')
-    results += fetcher.fetchurls('best of')    # once is not enough sometimes (?)
-    ok_(results, "method {0!r} results: {1}".format(method, results))
-
-
-if __name__ == '__main__':
-    nose.runmodule()
+        A resource wraps an underlying model, and can have an owner through
+        this model.
+    """
+    owner = None
+    model = None
