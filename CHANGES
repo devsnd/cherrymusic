@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+0.34.1 (2014-12-17)
+ - FIXED: Queue not visible due to outdated jPlayer
+
 0.34.0 (2014-12-08)
 
  - FEATURE: sorting of queue and open playlists via dropdown menu
