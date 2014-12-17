@@ -53,7 +53,7 @@ import signal
 
 import gettext
 from cherrymusicserver import pathprovider
-from audiotranscode import MimeTypes
+
 
 if sys.version_info < (3,):
     gettext.install('default', unicode=True, localedir=pathprovider.getResourcePath('res/i18n'))
@@ -164,6 +164,9 @@ from cherrymusicserver import useroptiondb
 from cherrymusicserver import api
 import cherrymusicserver.browsersetup
 
+import audiotranscode
+MEDIA_MIMETYPES = audiotranscode.MIMETYPES.copy()
+del audiotranscode
 
 class CherryMusic:
     """Sets up services (configuration, database, etc) and starts the server"""
@@ -486,7 +489,7 @@ Have fun!
                     'tools.staticdir.on': True,
                     'tools.staticdir.dir': basedirpath,
                     # 'tools.staticdir.index': 'index.html',    if ever needed: in py2 MUST utf-8 encode
-                    'tools.staticdir.content_types': MimeTypes,
+                    'tools.staticdir.content_types': MEDIA_MIMETYPES,
                     'tools.encode.on': True,
                     'tools.encode.encoding': 'utf-8',
                     'tools.caching.on': False,

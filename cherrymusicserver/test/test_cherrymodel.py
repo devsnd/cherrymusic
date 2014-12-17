@@ -142,7 +142,7 @@ def test_is_playable_by_transcoding():
 
     with patch('audiotranscode.AudioTranscode', spec=AudioTranscode) as ATMock:
         ATMock.return_value = ATMock
-        ATMock.availableDecoderFormats.return_value = ['xxx']
+        ATMock.available_decoder_formats.return_value = ['xxx']
         with tempdir('test_isplayable_by_transcoding') as tmpdir:
             with cherryconfig({'media.basedir': tmpdir}):
                 track = mkpath('track.xxx', parent=tmpdir, content='xy')
