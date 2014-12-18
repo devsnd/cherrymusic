@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+0.34.1 (2014-12-18)
+ - FIXED: bug where client didn't work in some browsers due to failure of old 
+jPlayer flash component
+
 0.34.0 (2014-12-08)
 
  - FEATURE: sorting of queue and open playlists via dropdown menu
