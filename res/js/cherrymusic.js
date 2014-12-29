@@ -516,6 +516,7 @@ function loadPlaylist(playlistid, playlistlabel){
             playlistManager.addSong(tracklist[i].urlpath, tracklist[i].label, pl.id, animate);
         }
         pl.setSaved(true);
+        pl.scrollToTrack(0);
     }
     api('loadplaylist',
         {'playlistid': playlistid},
