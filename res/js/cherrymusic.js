@@ -266,7 +266,7 @@ var handle_useroption_force_transcode_bitrate = function() {
         $(selected).attr('checked', 'checked');
         $(deselected).removeAttr('checked');
         $("#media-force_transcode_to_bitrate-display").val(forced_bitrate);
-        if([0, 96, 128].indexOf(forced_bitrate) < 0) {
+        if([0, 96, 128, 320].indexOf(forced_bitrate) < 0) {
             console.log("Unknown bitrate value:", forced_bitrate);
         }
     } else {
