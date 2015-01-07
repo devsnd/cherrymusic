@@ -5220,6 +5220,7 @@ body:after {
   display: inline-block;
   width: 105px;
   height: 130px;
+  vertical-align: middle;
   overflow: hidden;
 }
 .list-dir-item-listview {
