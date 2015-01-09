@@ -260,11 +260,11 @@ var handle_useroption_force_transcode_bitrate = function() {
     }
     var forced_bitrate = userOptions.media.force_transcode_to_bitrate;
     if (SERVER_CONFIG['transcoding_enabled']) {
-        var radios = "input[name='media-force_transcode_to_bitrate']";
-        var selected = radios + "[value='x']".replace(/x/, forced_bitrate);
+        var select = "select[name='media-force_transcode_to_bitrate']";
+        var selected = select + "> option[value='x']".replace(/x/, forced_bitrate);
         var deselected = selected.replace(/value=/, 'value!=');
-        $(selected).attr('checked', 'checked');
-        $(deselected).removeAttr('checked');
+        $(selected).attr('selected', 'selected');
+        $(deselected).removeAttr('selected');
         $("#media-force_transcode_to_bitrate-display").val(forced_bitrate);
         if([0, 96, 128, 320].indexOf(forced_bitrate) < 0) {
             console.log("Unknown bitrate value:", forced_bitrate);
@@ -1210,7 +1210,7 @@ $(document).ready(function(){
                                'ui.confirm_quit_dialog');
     userOptionCheckboxListener('#ui-display_album_art',
                                'ui.display_album_art');
-    userOptionMultivalListener("input[name='media-force_transcode_to_bitrate']",
+    userOptionMultivalListener("select[name='media-force_transcode_to_bitrate']",
                                 'media.force_transcode_to_bitrate');
     $('#media-force_transcode_to_bitrate-disable').click(function(){
         optionSetter('media.force_transcode_to_bitrate', 0, function(){

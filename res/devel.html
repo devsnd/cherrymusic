@@ -175,26 +175,12 @@
                 <div id="media-force_transcode_to_bitrate-container" class="control-group">
                     <div class="success">
                         Limit audio bitrate
-                        <div class="radio-inline">
-                            <label class="radio-inline">
-                                <input type="radio" name="media-force_transcode_to_bitrate" value="0"/> Unlimited
-                            </label>
-                        </div>
-                        <div class="radio-inline">
-                            <label class="radio-inline">
-                                <input type="radio" name="media-force_transcode_to_bitrate" value="96"/> Low
-                            </label>
-                        </div>
-                        <div class="radio-inline">
-                            <label class="radio-inline">
-                                <input type="radio" name="media-force_transcode_to_bitrate" value="128"/> Medium
-                            </label>
-                        </div>
-                        <div class="radio-inline">
-                            <label class="radio-inline">
-                                <input type="radio" name="media-force_transcode_to_bitrate" value="320"/> Very High
-                            </label>
-                        </div>
+                        <select name="media-force_transcode_to_bitrate" id="" class="">
+                            <option value="0">Unlimited</option>
+                            <option value="96">Low</option>
+                            <option value="128">Medium</option>
+                            <option value="320">Very High</option>
+                        </select>
                         &nbsp;<input id="media-force_transcode_to_bitrate-display" type="text" disabled value="" size="3" style="text-align:right;"/>&nbsp;kbps
                     </div>
                     <div class="error" style="display: none; text-align: center; margin: 5px;">
