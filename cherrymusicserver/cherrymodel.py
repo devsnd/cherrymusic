@@ -116,6 +116,10 @@ class CherryModel:
         if cherry.config['browser.pure_database_lookup']:
             allfilesindir = self.cache.listdir(dirpath)     # NOT absdirpath!
         else:
+            in_basedir = os.path.normpath(absdirpath).startswith(
+                cherry.config['media.basedir'])
+            if not in_basedir:
+                raise ValueError('dirpath not in basedir: %r' % dirpath)
             allfilesindir = os.listdir(absdirpath)
 
         #remove all files not inside the filter

@@ -61,6 +61,12 @@ def test_hidden_names_listdir():
     assert len(dir_listing) == 1, str(dir_listing)
     assert dir_listing[0].path == 'not_hidden.mp3'
 
+@raises(ValueError)
+@cherrytest(config({'browser.pure_database_lookup': False}))
+def test_listdir_in_filesystem_must_be_inside_basedir():
+    model = cherrymodel.CherryModel()
+    model.listdir('./../')
+# sqlitecache is covered in test_sqlitecache.test_listdir()
 
 @cherrytest(config({'search.maxresults': 10}))
 @patch('cherrymusicserver.cherrymodel.CherryModel.cache')
