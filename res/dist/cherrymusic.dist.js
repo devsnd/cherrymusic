@@ -1459,7 +1459,8 @@ function validateNewPassword($newpwfield,$repeatpwfield){var newpw=$newpwfield.v
 $repeatpwfield.closest('.control-group').addClass('error');return false;}
 function userExportPlaylists(){var loc=window.location;var hostaddr=loc.protocol+'//'+loc.host;$('#exportPlaylists input[name=hostaddr]').val(hostaddr);$('#exportPlaylists form').submit();$('#exportPlaylists').modal('hide');$('#userOptions').modal('hide');}
 function enableJplayerDebugging(){$('#jplayer_inspector').jPlayerInspector({jPlayer:$('#jquery_jplayer_1'),visible:true});$('#jquery_jplayer_1').data().jPlayer.options.errorAlerts=true;$('#jquery_jplayer_1').data().jPlayer.options.warningAlerts=true;$('#jplayer_inspector_update_0').click();}
-function loadBrowser(directory,title){if(typeof title==='undefined'){title='Root';}
+function loadBrowser(directory,title){if(typeof directory==='undefined'){directory='';}
+if(typeof title==='undefined'){title='Root';}
 var success=function(data){new MediaBrowser('.search-results',data,title);};busy('#searchfield').hide().fadeIn('fast');api('listdir',{'directory':directory},success,errorFunc('failed to load file browser'),function(){busy('#searchfield').fadeOut('fast')});}
 function endsWith(str,suffix){"use strict";return str.indexOf(suffix,str.length-suffix.length)!==-1;}
 function getFileTypeByExt(filepath){"use strict";var extmatch=filepath.match(/.*?\.(\w+)$/);if(extmatch){return extmatch[1].toLowerCase();}}

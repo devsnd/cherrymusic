@@ -810,6 +810,9 @@ function enableJplayerDebugging(){
 }
 
 function loadBrowser(directory, title){
+    if(typeof directory === 'undefined'){
+        directory = '';
+    }
     if(typeof title === 'undefined'){
         title = 'Root';
     }

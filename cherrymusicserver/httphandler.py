@@ -448,7 +448,7 @@ class HTTPHandler(object):
         files_to_list = self.model.listdir(directory, filterstr)
         return [entry.to_dict() for entry in files_to_list]
 
-    def api_listdir(self, directory=''):
+    def api_listdir(self, directory):
         return [entry.to_dict() for entry in self.model.listdir(directory)]
 
     def api_search(self, searchstring):
