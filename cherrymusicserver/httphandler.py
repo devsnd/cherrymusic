@@ -445,11 +445,17 @@ class HTTPHandler(object):
             f.write(data)
 
     def api_compactlistdir(self, directory, filterstr=None):
-        files_to_list = self.model.listdir(directory, filterstr)
+        try:
+            files_to_list = self.model.listdir(directory, filterstr)
+        except ValueError:
+            raise cherrypy.HTTPError(400, 'Bad Request')
         return [entry.to_dict() for entry in files_to_list]
 
     def api_listdir(self, directory):
-        return [entry.to_dict() for entry in self.model.listdir(directory)]
+        try:
+            return [entry.to_dict() for entry in self.model.listdir(directory)]
+        except ValueError:
+            raise cherrypy.HTTPError(400, 'Bad Request')
 
     def api_search(self, searchstring):
         if not searchstring.strip():

@@ -42,7 +42,7 @@ cherry.config = configuration.from_defaults()
 
 from cherrymusicserver import httphandler
 from cherrymusicserver import service
-from cherrymusicserver.cherrymodel import MusicEntry
+from cherrymusicserver.cherrymodel import CherryModel, MusicEntry
 
 from cherrymusicserver import log
 
@@ -294,7 +294,27 @@ class TestHTTPHandler(unittest.TestCase):
     def test_api_listdir(self):
         """when attribute error is raised, this means that cherrypy
         session is used to authenticate the http request."""
-        self.assertRaises(AttributeError, self.http.api, 'changeplaylist')
+        self.assertRaises(AttributeError, self.http.api, 'listdir')
+
+    def test_api_listdir_must_call_cherrymodel_listdir(self):
+        mock = MagicMock(spec=CherryModel)
+        oldservice = service.get('cherrymodel')
+        service.provide('cherrymodel', mock)
+
+        self.http.api_listdir('dir')
+        mock.listdir.assert_called_with('dir')
+
+        service.provide('cherrymodel', oldservice)
+
+    def test_api_compactlistdir_must_call_cherrymodel_listdir(self):
+        mock = MagicMock(spec=CherryModel)
+        oldservice = service.get('cherrymodel')
+        service.provide('cherrymodel', mock)
+
+        self.http.api_compactlistdir('dir', filterstr='x')
+        mock.listdir.assert_called_with('dir', 'x')
+
+        service.provide('cherrymodel', oldservice)
 
     def test_api_userchangepassword(self):
         """when attribute error is raised, this means that cherrypy
