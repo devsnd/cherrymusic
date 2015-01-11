@@ -425,13 +425,19 @@ class HTTPHandler(object):
                     return data
                 else:
                     # albumart fetcher failed, so we serve a standard image
-                    raise cherrypy.HTTPRedirect(default_folder_image, 302)
+                    tmp = cherrypy.HTTPRedirect(default_folder_image, 302)
+                    tmp.urls = [default_folder_image]
+                    raise tmp
             except:
                 # albumart fetcher threw exception, so we serve a standard image
-                raise cherrypy.HTTPRedirect(default_folder_image, 302)
+                tmp = cherrypy.HTTPRedirect(default_folder_image, 302)
+                tmp.urls = [default_folder_image]
+                raise tmp
         else:
             # no local album art found, online fetching deactivated, show default
-            raise cherrypy.HTTPRedirect(default_folder_image, 302)
+            tmp = cherrypy.HTTPRedirect(default_folder_image, 302)
+            tmp.urls = [default_folder_image]
+            raise tmp
     api_fetchalbumart.noauth = True
     api_fetchalbumart.binary = True
 
