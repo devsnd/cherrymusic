@@ -831,6 +831,7 @@ def cachetest(func):
     wrapper.__doc__ = func.__doc__
     return wrapper
 
+
 @cachetest
 def test_listdir():
     basedir_contents = ['some_file']
@@ -843,6 +844,18 @@ def test_listdir():
     assert [] == cache.listdir('/.')
     assert [] == cache.listdir('..')
     assert [] == cache.listdir('./..')
+
+
+@cachetest
+def test_search_nonascii():
+    """ searchfor can handle and find non-ascii """
+    basedir_contents = ['ä.mp3']
+    cache = setup_cache(basedir_contents)
+
+    found = cache.searchfor('ä')
+    assert len(found) == 1
+    assert found[0].path == basedir_contents[0]   # found MusicEntry
+
 
 if __name__ == "__main__":
     nose.runmodule()
