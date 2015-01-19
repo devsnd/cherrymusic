@@ -54,6 +54,8 @@ import cherrymusicserver.tweak
 from imp import reload
 import random
 
+from backport import unichr
+
 UNIDECODE_AVAILABLE = True
 try:
     import unidecode
@@ -133,7 +135,8 @@ class SQLiteCache(object):
                 params = (term + '%',)
             else:
                 where = ''' (dictionary.word >= ? AND dictionary.word < ?) '''
-                params = (term, tprefix + chr(1 + ord(tlast)))
+                nextchr = unichr(1 + ord(tlast))
+                params = (term, tprefix + nextchr)
             order = ' ORDER BY dictionary.occurrences DESC '
             limit = ' LIMIT 0, ' + str(maxFileIdsPerTerm) #TODO add maximum db results as configuration parameter
             sql = query + where + order +limit
