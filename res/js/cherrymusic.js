@@ -954,6 +954,7 @@ function keyboardShortcuts(e){
             if(e.which === userOptions.keyboard_shortcuts[action]){
                 window.console.log('triggering: '+action);
                 actions[action](e);
+				break;
             }
         }
         if(e.which === 32){
