@@ -312,7 +312,7 @@ keyboard_shortcut_setter = function(option, optionname){
             $('html').unbind('keyup',keydownhandler);
             $('#shortcut-changer').fadeOut('fast');
         }
-        if(e.which !== 27 && e.which !== 32){ //do not bind escape / space
+        if(e.which && e.which !== 27 && e.which !== 32){ //do not bind unrecognised keys or escape / space
             optionSetter(option,e.which,keyboardsetterend,keyboardsetterend);
         }
         keyboardsetterend();
