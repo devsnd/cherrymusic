@@ -308,17 +308,18 @@ keyboard_shortcut_setter = function(option, optionname){
         if (e.ctrlKey) return;
         if (e.metaKey) return;
         var keyboardsetterend = function(){
-            $('#shortcut-changer input').unbind('keyup',keydownhandler);
-            $('html').unbind('keyup',keydownhandler);
+            $('#shortcut-changer input').unbind('keydown',keydownhandler);
+            $('html').unbind('keydown',keydownhandler);
             $('#shortcut-changer').fadeOut('fast');
         }
         if(e.which && e.which !== 27 && e.which !== 32){ //do not bind unrecognised keys or escape / space
             optionSetter(option,e.which,keyboardsetterend,keyboardsetterend);
         }
         keyboardsetterend();
+        return false;
     }
-    $('#shortcut-changer input').bind('keyup',keydownhandler);
-    $('html').bind('keyup',keydownhandler);
+    $('#shortcut-changer input').bind('keydown',keydownhandler);
+    $('html').bind('keydown',keydownhandler);
 }
 
 function busy(selector, rect){
