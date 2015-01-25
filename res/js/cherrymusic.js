@@ -950,11 +950,17 @@ function keyboardShortcuts(e){
                         'search' :  function(e){$('#searchform input').focus().select(); e.preventDefault();},
                         'stop' :    function(e){playlistManager.cmd_stop()},
                         };
+        var mediaKeys = { 'next' :    'MediaNextTrack',
+                          'pause' :   'MediaPlayPause', //The pause action is really play/pause, while the play action is only play.
+                          'prev' :    'MediaPreviousTrack',
+                          'stop' :    'MediaStop',
+                          };
         for(var action in actions){
-            if(e.which === userOptions.keyboard_shortcuts[action] && userOptions.keyboard_shortcuts[action]){
+            if((e.which === userOptions.keyboard_shortcuts[action] && userOptions.keyboard_shortcuts[action])
+                || (e.key && e.key === mediaKeys[action])){
                 window.console.log('triggering: '+action);
                 actions[action](e);
-				break;
+                break;
             }
         }
         if(e.which === 32){
