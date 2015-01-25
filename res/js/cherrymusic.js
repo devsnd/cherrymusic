@@ -951,7 +951,7 @@ function keyboardShortcuts(e){
                         'stop' :    function(e){playlistManager.cmd_stop()},
                         };
         for(var action in actions){
-            if(e.which === userOptions.keyboard_shortcuts[action]){
+            if(e.which === userOptions.keyboard_shortcuts[action] && userOptions.keyboard_shortcuts[action]){
                 window.console.log('triggering: '+action);
                 actions[action](e);
 				break;
