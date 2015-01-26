@@ -109,13 +109,13 @@ def test_listdir_unreadable():
 
     with tempdir('test_listdir_unreadable') as tmpdir:
         with cherryconfig({'media.basedir': tmpdir}):
-            os.chmod(tmpdir, 0311)
+            os.chmod(tmpdir, 0o311)
             try:
                 open(os.path.join(tmpdir, 'file.mp3'), 'a').close()
                 eq_([], model.listdir(''))
             finally:
                 # Ensure tmpdir can be cleaned up, even if test fails
-                os.chmod(tmpdir, 0755)
+                os.chmod(tmpdir, 0o755)
 
 
 @cherrytest(config({'media.transcode': False}))
