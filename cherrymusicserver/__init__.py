@@ -80,6 +80,11 @@ def info():
     from audiotranscode import AudioTranscode
     audiotranscode = AudioTranscode()
 
+    encoders = ['%s (%s)' % (enc.filetype, enc.command[0])
+                for enc in audiotranscode.available_encoders]
+    decoders = ['%s (%s)' % (enc.filetype, enc.command[0])
+                for enc in audiotranscode.available_decoders]
+
     return """CherryMusic Server {cm_version}
 
 CherryPy: {cp_version}
@@ -100,8 +105,10 @@ process working dir:
 locale: {locale}, default: {deflocale}
 filesystem encoding: {fs_encoding}
 
-Available Decoders: {decoders}
-Available Encoders: {encoders}
+Available Decoders:
+    {decoders}
+Available Encoders:
+    {encoders}
 
 (Do not parse this output.)""".format(
     cm_version=REPO_VERSION or VERSION,
@@ -116,8 +123,8 @@ Available Encoders: {encoders}
     locale=str(locale.getlocale()),
     deflocale=str(locale.getdefaultlocale()),
     fs_encoding=sys.getfilesystemencoding(),
-    encoders=', '.join(audiotranscode.available_encoder_formats()),
-    decoders=', '.join(audiotranscode.available_decoder_formats()),
+    encoders='\n    '.join(encoders),
+    decoders='\n    '.join(decoders),
 )
 
 
