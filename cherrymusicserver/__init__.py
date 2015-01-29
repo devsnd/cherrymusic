@@ -77,6 +77,9 @@ Copyright (c) 2012 - 2014 Tom Wallroth & Tilman Boerner""".format(cm_version=VER
 def info():
     import locale
     import platform
+    from audiotranscode import AudioTranscode
+    audiotranscode = AudioTranscode()
+
     return """CherryMusic Server {cm_version}
 
 CherryPy: {cp_version}
@@ -97,6 +100,9 @@ process working dir:
 locale: {locale}, default: {deflocale}
 filesystem encoding: {fs_encoding}
 
+Available Decoders: {decoders}
+Available Encoders: {encoders}
+
 (Do not parse this output.)""".format(
     cm_version=REPO_VERSION or VERSION,
     cp_version=cherrypy.__version__,
@@ -110,6 +116,8 @@ filesystem encoding: {fs_encoding}
     locale=str(locale.getlocale()),
     deflocale=str(locale.getdefaultlocale()),
     fs_encoding=sys.getfilesystemencoding(),
+    encoders=', '.join(audiotranscode.available_encoder_formats()),
+    decoders=', '.join(audiotranscode.available_decoder_formats()),
 )
 
 
