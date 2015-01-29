@@ -116,7 +116,15 @@ class CherryModel:
         if cherry.config['browser.pure_database_lookup']:
             allfilesindir = self.cache.listdir(dirpath)     # NOT absdirpath!
         else:
-            allfilesindir = os.listdir(absdirpath)
+            in_basedir = os.path.normpath(absdirpath).startswith(
+                cherry.config['media.basedir'])
+            if not in_basedir:
+                raise ValueError('dirpath not in basedir: %r' % dirpath)
+            try:
+                allfilesindir = os.listdir(absdirpath)
+            except OSError as e:
+                log.e(_('Error listing directory %s: %s') % (absdirpath, str(e)))
+                allfilesindir = []
 
         #remove all files not inside the filter
         if filterstr:
@@ -351,7 +359,11 @@ class MusicEntry:
                 log.error(
                     "MusicEntry does not exist: %r", self.path)
                 return
-            directory_listing = os.listdir(fullpath)
+            try:
+                directory_listing = os.listdir(fullpath)
+            except OSError as e:
+                log.e(_('Error listing directory %s: %s') % (fullpath, str(e)))
+                directory_listing = []
             for idx, filename in enumerate(directory_listing):
                 if idx > MusicEntry.MAX_SUB_FILES_ITER_COUNT:
                     # estimate remaining file count

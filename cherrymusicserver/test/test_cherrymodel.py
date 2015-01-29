@@ -61,6 +61,12 @@ def test_hidden_names_listdir():
     assert len(dir_listing) == 1, str(dir_listing)
     assert dir_listing[0].path == 'not_hidden.mp3'
 
+@raises(ValueError)
+@cherrytest(config({'browser.pure_database_lookup': False}))
+def test_listdir_in_filesystem_must_be_inside_basedir():
+    model = cherrymodel.CherryModel()
+    model.listdir('./../')
+# sqlitecache is covered in test_sqlitecache.test_listdir()
 
 @cherrytest(config({'search.maxresults': 10}))
 @patch('cherrymusicserver.cherrymodel.CherryModel.cache')
@@ -94,6 +100,22 @@ def test_listdir_bad_symlinks():
         with cherryconfig({'media.basedir': tmpdir}):
             os.symlink('not_there', os.path.join(tmpdir, 'badlink'))
             eq_([], model.listdir(''))
+
+
+@cherrytest(config({'browser.pure_database_lookup': False}))
+def test_listdir_unreadable():
+    "cherrymodel.listdir should return empty when dir is unreadable"
+    model = cherrymodel.CherryModel()
+
+    with tempdir('test_listdir_unreadable') as tmpdir:
+        with cherryconfig({'media.basedir': tmpdir}):
+            os.chmod(tmpdir, 0o311)
+            try:
+                open(os.path.join(tmpdir, 'file.mp3'), 'a').close()
+                eq_([], model.listdir(''))
+            finally:
+                # Ensure tmpdir can be cleaned up, even if test fails
+                os.chmod(tmpdir, 0o755)
 
 
 @cherrytest(config({'media.transcode': False}))

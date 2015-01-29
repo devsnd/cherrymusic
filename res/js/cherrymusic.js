@@ -260,13 +260,13 @@ var handle_useroption_force_transcode_bitrate = function() {
     }
     var forced_bitrate = userOptions.media.force_transcode_to_bitrate;
     if (SERVER_CONFIG['transcoding_enabled']) {
-        var radios = "input[name='media-force_transcode_to_bitrate']";
-        var selected = radios + "[value='x']".replace(/x/, forced_bitrate);
+        var select = "select[name='media-force_transcode_to_bitrate']";
+        var selected = select + "> option[value='x']".replace(/x/, forced_bitrate);
         var deselected = selected.replace(/value=/, 'value!=');
-        $(selected).attr('checked', 'checked');
-        $(deselected).removeAttr('checked');
+        $(selected).attr('selected', 'selected');
+        $(deselected).removeAttr('selected');
         $("#media-force_transcode_to_bitrate-display").val(forced_bitrate);
-        if([0, 96, 128].indexOf(forced_bitrate) < 0) {
+        if([0, 96, 128, 320].indexOf(forced_bitrate) < 0) {
             console.log("Unknown bitrate value:", forced_bitrate);
         }
     } else {
@@ -308,17 +308,18 @@ keyboard_shortcut_setter = function(option, optionname){
         if (e.ctrlKey) return;
         if (e.metaKey) return;
         var keyboardsetterend = function(){
-            $('#shortcut-changer input').unbind('keyup',keydownhandler);
-            $('html').unbind('keyup',keydownhandler);
+            $('#shortcut-changer input').unbind('keydown',keydownhandler);
+            $('html').unbind('keydown',keydownhandler);
             $('#shortcut-changer').fadeOut('fast');
         }
-        if(e.which !== 27 && e.which !== 32){ //do not bind escape / space
+        if(e.which && e.which !== 27 && e.which !== 32){ //do not bind unrecognised keys or escape / space
             optionSetter(option,e.which,keyboardsetterend,keyboardsetterend);
         }
         keyboardsetterend();
+        return false;
     }
-    $('#shortcut-changer input').bind('keyup',keydownhandler);
-    $('html').bind('keyup',keydownhandler);
+    $('#shortcut-changer input').bind('keydown',keydownhandler);
+    $('html').bind('keydown',keydownhandler);
 }
 
 function busy(selector, rect){
@@ -811,6 +812,9 @@ function enableJplayerDebugging(){
 }
 
 function loadBrowser(directory, title){
+    if(typeof directory === 'undefined'){
+        directory = '';
+    }
     if(typeof title === 'undefined'){
         title = 'Root';
     }
@@ -932,29 +936,43 @@ function keyboardShortcuts(e){
     if (e.shiftKey) return;
     if (e.ctrlKey) return;
     if (e.metaKey) return;
-    var focusedElement = $("*:focus");
-    var inputFieldFocused = focusedElement.length > 0;
-    if(inputFieldFocused){
-        if(e.which === 27){ //escape -> unfocus
-            focusedElement.blur();
-        }
+
+    var actions = { 'next' :    function(e){playlistManager.cmd_next()},
+                    'pause' :   function(e){playlistManager.cmd_pause()},
+                    'play' :    function(e){playlistManager.cmd_play()},
+                    'prev' :    function(e){playlistManager.cmd_previous()},
+                    'search' :  function(e){$('#searchform input').focus().select(); e.preventDefault();},
+                    'stop' :    function(e){playlistManager.cmd_stop()},
+                    };
+    var mediaKeys = { 'MediaNextTrack' :        'next',
+                      'MediaPlayPause' :        'pause', //The pause action is really play/pause, while the play action is only play.
+                      'MediaPreviousTrack' :    'prev',
+                      'MediaStop' :             'stop'
+                      //Volume up/down/mute keys also exist, but ignore them because they already control system volume.
+                      };
+    var triggerAction = function (action){
+        window.console.log('triggering: '+action);
+        actions[action](e);
+    };
+
+    if (e.key && mediaKeys[e.key]){
+        triggerAction(mediaKeys[e.key]);
     } else {
-        var actions = { 'next' :    function(e){playlistManager.cmd_next()},
-                        'pause' :   function(e){playlistManager.cmd_pause()},
-                        'play' :    function(e){playlistManager.cmd_play()},
-                        'prev' :    function(e){playlistManager.cmd_previous()},
-                        'search' :  function(e){$('#searchform input').focus().select(); e.preventDefault();},
-                        'stop' :    function(e){playlistManager.cmd_stop()},
-                        };
-        for(var action in actions){
-            if(e.which === userOptions.keyboard_shortcuts[action]){
-                window.console.log('triggering: '+action);
-                actions[action](e);
+        var focusedElement = $("*:focus");
+        var inputFieldFocused = focusedElement.length > 0;
+        if(inputFieldFocused){
+            if(e.which === 27){ //escape -> unfocus
+                focusedElement.blur();
             }
-        }
-        if(e.which === 32){
-            window.console.log('triggering: pause');
-            actions['pause']();
+        } else if(e.which === 32){
+            triggerAction('pause');
+        } else {
+            for(var action in actions){
+                if(e.which === userOptions.keyboard_shortcuts[action] && userOptions.keyboard_shortcuts[action]){
+                    triggerAction(action);
+                    break;
+                }
+            }
         }
     }
 }
@@ -1210,7 +1228,7 @@ $(document).ready(function(){
                                'ui.confirm_quit_dialog');
     userOptionCheckboxListener('#ui-display_album_art',
                                'ui.display_album_art');
-    userOptionMultivalListener("input[name='media-force_transcode_to_bitrate']",
+    userOptionMultivalListener("select[name='media-force_transcode_to_bitrate']",
                                 'media.force_transcode_to_bitrate');
     $('#media-force_transcode_to_bitrate-disable').click(function(){
         optionSetter('media.force_transcode_to_bitrate', 0, function(){

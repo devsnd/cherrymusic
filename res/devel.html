@@ -53,7 +53,7 @@
     <script type="text/javascript" src="res/js/ext/jquery.jplayer.inspector.js"></script>
     <script type="text/javascript" src="res/js/ext/mustache-0.7.0.js"></script>
     <!-- ui sortable -->
-    <script type="text/javascript" src="res/js/ext/jquery-ui.js"></script> 
+    <script type="text/javascript" src="res/js/ext/jquery-ui.js"></script>
 
     <script type="text/javascript" src="res/bootstrap3/js/modal.js"></script>
     <script type="text/javascript" src="res/bootstrap3/js/collapse.js"></script>
@@ -121,26 +121,26 @@
         <div class="modal-body">
             <div class="content">
                 <h3>keyboard shortcuts</h3>
-                
+
                 <table>
                     <tr>
                         <td>next track</td>
                         <td><span class="label label-default" id="keyboard_shortcuts-next" value="66" name="keyboard_shortcuts.next"></span></td>
                         <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.next','Next Track')">change</a></td>
                     </tr>
-                    
+
                     <tr>
                         <td>stop</td>
                         <td><span class="label label-default"  id="keyboard_shortcuts-stop" value="86" name="keyboard_shortcuts.stop"></span></td>
                         <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.stop','Stop')">change</a></td>
                     </tr>
-                    
+
                     <tr>
                         <td>previous track</td>
                         <td><span class="label label-default"  value="89"  id="keyboard_shortcuts-prev" name="keyboard_shortcuts.prev"></span></td>
                         <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.prev','Previous Track')">change</a></td>
                     </tr>
-                    
+
                     <tr>
                         <td>pause</td>
                         <td>
@@ -149,13 +149,13 @@
                         </td>
                         <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.pause','Pause')">change</a></td>
                     </tr>
-                    
+
                     <tr>
                         <td>play</td>
                         <td><span class="label label-default"  value="88" id="keyboard_shortcuts-play" name="keyboard_shortcuts.play"></span></td>
                         <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.play','Play')">change</a></td>
                     </tr>
-                    
+
                     <tr>
                         <td>search</td>
                         <td><span class="label label-default" value="83"  id="keyboard_shortcuts-search" name="keyboard_shortcuts.search"></span></td>
@@ -163,8 +163,8 @@
                     </tr>
                 </table>
                 <h3>misc</h3>
-                <div class="control-group">  
-                    Autoplay when adding first track <input type="checkbox" onchange="" id="misc-autoplay_on_add" value="option1">  
+                <div class="control-group">
+                    Autoplay when adding first track <input type="checkbox" onchange="" id="misc-autoplay_on_add" value="option1">
                 </div>
                 <div class="control-group">
                     Confirm closing if music is playing <input type="checkbox" onchange="" id="ui-confirm_quit_dialog" value="option1">
@@ -175,21 +175,12 @@
                 <div id="media-force_transcode_to_bitrate-container" class="control-group">
                     <div class="success">
                         Limit audio bitrate
-                        <div class="radio-inline">
-                            <label class="radio-inline">
-                                <input type="radio" name="media-force_transcode_to_bitrate" value="0"/> Unlimited
-                            </label>
-                        </div>
-                        <div class="radio-inline">
-                            <label class="radio-inline">
-                                <input type="radio" name="media-force_transcode_to_bitrate" value="96"/> Low
-                            </label>
-                        </div>
-                        <div class="radio-inline">
-                            <label class="radio-inline">
-                                <input type="radio" name="media-force_transcode_to_bitrate" value="128"/> Medium
-                            </label>
-                        </div>
+                        <select name="media-force_transcode_to_bitrate">
+                            <option value="0">Unlimited</option>
+                            <option value="96">Low</option>
+                            <option value="128">Medium</option>
+                            <option value="320">Very High</option>
+                        </select>
                         &nbsp;<input id="media-force_transcode_to_bitrate-display" type="text" disabled value="" size="3" style="text-align:right;"/>&nbsp;kbps
                     </div>
                     <div class="error" style="display: none; text-align: center; margin: 5px;">
@@ -221,29 +212,29 @@
         </div>
         <div class="modal-body">
             <div class="content">
-            <form class="form-horizontal">  
+            <form class="form-horizontal">
                 <div class="form-group">
-                    <label for="oldpassword-change" class="col-lg-4 control-label" >old password</label>  
+                    <label for="oldpassword-change" class="col-lg-4 control-label" >old password</label>
                     <div class="col-lg-8">
-                        <input type="password" class="form-control" id="oldpassword-change">  
+                        <input type="password" class="form-control" id="oldpassword-change">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="newpassword-change" class="col-lg-4 control-label" >new password</label>  
+                    <label for="newpassword-change" class="col-lg-4 control-label" >new password</label>
                     <div class="col-lg-8">
-                        <input type="password" class="form-control" id="newpassword-change">  
+                        <input type="password" class="form-control" id="newpassword-change">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="repeatpassword-change" class="col-lg-4 control-label" >repeat new password</label>  
+                    <label for="repeatpassword-change" class="col-lg-4 control-label" >repeat new password</label>
                     <div class="col-lg-8">
-                        <input type="password" class="form-control" id="repeatpassword-change">  
+                        <input type="password" class="form-control" id="repeatpassword-change">
                     </div>
                 </div>
-                <div class="form-actions">  
+                <div class="form-actions">
                     <a href="javascript:;" onclick="userChangePassword()" class="btn btn-default">confirm password change</a>
-                </div>  
-            </form>  
+                </div>
+            </form>
             </div>
         </div>
         <div class="modal-footer">
@@ -314,9 +305,9 @@
         <div class="modal-body">
             <div class="content">
                 <div class="form-group">
-                    <label for="albumart-search-term" class="col-lg-3 control-label" >Search for art:</label>   
+                    <label for="albumart-search-term" class="col-lg-3 control-label" >Search for art:</label>
                     <div class="col-lg-7">
-                        <input type="text" class="form-control" id="albumart-search-term">  
+                        <input type="text" class="form-control" id="albumart-search-term">
                     </div>
                     <div class="col-lg-2">
                         <div class="btn btn-default" onclick="searchAlbumArt()">search</div>
@@ -396,14 +387,14 @@
             <h3 id="saveplaylistmodalLabel">Save new playlist</h3>
         </div>
         <div class="modal-body">
-                <div class="control-group">  
-                    <label for="playlisttitle">Playlist title</label>  
-                    <input id="playlisttitle" type="text" class="form-control" placeholder="Your playlist title">  
+                <div class="control-group">
+                    <label for="playlisttitle">Playlist title</label>
+                    <input id="playlisttitle" type="text" class="form-control" placeholder="Your playlist title">
                 </div>
-                <div class="control-group">  
-                    <div class="controls">  
+                <div class="control-group">
+                    <div class="controls">
                         <input id="playlistpublic" type="checkbox" class="input-xlarge">  visible for other users
-                    </div>  
+                    </div>
                 </div>
             </fieldset>
         </div>
@@ -470,13 +461,13 @@
                             </a></li>
                             <li><a href="javascript:;" class="jp-pause btn btn-default" tabindex="1">
                                 <span class="glyphicon glyphicon-pause"></span>
-                            </a></li>    
+                            </a></li>
                             <li><a href="javascript:;" class="jp-next btn btn-default" tabindex="1">
                                 <span class="glyphicon glyphicon-step-forward"></span>
                             </a></li>
                             <li><a href="javascript:;" class="jp-stop btn btn-default" tabindex="1">
                                 <span class="glyphicon glyphicon-stop"></span>
-                            </a></li>    
+                            </a></li>
                             <li>
                             </li>
                         </ul>
@@ -498,9 +489,9 @@
                         </ul>
                     </div>
 
-                    
+
                     <div class="cm-playlistplaytime"></div>
-                    
+
                     <ul class="jp-toggles">
                         <li><a href="javascript:;" class="jp-shuffle btn btn-default btn-xs" tabindex="1" title="turn shuffle on">
                             <span class="glyphicon glyphicon-random"></span>
@@ -545,7 +536,7 @@
         </form>
     </div>
   </div>
-  
+
   <div class="collapse navbar-collapse navbar-ex1-collapse" id="searchfield">
     <ul class="nav navbar-nav">
         <li class="hidden-xs">
@@ -560,7 +551,7 @@
             </form>
         </li>
         <li>
-            <a href="#" onclick="loadBrowser()">browse files</a>   
+            <a href="#" onclick="loadBrowser()">browse files</a>
         </li>
         <li>
             <a href="#" onclick="showPlaylists('age')">load playlist</a>
@@ -579,7 +570,7 @@
             </ul>
         </li>
     </ul>
-    
+
   </div>
 </div>
 <!-- END UPPER NAVIGATION ELEMENTS -->
@@ -663,7 +654,7 @@
                 <div class="playlist-container-parent playlist-tab-border-left"></div>
                 <div id="playlistBrowser">
                     <div class="available-playlists" style="display: none">
-                    </div>        
+                    </div>
                 </div>
             </div>
             <!-- PLAYLIST TAB END -->

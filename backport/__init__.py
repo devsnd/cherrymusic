@@ -28,3 +28,7 @@ if (3,) <= sys.version_info < (3, 2):
 else:
     callable = callable
 
+if sys.version_info < (3,0):
+    unichr = unichr
+else:
+    unichr = chr
