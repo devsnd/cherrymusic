@@ -183,11 +183,61 @@ import audiotranscode
 MEDIA_MIMETYPES = audiotranscode.MIMETYPES.copy()
 del audiotranscode
 
+def setup_services():
+    """ services can be used by other parts of the program to easily access
+        different functions of cherrymusic by registering themselves as
+        service.user
+
+        See :mod:`~cherrymusicserver.services`.
+    """
+    service.provide('filecache', sqlitecache.SQLiteCache)
+    service.provide('cherrymodel', cherrymodel.CherryModel)
+    service.provide('playlist', playlistdb.PlaylistDB)
+    service.provide('users', userdb.UserDB)
+    service.provide('useroptions', useroptiondb.UserOptionDB)
+    service.provide('dbconnector', database.sql.SQLiteConnector, kwargs={
+        'datadir': pathprovider.databaseFilePath(''),
+        'extension': 'db',
+        'connargs': {'check_same_thread': False},
+    })
+
+
+def setup_config(override_dict=None):
+    """ Updates the internal configuration using the following hierarchy:
+        override_dict > file_config > default_config
+
+        Notifies the user if there are new or deprecated configuration keys.
+
+        See :mod:`~cherrymusicserver.configuration`.
+    """
+    defaults = cfg.from_defaults()
+    filecfg = cfg.from_configparser(pathprovider.configurationFile())
+    custom = defaults.replace(filecfg, on_error=log.e)
+    if override_dict:
+        custom = custom.replace(override_dict, on_error=log.e)
+    global config
+    config = custom
+    _notify_about_config_updates(defaults, filecfg)
+
+
+def _migrate_databases():
+    """ Runs database migrations if necessary; prompt the user for consent if a
+        migration requires it.
+
+        See :mod:`~cherrymusicserver.databases`.
+    """
+    db_is_ready = database.ensure_current_version(
+        consentcallback=_get_user_consent_for_db_schema_update)
+    if not db_is_ready:
+        log.i(_("database schema update aborted. quitting."))
+        sys.exit(1)
+
+
 class CherryMusic:
     """Sets up services (configuration, database, etc) and starts the server"""
     def __init__(self, update=None, createNewConfig=False, dropfiledb=False,
                  setup=False, cfg_override={}, adduser=None):
-        self.setup_services()
+        setup_services()
         self.setup_config(createNewConfig, setup, cfg_override)
 
         if config['media.basedir'] is None:
@@ -250,17 +300,11 @@ I've you are sure that cherrymusic is not running, you can delete this file and 
         """setup services: they can be used by other parts of the program
         to easily access different functions of cherrymusic by registering
         themselves as service.user
+
+        .. deprecated:: > 0.34.1
+            Use :func:`~cherrymusicserver.setup_services` instead.
         """
-        service.provide('filecache', sqlitecache.SQLiteCache)
-        service.provide('cherrymodel', cherrymodel.CherryModel)
-        service.provide('playlist', playlistdb.PlaylistDB)
-        service.provide('users', userdb.UserDB)
-        service.provide('useroptions', useroptiondb.UserOptionDB)
-        service.provide('dbconnector', database.sql.SQLiteConnector, kwargs={
-            'datadir': pathprovider.databaseFilePath(''),
-            'extension': 'db',
-            'connargs': {'check_same_thread': False},
-        })
+        setup_services()
 
     def setup_config(self, createNewConfig, browsersetup, cfg_override):
         """start the in-browser configuration server, create a config if
@@ -286,7 +330,7 @@ I've you are sure that cherrymusic is not running, you can delete this file and 
             else:
                 cfg.write_to_file(cfg.from_defaults(), pathprovider.configurationFile())
                 self.printWelcomeAndExit()
-        self._init_config(cfg_override)
+        setup_config(cfg_override)
 
     def setup_databases(self, update, dropfiledb, setup):
         """ delete or update the file db if so requested.
@@ -297,11 +341,7 @@ I've you are sure that cherrymusic is not running, you can delete this file and 
             database.resetdb(sqlitecache.DBNAME)
         if setup:
             update = update or ()
-        db_is_ready = database.ensure_current_version(
-            consentcallback=self._get_user_consent_for_db_schema_update)
-        if not db_is_ready:
-            log.i(_("database schema update aborted. quitting."))
-            sys.exit(1)
+        _migrate_databases()
         if update is not None:
             cacheupdate = threading.Thread(name="Updater",
                                            target=self._update_if_necessary,
@@ -311,31 +351,6 @@ I've you are sure that cherrymusic is not running, you can delete this file and 
             if not setup:
                 CherryMusic.stopAndCleanUp()
 
-    @staticmethod
-    def _get_user_consent_for_db_schema_update(reasons):
-        """Ask the user if the database schema update should happen now
-        """
-        import textwrap
-        wrap = lambda r: os.linesep.join(
-            textwrap.wrap(r, initial_indent=' - ', subsequent_indent="   "))
-        msg = _("""
-==========================================================================
-A database schema update is needed and requires your consent.
-
-{reasons}
-
-To continue without changes, you need to downgrade to an earlier
-version of CherryMusic.
-
-To backup your database files first, abort for now and find them here:
-
-{dblocation}
-
-==========================================================================
-Run schema update? [y/N]: """).format(
-            reasons=(2 * os.linesep).join(wrap(r) for r in reasons),
-            dblocation='\t' + pathprovider.databaseFilePath(''))
-        return input(msg).lower().strip() in ('y',)
 
     def _update_if_necessary(self, update):
         """perform a database update if update (a list of paths to update is
@@ -347,48 +362,6 @@ Run schema update? [y/N]: """).format(
             cache.partial_update(*update)
         elif update is not None:
             cache.full_update()
-
-    def _init_config(self, override_dict):
-        """update the internal configuration using the following hierarchy:
-        command_line_config > file_config > default_config
-
-        check if there are new or deprecated configuration keys in the config
-        file
-        """
-        defaults = cfg.from_defaults()
-        filecfg = cfg.from_configparser(pathprovider.configurationFile())
-        custom = defaults.replace(filecfg, on_error=log.e)
-        global config
-        config = custom.replace(override_dict, on_error=log.e)
-        self._check_for_config_updates(defaults, filecfg)
-
-    def _check_for_config_updates(self, default, known_config):
-        """check if there are new or deprecated configuration keys in
-        the config file
-        """
-        new = []
-        deprecated = []
-        transform = lambda s: '[{0}]: {2}'.format(*(s.partition('.')))
-
-        for property in cfg.to_list(default):
-            if property.key not in known_config and not property.hidden:
-                new.append(transform(property.key))
-        for property in cfg.to_list(known_config):
-            if property.key not in default:
-                deprecated.append(transform(property.key))
-
-        if new:
-            log.i(_('''New configuration options available:
-                        %s
-                    Using default values for now.'''),
-                  '\n\t\t\t'.join(new))
-        if deprecated:
-            log.i(_('''The following configuration options are not used anymore:
-                        %s'''),
-                  '\n\t\t\t'.join(deprecated))
-        if new or deprecated:
-            log.i(_('Start with --newconfig to generate a new default config'
-                    ' file next to your current one.'))
 
     def printMigrationNoticeAndExit(self):  # temp. remove @ v0.30 or so
         print(_("""
@@ -531,7 +504,65 @@ cherrypy.tools.cm_auth = cherrypy.Tool(
     # priority=70 -->> make tool run after session is locked (at 50)
 
 
+def _get_user_consent_for_db_schema_update(reasons):
+    """Ask the user if the database schema update should happen now
+    """
+    import textwrap
+    wrap = lambda r: os.linesep.join(
+        textwrap.wrap(r, initial_indent=' - ', subsequent_indent="   "))
+    msg = _("""
+==========================================================================
+A database schema update is needed and requires your consent.
+
+{reasons}
+
+To continue without changes, you need to downgrade to an earlier
+version of CherryMusic.
+
+To backup your database files first, abort for now and find them here:
+
+{dblocation}
+
+==========================================================================
+Run schema update? [y/N]: """).format(
+        reasons=(2 * os.linesep).join(wrap(r) for r in reasons),
+        dblocation='\t' + pathprovider.databaseFilePath(''))
+    return input(msg).lower().strip() in ('y',)
+
+
+def _notify_about_config_updates(default, known_config):
+    """check if there are new or deprecated configuration keys in
+    the config file
+    """
+    new = []
+    deprecated = []
+    transform = lambda s: '[{0}]: {2}'.format(*(s.partition('.')))
+
+    for property in cfg.to_list(default):
+        if property.key not in known_config and not property.hidden:
+            new.append(transform(property.key))
+    for property in cfg.to_list(known_config):
+        if property.key not in default:
+            deprecated.append(transform(property.key))
+
+    if new:
+        log.i(_('''New configuration options available:
+                    %s
+                Using default values for now.'''),
+              '\n\t\t\t'.join(new))
+    if deprecated:
+        log.i(_('''The following configuration options are not used anymore:
+                    %s'''),
+              '\n\t\t\t'.join(deprecated))
+    if new or deprecated:
+        log.i(_('Start with --newconfig to generate a new default config'
+                ' file next to your current one.'))
+
+
 def _get_version_from_git():
+    """ Returns more precise version string based on the current git HEAD,
+        or None if not possible.
+    """
     import re
     from subprocess import Popen, PIPE
     cmd = {
