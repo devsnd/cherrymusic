@@ -177,11 +177,11 @@ from cherrymusicserver import sqlitecache
 from cherrymusicserver import userdb
 from cherrymusicserver import useroptiondb
 from cherrymusicserver import api
-import cherrymusicserver.browsersetup
 
 import audiotranscode
 MEDIA_MIMETYPES = audiotranscode.MIMETYPES.copy()
 del audiotranscode
+
 
 def setup_services():
     """ services can be used by other parts of the program to easily access
@@ -210,6 +210,14 @@ def setup_config(override_dict=None):
 
         See :mod:`~cherrymusicserver.configuration`.
     """
+    if not pathprovider.configurationFileExists():
+        if pathprovider.fallbackPathInUse():   # temp. remove @ v0.30 or so
+            _printMigrationNotice()
+            sys.exit(1)
+        else:
+            create_default_config_file(pathprovider.configurationFile())
+            _printWelcome()
+            sys.exit(0)
     defaults = cfg.from_defaults()
     filecfg = cfg.from_configparser(pathprovider.configurationFile())
     custom = defaults.replace(filecfg, on_error=log.e)
@@ -220,9 +228,12 @@ def setup_config(override_dict=None):
     _notify_about_config_updates(defaults, filecfg)
 
 
-def _migrate_databases():
-    """ Runs database migrations if necessary; prompt the user for consent if a
-        migration requires it.
+def migrate_databases():
+    """ Makes sure CherryMusic's databases are up to date, migrating them if
+        necessary.
+
+        This might prompt the user for consent if a migration requires it and
+        terminate the program if no consent is obtained.
 
         See :mod:`~cherrymusicserver.databases`.
     """
@@ -233,12 +244,51 @@ def _migrate_databases():
         sys.exit(1)
 
 
+def start_server(cfg_override=None):
+    """ Initializes and starts the CherryMusic server
+
+        Args:
+            cfg_override: A mapping of config keys to values to override those
+                in the config file.
+    """
+    CherryMusic(cfg_override)
+
+
+def create_user(username, password):
+    """ Creates a non-admin user with given username and password """
+    non_alnum = re.compile('[^a-z0-9]', re.IGNORECASE)
+    if non_alnum.findall(username) or non_alnum.findall(password):
+        log.e(_('username and password may only contain english letters'
+                ' and digits'))
+        return False
+    return service.get('users').addUser(username, password, admin=False)
+
+
+def update_filedb(paths):
+    """ Updates the file database in a separate thread,
+        possibly limited to a sequence of paths inside media.basedir
+
+        See :cls:`~cherrymusicserver.sqlitecache.SQLiteCache` methods
+        :meth:`~cherrymusicserver.sqlitecache.SQLiteCache.full_update` and
+        :meth:`~cherrymusicserver.sqlitecache.SQLiteCache.parital_update`.
+    """
+    cache = sqlitecache.SQLiteCache()
+    target = cache.partial_update if paths else cache.full_update
+    updater = threading.Thread(name='Updater', target=target, args=paths)
+    updater.start()
+
+
+def create_default_config_file(path):
+    """ Creates or overwrites a default configuration file at `path` """
+    cfg.write_to_file(cfg.from_defaults(), path)
+    log.i(_('Default configuration file written to %(path)r'), {'path': path})
+
+
 class CherryMusic:
     """Sets up services (configuration, database, etc) and starts the server"""
-    def __init__(self, update=None, createNewConfig=False, dropfiledb=False,
-                 setup=False, cfg_override={}, adduser=None):
+    def __init__(self, cfg_override=None):
+        self.setup_config(cfg_override)
         setup_services()
-        self.setup_config(createNewConfig, setup, cfg_override)
 
         if config['media.basedir'] is None:
             print(_("Invalid basedir. Please provide a valid basedir path."))
@@ -250,23 +300,18 @@ class CherryMusic:
         signal.signal(signal.SIGINT, CherryMusic.stopAndCleanUp)
         if os.name == 'posix':
             signal.signal(signal.SIGHUP, CherryMusic.stopAndCleanUp)
-        if adduser:
-            if CherryMusic.createUser(adduser):
-                sys.exit(0)
-            else:
-                sys.exit(1)
-        self.setup_databases(update, dropfiledb, setup)
+
         CherryMusic.create_pid_file()
         self.start_server(httphandler.HTTPHandler(config))
         CherryMusic.delete_pid_file()
 
     @classmethod
     def createUser(cls, credentials):
+        """ .. deprecated:: > 0.34.1
+                Use :func:`~cherrymusicserver.create_user` instead.
+        """
         username, password = credentials
-        alphanum = re.compile('[^a-z0-9]', re.IGNORECASE)
-        if alphanum.findall(username) or alphanum.findall(password):
-            return False
-        return service.get('users').addUser(username, password, False)
+        return create_user(username, password)
 
     @classmethod
     def stopAndCleanUp(cls, signal=None, stackframe=None):
@@ -306,101 +351,25 @@ I've you are sure that cherrymusic is not running, you can delete this file and 
         """
         setup_services()
 
-    def setup_config(self, createNewConfig, browsersetup, cfg_override):
-        """start the in-browser configuration server, create a config if
+    def setup_config(self, cfg_override):
+        """create a config if
         no configuration is found or provide migration help for old CM
         versions
 
         initialize the configuration if no config setup is needed/requested
+
+        .. deprecated:: > 0.34.1
+            Use :func:`~cherrymusicserver.setup_config` instead.
         """
-        if browsersetup:
-            port = cfg_override.pop('server.port', False)
-            cherrymusicserver.browsersetup.configureAndStartCherryPy(port)
-        if createNewConfig:
-            newconfigpath = pathprovider.configurationFile() + '.new'
-            cfg.write_to_file(cfg.from_defaults(), newconfigpath)
-            log.i(_('New configuration file was written to:{br}{path}').format(
-                path=newconfigpath,
-                br=os.linesep
-            ))
-            sys.exit(0)
-        if not pathprovider.configurationFileExists():
-            if pathprovider.fallbackPathInUse():   # temp. remove @ v0.30 or so
-                self.printMigrationNoticeAndExit()
-            else:
-                cfg.write_to_file(cfg.from_defaults(), pathprovider.configurationFile())
-                self.printWelcomeAndExit()
         setup_config(cfg_override)
 
-    def setup_databases(self, update, dropfiledb, setup):
-        """ delete or update the file db if so requested.
-        check if the db schema is up to date
-        """
-        if dropfiledb:
-            update = ()
-            database.resetdb(sqlitecache.DBNAME)
-        if setup:
-            update = update or ()
-        _migrate_databases()
-        if update is not None:
-            cacheupdate = threading.Thread(name="Updater",
-                                           target=self._update_if_necessary,
-                                           args=(update,))
-            cacheupdate.start()
-            # self._update_if_necessary(update)
-            if not setup:
-                CherryMusic.stopAndCleanUp()
+    def setup_databases(self):
+        """ check if the db schema is up to date
 
-
-    def _update_if_necessary(self, update):
-        """perform a database update if update (a list of paths to update is
-        not None. If update is an empty list, perform a full update instead
-        of a partial update
-        """
-        cache = sqlitecache.SQLiteCache()
-        if update:
-            cache.partial_update(*update)
-        elif update is not None:
-            cache.full_update()
-
-    def printMigrationNoticeAndExit(self):  # temp. remove @ v0.30 or so
-        print(_("""
-==========================================================================
-Oops!
-
-CherryMusic changed some file locations while you weren't looking.
-(To better comply with best practices, if you wanna know.)
-
-To continue, please move the following:
-
-    $ mv {src} {tgt}""".format(
-            src=os.path.join(pathprovider.fallbackPath(), 'config'),
-            tgt=pathprovider.configurationFile()) + """
-
-    $ mv {src} {tgt}""".format(
-            src=os.path.join(pathprovider.fallbackPath(), '*'),
-            tgt=pathprovider.getUserDataPath()) + """
-
-Thank you, and enjoy responsibly. :)
-==========================================================================
-"""))
-        sys.exit(1)
-
-    def printWelcomeAndExit(self):
-        print(_("""
-==========================================================================
-Welcome to CherryMusic """ + VERSION + """!
-
-To get this party started, you need to edit the configuration file, which
-resides under the following path:
-
-    """ + pathprovider.configurationFile() + """
-
-Then you can start the server and listen to whatever you like.
-Have fun!
-==========================================================================
-"""))
-        sys.exit(0)
+        .. deprecated:: > 0.34.1
+            Use :func:`~cherrymusicserver.migrate_databases` instead.
+         """
+        migrate_databases()
 
     def start_server(self, httphandler):
         """use the configuration to setup and start the cherrypy server
@@ -502,6 +471,46 @@ def _cm_auth_tool(httphandler):
 cherrypy.tools.cm_auth = cherrypy.Tool(
     'before_handler', _cm_auth_tool, priority=70)
     # priority=70 -->> make tool run after session is locked (at 50)
+
+
+def _printMigrationNotice():  # temp. remove @ v0.30 or so
+    print(_("""
+==========================================================================
+Oops!
+
+CherryMusic changed some file locations while you weren't looking.
+(To better comply with best practices, if you wanna know.)
+
+To continue, please move the following:
+
+    $ mv {src} {tgt}""".format(
+            src=os.path.join(pathprovider.fallbackPath(), 'config'),
+            tgt=pathprovider.configurationFile()) + """
+
+    $ mv {src} {tgt}""".format(
+            src=os.path.join(pathprovider.fallbackPath(), '*'),
+            tgt=pathprovider.getUserDataPath()) + """
+
+Thank you, and enjoy responsibly. :)
+==========================================================================
+"""))
+
+
+def _printWelcome():
+    print(_("""
+==========================================================================
+Welcome to CherryMusic """ + VERSION + """!
+
+To get this party started, you need to edit the configuration file, which
+resides under the following path:
+
+    """ + pathprovider.configurationFile() + """
+
+Then you can start the server and listen to whatever you like.
+Have fun!
+==========================================================================
+"""))
+
 
 
 def _get_user_consent_for_db_schema_update(reasons):

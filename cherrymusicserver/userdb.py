@@ -63,7 +63,7 @@ class UserDB:
             log.e('cannot create user "%s", already exists!' % user.name)
             return False
         self.conn.commit()
-        log.d('added user: ' + user.name)
+        log.i('added user: ' + user.name)
         return True
 
     def isDeletable(self, userid):
