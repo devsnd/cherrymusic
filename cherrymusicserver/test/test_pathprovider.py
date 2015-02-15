@@ -65,8 +65,10 @@ def test_base64coding():
     # check if encode and decode are inverse functions
     encode = pathprovider.base64encode
     decode = pathprovider.base64decode
-    transcoded = [decode(encode(c)) for c in teststrings]
-    assert_list_equal(teststrings, transcoded)
+    for expected in teststrings:
+        transcoded = decode(encode(expected))
+        eq_(expected, transcoded)
+
 
 if __name__ == '__main__':
     nose.runmodule()
