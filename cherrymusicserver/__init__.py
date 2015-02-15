@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # CherryMusic - a standalone music server
-# Copyright (c) 2012 - 2014 Tom Wallroth & Tilman Boerner
+# Copyright (c) 2012 - 2015 Tom Wallroth & Tilman Boerner
 #
 # Project page:
 #   http://fomori.org/cherrymusic/
@@ -171,6 +171,7 @@ from cherrymusicserver import cherrymodel
 from cherrymusicserver import database
 from cherrymusicserver import httphandler
 from cherrymusicserver import log
+from cherrymusicserver import migrations
 from cherrymusicserver import playlistdb
 from cherrymusicserver import service
 from cherrymusicserver import sqlitecache
@@ -210,14 +211,6 @@ def setup_config(override_dict=None):
 
         See :mod:`~cherrymusicserver.configuration`.
     """
-    if not pathprovider.configurationFileExists():
-        if pathprovider.fallbackPathInUse():   # temp. remove @ v0.30 or so
-            _printMigrationNotice()
-            sys.exit(1)
-        else:
-            create_default_config_file(pathprovider.configurationFile())
-            _printWelcome()
-            sys.exit(0)
     defaults = cfg.from_defaults()
     filecfg = cfg.from_configparser(pathprovider.configurationFile())
     custom = defaults.replace(filecfg, on_error=log.e)
@@ -226,6 +219,18 @@ def setup_config(override_dict=None):
     global config
     config = custom
     _notify_about_config_updates(defaults, filecfg)
+
+
+def run_general_migrations():
+    """ Runs necessary migrations for CherryMusic data that is NOT kept inside
+        of databases.
+
+        This might however include relocating the database files tmhemselves,
+        so general migrations should run before migrating the database content.
+
+        See :mod:`~cherrymusicserver.migrations`.
+    """
+    migrations.check_and_migrate_all()
 
 
 def migrate_databases():
@@ -352,13 +357,7 @@ I've you are sure that cherrymusic is not running, you can delete this file and 
         setup_services()
 
     def setup_config(self, cfg_override):
-        """create a config if
-        no configuration is found or provide migration help for old CM
-        versions
-
-        initialize the configuration if no config setup is needed/requested
-
-        .. deprecated:: > 0.34.1
+        """.. deprecated:: > 0.34.1
             Use :func:`~cherrymusicserver.setup_config` instead.
         """
         setup_config(cfg_override)
@@ -471,46 +470,6 @@ def _cm_auth_tool(httphandler):
 cherrypy.tools.cm_auth = cherrypy.Tool(
     'before_handler', _cm_auth_tool, priority=70)
     # priority=70 -->> make tool run after session is locked (at 50)
-
-
-def _printMigrationNotice():  # temp. remove @ v0.30 or so
-    print(_("""
-==========================================================================
-Oops!
-
-CherryMusic changed some file locations while you weren't looking.
-(To better comply with best practices, if you wanna know.)
-
-To continue, please move the following:
-
-    $ mv {src} {tgt}""".format(
-            src=os.path.join(pathprovider.fallbackPath(), 'config'),
-            tgt=pathprovider.configurationFile()) + """
-
-    $ mv {src} {tgt}""".format(
-            src=os.path.join(pathprovider.fallbackPath(), '*'),
-            tgt=pathprovider.getUserDataPath()) + """
-
-Thank you, and enjoy responsibly. :)
-==========================================================================
-"""))
-
-
-def _printWelcome():
-    print(_("""
-==========================================================================
-Welcome to CherryMusic """ + VERSION + """!
-
-To get this party started, you need to edit the configuration file, which
-resides under the following path:
-
-    """ + pathprovider.configurationFile() + """
-
-Then you can start the server and listen to whatever you like.
-Have fun!
-==========================================================================
-"""))
-
 
 
 def _get_user_consent_for_db_schema_update(reasons):

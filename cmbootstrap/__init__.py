@@ -1,3 +1,33 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#
+# CherryMusic - a standalone music server
+# Copyright (c) 2012-2015 Tom Wallroth & Tilman Boerner
+#
+# Project page:
+#   http://fomori.org/cherrymusic/
+# Sources on github:
+#   http://github.com/devsnd/cherrymusic/
+#
+# CherryMusic is based on
+#   jPlayer (GPL/MIT license) http://www.jplayer.org/
+#   CherryPy (BSD license) http://www.cherrypy.org/
+#
+# licensed under GNU GPL version 3 (or later)
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+#
 """
 This script is used to download cherrymusic dependencies on first startup.
 """
@@ -15,7 +45,7 @@ import os
 class DependencyInstaller:
     def __init__(self):
         self.cherrymusicfolder = os.path.dirname(os.path.dirname(__file__))
-        
+
     def install_cherrypy(self):
         """
         cherrypy releases: https://bitbucket.org/cherrypy/cherrypy/downloads
@@ -36,8 +66,8 @@ class DependencyInstaller:
         shutil.copytree(moduledir,os.path.join(self.cherrymusicfolder,'cherrypy'))
         print('Cleaning up temporary files...')
         shutil.rmtree(cherrypytempdir)
-        os.remove(cherrypytempfile)      
-    
+        os.remove(cherrypytempfile)
+
     def tmpdir(self, name):
         tempdirpath = os.path.join(tempfile.gettempdir(),name)
         if os.path.exists(tempdirpath):
@@ -49,61 +79,21 @@ class DependencyInstaller:
                 exit(1)
         os.mkdir(tempdirpath)
         return tempdirpath
-    
+
     def dl(self,url,target):
          with open(target, 'wb') as f:
             urlhandler = urllib.request.urlopen(urllib.request.Request(url))
             f.write(urlhandler.read())
 
-class Migrations(object):
-    """
-    This class contains all the workarounds required to make migrations
-    from older versions of cherrymusic to another possible. For database
-    migrations, please see the database/defs.
-    """
 
-    @classmethod
-    def check_and_perform_all(cls):
-        Migrations._osx_move_config_folder()
-
-    @classmethod
-    def _osx_move_config_folder(cls):
-        # See issue #459 cherrymusic.conf location on OS X on github.
-        # https://github.com/devsnd/cherrymusic/issues/459
-        #if not sys.platform.startswith('darwin'):
-        #    # only a osx bug
-        #    return
-        import os
-        import shutil
-        oldpath = os.path.join(os.path.expanduser('~'), 'Application Support', 'cherrymusic')
-        newpath = os.path.join(os.path.expanduser('~'), 'Library', 'Application Support', 'cherrymusic')
-        oldpath_exists = os.path.exists(oldpath)
-        newpath_exists = os.path.exists(newpath)
-        if oldpath_exists:
-            if newpath_exists:
-                # two data/conf directories, just warn and skip.
-                print("""There are two different data/config directories,
-but normally that shouldn't happen. The old and unused one is here:
-    %s
-The currently used one is here:
-    %s
-You can keep either one, and cherrymusic will figure it out on the next
-start.""" % (oldpath, newpath))
-            else:
-                # standard migration case. old one exists, but new one
-                # does not
-                print('UPDATE: Moving config/data directory to new location...')
-                shutil.move(oldpath, newpath)
-                print('UPDATE: done.')
-
-def bootstrap_and_migrate():
+def bootstrap():
     import sys
     try:
         import cherrypy
     except ImportError:
         print('''
-        CherryMusic needs the module "cherrypy" to run. You should install it 
-        using the package manager of your OS. Alternatively cherrymusic can 
+        CherryMusic needs the module "cherrypy" to run. You should install it
+        using the package manager of your OS. Alternatively cherrymusic can
         download it for you and put it in the folder in which currently
         CherryMusic resides.
         ''')
@@ -113,4 +103,3 @@ def bootstrap_and_migrate():
             print('Successfully installed cherrymusic dependencies! You can now start cherrymusic.')
         else:
             sys.exit(1)
-    Migrations.check_and_perform_all()

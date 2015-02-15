@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # CherryMusic - a standalone music server
-# Copyright (c) 2012 - 2014 Tom Wallroth & Tilman Boerner
+# Copyright (c) 2012 - 2015 Tom Wallroth & Tilman Boerner
 #
 # Project page:
 #   http://fomori.org/cherrymusic/
@@ -29,8 +29,23 @@
 #
 
 import cmbootstrap
-cmbootstrap.bootstrap_and_migrate()
+cmbootstrap.bootstrap()
 import cherrymusicserver
+
+
+welcomeMessage = _("""
+==========================================================================
+Welcome to CherryMusic """ + cherrymusicserver.VERSION + """!
+
+To get this party started, you need to edit the configuration file, which
+resides under the following path:
+
+    """ + cherrymusicserver.pathprovider.configurationFile() + """
+
+Then you can start the server and listen to whatever you like.
+Have fun!
+==========================================================================
+""")
 
 
 class ConfigOptionsBase(object):
@@ -166,6 +181,8 @@ if __name__ == "__main__":
         print(cherrymusicserver.version())
         sys.exit(0)
 
+    cherrymusicserver.run_general_migrations()
+
     if args.newconfig:
         filepath = cherrymusicserver.pathprovider.configurationFile() + '.new'
         cherrymusicserver.create_default_config_file(filepath)
@@ -176,6 +193,12 @@ if __name__ == "__main__":
         port = ConfigOptions.configdict.pop('server.port', False)
         from cherrymusicserver import browsersetup
         browsersetup.configureAndStartCherryPy(port) # blocks until config saved
+
+    if not cherrymusicserver.pathprovider.configurationFileExists():
+        filepath = cherrymusicserver.pathprovider.configurationFile()
+        cherrymusicserver.create_default_config_file(filepath)
+        print(welcomeMessage)
+        exit(0)
 
     cherrymusicserver.setup_config(ConfigOptions.configdict)
     cherrymusicserver.setup_services()
