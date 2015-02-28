@@ -31,10 +31,11 @@
 
 import nose
 
-#from mock import *
+from mock import *
 from nose.tools import *
 
 import os.path
+import re
 
 from cherrymusicserver import log
 log.setTest()
@@ -48,27 +49,12 @@ def test_absOrConfigPath():
     eq_(abspath, pathprovider.absOrConfigPath(abspath))
 
 
-def test_base64coding():
-    """ base64encode and base64decode must satisfy `decode(encode(x)) == x` """
-    from base64 import b64encode
-    from functools import reduce
-    from backport import unichr  # py2 compat
-
-    # quick and dirty: list of strings that use whole base64 alphabet in utf-8
-    teststrings = [unichr(i) for i in range(2**12)]
-
-    # check if test set is complete
-    b64test = (b64encode(c.encode('utf-8')) for c in teststrings)
-    b64chars = reduce(set.union, b64test, set())
-    eq_(65, len(b64chars), "Whole base64 alphabet must be used in test set")
-
-    # check if encode and decode are inverse functions
-    encode = pathprovider.base64encode
-    decode = pathprovider.base64decode
-    for expected in teststrings:
-        transcoded = decode(encode(expected))
-        eq_(expected, transcoded)
-
+def test_albumArtFilePath():
+    """albumArtFilePath contains md5-filename, or no filename with empty argument"""
+    testpath = pathprovider.albumArtFilePath('a/s/d')
+    artfolder, filename = os.path.split(testpath)
+    ok_(re.match(r'^[0-9a-fA-F]{32}\.thumb$', filename), filename)
+    eq_(artfolder, pathprovider.albumArtFilePath('').rstrip(os.path.sep))
 
 if __name__ == '__main__':
     nose.runmodule()

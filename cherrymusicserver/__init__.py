@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # CherryMusic - a standalone music server
-# Copyright (c) 2012 - 2014 Tom Wallroth & Tilman Boerner
+# Copyright (c) 2012 - 2015 Tom Wallroth & Tilman Boerner
 #
 # Project page:
 #   http://fomori.org/cherrymusic/
@@ -171,24 +171,129 @@ from cherrymusicserver import cherrymodel
 from cherrymusicserver import database
 from cherrymusicserver import httphandler
 from cherrymusicserver import log
+from cherrymusicserver import migrations
 from cherrymusicserver import playlistdb
 from cherrymusicserver import service
 from cherrymusicserver import sqlitecache
 from cherrymusicserver import userdb
 from cherrymusicserver import useroptiondb
 from cherrymusicserver import api
-import cherrymusicserver.browsersetup
 
 import audiotranscode
 MEDIA_MIMETYPES = audiotranscode.MIMETYPES.copy()
 del audiotranscode
 
+
+def setup_services():
+    """ services can be used by other parts of the program to easily access
+        different functions of cherrymusic by registering themselves as
+        service.user
+
+        See :mod:`~cherrymusicserver.services`.
+    """
+    service.provide('filecache', sqlitecache.SQLiteCache)
+    service.provide('cherrymodel', cherrymodel.CherryModel)
+    service.provide('playlist', playlistdb.PlaylistDB)
+    service.provide('users', userdb.UserDB)
+    service.provide('useroptions', useroptiondb.UserOptionDB)
+    service.provide('dbconnector', database.sql.SQLiteConnector, kwargs={
+        'datadir': pathprovider.databaseFilePath(''),
+        'extension': 'db',
+        'connargs': {'check_same_thread': False},
+    })
+
+
+def setup_config(override_dict=None):
+    """ Updates the internal configuration using the following hierarchy:
+        override_dict > file_config > default_config
+
+        Notifies the user if there are new or deprecated configuration keys.
+
+        See :mod:`~cherrymusicserver.configuration`.
+    """
+    defaults = cfg.from_defaults()
+    filecfg = cfg.from_configparser(pathprovider.configurationFile())
+    custom = defaults.replace(filecfg, on_error=log.e)
+    if override_dict:
+        custom = custom.replace(override_dict, on_error=log.e)
+    global config
+    config = custom
+    _notify_about_config_updates(defaults, filecfg)
+
+
+def run_general_migrations():
+    """ Runs necessary migrations for CherryMusic data that is NOT kept inside
+        of databases.
+
+        This might however include relocating the database files tmhemselves,
+        so general migrations should run before migrating the database content.
+
+        See :mod:`~cherrymusicserver.migrations`.
+    """
+    migrations.check_and_migrate_all()
+
+
+def migrate_databases():
+    """ Makes sure CherryMusic's databases are up to date, migrating them if
+        necessary.
+
+        This might prompt the user for consent if a migration requires it and
+        terminate the program if no consent is obtained.
+
+        See :mod:`~cherrymusicserver.databases`.
+    """
+    db_is_ready = database.ensure_current_version(
+        consentcallback=_get_user_consent_for_db_schema_update)
+    if not db_is_ready:
+        log.i(_("database schema update aborted. quitting."))
+        sys.exit(1)
+
+
+def start_server(cfg_override=None):
+    """ Initializes and starts the CherryMusic server
+
+        Args:
+            cfg_override: A mapping of config keys to values to override those
+                in the config file.
+    """
+    CherryMusic(cfg_override)
+
+
+def create_user(username, password):
+    """ Creates a non-admin user with given username and password """
+    non_alnum = re.compile('[^a-z0-9]', re.IGNORECASE)
+    if non_alnum.findall(username) or non_alnum.findall(password):
+        log.e(_('username and password may only contain english letters'
+                ' and digits'))
+        return False
+    return service.get('users').addUser(username, password, admin=False)
+
+
+def update_filedb(paths):
+    """ Updates the file database in a separate thread,
+        possibly limited to a sequence of paths inside media.basedir
+
+        See :cls:`~cherrymusicserver.sqlitecache.SQLiteCache` methods
+        :meth:`~cherrymusicserver.sqlitecache.SQLiteCache.full_update` and
+        :meth:`~cherrymusicserver.sqlitecache.SQLiteCache.parital_update`.
+    """
+    cache = sqlitecache.SQLiteCache()
+    target = cache.partial_update if paths else cache.full_update
+    updater = threading.Thread(name='Updater', target=target, args=paths)
+    updater.start()
+
+
+def create_default_config_file(path):
+    """ Creates or overwrites a default configuration file at `path` """
+    cfg.write_to_file(cfg.from_defaults(), path)
+    log.i(_('Default configuration file written to %(path)r'), {'path': path})
+
+
 class CherryMusic:
     """Sets up services (configuration, database, etc) and starts the server"""
-    def __init__(self, update=None, createNewConfig=False, dropfiledb=False,
-                 setup=False, cfg_override={}, adduser=None):
-        self.setup_services()
-        self.setup_config(createNewConfig, setup, cfg_override)
+    def __init__(self, cfg_override=None):
+        self.setup_config(cfg_override)
+        setup_services()
 
         if config['media.basedir'] is None:
             print(_("Invalid basedir. Please provide a valid basedir path."))
@@ -200,23 +305,18 @@ class CherryMusic:
         signal.signal(signal.SIGINT, CherryMusic.stopAndCleanUp)
         if os.name == 'posix':
             signal.signal(signal.SIGHUP, CherryMusic.stopAndCleanUp)
-        if adduser:
-            if CherryMusic.createUser(adduser):
-                sys.exit(0)
-            else:
-                sys.exit(1)
-        self.setup_databases(update, dropfiledb, setup)
+
         CherryMusic.create_pid_file()
         self.start_server(httphandler.HTTPHandler(config))
         CherryMusic.delete_pid_file()
 
     @classmethod
     def createUser(cls, credentials):
+        """ .. deprecated:: > 0.34.1
+                Use :func:`~cherrymusicserver.create_user` instead.
+        """
         username, password = credentials
-        alphanum = re.compile('[^a-z0-9]', re.IGNORECASE)
-        if alphanum.findall(username) or alphanum.findall(password):
-            return False
-        return service.get('users').addUser(username, password, False)
+        return create_user(username, password)
 
     @classmethod
     def stopAndCleanUp(cls, signal=None, stackframe=None):
@@ -250,184 +350,25 @@ I've you are sure that cherrymusic is not running, you can delete this file and 
         """setup services: they can be used by other parts of the program
         to easily access different functions of cherrymusic by registering
         themselves as service.user
+
+        .. deprecated:: > 0.34.1
+            Use :func:`~cherrymusicserver.setup_services` instead.
         """
-        service.provide('filecache', sqlitecache.SQLiteCache)
-        service.provide('cherrymodel', cherrymodel.CherryModel)
-        service.provide('playlist', playlistdb.PlaylistDB)
-        service.provide('users', userdb.UserDB)
-        service.provide('useroptions', useroptiondb.UserOptionDB)
-        service.provide('dbconnector', database.sql.SQLiteConnector, kwargs={
-            'datadir': pathprovider.databaseFilePath(''),
-            'extension': 'db',
-            'connargs': {'check_same_thread': False},
-        })
+        setup_services()
 
-    def setup_config(self, createNewConfig, browsersetup, cfg_override):
-        """start the in-browser configuration server, create a config if
-        no configuration is found or provide migration help for old CM
-        versions
-
-        initialize the configuration if no config setup is needed/requested
+    def setup_config(self, cfg_override):
+        """.. deprecated:: > 0.34.1
+            Use :func:`~cherrymusicserver.setup_config` instead.
         """
-        if browsersetup:
-            port = cfg_override.pop('server.port', False)
-            cherrymusicserver.browsersetup.configureAndStartCherryPy(port)
-        if createNewConfig:
-            newconfigpath = pathprovider.configurationFile() + '.new'
-            cfg.write_to_file(cfg.from_defaults(), newconfigpath)
-            log.i(_('New configuration file was written to:{br}{path}').format(
-                path=newconfigpath,
-                br=os.linesep
-            ))
-            sys.exit(0)
-        if not pathprovider.configurationFileExists():
-            if pathprovider.fallbackPathInUse():   # temp. remove @ v0.30 or so
-                self.printMigrationNoticeAndExit()
-            else:
-                cfg.write_to_file(cfg.from_defaults(), pathprovider.configurationFile())
-                self.printWelcomeAndExit()
-        self._init_config(cfg_override)
+        setup_config(cfg_override)
 
-    def setup_databases(self, update, dropfiledb, setup):
-        """ delete or update the file db if so requested.
-        check if the db schema is up to date
-        """
-        if dropfiledb:
-            update = ()
-            database.resetdb(sqlitecache.DBNAME)
-        if setup:
-            update = update or ()
-        db_is_ready = database.ensure_current_version(
-            consentcallback=self._get_user_consent_for_db_schema_update)
-        if not db_is_ready:
-            log.i(_("database schema update aborted. quitting."))
-            sys.exit(1)
-        if update is not None:
-            cacheupdate = threading.Thread(name="Updater",
-                                           target=self._update_if_necessary,
-                                           args=(update,))
-            cacheupdate.start()
-            # self._update_if_necessary(update)
-            if not setup:
-                CherryMusic.stopAndCleanUp()
+    def setup_databases(self):
+        """ check if the db schema is up to date
 
-    @staticmethod
-    def _get_user_consent_for_db_schema_update(reasons):
-        """Ask the user if the database schema update should happen now
-        """
-        import textwrap
-        wrap = lambda r: os.linesep.join(
-            textwrap.wrap(r, initial_indent=' - ', subsequent_indent="   "))
-        msg = _("""
-==========================================================================
-A database schema update is needed and requires your consent.
-
-{reasons}
-
-To continue without changes, you need to downgrade to an earlier
-version of CherryMusic.
-
-To backup your database files first, abort for now and find them here:
-
-{dblocation}
-
-==========================================================================
-Run schema update? [y/N]: """).format(
-            reasons=(2 * os.linesep).join(wrap(r) for r in reasons),
-            dblocation='\t' + pathprovider.databaseFilePath(''))
-        return input(msg).lower().strip() in ('y',)
-
-    def _update_if_necessary(self, update):
-        """perform a database update if update (a list of paths to update is
-        not None. If update is an empty list, perform a full update instead
-        of a partial update
-        """
-        cache = sqlitecache.SQLiteCache()
-        if update:
-            cache.partial_update(*update)
-        elif update is not None:
-            cache.full_update()
-
-    def _init_config(self, override_dict):
-        """update the internal configuration using the following hierarchy:
-        command_line_config > file_config > default_config
-
-        check if there are new or deprecated configuration keys in the config
-        file
-        """
-        defaults = cfg.from_defaults()
-        filecfg = cfg.from_configparser(pathprovider.configurationFile())
-        custom = defaults.replace(filecfg, on_error=log.e)
-        global config
-        config = custom.replace(override_dict, on_error=log.e)
-        self._check_for_config_updates(defaults, filecfg)
-
-    def _check_for_config_updates(self, default, known_config):
-        """check if there are new or deprecated configuration keys in
-        the config file
-        """
-        new = []
-        deprecated = []
-        transform = lambda s: '[{0}]: {2}'.format(*(s.partition('.')))
-
-        for property in cfg.to_list(default):
-            if property.key not in known_config and not property.hidden:
-                new.append(transform(property.key))
-        for property in cfg.to_list(known_config):
-            if property.key not in default:
-                deprecated.append(transform(property.key))
-
-        if new:
-            log.i(_('''New configuration options available:
-                        %s
-                    Using default values for now.'''),
-                  '\n\t\t\t'.join(new))
-        if deprecated:
-            log.i(_('''The following configuration options are not used anymore:
-                        %s'''),
-                  '\n\t\t\t'.join(deprecated))
-        if new or deprecated:
-            log.i(_('Start with --newconfig to generate a new default config'
-                    ' file next to your current one.'))
-
-    def printMigrationNoticeAndExit(self):  # temp. remove @ v0.30 or so
-        print(_("""
-==========================================================================
-Oops!
-
-CherryMusic changed some file locations while you weren't looking.
-(To better comply with best practices, if you wanna know.)
-
-To continue, please move the following:
-
-    $ mv {src} {tgt}""".format(
-            src=os.path.join(pathprovider.fallbackPath(), 'config'),
-            tgt=pathprovider.configurationFile()) + """
-
-    $ mv {src} {tgt}""".format(
-            src=os.path.join(pathprovider.fallbackPath(), '*'),
-            tgt=pathprovider.getUserDataPath()) + """
-
-Thank you, and enjoy responsibly. :)
-==========================================================================
-"""))
-        sys.exit(1)
-
-    def printWelcomeAndExit(self):
-        print(_("""
-==========================================================================
-Welcome to CherryMusic """ + VERSION + """!
-
-To get this party started, you need to edit the configuration file, which
-resides under the following path:
-
-    """ + pathprovider.configurationFile() + """
-
-Then you can start the server and listen to whatever you like.
-Have fun!
-==========================================================================
-"""))
-        sys.exit(0)
+        .. deprecated:: > 0.34.1
+            Use :func:`~cherrymusicserver.migrate_databases` instead.
+         """
+        migrate_databases()
 
     def start_server(self, httphandler):
         """use the configuration to setup and start the cherrypy server
@@ -531,7 +472,65 @@ cherrypy.tools.cm_auth = cherrypy.Tool(
     # priority=70 -->> make tool run after session is locked (at 50)
 
 
+def _get_user_consent_for_db_schema_update(reasons):
+    """Ask the user if the database schema update should happen now
+    """
+    import textwrap
+    wrap = lambda r: os.linesep.join(
+        textwrap.wrap(r, initial_indent=' - ', subsequent_indent="   "))
+    msg = _("""
+==========================================================================
+A database schema update is needed and requires your consent.
+
+{reasons}
+
+To continue without changes, you need to downgrade to an earlier
+version of CherryMusic.
+
+To backup your database files first, abort for now and find them here:
+
+{dblocation}
+
+==========================================================================
+Run schema update? [y/N]: """).format(
+        reasons=(2 * os.linesep).join(wrap(r) for r in reasons),
+        dblocation='\t' + pathprovider.databaseFilePath(''))
+    return input(msg).lower().strip() in ('y',)
+
+
+def _notify_about_config_updates(default, known_config):
+    """check if there are new or deprecated configuration keys in
+    the config file
+    """
+    new = []
+    deprecated = []
+    transform = lambda s: '[{0}]: {2}'.format(*(s.partition('.')))
+
+    for property in cfg.to_list(default):
+        if property.key not in known_config and not property.hidden:
+            new.append(transform(property.key))
+    for property in cfg.to_list(known_config):
+        if property.key not in default:
+            deprecated.append(transform(property.key))
+
+    if new:
+        log.i(_('''New configuration options available:
+                    %s
+                Using default values for now.'''),
+              '\n\t\t\t'.join(new))
+    if deprecated:
+        log.i(_('''The following configuration options are not used anymore:
+                    %s'''),
+              '\n\t\t\t'.join(deprecated))
+    if new or deprecated:
+        log.i(_('Start with --newconfig to generate a new default config'
+                ' file next to your current one.'))
+
+
 def _get_version_from_git():
+    """ Returns more precise version string based on the current git HEAD,
+        or None if not possible.
+    """
     import re
     from subprocess import Popen, PIPE
     cmd = {
