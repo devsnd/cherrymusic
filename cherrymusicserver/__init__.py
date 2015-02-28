@@ -329,13 +329,18 @@ class CherryMusic:
     def create_pid_file(cls):
         """create a process id file, exit if it already exists"""
         if pathprovider.pidFileExists():
-            sys.exit(_("""============================================
+            with open(pathprovider.pidFile(), 'r') as pidfile:
+                try:
+                    os.getpgid(int(pidfile.read()))
+                    sys.exit(_("""============================================
 Process id file %s already exists.
 I've you are sure that cherrymusic is not running, you can delete this file and restart cherrymusic.
 ============================================""") % pathprovider.pidFile())
-        else:
-            with open(pathprovider.pidFile(), 'w') as pidfile:
-                pidfile.write(str(os.getpid()))
+                except ProcessLookupError:
+                    print('Stale process id file, removing.')
+                    cls.delete_pid_file()
+        with open(pathprovider.pidFile(), 'w') as pidfile:
+            pidfile.write(str(os.getpid()))
 
     @classmethod
     def delete_pid_file(cls):
