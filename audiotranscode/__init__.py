@@ -37,6 +37,7 @@ MIMETYPES = {
     'm4a': 'audio/m4a',
     'wav': 'audio/wav',
     'wma' : 'audio/x-ms-wma',
+    'opus': 'audio/ogg; codecs=opus',
 }
 
 
@@ -189,6 +190,7 @@ class AudioTranscode:
         Decoder('aac', ['faad', '-w', 'INPUT']),
         Decoder('m4a', ['faad', '-w', 'INPUT']),
         Decoder('wav', ['cat', 'INPUT']),
+        Decoder('opus', ['opusdec', 'INPUT', '--force-wav', '--quiet', '-']),
     ]
 
     def __init__(self, debug=False):
