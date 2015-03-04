@@ -198,7 +198,7 @@ if __name__ == "__main__":
         filepath = cherrymusicserver.pathprovider.configurationFile()
         cherrymusicserver.create_default_config_file(filepath)
         print(welcomeMessage)
-        exit(0)
+        sys.exit(0)
 
     cherrymusicserver.setup_config(ConfigOptions.configdict)
     cherrymusicserver.setup_services()
