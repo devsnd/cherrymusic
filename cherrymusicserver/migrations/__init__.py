@@ -60,16 +60,18 @@ def check_and_migrate_all():
 
         The program can sys.exit if manual intervention is required.
     """
-    for migration in load_migrations():
+    for migration in iter_load_migrations():
         migration.do()
 
 
-def load_migrations():
-    """ Loads and returns all migration modules in alphabetical order """
+def iter_load_migrations():
+    """ Generator which imports and returns all migration modules in
+        alphabetical order.
+    """
     itermods = pkgutil.iter_modules([_MIGRATIONS_PATH])
     modnames = sorted(name for _, name, ispkg in itermods
         if not ispkg and _NAME_PATTERN.match(name))
-    return [_import_migration(name) for name in modnames]
+    return (_import_migration(name) for name in modnames)
 
 
 def _import_migration(modulename):
