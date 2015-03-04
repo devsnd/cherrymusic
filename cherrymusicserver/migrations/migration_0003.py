@@ -65,7 +65,7 @@ To abort the migration and lose the unmigrated album art:
 """.format(suffix=_MIGRATION_SUFFIX, donefile=_DONE_FILE)
 
 
-def do():
+def migrate():
     """ Migrate if necessary, exit(1) on error """
     artfolder = pathprovider.albumArtFilePath('')
     hashpathfile = os.path.join(artfolder, _DONE_FILE)
@@ -143,4 +143,4 @@ def _base64decode(s):
 
 
 if __name__ == "__main__":   # pragma: no cover
-    do()
+    migrate()

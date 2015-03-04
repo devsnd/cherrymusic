@@ -40,7 +40,7 @@ from __future__ import unicode_literals
 import os
 import shutil
 
-def do():
+def migrate():
     oldpath = os.path.join(os.path.expanduser('~'), 'Application Support', 'cherrymusic')
     newpath = os.path.join(os.path.expanduser('~'), 'Library', 'Application Support', 'cherrymusic')
     oldpath_exists = os.path.exists(oldpath)

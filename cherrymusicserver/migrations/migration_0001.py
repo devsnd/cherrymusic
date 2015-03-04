@@ -41,7 +41,7 @@ import sys
 
 from cherrymusicserver import pathprovider
 
-def do():
+def migrate():
     """If config file is still in old location, print a message and exit(1)"""
     if pathprovider.configurationFileExists() or not pathprovider.fallbackPathInUse():
         return

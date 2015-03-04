@@ -76,7 +76,7 @@ def check_filelist(startnames, wantnames):
             helpers.mkpath(name, artfolder)
 
         with patch('cherrymusicserver.pathprovider.albumArtFilePath', _mock_artpath(artfolder)):
-            migration_0003.do()
+            migration_0003.migrate()
 
         expected, result = sorted(wantnames), sorted(os.listdir(artfolder))
         eq_(expected, result, '\n%r\n%r' % (expected, result))

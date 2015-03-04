@@ -34,7 +34,7 @@
     A migration is a module named `migration_nnnn` , where `nnnn` is one of a
     series of consecutive integers starting with `0001`.
 
-    A migration has a `do()` function which will be called to execute the
+    A migration has a `migrate()` function which will be called to execute the
     migration; the function is expected to decide whether the migration should
     be carried out or not. If a migration requires manual intervention or needs
     to be aborted for any reason, the function should print an actionable error
@@ -61,7 +61,7 @@ def check_and_migrate_all():
         The program can sys.exit if manual intervention is required.
     """
     for migration in iter_load_migrations():
-        migration.do()
+        migration.migrate()
 
 
 def iter_load_migrations():
@@ -77,6 +77,6 @@ def iter_load_migrations():
 def _import_migration(modulename):
     qualname = 'cherrymusicserver.migrations.' + modulename
     mig = __import__(qualname, fromlist='dummy')
-    if not callable(getattr(mig, 'do', None)):
-        raise TypeError('Migration needs a `do` function: ' + mig.__name__)
+    if not callable(getattr(mig, 'migrate', None)):
+        raise TypeError('Migration needs a `migrate` function: ' + mig.__name__)
     return mig
