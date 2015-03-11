@@ -671,6 +671,7 @@ PlaylistManager.prototype = {
         return false;
     },
     clearQueue : function(){
+      this.cmd_stop();
       this.managedPlaylists[0].jplayerplaylist.remove();
       this.refreshCommands();
       $(this).blur();
