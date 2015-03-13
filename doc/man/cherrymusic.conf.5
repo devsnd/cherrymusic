@@ -86,6 +86,9 @@ This is the path to the SSL key that CherryMusic will use for SSL encryption. To
 .IP "\fB    update_notification = True | False\fP"
 If enabled, admins are notified about available security and feature updates when logging on in the web interface.
 
+.IP "\fB    get_version_from_git = True | False\fP"
+If enabled, attempts to get a more precise version string based on the current git HEAD
+
 .SH "FILES"
 According to XDG Base Directory Specification, CherryMusic honors $XDG_CONFIG_HOME. If this variable is empty or not set, the configuration file is stored using the standard path:
 

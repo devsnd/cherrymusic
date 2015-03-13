@@ -202,6 +202,15 @@ def setup_services():
         'connargs': {'check_same_thread': False},
     })
 
+def update_config():
+    """ Updates the internal configuration using the following hierarchy:
+        file_config > default_config
+
+        See :mod:`~cherrymusicserver.configuration`.
+    """
+    defaults = cfg.from_defaults()
+    filecfg = cfg.from_configparser(pathprovider.configurationFile())
+    return defaults.replace(filecfg, on_error=log.e)
 
 def setup_config(override_dict=None):
     """ Updates the internal configuration using the following hierarchy:
@@ -211,9 +220,7 @@ def setup_config(override_dict=None):
 
         See :mod:`~cherrymusicserver.configuration`.
     """
-    defaults = cfg.from_defaults()
-    filecfg = cfg.from_configparser(pathprovider.configurationFile())
-    custom = defaults.replace(filecfg, on_error=log.e)
+    custom = update_config()
     if override_dict:
         custom = custom.replace(override_dict, on_error=log.e)
     global config
@@ -536,6 +543,9 @@ def _get_version_from_git():
     """ Returns more precise version string based on the current git HEAD,
         or None if not possible.
     """
+    config = update_config()
+    if config['general.get_version_from_git'] == False:
+        return None
     import re
     from subprocess import Popen, PIPE
     cmd = {

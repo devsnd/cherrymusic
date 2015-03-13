@@ -266,6 +266,14 @@ def from_defaults():
                     Notify admins about available security and feature updates.
                             ''')
 
+    with c['general.get_version_from_git'] as get_version_from_git:
+        get_version_from_git.value = True
+        # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+        get_version_from_git.doc = _('''
+                    Get a more precise version string based on the current git HEAD.
+                            ''')
+
+
     return c.to_configuration()
 
 
