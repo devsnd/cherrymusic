@@ -210,7 +210,10 @@ def update_config():
     """
     defaults = cfg.from_defaults()
     filecfg = cfg.from_configparser(pathprovider.configurationFile())
-    return defaults.replace(filecfg, on_error=log.e)
+    if filecfg is not None:
+        return defaults.replace(filecfg, on_error=log.e)
+    else:
+        return defaults
 
 def setup_config(override_dict=None):
     """ Updates the internal configuration using the following hierarchy:
