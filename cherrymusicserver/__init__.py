@@ -551,8 +551,6 @@ def _get_version_from_git():
     if os.path.exists('.git') == False:
 	return None
     config = update_config()
-    if config['general.get_version_from_git'] == False:
-        return None
     def fetch(cmdname):
         import re
         from subprocess import Popen, PIPE
