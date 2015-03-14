@@ -549,7 +549,7 @@ def _get_version_from_git():
         or None if not possible.
     """
     if os.path.exists('.git') == False:
-	return None
+        return None
     config = update_config()
     def fetch(cmdname):
         import re
@@ -566,7 +566,7 @@ def _get_version_from_git():
             try:
                 devnull = open(os.devnull, 'w')
                 p = Popen(cmd[cmdname], stdout=PIPE, stderr=devnull)
-	        out, err = p.communicate()
+                out, err = p.communicate()
             except:
                 return None
             finally:
