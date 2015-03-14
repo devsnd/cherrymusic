@@ -209,9 +209,11 @@ def update_config():
         See :mod:`~cherrymusicserver.configuration`.
     """
     defaults = cfg.from_defaults()
-    filecfg = cfg.from_configparser(pathprovider.configurationFile())
-    _notify_about_config_updates(defaults, filecfg)
+    configfile = pathprovider.configurationFile()
+    if configfile is not None:
+        filecfg = cfg.from_configparser(pathprovider.configurationFile())
     if filecfg is not None:
+        _notify_about_config_updates(defaults, filecfg)
         return defaults.replace(filecfg, on_error=log.e)
     else:
         return defaults
