@@ -32,12 +32,12 @@ var browser = detectBrowser();
 if(['msie','safari'].indexOf(browser) != -1){
     var encoderPreferenceOrder = ['mp3','ogg'];
 } else {
-    var encoderPreferenceOrder = ['ogg','mp3'];
+    var encoderPreferenceOrder = ['opus', 'ogg','mp3'];
 }
 
 var SERVER_CONFIG = {};
 var availableEncoders = undefined;
-var availablejPlayerFormats = ['mp3','ogg'];
+var availablejPlayerFormats = ['opus', 'mp3','ogg'];
 var availableDecoders = undefined;
 var transcodingEnabled = undefined;
 var userOptions = undefined;
@@ -266,7 +266,7 @@ var handle_useroption_force_transcode_bitrate = function() {
         $(selected).attr('selected', 'selected');
         $(deselected).removeAttr('selected');
         $("#media-force_transcode_to_bitrate-display").val(forced_bitrate);
-        if([0, 96, 128, 320].indexOf(forced_bitrate) < 0) {
+        if([0, 48, 64, 96, 128, 320].indexOf(forced_bitrate) < 0) {
             console.log("Unknown bitrate value:", forced_bitrate);
         }
     } else {
@@ -382,6 +382,7 @@ ext2jPlayerFormat = function(ext){
         case "mp3": return "mp3";
 
         case "ogg":
+        case "opus":
         case "oga": return "oga";
 
         case "m4a":

@@ -70,7 +70,7 @@ class UserOptionDB:
             may_download.value = False
         with c['media.force_transcode_to_bitrate'] as force_transcode:
             force_transcode.value = 0
-            force_transcode.valid = '0|96|128|320'
+            force_transcode.valid = '0|48|64|96|128|320'
         with c['ui.confirm_quit_dialog'] as confirm_quit_dialog:
             confirm_quit_dialog.value = True
         with c['ui.display_album_art'] as display_album_art:
