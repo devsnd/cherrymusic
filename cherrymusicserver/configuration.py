@@ -266,6 +266,7 @@ def from_defaults():
                     Notify admins about available security and feature updates.
                             ''')
 
+
     return c.to_configuration()
 
 
