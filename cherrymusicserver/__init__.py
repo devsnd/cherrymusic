@@ -558,15 +558,28 @@ def _get_version_from_git():
             'date': ['git', 'log', '-1', '--format=%cd'],
         }
         unwanted_characters = re.compile('[^\w.-]+')
-        try:
-            with open(os.devnull, 'w') as devnull:
-                with Popen(cmd[cmdname], stdout=PIPE, stderr=devnull) as p:
-                    out, err = p.communicate()
-                    out = out.decode('ascii', 'ignore').strip()
-                    out = unwanted_characters.sub('', out)
-                    return out
-        except:
-            return None
+        out = None
+        err = None
+        if sys.hexversion < 0x30200F0: # Popen does not have context manager support before Python 3.2.
+            try:
+                devnull = open(os.devnull, 'w')
+                p = Popen(cmd[cmdname], stdout=PIPE, stderr=devnull)
+	        out, err = p.communicate()
+            except:
+                return None
+            finally:
+                devnull.close()
+        else:
+            try:
+                with open(os.devnull, 'w') as devnull:
+                    with Popen(cmd[cmdname], stdout=PIPE, stderr=devnull) as p:
+                        out, err = p.communicate()
+            except:
+                return None
+        if out is not None:
+            out = out.decode('ascii', 'ignore').strip()
+            out = unwanted_characters.sub('', out)
+        return out
     branch = fetch('branch')
     version = fetch('version')
     if not branch and not version or '-' not in version:
