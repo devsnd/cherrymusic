@@ -546,6 +546,8 @@ def _get_version_from_git():
     """ Returns more precise version string based on the current git HEAD,
         or None if not possible.
     """
+    if os.path.exists('.git') == False:
+	return None
     config = update_config()
     if config['general.get_version_from_git'] == False:
         return None
