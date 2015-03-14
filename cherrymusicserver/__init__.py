@@ -210,6 +210,7 @@ def update_config():
     """
     defaults = cfg.from_defaults()
     filecfg = cfg.from_configparser(pathprovider.configurationFile())
+    _notify_about_config_updates(defaults, filecfg)
     if filecfg is not None:
         return defaults.replace(filecfg, on_error=log.e)
     else:
@@ -228,7 +229,6 @@ def setup_config(override_dict=None):
         custom = custom.replace(override_dict, on_error=log.e)
     global config
     config = custom
-    _notify_about_config_updates(defaults, filecfg)
 
 
 def run_general_migrations():
