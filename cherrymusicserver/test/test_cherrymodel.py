@@ -35,7 +35,7 @@ import os
 from mock import *
 from nose.tools import *
 
-from cherrymusicserver.test.helpers import cherrytest, tempdir, mkpath, cherryconfig
+from cherrymusicserver.test.helpers import cherrytest, tempdir, mkpath, cherryconfig, symlinktest
 
 from cherrymusicserver import log
 log.setTest()
@@ -91,6 +91,7 @@ def test_listdir_deleted_files(cache):
     eq_([], model.listdir(''))
 
 
+@symlinktest
 @cherrytest(config({'browser.pure_database_lookup': False}))
 def test_listdir_bad_symlinks():
     "cherrymodel.listdir should work when cached files don't exist anymore"
