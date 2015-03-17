@@ -538,28 +538,32 @@ def _get_version_from_git():
     """
     if os.path.exists('.git') == False:
         return None
-    import re
-    from subprocess import Popen, PIPE
-    cmd = {
-        'branch': ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-        'version': ['git', 'describe', '--tags'],
-        'date': ['git', 'log', '-1', '--format=%cd'],
-    }
     def fetch(cmdname):
+        import re
+        from subprocess import Popen, PIPE
+        cmd = {
+            'branch': ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+            'version': ['git', 'describe', '--tags'],
+            'date': ['git', 'log', '-1', '--format=%cd'],
+        }
         unwanted_characters = re.compile('[^\w.-]+')
-        with open(os.devnull, 'w') as devnull:
-            with Popen(cmd[cmdname], stdout=PIPE, stderr=devnull) as p:
-                out, err = p.communicate()
-        out = out.decode('ascii', 'ignore').strip()
-        return unwanted_characters.sub('', out)
-    try:
-        branch = fetch('branch')
-        version = fetch('version')
-        version, patchlevel = version.split('-', 1)     # must fail if no patchlevel
-        assert version == VERSION
-    except:
+        try:
+            with open(os.devnull, 'w') as devnull:
+                with Popen(cmd[cmdname], stdout=PIPE, stderr=devnull) as p:
+                    out, err = p.communicate()
+                    out = out.decode('ascii', 'ignore').strip()
+                    return unwanted_characters.sub('', out)
+        except:
+            return None
+    branch = fetch('branch')
+    version = fetch('version')
+    if not branch and not version or '-' not in version:
         return None
     else:
-        return '{0}+{1}-{2}'.format(version, branch, patchlevel)
+        version, patchlevel = version.split('-', 1)
+        if version != VERSION:
+            return None
+        else:
+            return '{0}+{1}-{2}'.format(version, branch, patchlevel)
 
 REPO_VERSION = _get_version_from_git()
