@@ -536,6 +536,8 @@ def _get_version_from_git():
     """ Returns more precise version string based on the current git HEAD,
         or None if not possible.
     """
+    if os.path.exists('.git') == False:
+        return None
     import re
     from subprocess import Popen, PIPE
     cmd = {
