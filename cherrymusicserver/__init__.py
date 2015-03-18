@@ -562,7 +562,7 @@ def _get_version_from_git():
             try:
                 with open(os.devnull, 'w') as devnull:
                     with Popen(cmd[cmdname], stdout=PIPE, stderr=devnull) as p:
-                    out, err = p.communicate()
+                        out, err = p.communicate()
             except:
                 return None
         if out is not None:
