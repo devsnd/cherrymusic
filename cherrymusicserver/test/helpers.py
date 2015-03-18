@@ -130,3 +130,29 @@ def cherrytest(config=None, dbconnector=None):
         return wrapper
     return decorator
 
+
+def symlinktest(func):
+    ''' Decorator that returns a no-op function if symlinks are not supported '''
+    if can_symlink():
+        return func
+    return lambda *a, **kw: None
+
+
+def can_symlink():
+    ''' Returns True if the OS environment allows symlinking '''
+    global __can_symlink
+    try:
+        ok = __can_symlink
+    except NameError:
+        # actually try to symlink instead of ruling out entire OS families
+        with tempdir('cherrymusic_symlinktest') as tmpd:
+            try:
+                os.symlink(tmpd, os.path.join(tmpd, 'symlink'))
+            except (NameError, NotImplementedError, OSError):
+                # Windows: older than Vista or no privileges to symlink
+                # https://docs.python.org/3.2/library/os.html#os.symlink
+                ok = __can_symlink = False
+            else:
+                ok = __can_symlink = True
+    return ok
+

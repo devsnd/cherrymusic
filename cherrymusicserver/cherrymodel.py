@@ -64,7 +64,7 @@ NUMBERS = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
 @service.user(cache='filecache')
 class CherryModel:
     def __init__(self):
-        CherryModel.NATIVE_BROWSER_FORMATS = ['ogg', 'mp3']
+        CherryModel.NATIVE_BROWSER_FORMATS = ['opus', 'ogg', 'mp3']
         CherryModel.supportedFormats = CherryModel.NATIVE_BROWSER_FORMATS[:]
         if cherry.config['media.transcode']:
             self.transcoder = audiotranscode.AudioTranscode()

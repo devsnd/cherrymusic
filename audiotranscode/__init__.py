@@ -172,6 +172,8 @@ class AudioTranscode:
                          '--channels=2', '--bps=16', '--sample-rate=44100',
                          '--sign=signed', '-o', '-', '-']),
         Encoder('wav', ['cat']),
+        Encoder('opus', ['opusenc', '--bitrate', 'BITRATE', '--quiet',
+                         '-', '-']),
     ]
     Decoders = [
         #INPUT is replaced with filepath
@@ -199,7 +201,7 @@ class AudioTranscode:
                                    if enc.available()]
         self.available_decoders = [dec for dec in AudioTranscode.Decoders
                                    if dec.available()]
-        self.bitrate = {'mp3': 160, 'ogg': 128, 'aac': 128}
+        self.bitrate = {'mp3': 160, 'ogg': 128, 'aac': 128, 'opus': '64'}
 
     def available_encoder_formats(self):
         """returns the names of all available encoder formats"""

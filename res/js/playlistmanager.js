@@ -265,6 +265,7 @@ PlaylistManager = function(){
         availablejPlayerFormats = []
         var jplayer = self.jPlayerInstance.data('jPlayer');
         if(jplayer.html.canPlay.oga || jplayer.flash.canPlay.oga){
+            availablejPlayerFormats.push('opus');
             availablejPlayerFormats.push('ogg')
         }
         if(jplayer.html.canPlay.mp3 || jplayer.flash.canPlay.mp3){

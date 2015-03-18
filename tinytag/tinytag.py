@@ -61,7 +61,7 @@ class TinyTag(object):
             """choose which tag reader should be used by file extension"""
             mapping = {
                 ('.mp3',): ID3,
-                ('.oga', '.ogg'): Ogg,
+                ('.oga', '.ogg', '.opus'): Ogg,
                 ('.wav'): Wave,
                 ('.flac'): Flac,
             }

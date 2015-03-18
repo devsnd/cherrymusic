@@ -801,7 +801,7 @@ class File():
             if not f.fullpath.startswith(basedir):
                 log.e(_('file not in basedir: %s. skipping.') % f.fullpath)
                 continue
-            if f.islink:
+            if f.islink and not os.path.isfile(f.fullpath):
                 rp = os.path.realpath(f.fullpath)
                 if os.path.abspath(basedir).startswith(rp) \
                     or (os.path.islink(basedir)
@@ -811,7 +811,8 @@ class File():
                              "if followed. Skipping.")) % f.relpath)
                     continue
                 if not (f.parent is None or f.parent.parent is None):
-                    log.e(_(("Deeply nested symlink found: %s . All links "
+                    log.e(_(("Deeply nested directory symlink found: %s . "
+                          "All symlinks to directories "
                           "must be directly in your basedir (%s). The "
                           "program cannot safely handle them otherwise."
                           " Skipping.")) % (f.relpath, os.path.abspath(basedir)))
