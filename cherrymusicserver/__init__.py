@@ -202,21 +202,6 @@ def setup_services():
         'connargs': {'check_same_thread': False},
     })
 
-def update_config():
-    """ Updates the internal configuration using the following hierarchy:
-        file_config > default_config
-
-        See :mod:`~cherrymusicserver.configuration`.
-    """
-    defaults = cfg.from_defaults()
-    configfile = pathprovider.configurationFile()
-    if configfile is not None:
-        filecfg = cfg.from_configparser(pathprovider.configurationFile())
-    if filecfg is not None:
-        _notify_about_config_updates(defaults, filecfg)
-        return defaults.replace(filecfg, on_error=log.e)
-    else:
-        return defaults
 
 def setup_config(override_dict=None):
     """ Updates the internal configuration using the following hierarchy:
@@ -226,11 +211,14 @@ def setup_config(override_dict=None):
 
         See :mod:`~cherrymusicserver.configuration`.
     """
-    custom = update_config()
+    defaults = cfg.from_defaults()
+    filecfg = cfg.from_configparser(pathprovider.configurationFile())
+    custom = defaults.replace(filecfg, on_error=log.e)
     if override_dict:
         custom = custom.replace(override_dict, on_error=log.e)
     global config
     config = custom
+    _notify_about_config_updates(defaults, filecfg)
 
 
 def run_general_migrations():
@@ -548,49 +536,28 @@ def _get_version_from_git():
     """ Returns more precise version string based on the current git HEAD,
         or None if not possible.
     """
-    if os.path.exists('.git') == False:
-        return None
-    config = update_config()
+    import re
+    from subprocess import Popen, PIPE
+    cmd = {
+        'branch': ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+        'version': ['git', 'describe', '--tags'],
+        'date': ['git', 'log', '-1', '--format=%cd'],
+    }
     def fetch(cmdname):
-        import re
-        from subprocess import Popen, PIPE
-        cmd = {
-            'branch': ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-            'version': ['git', 'describe', '--tags'],
-            'date': ['git', 'log', '-1', '--format=%cd'],
-        }
         unwanted_characters = re.compile('[^\w.-]+')
-        out = None
-        err = None
-        if sys.hexversion < 0x30200F0: # Popen does not have context manager support before Python 3.2.
-            try:
-                devnull = open(os.devnull, 'w')
-                p = Popen(cmd[cmdname], stdout=PIPE, stderr=devnull)
+        with open(os.devnull, 'w') as devnull:
+            with Popen(cmd[cmdname], stdout=PIPE, stderr=devnull) as p:
                 out, err = p.communicate()
-            except:
-                return None
-            finally:
-                devnull.close()
-        else:
-            try:
-                with open(os.devnull, 'w') as devnull:
-                    with Popen(cmd[cmdname], stdout=PIPE, stderr=devnull) as p:
-                        out, err = p.communicate()
-            except:
-                return None
-        if out is not None:
-            out = out.decode('ascii', 'ignore').strip()
-            out = unwanted_characters.sub('', out)
-        return out
-    branch = fetch('branch')
-    version = fetch('version')
-    if not branch and not version or '-' not in version:
+        out = out.decode('ascii', 'ignore').strip()
+        return unwanted_characters.sub('', out)
+    try:
+        branch = fetch('branch')
+        version = fetch('version')
+        version, patchlevel = version.split('-', 1)     # must fail if no patchlevel
+        assert version == VERSION
+    except:
         return None
     else:
-        version, patchlevel = version.split('-', 1)
-        if version != VERSION:
-            return None
-        else:
-            return '{0}+{1}-{2}'.format(version, branch, patchlevel)
+        return '{0}+{1}-{2}'.format(version, branch, patchlevel)
 
 REPO_VERSION = _get_version_from_git()
