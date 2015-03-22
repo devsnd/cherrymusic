@@ -1,6 +1,20 @@
 Changelog
 ---------
 
+0.35.0 (2015-03-22)
+ - FEATURE: Opus transcoding support (thanks to qqueue)
+ - FEATURE: Support for media keys (thanks to cheese83)
+ - FIXED: File browser crash, when listing unreadable files (thanks to Tom Clegg)
+ - FIXED: Album art fetching breaking for very file paths (thanks to Che-Huai Lin)
+ - FIXED: Broken file listing if basedir does not end with a slash
+ - FIXED: Proper cover art display in safari (thanks to yukip)
+ - FIXED: Searching for terms ending in non ASCII-characters
+ - FIXED: keyboard shortcut settings for unrecognized keys (thanks cheese83)
+ - IMPROVEMENT: devel git version detection (thanks to MartijnRas)
+ - IMPROVEMENT: More transcoding quality settings (thanks to Druneau)
+ - IMPROVEMENT: Show first track after loading playlist
+ - IMPROVEMENT: Allow indexing of symlinked files
+
 0.34.1 (2014-12-17)
  - FIXED: Queue not visible due to outdated jPlayer
 
