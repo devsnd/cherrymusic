@@ -536,7 +536,7 @@ def _get_version_from_git():
     """ Returns more precise version string based on the current git HEAD,
         or None if not possible.
     """
-    if os.path.exists('.git') == False:
+    if not os.path.isdir('.git'):
         return None
     def fetch(cmdname):
         import re
@@ -547,37 +547,22 @@ def _get_version_from_git():
             'date': ['git', 'log', '-1', '--format=%cd'],
         }
         unwanted_characters = re.compile('[^\w.-]+')
-        out = None
-        err = None
-        if sys.hexversion < 0x30200F0: # Popen does not have context manager support before Python 3.2.
-            try:
-                devnull = open(os.devnull, 'w')
+        try:
+            with open(os.devnull, 'w') as devnull:
                 p = Popen(cmd[cmdname], stdout=PIPE, stderr=devnull)
-                out, err = p.communicate()
-            except:
-                return None
-            finally:
-                devnull.close()
-        else:
-            try:
-                with open(os.devnull, 'w') as devnull:
-                    with Popen(cmd[cmdname], stdout=PIPE, stderr=devnull) as p:
-                        out, err = p.communicate()
-            except:
-                return None
-        if out is not None:
-            out = out.decode('ascii', 'ignore').strip()
-            out = unwanted_characters.sub('', out)
+                out, err = p.communicate()  # blocks until process terminates
+        except:
+            return None
+        if out:
+            out = out.decode('ascii', 'ignore')
+            out = unwanted_characters.sub('', out).strip()
         return out
     branch = fetch('branch')
     version = fetch('version')
-    if not branch and not version or '-' not in version:
-        return None
-    else:
+    if branch and version and '-' in version:
         version, patchlevel = version.split('-', 1)
-        if version != VERSION:
-            return None
-        else:
+        if version == VERSION:  # sanity check: latest tag is for VERSION
             return '{0}+{1}-{2}'.format(version, branch, patchlevel)
+    return None
 
 REPO_VERSION = _get_version_from_git()
