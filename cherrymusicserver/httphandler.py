@@ -392,7 +392,7 @@ class HTTPHandler(object):
 
     def api_fetchalbumart(self, directory):
         _save_and_release_session()
-        default_folder_image = "/res/img/folder.png"
+        default_folder_image = "res/img/folder.png"
 
         #try getting a cached album art image
         b64imgpath = albumArtFilePath(directory)
