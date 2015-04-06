@@ -43,6 +43,11 @@ class TinyTag(object):
         self.audio_offset = 0
         self.bitrate = 0.0  # must be float for later VBR calculations
         self.samplerate = 0
+        self._load_image = False
+        self._image_data = None
+
+    def get_image(self):
+        return self._image_data
 
     def has_all_tags(self):
         """check if all tags are already defined. Useful for ID3 tags
@@ -52,7 +57,7 @@ class TinyTag(object):
                     self.artist, self.album, self.year))
 
     @classmethod
-    def get(cls, filename, tags=True, duration=True):
+    def get(cls, filename, tags=True, duration=True, image=False):
         parser_class = None
         size = os.path.getsize(filename)
         if not size > 0:
@@ -61,7 +66,7 @@ class TinyTag(object):
             """choose which tag reader should be used by file extension"""
             mapping = {
                 ('.mp3',): ID3,
-                ('.oga', '.ogg', '.opus'): Ogg,
+                ('.oga', '.ogg'): Ogg,
                 ('.wav'): Wave,
                 ('.flac'): Flac,
             }
@@ -75,7 +80,7 @@ class TinyTag(object):
             raise LookupError('No tag reader found to support filetype! ')
         with open(filename, 'rb') as af:
             tag = parser_class(af, size)
-            tag.load(tags=tags, duration=duration)
+            tag.load(tags=tags, duration=duration, image=image)
             return tag
 
     def __str__(self):
@@ -85,10 +90,12 @@ class TinyTag(object):
     def __repr__(self):
         return str(self)
 
-    def load(self, tags, duration):
+    def load(self, tags, duration, image=False):
         """default behavior of all tags. This method is called in the
         constructors of all tag readers
         """
+        if image:
+            self._load_image = True
         if tags:
             self._parse_tag(self._filehandler)
             self._filehandler.seek(0)
@@ -120,7 +127,7 @@ class TinyTag(object):
 
 
 class ID3(TinyTag):
-    FID_TO_FIELD = {  # Mapping from Frame ID to a field of the TinyTag
+    FRAME_ID_TO_FIELD = {  # Mapping from Frame ID to a field of the TinyTag
         'TRCK': 'track',  'TRK': 'track',
         'TYER': 'year',   'TYE': 'year',
         'TALB': 'album',  'TAL': 'album',
@@ -211,12 +218,12 @@ class ID3(TinyTag):
             extended = (header[3] & 0x40) > 0
             experimental = (header[3] & 0x20) > 0
             footer = (header[3] & 0x10) > 0
-            size = self._calc_size_7bit_bytes(header[4:9])
+            size = self._calc_size(header[4:9], 7)
             self._bytepos_after_id3v2 = size
             parsed_size = 0
             if extended:  # just read over the extended header.
                 size_bytes = struct.unpack('4B', fh.read(6)[0:4])
-                extd_size = self._calc_size_7bit_bytes(size_bytes)
+                extd_size = self._calc_size(size_bytes, 7)
                 fh.read(extd_size - 6)
             while parsed_size < size:
                 is_id3_v22 = major == 2
@@ -242,21 +249,31 @@ class ID3(TinyTag):
         frame_header_size = 6 if is_v22 else 10
         frame_size_bytes = 3 if is_v22 else 4
         binformat = '3s3B' if is_v22 else '4s4B2B'
+        bits_per_byte = 7 if is_v22 else 8
         frame_header_data = fh.read(frame_header_size)
         if len(frame_header_data) == 0:
             return 0
         frame = struct.unpack(binformat, frame_header_data)
         frame_id = self._decode_string(frame[0])
-        frame_size = self._calc_size_7bit_bytes(frame[1:1+frame_size_bytes])
+
+        frame_size = self._calc_size(frame[1:1+frame_size_bytes], bits_per_byte)
         if frame_size > 0:
             # flags = frame[1+frame_size_bytes:] # dont care about flags.
             content = fh.read(frame_size)
-            fieldname = ID3.FID_TO_FIELD.get(frame_id)
+            fieldname = ID3.FRAME_ID_TO_FIELD.get(frame_id)
             if fieldname:
                 if fieldname == 'track':
                     self._parse_track(content)
                 else:
                     self._set_field(fieldname, content, self._decode_string)
+            elif frame_id == 'APIC' and self._load_image:
+                # See section 4.14: http://id3.org/id3v2.4.0-frames
+                mimetype_end_pos = content[1:].index(b'\x00')+1
+                desc_start_pos = mimetype_end_pos + 2
+                desc_end_pos = desc_start_pos + content[desc_start_pos:].index(b'\x00')
+                if content[desc_end_pos:desc_end_pos+1] == b'\x00':
+                    desc_end_pos += 1 # the description ends with 1 or 2 null bytes
+                self._image_data = content[desc_end_pos:]
             return frame_size
         return 0
 
@@ -281,12 +298,14 @@ class ID3(TinyTag):
         self._set_field('track', track)
         self._set_field('track_total', track_total)
 
-    def _calc_size_7bit_bytes(self, bytestr):
-        ret = 0             # length of mp3 header fields is described
-        for b in bytestr:   # by some "7-bit-bytes". The most significant
-            ret <<= 7       # bit is always set to zero, so it has to be
-            ret += b & 127  # removed.
-        return ret          #
+    def _calc_size(self, bytestr, bits_per_byte):
+        # length of some mp3 header fields is described
+        # by "7-bit-bytes" or sometimes 8-bit bytes...
+        ret = 0
+        for b in bytestr:
+            ret <<= bits_per_byte
+            ret += b
+        return ret
 
 
 class StringWalker(object):
@@ -424,7 +443,7 @@ class Wave(TinyTag):
 
 
 class Flac(TinyTag):
-    def load(self, tags, duration):
+    def load(self, tags, duration, image=False):
         if self._filehandler.read(4) != b'fLaC':
             return  # not a flac file!
         if tags:
