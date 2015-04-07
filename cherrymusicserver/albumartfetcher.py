@@ -38,6 +38,9 @@ import os.path
 import codecs
 import re
 import subprocess
+
+from tinytag import TinyTag
+
 from cherrymusicserver import log
 
 #unidecode is opt-dependency
@@ -193,7 +196,14 @@ class AlbumArtFetcher:
         @type path: string
         @return header, imagedata, is_resized
         @rtype dict, bytestring"""
+        fetchers = (self._fetch_folder_image, _fetch_embedded_image)
+        for fetcher in fetchers:
+            header, data, resized = fetcher(path)
+            if data:
+                break
+        return header, data, resized
 
+    def _fetch_folder_image(self, path):
         filetypes = (".jpg", ".jpeg", ".png")
         try:
             for file_in_dir in os.listdir(path):
@@ -221,3 +231,50 @@ class AlbumArtFetcher:
         except OSError:
             return None, '', False
         return None, '', False
+
+    def _fetch_embedded_image(self, path):
+        filetypes = ('.mp3',)
+        max_tries = 3
+        header, data, resized = None, '', False
+        try:
+            files = (f for f in os.listdir(path) if f.lower().endswith(filetypes))
+            for count, file_in_dir in enumerate(files):
+                if count > max_tries:
+                    break
+                filepath = os.path.join(path, file_in_dir)
+                try:
+                    tag = TinyTag.get(filepath, image=True)
+                    image_data = tag.get_image()
+                except IOError:
+                    break
+                if not image_data:
+                    continue
+                _header, _data = self._convert_image_data(
+                    image_data, (self.IMAGE_SIZE, self.IMAGE_SIZE))
+                if _data:
+                    header, data, resized = _header, _data, True
+                    break
+        except OSError:
+            pass
+        return header, data, resized
+
+    def _convert_image_data(self, image_data, size):
+        """
+        resize an image using image magick
+
+        Returns:
+            the binary data of the image and a matching http header
+        """
+        if AlbumArtFetcher.imageMagickAvailable:
+            cmd = ['convert', '-',
+                   '-resize', str(size[0])+'x'+str(size[1]),
+                   'jpeg:-']
+            print(' '.join(cmd))
+            im = subprocess.Popen(cmd,
+                                  stdout=subprocess.PIPE,
+                                  stderr=subprocess.PIPE)
+            data, err = im.communicate(image_data)
+            header = {'Content-Type': "image/jpeg",
+                      'Content-Length': len(data)}
+            return header, data
+        return None, ''
