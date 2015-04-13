@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+0.35.1 (2015-04-10)
+ - FIXED: server not starting for python versions below 3.3
+
 0.35.0 (2015-03-22)
  - FEATURE: Opus transcoding support (thanks to qqueue)
  - FEATURE: Support for media keys (thanks to cheese83)

@@ -32,7 +32,7 @@
 #python 2.6+ backward compability
 from __future__ import unicode_literals
 
-VERSION = "0.35.0"
+VERSION = "0.35.1"
 __version__ = VERSION
 DESCRIPTION = "an mp3 server for your browser"
 LONG_DESCRIPTION = """CherryMusic is a music streaming
@@ -336,7 +336,7 @@ class CherryMusic:
 Process id file %s already exists.
 I've you are sure that cherrymusic is not running, you can delete this file and restart cherrymusic.
 ============================================""") % pathprovider.pidFile())
-                except ProcessLookupError:
+                except OSError:
                     print('Stale process id file, removing.')
                     cls.delete_pid_file()
         with open(pathprovider.pidFile(), 'w') as pidfile:
