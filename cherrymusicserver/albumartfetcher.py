@@ -196,7 +196,7 @@ class AlbumArtFetcher:
         @type path: string
         @return header, imagedata, is_resized
         @rtype dict, bytestring"""
-        fetchers = (self._fetch_folder_image, _fetch_embedded_image)
+        fetchers = (self._fetch_folder_image, self._fetch_embedded_image)
         for fetcher in fetchers:
             header, data, resized = fetcher(path)
             if data:
@@ -237,7 +237,8 @@ class AlbumArtFetcher:
         max_tries = 3
         header, data, resized = None, '', False
         try:
-            files = (f for f in os.listdir(path) if f.lower().endswith(filetypes))
+            files = os.listdir(path)
+            files = (f for f in files if f.lower().endswith(filetypes))
             for count, file_in_dir in enumerate(files):
                 if count > max_tries:
                     break
@@ -269,8 +270,8 @@ class AlbumArtFetcher:
             cmd = ['convert', '-',
                    '-resize', str(size[0])+'x'+str(size[1]),
                    'jpeg:-']
-            print(' '.join(cmd))
             im = subprocess.Popen(cmd,
+                                  stdin=subprocess.PIPE,
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE)
             data, err = im.communicate(image_data)
