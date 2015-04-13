@@ -239,7 +239,7 @@ class AlbumArtFetcher:
         try:
             files = os.listdir(path)
             files = (f for f in files if f.lower().endswith(filetypes))
-            for count, file_in_dir in enumerate(files):
+            for count, file_in_dir in enumerate(files, start=1):
                 if count > max_tries:
                     break
                 filepath = os.path.join(path, file_in_dir)
