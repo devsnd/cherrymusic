@@ -334,7 +334,7 @@ class CherryMusic:
                     os.getpgid(int(pidfile.read()))
                     sys.exit(_("""============================================
 Process id file %s already exists.
-I've you are sure that cherrymusic is not running, you can delete this file and restart cherrymusic.
+If you are sure that cherrymusic is not running, you can delete this file and restart cherrymusic.
 ============================================""") % pathprovider.pidFile())
                 except OSError:
                     print('Stale process id file, removing.')
