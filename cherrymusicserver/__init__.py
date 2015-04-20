@@ -331,7 +331,10 @@ class CherryMusic:
         if pathprovider.pidFileExists():
             with open(pathprovider.pidFile(), 'r') as pidfile:
                 try:
-                    os.getpgid(int(pidfile.read()))
+                    if not sys.platform.startswith('win'):
+                        # this call is only available on unix systems and throws
+                        # an OSError if the process does not exist.
+                        os.getpgid(int(pidfile.read()))
                     sys.exit(_("""============================================
 Process id file %s already exists.
 I've you are sure that cherrymusic is not running, you can delete this file and restart cherrymusic.
