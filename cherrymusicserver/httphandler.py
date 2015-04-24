@@ -394,7 +394,7 @@ class HTTPHandler(object):
 
     def api_fetchalbumart(self, directory):
         _save_and_release_session()
-        default_folder_image = "res/img/folder.png"
+        default_folder_image = "../res/img/folder.png"
 
         log.i('Fetching album art for: %s' % directory)
         filepath = os.path.join(cherry.config['media.basedir'], directory)
