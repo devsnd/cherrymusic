@@ -32,7 +32,7 @@
 #python 2.6+ backward compability
 from __future__ import unicode_literals
 
-VERSION = "0.35.1"
+VERSION = "0.35.2"
 __version__ = VERSION
 DESCRIPTION = "an mp3 server for your browser"
 LONG_DESCRIPTION = """CherryMusic is a music streaming
@@ -331,7 +331,10 @@ class CherryMusic:
         if pathprovider.pidFileExists():
             with open(pathprovider.pidFile(), 'r') as pidfile:
                 try:
-                    os.getpgid(int(pidfile.read()))
+                    if not sys.platform.startswith('win'):
+                        # this call is only available on unix systems and throws
+                        # an OSError if the process does not exist.
+                        os.getpgid(int(pidfile.read()))
                     sys.exit(_("""============================================
 Process id file %s already exists.
 If you are sure that cherrymusic is not running, you can delete this file and restart cherrymusic.

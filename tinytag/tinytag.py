@@ -39,10 +39,16 @@ class TinyTag(object):
         self.artist = None
         self.album = None
         self.year = None
+        self.genre = None
         self.duration = 0
         self.audio_offset = 0
         self.bitrate = 0.0  # must be float for later VBR calculations
         self.samplerate = 0
+        self._load_image = False
+        self._image_data = None
+
+    def get_image(self):
+        return self._image_data
 
     def has_all_tags(self):
         """check if all tags are already defined. Useful for ID3 tags
@@ -52,7 +58,7 @@ class TinyTag(object):
                     self.artist, self.album, self.year))
 
     @classmethod
-    def get(cls, filename, tags=True, duration=True):
+    def get(cls, filename, tags=True, duration=True, image=False):
         parser_class = None
         size = os.path.getsize(filename)
         if not size > 0:
@@ -61,9 +67,10 @@ class TinyTag(object):
             """choose which tag reader should be used by file extension"""
             mapping = {
                 ('.mp3',): ID3,
-                ('.oga', '.ogg', '.opus'): Ogg,
+                ('.oga', '.ogg'): Ogg,
                 ('.wav'): Wave,
                 ('.flac'): Flac,
+                ('.wma'): Wma,
             }
             for fileextension, tagclass in mapping.items():
                 if filename.lower().endswith(fileextension):
@@ -75,7 +82,7 @@ class TinyTag(object):
             raise LookupError('No tag reader found to support filetype! ')
         with open(filename, 'rb') as af:
             tag = parser_class(af, size)
-            tag.load(tags=tags, duration=duration)
+            tag.load(tags=tags, duration=duration, image=image)
             return tag
 
     def __str__(self):
@@ -85,10 +92,12 @@ class TinyTag(object):
     def __repr__(self):
         return str(self)
 
-    def load(self, tags, duration):
+    def load(self, tags, duration, image=False):
         """default behavior of all tags. This method is called in the
         constructors of all tag readers
         """
+        if image:
+            self._load_image = True
         if tags:
             self._parse_tag(self._filehandler)
             self._filehandler.seek(0)
@@ -118,9 +127,24 @@ class TinyTag(object):
             if not getattr(self, key) and getattr(other, key):
                 setattr(self, key, getattr(other, key))
 
+    def _bytes_to_int(self, b):
+        result = 0
+        for byte in b:
+            result = (result << 8) + byte
+        return result
+
+    def _bytes_to_int_le(self, b):
+        result = 0
+        for idx in range(len(b)): # uglyness for py2/3 compat
+            result += (struct.unpack('B', b[idx:idx+1])[0] << 8*idx)
+        return result
+
+    def _unpad(self, s):
+        # strings in mp3 and asf _can_ be terminated with a zero byte at the end
+        return s[:s.index('\x00')] if '\x00' in s else s
 
 class ID3(TinyTag):
-    FID_TO_FIELD = {  # Mapping from Frame ID to a field of the TinyTag
+    FRAME_ID_TO_FIELD = {  # Mapping from Frame ID to a field of the TinyTag
         'TRCK': 'track',  'TRK': 'track',
         'TYER': 'year',   'TYE': 'year',
         'TALB': 'album',  'TAL': 'album',
@@ -211,12 +235,12 @@ class ID3(TinyTag):
             extended = (header[3] & 0x40) > 0
             experimental = (header[3] & 0x20) > 0
             footer = (header[3] & 0x10) > 0
-            size = self._calc_size_7bit_bytes(header[4:9])
+            size = self._calc_size(header[4:9], 7)
             self._bytepos_after_id3v2 = size
             parsed_size = 0
             if extended:  # just read over the extended header.
                 size_bytes = struct.unpack('4B', fh.read(6)[0:4])
-                extd_size = self._calc_size_7bit_bytes(size_bytes)
+                extd_size = self._calc_size(size_bytes, 7)
                 fh.read(extd_size - 6)
             while parsed_size < size:
                 is_id3_v22 = major == 2
@@ -242,21 +266,31 @@ class ID3(TinyTag):
         frame_header_size = 6 if is_v22 else 10
         frame_size_bytes = 3 if is_v22 else 4
         binformat = '3s3B' if is_v22 else '4s4B2B'
+        bits_per_byte = 7 if is_v22 else 8
         frame_header_data = fh.read(frame_header_size)
         if len(frame_header_data) == 0:
             return 0
         frame = struct.unpack(binformat, frame_header_data)
         frame_id = self._decode_string(frame[0])
-        frame_size = self._calc_size_7bit_bytes(frame[1:1+frame_size_bytes])
+
+        frame_size = self._calc_size(frame[1:1+frame_size_bytes], bits_per_byte)
         if frame_size > 0:
             # flags = frame[1+frame_size_bytes:] # dont care about flags.
             content = fh.read(frame_size)
-            fieldname = ID3.FID_TO_FIELD.get(frame_id)
+            fieldname = ID3.FRAME_ID_TO_FIELD.get(frame_id)
             if fieldname:
                 if fieldname == 'track':
                     self._parse_track(content)
                 else:
                     self._set_field(fieldname, content, self._decode_string)
+            elif frame_id == 'APIC' and self._load_image:
+                # See section 4.14: http://id3.org/id3v2.4.0-frames
+                mimetype_end_pos = content[1:].index(b'\x00')+1
+                desc_start_pos = mimetype_end_pos + 2
+                desc_end_pos = desc_start_pos + content[desc_start_pos:].index(b'\x00')
+                if content[desc_end_pos:desc_end_pos+1] == b'\x00':
+                    desc_end_pos += 1 # the description ends with 1 or 2 null bytes
+                self._image_data = content[desc_end_pos:]
             return frame_size
         return 0
 
@@ -269,10 +303,6 @@ class ID3(TinyTag):
             return codecs.decode(bytestr, 'UTF-16')
         return self._unpad(codecs.decode(b, 'ISO-8859-1'))
 
-    def _unpad(self, s):
-        # strings in mp3 _can_ be terminated with a zero byte at the end
-        return s[:s.index('\x00')] if '\x00' in s else s
-
     def _parse_track(self, b):
         track = self._decode_string(b)
         track_total = None
@@ -281,12 +311,14 @@ class ID3(TinyTag):
         self._set_field('track', track)
         self._set_field('track_total', track_total)
 
-    def _calc_size_7bit_bytes(self, bytestr):
-        ret = 0             # length of mp3 header fields is described
-        for b in bytestr:   # by some "7-bit-bytes". The most significant
-            ret <<= 7       # bit is always set to zero, so it has to be
-            ret += b & 127  # removed.
-        return ret          #
+    def _calc_size(self, bytestr, bits_per_byte):
+        # length of some mp3 header fields is described
+        # by "7-bit-bytes" or sometimes 8-bit bytes...
+        ret = 0
+        for b in bytestr:
+            ret <<= bits_per_byte
+            ret += b
+        return ret
 
 
 class StringWalker(object):
@@ -424,7 +456,7 @@ class Wave(TinyTag):
 
 
 class Flac(TinyTag):
-    def load(self, tags, duration):
+    def load(self, tags, duration, image=False):
         if self._filehandler.read(4) != b'fLaC':
             return  # not a flac file!
         if tags:
@@ -474,17 +506,12 @@ class Flac(TinyTag):
                 total_samples = self._bytes_to_int(total_sample_bytes)
                 md5 = header[12:]
                 self.duration = float(total_samples) / self.samplerate
-                self.bitrate = self.filesize/self.duration*8/1024
+                if self.duration > 0:
+                    self.bitrate = self.filesize/self.duration*8/1024
                 return
             else:
                 fh.seek(size, 1)
                 header_data = fh.read(4)
-
-    def _bytes_to_int(self, b):
-        result = 0
-        for byte in b:
-            result = (result << 8) + byte
-        return result
 
     def _parse_tag(self, fh):
         # for spec, see https://xiph.org/flac/ogg_mapping.html
@@ -500,3 +527,150 @@ class Flac(TinyTag):
             else:
                 fh.seek(size, 1)
                 header_data = fh.read(4)
+
+
+class Wma(TinyTag):
+    ASF_CONTENT_DESCRIPTION_OBJECT = b'3&\xb2u\x8ef\xcf\x11\xa6\xd9\x00\xaa\x00b\xcel'
+    ASF_EXTENDED_CONTENT_DESCRIPTION_OBJECT = b'@\xa4\xd0\xd2\x07\xe3\xd2\x11\x97\xf0\x00\xa0\xc9^\xa8P'
+    STREAM_BITRATE_PROPERTIES_OBJECT = b'\xceu\xf8{\x8dF\xd1\x11\x8d\x82\x00`\x97\xc9\xa2\xb2'
+    ASF_FILE_PROPERTY_OBJECT = b'\xa1\xdc\xab\x8cG\xa9\xcf\x11\x8e\xe4\x00\xc0\x0c Se'
+    ASF_STREAM_PROPERTIES_OBJECT = b'\x91\x07\xdc\xb7\xb7\xa9\xcf\x11\x8e\xe6\x00\xc0\x0c Se'
+    STREAM_TYPE_ASF_AUDIO_MEDIA = b'@\x9ei\xf8M[\xcf\x11\xa8\xfd\x00\x80_\\D+'
+    # see:
+    # http://web.archive.org/web/20131203084402/http://msdn.microsoft.com/en-us/library/bb643323.aspx
+    # and (japanese, but none the less helpful)
+    # http://uguisu.skr.jp/Windows/format_asf.html
+
+    def __init__(self, filehandler, filesize):
+        TinyTag.__init__(self, filehandler, filesize)
+        self.__tag_parsed = False
+
+    def _determine_duration(self, fh):
+        if not self.__tag_parsed:
+            self._parse_tag(fh)
+
+    def read_blocks(self, fh, blocks):
+        decoded = {}
+        for block in blocks:
+            val = fh.read(block[1])
+            if block[2]:
+                val = self._bytes_to_int_le(val)
+            decoded[block[0]] = val
+        return decoded
+
+    def __bytes_to_guid(self, obj_id_bytes):
+        return '-'.join([
+            hex(self._bytes_to_int_le(obj_id_bytes[:-12]))[2:].zfill(6),
+            hex(self._bytes_to_int_le(obj_id_bytes[-12:-10]))[2:].zfill(4),
+            hex(self._bytes_to_int_le(obj_id_bytes[-10:-8]))[2:].zfill(4),
+            hex(self._bytes_to_int(obj_id_bytes[-8:-6]))[2:].zfill(4),
+            hex(self._bytes_to_int(obj_id_bytes[-6:]))[2:].zfill(12),
+        ])
+
+    def __decode_string(self, bytestring):
+        return self._unpad(codecs.decode(bytestring, 'utf-16'))
+
+    def __decode_ext_desc(self, value_type, value):
+        ''' decode ASF_EXTENDED_CONTENT_DESCRIPTION_OBJECT values'''
+        if value_type == 0:
+            return self.__decode_string(value)
+        elif value_type == 1:
+            return value
+        elif 1 < value_type < 6:
+            return self._bytes_to_int_le(value)
+
+    def _parse_tag(self, fh):
+        self.__tag_parsed = True
+        guid = fh.read(16) # 128 bit GUID
+        if guid != b'0&\xb2u\x8ef\xcf\x11\xa6\xd9\x00\xaa\x00b\xcel':
+            return # not a valid ASF container! see: http://www.garykessler.net/library/file_sigs.html
+        size = struct.unpack('Q', fh.read(8))[0]
+        obj_count = struct.unpack('I', fh.read(4))[0]
+        if fh.read(2) != b'\x01\x02':
+            # http://web.archive.org/web/20131203084402/http://msdn.microsoft.com/en-us/library/bb643323.aspx#_Toc521913958
+            return # not a valid asf header!
+        while True:
+            object_id = fh.read(16)
+            object_size = self._bytes_to_int_le(fh.read(8))
+            if object_size == 0:
+                break
+            if object_id == Wma.ASF_CONTENT_DESCRIPTION_OBJECT:
+                len_blocks = self.read_blocks(fh, [
+                    ('title_length', 2, True),
+                    ('author_length', 2, True),
+                    ('copyright_length', 2, True),
+                    ('description_length', 2, True),
+                    ('rating_length', 2, True),
+                ])
+                data_blocks = self.read_blocks(fh, [
+                    ('title', len_blocks['title_length'], False),
+                    ('artist', len_blocks['author_length'], False),
+                    ('', len_blocks['copyright_length'], True),
+                    ('', len_blocks['description_length'], True),
+                    ('', len_blocks['rating_length'], True),
+                ])
+                for field_name, bytestring in data_blocks.items():
+                    if field_name:
+                        self._set_field(field_name, bytestring, self.__decode_string)
+            elif object_id == Wma.ASF_EXTENDED_CONTENT_DESCRIPTION_OBJECT:
+                mapping = {
+                    'WM/TrackNumber': 'track',
+                    'WM/Year': 'year',
+                    'WM/AlbumArtist': 'album',
+                    'WM/Genre': 'genre',
+                    'WM/AlbumTitle': 'album',
+                }
+                # see: http://web.archive.org/web/20131203084402/http://msdn.microsoft.com/en-us/library/bb643323.aspx#_Toc509555195
+                descriptor_count = self._bytes_to_int_le(fh.read(2))
+                for _ in range(descriptor_count):
+                    name_len = self._bytes_to_int_le(fh.read(2))
+                    name = self.__decode_string(fh.read(name_len))
+                    value_type = self._bytes_to_int_le(fh.read(2))
+                    value_len = self._bytes_to_int_le(fh.read(2))
+                    value = fh.read(value_len)
+                    field_name = mapping.get(name)
+                    if field_name:
+                        field_value = self.__decode_ext_desc(value_type, value)
+                        self._set_field(field_name, str(field_value))
+            elif object_id == Wma.ASF_FILE_PROPERTY_OBJECT:
+                blocks = self.read_blocks(fh, [
+                    ('file_id', 16, False),
+                    ('file_size', 8, False),
+                    ('creation_date', 8, True),
+                    ('data_packets_count', 8, True),
+                    ('play_duration', 8, True),
+                    ('send_duration', 8, True),
+                    ('preroll', 8, True),
+                    ('flags', 4, False),
+                    ('minimum_data_packet_size', 4, True),
+                    ('maximum_data_packet_size', 4, True),
+                    ('maximum_bitrate', 4, False),
+                ])
+                self.duration = blocks.get('play_duration') / float(10000000)
+            elif object_id == Wma.ASF_STREAM_PROPERTIES_OBJECT:
+                blocks = self.read_blocks(fh, [
+                    ('stream_type', 16, False),
+                    ('error_correction_type', 16, False),
+                    ('time_offset', 8, True),
+                    ('type_specific_data_length', 4, True),
+                    ('error_correction_data_length', 4, True),
+                    ('flags', 2, True),
+                    ('reserved', 4, False)
+                ])
+                already_read = 0
+                if blocks['stream_type'] == Wma.STREAM_TYPE_ASF_AUDIO_MEDIA:
+                    stream_info = self.read_blocks(fh, [
+                        ('codec_id_format_tag', 2, True),
+                        ('number_of_channels', 2, True),
+                        ('samples_per_second', 4, True),
+                        ('avg_bytes_per_second', 4, True),
+                        ('block_alignment', 2, True),
+                        ('bits_per_sample', 2, True),
+                    ])
+                    self.samplerate = stream_info['samples_per_second']
+                    self.bitrate = stream_info['avg_bytes_per_second'] * 8 / float(1000)
+                    already_read = 16
+                fh.read(blocks['type_specific_data_length'] - already_read)
+                fh.read(blocks['error_correction_data_length'])
+            else:
+                fh.read(object_size - 24) # read over onknown object ids
