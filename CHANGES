@@ -1,10 +1,8 @@
 Changelog
 ---------
 
-
 0.35.2 (2015-04-20)
  - FIXED: server not starting on windows
-
 
 0.35.1 (2015-04-10)
  - FIXED: server not starting for python versions below 3.3
