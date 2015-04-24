@@ -746,7 +746,7 @@ PlaylistManager.prototype = {
     setAlbumArtDisplay : function(track) {
         if(userOptions.ui.display_album_art){
             // strip filename from url
-            var directory = track.url.substring(0,track.url.lastIndexOf('/'))
+            var directory = track.url;
             if (directory == '') // root directory
                 directory = '/';
             var api_param = JSON.stringify({directory: directory});
