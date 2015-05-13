@@ -82,6 +82,8 @@ class HTTPHandler(object):
         self.loginpage = readRes(template_login)
         self.firstrunpage = readRes(template_firstrun)
 
+        self.previous_sorted = 'created'
+
         self.handlers = {
             'search': self.api_search,
             'rememberplaylist': self.api_rememberplaylist,
@@ -611,14 +613,23 @@ class HTTPHandler(object):
     def api_showplaylists(self, sortby="created", filterby=''):
         playlists = self.playlistdb.showPlaylists(self.getUserId(), filterby)
         curr_time = int(time.time())
+        is_reverse = False
         #translate userids to usernames:
         for pl in playlists:
             pl['username'] = self.userdb.getNameById(pl['userid'])
             pl['type'] = 'playlist'
             pl['age'] = curr_time - pl['created']
-        if not sortby in ('username', 'age', 'title'):
+        if not sortby in ('username', 'age', 'title', 'default'):
             sortby = 'created'
-        playlists = sorted(playlists, key=lambda x: x[sortby])
+        if sortby == self.previous_sorted:
+            is_reverse = True
+        if sortby == 'default':
+            sortby = 'age'
+        playlists = sorted(playlists, key=lambda x: x[sortby], reverse=is_reverse)
+        if sortby == self.previous_sorted or sortby in ['created', 'default']:
+            self.previous_sorted = ''          
+        else:
+            self.previous_sorted = sortby
         return playlists
 
     def api_logout(self):
