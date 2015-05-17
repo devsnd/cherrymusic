@@ -55,7 +55,7 @@ class TinyTag(object):
         since multiple kinds of tags can be in one audio file
         """
         return all((self.track, self.track_total, self.title,
-                    self.artist, self.album, self.year))
+                    self.artist, self.album, self.year, self.genre))
 
     @classmethod
     def get(cls, filename, tags=True, duration=True, image=False):
@@ -123,7 +123,7 @@ class TinyTag(object):
     def update(self, other):
         """update the values of this tag with the values from another tag"""
         for key in ['track', 'track_total', 'title', 'artist',
-                    'album', 'year', 'duration']:
+                    'album', 'year', 'duration', 'genre']:
             if not getattr(self, key) and getattr(other, key):
                 setattr(self, key, getattr(other, key))
 
@@ -150,8 +150,37 @@ class ID3(TinyTag):
         'TALB': 'album',  'TAL': 'album',
         'TPE1': 'artist', 'TP1': 'artist',
         'TIT2': 'title',  'TT2': 'title',
+        'TCON': 'genre',
     }
     _MAX_ESTIMATION_SEC = 30
+
+    ID3V1_GENRES = [
+        'Blues', 'Classic Rock', 'Country', 'Dance', 'Disco',
+        'Funk', 'Grunge', 'Hip-Hop', 'Jazz', 'Metal', 'New Age', 'Oldies',
+        'Other', 'Pop', 'R&B', 'Rap', 'Reggae', 'Rock', 'Techno', 'Industrial',
+        'Alternative', 'Ska', 'Death Metal', 'Pranks', 'Soundtrack', 
+        'Euro-Techno', 'Ambient', 'Trip-Hop', 'Vocal', 'Jazz+Funk', 'Fusion',
+        'Trance', 'Classical', 'Instrumental', 'Acid', 'House', 'Game', 
+        'Sound Clip', 'Gospel', 'Noise', 'AlternRock', 'Bass', 'Soul', 'Punk',
+        'Space', 'Meditative', 'Instrumental Pop', 'Instrumental Rock',
+        'Ethnic', 'Gothic','Darkwave', 'Techno-Industrial', 'Electronic',
+        'Pop-Folk', 'Eurodance', 'Dream', 'Southern Rock', 'Comedy', 'Cult',
+        'Gangsta', 'Top 40', 'Christian Rap', 'Pop/Funk', 'Jungle',
+        'Native American', 'Cabaret', 'New Wave', 'Psychadelic', 'Rave',
+        'Showtunes', 'Trailer', 'Lo-Fi', 'Tribal', 'Acid Punk', 'Acid Jazz',
+        'Polka', 'Retro', 'Musical', 'Rock & Roll', 'Hard Rock',
+
+        # Wimamp Extended Genres
+        'Folk', 'Folk-Rock', 'National Folk', 'Swing', 'Fast Fusion', 'Bebob',
+        'Latin', 'Revival', 'Celtic', 'Bluegrass', 'Avantgarde', 'Gothic Rock',
+        'Progressive Rock', 'Psychedelic Rock', 'Symphonic Rock', 'Slow Rock',
+        'Big Band', 'Chorus', 'Easy Listening', 'Acoustic', 'Humour', 'Speech',
+        'Chanson', 'Opera', 'Chamber Music', 'Sonata', 'Symphony', 'Booty Bass',
+        'Primus', 'Porn Groove', 'Satire', 'Slow Jam', 'Club', 'Tango', 'Samba',
+        'Folklore', 'Ballad', 'Power Ballad', 'Rhythmic Soul', 'Freestyle',
+        'Duet', 'Punk Rock', 'Drum Solo', 'A capella', 'Euro-House', 'Dance Hall',
+
+    ]
 
     def __init__(self, filehandler, filesize):
         TinyTag.__init__(self, filehandler, filesize)
@@ -259,6 +288,8 @@ class ID3(TinyTag):
             comment = fh.read(30)
             if b'\x00\x00' < comment[-2:] < b'\x01\x00':
                 self._set_field('track', str(ord(comment[-1:])))
+            genre_id = ord(fh.read(1))
+            self.genre = ID3.ID3V1_GENRES[genre_id]
 
     def _parse_frame(self, fh, is_v22=False):
         encoding = 'ISO-8859-1'  # default encoding used in most mp3 tags
@@ -296,11 +327,19 @@ class ID3(TinyTag):
 
     def _decode_string(self, b):
         # it's not my fault, this is the spec.
-        if b[:1] == b'\x00':
+        first_byte = b[:1]
+        if first_byte == b'\x00':
             return self._unpad(codecs.decode(b[1:], 'ISO-8859-1'))
-        if b[0:3] == b'\x01\xff\xfe':
+        elif first_byte == b'\x01':
+            # strip the bom and optional null bytes
             bytestr = b[3:-1] if len(b) % 2 == 0 else b[3:]
             return codecs.decode(bytestr, 'UTF-16')
+        elif first_byte == b'\x02':
+            # strip optional null byte
+            bytestr = b[1:-1] if len(b) % 2 == 0 else b[1:]
+            return codecs.decode(bytestr, 'UTF-16be')
+        elif first_byte == b'\x03':
+            return codecs.decode(b[1:], 'UTF-8')
         return self._unpad(codecs.decode(b, 'ISO-8859-1'))
 
     def _parse_track(self, b):
@@ -376,8 +415,14 @@ class Ogg(TinyTag):
 
     def _parse_vorbis_comment(self, fh):
         # for the spec, see: http://xiph.org/vorbis/doc/v-comment.html
-        mapping = {'album': 'album', 'title': 'title', 'artist': 'artist',
-                   'date': 'year', 'tracknumber': 'track'}
+        comment_type_to_attr_mapping = {
+            'album': 'album',
+            'title': 'title',
+            'artist': 'artist',
+            'date': 'year',
+            'tracknumber': 'track',
+            'genre': 'genre'
+        }
         vendor_length = struct.unpack('I', fh.read(4))[0]
         vendor = fh.read(vendor_length)
         elements = struct.unpack('I', fh.read(4))[0]
@@ -387,7 +432,7 @@ class Ogg(TinyTag):
             if '=' in keyvalpair:
                 splitidx = keyvalpair.index('=')
                 key, value = keyvalpair[:splitidx], keyvalpair[splitidx+1:]
-                fieldname = mapping.get(key.lower())
+                fieldname = comment_type_to_attr_mapping.get(key.lower())
                 if fieldname:
                     self._set_field(fieldname, value)
 
@@ -456,23 +501,24 @@ class Wave(TinyTag):
 
 
 class Flac(TinyTag):
+    METADATA_STREAMINFO = 0
+    METADATA_VORBIS_COMMENT = 4
+
     def load(self, tags, duration, image=False):
         if self._filehandler.read(4) != b'fLaC':
             return  # not a flac file!
-        if tags:
-            self._parse_tag(self._filehandler)
-            self._filehandler.seek(4)
-        if duration:
-            self._determine_duration(self._filehandler)
+        self._determine_duration(self._filehandler, skip_tags=not tags)
 
-    def _determine_duration(self, fh):
+    def _determine_duration(self, fh, skip_tags=False):
         # for spec, see https://xiph.org/flac/ogg_mapping.html
         header_data = fh.read(4)
         while len(header_data):
             meta_header = struct.unpack('B3B', header_data)
+            block_type = meta_header[0] & 0x7f
+            is_last_block = meta_header[0] & 0x80
             size = self._bytes_to_int(meta_header[1:4])
             # http://xiph.org/flac/format.html#metadata_block_streaminfo
-            if meta_header[0] == 0:  # STREAMINFO
+            if block_type == Flac.METADATA_STREAMINFO:
                 stream_info_header = fh.read(size)
                 if len(stream_info_header) < 34:  # invalid streaminfo
                     break
@@ -507,25 +553,20 @@ class Flac(TinyTag):
                 md5 = header[12:]
                 self.duration = float(total_samples) / self.samplerate
                 if self.duration > 0:
-                    self.bitrate = self.filesize/self.duration*8/1024
-                return
-            else:
-                fh.seek(size, 1)
-                header_data = fh.read(4)
-
-    def _parse_tag(self, fh):
-        # for spec, see https://xiph.org/flac/ogg_mapping.html
-        header_data = fh.read(4)
-        while len(header_data):
-            meta_header = struct.unpack('B3B', header_data)
-            size = self._bytes_to_int(meta_header[1:4])
-            if meta_header[0] == 4:
+                    self.bitrate = self.filesize / self.duration * 8 / 1024
+                #return
+            elif block_type == Flac.METADATA_VORBIS_COMMENT and not skip_tags:
                 oggtag = Ogg(fh, 0)
                 oggtag._parse_vorbis_comment(fh)
                 self.update(oggtag)
-                return
+            elif block_type >= 127:
+                return # invalid block type
             else:
-                fh.seek(size, 1)
+                fh.seek(size, 1)  # seek over this block
+
+            if is_last_block:
+                break
+            else:
                 header_data = fh.read(4)
 
 
