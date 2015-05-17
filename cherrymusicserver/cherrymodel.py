@@ -112,7 +112,10 @@ class CherryModel:
         return sortedfiles
 
     def listdir(self, dirpath, filterstr=''):
-        absdirpath = CherryModel.abspath(dirpath)
+        if dirpath is None:
+            absdirpath = cherry.config['media.basedir']
+        else:
+            absdirpath = CherryModel.abspath(dirpath)
         if cherry.config['browser.pure_database_lookup']:
             allfilesindir = self.cache.listdir(dirpath)     # NOT absdirpath!
         else:
