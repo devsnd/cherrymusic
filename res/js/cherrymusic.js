@@ -48,6 +48,7 @@ var CHECK_MUSIC_PLAYING_INTERVAL = 2000;
 var HEARTBEAT_INTERVAL_MS = 30*1000;
 
 var playlistSelector = '.jp-playlist';
+var previousSorted = undefined
 
 var executeAfterConfigLoaded = []
 
@@ -460,6 +461,11 @@ function showPlaylists(sortby, filterby){
         $('.playlist-filter-input').val(value_before);
     };
     var error = errorFunc('error loading external playlists');
+
+    if(sortby == previousSorted){
+        sortby = '-' + sortby; 
+    }
+    previousSorted = sortby;
 
     busy('.search-results').hide().fadeIn('fast');
     api('showplaylists',
