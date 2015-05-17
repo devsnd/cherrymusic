@@ -162,7 +162,10 @@ else:
 parser.add_argument('--newconfig', dest='newconfig', action='store_true', help='Create a new config file next to your current one, e.g. ~/.config/cherrymusic/cherrymusic.conf.new.')
 parser.add_argument('--dropfiledb', dest='dropfiledb', action='store_true', help='Clear the file database. This might be necessary after a version jump.')
 parser.add_argument('--setup', dest='setup', action='store_true', help='Configure CherryMusic in your browser.')
+
 parser.add_argument('--adduser', dest='adduser', nargs=2, metavar=('USERNAME', 'PASSWORD'), default=None, help='Create a new user with the given password.')
+parser.add_argument('--deleteuser', dest='deleteuser', nargs=1, metavar=('USERNAME',), default=None, help='Delete a user')
+parser.add_argument('--changepassword', dest='changepassword', nargs=2, metavar=('USERNAME', 'PASSWORD'), default=None, help='Change the password of a user')
 
 ConfigOptions.addShortcutOption(parser, ('--port', '-p'), key='server.port', type=int, help='Set the port the server will listen to.')
 ConfigOptions.addGeneralOption(parser, ('--conf', '-c'), help='Override configuration values.')
@@ -213,6 +216,16 @@ if __name__ == "__main__":
     if args.adduser:
         username, password = args.adduser
         success = cherrymusicserver.create_user(username, password)
+        sys.exit(0 if success else 1)
+
+    if args.deleteuser:
+        username = args.deleteuser[0]
+        success = cherrymusicserver.delete_user(username)
+        sys.exit(0 if success else 1)
+
+    if args.changepassword:
+        username, password = args.changepassword
+        success = cherrymusicserver.change_password(username, password)
         sys.exit(0 if success else 1)
 
     if args.update is not None:
