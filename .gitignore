@@ -63,3 +63,6 @@ doc/sphinx/_build
 
 res/ngclient/node_modules/
 res/ngclient/app/components/
+
+# Vagrant 
+.vagrant/

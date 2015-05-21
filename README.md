@@ -43,6 +43,26 @@ and then start the server and follow the instructions:
     
 (Leave out the --options for subsequent starts.)
 
+Developing with Vagrant 
+-----------------------
+
+1. Install [Vagrant](https://www.vagrantup.com/downloads.html)
+
+2. Install [Virtualbox](https://www.virtualbox.org/) 
+3. Add a new Ubuntu box 
+    
+    ```bash 
+    vagrant box add ubuntu/trusty64
+    ```
+
+4. Clone this repo `git clone git://github.com/devsnd/cherrymusic.gitt`
+5. Go to the repo `cd 2webm` 
+6. Launch the Development Environment 
+
+    ```bash 
+    vagrant up 
+    ```
+7. Navigate to localhost:8080 in a web browser. Changes you make in your local git repo will automatically appear on the website.  
 
 Requirements
 ------------
