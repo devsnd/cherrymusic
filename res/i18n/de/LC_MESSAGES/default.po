@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CherryMusic 0.27.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-14 15:54+0100\n"
+"POT-Creation-Date: 2015-05-30 00:37+0200\n"
 "PO-Revision-Date: 2015-03-14 16:03+0100\n"
 "Last-Translator: tilboerner <tilman.boerner@gmx.net>\n"
 "Language-Team:  <tomwallroth@gmail.com>\n"
@@ -18,28 +18,235 @@ msgstr ""
 "X-Generator: Poedit 1.7.4\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
-#: cherrymusicserver/cherrymodel.py:126 cherrymusicserver/cherrymodel.py:365
+#: cherrymusicserver/httphandler.py:130
+msgid "Not secure, redirecting..."
+msgstr "Keine sichere Verbindung. Weiterleiten auf sicheren Port..."
+
+#: cherrymusicserver/httphandler.py:156
+#, python-brace-format
+msgid "user {name} just logged in."
+msgstr "Benutzer {name} hat sich eingeloggt."
+
+#: cherrymusicserver/httphandler.py:182
+msgid ""
+"\n"
+"            Dropping all sessions! Try not to change between python 2 and "
+"3,\n"
+"            everybody has to relogin now."
+msgstr ""
+"\n"
+"Setze alle Benutzersessions zurück! Möglichst nicht zwischen Python 2 und 3 "
+"wechseln, jeder Benutzer muss sich jetzt neu einloggen."
+
+#: cherrymusicserver/httphandler.py:211
+#, python-brace-format
+msgid "Rejected remote admin login from user: {name}"
+msgstr "Admin-Login über Netzwerkverbindung abgewiesen für Benutzer: {name}"
+
+#: cherrymusicserver/httphandler.py:439
+msgid "Fetching album art for keywords {keywords!r}"
+msgstr "Coverbild herunterladen für Schlüsselwörter {keywords!r}"
+
+#: cherrymusicserver/httphandler.py:483
+msgid "processing whole search request"
+msgstr "Bearbeite vollständgige Suchanfrage"
+
+#: cherrymusicserver/httphandler.py:485
+msgid "rendering search results as json"
+msgstr "Suchergebnisse als JSON rendern"
+
+#: cherrymusicserver/httphandler.py:647
+msgid "Please log in"
+msgstr "Bitte einloggen"
+
+#: cherrymusicserver/httphandler.py:657
+msgid "Unknown playlist format: {format!r}"
+msgstr "Unbekanntes Playlist-Format: {format!r}"
+
+#: cherrymusicserver/httphandler.py:661
+msgid "No playlists found"
+msgstr "Keine Playlisten gefunden"
+
+#: cherrymusicserver/browsersetup.py:71
+msgid "resizing of album covers"
+msgstr "automatische Größenanpassung von Album-Coverbildern"
+
+#: cherrymusicserver/browsersetup.py:72
+msgid "The executable \"convert\" was not found in you PATH"
+msgstr "Ausführbare Datei \"convert\" nicht im PATH gefunden"
+
+#: cherrymusicserver/browsersetup.py:75
+msgid "encoding and decoding of OGGs"
+msgstr "Encoding und Decoding für OGG-Formate"
+
+#: cherrymusicserver/browsersetup.py:76
+msgid "The executables \"oggenc\" and \"oggdec\" were not found in you PATH"
+msgstr "Ausführbare Dateien \"oggenc\" und \"oggdec\"  nicht im PATH gefunden"
+
+#: cherrymusicserver/browsersetup.py:79
+msgid "encoding and decoding of MP3s"
+msgstr "Encoding und Decoding für MP3-Formate"
+
+#: cherrymusicserver/browsersetup.py:80
+msgid "The executable \"lame\" was not found in you PATH"
+msgstr "Ausführbare Datei \"lame\" nicht im PATH gefunden"
+
+#: cherrymusicserver/browsersetup.py:83
+msgid "encoding and decoding of FLACs"
+msgstr "Encoding und Decoding für FLAC-Formate"
+
+#: cherrymusicserver/browsersetup.py:84
+msgid "The executable \"flac\" was not found in you PATH"
+msgstr "Ausführbare Datei \"flac\" nicht im PATH gefunden"
+
+#: cherrymusicserver/browsersetup.py:87
+msgid "decoding OGG, MP3, FLAC, WMA and AAC"
+msgstr "Decoding von OGG, MP3, FLAC, WMA und AAC"
+
+#: cherrymusicserver/browsersetup.py:88
+msgid "The executable \"mplayer\" was not found in you PATH"
+msgstr "Ausführbare Datei \"mplayer\" nicht im PATH gefunden"
+
+#: cherrymusicserver/browsersetup.py:159
+#, python-brace-format
+msgid ""
+"\n"
+"Starting setup server on port {port} ...\n"
+"Open your browser and put the server IP:{port} in the address bar.\n"
+"If you run the server locally, use: localhost:{port}.\n"
+msgstr ""
+"\n"
+"Starte Setup-Server auf dem Port {port} ...\n"
+"Browser öffnen und SERVER_IP:{port} in die Adresszeile eingeben.\n"
+"Wenn der Server auf dem lokalen Rechner läuft, dann localhost:{port} "
+"benutzen.\n"
+
+#: cherrymusicserver/__init__.py:134
 #, python-format
-msgid "Error listing directory %s: %s"
-msgstr "Kann Verzeichnis %s nicht listen: %s"
+msgid ""
+"\n"
+"cherrypy version is too old!\n"
+"Current version: %(current_version)s\n"
+"Required version: %(required_version)s or higher\n"
+msgstr ""
+"\n"
+"cherrypy Version ist veraltet!\n"
+"Gefundene Version: %(current_version)s\n"
+"Vorrausgesetzte Version %(required_version)s\n"
 
-#: cherrymusicserver/cherrymodel.py:201
+#: cherrymusicserver/__init__.py:248
+msgid "database schema update aborted. quitting."
+msgstr "Datenbankschema Aktualisierung abgebrochen. Programm beendet."
+
+#: cherrymusicserver/__init__.py:266
+#, fuzzy
+msgid "usernames may only contain letters and digits"
+msgstr ""
+"Benutzername und Passwort dürfen nur Buchstaben und Ziffern enthalten (auch "
+"keine Akzente, Umlaute oder ß)."
+
+#: cherrymusicserver/__init__.py:274
 #, python-format
-msgid "%(user)s searched for '%(term)s'"
-msgstr "%(user)s hat gesucht nach '%(term)s'"
+msgid "user with the name \"%s\" does not exist!"
+msgstr ""
 
-#: cherrymusicserver/cherrymodel.py:204
-msgid "sorting DB results using ResultOrder"
-msgstr "sortiere DB-Ergebnisse mit ResultOrder"
-
-#: cherrymusicserver/cherrymodel.py:216
-msgid "checking and classifying results:"
-msgstr "prüfe und klassifiziere Ergebnisse:"
-
-#: cherrymusicserver/cherrymodel.py:232
+#: cherrymusicserver/__init__.py:300
 #, python-format
-msgid "Error fetching version info: %s"
-msgstr "Fehler beim Lesen der Versionsinfo: %s"
+msgid "Default configuration file written to %(path)r"
+msgstr "Neue Konfigurationsdatei angelegt: %(path)r"
+
+#: cherrymusicserver/__init__.py:310
+msgid "Invalid basedir. Please provide a valid basedir path."
+msgstr "Ungültiges basedir. Bitte einen gültigen Pfad zum basedir angeben."
+
+#: cherrymusicserver/__init__.py:349
+#, python-format
+msgid ""
+"============================================\n"
+"Process id file %s already exists.\n"
+"If you are sure that cherrymusic is not running, you can delete this file "
+"and restart cherrymusic.\n"
+"============================================"
+msgstr ""
+"============================================\n"
+"Prozess id Datei %s existiert bereits.\n"
+"Falls sicher ist, dass cherrymusic nicht bereits gestartet ist, kann die "
+"Datei gelöscht und cherrymusic neu gestartet werden.\n"
+"============================================"
+
+#: cherrymusicserver/__init__.py:365
+msgid "Error removing pid file, doesn't exist!"
+msgstr "Fehler beim löschen der PID Datei, sie existierte nicht!"
+
+#: cherrymusicserver/__init__.py:479
+#, python-format
+msgid "Starting server on port %s ..."
+msgstr "Starte Server auf Port %s ..."
+
+#: cherrymusicserver/__init__.py:500
+#, python-brace-format
+msgid ""
+"\n"
+"==========================================================================\n"
+"A database schema update is needed and requires your consent.\n"
+"\n"
+"{reasons}\n"
+"\n"
+"To continue without changes, you need to downgrade to an earlier\n"
+"version of CherryMusic.\n"
+"\n"
+"To backup your database files first, abort for now and find them here:\n"
+"\n"
+"{dblocation}\n"
+"\n"
+"==========================================================================\n"
+"Run schema update? [y/N]: "
+msgstr ""
+"\n"
+"==========================================================================\n"
+"Eine Datenbankstruktur-Aktualisierung ist nötig, welche eine Zustimmung "
+"verlangt.\n"
+"\n"
+"{reasons}\n"
+"\n"
+"Um ohne Änderungen fortzufahren, müsste CherryMusic zu einer älteren Version "
+"down-ge-gradet werden.\n"
+"\n"
+"Um vorher ein Datenbank-Backup zu machen muss das Update abgebrochen werden. "
+"Die Datenbank-Dateien befinden sich hier:\n"
+"\n"
+"{dblocation}\n"
+"\n"
+"==========================================================================\n"
+"Datenbank-Aktualisierung jetzt durchführen? [y/N]: "
+
+#: cherrymusicserver/__init__.py:536
+#, python-format
+msgid ""
+"New configuration options available:\n"
+"                    %s\n"
+"                Using default values for now."
+msgstr ""
+"Neue Konfigurationsoptionen verfügbar:\n"
+"                        %s\n"
+"                    Verwende vorerst die Standardwerte."
+
+#: cherrymusicserver/__init__.py:541
+#, python-format
+msgid ""
+"The following configuration options are not used anymore:\n"
+"                    %s"
+msgstr ""
+"Folgende Konfigurationsoptionen werden nicht mehr verwendet:\n"
+"                        %s"
+
+#: cherrymusicserver/__init__.py:545
+msgid ""
+"Start with --newconfig to generate a new default config file next to your "
+"current one."
+msgstr ""
+"Starte mit --newconfig um eine neue Konfigurationsdatei neben der bereits "
+"vorhandenen zu erstellen."
 
 #. i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
 #: cherrymusicserver/configuration.py:70
@@ -414,239 +621,21 @@ msgstr "Konfigurationsdatei nicht gefunden: %(filepath)s"
 msgid "configuration path is not a file: %(filepath)s"
 msgstr "Konfigurationspfad ist keine Datei: %(filepath)s"
 
-#: cherrymusicserver/migrations/migration_0001.py:53
-#, python-brace-format
-msgid ""
-"\n"
-"==========================================================================\n"
-"Oops!\n"
-"\n"
-"CherryMusic changed some file locations while you weren't looking.\n"
-"(To better comply with best practices, if you wanna know.)\n"
-"\n"
-"To continue, please move the following:\n"
-"\n"
-"$ mv {src} {tgt}"
-msgstr ""
-"\n"
-"==========================================================================\n"
-"Hoppla!\n"
-"\n"
-"CherryMusic hat ein paar Dateipfade geändert!\n"
-"(Um den Standards besser zu entsprechen, man fragt sich, warum...)\n"
-"\n"
-"Um fortzufahren müssen folgende Dateien verschoben werden:\n"
-"\n"
-"    $ mv {src} {tgt}"
+#: cherrymusicserver/playlistdb.py:53
+msgid "This playlist doesn't exist! Nothing deleted!"
+msgstr "Playlist existiert nicht, nichts geloescht!"
 
-#: cherrymusicserver/database/sql.py:266
-msgid "Exception while updating database schema."
-msgstr "Fehler beim Aktualisieren des Datenbankschemas."
+#: cherrymusicserver/playlistdb.py:55
+msgid "This playlist belongs to another user! Nothing deleted."
+msgstr "Playlist gehoert einem anderen Benutzer, nichts geloescht!"
 
-#: cherrymusicserver/database/sql.py:267
-msgid ""
-"Database error. This is probably due to your version of sqlite being too "
-"old. Try updating sqlite3 and updating python. If the problem persists, you "
-"will need to delete the database at "
-msgstr ""
-"Datenbankfehler. Wahrscheinlich ist die Version von SQLite zu alt. sqlite3 "
-"und python aktualisieren. Wenn das nicht hilft, muss die folgende "
-"Datenbankdatei gelöscht werden:"
+#: cherrymusicserver/playlistdb.py:62
+msgid "I will not create an empty playlist. sorry."
+msgstr "Ich kann keine leere Playlist erstellen, sorry."
 
-#: cherrymusicserver/browsersetup.py:71
-msgid "resizing of album covers"
-msgstr "automatische Größenanpassung von Album-Coverbildern"
-
-#: cherrymusicserver/browsersetup.py:72
-msgid "The executable \"convert\" was not found in you PATH"
-msgstr "Ausführbare Datei \"convert\" nicht im PATH gefunden"
-
-#: cherrymusicserver/browsersetup.py:75
-msgid "encoding and decoding of OGGs"
-msgstr "Encoding und Decoding für OGG-Formate"
-
-#: cherrymusicserver/browsersetup.py:76
-msgid "The executables \"oggenc\" and \"oggdec\" were not found in you PATH"
-msgstr "Ausführbare Dateien \"oggenc\" und \"oggdec\"  nicht im PATH gefunden"
-
-#: cherrymusicserver/browsersetup.py:79
-msgid "encoding and decoding of MP3s"
-msgstr "Encoding und Decoding für MP3-Formate"
-
-#: cherrymusicserver/browsersetup.py:80
-msgid "The executable \"lame\" was not found in you PATH"
-msgstr "Ausführbare Datei \"lame\" nicht im PATH gefunden"
-
-#: cherrymusicserver/browsersetup.py:83
-msgid "encoding and decoding of FLACs"
-msgstr "Encoding und Decoding für FLAC-Formate"
-
-#: cherrymusicserver/browsersetup.py:84
-msgid "The executable \"flac\" was not found in you PATH"
-msgstr "Ausführbare Datei \"flac\" nicht im PATH gefunden"
-
-#: cherrymusicserver/browsersetup.py:87
-msgid "decoding OGG, MP3, FLAC, WMA and AAC"
-msgstr "Decoding von OGG, MP3, FLAC, WMA und AAC"
-
-#: cherrymusicserver/browsersetup.py:88
-msgid "The executable \"mplayer\" was not found in you PATH"
-msgstr "Ausführbare Datei \"mplayer\" nicht im PATH gefunden"
-
-#: cherrymusicserver/browsersetup.py:159
-#, python-brace-format
-msgid ""
-"\n"
-"Starting setup server on port {port} ...\n"
-"Open your browser and put the server IP:{port} in the address bar.\n"
-"If you run the server locally, use: localhost:{port}.\n"
-msgstr ""
-"\n"
-"Starte Setup-Server auf dem Port {port} ...\n"
-"Browser öffnen und SERVER_IP:{port} in die Adresszeile eingeben.\n"
-"Wenn der Server auf dem lokalen Rechner läuft, dann localhost:{port} "
-"benutzen.\n"
-
-#: cherrymusicserver/i18n_client.py:3
-msgid "track has no path set!"
-msgstr "Track hat keinen Dateipfad!"
-
-#: cherrymusicserver/i18n_client.py:4
-msgid "track has no label set!"
-msgstr "Track hat kein Titel!"
-
-#: cherrymusicserver/util.py:218
-#, python-format
-msgid "%d years ago"
-msgstr "vor %d Jahren"
-
-#: cherrymusicserver/util.py:220
-msgid "a year ago"
-msgstr "vor einem Jahr"
-
-#: cherrymusicserver/util.py:223
-#, python-format
-msgid "%d months ago"
-msgstr "vor %d Monaten"
-
-#: cherrymusicserver/util.py:225
-msgid "a month ago"
-msgstr "vor einem Monat"
-
-#: cherrymusicserver/util.py:228
-#, python-format
-msgid "%d weeks ago"
-msgstr "vor %d Wochen"
-
-#: cherrymusicserver/util.py:230
-msgid "a week ago"
-msgstr "vor einer Woche"
-
-#: cherrymusicserver/util.py:233
-#, python-format
-msgid "%d days ago"
-msgstr "vor %d Tagen"
-
-#: cherrymusicserver/util.py:235
-msgid "a day ago"
-msgstr "Gestern"
-
-#: cherrymusicserver/util.py:238
-#, python-format
-msgid "%d hours ago"
-msgstr "vor %d Stunden"
-
-#: cherrymusicserver/util.py:240
-msgid "an hour ago"
-msgstr "vor einer Stunde"
-
-#: cherrymusicserver/util.py:242
-msgid "half an hour ago"
-msgstr "vor einer halben Stunde"
-
-#: cherrymusicserver/util.py:245
-#, python-format
-msgid "%d minutes ago"
-msgstr "vor %d Minuten"
-
-#: cherrymusicserver/util.py:247
-msgid "a minute ago"
-msgstr "vor einer Minute"
-
-#: cherrymusicserver/util.py:249
-msgid "a few seconds ago"
-msgstr "vor ein paar Sekunden"
-
-#: cherrymusicserver/util.py:253
-#, python-format
-msgid "in %d years"
-msgstr "in %d Jahren"
-
-#: cherrymusicserver/util.py:255
-msgid "in a year"
-msgstr "in einem Jahr"
-
-#: cherrymusicserver/util.py:258
-#, python-format
-msgid "in %d months"
-msgstr "in %d Monaten"
-
-#: cherrymusicserver/util.py:260
-msgid "in a month"
-msgstr "in einem Monat"
-
-#: cherrymusicserver/util.py:263
-#, python-format
-msgid "in %d weeks"
-msgstr "in %d Wochen"
-
-#: cherrymusicserver/util.py:265
-msgid "in a week"
-msgstr "in einer Woche"
-
-#: cherrymusicserver/util.py:268
-#, python-format
-msgid "in %d days"
-msgstr "in %d Tagen"
-
-#: cherrymusicserver/util.py:270
-msgid "in a day"
-msgstr "Morgen"
-
-#: cherrymusicserver/util.py:273
-#, python-format
-msgid "in %d hours"
-msgstr "in %d Stunden"
-
-#: cherrymusicserver/util.py:275
-msgid "in an hour"
-msgstr "in einer Stunde"
-
-#: cherrymusicserver/util.py:277
-msgid "in half an hour"
-msgstr "in einer halben Stunde"
-
-#: cherrymusicserver/util.py:280
-#, python-format
-msgid "in %d minutes"
-msgstr "in %d Minuten"
-
-#: cherrymusicserver/util.py:282
-msgid "in a minute"
-msgstr "in einer Minute"
-
-#: cherrymusicserver/util.py:284
-msgid "in a few seconds"
-msgstr "in ein paar Sekunden"
-
-#: cherrymusicserver/util.py:286
-msgid "just now"
-msgstr "jetzt gerade"
-
-#: cherrymusicserver/util.py:307
-#, python-format
-msgid "Error writing file %(name)r to memory zip"
-msgstr "Fehler beim Schreiben der Datei %(name)r nach memory zip"
+#: cherrymusicserver/playlistdb.py:76
+msgid "This playlist name already exists! Nothing saved."
+msgstr "Dieser Playlistname existiert bereits! Nichts gespeichert."
 
 #: cherrymusicserver/sqlitecache.py:127
 msgid "terms must not contain ''"
@@ -830,126 +819,177 @@ msgstr "Datei ist nicht im \"basedir\": %s. ueberspringe."
 msgid "Loading files database into memory..."
 msgstr "Lade Datenbank in den Arbeitsspeicher..."
 
-#: cherrymusicserver/__init__.py:134
-#, python-format
-msgid ""
-"\n"
-"cherrypy version is too old!\n"
-"Current version: %(current_version)s\n"
-"Required version: %(required_version)s or higher\n"
-msgstr ""
-"\n"
-"cherrypy Version ist veraltet!\n"
-"Gefundene Version: %(current_version)s\n"
-"Vorrausgesetzte Version %(required_version)s\n"
-
-#: cherrymusicserver/__init__.py:248
-msgid "database schema update aborted. quitting."
-msgstr "Datenbankschema Aktualisierung abgebrochen. Programm beendet."
-
-#: cherrymusicserver/__init__.py:266
-msgid "username and password may only contain english letters and digits"
-msgstr ""
-"Benutzername und Passwort dürfen nur Buchstaben und Ziffern enthalten (auch "
-"keine Akzente, Umlaute oder ß)."
-
-#: cherrymusicserver/__init__.py:289
-#, python-format
-msgid "Default configuration file written to %(path)r"
-msgstr "Neue Konfigurationsdatei angelegt: %(path)r"
-
-#: cherrymusicserver/__init__.py:299
-msgid "Invalid basedir. Please provide a valid basedir path."
-msgstr "Ungültiges basedir. Bitte einen gültigen Pfad zum basedir angeben."
-
-#: cherrymusicserver/__init__.py:335
-#, python-format
-msgid ""
-"============================================\n"
-"Process id file %s already exists.\n"
-"If you are sure that cherrymusic is not running, you can delete this file "
-"and restart cherrymusic.\n"
-"============================================"
-msgstr ""
-"============================================\n"
-"Prozess id Datei %s existiert bereits.\n"
-"Falls sicher ist, dass cherrymusic nicht bereits gestartet ist, kann die "
-"Datei gelöscht und cherrymusic neu gestartet werden.\n"
-"============================================"
-
-#: cherrymusicserver/__init__.py:351
-msgid "Error removing pid file, doesn't exist!"
-msgstr "Fehler beim löschen der PID Datei, sie existierte nicht!"
-
-#: cherrymusicserver/__init__.py:465
-#, python-format
-msgid "Starting server on port %s ..."
-msgstr "Starte Server auf Port %s ..."
-
-#: cherrymusicserver/__init__.py:486
+#: cherrymusicserver/migrations/migration_0001.py:53
 #, python-brace-format
 msgid ""
 "\n"
 "==========================================================================\n"
-"A database schema update is needed and requires your consent.\n"
+"Oops!\n"
 "\n"
-"{reasons}\n"
+"CherryMusic changed some file locations while you weren't looking.\n"
+"(To better comply with best practices, if you wanna know.)\n"
 "\n"
-"To continue without changes, you need to downgrade to an earlier\n"
-"version of CherryMusic.\n"
+"To continue, please move the following:\n"
 "\n"
-"To backup your database files first, abort for now and find them here:\n"
-"\n"
-"{dblocation}\n"
-"\n"
-"==========================================================================\n"
-"Run schema update? [y/N]: "
+"$ mv {src} {tgt}"
 msgstr ""
 "\n"
 "==========================================================================\n"
-"Eine Datenbankstruktur-Aktualisierung ist nötig, welche eine Zustimmung "
-"verlangt.\n"
+"Hoppla!\n"
 "\n"
-"{reasons}\n"
+"CherryMusic hat ein paar Dateipfade geändert!\n"
+"(Um den Standards besser zu entsprechen, man fragt sich, warum...)\n"
 "\n"
-"Um ohne Änderungen fortzufahren, müsste CherryMusic zu einer älteren Version "
-"down-ge-gradet werden.\n"
+"Um fortzufahren müssen folgende Dateien verschoben werden:\n"
 "\n"
-"Um vorher ein Datenbank-Backup zu machen muss das Update abgebrochen werden. "
-"Die Datenbank-Dateien befinden sich hier:\n"
-"\n"
-"{dblocation}\n"
-"\n"
-"==========================================================================\n"
-"Datenbank-Aktualisierung jetzt durchführen? [y/N]: "
+"    $ mv {src} {tgt}"
 
-#: cherrymusicserver/__init__.py:522
+#: cherrymusicserver/database/sql.py:266
+msgid "Exception while updating database schema."
+msgstr "Fehler beim Aktualisieren des Datenbankschemas."
+
+#: cherrymusicserver/database/sql.py:267
+msgid ""
+"Database error. This is probably due to your version of sqlite being too "
+"old. Try updating sqlite3 and updating python. If the problem persists, you "
+"will need to delete the database at "
+msgstr ""
+"Datenbankfehler. Wahrscheinlich ist die Version von SQLite zu alt. sqlite3 "
+"und python aktualisieren. Wenn das nicht hilft, muss die folgende "
+"Datenbankdatei gelöscht werden:"
+
+#: cherrymusicserver/util.py:218
 #, python-format
-msgid ""
-"New configuration options available:\n"
-"                    %s\n"
-"                Using default values for now."
-msgstr ""
-"Neue Konfigurationsoptionen verfügbar:\n"
-"                        %s\n"
-"                    Verwende vorerst die Standardwerte."
+msgid "%d years ago"
+msgstr "vor %d Jahren"
 
-#: cherrymusicserver/__init__.py:527
+#: cherrymusicserver/util.py:220
+msgid "a year ago"
+msgstr "vor einem Jahr"
+
+#: cherrymusicserver/util.py:223
 #, python-format
-msgid ""
-"The following configuration options are not used anymore:\n"
-"                    %s"
-msgstr ""
-"Folgende Konfigurationsoptionen werden nicht mehr verwendet:\n"
-"                        %s"
+msgid "%d months ago"
+msgstr "vor %d Monaten"
 
-#: cherrymusicserver/__init__.py:531
-msgid ""
-"Start with --newconfig to generate a new default config file next to your "
-"current one."
-msgstr ""
-"Starte mit --newconfig um eine neue Konfigurationsdatei neben der bereits "
-"vorhandenen zu erstellen."
+#: cherrymusicserver/util.py:225
+msgid "a month ago"
+msgstr "vor einem Monat"
+
+#: cherrymusicserver/util.py:228
+#, python-format
+msgid "%d weeks ago"
+msgstr "vor %d Wochen"
+
+#: cherrymusicserver/util.py:230
+msgid "a week ago"
+msgstr "vor einer Woche"
+
+#: cherrymusicserver/util.py:233
+#, python-format
+msgid "%d days ago"
+msgstr "vor %d Tagen"
+
+#: cherrymusicserver/util.py:235
+msgid "a day ago"
+msgstr "Gestern"
+
+#: cherrymusicserver/util.py:238
+#, python-format
+msgid "%d hours ago"
+msgstr "vor %d Stunden"
+
+#: cherrymusicserver/util.py:240
+msgid "an hour ago"
+msgstr "vor einer Stunde"
+
+#: cherrymusicserver/util.py:242
+msgid "half an hour ago"
+msgstr "vor einer halben Stunde"
+
+#: cherrymusicserver/util.py:245
+#, python-format
+msgid "%d minutes ago"
+msgstr "vor %d Minuten"
+
+#: cherrymusicserver/util.py:247
+msgid "a minute ago"
+msgstr "vor einer Minute"
+
+#: cherrymusicserver/util.py:249
+msgid "a few seconds ago"
+msgstr "vor ein paar Sekunden"
+
+#: cherrymusicserver/util.py:253
+#, python-format
+msgid "in %d years"
+msgstr "in %d Jahren"
+
+#: cherrymusicserver/util.py:255
+msgid "in a year"
+msgstr "in einem Jahr"
+
+#: cherrymusicserver/util.py:258
+#, python-format
+msgid "in %d months"
+msgstr "in %d Monaten"
+
+#: cherrymusicserver/util.py:260
+msgid "in a month"
+msgstr "in einem Monat"
+
+#: cherrymusicserver/util.py:263
+#, python-format
+msgid "in %d weeks"
+msgstr "in %d Wochen"
+
+#: cherrymusicserver/util.py:265
+msgid "in a week"
+msgstr "in einer Woche"
+
+#: cherrymusicserver/util.py:268
+#, python-format
+msgid "in %d days"
+msgstr "in %d Tagen"
+
+#: cherrymusicserver/util.py:270
+msgid "in a day"
+msgstr "Morgen"
+
+#: cherrymusicserver/util.py:273
+#, python-format
+msgid "in %d hours"
+msgstr "in %d Stunden"
+
+#: cherrymusicserver/util.py:275
+msgid "in an hour"
+msgstr "in einer Stunde"
+
+#: cherrymusicserver/util.py:277
+msgid "in half an hour"
+msgstr "in einer halben Stunde"
+
+#: cherrymusicserver/util.py:280
+#, python-format
+msgid "in %d minutes"
+msgstr "in %d Minuten"
+
+#: cherrymusicserver/util.py:282
+msgid "in a minute"
+msgstr "in einer Minute"
+
+#: cherrymusicserver/util.py:284
+msgid "in a few seconds"
+msgstr "in ein paar Sekunden"
+
+#: cherrymusicserver/util.py:286
+msgid "just now"
+msgstr "jetzt gerade"
+
+#: cherrymusicserver/util.py:307
+#, python-format
+msgid "Error writing file %(name)r to memory zip"
+msgstr "Fehler beim Schreiben der Datei %(name)r nach memory zip"
 
 #: cherrymusicserver/userdb.py:53
 msgid "empty username or password!"
@@ -959,78 +999,44 @@ msgstr "Benutzername oder Passwort leer!"
 msgid "not a valid password"
 msgstr "kein gueltiges Passwort"
 
-#: cherrymusicserver/userdb.py:158
+#: cherrymusicserver/userdb.py:168
 msgid "name must not be empty"
 msgstr "Name darf nicht leer sein"
 
-#: cherrymusicserver/userdb.py:160
+#: cherrymusicserver/userdb.py:170
 msgid "password must not be empty"
 msgstr "Passwort darf nicht leer sein"
 
-#: cherrymusicserver/httphandler.py:129
-msgid "Not secure, redirecting..."
-msgstr "Keine sichere Verbindung. Weiterleiten auf sicheren Port..."
+#: cherrymusicserver/cherrymodel.py:129 cherrymusicserver/cherrymodel.py:368
+#, python-format
+msgid "Error listing directory %s: %s"
+msgstr "Kann Verzeichnis %s nicht listen: %s"
 
-#: cherrymusicserver/httphandler.py:155
-#, python-brace-format
-msgid "user {name} just logged in."
-msgstr "Benutzer {name} hat sich eingeloggt."
+#: cherrymusicserver/cherrymodel.py:204
+#, python-format
+msgid "%(user)s searched for '%(term)s'"
+msgstr "%(user)s hat gesucht nach '%(term)s'"
 
-#: cherrymusicserver/httphandler.py:181
-msgid ""
-"\n"
-"            Dropping all sessions! Try not to change between python 2 and "
-"3,\n"
-"            everybody has to relogin now."
-msgstr ""
-"\n"
-"Setze alle Benutzersessions zurück! Möglichst nicht zwischen Python 2 und 3 "
-"wechseln, jeder Benutzer muss sich jetzt neu einloggen."
+#: cherrymusicserver/cherrymodel.py:207
+msgid "sorting DB results using ResultOrder"
+msgstr "sortiere DB-Ergebnisse mit ResultOrder"
 
-#: cherrymusicserver/httphandler.py:210
-#, python-brace-format
-msgid "Rejected remote admin login from user: {name}"
-msgstr "Admin-Login über Netzwerkverbindung abgewiesen für Benutzer: {name}"
+#: cherrymusicserver/cherrymodel.py:219
+msgid "checking and classifying results:"
+msgstr "prüfe und klassifiziere Ergebnisse:"
 
-#: cherrymusicserver/httphandler.py:420
-msgid "Fetching album art for keywords {keywords!r}"
-msgstr "Coverbild herunterladen für Schlüsselwörter {keywords!r}"
+#: cherrymusicserver/cherrymodel.py:235
+#, python-format
+msgid "Error fetching version info: %s"
+msgstr "Fehler beim Lesen der Versionsinfo: %s"
 
-#: cherrymusicserver/httphandler.py:464
-msgid "processing whole search request"
-msgstr "Bearbeite vollständgige Suchanfrage"
+#: cherrymusicserver/i18n_client.py:3
+msgid "track has no path set!"
+msgstr "Track hat keinen Dateipfad!"
 
-#: cherrymusicserver/httphandler.py:466
-msgid "rendering search results as json"
-msgstr "Suchergebnisse als JSON rendern"
-
-#: cherrymusicserver/httphandler.py:628
-msgid "Please log in"
-msgstr "Bitte einloggen"
-
-#: cherrymusicserver/httphandler.py:638
-msgid "Unknown playlist format: {format!r}"
-msgstr "Unbekanntes Playlist-Format: {format!r}"
-
-#: cherrymusicserver/httphandler.py:642
-msgid "No playlists found"
-msgstr "Keine Playlisten gefunden"
-
-#: cherrymusicserver/playlistdb.py:53
-msgid "This playlist doesn't exist! Nothing deleted!"
-msgstr "Playlist existiert nicht, nichts geloescht!"
-
-#: cherrymusicserver/playlistdb.py:55
-msgid "This playlist belongs to another user! Nothing deleted."
-msgstr "Playlist gehoert einem anderen Benutzer, nichts geloescht!"
-
-#: cherrymusicserver/playlistdb.py:62
-msgid "I will not create an empty playlist. sorry."
-msgstr "Ich kann keine leere Playlist erstellen, sorry."
-
-#: cherrymusicserver/playlistdb.py:83
-msgid "This playlist name already exists! Nothing saved."
-msgstr "Dieser Playlistname existiert bereits! Nichts gespeichert."
+#: cherrymusicserver/i18n_client.py:4
+msgid "track has no label set!"
+msgstr "Track hat kein Titel!"
 
 #~ msgid ""
 #~ "\n"
