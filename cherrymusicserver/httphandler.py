@@ -611,14 +611,21 @@ class HTTPHandler(object):
     def api_showplaylists(self, sortby="created", filterby=''):
         playlists = self.playlistdb.showPlaylists(self.getUserId(), filterby)
         curr_time = int(time.time())
+        is_reverse = False
         #translate userids to usernames:
         for pl in playlists:
             pl['username'] = self.userdb.getNameById(pl['userid'])
             pl['type'] = 'playlist'
             pl['age'] = curr_time - pl['created']
-        if not sortby in ('username', 'age', 'title'):
+        if sortby[0] == '-':
+            is_reverse = True
+            sortby = sortby[1:]
+        if not sortby in ('username', 'age', 'title', 'default'):
             sortby = 'created'
-        playlists = sorted(playlists, key=lambda x: x[sortby])
+        if sortby == 'default':
+            sortby = 'age'
+            is_reverse = False
+        playlists = sorted(playlists, key=lambda x: x[sortby], reverse = is_reverse)
         return playlists
 
     def api_logout(self):
