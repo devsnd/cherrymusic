@@ -1,3 +1,0 @@
-DROP TABLE IF EXISTS playlists;
-
-DROP TABLE IF EXISTS tracks;
