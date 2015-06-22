@@ -1,0 +1,12 @@
+<div>
+  Playlist mode
+  <table class="table table-striped">
+    <tr ng-repeat="playlist in playlists track by playlist.id" ng-click="loadPlaylist(playlist)">
+      <td>{{ playlist.id }}</td>
+      <td>{{ playlist.name }}</td>
+      <td>{{ playlist.owner }}</td>
+      <td>{{ playlist.owner_name }}</td>
+      <td>{{ playlist.public }}</td>
+    </tr>
+  </table>
+</div>

@@ -1,0 +1,34 @@
+<div>
+  File Browser Mode<br>
+
+  <ol class="breadcrumb">
+    <li ng-repeat="breadcrumb in breadcrumbs track by breadcrumb.path">
+      <a ng-click="loadDirectory(breadcrumb.path)">{{ breadcrumb.name }}</a>
+    </li>
+  </ol>
+
+  <div ng-if="content.directories.length">
+    <h3>Directories</h3>
+
+      <div ng-repeat="directory in content.directories track by directory.id" ng-click="loadDirectory(content.current_path + '/' + directory.path)">
+        <img ng-src="{{ albumArtUrl(content.current_path + '/' + directory.path) }}"></td>
+        <div>
+          {{ directory.path }}
+        </div>
+      </div>
+
+  </div>
+  <div ng-if="content.files.length">
+    <h3>Files</h3>
+    <table class="table table-striped">
+      <tr ng-repeat="file in content.files track by file.id" ng-click="addToPlaylist(file)">
+        <td><file file="file"></file></td>
+      </tr>
+    </table>
+  </div>
+
+  <div ng-if="baseDirNotIndexed(content)">
+    It seems you have not indexed your music library yet.
+    <button ng-disabled="indexingStarted" ng-click="indexLibrary('')">Index library now</button>
+  </div>
+</div>
