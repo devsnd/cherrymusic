@@ -35,7 +35,7 @@ import os
 from mock import *
 from nose.tools import *
 
-from cherrymusicserver.test.helpers import cherrytest, tempdir, mkpath, cherryconfig
+from cherrymusicserver.test.helpers import cherrytest, tempdir, mkpath, cherryconfig, symlinktest
 
 from cherrymusicserver import log
 log.setTest()
@@ -91,6 +91,7 @@ def test_listdir_deleted_files(cache):
     eq_([], model.listdir(''))
 
 
+@symlinktest
 @cherrytest(config({'browser.pure_database_lookup': False}))
 def test_listdir_bad_symlinks():
     "cherrymodel.listdir should work when cached files don't exist anymore"
@@ -100,6 +101,22 @@ def test_listdir_bad_symlinks():
         with cherryconfig({'media.basedir': tmpdir}):
             os.symlink('not_there', os.path.join(tmpdir, 'badlink'))
             eq_([], model.listdir(''))
+
+
+@cherrytest(config({'browser.pure_database_lookup': False}))
+def test_listdir_unreadable():
+    "cherrymodel.listdir should return empty when dir is unreadable"
+    model = cherrymodel.CherryModel()
+
+    with tempdir('test_listdir_unreadable') as tmpdir:
+        with cherryconfig({'media.basedir': tmpdir}):
+            os.chmod(tmpdir, 0o311)
+            try:
+                open(os.path.join(tmpdir, 'file.mp3'), 'a').close()
+                eq_([], model.listdir(''))
+            finally:
+                # Ensure tmpdir can be cleaned up, even if test fails
+                os.chmod(tmpdir, 0o755)
 
 
 @cherrytest(config({'media.transcode': False}))

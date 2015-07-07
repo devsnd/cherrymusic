@@ -60,3 +60,6 @@ doc/sphinx/_build
 # ipython notebook
 *.ipynb
 .ipynb*
+
+res/ngclient/node_modules/
+res/ngclient/app/components/

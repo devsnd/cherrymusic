@@ -50,6 +50,7 @@ except ImportError:
 
 
 import audiotranscode
+from tinytag import TinyTag
 
 from cherrymusicserver import userdb
 from cherrymusicserver import log
@@ -365,6 +366,7 @@ class HTTPHandler(object):
         uo = self.useroptions.forUser(self.getUserId())
         uo.setOption(optionkey, optionval)
         return "success"
+
     def api_setuseroptionfor(self, userid, optionkey, optionval):
         if cherrypy.session['admin']:
             uo = self.useroptions.forUser(userid)
@@ -392,7 +394,24 @@ class HTTPHandler(object):
 
     def api_fetchalbumart(self, directory):
         _save_and_release_session()
-        default_folder_image = "/res/img/folder.png"
+        default_folder_image = "../res/img/folder.png"
+
+        log.i('Fetching album art for: %s' % directory)
+        filepath = os.path.join(cherry.config['media.basedir'], directory)
+
+        if os.path.isfile(filepath):
+            # if the given path is a file, try to get the image from ID3
+            tag = TinyTag.get(filepath, image=True)
+            image_data = tag.get_image()
+            if image_data:
+                log.d('Image found in tag.')
+                header = {'Content-Type': 'image/jpg', 'Content-Length': len(image_data)}
+                cherrypy.response.headers.update(header)
+                return image_data
+            else:
+                # if the file does not contain an image, display the image of the
+                # parent directory
+                directory = os.path.dirname(directory)
 
         #try getting a cached album art image
         b64imgpath = albumArtFilePath(directory)
@@ -598,14 +617,21 @@ class HTTPHandler(object):
     def api_showplaylists(self, sortby="created", filterby=''):
         playlists = self.playlistdb.showPlaylists(self.getUserId(), filterby)
         curr_time = int(time.time())
+        is_reverse = False
         #translate userids to usernames:
         for pl in playlists:
             pl['username'] = self.userdb.getNameById(pl['userid'])
             pl['type'] = 'playlist'
             pl['age'] = curr_time - pl['created']
-        if not sortby in ('username', 'age', 'title'):
+        if sortby[0] == '-':
+            is_reverse = True
+            sortby = sortby[1:]
+        if not sortby in ('username', 'age', 'title', 'default'):
             sortby = 'created'
-        playlists = sorted(playlists, key=lambda x: x[sortby])
+        if sortby == 'default':
+            sortby = 'age'
+            is_reverse = False
+        playlists = sorted(playlists, key=lambda x: x[sortby], reverse = is_reverse)
         return playlists
 
     def api_logout(self):

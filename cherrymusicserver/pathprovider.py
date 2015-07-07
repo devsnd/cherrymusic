@@ -29,10 +29,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
+import codecs
+import hashlib
 import os
 import sys
-import base64
-import codecs
 
 userDataFolderName = 'cherrymusic'  # $XDG_DATA_HOME/userDataFolderName
 pidFileName = 'cherrymusic.pid'     # $XDG_DATA_HOME/userDataFolderName/cherrymusic.pid
@@ -122,16 +122,10 @@ def albumArtFilePath(directorypath):
     albumartcachepath = os.path.join(getUserDataPath(), 'albumart')
     if not os.path.exists(albumartcachepath):
         os.makedirs(albumartcachepath)
-    configpath = os.path.join(albumartcachepath, base64encode(directorypath))
-    return configpath
-
-def base64encode(s):
-    utf8_bytestr = codecs.encode(s, 'UTF-8')
-    utf8_altchar = codecs.encode('+-', 'UTF-8')
-    return codecs.decode(base64.b64encode(utf8_bytestr, utf8_altchar), 'UTF-8')
-
-def base64decode(s):
-    return codecs.decode(base64.b64decode(s),'UTF-8')
+    if directorypath:
+        filename = _md5_hash(directorypath) + '.thumb'
+        albumartcachepath = os.path.join(albumartcachepath, filename)
+    return albumartcachepath
 
 def assureFolderExists(folder,subfolders=['']):
     for subfolder in subfolders:
@@ -183,3 +177,7 @@ def stripext(filename):
     if '.' in filename:
         return filename[:filename.rindex('.')]
     return filename
+
+def _md5_hash(s):
+    utf8_bytestr = codecs.encode(s, 'UTF-8')
+    return hashlib.md5(utf8_bytestr).hexdigest()

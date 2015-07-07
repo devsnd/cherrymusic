@@ -54,6 +54,8 @@ import cherrymusicserver.tweak
 from imp import reload
 import random
 
+from backport import unichr
+
 UNIDECODE_AVAILABLE = True
 try:
     import unidecode
@@ -133,7 +135,8 @@ class SQLiteCache(object):
                 params = (term + '%',)
             else:
                 where = ''' (dictionary.word >= ? AND dictionary.word < ?) '''
-                params = (term, tprefix + chr(1 + ord(tlast)))
+                nextchr = unichr(1 + ord(tlast))
+                params = (term, tprefix + nextchr)
             order = ' ORDER BY dictionary.occurrences DESC '
             limit = ' LIMIT 0, ' + str(maxFileIdsPerTerm) #TODO add maximum db results as configuration parameter
             sql = query + where + order +limit
@@ -798,7 +801,7 @@ class File():
             if not f.fullpath.startswith(basedir):
                 log.e(_('file not in basedir: %s. skipping.') % f.fullpath)
                 continue
-            if f.islink:
+            if f.islink and not os.path.isfile(f.fullpath):
                 rp = os.path.realpath(f.fullpath)
                 if os.path.abspath(basedir).startswith(rp) \
                     or (os.path.islink(basedir)
@@ -808,7 +811,8 @@ class File():
                              "if followed. Skipping.")) % f.relpath)
                     continue
                 if not (f.parent is None or f.parent.parent is None):
-                    log.e(_(("Deeply nested symlink found: %s . All links "
+                    log.e(_(("Deeply nested directory symlink found: %s . "
+                          "All symlinks to directories "
                           "must be directly in your basedir (%s). The "
                           "program cannot safely handle them otherwise."
                           " Skipping.")) % (f.relpath, os.path.abspath(basedir)))

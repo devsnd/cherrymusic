@@ -64,7 +64,7 @@ NUMBERS = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
 @service.user(cache='filecache')
 class CherryModel:
     def __init__(self):
-        CherryModel.NATIVE_BROWSER_FORMATS = ['ogg', 'mp3']
+        CherryModel.NATIVE_BROWSER_FORMATS = ['opus', 'ogg', 'mp3']
         CherryModel.supportedFormats = CherryModel.NATIVE_BROWSER_FORMATS[:]
         if cherry.config['media.transcode']:
             self.transcoder = audiotranscode.AudioTranscode()
@@ -112,15 +112,22 @@ class CherryModel:
         return sortedfiles
 
     def listdir(self, dirpath, filterstr=''):
-        absdirpath = CherryModel.abspath(dirpath)
+        if dirpath is None:
+            absdirpath = cherry.config['media.basedir']
+        else:
+            absdirpath = CherryModel.abspath(dirpath)
         if cherry.config['browser.pure_database_lookup']:
             allfilesindir = self.cache.listdir(dirpath)     # NOT absdirpath!
         else:
-            in_basedir = os.path.normpath(absdirpath).startswith(
+            in_basedir = (os.path.normpath(absdirpath)+'/').startswith(
                 cherry.config['media.basedir'])
             if not in_basedir:
                 raise ValueError('dirpath not in basedir: %r' % dirpath)
-            allfilesindir = os.listdir(absdirpath)
+            try:
+                allfilesindir = os.listdir(absdirpath)
+            except OSError as e:
+                log.e(_('Error listing directory %s: %s') % (absdirpath, str(e)))
+                allfilesindir = []
 
         #remove all files not inside the filter
         if filterstr:
@@ -355,7 +362,11 @@ class MusicEntry:
                 log.error(
                     "MusicEntry does not exist: %r", self.path)
                 return
-            directory_listing = os.listdir(fullpath)
+            try:
+                directory_listing = os.listdir(fullpath)
+            except OSError as e:
+                log.e(_('Error listing directory %s: %s') % (fullpath, str(e)))
+                directory_listing = []
             for idx, filename in enumerate(directory_listing):
                 if idx > MusicEntry.MAX_SUB_FILES_ITER_COUNT:
                     # estimate remaining file count

@@ -196,7 +196,7 @@ class AlbumArtFetcher:
 
         filetypes = (".jpg", ".jpeg", ".png")
         try:
-            for file_in_dir in os.listdir(path):
+            for file_in_dir in sorted(os.listdir(path)):
                 if not file_in_dir.lower().endswith(filetypes):
                     continue
                 try:

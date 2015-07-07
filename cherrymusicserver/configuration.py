@@ -103,7 +103,7 @@ def from_defaults():
     with c['media.show_subfolder_count'] as subfoldercount:
         subfoldercount.value = True
         # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
-        fetch.doc = _("""
+        subfoldercount.doc = _("""
                     Show the number of sub-folders and tracks contained
                     in any folder. This will increase the stress for the
                     server, so if you're running CherryMusic on a 386DX II

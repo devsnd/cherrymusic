@@ -36,6 +36,8 @@ import nose
 import unittest
 from nose.tools import *
 
+from cherrymusicserver.test.helpers import cherrytest, tempdir, symlinktest
+
 import os
 import re
 import shutil
@@ -52,7 +54,6 @@ from cherrymusicserver import service
 sqlitecache.debug = True
 
 from cherrymusicserver.database.sql import MemConnector
-
 log.setTest()
 
 
@@ -624,7 +625,7 @@ class SymlinkTest(unittest.TestCase):
         return [os.path.join(self.testdir, i.infs.relpath) for
                 i in self.Cache.enumerate_fs_with_db(self.testdir)]
 
-
+    @symlinktest
     def testRootLinkOk(self):
         link = os.path.join(self.testdir, 'link')
         target = os.path.join(self.testdir, 'root_file')
@@ -637,18 +638,21 @@ class SymlinkTest(unittest.TestCase):
             os.remove(link)
 
 
-    def testSkipSymlinksBelowBasedirRoot(self):
-        link = os.path.join(self.testdir, 'root_dir', 'link')
-        target = os.path.join(self.testdir, 'root_file')
-        os.symlink(target, link)
+    @symlinktest
+    def testSkipDirSymlinksBelowBasedirRoot(self):
+        with tempdir('') as tmpd:
+            link = os.path.join(self.testdir, 'root_dir', 'link')
+            target = tmpd
+            os.symlink(target, link)
 
-        try:
-            self.assertFalse(link in self.enumeratedTestdir(),
-                            'deeply nested link must not be returned')
-        finally:
-            os.remove(link)
+            try:
+                self.assertFalse(link in self.enumeratedTestdir(),
+                                'deeply nested dir link must not be returned')
+            finally:
+                os.remove(link)
 
 
+    @symlinktest
     def testNoCyclicalSymlinks(self):
         target = os.path.abspath(self.testdir)
         link = os.path.join(self.testdir, 'link')
@@ -793,8 +797,6 @@ class UpdateTest(unittest.TestCase):
         self.assertEqual(None, self.Cache.db_find_file_by_path(path_to(newfiles[1])), msg)
         self.assertEqual(None, self.Cache.db_find_file_by_path(path_to(newfiles[2])), msg)
 
-from cherrymusicserver.test.helpers import cherrytest, tempdir
-
 def setup_cache(testfiles=()):
     """ Sets up a SQLiteCache instance bound to current `media.basedir`.
 
@@ -831,6 +833,7 @@ def cachetest(func):
     wrapper.__doc__ = func.__doc__
     return wrapper
 
+
 @cachetest
 def test_listdir():
     basedir_contents = ['some_file']
@@ -843,6 +846,34 @@ def test_listdir():
     assert [] == cache.listdir('/.')
     assert [] == cache.listdir('..')
     assert [] == cache.listdir('./..')
+
+
+@cachetest
+def test_search_nonascii():
+    """ searchfor can handle and find non-ascii """
+    basedir_contents = ['ä.mp3']
+    cache = setup_cache(basedir_contents)
+
+    found = cache.searchfor('ä')
+    assert len(found) == 1
+    assert found[0].path == basedir_contents[0]   # found MusicEntry
+
+@symlinktest
+@cachetest
+def test_symlinks_to_files_are_indexed():
+    """ deep file symlinks are indexed """
+
+    # create 'file', 'dir/link' --> 'file'
+    cache = setup_cache(['file', 'dir/'])
+    basedir = cherry.config['media.basedir']
+    src = os.path.join(basedir, 'file')
+    dst = os.path.join(basedir, 'dir', 'link')
+    os.symlink(src, dst)
+    assert os.path.isfile(dst)
+
+    cache.full_update()
+    assert cache.searchfor('link')
+
 
 if __name__ == "__main__":
     nose.runmodule()

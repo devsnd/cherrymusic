@@ -32,12 +32,12 @@ var browser = detectBrowser();
 if(['msie','safari'].indexOf(browser) != -1){
     var encoderPreferenceOrder = ['mp3','ogg'];
 } else {
-    var encoderPreferenceOrder = ['ogg','mp3'];
+    var encoderPreferenceOrder = ['opus', 'ogg','mp3'];
 }
 
 var SERVER_CONFIG = {};
 var availableEncoders = undefined;
-var availablejPlayerFormats = ['mp3','ogg'];
+var availablejPlayerFormats = ['opus', 'mp3','ogg'];
 var availableDecoders = undefined;
 var transcodingEnabled = undefined;
 var userOptions = undefined;
@@ -48,6 +48,7 @@ var CHECK_MUSIC_PLAYING_INTERVAL = 2000;
 var HEARTBEAT_INTERVAL_MS = 30*1000;
 
 var playlistSelector = '.jp-playlist';
+var previousSorted = undefined
 
 var executeAfterConfigLoaded = []
 
@@ -266,7 +267,7 @@ var handle_useroption_force_transcode_bitrate = function() {
         $(selected).attr('selected', 'selected');
         $(deselected).removeAttr('selected');
         $("#media-force_transcode_to_bitrate-display").val(forced_bitrate);
-        if([0, 96, 128, 320].indexOf(forced_bitrate) < 0) {
+        if([0, 48, 64, 96, 128, 320].indexOf(forced_bitrate) < 0) {
             console.log("Unknown bitrate value:", forced_bitrate);
         }
     } else {
@@ -308,17 +309,18 @@ keyboard_shortcut_setter = function(option, optionname){
         if (e.ctrlKey) return;
         if (e.metaKey) return;
         var keyboardsetterend = function(){
-            $('#shortcut-changer input').unbind('keyup',keydownhandler);
-            $('html').unbind('keyup',keydownhandler);
+            $('#shortcut-changer input').unbind('keydown',keydownhandler);
+            $('html').unbind('keydown',keydownhandler);
             $('#shortcut-changer').fadeOut('fast');
         }
-        if(e.which !== 27 && e.which !== 32){ //do not bind escape / space
+        if(e.which && e.which !== 27 && e.which !== 32){ //do not bind unrecognised keys or escape / space
             optionSetter(option,e.which,keyboardsetterend,keyboardsetterend);
         }
         keyboardsetterend();
+        return false;
     }
-    $('#shortcut-changer input').bind('keyup',keydownhandler);
-    $('html').bind('keyup',keydownhandler);
+    $('#shortcut-changer input').bind('keydown',keydownhandler);
+    $('html').bind('keydown',keydownhandler);
 }
 
 function busy(selector, rect){
@@ -381,6 +383,7 @@ ext2jPlayerFormat = function(ext){
         case "mp3": return "mp3";
 
         case "ogg":
+        case "opus":
         case "oga": return "oga";
 
         case "m4a":
@@ -458,6 +461,11 @@ function showPlaylists(sortby, filterby){
         $('.playlist-filter-input').val(value_before);
     };
     var error = errorFunc('error loading external playlists');
+
+    if(sortby == previousSorted){
+        sortby = '-' + sortby; 
+    }
+    previousSorted = sortby;
 
     busy('.search-results').hide().fadeIn('fast');
     api('showplaylists',
@@ -935,29 +943,43 @@ function keyboardShortcuts(e){
     if (e.shiftKey) return;
     if (e.ctrlKey) return;
     if (e.metaKey) return;
-    var focusedElement = $("*:focus");
-    var inputFieldFocused = focusedElement.length > 0;
-    if(inputFieldFocused){
-        if(e.which === 27){ //escape -> unfocus
-            focusedElement.blur();
-        }
+
+    var actions = { 'next' :    function(e){playlistManager.cmd_next()},
+                    'pause' :   function(e){playlistManager.cmd_pause()},
+                    'play' :    function(e){playlistManager.cmd_play()},
+                    'prev' :    function(e){playlistManager.cmd_previous()},
+                    'search' :  function(e){$('#searchform input').focus().select(); e.preventDefault();},
+                    'stop' :    function(e){playlistManager.cmd_stop()},
+                    };
+    var mediaKeys = { 'MediaNextTrack' :        'next',
+                      'MediaPlayPause' :        'pause', //The pause action is really play/pause, while the play action is only play.
+                      'MediaPreviousTrack' :    'prev',
+                      'MediaStop' :             'stop'
+                      //Volume up/down/mute keys also exist, but ignore them because they already control system volume.
+                      };
+    var triggerAction = function (action){
+        window.console.log('triggering: '+action);
+        actions[action](e);
+    };
+
+    if (e.key && mediaKeys[e.key]){
+        triggerAction(mediaKeys[e.key]);
     } else {
-        var actions = { 'next' :    function(e){playlistManager.cmd_next()},
-                        'pause' :   function(e){playlistManager.cmd_pause()},
-                        'play' :    function(e){playlistManager.cmd_play()},
-                        'prev' :    function(e){playlistManager.cmd_previous()},
-                        'search' :  function(e){$('#searchform input').focus().select(); e.preventDefault();},
-                        'stop' :    function(e){playlistManager.cmd_stop()},
-                        };
-        for(var action in actions){
-            if(e.which === userOptions.keyboard_shortcuts[action]){
-                window.console.log('triggering: '+action);
-                actions[action](e);
+        var focusedElement = $("*:focus");
+        var inputFieldFocused = focusedElement.length > 0;
+        if(inputFieldFocused){
+            if(e.which === 27){ //escape -> unfocus
+                focusedElement.blur();
             }
-        }
-        if(e.which === 32){
-            window.console.log('triggering: pause');
-            actions['pause']();
+        } else if(e.which === 32){
+            triggerAction('pause');
+        } else {
+            for(var action in actions){
+                if(e.which === userOptions.keyboard_shortcuts[action] && userOptions.keyboard_shortcuts[action]){
+                    triggerAction(action);
+                    break;
+                }
+            }
         }
     }
 }

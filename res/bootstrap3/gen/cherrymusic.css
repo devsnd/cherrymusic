@@ -5402,12 +5402,6 @@ body:after {
     top: 50px;
     bottom: 70px;
     overflow: auto;
-    direction: rtl;
-    /*scrollbar on the left*/
-  }
-  #search-panel > div {
-    direction: ltr;
-    /*back to normal*/
   }
 }
 @media (min-width: 1200px) {

@@ -31,10 +31,11 @@
 
 import nose
 
-#from mock import *
+from mock import *
 from nose.tools import *
 
 import os.path
+import re
 
 from cherrymusicserver import log
 log.setTest()
@@ -47,6 +48,13 @@ def test_absOrConfigPath():
     ok_(pathprovider.absOrConfigPath(relpath).startswith(pathprovider.getConfigPath()))
     eq_(abspath, pathprovider.absOrConfigPath(abspath))
 
+
+def test_albumArtFilePath():
+    """albumArtFilePath contains md5-filename, or no filename with empty argument"""
+    testpath = pathprovider.albumArtFilePath('a/s/d')
+    artfolder, filename = os.path.split(testpath)
+    ok_(re.match(r'^[0-9a-fA-F]{32}\.thumb$', filename), filename)
+    eq_(artfolder, pathprovider.albumArtFilePath('').rstrip(os.path.sep))
 
 if __name__ == '__main__':
     nose.runmodule()
