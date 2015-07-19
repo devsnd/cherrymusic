@@ -289,7 +289,8 @@ class ID3(TinyTag):
             if b'\x00\x00' < comment[-2:] < b'\x01\x00':
                 self._set_field('track', str(ord(comment[-1:])))
             genre_id = ord(fh.read(1))
-            self.genre = ID3.ID3V1_GENRES[genre_id]
+            if genre_id < len(ID3.ID3V1_GENRES):
+                self.genre = ID3.ID3V1_GENRES[genre_id]
 
     def _parse_frame(self, fh, is_v22=False):
         encoding = 'ISO-8859-1'  # default encoding used in most mp3 tags
@@ -333,11 +334,11 @@ class ID3(TinyTag):
         elif first_byte == b'\x01':
             # strip the bom and optional null bytes
             bytestr = b[3:-1] if len(b) % 2 == 0 else b[3:]
-            return codecs.decode(bytestr, 'UTF-16')
+            return self._unpad(codecs.decode(bytestr, 'UTF-16'))
         elif first_byte == b'\x02':
             # strip optional null byte
             bytestr = b[1:-1] if len(b) % 2 == 0 else b[1:]
-            return codecs.decode(bytestr, 'UTF-16be')
+            return self._unpad(codecs.decode(bytestr, 'UTF-16be'))
         elif first_byte == b'\x03':
             return codecs.decode(b[1:], 'UTF-8')
         return self._unpad(codecs.decode(b, 'ISO-8859-1'))
