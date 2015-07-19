@@ -61,5 +61,7 @@ doc/sphinx/_build
 *.ipynb
 .ipynb*
 
-res/ngclient/node_modules/
-res/ngclient/app/components/
+cherrymusic/venv/
+cherrymusic/static/
+cherrymusic/client/static/client/bower_components/
+/static
