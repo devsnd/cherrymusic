@@ -190,7 +190,16 @@ class AudioTranscode:
                         '-acodec', 'pcm_s16le', '-']),
         Decoder('flac', ['flac', '-F', '-d', '-c', 'INPUT']),
         Decoder('aac', ['faad', '-w', 'INPUT']),
-        Decoder('m4a', ['faad', '-w', 'INPUT']),
+
+        #Preferring ffmpeg/avconv over faad for m4a files as Apple Lossless (ALAC)
+        #files carry the m4a extension as well.  While ffad does not handle ALAC 
+        #it seems ffmpeg does at least on Raspbian/Ubuntu. 
+        #Syntax copied from the wma declaration above.
+        #Decoder('m4a', ['faad', '-w', 'INPUT']), 
+        Decoder('m4a'  , ['ffmpeg', '-ss', 'STARTTIME',
+	                  '-i', 'INPUT', '-f', 'wav',
+			  '-acodec', 'pcm_s16le', '-']),
+
         Decoder('wav', ['cat', 'INPUT']),
         Decoder('opus', ['opusdec', 'INPUT', '--force-wav', '--quiet', '-']),
     ]
