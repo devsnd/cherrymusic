@@ -40,6 +40,7 @@ import codecs
 import json
 import cherrypy
 import audiotranscode
+import re
 from imp import reload
 
 try:
@@ -148,6 +149,10 @@ class CherryModel:
             currentletter = '/'  # impossible first character
             # don't care about natural number order in compact listing
             sortedfiles = self.sortFiles(allfilesindir, number_ordering=False)
+
+# _AND_
+#            print(filterlength, filterstr)
+
             for dir in sortedfiles:
                 filter_match = dir.upper().startswith(currentletter.upper())
                 if filter_match and not len(currentletter) < filterlength:
@@ -158,11 +163,13 @@ class CherryModel:
                     if len(currentletter) == len(filterstr):
                         subpath = os.path.join(absdirpath, dir)
                         CherryModel.addMusicEntry(subpath, musicentries)
+#                        print("addMusicEntry")
                     else:
                         musicentries.append(
                             MusicEntry(strippath(absdirpath),
                                        repr=currentletter,
                                        compact=True))
+#                        print("musicentries_append", currentletter)
         else:
             # enable natural number ordering for real directories and files
             sortedfiles = self.sortFiles(allfilesindir, absdirpath,
