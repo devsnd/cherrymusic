@@ -400,7 +400,7 @@ class MPEG:
         curr_pos = 0
         read_more = 0 # False
 
-        print("_find_header(", seeklimit, seekstart, check_next_header, ")")
+#        print("_find_header(", seeklimit, seekstart, check_next_header, ")")
 
         file.seek(int(seekstart), 0)
         # Don't read more than we are allowed to see (size of header is 4)
@@ -418,7 +418,7 @@ class MPEG:
                 else:
                     i = i+1 
 
-            print(curr_pos, seekstart)
+#            print(curr_pos, seekstart)
 
             if offset == -1:
                 curr_pos = len(header)  # Header after everything so far
@@ -538,10 +538,10 @@ class MPEG:
                 self.samplesperframe = 1152.0 # This might be wrong
                 
 
-            print("framelength ", self.framelength)
-            print("bitrate ",self.bitrate)
-            print("samplerate ",self.samplerate)
-            print("samplesperframe ",self.samplesperframe)
+#            print("framelength ", self.framelength)
+#            print("bitrate ",self.bitrate)
+#            print("samplerate ",self.samplerate)
+#            print("samplesperframe ",self.samplesperframe)
 
 
 #            self.length = int(round((self.filesize / self.framelength) * (self.samplesperframe / self.samplerate)))
