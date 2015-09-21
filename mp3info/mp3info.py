@@ -409,15 +409,7 @@ class MPEG:
         while curr_pos <= seeklimit:            
             # look for the sync byte
 #            offset = string.find(header, chr(255), curr_pos)
-            offset = -1
-            i = curr_pos
-            while i < len(header):
-                if header[i] == 255:
-                    offset = i
-                    i = len(header)
-                else:
-                    i = i+1 
-
+            offset = header.find(255,  curr_pos)
 #            print(curr_pos, seekstart)
 
             if offset == -1:
@@ -563,13 +555,13 @@ class MPEG:
         of the file.
         """
 
-        return
-
         file.seek(seekstart, 0)
         header = file.read(seeklimit)
 
         try:
-            i = string.find(header, 'Xing')
+#            i = string.find(header, 'Xing')
+            i = header.find(b'Xing')
+
             if i > 0:
                 header += file.read(128)
                 (flags,) = struct.unpack('>i', header[i+4:i+8])
@@ -663,6 +655,7 @@ class MP3Info:
 
 if __name__ == '__main__':
     import sys
+
     i = MP3Info(open(sys.argv[1], 'rb'))
     print("File Info")
     print("---------")
