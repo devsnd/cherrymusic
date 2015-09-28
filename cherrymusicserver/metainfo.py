@@ -34,6 +34,8 @@ import sys
 
 from tinytag import TinyTag
 
+from mp3info import MP3Info
+
 class Metainfo():
     def __init__(self, artist='', album='', title='', track='', length=0):
         self.artist = artist
@@ -51,6 +53,28 @@ class Metainfo():
         }
 
 def getSongInfo(filepath):
+    try:
+        file = open(filepath, 'rb')
+        tag = MP3Info(file)
+        file.close()
+    except LookupError:
+        return Metainfo()
+    # make sure everthing returned (except length) is a string
+    for attribute in ['artist','album','title','track']:
+        if getattr(tag, attribute) is None:
+            setattr(tag, attribute, '')
+#    if tag.artist is None:
+#        tag.artist = ''
+#    if tag.__dict__['album'] is None:
+#        tag.__dict__['album'] = ''
+#    if tag.__dict__['title'] is None:
+#        tag.__dict__['title'] = ''
+#    if tag.__dict__['track'] is None:
+#        tag.__dict__['track'] = ''
+    return Metainfo(tag.artist, tag.album, tag.title, str(tag.track), tag.mpeg.total_time)
+#    return Metainfo(tag.__dict__['artist'], tag.__dict__['album'], tag.__dict__['title'] , str(tag.__dict__['track']), tag.mpeg.__dict__['total_time'] )
+
+def getSongInfo_old(filepath):
     try:
         tag = TinyTag.get(filepath)
     except LookupError:

@@ -1120,6 +1120,7 @@ function pickCoverArt(img){
     );
 }
 
+/***
 function displayMessageOfTheDay(){
     api('getmotd',
         function(resp){
@@ -1161,6 +1162,7 @@ function displayMessageOfTheDay(){
         errorFunc('could not fetch message of the day')
     );
 }
+***/
 
 /***
 ON DOCUMENT READY... STEADY... GO!
@@ -1188,7 +1190,8 @@ $(document).ready(function(){
     //window.setInterval("resizePlaylistSlowly()",2000);
     $('#searchform .searchinput').focus();
     sendHeartBeat();
-    displayMessageOfTheDay();
+//    displayMessageOfTheDay();
+    loadBrowser();
     $('#adminpanel').on('shown.bs.modal', function (e) {
         updateUserList();
     });

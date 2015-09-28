@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # tinytag - an audio meta info reader
-# Copyright (c) 2014 Tom Wallroth
+# Copyright (c) 2014-2015 Tom Wallroth
 #
 # Sources on github:
 # http://github.com/devsnd/tinytag/
@@ -158,9 +158,9 @@ class ID3(TinyTag):
         'Blues', 'Classic Rock', 'Country', 'Dance', 'Disco',
         'Funk', 'Grunge', 'Hip-Hop', 'Jazz', 'Metal', 'New Age', 'Oldies',
         'Other', 'Pop', 'R&B', 'Rap', 'Reggae', 'Rock', 'Techno', 'Industrial',
-        'Alternative', 'Ska', 'Death Metal', 'Pranks', 'Soundtrack', 
+        'Alternative', 'Ska', 'Death Metal', 'Pranks', 'Soundtrack',
         'Euro-Techno', 'Ambient', 'Trip-Hop', 'Vocal', 'Jazz+Funk', 'Fusion',
-        'Trance', 'Classical', 'Instrumental', 'Acid', 'House', 'Game', 
+        'Trance', 'Classical', 'Instrumental', 'Acid', 'House', 'Game',
         'Sound Clip', 'Gospel', 'Noise', 'AlternRock', 'Bass', 'Soul', 'Punk',
         'Space', 'Meditative', 'Instrumental Pop', 'Instrumental Rock',
         'Ethnic', 'Gothic','Darkwave', 'Techno-Industrial', 'Electronic',
@@ -179,7 +179,26 @@ class ID3(TinyTag):
         'Primus', 'Porn Groove', 'Satire', 'Slow Jam', 'Club', 'Tango', 'Samba',
         'Folklore', 'Ballad', 'Power Ballad', 'Rhythmic Soul', 'Freestyle',
         'Duet', 'Punk Rock', 'Drum Solo', 'A capella', 'Euro-House', 'Dance Hall',
+        'Goa', 'Drum & Bass',
 
+        # according to https://de.wikipedia.org/wiki/Liste_der_ID3v1-Genres:
+        'Club-House', 'Hardcore Techno', 'Terror', 'Indie', 'BritPop',
+        # don't use ethnic slur ("Negerpunk", WTF!)
+        '',
+        'Polsk Punk', 'Beat', 'Christian Gangsta Rap',
+        'Heavy Metal', 'Black Metal', 'Contemporary Christian',
+        'Christian Rock',
+        # WinAmp 1.91
+        'Merengue', 'Salsa', 'Thrash Metal', 'Anime', 'Jpop', 'Synthpop',
+        # WinAmp 5.6
+        'Abstract', 'Art Rock', 'Baroque', 'Bhangra', 'Big Beat', 'Breakbeat',
+        'Chillout', 'Downtempo', 'Dub', 'EBM', 'Eclectic', 'Electro',
+        'Electroclash', 'Emo', 'Experimental', 'Garage', 'Illbient',
+        'Industro-Goth', 'Jam Band', 'Krautrock', 'Leftfield', 'Lounge',
+        'Math Rock', 'New Romantic', 'Nu-Breakz', 'Post-Punk', 'Post-Rock',
+        'Psytrance', 'Shoegaze', 'Space Rock', 'Trop Rock', 'World Music',
+        'Neoclassical', 'Audiobook', 'Audio Theatre', 'Neue Deutsche Welle',
+        'Podcast', 'Indie Rock', 'G-Funk', 'Dubstep', 'Garage Rock', 'Psybient',
     ]
 
     def __init__(self, filehandler, filesize):
@@ -198,9 +217,14 @@ class ID3(TinyTag):
         file_sample_rate = 44100
         # see this page for the magic values used in mp3:
         # http://www.mpgedit.org/mpgedit/mpeg_format/mpeghdr.htm
-        bitrates = [0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192,
+        bitrates_v1 = [0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192,
                     224, 256, 320]
-        samplerates = [44100, 48000, 32000]
+        bitrates_v2_l1 = [0, 32, 48, 56, 64, 80, 96, 112, 128, 144, 160, 176, 
+                    192, 224, 256]
+        bitrates_v2_l2 = [0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 
+                    128, 144, 160]
+        samplerates_v1 = [44100, 48000, 32000]
+        samplerates_v2 = [22050, 24000, 16000]
         header_bytes = 4
         frames = 0  # count frames for determining mp3 duration
         # seek to first position after id3 tag (speedup for large header)
@@ -210,20 +234,32 @@ class ID3(TinyTag):
             b = fh.read(1)
             if len(b) == 0:
                 break
-            if b == b'\xff':
+#            if b == b'\xff':
+            if b[0] == 0xff:
                 b = fh.read(1)
-                if b > b'\xf0':
+                if (b[0] & 0xE0) == 0xE0:
+                    MPEG_ver_id = (b[0] >> 3) & 0x3
+                    Layer_id = (b[0] >> 1) & 0x3 
+#                    print(MPEG_ver, Layer)
                     bitrate_freq, rest = struct.unpack('BB', fh.read(2))
                     br_id = (bitrate_freq & 0xf0) >> 4  # biterate id
-                    sr_id = (bitrate_freq & 0x03) >> 2  # sample rate id
+                    sr_id = (bitrate_freq & 0x0C) >> 2  # sample rate id
                     # check if the values aren't just random
                     if br_id == 15 or br_id == 0 or sr_id == 3:
                         # invalid frame! roll back to last position
                         fh.seek(-2, os.SEEK_CUR)
                         continue
                     frames += 1  # it's most probably an mp3 frame
-                    bitrate = bitrates[br_id]
-                    samplerate = samplerates[sr_id]
+#                    print(MPEG_ver_id, Layer_id, br_id, sr_id)
+                    if MPEG_ver_id == 3:
+                         bitrate = bitrates_v1[br_id]
+                         samplerate = samplerates_v1[sr_id]
+                    else:
+                         if Layer_id == 3:
+                             bitrate = bitrates_v2_l1[br_id]
+                         else:
+                             bitrate = bitrates_v2_l2[br_id]
+                         samplerate = samplerates_v2[sr_id]
                     # running average of bitrate
                     self.bitrate = (self.bitrate*(frames-1) + bitrate)/frames
                     if frames == 1:
@@ -231,7 +267,12 @@ class ID3(TinyTag):
                         self.audio_offset = fh.tell() - 4
                         self.samplerate = samplerate
                     padding = 1 if bitrate_freq & 0x02 > 0 else 0
-                    frame_length = (144000 * bitrate) // samplerate + padding
+#                    frame_length = (144000 * bitrate) // samplerate + padding
+                    if Layer_id == 3:
+                        frame_length = ((12000 * bitrate) // samplerate + padding) * 4
+                    else:
+                        frame_length = (144000 * bitrate) // samplerate + padding
+#                    print(bitrate, samplerate, frame_length)
                     frame_size_mean += frame_length
                     if frames == max_estimation_frames:
                         # try to estimate duration
@@ -544,7 +585,7 @@ class Flac(TinyTag):
                 #                          `.  bits      total samples
                 # |----- samplerate -----| |-||----| |---------~   ~----|
                 # 0000 0000 0000 0000 0000 0000 0000 0000 0000      0000
-                # #---4---# #---5---# #---6---# #---7---# #--8-~   ~-12-# 
+                # #---4---# #---5---# #---6---# #---7---# #--8-~   ~-12-#
                 self.samplerate = self._bytes_to_int(header[4:7]) >> 4
                 channels = ((header[6] >> 1) & 0x07) + 1
                 bit_depth = ((header[6] & 1) << 4) + ((header[7] & 0xF0) >> 4)
