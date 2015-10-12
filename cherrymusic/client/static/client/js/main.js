@@ -1,13 +1,18 @@
 /**
  * Created by tom on 6/14/15.
  */
-app = angular.module('CherryMusicClient', ['ui.bootstrap', 'ui.bootstrap.tpls', 'ngResource']);
+app = angular.module('CherryMusicClient', [
+    'ui.bootstrap',
+    'ui.bootstrap.tpls',
+    'dndLists',
+    'ngResource'
+]);
 
 app.config(function($resourceProvider) {
   $resourceProvider.defaults.stripTrailingSlashes = false;
 });
 
-app.controller('MainViewController', function($scope, $rootScope, $modal, PlaybackService, Playlist, Browse, IndexDirectory){
+app.controller('MainViewController', function($scope, $rootScope, $modal, PlaybackService, Playlist, Browse, IndexDirectory, Track){
     $scope.openAboutModal = function(){
         var modalInstance = $modal.open({
             animation: true,
@@ -75,10 +80,7 @@ app.controller('MainViewController', function($scope, $rootScope, $modal, Playba
     };
 
     $scope.$on('ADD_FILE_TO_PLAYLIST', function(event, file){
-        $scope.currentPlaylist.tracks.push({
-            data: file,
-            type: 0 //file
-        });
+        $scope.currentPlaylist.tracks.push(Track.fromFile(file));
     });
 
     $scope.$on('INDEX_DIRECTORY', function(event, path){

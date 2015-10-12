@@ -10,7 +10,8 @@
   <div ng-if="content.directories.length">
     <h3>Directories</h3>
 
-      <div ng-repeat="directory in content.directories track by directory.id" ng-click="loadDirectory(content.current_path + '/' + directory.path)">
+      <div ng-repeat="directory in content.directories track by directory.id"
+           ng-click="loadDirectory(content.current_path + '/' + directory.path)">
         <img ng-src="{{ albumArtUrl(content.current_path + '/' + directory.path) }}"></td>
         <div>
           {{ directory.path }}
@@ -19,11 +20,26 @@
 
   </div>
   <div ng-if="content.files.length">
+    {{ content.selected | json }}
     <h3>Files</h3>
     <table class="table table-striped">
-      <tr ng-repeat="file in content.files track by file.id" ng-click="addToPlaylist(file)">
-        <td><file file="file"></file></td>
-      </tr>
+      <tbody
+              dnd-list="content.files"
+              dnd-placeholder-tpl="<tr class='dndPlaceholder'><td></td><tr>"
+              dnd-drop="transformToPlaylistTrack(event, index, transferredObject)"
+              >
+        <tr ng-repeat="file in content.files track by file.id"
+                dnd-draggable="file"
+                dnd-moved="content.files.splice($index, 1)"
+                dnd-effect-allowed="copy"
+                dnd-selected="addToPlaylist(file)"
+                ng-class="{'selected': models.selected === file}"
+                >
+          <td>
+            <file file="file"></file>
+          </td>
+        </tr>
+      </tbody>
     </table>
   </div>
 

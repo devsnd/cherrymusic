@@ -65,3 +65,5 @@ cherrymusic/venv/
 cherrymusic/static/
 cherrymusic/client/static/client/bower_components/
 /static
+/venv
+

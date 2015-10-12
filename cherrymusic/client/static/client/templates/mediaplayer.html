@@ -72,16 +72,28 @@
     </div>
     <!-- render all tracks of the current playlist -->
     <table ng-if="!currentPlaylist.loading" class="table">
-       <tr
-               ng-repeat="track in currentPlaylist.tracks"
-               ng-click="playTrack($index)"
-               ng-class="{'bg-primary': currentTrackIndex == $index}">
+      <tbody
+              dnd-list="currentPlaylist.tracks"
+              dnd-placeholder-tpl="<tr class='dndPlaceholder'><td></td></tr>"
+              dnd-drop="dropCallback(event, index, file)"
+              >
+      <tr
+              ng-repeat="track in currentPlaylist.tracks"
+              ng-click="playTrack($index)"
+              ng-class="{'bg-primary': currentTrackIndex == $index}"
+
+              dnd-draggable="track"
+              dnd-moved="currentPlaylist.tracks.splice($index, 1)"
+              dnd-effect-allowed="move"
+
+              >
         <td ng-if="track.type == 0">
           <file file="track.data"></file>
         </td>
       </tr>
+      </tbody>
     </table>
-
+    {{ currentPlaylist.tracks | json }}
   </div>
 
 </div>

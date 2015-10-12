@@ -16,6 +16,21 @@
     cursor: pointer;
 }
 
+// make sure all dnd-list elements are relative to be draggable
+*[dnd-list], *[dnd-list] > * {
+    position: relative;
+}
+*[dnd-list] .dndDraggingSource {
+    display: none;
+}
+*[dnd-list] .dndPlaceholder {
+    display: block;
+    background-color: #ddd;
+    min-height: 42px;
+}
+
+
+
 //message of the day
 .motd{
     left: 50%;

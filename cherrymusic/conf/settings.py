@@ -116,6 +116,7 @@ PIPELINE_JS = {
         'source_filenames': (
             'client/bower_components/angular/angular.js',
             'client/bower_components/angular-resource/angular-resource.js',
+            'client/js/lib/angular-drag-and-drop-lists.js',
             'client/bower_components/angular-bootstrap/ui-bootstrap.js',
             'client/bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
             'client/bower_components/jquery/dist/jquery.js',
@@ -123,6 +124,7 @@ PIPELINE_JS = {
             'client/bower_components/underscore/underscore.js',
             'client/js/main.js',
             'client/js/resources.js',
+            'client/js/track.js',
             'client/js/playlistbrowser.js',
             'client/js/filebrowser.js',
             'client/js/directives/progressbar.js',
