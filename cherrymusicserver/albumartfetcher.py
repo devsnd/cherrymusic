@@ -38,6 +38,9 @@ import os.path
 import codecs
 import re
 import subprocess
+
+from tinytag import TinyTag
+
 from cherrymusicserver import log
 
 #unidecode is opt-dependency
@@ -116,13 +119,26 @@ class AlbumArtFetcher:
 
     def resize(self, imagepath, size):
         """
-        resize an image using image magick
+        resize an image using image magick or pillow
+
+        Returns:
+            the binary data of the image and a matching http header
+        """
+        with open(imagepath, 'rb') as fh:
+            return self.resize_image_data(fh.read(), size)
+
+    def resize_image_data(self, image_data, size):
+        """
+        resize an image as BytesIO using pillow or image magick
 
         Returns:
             the binary data of the image and a matching http header
         """
         if pillowAvailable:
-            image = Image.open(imagepath)
+            input_image = BytesIO()
+            input_image.write(image_data)
+            input_image.seek(0)
+            image = Image.open(input_image)
             image.thumbnail(size, Image.ANTIALIAS)
             image_data = BytesIO()
             image.save(image_data, "JPEG")
@@ -137,19 +153,22 @@ class AlbumArtFetcher:
             )
 
         if AlbumArtFetcher.imageMagickAvailable:
-            with open(os.devnull, 'w') as devnull:
-                cmd = ['convert', imagepath,
-                       '-resize', str(size[0])+'x'+str(size[1]),
-                       'jpeg:-']
-                print(' '.join(cmd))
-                im = subprocess.Popen(cmd,
-                                      stdout=subprocess.PIPE,
-                                      stderr=subprocess.PIPE)
-                data = im.communicate()[0]
-                header = {'Content-Type': "image/jpeg",
-                          'Content-Length': len(data)}
-                return header, data
+            cmd = ['convert', '-',
+                   '-resize', str(size[0])+'x'+str(size[1]),
+                   'jpeg:-']
+            im = subprocess.Popen(cmd,
+                                  stdin=subprocess.PIPE,
+                                  stdout=subprocess.PIPE,
+                                  stderr=subprocess.PIPE)
+            data, err = im.communicate(image_data)
+            header = {'Content-Type': "image/jpeg",
+                      'Content-Length': len(data)}
+            return header, data
         return None, ''
+
+        
+        return None, ''
+
 
     def fetchurls(self, searchterm):
         """fetch image urls based on the provided searchterms
@@ -215,7 +234,14 @@ class AlbumArtFetcher:
         @type path: string
         @return header, imagedata, is_resized
         @rtype dict, bytestring"""
+        fetchers = (self._fetch_folder_image, self._fetch_embedded_image)
+        for fetcher in fetchers:
+            header, data, resized = fetcher(path)
+            if data:
+                break
+        return header, data, resized
 
+    def _fetch_folder_image(self, path):
         filetypes = (".jpg", ".jpeg", ".png")
         try:
             for file_in_dir in sorted(os.listdir(path)):
@@ -243,3 +269,30 @@ class AlbumArtFetcher:
         except OSError:
             return None, '', False
         return None, '', False
+
+    def _fetch_embedded_image(self, path):
+        filetypes = ('.mp3',)
+        max_tries = 3
+        header, data, resized = None, '', False
+        try:
+            files = os.listdir(path)
+            files = (f for f in files if f.lower().endswith(filetypes))
+            for count, file_in_dir in enumerate(files, start=1):
+                if count > max_tries:
+                    break
+                filepath = os.path.join(path, file_in_dir)
+                try:
+                    tag = TinyTag.get(filepath, image=True)
+                    image_data = tag.get_image()
+                except IOError:
+                    continue
+                if not image_data:
+                    continue
+                _header, _data = self.resize_image_data(
+                    image_data, (self.IMAGE_SIZE, self.IMAGE_SIZE))
+                if _data:
+                    header, data, resized = _header, _data, True
+                    break
+        except OSError:
+            pass
+        return header, data, resized

@@ -63,3 +63,5 @@ doc/sphinx/_build
 
 res/ngclient/node_modules/
 res/ngclient/app/components/
+/venv
+/venv2
