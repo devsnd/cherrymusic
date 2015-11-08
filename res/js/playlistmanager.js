@@ -189,6 +189,11 @@ ManagedPlaylist.prototype = {
                 if(typeof b.meta !== 'undefined'){
                     value_b = b.meta[sort_by];
                 }
+                // sort numerically if both values start with numbers
+                if(!!value_a.match(/^\d+/) && !!value_b.match(/^\d+/)){
+                    return parseInt(value_a) - parseInt(value_b);
+                }
+                // otherwise sort alphabetically
                 if(value_a > value_b){
                     return 1;
                 } else if(value_a < value_b){
