@@ -598,6 +598,8 @@ function download_editing_playlist(){
             if(msg == 'ok'){
                 //add tracks to hidden form and call to call download using post data
                 $('#download-redirect-files').val(encodeURIComponent(JSON.stringify(track_urls)));
+                // disable confirm-to-quit for the download link (will be reenabled automatically)
+                window.onbeforeunload = null
                 $('#download-redirect').submit();
             } else {
                 alert(msg);

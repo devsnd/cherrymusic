@@ -1506,7 +1506,8 @@ function randomPlaylist(){"use strict";playlistManager.clearQueue();var success=
 var lastPlaylistHeight=0;function resizePlaylistSlowly(){var currentHeight=$('.jp-playlist').height();if(lastPlaylistHeight<=currentHeight){$('#playlistContainerParent').animate({'min-height':currentHeight});}
 lastPlaylistHeight=currentHeight;}
 function download_editing_playlist(){var pl=playlistManager.getEditingPlaylist();var p=pl.jplayerplaylist.playlist;var track_urls=[];for(i=0;i<p.length;i++){track_urls.push(decodeURIComponent(p[i].url));}
-api('downloadcheck',{'filelist':track_urls},function(msg){if(msg=='ok'){$('#download-redirect-files').val(encodeURIComponent(JSON.stringify(track_urls)));$('#download-redirect').submit();}else{alert(msg);}},errorFunc('Failed to check if playlist may be downloaded'));}
+api('downloadcheck',{'filelist':track_urls},function(msg){if(msg=='ok'){$('#download-redirect-files').val(encodeURIComponent(JSON.stringify(track_urls)));window.onbeforeunload=null
+$('#download-redirect').submit();}else{alert(msg);}},errorFunc('Failed to check if playlist may be downloaded'));}
 function reloadPage(){var reloadurl=window.location.protocol+'//'+window.location.host;window.location.href=reloadurl;}
 function logout(){"use strict";api('logout',reloadPage);}
 function TemplateLoader(template_path){this.template_path=template_path;this.loaded_templates={};var self=this;this.get=function(template_name,callback){if(this.loaded_templates.hasOwnProperty(template_name)){callback(this.loaded_templates[template_name]);}else{$.get(this.template_path+'/'+template_name+'.html',function(data){self.loaded_templates[template_name]=data;if(typeof callback==='undefined'){window.console.log('preloaded template '+template_name);}else{callback(self.loaded_templates[template_name]);}});}}
