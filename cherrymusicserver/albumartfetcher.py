@@ -46,6 +46,14 @@ try:
 except ImportError:
     unidecode = lambda x: x
 
+pillowAvailable = False
+try:
+    from PIL import Image
+    from io import BytesIO
+    pillowAvailable = True
+except ImportError:
+    pass
+
 
 def programAvailable(name):
         """
@@ -59,7 +67,6 @@ def programAvailable(name):
                 return 'ImageMagick' in codecs.decode(out, 'UTF-8')
         except OSError:
             return False
-
 
 class AlbumArtFetcher:
     """
@@ -114,6 +121,21 @@ class AlbumArtFetcher:
         Returns:
             the binary data of the image and a matching http header
         """
+        if pillowAvailable:
+            image = Image.open(imagepath)
+            image.thumbnail(size, Image.ANTIALIAS)
+            image_data = BytesIO()
+            image.save(image_data, "JPEG")
+            image_byte_count = image_data.tell()
+            image_data.seek(0)
+            return (
+                {
+                    'Content-Type': "image/jpeg",
+                    'Content-Length': image_byte_count
+                },
+                image_data.read()
+            )
+
         if AlbumArtFetcher.imageMagickAvailable:
             with open(os.devnull, 'w') as devnull:
                 cmd = ['convert', imagepath,
