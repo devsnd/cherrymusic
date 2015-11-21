@@ -1,6 +1,21 @@
 Changelog
 ---------
 
+0.36.0 (2015-11-21)
+ - FIXED: *Security* CVE-2015-8309 Download of arbitrary files by logged in users (thanks 
+feedersec)
+ - FIXED: *Security* CVE-2015-8310 XSS attack by logged-in users (thanks feedersec)
+ - FIXED: OGA files are now correctly recognized as ogg-audio files
+ - FIXED: Sorting tracks by track number correctly
+ - FIXED: Cannot load playlists containing single quotes
+ - FEATURE: allow reverse-sorting of playlists (thanks pando85)
+ - FEATURE: Enabled support of ffmpeg to decode ALAC files
+ - FEATURE: Added optional support for Pillow as Image Library
+ - IMPROVEMENT: disabled confirm-to-quit message for playlist downloads
+ - IMPROVEMENT: Updated TinyTag to version 0.10.1 (much faster ID3 parsing)
+ - IMPROVEMENT: Predictable selection of album-art images (thanks lzh9102)
+ - FIXED: Removed restrictions for passwords created in CLI
+
 0.35.2 (2015-04-20)
  - FIXED: server not starting on windows
 
