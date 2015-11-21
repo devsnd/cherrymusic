@@ -300,7 +300,11 @@ class HTTPHandler(object):
                 return 'not_permitted'
         # make sure nobody tries to escape from basedir
         for f in filelist:
-            if '/../' in f:
+            # don't allow to traverse up in the file system
+            if '/../' in f or f.startswith('../'):
+                return 'invalid_file'
+            # CVE-2015-8309: do not allow absolute file paths
+            if os.path.isabs(f):
                 return 'invalid_file'
         # make sure all files are smaller than maximum download size
         size_limit = cherry.config['media.maximum_download_size']

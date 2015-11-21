@@ -562,8 +562,9 @@ PlaylistManager.prototype = {
                 isunsaved += ' <em>(unsaved)</em>';
             }
 
-
-            pltabs += '<a href="#" onclick="playlistManager.showPlaylist('+pl.id+')">'+isplaying+' '+pl.name+ isunsaved;
+            // fix for CVE-2015-8310
+            var escaped_playlist_name = $("<div>").text(pl.name).html();
+            pltabs += '<a href="#" onclick="playlistManager.showPlaylist('+pl.id+')">'+isplaying+' '+escaped_playlist_name + isunsaved;
             if(pl.closable){
                 pltabs += '<span class="playlist-tab-closer pointer" href="#" onclick="playlistManager.closePlaylist('+pl.id+')">&times;</span>';
             }
