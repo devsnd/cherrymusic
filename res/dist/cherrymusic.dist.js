@@ -1374,7 +1374,7 @@ $('.remaining-tracks-or-time').html(remainingStr);$('.playlist-progress-bar .pro
 if(pl.id==this.editingPlaylist){isactive=' class="active" ';}else{isactive=' class="playlist-tab-inactive" ';}
 pltabs+='<li '+isactive+' id="'+this.tabid2htmlid(pl.id)+'">';var isplaying='';if(pl.id==this.playingPlaylist){isplaying+='&#9654;';}
 var isunsaved='';if(!pl.saved&&pl.reason_open!=='queue'){isunsaved+=' <em>(unsaved)</em>';}
-pltabs+='<a href="#" onclick="playlistManager.showPlaylist('+pl.id+')">'+isplaying+' '+pl.name+isunsaved;if(pl.closable){pltabs+='<span class="playlist-tab-closer pointer" href="#" onclick="playlistManager.closePlaylist('+pl.id+')">&times;</span>';}
+var escaped_playlist_name=$("<div>").text(pl.name).html();pltabs+='<a href="#" onclick="playlistManager.showPlaylist('+pl.id+')">'+isplaying+' '+escaped_playlist_name+isunsaved;if(pl.closable){pltabs+='<span class="playlist-tab-closer pointer" href="#" onclick="playlistManager.closePlaylist('+pl.id+')">&times;</span>';}
 pltabs+='</a></li>';}
 pltabs+='<li class="playlist-tab-inactive playlist-tab-new"><a href="#" onclick="playlistManager.newPlaylist()"><b>+</b></a></li>';$(self.cssSelectorPlaylistChooser+' ul').empty()
 $(self.cssSelectorPlaylistChooser+' ul').append(pltabs);},tabid2htmlid:function(id){return this.plid2htmlid(id)+'-tab';},plid2htmlid:function(id){return'pl-'+id;},htmlid2plid:function(htmlid){return parseInt(htmlid.slice(4,htmlid.length))},refreshPlaylists:function(){window.console.log('refreshPlaylists');var self=this;var validHTMLIds=[];for(var i=0;i<this.managedPlaylists.length;i++){validHTMLIds.push(this.plid2htmlid(this.managedPlaylists[i].id));}
