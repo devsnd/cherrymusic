@@ -1,0 +1,111 @@
+<div class="modal-header">
+    <button class="close" ng-click="close()">&times;</button>
+    <h3>Options</h3>
+</div>
+<div class="modal-body">
+    <div class="content">
+        <h3>keyboard shortcuts</h3>
+
+        {{options | json}}
+
+        <table>
+            <tr>
+                <td>next track</td>
+                <td><span class="label label-default" id="keyboard_shortcuts-next" value="66" name="keyboard_shortcuts.next"></span></td>
+                <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.next','Next Track')">change</a></td>
+            </tr>
+
+            <tr>
+                <td>stop</td>
+                <td><span class="label label-default"  id="keyboard_shortcuts-stop" value="86" name="keyboard_shortcuts.stop"></span></td>
+                <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.stop','Stop')">change</a></td>
+            </tr>
+
+            <tr>
+                <td>previous track</td>
+                <td><span class="label label-default"  value="89"  id="keyboard_shortcuts-prev" name="keyboard_shortcuts.prev"></span></td>
+                <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.prev','Previous Track')">change</a></td>
+            </tr>
+
+            <tr>
+                <td>pause</td>
+                <td>
+                    <span class="label label-default"  value="67"  id="keyboard_shortcuts-pause" name="keyboard_shortcuts.pause"></span>
+                    <span class="label label-default"  value="space">space</span>
+                </td>
+                <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.pause','Pause')">change</a></td>
+            </tr>
+
+            <tr>
+                <td>play</td>
+                <td><span class="label label-default"  value="88" id="keyboard_shortcuts-play" name="keyboard_shortcuts.play"></span></td>
+                <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.play','Play')">change</a></td>
+            </tr>
+
+            <tr>
+                <td>search</td>
+                <td><span class="label label-default" value="83"  id="keyboard_shortcuts-search" name="keyboard_shortcuts.search"></span></td>
+                <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.search','Use Search')">change</a></td>
+            </tr>
+        </table>
+        <h3>misc</h3>
+        <div class="control-group">
+            Autoplay when adding first track
+            <input
+                type="checkbox"
+                ng-model="options.misc.autoplay_on_add"
+                ng-change="changeOption('misc.autoplay_on_add', options.misc.autoplay_on_add)"
+                ng-disabled="isUpdating('misc.autoplay_on_add')"
+                >
+        </div>
+        <div class="control-group">
+            Confirm closing if music is playing
+            <input
+                type="checkbox"
+                ng-model="options.ui.confirm_quit_dialog"
+                ng-change="changeOption('ui.confirm_quit_dialog', options.ui.confirm_quit_dialog)"
+                ng-disabled="isUpdating('ui.confirm_quit_dialog')"
+            >
+        </div>
+        <div class="control-group">
+            Display album art when playing
+            <input
+                type="checkbox"
+                ng-model="options.ui.display_album_art"
+                ng-change="changeOption('ui.display_album_art', options.ui.display_album_art)"
+                ng-disabled="isUpdating('ui.display_album_art')"
+            >
+        </div>
+        <div class="control-group">
+            <div class="success">
+                Limit audio bitrate
+                <select 
+                    ng-init="options.media.force_transcode_to_bitrate"
+                    ng-model="options.media.force_transcode_to_bitrate"
+                    ng-change="changeOption('media.force_transcode_to_bitrate', options.media.force_transcode_to_bitrate)"
+                    ng-disabled="isUpdating('media.force_transcode_to_bitrate')"
+                    >
+                    <option value="0">Unlimited</option>
+                    <option value="48">48 (Super Low)</option>
+                    <option value="64">64 (Very Low)</option>
+                    <option value="96">96 (Low)</option>
+                    <option value="128">128 (Medium)</option>
+                    <option value="320">320 (Very High)</option>
+                </select>
+            </div>
+            <div class="error" style="display: none; text-align: center; margin: 5px;">
+                <span class="msg"></span>
+                <button id="media-force_transcode_to_bitrate-disable" class="btn btn-danger">
+                    Remove personal bitrate limit
+                </button>
+            </div>
+        </div>
+        <h3>change password</h3>
+        <a class="btn btn-default" href="#changePassword" role="button" data-toggle="modal">change password</a>
+        <h3>export playlists</h3>
+        <a class="btn btn-default" href="#exportPlaylists" role="button" data-toggle="modal">create archive</a>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn" ng-click="close()" aria-hidden="true">Close</button>
+</div>

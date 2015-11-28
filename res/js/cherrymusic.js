@@ -27,6 +27,62 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 //
 
+app = angular.module('CherryMusicClient', [
+    'ngResource',
+    'ui.bootstrap',
+    'ui.bootstrap.tpls',
+]);
+
+app.config(function($resourceProvider) {
+  $resourceProvider.defaults.stripTrailingSlashes = false;
+});
+
+app.controller(
+    'MainViewController',
+    function($scope, $modal, UserOptionService){
+        UserOptionService.init();
+
+        $scope.openAboutModal = function(){
+            var modalInstance = $modal.open({
+                animation: true,
+                templateUrl: '../res/js/views/about-modal.html',
+                controller: function($scope, $uibModalInstance){
+                    $scope.close = function(){
+                        $uibModalInstance.dismiss('cancel');
+                    }
+                }
+            });
+        };
+
+        $scope.openUserOptionModal = function(){
+            var modalInstance = $modal.open({
+                animation: true,
+                templateUrl: '../res/js/views/user-option-modal.html',
+                controller: function($scope, $uibModalInstance){
+                    var updating = {}
+                    $scope.options = UserOptionService.getAll();
+                    $scope.isUpdating = function(key){
+                        return !!updating[key];
+                    }
+                    $scope.changeOption = function(key, value){
+                        updating[key] = true;
+                        UserOptionService.set(key, value).then(function(){
+                            delete updating[key];
+                        }, function(){
+                            // setting the option failed, revert to previous state
+                            $scope.options = UserOptionService.getAll();
+                            delete updating[key];
+                        });
+                    }
+                    $scope.close = function(){
+                        $uibModalInstance.dismiss('cancel');
+                    }
+                }
+            });
+        }
+    }
+);
+
 var browser = detectBrowser();
 //see http://www.w3schools.com/html/html5_audio.asp for available formats per browser
 if(['msie','safari'].indexOf(browser) != -1){

@@ -46,6 +46,10 @@
 <!--REMOVE-END-->
 
 <!--COMPRESS-JS-BEGIN out=res/dist/cherrymusic.dist.js-->
+    <script type="text/javascript" src="res/js/ext/angular.js"></script>
+    <script type="text/javascript" src="res/js/ext/angular-resource.js"></script>
+    <script type="text/javascript" src="res/js/ext/ui-bootstrap-tpls-0.14.3.js"></script>
+
     <script type="text/javascript" src="res/js/ext/jquery-1.10.2.js"></script>
     <script type="text/javascript" src="res/js/ext/json2.min.js"></script>
     <script type="text/javascript" src="res/js/ext/jquery.jplayer.js"></script>
@@ -65,11 +69,13 @@
     <script type="text/javascript" src="res/js/playlistmanager.js"></script>
     <script type="text/javascript" src="res/js/mediabrowser.js"></script>
     <script type="text/javascript" src="res/js/cherrymusic.js"></script>
+
+    <script type="text/javascript" src="res/js/services/user_option_service.js"></script>
 <!--COMPRESS-JS-END-->
 
 <title>CherryMusic</title>
 </head>
-<body>
+<body ng-controller="MainViewController" ng-app="CherryMusicClient">
 <!--ABOUT -->
 <div class="modal fade" id="aboutModal">
     <div class="modal-dialog">
@@ -524,7 +530,7 @@
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
     </button>
-    <a id="brandname" data-toggle="modal" role="button" href="#aboutModal" class="navbar-brand">
+    <a ng-click="openAboutModal()" class="navbar-brand">
         <span class="hidden-xs">Cherry&nbsp;&nbsp;Music</span>
     </a>
     <div class="visible-xs">
@@ -565,7 +571,7 @@
                 <b class="caret"></b><span class="glyphicon glyphicon-wrench"></span>
             </a>
             <ul class="dropdown-menu">
-                <li><a href="#userOptions" role="button" data-toggle="modal">Options</a></li>
+                <li><a ng-click="openUserOptionModal()">Options</a></li>
                 <li><a style="display: none;" href="#adminpanel" role="button" data-toggle="modal">Admin</a></li>
                 <li class="divider"></li>
                 <li><a href="javascript:;" id="logout-menu-button" onclick="logout()">Logout <span id="username-label"></span></a></li>
