@@ -14,10 +14,10 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 import os
 import sys
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, BASE_DIR + '/../apps')
-sys.path.insert(0, BASE_DIR + '/../ext')
-STATIC_ROOT = BASE_DIR + '/../static'
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."),)
+sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
+sys.path.insert(0, os.path.join(BASE_DIR, 'ext'))
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'core',
     'storage',
     'client',
+    'djangobower',
 ]
 
 MIDDLEWARE_CLASSES = (
@@ -90,12 +91,19 @@ DATABASES = {
         }
 }
 
+# bower config
+BOWER_INSTALLED_APPS = (
+    'angular',
+    'bootstrap',
+)
+
 # pipeline config
 STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'pipeline.finders.PipelineFinder',
+    'djangobower.finders.BowerFinder',
 )
 PIPELINE_COMPILERS = (
     'pipeline.compilers.less.LessCompiler',
@@ -155,4 +163,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
 STATIC_URL = '/static/'
+
+BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, 'client', 'static', 'client')
