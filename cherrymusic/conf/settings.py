@@ -95,6 +95,8 @@ DATABASES = {
 BOWER_INSTALLED_APPS = (
     'angular',
     'bootstrap',
+    'angular-bootstrap',
+    'angular-resource',
 )
 
 # pipeline config
