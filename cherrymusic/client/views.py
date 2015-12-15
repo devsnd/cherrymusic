@@ -24,8 +24,7 @@ class LoginView(TemplateView):
         return self.request.REQUEST.get('next', '/')
 
     def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST)
-        form.clean()
+        form = self.form_class(data=request.POST)
         if form.is_valid():
             user = form.get_user()
             if user is not None:
@@ -35,4 +34,5 @@ class LoginView(TemplateView):
                     return HttpResponseRedirect(reverse('main_view'))
         else:
             print(form.error_messages)
+
         return HttpResponseRedirect(reverse('login_view'))
