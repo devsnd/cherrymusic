@@ -97,6 +97,10 @@ BOWER_INSTALLED_APPS = (
     'bootstrap',
     'angular-bootstrap',
     'angular-resource',
+    'jquery',
+    'jplayer',
+    'dndLists',
+    'underscore',
 )
 
 # pipeline config
@@ -130,7 +134,7 @@ PIPELINE_JS = {
             'client/bower_components/angular-bootstrap/ui-bootstrap.js',
             'client/bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
             'client/bower_components/jquery/dist/jquery.js',
-            'client/bower_components/jplayer/dist/jplayer/jquery.jplayer.js',
+            'client/bower_components/jPlayer/dist/jplayer/jquery.jplayer.js',
             'client/bower_components/underscore/underscore.js',
             'client/js/main.js',
             'client/js/resources.js',
