@@ -34,6 +34,8 @@ import hashlib
 import os
 import sys
 
+from conf.settings import BASE_DIR, STATIC_ROOT
+
 userDataFolderName = 'cherrymusic'  # $XDG_DATA_HOME/userDataFolderName
 pidFileName = 'cherrymusic.pid'     # $XDG_DATA_HOME/userDataFolderName/cherrymusic.pid
 configFolderName = 'cherrymusic'    # $XDG_CONFIG_HOME/configFolderName
@@ -126,6 +128,9 @@ def albumArtFilePath(directorypath):
         filename = _md5_hash(directorypath) + '.thumb'
         albumartcachepath = os.path.join(albumartcachepath, filename)
     return albumartcachepath
+
+def defaultAlbumArt():
+    return os.path.join(STATIC_ROOT, 'client', 'img', 'folder.png')
 
 def assureFolderExists(folder,subfolders=['']):
     for subfolder in subfolders:
