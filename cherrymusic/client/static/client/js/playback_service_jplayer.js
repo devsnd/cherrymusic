@@ -12,10 +12,6 @@ app.factory('PlaybackServiceJPlayer', ['$log', '$rootScope', function($log, $roo
     $("#jplayer-instance").jPlayer({
         ready: function () {
             jplayerInstance = $(this);
-            $(this).jPlayer("setMedia", {
-                title: "Bubble",
-                oga: "http://localhost:8000/api/stream/02 Default.mp3.ogg"
-            });
         },
 
         //cssSelectorAncestor: "#jp_container_1",
