@@ -12,7 +12,7 @@
 
       <div ng-repeat="directory in content.directories track by directory.id"
            ng-click="loadDirectory(content.current_path + '/' + directory.path)">
-        <img ng-src="{{ albumArtUrl(content.current_path + '/' + directory.path) }}"></td>
+        <img ng-src="{{ albumArtUrl(content.current_path + '/' + directory.path) }}" err-src="static/client/img/folder.png"></td>
         <div>
           {{ directory.path }}
         </div>

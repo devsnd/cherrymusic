@@ -176,12 +176,7 @@ class AlbumArtView(APIView):
                     return ImageResponse(image_data=data)
             except:
                 pass
-
-        try:
-            data = fetcher.fetchDefault()
-            return ImageResponse(image_data=data)
-        except:
-            raise Http404()
+        raise Http404()
 
 
 class IndexDirectoryView(APIView):

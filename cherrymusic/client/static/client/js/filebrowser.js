@@ -73,3 +73,19 @@ app.directive('fileBrowser', [
         }
     }
 ]);
+
+app.directive('errSrc', function() {
+  return {
+    link: function(scope, element, attrs) {
+      var defaultSrc = attrs.src;
+      element.bind('error', function() {
+        if(attrs.errSrc) {
+            element.attr('src', attrs.errSrc);
+        }
+        else if(attrs.src) {
+            element.attr('src', defaultSrc);
+        }
+      });
+    }
+  }
+});

@@ -40,8 +40,6 @@ import re
 import subprocess
 import logging
 
-from core import pathprovider
-
 logger = logging.getLogger(__name__)
 
 #unidecode is opt-dependency
@@ -225,9 +223,3 @@ class AlbumArtFetcher:
         except OSError:
             return None, '', False
         return None, '', False
-
-    def fetchDefault(self):
-        imgpath = str(pathprovider.defaultAlbumArt())
-        with open(imgpath, "rb") as f:
-            data = f.read()
-        return data
