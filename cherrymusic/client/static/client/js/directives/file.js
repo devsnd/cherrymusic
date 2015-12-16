@@ -5,16 +5,20 @@ app.directive('file', [
     function() {
         return {
             restrict: 'E',
-            template: '<span ng-if="file.meta_title">'+
-                    '{{ file.meta_track }} '+
-                    '{{ file.meta_artist }} - {{ file.meta_title }} '+
-                    '({{ file.meta_duration | timeformat }})'+
-                '</span>'+
-                '<span ng-if="!file.meta_title">'+
-                    '{{ file.filename }}'+
-                '</span>',
+            templateUrl: function(elem, attrs){
+                //console.log(elem);
+                console.log(attrs);
+                if(attrs['file'] == 'track.data'){
+                    return STATIC_FILES + 'client/templates/file-playlist.html';
+                }
+                else {
+                    return STATIC_FILES + 'client/templates/file.html';
+                }
+            },
             scope: {
-                file: '='
+                file: '=',
+                onRemove:"&",
+                onPlay:"&"
             }
         }
     }

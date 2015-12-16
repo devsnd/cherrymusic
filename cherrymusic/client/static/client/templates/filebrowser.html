@@ -9,38 +9,38 @@
 
   <div ng-if="content.directories.length">
     <h3>Directories</h3>
-
-      <div ng-repeat="directory in content.directories track by directory.id"
-           ng-click="loadDirectory(content.current_path + '/' + directory.path)">
+    <li ng-repeat="directory in content.directories track by directory.id"
+        ng-click="loadDirectory(content.current_path + '/' + directory.path)"
+        class="list-dir list-dir-item cm-media-list-item">
+      <div class="list-dir-cover-area">
+        <div class="list-dir-albumart">
         <img ng-src="{{ albumArtUrl(content.current_path + '/' + directory.path) }}" err-src="static/client/img/folder.png"></td>
-        <div>
-          {{ directory.path }}
+        </div>
+        <div class="list-dir-name-wrap">
+          <span class="list-dir-name">{{ directory.path }}</span>
         </div>
       </div>
-
+    </li>
   </div>
-  <div ng-if="content.files.length">
-    {{ content.selected | json }}
-    <h3>Files</h3>
-    <table class="table table-striped">
-      <tbody
-              dnd-list="content.files"
-              dnd-placeholder-tpl="<tr class='dndPlaceholder'><td></td><tr>"
-              dnd-drop="transformToPlaylistTrack(event, index, transferredObject)"
-              >
+  <div class="tab-content">
+    <div ng-if="content.files.length">
+      {{ content.selected | json }}
+      <h3>Files</h3>
+      <table dnd-list="content.files"
+             dnd-placeholder-tpl="<tr class='dndPlaceholder'><td></td></tr>"
+             dnd-drop="transformToPlaylistTrack(event, index, transferredObject)">
         <tr ng-repeat="file in content.files track by file.id"
-                dnd-draggable="file"
-                dnd-moved="content.files.splice($index, 1)"
-                dnd-effect-allowed="copy"
-                dnd-selected="addToPlaylist(file)"
-                ng-class="{'selected': models.selected === file}"
-                >
+            dnd-draggable="file"
+            dnd-moved="content.files.splice($index, 1)"
+            dnd-effect-allowed="copy"
+            dnd-selected="addToPlaylist(file)"
+            ng-class="{'selected': models.selected === file}">
           <td>
             <file file="file"></file>
           </td>
         </tr>
-      </tbody>
-    </table>
+      </table>
+    </div>
   </div>
 
   <div ng-if="baseDirNotIndexed(content)">

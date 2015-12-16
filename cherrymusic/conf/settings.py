@@ -121,6 +121,8 @@ PIPELINE_CSS = {
         'source_filenames': (
             'client/bower_components/bootstrap/less/bootstrap.less',
             'client/style/cherrymusic.less',
+            'client/style/filebrowser.less',
+            'client/style/mediaplayer.less',
         ),
         'output_filename': 'client/cherrymusic.css',
         }
