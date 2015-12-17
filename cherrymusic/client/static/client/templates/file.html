@@ -1,9 +1,9 @@
 <span class="glyphicon glyphicon-music"></span>
-<span ng-click="onPlay()" ng-if="file.meta_title">
+<span ng-if="file.meta_title">
     {{ file.meta_track }}
     {{ file.meta_artist }} - {{ file.meta_title }}
     ({{ file.meta_duration | timeformat }})
 </span>
-<span ng-click="onPlay()" ng-if="!file.meta_title">
+<span ng-if="!file.meta_title">
     {{ file.filename }}
 </span>

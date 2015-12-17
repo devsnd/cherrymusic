@@ -6,8 +6,6 @@ app.directive('file', [
         return {
             restrict: 'E',
             templateUrl: function(elem, attrs){
-                //console.log(elem);
-                console.log(attrs);
                 if(attrs['file'] == 'track.data'){
                     return STATIC_FILES + 'client/templates/file-playlist.html';
                 }

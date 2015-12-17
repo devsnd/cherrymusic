@@ -80,6 +80,7 @@ class Directory(models.Model):
                         # check if the file was already indexed:
                         f = File.objects.get(filename=sub_path.name, directory=self)
                     except File.DoesNotExist:
+                        f.parse_metadata()
                         f.save()
                         indexed_files += 1
             elif sub_path.is_dir():
@@ -123,12 +124,12 @@ class File(models.Model):
 
     meta_index_date = models.DateField(null=True, blank=True)
 
-    meta_track = models.IntegerField(null=True, blank=True)
-    meta_track_total = models.IntegerField(null=True, blank=True)
+    meta_track = models.CharField(max_length=255, null=True, blank=True)
+    meta_track_total = models.CharField(max_length=255, null=True, blank=True)
     meta_title = models.CharField(max_length=255, null=True, blank=True)
     meta_artist = models.CharField(max_length=255, null=True, blank=True)
     meta_album = models.CharField(max_length=255, null=True, blank=True)
-    meta_year = models.IntegerField(null=True, blank=True)
+    meta_year = models.CharField(max_length=255, null=True, blank=True)
     meta_genre = models.CharField(max_length=255, null=True, blank=True)
     meta_duration = models.FloatField(null=True, blank=True)
 
@@ -157,12 +158,12 @@ class File(models.Model):
 
     def parse_metadata(self):
         tag = TinyTag.get(str(self.absolute_path()))
-        self.meta_track = int(tag.track) if tag.track else None
-        self.meta_track_total = int(tag.track_total) if tag.track_total else None
+        self.meta_track = tag.track.zfill(2)
+        self.meta_track_total = tag.track_total
         self.meta_title = tag.title
         self.meta_artist = tag.artist
         self.meta_album = tag.album
-        self.meta_year = int(tag.year) if tag.year else None
+        self.meta_year = tag.year
         self.meta_genre = tag.genre
         self.meta_duration = tag.duration
 
