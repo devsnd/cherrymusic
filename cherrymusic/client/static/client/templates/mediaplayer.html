@@ -1,6 +1,6 @@
 <div role="tabpanel">
   <!-- tabs -->
-  <ul class="nav nav-tabs" role="tablist">
+  <ul class="playlist-tab-list nav nav-tabs" role="tablist">
     <li role="presentation" ng-class="{'active': playlist==currentPlaylist}" ng-repeat="playlist in playlists">
       <a ng-click="setCurrentPlaylist(playlist)" aria-controls="home" role="tab" data-toggle="tab">{{ playlist.name }}</a>
     </li>

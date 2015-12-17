@@ -11,5 +11,5 @@ Install bower components:
 python manage.py bower_install
 ```
 
-Django admin user/password: cherrymusic/cherrymusic
+Django admin user/password: `cherrymusic/cherrymusic`
 

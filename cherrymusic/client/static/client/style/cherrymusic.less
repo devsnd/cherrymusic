@@ -1,13 +1,5 @@
-@import "../bower_components/bootstrap/less/variables.less";
+@import "variables.less";
 
-@mediaplayer-height: 70px;
-@main-color: @brand-primary;
-@main-color-bright: lighten(@main-color, 20%);
-@zindex-player-panel:      1032;
-
-@spinning-loader:   url("../img/cherrymusic_loader.gif");
-@gray-even-lighter:      lighten(#000, 97.5%);
-@font-size-tiny:          ceil(@font-size-base * 0.75); // 
 
 #search-panel{
   padding-bottom: @mediaplayer-height;
@@ -69,7 +61,26 @@
     /* .box-shadow(~"2px 2px 3px rgba(0,0,0,.4), 0px 0px 5px rgba(0,0,0,.8)"); */
 }
 
-
+.navbar-nav > li > a {
+    padding-left: 7px;
+    padding-right: 7px;
+}
+.hidden-xs {
+    display: block !important;
+}
+.navbar-form {
+    margin: 8px 0px;
+    padding: 0px;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+    box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.1) inset, 0px 1px 0px rgba(255, 255, 255, 0.1);
+}
+.navbar-brand {
+    float: left;
+    padding: 15px 0px;
+    font-size: 18px;
+    line-height: 20px;
+}
 
 .jp{
 

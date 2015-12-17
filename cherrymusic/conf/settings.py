@@ -123,6 +123,8 @@ PIPELINE_CSS = {
             'client/style/cherrymusic.less',
             'client/style/filebrowser.less',
             'client/style/mediaplayer.less',
+            'client/style/playlist.less',
+            'client/style/variables.less',
         ),
         'output_filename': 'client/cherrymusic.css',
         }

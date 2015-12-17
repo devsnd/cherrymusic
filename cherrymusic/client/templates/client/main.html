@@ -115,19 +115,22 @@
     </div>
   </div>
 
-  <div id="search-panel" class="col-md-6 row">
-    <playlist-browser playlists="playlists" ng-show="mediaBrowserMode == 'playlist'"></playlist-browser>
-    <file-browser content="fileBrowserContent" ng-show="mediaBrowserMode == 'file'"></file-browser>
-    <div class="motd" ng-show="mediaBrowserMode == 'motd'">
-      useless wisdom
-      <hr>
-      Something funny
+  <div class="">
+    <div class="row">
+      <div id="search-panel" class="col-md-6 row">
+        <playlist-browser playlists="playlists" ng-show="mediaBrowserMode == 'playlist'"></playlist-browser>
+        <file-browser content="fileBrowserContent" ng-show="mediaBrowserMode == 'file'"></file-browser>
+        <div class="motd" ng-show="mediaBrowserMode == 'motd'">
+          useless wisdom
+          <hr>
+          Something funny
+        </div>
+      </div>
+      <div id="playlist-panel" class="col-md-6 row">
+        <media-player playlists="openedPlaylists" current-playlist="currentPlaylist"></media-player>
+      </div>
     </div>
   </div>
-  <div id="playlist-panel" class="col-md-6 row">
-    <media-player playlists="openedPlaylists" current-playlist="currentPlaylist"></media-player>
-  </div>
-
 
   <div id="playback-controls">
     <img id="albumart"/>
