@@ -1,17 +1,17 @@
 <div role="tabpanel">
   <!-- tabs -->
   <ul class="playlist-tab-list nav nav-tabs" role="tablist">
-    <li role="presentation" ng-class="{'active': playlist==currentPlaylist}" ng-repeat="playlist in playlists">
-      <a ng-click="setCurrentPlaylist(playlist)" aria-controls="home" role="tab" data-toggle="tab">{{ playlist.name }}</a>
+    <li role="presentation" ng-class="{'active': playlist==currentPlaylist, 'playlist-tab-inactive': playlist!==currentPlaylist}" ng-repeat="playlist in playlists">
+      <playlist-tab playlist="playlist" on-remove="playlists.splice($index, 1)" ng-click="setCurrentPlaylist(playlist)" > </playlist-tab>
     </li>
-    <li role="presentation">
+    <li class="playlist-tab-inactive playlist-tab-new" role="presentation">
       <a ng-click="createNewPlaylist()" aria-controls="new playlist" role="tab">
         <b>+</b>
       </a>
     </li>
   </ul>
   <!-- action buttons -->
-  <div class="container-fluid">
+  <div id="playlistCommands" class="playlist-tab-border-left">
     <div class="playlist-command-buttons row">
       <div id="playlist-command-button-group" class="pull-left btn-group">
         <button class="btn dropdown-toggle btn-default btn-xs" data-toggle="dropdown">

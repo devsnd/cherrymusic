@@ -147,6 +147,7 @@ PIPELINE_JS = {
             'client/js/filebrowser.js',
             'client/js/directives/progressbar.js',
             'client/js/directives/file.js',
+            'client/js/directives/playlist.js',
             'client/js/filters/timeformat.js',
             'client/js/mediaplayer.js',
             'client/js/playback_service.js',

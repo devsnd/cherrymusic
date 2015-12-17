@@ -12,6 +12,10 @@ app.config(function($resourceProvider) {
   $resourceProvider.defaults.stripTrailingSlashes = false;
 });
 
+app.config(['$compileProvider', function ($compileProvider) {
+  $compileProvider.debugInfoEnabled(false);
+}]);
+
 app.controller('MainViewController', function($scope, $rootScope, $modal, PlaybackService, Playlist, Browse, IndexDirectory, Track){
     $scope.openAboutModal = function(){
         var modalInstance = $modal.open({

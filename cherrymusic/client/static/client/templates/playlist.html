@@ -1,0 +1,4 @@
+
+<a ng-click="setCurrentPlaylist(playlist)" aria-controls="home" role="tab" data-toggle="tab">{{ playlist.name }}
+    <span ng-if="playlist.name!=='Queue'" class="playlist-tab-closer pointer" ng-click="onRemove()">x</span>
+</a>
