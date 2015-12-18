@@ -1,7 +1,7 @@
 /**
  * Created by tom on 9/6/15.
  */
-app.factory('Track', [function(){
+app.factory('track', [function(){
     var TYPE_FILE = 0;
     return {
         fromFile: function(file){

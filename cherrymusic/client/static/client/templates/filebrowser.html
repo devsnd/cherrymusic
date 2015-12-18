@@ -31,7 +31,6 @@
              dnd-drop="transformToPlaylistTrack(event, index, transferredObject)">
         <tr ng-repeat="file in content.files track by file.id"
             dnd-draggable="file"
-            dnd-moved="content.files.splice($index, 1)"
             dnd-effect-allowed="copy"
             dnd-selected="addToPlaylist(file)"
             ng-class="{'selected': models.selected === file}">

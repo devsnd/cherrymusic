@@ -1,6 +1,6 @@
 app.directive('mediaPlayer', [
-    'Track',
-  function(Track) {
+    'track',
+  function(track) {
       return {
           restrict: 'E',
           templateUrl: STATIC_FILES + 'client/templates/mediaplayer.html',
@@ -36,11 +36,11 @@ app.directive('mediaPlayer', [
                 console.log('savePlaylist is a STUB.');
               };
 
-              $scope.dropCallback = function(event, index, file){
-                  if(file.type === undefined){
-                    return Track.fromFile(file);
+              $scope.dropCallback = function(event, index, item){
+                  if(item.type === undefined){
+                    return track.fromFile(item);
                   }
-                  return file;
+                  return item;
               };
           }
       }

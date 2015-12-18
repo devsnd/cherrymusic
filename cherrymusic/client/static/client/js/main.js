@@ -16,7 +16,7 @@ app.config(['$compileProvider', function ($compileProvider) {
   $compileProvider.debugInfoEnabled(false);
 }]);
 
-app.controller('MainViewController', function($scope, $rootScope, $modal, PlaybackService, Playlist, Browse, IndexDirectory, Track){
+app.controller('MainViewController', function($scope, $rootScope, $modal, PlaybackService, Playlist, Browse, IndexDirectory, track){
     $scope.openAboutModal = function(){
         var modalInstance = $modal.open({
             animation: true,
@@ -84,7 +84,7 @@ app.controller('MainViewController', function($scope, $rootScope, $modal, Playba
     };
 
     $scope.$on('ADD_FILE_TO_PLAYLIST', function(event, file){
-        $scope.currentPlaylist.tracks.push(Track.fromFile(file));
+        $scope.currentPlaylist.tracks.push(track.fromFile(file));
     });
 
     $scope.$on('INDEX_DIRECTORY', function(event, path){

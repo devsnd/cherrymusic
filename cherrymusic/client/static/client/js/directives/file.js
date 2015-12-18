@@ -15,9 +15,10 @@ app.directive('file', [
             },
             scope: {
                 file: '=',
-                onRemove:"&",
-                onPlay:"&"
-            }
+                model: '=',
+                onRemove:"&"
+            },
+            replace: true
         }
     }
 ]);
