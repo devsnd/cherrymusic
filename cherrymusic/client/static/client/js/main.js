@@ -96,6 +96,7 @@ app.controller('MainViewController', function($scope, $rootScope, $modal, Playba
     });
 
     $scope.$on('PLAY_TRACK', function(event, currentPlaylist, track){
+        $scope.currentPlayTrack = track
         if(track.type == 0){ //file
             PlaybackService.setTrack(track);
             PlaybackService.play();
@@ -118,12 +119,14 @@ app.controller('MainViewController', function($scope, $rootScope, $modal, Playba
     });
 
     $scope.$on('JUMP_TO_UNIT', function(event, unit){
+        console.log(unit)
         PlaybackService.seek(PlaybackService.totalTime() * unit);
     });
 
     $scope.currentPlaybackPercentage = 0;
     $rootScope.$on('PLAYBACK_TIME_UPDATE', function(event, currentTime, totalTime){
-        $scope.currentPlaybackPercentage = PlaybackService.currentTime() / PlaybackService.totalTime() * 100;
+        // PlaybackService gives correct totalTime always from metada, totalTime comes from JPlayer and sometimes fail
+        $scope.currentPlaybackPercentage = currentTime / PlaybackService.totalTime() * 100;
         if(!$scope.$$phase) {
             $scope.$digest(); // HACK: force progress bar update
         }

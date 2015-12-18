@@ -119,7 +119,7 @@ PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
 PIPELINE_CSS = {
     'client': {
         'source_filenames': (
-            'client/bower_components/bootstrap/less/bootstrap.less',
+            'client/bower_components/bootstrap/dist/css/bootstrap.css',
             'client/style/cherrymusic.less',
             'client/style/filebrowser.less',
             'client/style/mediaplayer.less',

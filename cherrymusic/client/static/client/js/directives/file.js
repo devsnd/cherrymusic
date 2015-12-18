@@ -7,10 +7,13 @@ app.directive('file', [
             restrict: 'E',
             templateUrl: function(elem, attrs){
                 if(attrs['file'] == 'track.data'){
-                    return STATIC_FILES + 'client/templates/file-playlist.html';
+                    return STATIC_FILES + 'client/templates/file/file-playlist.html';
+                }
+                else if( attrs['file'] == 'currentPlayTrack.data'){
+                    return STATIC_FILES + 'client/templates/file/file-current-track.html';
                 }
                 else {
-                    return STATIC_FILES + 'client/templates/file.html';
+                    return STATIC_FILES + 'client/templates/file/default.html';
                 }
             },
             scope: {

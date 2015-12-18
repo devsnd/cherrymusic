@@ -8,11 +8,38 @@
     color: #888;
 }
 .fill-height{
-    height: 100%;
+    margin: 0;
 }
+
+.fill-height-with-jp{
+    height: calc(~'100vh - 70px');
+}
+
+.cm-songtitle{
+    &-container{
+        position: fixed;
+        left: 50%;
+        bottom: 49px;
+        z-index: @zindex-player-panel + 1;
+        pointer-events: none;
+    }
+    float: left;
+    left: -50%;
+    position:relative;
+    white-space: nowrap;
+}
+
 .jp{
-
-
+    &-bar-seek{
+        .progress-bar-variant(@main-color-bright);
+        cursor: pointer;
+    }
+    
+    &-bar-played{
+        .progress-bar-variant(@main-color);
+        cursor: pointer;
+    }
+    
     &-controls{
         position: absolute;
         padding: 0;
@@ -55,7 +82,7 @@
     &-controls li{
         display: inline;
     }
-    &-volume{
+    &-volume{    
         &-toggles{
             list-style: none outside none;
             position: absolute;
@@ -86,6 +113,29 @@
         }
     }
 }
+
+// *****************************************************************************
+// Added bootstrap components, probably there are better ways to add it
+#gradient {
+  .striped(@color: rgba(255,255,255,.15); @angle: 45deg) {
+    background-image: -webkit-linear-gradient(@angle, @color 25%, transparent 25%, transparent 50%, @color 50%, @color 75%, transparent 75%, transparent);
+    background-image: -o-linear-gradient(@angle, @color 25%, transparent 25%, transparent 50%, @color 50%, @color 75%, transparent 75%, transparent);
+    background-image: linear-gradient(@angle, @color 25%, transparent 25%, transparent 50%, @color 50%, @color 75%, transparent 75%, transparent);
+  }
+}
+
+
+.progress-bar-variant(@color) {
+  background-color: @color;
+
+  // Deprecated parent class requirement as of v3.2.0
+  .progress-striped & {
+    #gradient > .striped();
+  }
+}
+
+// *****************************************************************************
+
 /*
 .jp-jplayer{
     width: 1px !important;
