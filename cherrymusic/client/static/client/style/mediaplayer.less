@@ -7,7 +7,85 @@
     display: block;
     color: #888;
 }
+.fill-height{
+    height: 100%;
+}
+.jp{
 
+
+    &-controls{
+        position: absolute;
+        padding: 0;
+    }
+
+    &-control-buttons{
+        position: absolute;
+        left: 50%;
+        width: 240px;
+        margin-left: -120px;
+        bottom: 42px
+    }
+
+    &-time-holder{
+        left: 0;
+        top: 10px;
+        width: 100%;
+    }
+    &-current-time{
+        float: left;
+        margin-left: 5px;
+    }
+    &-duration{
+        float: right;
+        margin-right: 5px;
+    }
+
+    &-toggles{
+        list-style-type: none;
+        padding: 0;
+        position: absolute;
+        bottom: 4px;
+        left: 50%;
+        margin-left: 130px
+    }
+    &-toggles li{
+        display: inline-block;
+    }
+
+    &-controls li{
+        display: inline;
+    }
+    &-volume{
+        &-toggles{
+            list-style: none outside none;
+            position: absolute;
+            left: 180px;
+            padding: 0;
+        }
+        &-bar{
+            height: 6px !important;
+            position: absolute;
+            width: 60px;
+            top: 28px;
+        }
+        &-toggles li{
+            display: inline;
+        }
+        jp-mute{
+            padding: 1px 4px !important;
+            top: 0;
+        }
+        jp-unmute{
+            padding: 1px 4px !important;
+            top: 0;
+        }
+        &-max{
+            margin-left: 6px;
+            padding: 1px 4px !important;
+            top: 0;
+        }
+    }
+}
 /*
 .jp-jplayer{
     width: 1px !important;

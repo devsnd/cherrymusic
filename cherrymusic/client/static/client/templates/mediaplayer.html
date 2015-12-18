@@ -1,4 +1,4 @@
-<div role="tabpanel">
+<div class="fill-height" role="tabpanel">
   <!-- tabs -->
   <ul class="playlist-tab-list nav nav-tabs" role="tablist">
     <li role="presentation" ng-class="{'active': playlist==currentPlaylist, 'playlist-tab-inactive': playlist!==currentPlaylist}" ng-repeat="playlist in playlists">
@@ -65,13 +65,13 @@
     </div>
   </div>
   <!-- playlist content -->
-  <div class="tab-content">
+  <div class="tab-content fill-height">
     <!-- unloaded playlists are shown immediately when loading them, but the content is filled in later -->
     <div ng-if="currentPlaylist.loading">
       Loading...
     </div>
     <!-- render all tracks of the current playlist -->
-    <ul class="no-bullet"
+    <ul class="no-bullet fill-height"
         ng-if="!currentPlaylist.loading" 
         dnd-list="currentPlaylist.tracks"
         dnd-placeholder-tpl="<tr class='dndPlaceholder'><td></td></tr>"
@@ -86,7 +86,6 @@
         </div>
       </li>
     </ul>
-    {{ currentPlaylist.tracks | json }}
   </div>
 
 </div>
