@@ -112,6 +112,10 @@ app.controller('MainViewController', function($scope, $rootScope, $modal, Playba
         })
     };
 
+    $scope.albumArtUrl = function(filepath){
+        return API_URL + 'albumart/' + filepath
+    };
+
     $scope.$on('CREATE_NEW_PLAYLIST', function(event){
         var newPlaylist = createEmptyPlaylist('New Playlist', 'playlist');
         $scope.openedPlaylists.push(newPlaylist);
@@ -125,6 +129,7 @@ app.controller('MainViewController', function($scope, $rootScope, $modal, Playba
 
     $scope.currentPlaybackPercentage = 0;
     $rootScope.$on('PLAYBACK_TIME_UPDATE', function(event, currentTime, totalTime){
+        $scope.currentPlayTime = currentTime;
         // PlaybackService gives correct totalTime always from metada, totalTime comes from JPlayer and sometimes fail
         $scope.currentPlaybackPercentage = currentTime / PlaybackService.totalTime() * 100;
         if(!$scope.$$phase) {
