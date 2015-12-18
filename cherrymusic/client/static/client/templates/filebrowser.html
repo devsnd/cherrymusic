@@ -1,6 +1,11 @@
 <div>
-  File Browser Mode<br>
-
+  <div class="cm-media-list-item cm-media-list-parent-item"
+       ng-if="content.current_path !=='.'"
+       ng-click="loadDirectory(content.current_path + '/..')">
+    <a class="cm-media-list-parent" >
+      <span class="glyphicon glyphicon-arrow-left"></span>
+    </a>
+  </div>
   <ol class="breadcrumb">
     <li ng-repeat="breadcrumb in breadcrumbs track by breadcrumb.path">
       <a ng-click="loadDirectory(breadcrumb.path)">{{ breadcrumb.name }}</a>
