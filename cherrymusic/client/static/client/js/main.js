@@ -5,7 +5,8 @@ app = angular.module('CherryMusicClient', [
     'ui.bootstrap',
     'ui.bootstrap.tpls',
     'dndLists',
-    'ngResource'
+    'ngResource',
+    'ngDropdowns'
 ]);
 
 app.config(function($resourceProvider) {
@@ -16,14 +17,26 @@ app.config(['$compileProvider', function ($compileProvider) {
   $compileProvider.debugInfoEnabled(false);
 }]);
 
-app.controller('MainViewController', function($scope, $rootScope, $modal, PlaybackService, Playlist, Browse, IndexDirectory, track){
+app.controller('MainViewController', function($scope, $rootScope, $uibModal, PlaybackService, Playlist, Browse, IndexDirectory, User, track){
     $scope.openAboutModal = function(){
-        var modalInstance = $modal.open({
+        var uibModalInstance = $uibModal.open({
             animation: true,
             templateUrl: STATIC_FILES + 'client/modals/about.html',
-            controller: function($scope, $modalInstance){
+            controller: function($scope, $uibModalInstance){
                 $scope.close = function(){
-                    $modalInstance.dismiss('cancel');
+                    $uibModalInstance.dismiss('cancel');
+                }
+            }
+        });
+    };
+
+    $scope.openOptionsModal = function(){
+        var uibModalInstance = $uibModal.open({
+            animation: true,
+            templateUrl: STATIC_FILES + 'client/modals/user_options.html',
+            controller: function($scope, $uibModalInstance){
+                $scope.close = function(){
+                    $uibModalInstance.dismiss('cancel');
                 }
             }
         });
@@ -140,4 +153,49 @@ app.controller('MainViewController', function($scope, $rootScope, $modal, Playba
         console.log(currentTime);
         console.log(totalTime);
     });
+
+    $scope.ddTopMenu = {};
+
+    $scope.ddSelectTopMenu = {};
+
+    $scope.updateDdTopMenu = function() {
+        $scope.ddTopMenu = getDdTopMenu();
+    };
+
+    var getDdTopMenu = function()
+    {
+        var menuOptions = [
+            {
+                text: 'Options',
+                value: 'options',
+            },
+            {
+                divider: true
+            },
+            {
+                text: 'Logout',
+                value: 'logout'
+            }
+        ];
+        if($rootScope.user.is_superuser){
+            menuOptions.splice(1, 0,{
+                text: 'Admin',
+                value: 'admin',
+                href: ADMIN_URL,
+            });
+        }
+
+        return menuOptions;
+    };
+
+    $scope.ddLauncher = function(selected){
+        console.log(selected);
+        if(selected.value == 'options'){
+            $scope.openOptionsModal();
+        }
+        else if(selected.value == 'logout'){
+            $scope.openAboutModal();
+        };
+
+    };
 });

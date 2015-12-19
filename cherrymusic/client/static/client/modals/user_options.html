@@ -1,94 +1,89 @@
 <!-- USER OPTIONS -->
-<div id="userOptions" class="modal fade">
-    <div class="modal-dialog">
-    <div class="modal-content">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h3>Options</h3>
+<div class="modal-header">
+    <button type="button" ng-click="close()" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3>Options</h3>
+</div>
+<div class="modal-body">
+    <div class="content">
+        <h3>keyboard shortcuts</h3>
+
+        <table>
+            <tr>
+                <td>next track</td>
+                <td><span class="label label-default" id="keyboard_shortcuts-next" value="66" name="keyboard_shortcuts.next"></span></td>
+                <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.next','Next Track')">change</a></td>
+            </tr>
+
+            <tr>
+                <td>stop</td>
+                <td><span class="label label-default"  id="keyboard_shortcuts-stop" value="86" name="keyboard_shortcuts.stop"></span></td>
+                <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.stop','Stop')">change</a></td>
+            </tr>
+
+            <tr>
+                <td>previous track</td>
+                <td><span class="label label-default"  value="89"  id="keyboard_shortcuts-prev" name="keyboard_shortcuts.prev"></span></td>
+                <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.prev','Previous Track')">change</a></td>
+            </tr>
+
+            <tr>
+                <td>pause</td>
+                <td>
+                    <span class="label label-default"  value="67"  id="keyboard_shortcuts-pause" name="keyboard_shortcuts.pause"></span>
+                    <span class="label label-default"  value="space">space</span>
+                </td>
+                <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.pause','Pause')">change</a></td>
+            </tr>
+
+            <tr>
+                <td>play</td>
+                <td><span class="label label-default"  value="88" id="keyboard_shortcuts-play" name="keyboard_shortcuts.play"></span></td>
+                <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.play','Play')">change</a></td>
+            </tr>
+
+            <tr>
+                <td>search</td>
+                <td><span class="label label-default" value="83"  id="keyboard_shortcuts-search" name="keyboard_shortcuts.search"></span></td>
+                <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.search','Use Search')">change</a></td>
+            </tr>
+        </table>
+        <h3>misc</h3>
+        <div class="control-group">
+            Autoplay when adding first track <input type="checkbox" onchange="" id="misc-autoplay_on_add" value="option1">
         </div>
-        <div class="modal-body">
-            <div class="content">
-                <h3>keyboard shortcuts</h3>
-
-                <table>
-                    <tr>
-                        <td>next track</td>
-                        <td><span class="label label-default" id="keyboard_shortcuts-next" value="66" name="keyboard_shortcuts.next"></span></td>
-                        <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.next','Next Track')">change</a></td>
-                    </tr>
-
-                    <tr>
-                        <td>stop</td>
-                        <td><span class="label label-default"  id="keyboard_shortcuts-stop" value="86" name="keyboard_shortcuts.stop"></span></td>
-                        <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.stop','Stop')">change</a></td>
-                    </tr>
-
-                    <tr>
-                        <td>previous track</td>
-                        <td><span class="label label-default"  value="89"  id="keyboard_shortcuts-prev" name="keyboard_shortcuts.prev"></span></td>
-                        <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.prev','Previous Track')">change</a></td>
-                    </tr>
-
-                    <tr>
-                        <td>pause</td>
-                        <td>
-                            <span class="label label-default"  value="67"  id="keyboard_shortcuts-pause" name="keyboard_shortcuts.pause"></span>
-                            <span class="label label-default"  value="space">space</span>
-                        </td>
-                        <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.pause','Pause')">change</a></td>
-                    </tr>
-
-                    <tr>
-                        <td>play</td>
-                        <td><span class="label label-default"  value="88" id="keyboard_shortcuts-play" name="keyboard_shortcuts.play"></span></td>
-                        <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.play','Play')">change</a></td>
-                    </tr>
-
-                    <tr>
-                        <td>search</td>
-                        <td><span class="label label-default" value="83"  id="keyboard_shortcuts-search" name="keyboard_shortcuts.search"></span></td>
-                        <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.search','Use Search')">change</a></td>
-                    </tr>
-                </table>
-                <h3>misc</h3>
-                <div class="control-group">
-                    Autoplay when adding first track <input type="checkbox" onchange="" id="misc-autoplay_on_add" value="option1">
-                </div>
-                <div class="control-group">
-                    Confirm closing if music is playing <input type="checkbox" onchange="" id="ui-confirm_quit_dialog" value="option1">
-                </div>
-                <div class="control-group">
-                    Display album art when playing <input type="checkbox" onchange="" id="ui-display_album_art" value="option1">
-                </div>
-                <div id="media-force_transcode_to_bitrate-container" class="control-group">
-                    <div class="success">
-                        Limit audio bitrate
-                        <select name="media-force_transcode_to_bitrate">
-                            <option value="0">Unlimited</option>
-                            <option value="48">48 (Super Low)</option>
-                            <option value="64">64 (Very Low)</option>
-                            <option value="96">96 (Low)</option>
-                            <option value="128">128 (Medium)</option>
-                            <option value="320">320 (Very High)</option>
-                        </select>
-                        &nbsp;<input id="media-force_transcode_to_bitrate-display" type="text" disabled value="" size="3" style="text-align:right;"/>&nbsp;kbps
-                    </div>
-                    <div class="error" style="display: none; text-align: center; margin: 5px;">
-                        <span class="msg"></span>
-                        <button id="media-force_transcode_to_bitrate-disable" class="btn btn-danger">
-                            Remove personal bitrate limit
-                        </button>
-                    </div>
-                </div>
-                <h3>change password</h3>
-                <a class="btn btn-default" href="#changePassword" role="button" data-toggle="modal">change password</a>
-                <h3>export playlists</h3>
-                <a class="btn btn-default" href="#exportPlaylists" role="button" data-toggle="modal">create archive</a>
+        <div class="control-group">
+            Confirm closing if music is playing <input type="checkbox" onchange="" id="ui-confirm_quit_dialog" value="option1">
+        </div>
+        <div class="control-group">
+            Display album art when playing <input type="checkbox" onchange="" id="ui-display_album_art" value="option1">
+        </div>
+        <div id="media-force_transcode_to_bitrate-container" class="control-group">
+            <div class="success">
+                Limit audio bitrate
+                <select name="media-force_transcode_to_bitrate">
+                    <option value="0">Unlimited</option>
+                    <option value="48">48 (Super Low)</option>
+                    <option value="64">64 (Very Low)</option>
+                    <option value="96">96 (Low)</option>
+                    <option value="128">128 (Medium)</option>
+                    <option value="320">320 (Very High)</option>
+                </select>
+                &nbsp;<input id="media-force_transcode_to_bitrate-display" type="text" disabled value="" size="3" style="text-align:right;"/>&nbsp;kbps
+            </div>
+            <div class="error" style="display: none; text-align: center; margin: 5px;">
+                <span class="msg"></span>
+                <button id="media-force_transcode_to_bitrate-disable" class="btn btn-danger">
+                    Remove personal bitrate limit
+                </button>
             </div>
         </div>
-        <div class="modal-footer">
-            <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-        </div>
-    </div>
+        <h3>change password</h3>
+        <a class="btn btn-default" href="#changePassword" role="button" data-toggle="modal">change password</a>
+        <h3>export playlists</h3>
+        <a class="btn btn-default" href="#exportPlaylists" role="button" data-toggle="modal">create archive</a>
     </div>
 </div>
+<div class="modal-footer">
+    <button class="btn" ng-click="close()" data-dismiss="modal" aria-hidden="true">Close</button>
+</div>
+

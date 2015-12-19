@@ -95,6 +95,9 @@ class UserViewSet(SlowServerMixin, viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+    def get_object(self):
+        return self.request.user
+
 class TrackViewSet(SlowServerMixin, viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, )
     queryset = Track.objects.all()

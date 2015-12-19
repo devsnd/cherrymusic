@@ -101,6 +101,7 @@ BOWER_INSTALLED_APPS = (
     'jplayer',
     'dndLists',
     'underscore',
+    'angular-dropdowns',
 )
 
 # pipeline config
@@ -125,6 +126,7 @@ PIPELINE_CSS = {
             'client/style/mediaplayer.less',
             'client/style/playlist.less',
             'client/style/variables.less',
+            'client/style/dropdowns.less',
         ),
         'output_filename': 'client/cherrymusic.css',
         }
@@ -140,6 +142,7 @@ PIPELINE_JS = {
             'client/bower_components/jquery/dist/jquery.js',
             'client/bower_components/jPlayer/dist/jplayer/jquery.jplayer.js',
             'client/bower_components/underscore/underscore.js',
+            'client/bower_components/angular-dropdowns/dist/angular-dropdowns.js',
             'client/js/main.js',
             'client/js/resources.js',
             'client/js/track.js',
