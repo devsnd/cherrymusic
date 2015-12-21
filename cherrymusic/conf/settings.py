@@ -42,12 +42,22 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
     'pipeline',
     'core',
     'storage',
     'client',
     'djangobower',
+    'rest_auth'
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+#        'rest_framework.authentication.BasicAuthentication',
+#        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    )
+}
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -102,6 +112,11 @@ BOWER_INSTALLED_APPS = (
     'dndLists',
     'underscore',
     'angular-dropdowns',
+    'angular-cookies',
+    'json3',
+    'es5-shim',
+    'angular-sanitize',
+    'angular-route',
 )
 
 # pipeline config
@@ -143,6 +158,11 @@ PIPELINE_JS = {
             'client/bower_components/jPlayer/dist/jplayer/jquery.jplayer.js',
             'client/bower_components/underscore/underscore.js',
             'client/bower_components/angular-dropdowns/dist/angular-dropdowns.js',
+            'client/bower_components/angular-cookies/angular-cookies.js',
+            'client/bower_components/json3/lib/json3.js',
+            'client/bower_components/es5-shim/es5-shim.js',
+            'client/bower_components/angular-sanitize/angular-sanitize.js',
+            'client/bower_components/angular-route/angular-route.js',
             'client/js/main.js',
             'client/js/resources.js',
             'client/js/track.js',
@@ -155,6 +175,8 @@ PIPELINE_JS = {
             'client/js/mediaplayer.js',
             'client/js/playback_service.js',
             'client/js/playback_service_jplayer.js',
+            'client/js/auth-user/djangoAuth.js',
+            'client/js/auth-user/validate.js',
         ),
         'output_filename': 'client/cherrymusic.js'
     }

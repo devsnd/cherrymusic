@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.http import HttpResponse, StreamingHttpResponse, Http404
 from rest_framework import viewsets
 from rest_framework.exceptions import NotFound
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -89,11 +90,18 @@ class PlaylistViewSet(SlowServerMixin, MultiSerializerViewSetMixin, viewsets.Mod
         'retrieve': PlaylistDetailSerializer,
     }
 
-
 class UserViewSet(SlowServerMixin, viewsets.ModelViewSet):
+    authentication_classes = (SessionAuthentication, BasicAuthentication)
     permission_classes = (IsAuthenticated, )
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+    def get(self, request, format=None):
+        content = {
+            'user': unicode(request.user),  # `django.contrib.auth.User` instance.
+            'auth': unicode(request.auth),  # None
+        }
+        return Response(content)
 
     def get_object(self):
         return self.request.user

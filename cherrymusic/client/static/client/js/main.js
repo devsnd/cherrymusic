@@ -6,9 +6,15 @@ app = angular.module('CherryMusicClient', [
     'ui.bootstrap.tpls',
     'dndLists',
     'ngResource',
-    'ngDropdowns'
+    'ngDropdowns',
+    'ngCookies',
+    'ngSanitize',
+    'ngRoute',
 ]);
 
+angular.module('angularDjangoRegistrationAuthApp', [
+
+])
 app.config(function($resourceProvider) {
   $resourceProvider.defaults.stripTrailingSlashes = false;
 });
@@ -17,7 +23,7 @@ app.config(['$compileProvider', function ($compileProvider) {
   $compileProvider.debugInfoEnabled(false);
 }]);
 
-app.controller('MainViewController', function($scope, $rootScope, $uibModal, PlaybackService, Playlist, Browse, IndexDirectory, User, track){
+app.controller('MainViewController', function($scope, $rootScope, $uibModal, PlaybackService, Playlist, Browse, IndexDirectory, User, track, djangoAuth){
     $scope.openAboutModal = function(){
         var uibModalInstance = $uibModal.open({
             animation: true,
@@ -194,8 +200,11 @@ app.controller('MainViewController', function($scope, $rootScope, $uibModal, Pla
             $scope.openOptionsModal();
         }
         else if(selected.value == 'logout'){
-            $scope.openAboutModal();
+            djangoAuth.logout();
+            window.location.replace(LOGIN_URL);
         };
 
     };
+
+    $scope.login = djangoAuth.login;
 });
