@@ -179,6 +179,9 @@ PIPELINE_JS = {
             'client/js/playback_service_jplayer.js',
             'client/js/auth-user/djangoAuth.js',
             'client/js/auth-user/validate.js',
+            'client/js/controllers/change_password.js',
+            'client/js/controllers/dropdown_top_menu.js',
+            'client/js/controllers/main_view.js',
         ),
         'output_filename': 'client/cherrymusic.js'
     }

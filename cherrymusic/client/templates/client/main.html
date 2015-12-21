@@ -100,7 +100,7 @@
           <a ng-click="showPlaylists()">load playlist</a>
         </li>
       </ul>
-      <ul class="nav navbar-nav">
+      <ul class="nav navbar-nav" ng-controller="DropdownTopMenuController">
         <div class="wrap-dd-menu-padding"
              ng-click="updateDdTopMenu()"
              dropdown-menu="ddTopMenu"
