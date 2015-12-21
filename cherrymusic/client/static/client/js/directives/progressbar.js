@@ -5,16 +5,32 @@ app.directive('progressBar', [
     function() {
         return {
             restrict: 'E',
-            template: '<div class="jp-seek-bar progress jp-bar-seek" ng-click="jump($event)">'+
-              '<div class="jp-play-bar progress progress-bar jp-bar-played" style="width: {{ percentage }}%"></div>'+
-            '</div>',
-            scope: {
-                percentage: '@'
+            templateUrl: function(elem, attrs){
+                if(attrs['kindOfBar'] == 'jp'){
+                    return STATIC_FILES + 'client/templates/progressbars/jp-bar.html';
+                };
+                if( attrs['kindOfBar'] == 'volume'){
+                    return STATIC_FILES + 'client/templates/progressbars/volume-bar.html';
+                };
             },
+            scope: {
+                percentage: '@',
+                kindOfBar: '@'
+            },
+            replace: true,
             link: function(scope, element, attributes){
                 scope.element = element[0];
                 scope.jump = function(event){
-                    scope.$emit('JUMP_TO_UNIT', event.clientX / scope.element.offsetWidth);
+                    var jumpTo = null;
+
+                    if(attributes.kindOfBar == 'jp'){
+                        jumpTo = 'JUMP_TO_UNIT'
+                    }
+                    else if(attributes.kindOfBar == 'volume'){
+                        jumpTo = 'VOLUME_TO_UNIT'
+                    };
+
+                    scope.$emit(jumpTo, (event.clientX - scope.element.getBoundingClientRect().left) / scope.element.offsetWidth);
                 }
             }
         }

@@ -73,6 +73,15 @@ app.factory('PlaybackServiceJPlayer', ['$log', '$rootScope', function($log, $roo
                 return currentTrack.data.meta_duration;
             }
             return totalTime;
+        },
+        volume: function(volume){
+            jplayerInstance.jPlayer('volume', volume);
+        },
+        mute: function(){
+            jplayerInstance.jPlayer('mute', true);
+        },
+        unmute: function(){
+            jplayerInstance.jPlayer('mute', false);
         }
     };
 }]);

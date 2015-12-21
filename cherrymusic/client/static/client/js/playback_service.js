@@ -1,4 +1,4 @@
-app.factory('PlaybackService', ['$injector', function($injector){
+app.factory('PlaybackService', ['$injector', '$rootScope', function($injector, $rootScope){
     var backend = null;
 
     assureBackend = function() {
@@ -22,18 +22,32 @@ app.factory('PlaybackService', ['$injector', function($injector){
         },
         play: function(start_time){
             backend.play(start_time);
+            $rootScope.isPlaying = true;
         },
         pause: function(start_time){
             backend.pause();
+            $rootScope.isPlaying = false;
         },
         stop: function(){
             backend.stop();
+            $rootScope.isPlaying = false;
+            $rootScope.$emit('DELETE_CURRENT_TRACK');
         },
         currentTime: function(){
             return backend.currentTime();
         },
         totalTime: function(){
             return backend.totalTime();
-        }
+        },
+        volume: function(volume){
+            return backend.volume(volume);
+        },
+        mute: function(){
+            return backend.mute();
+        },
+        unmute: function(){
+            return backend.unmute();
+        },
+
     }
 }]);

@@ -184,6 +184,8 @@ PIPELINE_JS = {
             'client/js/controllers/change_password.js',
             'client/js/controllers/dropdown_top_menu.js',
             'client/js/controllers/main_view.js',
+            'client/js/controllers/jplayer.js',
+            'client/js/controllers/playlists.js',
             'client/js/hotkeys.js',
         ),
         'output_filename': 'client/cherrymusic.js'
