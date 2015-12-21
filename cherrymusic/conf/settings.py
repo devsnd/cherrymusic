@@ -119,6 +119,7 @@ BOWER_INSTALLED_APPS = (
     'es5-shim',
     'angular-sanitize',
     'angular-route',
+    'chieffancypants/angular-hotkeys',
 )
 
 # pipeline config
@@ -165,6 +166,7 @@ PIPELINE_JS = {
             'client/bower_components/es5-shim/es5-shim.js',
             'client/bower_components/angular-sanitize/angular-sanitize.js',
             'client/bower_components/angular-route/angular-route.js',
+            'client/bower_components/angular-hotkeys/build/hotkeys.js',
             'client/js/main.js',
             'client/js/resources.js',
             'client/js/track.js',
@@ -182,6 +184,7 @@ PIPELINE_JS = {
             'client/js/controllers/change_password.js',
             'client/js/controllers/dropdown_top_menu.js',
             'client/js/controllers/main_view.js',
+            'client/js/hotkeys.js',
         ),
         'output_filename': 'client/cherrymusic.js'
     }

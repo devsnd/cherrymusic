@@ -10,6 +10,7 @@ app = angular.module('CherryMusicClient', [
     'ngCookies',
     'ngSanitize',
     'ngRoute',
+    'cfp.hotkeys',
 ]);
 
 angular.module('angularDjangoRegistrationAuthApp', [

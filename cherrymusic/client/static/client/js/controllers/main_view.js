@@ -1,6 +1,7 @@
-app.controller('MainViewController', function($scope, $rootScope, $uibModal, PlaybackService, Playlist, Browse, IndexDirectory, track, djangoAuth){
+app.controller('MainViewController', function($scope, $rootScope, $uibModal, $controller, PlaybackService, Playlist, Browse, IndexDirectory, track, djangoAuth){
     djangoAuth.authenticationStatus();
 
+    angular.extend(this, $controller('HotkeysCtrl', {$scope: $scope}));
     $scope.openAboutModal = function(){
         var uibModalInstance = $uibModal.open({
             animation: true,
