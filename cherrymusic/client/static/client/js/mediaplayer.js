@@ -1,6 +1,6 @@
 app.directive('mediaPlayer', [
-    'track',
-  function(track) {
+    'Track',
+  function(Track) {
       return {
           restrict: 'E',
           templateUrl: STATIC_FILES + 'client/templates/mediaplayer.html',
@@ -38,7 +38,7 @@ app.directive('mediaPlayer', [
 
               $scope.dropCallback = function(event, index, item){
                   if(item.type === undefined){
-                    return track.fromFile(item);
+                    return Track.fromFile(item);
                   }
                   return item;
               };
