@@ -24,6 +24,8 @@ app.config(['$compileProvider', function ($compileProvider) {
 }]);
 
 app.controller('MainViewController', function($scope, $rootScope, $uibModal, PlaybackService, Playlist, Browse, IndexDirectory, User, track, djangoAuth){
+    djangoAuth.authenticationStatus();
+
     $scope.openAboutModal = function(){
         var uibModalInstance = $uibModal.open({
             animation: true,
@@ -36,10 +38,24 @@ app.controller('MainViewController', function($scope, $rootScope, $uibModal, Pla
         });
     };
 
-    $scope.openOptionsModal = function(){
+    var openOptionsModal = function(){
         var uibModalInstance = $uibModal.open({
             animation: true,
             templateUrl: STATIC_FILES + 'client/modals/user_options.html',
+            scope: $scope,
+            controller: function($scope, $uibModalInstance){
+                $scope.close = function(){
+                    $uibModalInstance.dismiss('cancel');
+                }
+            }
+        });
+    };
+
+    $scope.openChangePasswordModal = function(){
+        var uibModalInstance = $uibModal.open({
+            animation: true,
+            templateUrl: STATIC_FILES + 'client/modals/change_password.html',
+            scope: $scope,
             controller: function($scope, $uibModalInstance){
                 $scope.close = function(){
                     $uibModalInstance.dismiss('cancel');
@@ -195,9 +211,8 @@ app.controller('MainViewController', function($scope, $rootScope, $uibModal, Pla
     };
 
     $scope.ddLauncher = function(selected){
-        console.log(selected);
         if(selected.value == 'options'){
-            $scope.openOptionsModal();
+            openOptionsModal();
         }
         else if(selected.value == 'logout'){
             djangoAuth.logout();
@@ -206,5 +221,20 @@ app.controller('MainViewController', function($scope, $rootScope, $uibModal, Pla
 
     };
 
-    $scope.login = djangoAuth.login;
+
+});
+
+app.controller('FormController', function($scope, djangoAuth) {
+    $scope.changePassword = function(oldpassword, newpassword, repeatnewpassword){
+
+        console.log(oldpassword);
+        djangoAuth.changePassword(newpassword, repeatnewpassword, oldpassword);
+
+
+        $scope.oldpassword = null;
+        $scope.newpassword = null;
+        $scope.repeatnewpassword = null;
+        $scope.changePasswordForm.$setPristine();
+    };
+
 });

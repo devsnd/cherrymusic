@@ -31,7 +31,7 @@ app.service('djangoAuth', function djangoAuth($q, $http, $cookies, $rootScope) {
                 url: url,
                 withCredentials: this.use_session,
                 method: method.toUpperCase(),
-                headers: {'X-CSRFToken': $cookies['csrftoken']},
+                headers: {'X-CSRFToken': $cookies.get('csrftoken')},
                 params: params,
                 data: data
             })
@@ -107,13 +107,14 @@ app.service('djangoAuth', function djangoAuth($q, $http, $cookies, $rootScope) {
                 $rootScope.$broadcast("djangoAuth.logged_out");
             });
         },
-        'changePassword': function(password1,password2){
+        'changePassword': function(password1, password2, oldpassword){
             return this.request({
                 'method': "POST",
                 'url': "/password/change/",
                 'data':{
                     'new_password1':password1,
-                    'new_password2':password2
+                    'new_password2':password2,
+                    'old_password':oldpassword
                 }
             });
         },

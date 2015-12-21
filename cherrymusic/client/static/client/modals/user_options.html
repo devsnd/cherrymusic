@@ -3,7 +3,7 @@
     <button type="button" ng-click="close()" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
     <h3>Options</h3>
 </div>
-<div class="modal-body">
+<div id="options" class="modal-body">
     <div class="content">
         <h3>keyboard shortcuts</h3>
 
@@ -78,7 +78,7 @@
             </div>
         </div>
         <h3>change password</h3>
-        <a class="btn btn-default" href="#changePassword" role="button" data-toggle="modal">change password</a>
+        <a class="btn btn-default" href="#changePassword" ng-click="openChangePasswordModal()" role="button" data-toggle="modal">change password</a>
         <h3>export playlists</h3>
         <a class="btn btn-default" href="#exportPlaylists" role="button" data-toggle="modal">create archive</a>
     </div>
