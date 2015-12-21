@@ -1,4 +1,4 @@
-app.controller('PlaylistsCtrl', function($scope, $rootScope, Playlist, Track) {
+app.controller('PlaylistsCtrl', function($scope, Playlist, Track) {
 
     $scope.getRemainingTimeOrTracks = function (playlist) {
         return playlist.tracks.length;
@@ -19,7 +19,6 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, Playlist, Track) {
     $scope.playlists = [];
     $scope.openedPlaylists = [defaultPlaylist];
     $scope.currentPlaylist = defaultPlaylist;
-    $scope.mediaBrowserMode = 'motd';
 
     $scope.$on('LOAD_PLAYLIST', function(event, playlist) {
         playlistid = playlist.id;

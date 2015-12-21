@@ -5,11 +5,28 @@ app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
     $scope.isRepeat = false;
     $rootScope.volume = 1;
 
+    var getTitle = function(track){
+        var defaultTitle = 'CherryMusic';
+        if(track == undefined){
+            return defaultTitle;
+        }
+        else if(track.data.meta_title){
+            return track.data.meta_track + ' ' + track.data.meta_artist +
+                ' - ' + track.data.meta_title + ' | ' + defaultTitle;
+        }
+        else{
+            return track.data.filename + ' | ' + defaultTitle;
+        };
+    };
+
+    $rootScope.title = getTitle(null);
     PlaybackService.setBackend('PlaybackServiceJPlayer');
     $scope.playback = PlaybackService;
 
     $scope.$on('PLAY_TRACK', function(event, currentPlaylist, track){
         $scope.currentPlayTrack = track;
+        $rootScope.title = getTitle(track);
+        
         if(track.type == 0){ //file
             PlaybackService.setTrack(track);
             PlaybackService.play();
@@ -29,6 +46,7 @@ app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
 
     $rootScope.$on('DELETE_CURRENT_TRACK', function(event){
         $scope.currentPlayTrack = null;
+        $rootScope.title = getTitle(null);
     });
 
     $scope.mute = function(){
@@ -55,11 +73,9 @@ app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
             $scope.$digest(); // HACK: force progress bar update
         }
     });
-    $rootScope.$on('PLAYBACK_ENDED', function(event, currentTime, totalTime){
-        $rootScope.isPlaying = true;
-
-        console.log(currentTime);
-        console.log(totalTime);
+    $rootScope.$on('PLAYBACK_ENDED', function(){
+        $rootScope.isPlaying = false;
+        console.log('Playback end');
     });
 
 });

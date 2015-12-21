@@ -31,6 +31,7 @@ app.controller('MainViewController', function($scope, $rootScope, $uibModal, $co
     };
 
     $scope.userMayDownload = true;
+    $scope.mediaBrowserMode = 'motd';
 
     $scope.fileBrowserContent = {};
 

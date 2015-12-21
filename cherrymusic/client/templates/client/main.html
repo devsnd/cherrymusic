@@ -1,7 +1,7 @@
 {% load staticfiles %}
 {% load pipeline %}
 <!DOCTYPE html>
-<html>
+<html ng-controller="MainViewController" ng-app="CherryMusicClient">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <!--
@@ -41,7 +41,7 @@
   <link rel="icon" href="{% static "client/img/favicon32.png" %}" type="image/png">
   <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
 
-  <title>CherryMusic</title>
+  <title ng-bind-html="title" >CherryMusic</title>
 </head>
 <body style="margin-top: 50px">
 
@@ -55,7 +55,7 @@
 </script>
 
 {% verbatim %}
-<div ng-controller="MainViewController" ng-app="CherryMusicClient">
+<div>
   <div class="navbar navbar-inverse navbar-fixed-top">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
