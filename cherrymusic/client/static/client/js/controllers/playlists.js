@@ -1,4 +1,4 @@
-app.controller('PlaylistsCtrl', function($scope, $rootScope, Playlist, track) {
+app.controller('PlaylistsCtrl', function($scope, $rootScope, Playlist, Track) {
 
     $scope.getRemainingTimeOrTracks = function (playlist) {
         return playlist.tracks.length;
@@ -41,7 +41,7 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, Playlist, track) {
     });
 
     $scope.$on('ADD_FILE_TO_PLAYLIST', function(event, file){
-        $scope.currentPlaylist.tracks.push(track.fromFile(file));
+        $scope.currentPlaylist.tracks.push(Track.fromFile(file));
     });
 
     $scope.showPlaylists = function(){
