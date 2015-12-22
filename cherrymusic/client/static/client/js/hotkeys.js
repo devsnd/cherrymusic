@@ -48,14 +48,35 @@ app.controller('HotkeysCtrl', function($scope, $rootScope, hotkeys) {
         }
     });
 
-    // when you bind it to the controller's scope, it will automatically unbind
-    // the hotkey when the scope is destroyed (due to ng-if or something that changes the DOM)
-    hotkeys.bindTo($scope)
-        .add({
-            combo: 'w',
-            description: 'blah blah',
-            callback: function() {}
-        })
-      // you can chain these methods for ease of use:
+    hotkeys.add({
+        combo: 'ctrl+left',
+        description: 'Previous track',
+        callback: function() {
+            $scope.playPreviousTrack();
+        }
+    });
+
+    hotkeys.add({
+        combo: 'ctrl+right',
+        description: 'Next track',
+        callback: function() {
+            $scope.playNextTrack();
+        }
+    });
+
+    hotkeys.add({
+        combo: 'space',
+        description: 'Play/Pause',
+        callback: function() {
+            console.log($rootScope.isPlaying);
+            if ($rootScope.isPlaying){
+                $scope.playback.pause();
+            }
+            else{
+                $scope.playTrack();
+            };
+        }
+    });
+
 
 });

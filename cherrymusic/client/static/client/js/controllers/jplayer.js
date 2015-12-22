@@ -1,6 +1,6 @@
 app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
     $scope.isMute = false;
-    $scope.isPlaying = false;
+    $rootScope.isPlaying = false;
     $rootScope.volume = 1;
 
     var getTitle = function(track){
