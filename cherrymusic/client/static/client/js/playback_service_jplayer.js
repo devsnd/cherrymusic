@@ -15,7 +15,7 @@ app.factory('PlaybackServiceJPlayer', ['$log', '$rootScope', function($log, $roo
         },
 
         //cssSelectorAncestor: "#jp_container_1",
-        swfPath: STATIC_FILES+"/client/bower_components/jplayer/dist/jplayer/jquery.jplayer.swf",
+        swfPath: STATIC_FILES+"/client/bower_components/jPlayer/dist/jplayer/jquery.jplayer.swf",
         supplied: "oga",
         useStateClassSkin: true,
         autoBlur: false,
@@ -34,7 +34,7 @@ app.factory('PlaybackServiceJPlayer', ['$log', '$rootScope', function($log, $roo
     var setTrack = function(track, start_time){
         currentTimeOffset = start_time;
 
-        if(track.type == 0){ // file
+        if(track.type == TYPE_FILE){
             currentTrack = track;
             var trackurl = STREAM_URL + track.data.path;
             if(start_time !== undefined){

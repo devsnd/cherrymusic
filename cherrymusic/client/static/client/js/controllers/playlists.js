@@ -1,5 +1,26 @@
 app.controller('PlaylistsCtrl', function($scope, Playlist, Track) {
 
+    $scope.isShuffle = false;
+    $scope.isRepeat = false;
+
+    $scope.toggleShuffle = function() {
+        if ($scope.isShuffle){
+            $scope.isShuffle = false;
+        }
+        else{
+            $scope.isShuffle = true;
+        };
+    };
+
+    $scope.toggleRepeat = function() {
+        if ($scope.isRepeat){
+            $scope.isRepeat = false;
+        }
+        else{
+            $scope.isRepeat = true;
+        };
+    };
+
     $scope.getRemainingTimeOrTracks = function (playlist) {
         return playlist.tracks.length;
     };
@@ -19,6 +40,7 @@ app.controller('PlaylistsCtrl', function($scope, Playlist, Track) {
     $scope.playlists = [];
     $scope.openedPlaylists = [defaultPlaylist];
     $scope.currentPlaylist = defaultPlaylist;
+    $scope.indexHistory = [];
 
     $scope.$on('LOAD_PLAYLIST', function(event, playlist) {
         playlistid = playlist.id;
@@ -54,5 +76,6 @@ app.controller('PlaylistsCtrl', function($scope, Playlist, Track) {
         var newPlaylist = createEmptyPlaylist('New Playlist', 'playlist');
         $scope.openedPlaylists.push(newPlaylist);
         $scope.currentPlaylist = newPlaylist;
+        $scope.indexHistory = [];
     });
 });

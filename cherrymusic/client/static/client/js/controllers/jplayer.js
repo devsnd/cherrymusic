@@ -1,8 +1,6 @@
 app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
     $scope.isMute = false;
     $scope.isPlaying = false;
-    $scope.isShuffle = false;
-    $scope.isRepeat = false;
     $rootScope.volume = 1;
 
     var getTitle = function(track){
@@ -22,18 +20,6 @@ app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
     $rootScope.title = getTitle(null);
     PlaybackService.setBackend('PlaybackServiceJPlayer');
     $scope.playback = PlaybackService;
-
-    $scope.$on('PLAY_TRACK', function(event, currentPlaylist, track){
-        $scope.currentPlayTrack = track;
-        $rootScope.title = getTitle(track);
-        
-        if(track.type == 0){ //file
-            PlaybackService.setTrack(track);
-            PlaybackService.play();
-        } else {
-            console.error('Cannot play track of type '+track.type);
-        }
-    });
 
     $scope.$on('JUMP_TO_UNIT', function(event, unit){
         PlaybackService.seek(PlaybackService.totalTime() * unit);
@@ -74,8 +60,100 @@ app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
         }
     });
     $rootScope.$on('PLAYBACK_ENDED', function(){
-        $rootScope.isPlaying = false;
+        $scope.playNextTrack();
         console.log('Playback end');
     });
 
+    $scope.playTrack = function(index){
+        var starTime = 0;
+        var track = null;
+
+        if(index == undefined){
+            if($scope.currentPlayTrack){
+                starTime = $scope.currentPlayTime;
+                track = $scope.currentPlayTrack;
+            }
+            else{
+                track = trackFromIndex(0);
+                $scope.currentTrackIndex = 0;
+            };   
+        }
+        else{
+            $scope.currentTrackIndex = index;
+            track = trackFromIndex(index);
+        };
+        $scope.currentPlayTrack = track;
+
+        $rootScope.title = getTitle(track);
+
+        if(track.type == TYPE_FILE){
+            PlaybackService.setTrack(track, starTime);
+            PlaybackService.play();
+        } else {
+            console.error('Cannot play track of type '+track.type);
+        }
+    };
+
+    var trackFromIndex = function(index){
+        return $scope.currentPlaylist.tracks[index];
+    };
+
+    $scope.playNextTrack = function(){
+        var nextIndex = getNextIndex();
+        if(nextIndex == null){
+            $scope.playback.stop()
+        }
+        else{
+            $scope.playTrack(nextIndex);
+        };
+    };
+
+    var getNextIndex = function(){
+        var currentIndex = $scope.currentTrackIndex;
+        var tracksInPlaylist = $scope.currentPlaylist.tracks.length;
+
+        if($scope.currentPlaylist.type == 'queue'){
+            $scope.currentPlaylist.tracks.splice(currentIndex, 1);
+            return (tracksInPlaylist > 1) ? 0 : null;
+        };
+
+        $scope.indexHistory.push(currentIndex);
+
+        var followedIndex = ((currentIndex + 1) < tracksInPlaylist) ? currentIndex + 1 : 0;
+
+        if($scope.isShuffle){
+            return Math.round(Math.random() * (tracksInPlaylist - 1));
+        };
+
+        if(!$scope.isRepeat && followedIndex == 0 ){
+            $scope.currentTrackIndex = null;
+            $scope.currentPlayTrack = null;
+            return null;
+        };
+        return (followedIndex);
+    };
+
+    $scope.playPreviousTrack = function(){
+        var previousIndex = getPreviousIndex();
+        if(previousIndex == null){
+            $scope.playback.stop()
+        }
+        else{
+            $scope.playTrack(previousIndex);
+        };
+    };
+
+    var getPreviousIndex = function(){
+        var currentIndex = $scope.currentTrackIndex;
+        var followedIndex = ((currentIndex - 1) >= 0) ? currentIndex - 1 : null;
+        var historyLength = $scope.indexHistory.length;
+
+        if($scope.isShuffle && historyLength >= 1){
+            var lastPlayed = historyLength - 1;
+            followedIndex = $scope.indexHistory[lastPlayed];
+            $scope.indexHistory.splice(lastPlayed, 1);
+        };  
+
+        return followedIndex;
+    };
 });

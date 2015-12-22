@@ -6,7 +6,10 @@ app.directive('mediaPlayer', [
           templateUrl: STATIC_FILES + 'client/templates/mediaplayer.html',
           scope: {
               playlists: '=',
-              currentPlaylist: '='
+              currentPlaylist: '=',
+              currentTrackIndex: '=',
+              playTrack: '=',
+              indexHistory: '='
           },
           controller: function ($scope) {
               $scope.currentTrackIndex = 0;
@@ -24,12 +27,9 @@ app.directive('mediaPlayer', [
               };
 
               $scope.setCurrentPlaylist = function(playlist){
+                  console.log(playlist);
                   $scope.currentPlaylist = playlist;
-              };
-
-              $scope.playTrack = function(trackNr){
-                  $scope.currentTrackIndex = trackNr;
-                  $scope.$emit('PLAY_TRACK', $scope.currentPlaylist, $scope.currentPlaylist.tracks[trackNr]);
+                  $scope.indexHistory = [];
               };
 
               $scope.savePlaylist = function(playlist){

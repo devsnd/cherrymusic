@@ -137,7 +137,10 @@
         </div>
       </div>
       <div id="playlist-panel" class="col-md-6 row">
-        <media-player playlists="openedPlaylists" current-playlist="currentPlaylist"></media-player>
+        <media-player playlists="openedPlaylists" current-playlist="currentPlaylist" 
+                      current-track-index="currentTrackIndex" play-track="playTrack"
+                      index-history="indexHistory">
+        </media-player>
       </div>
     </div>
   </div>
@@ -167,16 +170,16 @@
             <div class="jp-control-buttons">
               <ul class="jp-controls">
                 <li><a class="jp-previous btn btn-default" tabindex="1">
-                  <span class="glyphicon glyphicon-step-backward"></span>
+                  <span ng-click="playPreviousTrack()" class="glyphicon glyphicon-step-backward"></span>
                 </a></li>
-                <li><a ng-click="playback.play()" class="jp-play  btn btn-default" tabindex="1" ng-if="!$root.isPlaying">
-                  <span class="glyphicon glyphicon-play"></span>
+                <li><a  class="jp-play  btn btn-default" tabindex="1" ng-if="!$root.isPlaying">
+                  <span ng-click="playTrack()" class="glyphicon glyphicon-play"></span>
                 </a></li>
-                <li><a ng-click="playback.pause()" class="jp-pause btn btn-default" tabindex="1" ng-if="$root.isPlaying">
-                  <span class="glyphicon glyphicon-pause"></span>
+                <li><a  class="jp-pause btn btn-default" tabindex="1" ng-if="$root.isPlaying">
+                  <span ng-click="playback.pause()" class="glyphicon glyphicon-pause"></span>
                 </a></li>
                 <li><a class="jp-next btn btn-default" tabindex="1">
-                  <span class="glyphicon glyphicon-step-forward"></span>
+                  <span ng-click="playNextTrack()" class="glyphicon glyphicon-step-forward"></span>
                 </a></li>
                 <li><a class="jp-stop btn btn-default" tabindex="1">
                   <span ng-click="playback.stop()" class="glyphicon glyphicon-stop"></span>
@@ -204,16 +207,16 @@
   
             <ul class="jp-toggles">
               <li><a class="jp-shuffle btn btn-default btn-xs" tabindex="1" title="turn shuffle on" ng-if="!isShuffle">
-                <span class="glyphicon glyphicon-random"></span>
+                <span ng-click="toggleShuffle()" class="glyphicon glyphicon-random"></span>
               </a></li>
               <li><a class="jp-shuffle-off btn btn-default btn-xs" tabindex="1" title="turn shuffle off" ng-if="isShuffle">
-                <span class="glyphicon glyphicon-arrow-right"></span>
+                <span ng-click="toggleShuffle()" class="glyphicon glyphicon-arrow-right"></span>
               </a></li>
               <li><a class="jp-repeat btn btn-default btn-xs" tabindex="1" title="activate repeat" ng-if="!isRepeat">
-                <span class="glyphicon glyphicon-retweet"></span>
+                <span ng-click="toggleRepeat()" class="glyphicon glyphicon-retweet"></span>
               </a></li>
               <li><a class="jp-repeat-off btn btn-default btn-xs" tabindex="1" title="deactivate repeat off" ng-if="isRepeat">
-                <span class="glyphicon glyphicon-arrow-down"></span>
+                <span ng-click="toggleRepeat()" class="glyphicon glyphicon-arrow-down"></span>
               </a></li>
             </ul>
           </div>

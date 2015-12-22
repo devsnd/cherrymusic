@@ -1,6 +1,6 @@
-/**
- * Created by tom on 6/14/15.
- */
+
+TYPE_FILE = 0;
+
 app = angular.module('CherryMusicClient', [
     'ui.bootstrap',
     'ui.bootstrap.tpls',

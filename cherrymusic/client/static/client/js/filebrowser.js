@@ -45,13 +45,6 @@ app.directive('fileBrowser', [
                     return API_URL + 'albumart/' + filepath
                 };
 
-                $scope.transformToPlaylistTrack = function(event, index, transferredObject){
-                    console.log(event);
-                    console.log(index);
-                    console.log(transferredObject);
-                    return transferredObject;
-                };
-
                 $scope.getBreadcrumbs = function(currentPath){
                     if(currentPath === undefined){
                         return [];

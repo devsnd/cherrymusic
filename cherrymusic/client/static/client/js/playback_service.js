@@ -13,12 +13,13 @@ app.factory('PlaybackService', ['$injector', '$rootScope', function($injector, $
         setBackend: function(backendServiceName){
             backend = $injector.get(backendServiceName);
         },
-        setTrack: function(track){
+        setTrack: function(track, start_time){
             currentTrack = track;
-            backend.setTrack(track);
+            backend.setTrack(track, start_time);
         },
         seek: function(start_time){
             backend.seek(start_time);
+            $rootScope.isPlaying = true;
         },
         play: function(start_time){
             backend.play(start_time);
