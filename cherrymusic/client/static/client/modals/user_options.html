@@ -5,57 +5,60 @@
 </div>
 <div id="options" class="modal-body">
     <div class="content">
-        <h3>keyboard shortcuts</h3>
-
+        <h3>keyboard shortcuts (needs reload to work)</h3>
         <table>
             <tr>
-                <td>next track</td>
-                <td><span class="label label-default" id="keyboard_shortcuts-next" value="66" name="keyboard_shortcuts.next"></span></td>
-                <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.next','Next Track')">change</a></td>
+                <td>increase volume</td>
+                <td><span class="label label-default">{{ $root.increaseVolumeKey }}</span></td>
+                <td><a ng-keydown="$root.updateKey($event, 'increaseVolumeKey')"
+                       ng-click="$root.changeKey = 'Press keys' "
+                       class="btn btn-default" tabindex="0">{{ $root.changeKey }}</a></td>
             </tr>
-
             <tr>
-                <td>stop</td>
-                <td><span class="label label-default"  id="keyboard_shortcuts-stop" value="86" name="keyboard_shortcuts.stop"></span></td>
-                <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.stop','Stop')">change</a></td>
+                <td>decrease volume</td>
+                <td><span class="label label-default">{{ $root.decreaseVolumeKey }}</span></td>
+                <td><a ng-keydown="$root.updateKey($event, 'decreaseVolumeKey')"
+                       ng-click="$root.changeKey = 'Press keys' "
+                       class="btn btn-default" tabindex="0">{{ $root.changeKey }}</a></td>
             </tr>
-
-            <tr>
-                <td>previous track</td>
-                <td><span class="label label-default"  value="89"  id="keyboard_shortcuts-prev" name="keyboard_shortcuts.prev"></span></td>
-                <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.prev','Previous Track')">change</a></td>
-            </tr>
-
-            <tr>
-                <td>pause</td>
-                <td>
-                    <span class="label label-default"  value="67"  id="keyboard_shortcuts-pause" name="keyboard_shortcuts.pause"></span>
-                    <span class="label label-default"  value="space">space</span>
-                </td>
-                <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.pause','Pause')">change</a></td>
-            </tr>
-
             <tr>
                 <td>play</td>
-                <td><span class="label label-default"  value="88" id="keyboard_shortcuts-play" name="keyboard_shortcuts.play"></span></td>
-                <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.play','Play')">change</a></td>
+                <td><span class="label label-default">{{ $root.togglePlayKey }}</span></td>
+                <td><a ng-keydown="$root.updateKey($event, 'togglePlayKey')"
+                       ng-click="$root.changeKey = 'Press keys' "
+                       class="btn btn-default" tabindex="0">{{ $root.changeKey }}</a></td>
             </tr>
-
+            <tr>
+                <td>next track</td>
+                <td><span class="label label-default">{{ $root.nextTrackKey }}</span></td>
+                <td><a ng-keydown="$root.updateKey($event, 'nextTrackKey')"
+                       ng-click="$root.changeKey = 'Press keys' "
+                       class="btn btn-default" tabindex="0">{{ $root.changeKey }}</a></td>
+            </tr>
+            <tr>
+                <td>previous track</td>
+                <td><span class="label label-default">{{ $root.previousTrackKey }}</span></td>
+                <td><a ng-keydown="$root.updateKey($event, 'previousTrackKey')"
+                       ng-click="$root.changeKey = 'Press keys' "
+                       class="btn btn-default" tabindex="0">{{ $root.changeKey }}</a></td>
+            </tr>
             <tr>
                 <td>search</td>
-                <td><span class="label label-default" value="83"  id="keyboard_shortcuts-search" name="keyboard_shortcuts.search"></span></td>
-                <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.search','Use Search')">change</a></td>
+                <td><span class="label label-default"></span></td>
+                <td><a ng-keydown="$root.updateKey($event, 'searchKey')"
+                       ng-click="$root.changeKey = 'Press keys' "
+                       class="btn btn-default" tabindex="0">{{ $root.changeKey }}</a></td>
             </tr>
         </table>
         <h3>misc</h3>
         <div class="control-group">
-            Autoplay when adding first track <input type="checkbox" onchange="" id="misc-autoplay_on_add" value="option1">
+            Autoplay when adding first track <input ng-model="$root.autoPlay" type="checkbox" id="misc-autoplay_on_add" value="option1">
         </div>
         <div class="control-group">
-            Confirm closing if music is playing <input type="checkbox" onchange="" id="ui-confirm_quit_dialog" value="option1">
+            Confirm closing if music is playing <input  ng-model="$root.confirmClosing" type="checkbox" id="ui-confirm_quit_dialog" value="option1">
         </div>
         <div class="control-group">
-            Display album art when playing <input type="checkbox" onchange="" id="ui-display_album_art" value="option1">
+            Display album art when playing <input ng-model="$root.showAlbumArt" type="checkbox" id="ui-display_album_art" value="option1">
         </div>
         <div id="media-force_transcode_to_bitrate-container" class="control-group">
             <div class="success">

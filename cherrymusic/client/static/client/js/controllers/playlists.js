@@ -1,4 +1,4 @@
-app.controller('PlaylistsCtrl', function($scope, Playlist, Track) {
+app.controller('PlaylistsCtrl', function($scope, $rootScope, Playlist, Track) {
 
     $scope.isShuffle = false;
     $scope.isRepeat = false;
@@ -63,6 +63,9 @@ app.controller('PlaylistsCtrl', function($scope, Playlist, Track) {
 
     $scope.$on('ADD_FILE_TO_PLAYLIST', function(event, file){
         $scope.currentPlaylist.tracks.push(Track.fromFile(file));
+        if(($scope.currentPlaylist.tracks.length == 1) && $rootScope.autoPlay){
+            $scope.playTrack();
+        };
     });
 
     $scope.showPlaylists = function(){

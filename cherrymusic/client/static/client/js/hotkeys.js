@@ -8,7 +8,7 @@ app.controller('HotkeysCtrl', function($scope, $rootScope, hotkeys) {
   // using the hotkeys.del() method
   var volumeStep = 0.10;
   hotkeys.add({
-        combo: 'ctrl+up',
+        combo: $rootScope.increaseVolumeKey,
         description: 'Increase volume',
         callback: function() {
             if ($rootScope.volume < (1 - volumeStep)){
@@ -22,7 +22,7 @@ app.controller('HotkeysCtrl', function($scope, $rootScope, hotkeys) {
     });
 
   hotkeys.add({
-        combo: 'ctrl+down',
+        combo: $rootScope.decreaseVolumeKey,
         description: 'Decrease volume',
         callback: function() {
             if ($rootScope.volume > (volumeStep)){
@@ -36,7 +36,7 @@ app.controller('HotkeysCtrl', function($scope, $rootScope, hotkeys) {
     });
 
     hotkeys.add({
-        combo: 'ctrl+m',
+        combo: $rootScope.toggleMuteKey,
         description: 'Mute/Unmute',
         callback: function() {
             if ($scope.isMute){
@@ -49,7 +49,7 @@ app.controller('HotkeysCtrl', function($scope, $rootScope, hotkeys) {
     });
 
     hotkeys.add({
-        combo: 'ctrl+left',
+        combo: $rootScope.previousTrackKey,
         description: 'Previous track',
         callback: function() {
             $scope.playPreviousTrack();
@@ -57,7 +57,7 @@ app.controller('HotkeysCtrl', function($scope, $rootScope, hotkeys) {
     });
 
     hotkeys.add({
-        combo: 'ctrl+right',
+        combo: $rootScope.nextTrackKey,
         description: 'Next track',
         callback: function() {
             $scope.playNextTrack();
@@ -65,7 +65,7 @@ app.controller('HotkeysCtrl', function($scope, $rootScope, hotkeys) {
     });
 
     hotkeys.add({
-        combo: 'space',
+        combo: $rootScope.togglePlayKey,
         description: 'Play/Pause',
         callback: function() {
             console.log($rootScope.isPlaying);

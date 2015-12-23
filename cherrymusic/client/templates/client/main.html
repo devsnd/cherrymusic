@@ -155,7 +155,8 @@
     <div >
       <img id="albumart" 
            ng-src="{{ albumArtUrl(currentPlayTrack.data.path) }}" 
-           err-src="static/client/img/folder.png"> </img>
+           err-src="static/client/img/folder.png"
+           ng-if="$root.showAlbumArt"> </img>
       <div id="jquery_jplayer_1" class="jp-jplayer"></div>
       <div id="jp_ancestor" class="jp-audio">
         <div class="jp-type-playlist">
