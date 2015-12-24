@@ -149,6 +149,11 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, Playlist
         };
     });
 
+    $scope.closePlaylist = function(index){
+        $scope.openedPlaylists.splice(index, 1);
+        $scope.setCurrentPlaylist($scope.openedPlaylists[index - 1]);
+    }
+
     $scope.showPlaylists = function(){
         $scope.mediaBrowserMode = 'playlist';
         Playlist.query(function(playlists){

@@ -4,6 +4,7 @@ app.directive('playlistTab', function() {
         templateUrl: STATIC_FILES + 'client/templates/playlist.html',
         scope: {
             playlist:"=",
+            currentPlayingPlaylist:"=",
             onRemove:"&"
         },
         replace: true

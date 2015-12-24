@@ -31,7 +31,7 @@ app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
     });
 
     $rootScope.$on('DELETE_CURRENT_TRACK', function(event){
-        $scope.currentPlayTrack = null;
+        $scope.currentPlayingTrack = null;
         $rootScope.title = getTitle(null);
     });
 
@@ -64,14 +64,19 @@ app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
         console.log('Playback end');
     });
 
+    $scope.startPlaylingTrack = function(index){
+        $scope.currentPlayingPlaylist = $scope.currentPlaylist;
+        $scope.playTrack(index);
+    }
+
     $scope.playTrack = function(index){
         var starTime = 0;
         var track = null;
 
         if(index == undefined){
-            if($scope.currentPlayTrack){
+            if($scope.currentPlayingTrack){
                 starTime = $scope.currentPlayTime;
-                track = $scope.currentPlayTrack;
+                track = $scope.currentPlayingTrack;
             }
             else{
                 track = trackFromIndex(0);
@@ -82,7 +87,7 @@ app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
             $scope.currentTrackIndex = index;
             track = trackFromIndex(index);
         };
-        $scope.currentPlayTrack = track;
+        $scope.currentPlayingTrack = track;
 
         $rootScope.title = getTitle(track);
 
@@ -95,7 +100,7 @@ app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
     };
 
     var trackFromIndex = function(index){
-        return $scope.currentPlaylist.tracks[index];
+        return $scope.currentPlayingPlaylist.tracks[index];
     };
 
     $scope.playNextTrack = function(){
@@ -110,10 +115,10 @@ app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
 
     var getNextIndex = function(){
         var currentIndex = $scope.currentTrackIndex;
-        var tracksInPlaylist = $scope.currentPlaylist.tracks.length;
+        var tracksInPlaylist = $scope.currentPlayingPlaylist.tracks.length;
 
-        if($scope.currentPlaylist.type == 'queue'){
-            $scope.currentPlaylist.tracks.splice(currentIndex, 1);
+        if($scope.currentPlayingPlaylist.type == 'queue'){
+            $scope.currentPlayingPlaylist.tracks.splice(currentIndex, 1);
             return (tracksInPlaylist > 1) ? 0 : null;
         };
 
@@ -127,7 +132,7 @@ app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
 
         if(!$scope.isRepeat && followedIndex == 0 ){
             $scope.currentTrackIndex = null;
-            $scope.currentPlayTrack = null;
+            $scope.currentPlayingTrack = null;
             return null;
         };
         return (followedIndex);

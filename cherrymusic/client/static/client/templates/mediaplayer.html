@@ -2,7 +2,10 @@
   <!-- tabs -->
   <ul class="playlist-tab-list nav nav-tabs" role="tablist">
     <li role="presentation" ng-class="{'active': playlist==currentPlaylist, 'playlist-tab-inactive': playlist!==currentPlaylist}" ng-repeat="playlist in openedPlaylists">
-      <playlist-tab playlist="playlist" on-remove="openedPlaylists.splice($index, 1)" ng-click="setCurrentPlaylist(playlist)" > </playlist-tab>
+      <playlist-tab playlist="playlist" 
+                    current-playing-playlist="currentPlayingPlaylist"
+                    on-remove="closePlaylist($index)"
+                    ng-click="setCurrentPlaylist(playlist)" > </playlist-tab>
     </li>
     <li class="playlist-tab-inactive playlist-tab-new" role="presentation">
       <a ng-click="createNewPlaylist()" aria-controls="new playlist" role="tab">
@@ -82,7 +85,7 @@
           dnd-moved="currentPlaylist.tracks.splice($index, 1)"
           dnd-effect-allowed="move">
         <div ng-if="track.type == 0">
-          <file on-remove="currentPlaylist.tracks.splice($index, 1)" ng-click="playTrack($index)" file="track.data"></file>
+          <file on-remove="currentPlaylist.tracks.splice($index, 1)" ng-click="startPlaylingTrack($index)" file="track.data"></file>
         </div>
       </li>
     </ul>

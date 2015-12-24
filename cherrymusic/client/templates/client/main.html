@@ -145,13 +145,13 @@
   <div id="playback-controls">
     <div class="cm-songtitle-container" >
       <div class="cm-songtitle">
-        <file file="currentPlayTrack.data"></file>
+        <file file="currentPlayingTrack.data"></file>
       </div>
     </div>  
   
     <div >
       <img id="albumart" 
-           ng-src="{{ albumArtUrl(currentPlayTrack.data.path) }}" 
+           ng-src="{{ albumArtUrl(currentPlayingTrack.data.path) }}" 
            err-src="static/client/img/folder.png"
            ng-if="$root.showAlbumArt"> </img>
       <div id="jquery_jplayer_1" class="jp-jplayer"></div>
@@ -161,8 +161,8 @@
             <div class="jp-center-progress-bar pointer">
               <progress-bar percentage="{{ currentPlaybackPercentage }}"  kind-of-bar='jp'></progress-bar>
               <div class="jp-time-holder">
-                <div ng-if="currentPlayTrack" class="jp-current-time">{{ currentPlayTime | timeformat }} </div>
-                <div ng-if="currentPlayTrack" class="jp-duration">{{ currentPlayTrack.data.meta_duration | timeformat }}</div>
+                <div ng-if="currentPlayingTrack" class="jp-current-time">{{ currentPlayTime | timeformat }} </div>
+                <div ng-if="currentPlayingTrack" class="jp-duration">{{ currentPlayingTrack.data.meta_duration | timeformat }}</div>
               </div>
             </div>
             <div class="jp-control-buttons">
