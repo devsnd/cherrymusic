@@ -1,4 +1,5 @@
 app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
+    $rootScope.removeWhenQueue = true;
     $scope.isMute = false;
     $rootScope.isPlaying = false;
     $rootScope.volume = 1;
@@ -117,8 +118,10 @@ app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
         var currentIndex = $scope.currentTrackIndex;
         var tracksInPlaylist = $scope.currentPlayingPlaylist.tracks.length;
 
-        if($scope.currentPlayingPlaylist.type == 'queue'){
-            $scope.currentPlayingPlaylist.tracks.splice(currentIndex, 1);
+        if($scope.currentPlayingPlaylist.type == 'queue' && $rootScope.removeWhenQueue){
+            if($scope.currentPlayingPlaylist.tracks[currentIndex] == $scope.currentPlayingTrack){
+                $scope.currentPlayingPlaylist.tracks.splice(currentIndex, 1);
+            };
             return (tracksInPlaylist > 1) ? 0 : null;
         };
 
