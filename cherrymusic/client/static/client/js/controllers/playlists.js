@@ -113,7 +113,7 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, Playlist
     });
 
     $scope.$on('UPDATE_PLAYLIST', function(event, playlist){
-        Playlist.update(playlist, function(){
+        Playlist.update({ id:playlist.id}, playlist, function(){
             $scope.showPlaylists();
         });
     });

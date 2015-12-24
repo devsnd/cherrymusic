@@ -15,10 +15,13 @@ from core import pathprovider
 from core.albumartfetcher import AlbumArtFetcher
 from core.config import Config
 from core.models import Playlist, Track
+from .permissions import IsOwnerOrReadOnly
 from ext import audiotranscode
 from ext.tinytag import TinyTag
 from .serializers import FileSerializer, DirectorySerializer, UserSerializer, \
     PlaylistDetailSerializer, TrackSerializer, PlaylistListSerializer
+
+from django.db.models import Q
 
 from storage.status import ServerStatus
 from storage.models import File, Directory
@@ -81,10 +84,14 @@ class DirectoryViewSet(SlowServerMixin, viewsets.ReadOnlyModelViewSet):
 
 
 class PlaylistViewSet(SlowServerMixin, MultiSerializerViewSetMixin, viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsOwnerOrReadOnly, )
     queryset = Playlist.objects.all()
+
     serializer_class = PlaylistDetailSerializer
 
+    def get_queryset(self):
+        user = self.request.user
+        return Playlist.objects.filter(Q(owner=user) | Q(public=True))
     #serializer_action_classes = {
     #    'list': PlaylistListSerializer,
     #    'retrieve': PlaylistDetailSerializer,

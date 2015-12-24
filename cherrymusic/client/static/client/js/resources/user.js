@@ -1,5 +1,5 @@
 app.factory('User', ['$http', '$rootScope', function($http, $rootScope){
-    return $http.get(API_URL + 'user/1').then(
+    return $http.get(API_URL + 'user/1/').then(
         function (response){
             $rootScope.user = response.data;
         },
