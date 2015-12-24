@@ -19,7 +19,7 @@
           <div class="playlist-age">
             age: TODO
           </div>
-          <div class="playlist-ispublic">
+          <div class="playlist-ispublic" ng-if="$root.user.username == playlist.owner_name">
               <span class="label" ng-class="{'label-default': !playlist.public, 'label-success': playlist.public}">
                 public<input type="checkbox" ng-model="playlist.public" ng-click="updatePlaylist(playlist)"></input>                
               </span>
