@@ -6,7 +6,7 @@ app.directive('file', [
         return {
             restrict: 'E',
             templateUrl: function(elem, attrs){
-                if(attrs['file'] == 'track.data'){
+                if(attrs['file'] == 'track.data' && (attrs['model'] == undefined)){
                     return STATIC_FILES + 'client/templates/file/file-playlist.html';
                 }
                 else if( attrs['file'] == 'currentPlayTrack.data'){

@@ -1,5 +1,5 @@
 
-TYPE_FILE = 0;
+LOCAL_STORAGE = 0;
 
 app = angular.module('CherryMusicClient', [
     'ui.bootstrap',
@@ -20,6 +20,7 @@ app.config(function($resourceProvider) {
   $resourceProvider.defaults.stripTrailingSlashes = false;
 });
 
-app.config(['$compileProvider', function ($compileProvider) {
-  $compileProvider.debugInfoEnabled(false);
+app.config(['$httpProvider', function($httpProvider){
+    $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
+    $httpProvider.defaults.xsrfCookieName = 'csrftoken';
 }]);

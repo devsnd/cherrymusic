@@ -34,7 +34,7 @@ app.factory('PlaybackServiceJPlayer', ['$log', '$rootScope', function($log, $roo
     var setTrack = function(track, start_time){
         currentTimeOffset = start_time;
 
-        if(track.type == TYPE_FILE){
+        if(track.type == LOCAL_STORAGE){
             currentTrack = track;
             var trackurl = STREAM_URL + track.data.path;
             if(start_time !== undefined){

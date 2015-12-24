@@ -85,10 +85,10 @@ class PlaylistViewSet(SlowServerMixin, MultiSerializerViewSetMixin, viewsets.Mod
     queryset = Playlist.objects.all()
     serializer_class = PlaylistDetailSerializer
 
-    serializer_action_classes = {
-        'list': PlaylistListSerializer,
-        'retrieve': PlaylistDetailSerializer,
-    }
+    #serializer_action_classes = {
+    #    'list': PlaylistListSerializer,
+    #    'retrieve': PlaylistDetailSerializer,
+    #}
 
 class UserViewSet(SlowServerMixin, viewsets.ModelViewSet):
     authentication_classes = (SessionAuthentication, BasicAuthentication)

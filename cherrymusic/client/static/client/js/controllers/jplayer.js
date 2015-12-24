@@ -86,7 +86,7 @@ app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
 
         $rootScope.title = getTitle(track);
 
-        if(track.type == TYPE_FILE){
+        if(track.type == LOCAL_STORAGE){
             PlaybackService.setTrack(track, starTime);
             PlaybackService.play();
         } else {

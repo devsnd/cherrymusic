@@ -1,8 +1,8 @@
 <div class="fill-height-with-jp" role="tabpanel">
   <!-- tabs -->
   <ul class="playlist-tab-list nav nav-tabs" role="tablist">
-    <li role="presentation" ng-class="{'active': playlist==currentPlaylist, 'playlist-tab-inactive': playlist!==currentPlaylist}" ng-repeat="playlist in playlists">
-      <playlist-tab playlist="playlist" on-remove="playlists.splice($index, 1)" ng-click="setCurrentPlaylist(playlist)" > </playlist-tab>
+    <li role="presentation" ng-class="{'active': playlist==currentPlaylist, 'playlist-tab-inactive': playlist!==currentPlaylist}" ng-repeat="playlist in openedPlaylists">
+      <playlist-tab playlist="playlist" on-remove="openedPlaylists.splice($index, 1)" ng-click="setCurrentPlaylist(playlist)" > </playlist-tab>
     </li>
     <li class="playlist-tab-inactive playlist-tab-new" role="presentation">
       <a ng-click="createNewPlaylist()" aria-controls="new playlist" role="tab">
@@ -28,7 +28,7 @@
       </div>
       <div ng-if="currentPlaylist.type == 'queue'">
         <a class="pull-left btn btn-xs btn-default">random!</a>
-        <a class="pull-left btn btn-xs btn-default" ng-click="savePlaylist(currentPlaylist)">save</a>
+        <a class="pull-left btn btn-xs btn-default" ng-click="openSavePlaylistModal()">save as playlist</a>
         <div class="btn-group pull-right">
           <button class="btn btn-xs btn-default" ng-click="clearPlaylist(currentPlaylist)">clear</button>
           <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">

@@ -50,7 +50,7 @@ class TrackSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Track
-        fields = ('type', 'data', 'playlist')
+        fields = ('playlist', 'order', 'type', 'file', 'data' )
 
     @staticmethod
     def serialize_data(track):
@@ -96,4 +96,4 @@ class PlaylistListSerializer(PlayListSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'is_superuser')
+        fields = ('id', 'username', 'is_superuser')

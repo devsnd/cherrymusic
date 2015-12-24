@@ -41,6 +41,12 @@ app.directive('fileBrowser', [
                     $scope.$emit('ADD_FILE_TO_PLAYLIST', file);
                 };
 
+                $scope.addAllFilesToPlaylist = function(files){
+                    files.forEach(function(file){
+                        $scope.addToPlaylist(file);
+                    });
+                };
+
                 $scope.albumArtUrl = function(filepath){
                     return API_URL + 'albumart/' + filepath
                 };

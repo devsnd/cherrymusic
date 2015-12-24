@@ -30,8 +30,8 @@
   <div class="tab-content">
     <div ng-if="content.files.length">
       {{ content.selected | json }}
-      <h3>Files</h3>
-      <ul class="no-bullet" 
+      <h3>Files <a ng-click="addAllFilesToPlaylist(content.files)" class="btn btn-default">add all files to current playlist</a></h3>
+      <ul class="no-bullet cm-media-list" 
           dnd-list="content.files"
           dnd-placeholder-tpl="<tr class='dndPlaceholder'><td></td></tr>"
           dnd-drop="false">
