@@ -117,7 +117,7 @@ class UserViewSet(SlowServerMixin, viewsets.ModelViewSet):
         return self.request.user
 
 class UserSettingsViewSet(SlowServerMixin, viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsOwnUser, )
     queryset = UserSettings.objects.all()
     serializer_class = UserSettingsSerializer
 
