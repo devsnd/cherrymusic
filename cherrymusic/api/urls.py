@@ -1,13 +1,14 @@
 from django.conf.urls import url, include
 from rest_framework import routers
 from .views import FileViewSet, DirectoryViewSet, ServerStatusView, PlaylistViewSet, UserViewSet, \
-    TrackViewSet, stream, BrowseView, IndexDirectoryView, AlbumArtView
+    UserSettingsViewSet, TrackViewSet, stream, BrowseView, IndexDirectoryView, AlbumArtView
 
 router = routers.DefaultRouter()
 router.register(r'file', FileViewSet)
 router.register(r'directory', DirectoryViewSet)
 router.register(r'playlist', PlaylistViewSet)
 router.register(r'user', UserViewSet)
+router.register(r'user-settings', UserSettingsViewSet)
 router.register(r'track', TrackViewSet)
 
 urlpatterns = [

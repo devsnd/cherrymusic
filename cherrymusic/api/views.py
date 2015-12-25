@@ -14,12 +14,13 @@ from api.helper import ImageResponse, ImageRenderer
 from core import pathprovider
 from core.albumartfetcher import AlbumArtFetcher
 from core.config import Config
-from core.models import Playlist, Track
-from .permissions import IsOwnerOrReadOnly
+from core.models import Playlist, Track, UserSettings
+from .permissions import IsOwnerOrReadOnly, IsOwnUser
 from ext import audiotranscode
 from ext.tinytag import TinyTag
 from .serializers import FileSerializer, DirectorySerializer, UserSerializer, \
-    PlaylistDetailSerializer, TrackSerializer, PlaylistListSerializer
+    UserSettingsSerializer, PlaylistDetailSerializer, TrackSerializer, \
+    PlaylistListSerializer
 
 from django.db.models import Q
 
@@ -112,6 +113,15 @@ class UserViewSet(SlowServerMixin, viewsets.ModelViewSet):
 
     def get_object(self):
         return self.request.user
+
+class UserSettingsViewSet(SlowServerMixin, viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated, )
+    queryset = UserSettings.objects.all()
+    serializer_class = UserSettingsSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return UserSettings.objects.filter(user=user)
 
 class TrackViewSet(SlowServerMixin, viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, )

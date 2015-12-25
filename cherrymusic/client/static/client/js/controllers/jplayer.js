@@ -1,5 +1,4 @@
 app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
-    $rootScope.removeWhenQueue = true;
     $scope.isMute = false;
     $rootScope.isPlaying = false;
     $rootScope.volume = 1;

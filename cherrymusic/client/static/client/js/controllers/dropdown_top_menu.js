@@ -9,6 +9,10 @@ app.controller('DropdownTopMenuController', function($scope, $rootScope, $uibMod
             controller: function($scope, $uibModalInstance){
                 $scope.close = function(){
                     $uibModalInstance.dismiss('cancel');
+                };
+                $scope.saveSettings = function(){
+                    $scope.$emit('SAVE_SETTINGS');
+                    $scope.close();
                 }
             }
         });
