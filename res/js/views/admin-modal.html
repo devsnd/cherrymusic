@@ -1,0 +1,99 @@
+<div class="modal-header">
+    <button class="close" ng-click="close()">&times;</button>
+    <h3>Admin</h3>
+</div>
+<div class="modal-body">
+    <div class="content" cm-busy="isUpdating">
+        <h4>Create new user:</h4>
+        <form role="form">
+          <div class="form-group">
+            <label for="newusername">User Name</label>
+            <input
+                ng-model="newUserName"
+                type="text"
+                class="form-control"
+                placeholder="Enter new user name">
+          </div>
+          <div class="form-group">
+            <label for="newpassword">Password</label>
+            <input
+                ng-model="newUserPassword"
+                type="password"
+                class="form-control"
+                placeholder="Password">
+          </div>
+          <div class="checkbox">
+            <label>
+              <input
+                ng-model="newUserIsAdmin"
+                type="checkbox"> admin
+            </label>
+          </div>
+          <button
+            ng-click="createUser(newUserName, newUserPassword, newUserIsAdmin)"
+            class="btn btn-default">Create User</button>
+        </form>
+        <h4>User List:</h4>
+        <div class="row-fluid">
+            <div id="adminuserlist">
+                <ul class="user-list">
+                    <li 
+                        ng-repeat="user in userList | orderBy:user.lastSeenRelSec"
+                        class="user-list-item"
+                        ng-class="{admin: user.isAdmin}"
+                        >
+                        <div class="row">
+                            <div class="col-md-1">
+                                <span class="label"
+                                    ng-class="{'label-success': user.isOnline, 'label-danger': !user.isOnline}">
+                                    &#x2022;
+                                </span>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="usernamelabel">
+                                <span class="badge" style="background-color: {{user.color}}">
+                                    {{user.username}}
+                                </span>
+                                </div>
+                            </div>
+                            <div class="col-md-4"> last seen: {{user.lastSeenReadable}}</div>
+                            <div class="col-md-3">
+                                <span ng-if="!user.isAdmin">
+                                    <input
+                                        type="checkbox" 
+                                        ng-change="userTogglePermitDownload(user)"
+                                        ng-model="user.mayDownload"
+                                    >permit download
+                                </span>
+                            </div>
+                            <div class="col-md-1">
+                                <span ng-if="user.isDeletable">
+                                    <a
+                                        class="btn btn-mini btn-danger"
+                                        ng-click="deleteUser(user)"
+                                        >
+                                        delete
+                                    </a>
+                                </span>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <h4>Advanced:</h4>
+        <div class="row-fluid">
+            <a class="btn btn-default" ng-click="updateMusicLibrary()" class="button">
+                Update Music Library (may take some time!)
+            </a>
+        </div>
+        <div class="row-fluid">
+            <a class="btn btn-default" ng-click="enableJplayerDebugging()" class="button">
+                Enable JPlayer Debugging
+            </a>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn" ng-click="close()" aria-hidden="true">Close</button>
+</div>

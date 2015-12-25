@@ -3,11 +3,8 @@
     <h3>Options</h3>
 </div>
 <div class="modal-body">
-    <div class="content">
+    <div class="content" cm-busy="isUpdating()">
         <h3>keyboard shortcuts</h3>
-
-        {{options | json}}
-
         <table>
             <tr>
                 <td>next track</td>
@@ -80,17 +77,11 @@
             <div class="success">
                 Limit audio bitrate
                 <select 
-                    ng-init="options.media.force_transcode_to_bitrate"
                     ng-model="options.media.force_transcode_to_bitrate"
+                    ng-options="trans.bitrate as trans.label for trans in transcodingBitrates"
                     ng-change="changeOption('media.force_transcode_to_bitrate', options.media.force_transcode_to_bitrate)"
                     ng-disabled="isUpdating('media.force_transcode_to_bitrate')"
                     >
-                    <option value="0">Unlimited</option>
-                    <option value="48">48 (Super Low)</option>
-                    <option value="64">64 (Very Low)</option>
-                    <option value="96">96 (Low)</option>
-                    <option value="128">128 (Medium)</option>
-                    <option value="320">320 (Very High)</option>
                 </select>
             </div>
             <div class="error" style="display: none; text-align: center; margin: 5px;">
@@ -101,7 +92,9 @@
             </div>
         </div>
         <h3>change password</h3>
-        <a class="btn btn-default" href="#changePassword" role="button" data-toggle="modal">change password</a>
+        <a class="btn btn-default" ng-click="openChangePasswordModal()">
+            change password
+        </a>
         <h3>export playlists</h3>
         <a class="btn btn-default" href="#exportPlaylists" role="button" data-toggle="modal">create archive</a>
     </div>

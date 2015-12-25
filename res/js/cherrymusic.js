@@ -27,8 +27,18 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 //
 
+// helper
+function isEmpty(obj) {
+    for(var prop in obj) {
+        if(obj.hasOwnProperty(prop)) return false;
+    }
+    return true;
+}
+
+// application
 app = angular.module('CherryMusicClient', [
     'ngResource',
+    'ngSanitize',
     'ui.bootstrap',
     'ui.bootstrap.tpls',
 ]);
@@ -39,9 +49,101 @@ app.config(function($resourceProvider) {
 
 app.controller(
     'MainViewController',
-    function($scope, $modal, UserOptionService){
+    function(
+        $scope,
+        $modal,
+        $q,
+        $sanitize,
+        UserOptionService,
+        NotificationService,
+        ConfigService,
+        AuthService,
+        MOTDService,
+        FocusService,
+        BrowseService,
+        AdminService
+    ){
         UserOptionService.init();
+        ConfigService.init();
+        MOTDService.fetch();
 
+        // notifications
+        $scope.getNotifications = function(){
+            return NotificationService.getNotifications();
+        }
+
+        // auth
+        $scope.getCurrentUserName = function(){
+            return AuthService.getUserName();
+        }
+        $scope.currentUserIsAdmin = function(){
+            return AuthService.isAdmin();
+        }
+        $scope.logout = function(){
+            if(ConfigService.autoLoginEnabled()){
+                alert('Auto-Login enabled, cannot log out.');
+            } else {
+                AuthService.logout();
+            }
+        }
+        $scope.autoLoginEnabled = function(){
+            return ConfigService.autoLoginEnabled();
+        }
+
+        // message of the day
+        $scope.getMOTDType = function(){
+            return MOTDService.getMOTDType();
+        }
+        $scope.getMOTDWisdom = function(){
+            return MOTDService.getWisdom();
+        }
+
+        // main interaction
+        $scope.searchPlaceholder = 'Search';
+        $scope.searchField = '';
+        $scope.mediaBrowserBusy = false
+        $scope.search = function(searchTerm){
+            // check if the search field is empty
+            if(typeof searchTerm === 'undefined' || searchTerm.trim() === '') {
+                $scope.searchField = '';
+                $scope.searchPlaceholder = 'Search for what?';
+                FocusService.focus('searchinput');
+                return
+            }
+            $scope.mediaBrowserBusy = true
+            BrowseService.search(searchTerm).then(function(results){
+                $scope.mediaBrowserBusy = false;
+                // use legacy mediabrowser for now
+                new MediaBrowser('.search-results', results, 'Search: '+htmlencode(searchTerm));
+            }, function(){
+                $scope.mediaBrowserBusy = false;
+                NotificationService.error('Failed loading search results!');
+            });
+        }
+
+        $scope.loadBrowser = function(){
+            $scope.mediaBrowserBusy = true;
+            BrowseService.listDirectory().then(function(results){
+                new MediaBrowser('.search-results', results, 'Root');
+                $scope.mediaBrowserBusy = false;
+            }, function(){
+                NotificationService.error('Failed to load file browser');
+                $scope.mediaBrowserBusy = false;
+            })
+        }
+        $scope.showPlaylists = function(){
+            $scope.mediaBrowserBusy = true;
+            BrowseService.fetchPlaylists('default').then(function(results){
+                console.log(results);
+                $scope.mediaBrowserBusy = false;
+                new MediaBrowser('.search-results', results, 'Playlist browser', false, {showPlaylistPanel: true});
+            }, function(){
+                NotificationService.error('Error fetching playlists from server');
+                $scope.mediaBrowserBusy = false;
+            });
+        }
+
+        // modals
         $scope.openAboutModal = function(){
             var modalInstance = $modal.open({
                 animation: true,
@@ -54,14 +156,69 @@ app.controller(
             });
         };
 
+        var openChangePasswordModal = function(){
+            console.log('new password modal')
+            var modalInstance = $modal.open({
+                animation: true,
+                templateUrl: '../res/js/views/change-password-modal.html',
+                controller: function($scope, $uibModalInstance, AuthService){
+                    var updating = false;
+                    $scope.isUpdating = function(){
+                        return updating;
+                    }
+                    var validatePassword = function(pw){
+                        if(pw.trim().length === 0){
+                            return 'Password may not be empty';
+                        }
+                        if(pw.indexOf(' ') !== -1){
+                            return 'Password must not contain spaces!';
+                        }
+                    }
+                    $scope.oldPassword = '';
+                    $scope.newPassword = '';
+                    $scope.newPasswordConfirm = '';
+                    $scope.error = '';
+                    $scope.$watchGroup(['newPassword', 'newPasswordConfirm', 'oldPassword'], function(newValues, oldValues, scope) {
+                        if(newValues[1].length !== 0){
+                            if(newValues[0] !== newValues[1]){
+                                $scope.error = 'The two passwords differ!'
+                                return
+                            }
+                        }
+                        if(newValues[0].length !== 0 && newValues[0].length < 3){
+                            $scope.error = 'The password must be at least 3 letters long!';
+                        }
+                        $scope.error = '';
+                    });
+                    $scope.changePassword = function(){
+                        AuthService.setPassword(
+                            $scope.oldPassword, $scope.newPassword
+                        ).then(function(){
+                            NotificationService.success('Password changed successfully!');
+                            $uibModalInstance.dismiss('success');
+                        }, function(){
+                            $scope.error = 'Error changing the password, is the old password correct?'
+                        })
+                    }
+                    $scope.close = function(){
+                        $uibModalInstance.dismiss('cancel');
+                    }
+                }
+            });
+        }
+
         $scope.openUserOptionModal = function(){
             var modalInstance = $modal.open({
                 animation: true,
                 templateUrl: '../res/js/views/user-option-modal.html',
                 controller: function($scope, $uibModalInstance){
                     var updating = {}
+                    $scope.openChangePasswordModal = openChangePasswordModal;
                     $scope.options = UserOptionService.getAll();
                     $scope.isUpdating = function(key){
+                        if(typeof key === 'undefined'){
+                            return !isEmpty(updating);
+                        }
                         return !!updating[key];
                     }
                     $scope.changeOption = function(key, value){
@@ -73,6 +230,144 @@ app.controller(
                             $scope.options = UserOptionService.getAll();
                             delete updating[key];
                         });
+                    }
+                    $scope.transcodingBitrates = [
+                        {'bitrate': 0, 'label': 'Unlimited'},
+                        {'bitrate': 48, 'label': '48 (Super Low)'},
+                        {'bitrate': 64, 'label': '64 (Very Low)'},
+                        {'bitrate': 96, 'label': '96 (Low)'},
+                        {'bitrate': 128, 'label': '128 (Medium)'},
+                        {'bitrate': 320, 'label': '320 (Very High)'},
+                    ];
+                    $scope.close = function(){
+                        $uibModalInstance.dismiss('cancel');
+                    }
+                }
+            });
+        }
+
+        var createConfirmModal = function(message, ok, cancel, safeAction){
+            if(typeof ok === 'undefined'){
+                ok = 'Ok';
+            }
+            if(typeof cancel === 'undefined'){
+                cancel = 'Cancel';
+            }
+            // safe action defines which of the two buttons should be green and
+            // on the right side of the screen.
+            // the safe action is independent of the action confirmation. e.g.
+            // 
+            // for a deletetion confirmation, the safe action is not to delete,
+            // but the 'ok' will still resolve the promise
+            if(typeof safeAction === 'undefined'){
+                safeAction = 'ok'
+            }
+            var deferred = $q.defer();
+            $modal.open({
+                templateUrl: '../res/js/views/confirm-modal.html',
+                controller: function($scope, $uibModalInstance){
+                    $scope.message = message;
+                    $scope.oktext = ok;
+                    $scope.canceltext = cancel;
+                    $scope.safeAction = safeAction
+
+                    $scope.ok = function(){
+                        $uibModalInstance.close();
+                        deferred.resolve();
+                    }
+                    $scope.cancel = function(){
+                        $uibModalInstance.dismiss('cancel');
+                        deferred.reject();
+                    }
+                }
+            });
+            return deferred.promise;
+        }
+
+        $scope.openAdminModal = function(){
+            var modalInstance = $modal.open({
+                animation: true,
+                templateUrl: '../res/js/views/admin-modal.html',
+                controller: function($scope, $uibModalInstance){
+                    $scope.userList = [];
+                    $scope.isUpdating = false;
+                    var updateUserList = function(){
+                        $scope.isUpdating = true;
+                        AdminService.fetchUserList().then(function(results){
+                            $scope.userList = results;
+                            $scope.isUpdating = false;
+                        });
+                    }
+                    updateUserList();
+
+                    $scope.createUser = function(userName, password, isAdmin){
+                        $scope.isUpdating = true;
+                        AdminService.createUser(userName, password, isAdmin).then(
+                            function(){
+                                $scope.isUpdating = false;
+                                NotificationService.success('New user created!');
+                                updateUserList();
+                            }, function(){
+                                $scope.isUpdating = false;
+                                NotificationService.error('Error creating user');
+                            }
+                        );
+                    }
+                    $scope.userTogglePermitDownload = function(user){
+                        $scope.isUpdating = true;
+                        AdminService.permitDownload(user, user.mayDownload).then(
+                            function(){
+                                $scope.isUpdating = false;
+                                updateUserList();
+                            },
+                            function(){
+                                $scope.isUpdating = false;
+                                // reset the user state to what it was before
+                                user.mayDownload = !user.mayDownload;
+                                NotificationService.error('Error setting download permission for user')
+                            }
+                        );
+                    }
+                    $scope.deleteUser = function(user){
+                        saneUserName = $sanitize(user.username);
+                        // launch confirm modal
+                        createConfirmModal(
+                            'Do you really want to delete user '+saneUserName+'?',
+                            'Delete user',
+                            'Cancel',
+                            'cancel'
+                        ).then(function(){
+                            // confirmed
+                            $scope.isUpdating = true;
+                            AdminService.deleteUser(user).then(function(){
+                                $scope.isUpdating = false;
+                                updateUserList();
+                            }, function(){
+                                $scope.isUpdating = false;
+                                NotificationService.error('Error deleting user');
+                            });
+                        })
+                        
+                    }
+                    $scope.updateMusicLibrary = function(){
+                        $scope.isUpdating = true;
+                        AdminService.updateMusicLibrary().then(function(){
+                            $scope.isUpdating = false;
+                            NotificationService.success('Library Update started');
+                            // close the modal as incentive not to press the
+                            // button again ;)
+                            $uibModalInstance.close();
+                        }, function(){
+                            $scope.isUpdating = false;
+                            NotificationService.error('Error requesting music library update');
+                        })
+                    }
+                    $scope.enableJplayerDebugging = function(){
+                        // TODO: this is still ugly as a naked mole-rat
+                        $('#jplayer_inspector').jPlayerInspector({jPlayer:$('#jquery_jplayer_1'), visible:true});
+                        $('#jquery_jplayer_1').data().jPlayer.options.errorAlerts = true;
+                        $('#jquery_jplayer_1').data().jPlayer.options.warningAlerts = true;
+                        $('#jplayer_inspector_update_0').click();
                     }
                     $scope.close = function(){
                         $uibModalInstance.dismiss('cancel');
@@ -379,54 +674,6 @@ keyboard_shortcut_setter = function(option, optionname){
     $('html').bind('keydown',keydownhandler);
 }
 
-function busy(selector, rect){
-    "use strict";
-    var domelem = $(selector).children('.busy-indicator');
-    if(domelem.length == 0){
-        domelem = $('<div></div>');
-        domelem.addClass('busy-indicator');
-        $(selector).append(domelem);
-    }
-    var top, left, width, height;
-
-    var pos = $(selector).position();
-    top = 'top: '+pos.top+'px;';
-    left = 'left: '+pos.left+'px;';
-    width = 'width: '+$(selector).width()+'px;';
-    height = 'height: '+$(selector).height()+'px;';
-
-    domelem.attr('style','position: absolute;'+top+left+width+height);
-    return domelem;
-}
-
-function search($form){
-    "use strict";
-    var $input = $form.find('input');
-    if($input.val().trim() == ""){
-        //make sure no spaces, so placeholder is shown
-        $input.val('');
-        $input.prop('placeholder', 'Search for what?');
-        $input.focus();
-        return false;
-    }
-    var searchstring = $input.val();
-    var success = function(json){
-        $('.searchinput').removeClass('searchinput-busy');
-        new MediaBrowser('.search-results', json, 'Search: '+htmlencode(searchstring));
-    };
-    var error = function(){
-        $('.searchinput').removeClass('searchinput-busy');
-        errorFunc('failed loading search results')();
-    };
-    $('.searchinput').addClass('searchinput-busy');
-    api('search', {'searchstring': searchstring}, success, error);
-    return false;
-}
-function submitsearch(){
-    search();
-    return false;
-}
-
 /***
 INTERACTION
 ***/
@@ -523,13 +770,12 @@ function showPlaylists(sortby, filterby){
     }
     previousSorted = sortby;
 
-    busy('.search-results').hide().fadeIn('fast');
     api('showplaylists',
         {'sortby': sortby,
          'filterby': filterby},
         success,
         error,
-        function(){busy('.search-results').fadeOut('fast')}
+        function(){}
     );
 }
 
@@ -665,21 +911,6 @@ function download_editing_playlist(){
     );
 }
 
-/*****
-OTHER
-*****/
-
-function reloadPage(){
-    //reconstruct url to suppress page reload post-data warning
-    var reloadurl = window.location.protocol+'//'+window.location.host;
-    window.location.href = reloadurl;
-}
-
-function logout(){
-    "use strict";
-    api('logout', reloadPage);
-}
-
 /** TEMPLATES **/
 function TemplateLoader(template_path){
     this.template_path = template_path;
@@ -734,131 +965,6 @@ templateLoader.get('flash-message');
 ADMIN PANEL
 ***/
 
-function updateUserList(){
-    "use strict";
-    var success = function(data){
-        var htmllist = "";
-        var response = $.parseJSON(data);
-        var time = response['time'];
-        var template_user_data = {'users': []};
-        $.each(response['userlist'],function(i,e){
-            var reltime = time - e.last_time_online;
-            template_user_data['users'].push({
-                isadmin: e.admin,
-                may_download: e.may_download,
-                isnotadmin: !e.admin,
-                isdeletable: e.deletable,
-                userid: e.id,
-                isonline: reltime < HEARTBEAT_INTERVAL_MS/500,
-                username: e.username,
-                username_color: userNameToColor(e.username),
-                fuzzytime: time2text(reltime),
-            });
-        });
-        templateLoader.get('user-list', function(template){
-            $('#adminuserlist').html(Mustache.render(template, template_user_data));
-        });
-    };
-    busy('#adminuserlist').hide().fadeIn('fast');
-    api('getuserlist',
-        success,
-        errorFunc('cannot fetch user list'),
-        function(){busy('#adminuserlist').fadeOut('fast')}
-    );
-}
-function addNewUser(){
-    "use strict";
-    var newusername = $('#newusername').val();
-    var newpassword = $('#newpassword').val();
-    var newisadmin = $('#newisadmin').prop('checked')?1:0;
-    if(newusername.trim() === '' || newpassword.trim() === ''){
-        return;
-    }
-    var success = function(data){
-        $('#newusername').val('');
-        $('#newpassword').val('');
-        $('#newisadmin').prop('checked', false);
-        updateUserList();
-    };
-    busy('#adminpanel').hide().fadeIn('fast');
-    api('adduser',
-        {
-            'username':newusername,
-            'password':newpassword,
-            'isadmin':newisadmin
-        },
-        success,
-        errorFunc('failed to add new user'),
-        function(){busy('#adminpanel').fadeOut('fast')}
-    );
-}
-
-function userDelete(userid){
-    var success = function(data){
-        updateUserList();
-    };
-    busy('#adminuserlist').hide().fadeIn('fast');
-    api('userdelete',
-        { 'userid':userid },
-        success,
-        errorFunc('failed to delete user'),
-        function(){ busy('#adminuserlist').fadeOut('fast') }
-    );
-}
-
-function userSetPermitDownload(userid, allow_download){
-    var success = function(data){
-        updateUserList();
-    };
-    busy('#adminuserlist').hide().fadeIn('fast');
-    api('setuseroptionfor',
-        {
-            'optionkey': 'media.may_download',
-            'optionval': allow_download,
-            'userid': userid,
-        },
-        success,
-        errorFunc('Failed to set user download state'),
-        function(){busy('#adminuserlist').fadeOut('fast')}
-    );
-}
-
-function userChangePassword(){
-    if (! validateNewPassword($('#newpassword-change'), $('#repeatpassword-change'))) {
-        return false;
-    }
-    var success = function(data){
-        $('#changePassword').find('input').each(function(idx, el) { $(el).val(''); } );
-        $('#changePassword').modal('hide');
-        $('#userOptions').modal('hide');
-        successNotify('Password changed successfully!')();
-    };
-    var error = function(){
-        $('#oldpassword-change').val('');
-        $('#oldpassword-change').focus();
-        $("#changePassword").modal('attention');
-    };
-    busy('#changePassword').hide().fadeIn('fast');
-    api('userchangepassword',
-        {
-            'oldpassword':$('#oldpassword-change').val(),
-            'newpassword':$('#newpassword-change').val()
-        },
-        success,
-        error,
-        function(){busy('#changePassword').fadeOut('fast');}
-    );
-}
-function validateNewPassword($newpwfield, $repeatpwfield){
-    var newpw = $newpwfield.val();
-    var repeatpw = $repeatpwfield.val();
-    if (newpw == repeatpw) {
-        $repeatpwfield.closest('.control-group').removeClass('error');
-        return true;
-    }
-    $repeatpwfield.closest('.control-group').addClass('error');
-    return false;
-}
 
 function userExportPlaylists() {
     var loc = window.location;
@@ -869,30 +975,7 @@ function userExportPlaylists() {
     $('#userOptions').modal('hide');
 }
 
-function enableJplayerDebugging(){
-    $('#jplayer_inspector').jPlayerInspector({jPlayer:$('#jquery_jplayer_1'),visible:true});
-    $('#jquery_jplayer_1').data().jPlayer.options.errorAlerts = true;
-    $('#jquery_jplayer_1').data().jPlayer.options.warningAlerts = true;
-    $('#jplayer_inspector_update_0').click();
-}
 
-function loadBrowser(directory, title){
-    if(typeof directory === 'undefined'){
-        directory = '';
-    }
-    if(typeof title === 'undefined'){
-        title = 'Root';
-    }
-    var success = function(data){
-        new MediaBrowser('.search-results', data, title);
-    };
-    busy('#searchfield').hide().fadeIn('fast');
-    api('listdir',
-        {'directory' : directory},
-        success,
-        errorFunc('failed to load file browser'),
-        function(){busy('#searchfield').fadeOut('fast')});
-}
 
 /***
 HELPER
@@ -928,59 +1011,7 @@ function unixtime(){
     return parseInt(d.getTime() / 1000);
 }
 
-function time2text(sec){
-    var abssec = Math.abs(sec);
-    var minutes = parseInt(abssec/60);
-    var hours = parseInt(minutes/60)
-    var days = parseInt(hours/24);
-    var weeks = parseInt(days/7);
-    var months = parseInt(days/30);
-    var years = parseInt(days/365);
-    var t='';
-    if(abssec < 30){
-        return 'just now'
-    } else {
-        if(years != 0){
-            t = years == 1 ? 'a year' : years+' years';
-            if(years > 20){
-                t = 'a long time';
-            }
-        } else if(months != 0){
-            t = months == 1 ? 'a month' : months+' months';
-        } else if(weeks != 0){
-            t = weeks == 1 ? 'a week' : weeks+' weeks';
-        } else if(days != 0){
-            t = days == 1 ? 'a day' : days+' days';
-        } else if(hours != 0){
-            t = hours == 1 ? 'an hour' : hours+' hours';
-        } else if(minutes != 0){
-            t = minutes > 25 ? 'half an hour' : minutes+' minutes';
-            if (minutes == 1){
-                t = 'a minute';
-            }
-        } else {
-            t = 'a few seconds'
-        }
-        return sec > 0 ? t+' ago' : 'in '+t;
-    }
-}
 
-function dec2Hex(dec){
-    var hexChars = "0123456789ABCDEF";
-    var a = dec % 16;
-    var b = (dec - a)/16;
-    hex = hexChars.charAt(b) + hexChars.charAt(a);
-    return hex;
-}
-
-function userNameToColor(username){
-    username = username.toUpperCase();
-    username+='AAA';
-    var g = ((ord(username[0])-65)*255)/30;
-    var b = ((ord(username[1])-65)*255)/30;
-    var r = ((ord(username[2])-65)*255)/30;
-    return '#'+dec2Hex(r)+dec2Hex(g)+dec2Hex(b);
-}
 
 /*****************
  * KEYBOARD SHORTCUTS
@@ -1178,48 +1209,6 @@ function pickCoverArt(img){
     );
 }
 
-function displayMessageOfTheDay(){
-    api('getmotd',
-        function(resp){
-            if(resp.type == 'update'){
-                html = Mustache.render(
-                    '<a href="http://fomori.org/cherrymusic/">'+
-                        'CherryMusic {{version}} is available!'+
-                        '<h2>download now →</h2>'+
-                    '</a><hr>'+
-                    '<h3>{{features_count}} new {{feature_title}}:</h3>'+
-                    '<ul class="feature-list">'+
-                    '   {{#features}}<li>{{.}}</li>{{/features}}'+
-                    '</ul>'+
-                    '<h3>{{fixes_count}} {{fixes_title}}:</h3>'+
-                    '<ul class="feature-list">'+
-                    '   {{#fixes}}<li>{{.}}</li>{{/fixes}}'+
-                    '</ul><hr>'+
-                    '<p>'+
-                    '   And a lot of other stuff, see the'+
-                    '   <a href="https://github.com/devsnd/cherrymusic/blob/{{version}}/CHANGES" target="_blank">'+
-                    '   CHANGELOG</a>.'+
-                    '</p>',
-                    {
-                        version: resp.data.version,
-                        features: resp.data.features,
-                        features_count: resp.data.features.length,
-                        feature_title: resp.data.features.length > 1 ? 'features' : 'feature',
-                        fixes: resp.data.fixes,
-                        fixes_count: resp.data.fixes.length,
-                        fixes_title: resp.data.fixes.length > 1 ? 'fixes' : 'fix',
-                    });
-                $('#motd').html(html);
-            } else if(resp.type == 'wisdom'){
-                $('#motd').html('useless wisdom<hr>'+resp.data);
-            } else {
-                window.console.error('unknown motd type '+resp.type);
-            }
-        },
-        errorFunc('could not fetch message of the day')
-    );
-}
-
 /***
 ON DOCUMENT READY... STEADY... GO!
 ***/
@@ -1246,10 +1235,7 @@ $(document).ready(function(){
     //window.setInterval("resizePlaylistSlowly()",2000);
     $('#searchform .searchinput').focus();
     sendHeartBeat();
-    displayMessageOfTheDay();
-    $('#adminpanel').on('shown.bs.modal', function (e) {
-        updateUserList();
-    });
+    
     $('#save-playlist-from-queue').on('click',function(){
         $('#playlisttitle').val('');
         $("#playlistpublic").attr("checked", true);

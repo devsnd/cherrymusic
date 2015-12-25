@@ -48,6 +48,7 @@
 <!--COMPRESS-JS-BEGIN out=res/dist/cherrymusic.dist.js-->
     <script type="text/javascript" src="res/js/ext/angular.js"></script>
     <script type="text/javascript" src="res/js/ext/angular-resource.js"></script>
+    <script type="text/javascript" src="res/js/ext/angular-sanitize.js"></script>
     <script type="text/javascript" src="res/js/ext/ui-bootstrap-tpls-0.14.3.js"></script>
 
     <script type="text/javascript" src="res/js/ext/jquery-1.10.2.js"></script>
@@ -70,7 +71,20 @@
     <script type="text/javascript" src="res/js/mediabrowser.js"></script>
     <script type="text/javascript" src="res/js/cherrymusic.js"></script>
 
+    <script type="text/javascript" src="res/js/services/util_service.js"></script>
+    <script type="text/javascript" src="res/js/services/notification_service.js"></script>
+    <script type="text/javascript" src="res/js/services/legacy_api_service.js"></script>
+    <script type="text/javascript" src="res/js/services/config_service.js"></script>
     <script type="text/javascript" src="res/js/services/user_option_service.js"></script>
+    <script type="text/javascript" src="res/js/services/auth_service.js"></script>
+    <script type="text/javascript" src="res/js/services/motd_service.js"></script>
+    <script type="text/javascript" src="res/js/services/focus_service.js"></script>
+    <script type="text/javascript" src="res/js/services/file_browse_service.js"></script>
+    <script type="text/javascript" src="res/js/services/admin_service.js"></script>
+
+    <script type="text/javascript" src="res/js/directives/motd.js"></script>
+    <script type="text/javascript" src="res/js/directives/busy.js"></script>
+    <script type="text/javascript" src="res/js/directives/notification.js"></script>
 <!--COMPRESS-JS-END-->
 
 <title>CherryMusic</title>
@@ -116,141 +130,6 @@
     <input value="" onkeyup="" />
 </div>
 <!--keyboard shortcut changer overlay end -->
-<!-- USER OPTIONS -->
-<div id="userOptions" class="modal fade">
-    <div class="modal-dialog">
-    <div class="modal-content">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h3>Options</h3>
-        </div>
-        <div class="modal-body">
-            <div class="content">
-                <h3>keyboard shortcuts</h3>
-
-                <table>
-                    <tr>
-                        <td>next track</td>
-                        <td><span class="label label-default" id="keyboard_shortcuts-next" value="66" name="keyboard_shortcuts.next"></span></td>
-                        <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.next','Next Track')">change</a></td>
-                    </tr>
-
-                    <tr>
-                        <td>stop</td>
-                        <td><span class="label label-default"  id="keyboard_shortcuts-stop" value="86" name="keyboard_shortcuts.stop"></span></td>
-                        <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.stop','Stop')">change</a></td>
-                    </tr>
-
-                    <tr>
-                        <td>previous track</td>
-                        <td><span class="label label-default"  value="89"  id="keyboard_shortcuts-prev" name="keyboard_shortcuts.prev"></span></td>
-                        <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.prev','Previous Track')">change</a></td>
-                    </tr>
-
-                    <tr>
-                        <td>pause</td>
-                        <td>
-                            <span class="label label-default"  value="67"  id="keyboard_shortcuts-pause" name="keyboard_shortcuts.pause"></span>
-                            <span class="label label-default"  value="space">space</span>
-                        </td>
-                        <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.pause','Pause')">change</a></td>
-                    </tr>
-
-                    <tr>
-                        <td>play</td>
-                        <td><span class="label label-default"  value="88" id="keyboard_shortcuts-play" name="keyboard_shortcuts.play"></span></td>
-                        <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.play','Play')">change</a></td>
-                    </tr>
-
-                    <tr>
-                        <td>search</td>
-                        <td><span class="label label-default" value="83"  id="keyboard_shortcuts-search" name="keyboard_shortcuts.search"></span></td>
-                        <td><a class="btn btn-default" onclick="keyboard_shortcut_setter('keyboard_shortcuts.search','Use Search')">change</a></td>
-                    </tr>
-                </table>
-                <h3>misc</h3>
-                <div class="control-group">
-                    Autoplay when adding first track <input type="checkbox" onchange="" id="misc-autoplay_on_add" value="option1">
-                </div>
-                <div class="control-group">
-                    Confirm closing if music is playing <input type="checkbox" onchange="" id="ui-confirm_quit_dialog" value="option1">
-                </div>
-                <div class="control-group">
-                    Display album art when playing <input type="checkbox" onchange="" id="ui-display_album_art" value="option1">
-                </div>
-                <div id="media-force_transcode_to_bitrate-container" class="control-group">
-                    <div class="success">
-                        Limit audio bitrate
-                        <select name="media-force_transcode_to_bitrate">
-                            <option value="0">Unlimited</option>
-                            <option value="48">48 (Super Low)</option>
-                            <option value="64">64 (Very Low)</option>
-                            <option value="96">96 (Low)</option>
-                            <option value="128">128 (Medium)</option>
-                            <option value="320">320 (Very High)</option>
-                        </select>
-                        &nbsp;<input id="media-force_transcode_to_bitrate-display" type="text" disabled value="" size="3" style="text-align:right;"/>&nbsp;kbps
-                    </div>
-                    <div class="error" style="display: none; text-align: center; margin: 5px;">
-                        <span class="msg"></span>
-                        <button id="media-force_transcode_to_bitrate-disable" class="btn btn-danger">
-                            Remove personal bitrate limit
-                        </button>
-                    </div>
-                </div>
-                <h3>change password</h3>
-                <a class="btn btn-default" href="#changePassword" role="button" data-toggle="modal">change password</a>
-                <h3>export playlists</h3>
-                <a class="btn btn-default" href="#exportPlaylists" role="button" data-toggle="modal">create archive</a>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-        </div>
-    </div>
-    </div>
-</div>
-<!-- change password -->
-<div id="changePassword" class="modal fade">
-    <div class="modal-dialog">
-    <div class="modal-content">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h3>change password</h3>
-        </div>
-        <div class="modal-body">
-            <div class="content">
-            <form class="form-horizontal">
-                <div class="form-group">
-                    <label for="oldpassword-change" class="col-lg-4 control-label" >old password</label>
-                    <div class="col-lg-8">
-                        <input type="password" class="form-control" id="oldpassword-change">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="newpassword-change" class="col-lg-4 control-label" >new password</label>
-                    <div class="col-lg-8">
-                        <input type="password" class="form-control" id="newpassword-change">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="repeatpassword-change" class="col-lg-4 control-label" >repeat new password</label>
-                    <div class="col-lg-8">
-                        <input type="password" class="form-control" id="repeatpassword-change">
-                    </div>
-                </div>
-                <div class="form-actions">
-                    <a href="javascript:;" onclick="userChangePassword()" class="btn btn-default">confirm password change</a>
-                </div>
-            </form>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-        </div>
-    </div>
-    </div>
-</div>
 <!-- export playlists -->
 <div id="exportPlaylists" class="modal fade">
     <div class="modal-dialog">
@@ -299,7 +178,6 @@
     </div>
 </div>
 <!-- export playlists end -->
-<!-- change password end -->
 <!-- change albumart -->
 <div id="changeAlbumArt" class="modal fade">
     <div class="modal-dialog">
@@ -334,58 +212,6 @@
     <!-- change password end -->
 <!-- USER OPTIONS END-->
 
-<!-- ADMIN PANEL START -->
-<div id="adminpanel" class="modal fade">
-    <div class="modal-dialog">
-    <div class="modal-content">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h3>Options</h3>
-        </div>
-        <div class="modal-body">
-            <div class="content">
-                <h4>Create new user:</h4>
-                <form role="form" onsubmit="addNewUser(); return false;">
-                  <div class="form-group">
-                    <label for="newusername">User Name</label>
-                    <input type="text" class="form-control" id="newusername" placeholder="Enter new user name">
-                  </div>
-                  <div class="form-group">
-                    <label for="newpassword">Password</label>
-                    <input type="password" class="form-control" id="newpassword" placeholder="Password">
-                  </div>
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" id="newisadmin"> admin
-                    </label>
-                  </div>
-                  <button type="submit" class="btn btn-default">Submit</button>
-                </form>
-                <h4>User List:</h4>
-                <div class="row-fluid">
-                    <div id="adminuserlist">
-                    </div>
-                </div>
-                <h4>Advanced:</h4>
-                <div class="row-fluid">
-                    <a class="btn btn-default" href="javascript:;" onclick="api('updatedb')" class="button">
-                    Update Music Library (may take some time!)
-                    </a>
-                </div>
-                <div class="row-fluid">
-                    <a class="btn btn-default" href="javascript:;" onclick="enableJplayerDebugging()" class="button">
-                    Enable JPlayer Debugging
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-        </div>
-    </div>
-    </div>
-</div>
-<!-- ADMIN PANEL END -->
 <!-- SAVE PLAYLIST MODAL -->
 <div id="saveplaylistmodal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="saveplaylistmodalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -536,9 +362,19 @@
     <div class="visible-xs">
         <form class="navbar-form navbar-left" role="search" id="searchform" onsubmit="return search($(this))">
             <div class="input-group">
-                <input type="text" name="searchinput" class="searchinput form-control" placeholder="Search">
+                <input
+                    type="text"
+                    name="searchinput"
+                    class="searchinput form-control"
+                    ng-model="searchField"
+                    placeholder="{{ searchPlaceholder }}">
                 <span class="input-group-btn">
-                    <button type="submit" class="btn btn-primary">Search</button>
+                    <button
+                        type="submit"
+                        ng-click="search(searchField)"
+                        class="btn btn-primary">
+                        Search
+                    </button>
                 </span>
             </div>
         </form>
@@ -548,21 +384,32 @@
   <div class="collapse navbar-collapse navbar-ex1-collapse" id="searchfield">
     <ul class="nav navbar-nav">
         <li class="hidden-xs">
-            <form class="navbar-form navbar-left" role="search" id="searchform" onsubmit="return search($(this))">
+            <form class="navbar-form navbar-left">
                 <!--workaround for CHROME BUG  https://code.google.com/p/chromium/issues/detail?id=309483 -->
                 <div class="input-group" style="width: 260px">
-                    <input type="text" name="searchinput" class="searchinput form-control" placeholder="Search">
+                    <input
+                        type="text"
+                        name="searchinput"
+                        id="searchinput"
+                        class="searchinput form-control"
+                        ng-model="searchField"
+                        placeholder="{{ searchPlaceholder }}">
                     <span class="input-group-btn">
-                        <button type="submit" class="btn btn-primary">Search</button>
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                            ng-click="search(searchField)">
+                        Search
+                        </button>
                     </span>
                 </div>
             </form>
         </li>
         <li>
-            <a href="#" onclick="loadBrowser()">browse files</a>
+            <a ng-click="loadBrowser()">browse files</a>
         </li>
         <li>
-            <a href="#" onclick="showPlaylists('default')">load playlist</a>
+            <a ng-click="showPlaylists('default')">load playlist</a>
         </li>
     </ul>
     <ul class="nav navbar-nav">
@@ -571,10 +418,21 @@
                 <b class="caret"></b><span class="glyphicon glyphicon-wrench"></span>
             </a>
             <ul class="dropdown-menu">
-                <li><a ng-click="openUserOptionModal()">Options</a></li>
-                <li><a style="display: none;" href="#adminpanel" role="button" data-toggle="modal">Admin</a></li>
+                <li>
+                    <a ng-click="openUserOptionModal()">Options</a>
+                </li>
+                <li ng-if="currentUserIsAdmin()">
+                    <a ng-click="openAdminModal()">Admin</a>
+                </li>
                 <li class="divider"></li>
-                <li><a href="javascript:;" id="logout-menu-button" onclick="logout()">Logout <span id="username-label"></span></a></li>
+                <li>
+                    <a 
+                        ng-disabled="autoLoginEnabled()"
+                        ng-click="logout()">
+                        Logout
+                        (<span id="username-label">{{ getCurrentUserName() }}</span>)
+                    </a>
+                </li>
             </ul>
         </li>
     </ul>
@@ -583,17 +441,24 @@
 </div>
 <!-- END UPPER NAVIGATION ELEMENTS -->
 
+<!-- NOTIFICATIONS -->
+<div id="errormessage">
+    <div ng-repeat="notification in getNotifications() track by notification.id">
+        <cm-notification notification="notification">        
+    </div>
+</div>
+<!-- NOTIFICATIONS END -->
 
-<!-- <a id="errormessage" href="#" title="click to dismiss" onclick="$(this).html('')"></a> -->
 <!-- TABS START -->
-<div id="errormessage"></div>
 <div class="">
     <div class="row">
         <div id="search-panel" class="col-md-6 row">
             <!--SEARCH TAB START -->
-            <div class="search">
+            <div class="search" cm-busy="mediaBrowserBusy">
                 <div class="search-results">
-                    <div id="motd"></div>
+                    <div id="motd">
+                        <cm-message-of-the-day>
+                    </div>
                 </div>
             </div>
             <!--SEARCH TAB END -->

@@ -27,6 +27,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 //
 
+var time2text = function(t){ // compat hack
+    return t;
+}
+var userNameToColor = function(n){  // compat hack
+    return '#112233';
+}
+
 /********
 RENDERING
 ********/

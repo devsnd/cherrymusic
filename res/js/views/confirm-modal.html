@@ -1,0 +1,32 @@
+<div class="modal-header">
+    <button class="close" ng-click="close()">&times;</button>
+</div>
+<div class="modal-body">
+    <div class="content" ng-bind="message"></div>
+</div>
+<div class="modal-footer">
+    <div ng-if="safeAction == 'ok'">
+        <button
+            class="btn btn-danger pull-left"
+            ng-click="cancel()"
+            aria-hidden="true">{{ canceltext }}
+        </button>
+        <button
+            class="btn btn-success"
+            ng-click="ok()"
+            aria-hidden="true">{{ oktext }}
+        </button>
+    </div>
+    <div ng-if="safeAction != 'ok'">
+        <button
+            class="btn btn-danger  pull-left"
+            ng-click="ok()"
+            aria-hidden="true">{{ oktext }}
+        </button>
+        <button
+            class="btn btn-success"
+            ng-click="cancel()"
+            aria-hidden="true">{{ canceltext }}
+        </button>
+    </div>
+</div>

@@ -7,7 +7,7 @@ app.factory('UserOptionService', function($resource, $http, $q){
 
     var traverseSetOption = function(traversePath, value){
         // takes an option `traversePath` string like "misc.some.option" and  
-        // applies the value to `options.misc.some.option`
+        // applies the value to `UserOptionService.options.misc.some.option`
 
         var pathElements = traversePath.split('.');
         var parent = options;

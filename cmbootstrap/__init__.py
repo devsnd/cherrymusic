@@ -50,7 +50,7 @@ class DependencyInstaller:
         """
         cherrypy releases: https://bitbucket.org/cherrypy/cherrypy/downloads
         """
-        cherrypygitcommit = "586bee7ac445"
+        cherrypygitcommit = "222f6f086e9a"  # version 3.8.0
         cherrypyurl = "https://bitbucket.org/cherrypy/cherrypy/get/%s.tar.gz" % cherrypygitcommit
         cherrypysubfolder = os.path.join('cherrypy-cherrypy-%s'%cherrypygitcommit,'cherrypy')
         cherrypytempfile = os.path.join(tempfile.gettempdir(),'cherrypy.tar.gz')
