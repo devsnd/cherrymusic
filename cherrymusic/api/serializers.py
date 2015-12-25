@@ -115,25 +115,18 @@ class UserSettingsSerializer(serializers.ModelSerializer):
         fields = ('user', 'hotkeys', 'misc')
 
     def update(self, instance, validated_data):
-        # TODO: loops... and if not exist validated_data.get('auto_play', misc.auto_play)
         misc_data = validated_data.pop('misc')
         misc = instance.misc
-        
-        misc.auto_play = misc_data['auto_play'] 
-        misc.confirm_closing = misc_data['confirm_closing']
-        misc.show_album_art = misc_data['show_album_art']
-        misc.remove_when_queue = misc_data['remove_when_queue']
+
+        for key, value in misc_data.items():
+            setattr(misc, key, value)
         misc.save()
 
         hotkeys_data = validated_data.pop('hotkeys')
         hotkeys = instance.hotkeys
 
-        hotkeys.increase_volume = hotkeys_data['increase_volume']
-        hotkeys.decrease_volume = hotkeys_data['decrease_volume']
-        hotkeys.toggle_mute = hotkeys_data['toggle_mute']
-        hotkeys.previous_track = hotkeys_data['previous_track']
-        hotkeys.next_track = hotkeys_data['next_track']
-        hotkeys.toggle_play = hotkeys_data['toggle_play']
+        for key, value in hotkeys_data.items():
+            setattr(hotkeys, key, value)
 
         hotkeys.save()
 
