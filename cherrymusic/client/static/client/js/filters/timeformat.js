@@ -18,4 +18,3 @@ app.filter('timeformat', function() {
         }
     };
 });
-
