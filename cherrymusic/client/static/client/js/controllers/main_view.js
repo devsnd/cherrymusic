@@ -1,4 +1,5 @@
-app.controller('MainViewController', function($scope, $rootScope, $uibModal, $controller, $window, Browse, IndexDirectory, djangoAuth, UserSettings){
+app.controller('MainViewController', function($scope, $rootScope, $uibModal, $controller, $window,
+     Browse, Search, IndexDirectory, djangoAuth, UserSettings){
     djangoAuth.authenticationStatus();
 
     $scope.userMayDownload = true;
@@ -78,6 +79,13 @@ app.controller('MainViewController', function($scope, $rootScope, $uibModal, $co
 
     $scope.browse = function(directory){
         Browse.get(directory, function(data){
+            $scope.fileBrowserContent = data
+        });
+        $scope.mediaBrowserMode = 'file'
+    };
+
+    $scope.search = function(query){
+        Search.get(query, function(data){
             $scope.fileBrowserContent = data
         });
         $scope.mediaBrowserMode = 'file'

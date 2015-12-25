@@ -185,6 +185,7 @@ PIPELINE_JS = {
             'client/js/resources/browse.js',
             'client/js/resources/index_directory.js',
             'client/js/resources/playlist.js',
+            'client/js/resources/search.js',
             'client/js/resources/track.js',
             'client/js/resources/user.js',
             'client/js/resources/user_settings.js',

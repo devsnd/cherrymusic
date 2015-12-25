@@ -3,7 +3,7 @@ import os
 import logging
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse, StreamingHttpResponse, Http404
-from rest_framework import viewsets
+from rest_framework import viewsets, filters
 from rest_framework.exceptions import NotFound
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -76,6 +76,8 @@ class FileViewSet(SlowServerMixin, viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = File.objects.all()
     serializer_class = FileSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('filename', 'meta_title', 'meta_artist', 'meta_genre')   
 
 
 class DirectoryViewSet(SlowServerMixin, viewsets.ReadOnlyModelViewSet):
@@ -244,6 +246,28 @@ class BrowseView(SlowServerMixin, APIView):
             'files': [file_serializer.to_representation(file) for file in files],
             'directories': [dir_serializer.to_representation(directory) for directory in directories],
         })
+
+class GlobalSearchList(SlowServerMixin, APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        query = self.request.QUERY_PARAMS.get('q', '')
+
+        max_directories = 10
+        max_files = 50
+        
+        directories = Directory.objects.filter(path__icontains=query)[: max_directories]
+        files = File.objects.filter(Q(filename__icontains=query) |
+            Q(meta_title__icontains=query) | Q(meta_artist__icontains=query))[: max_files]
+
+        dir_serializer = DirectorySerializer()
+        file_serializer = FileSerializer()
+
+        return Response({
+            'directories': [dir_serializer.to_representation(directory) for directory in directories],
+            'files': [file_serializer.to_representation(file) for file in files],
+        })
+
 
 class MessageOfTheDayView(APIView):
     permission_classes = (IsAuthenticated,)

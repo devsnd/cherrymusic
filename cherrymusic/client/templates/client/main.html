@@ -82,13 +82,12 @@
     <div class="collapse navbar-collapse navbar-ex1-collapse" id="searchfield">
       <ul class="nav navbar-nav">
         <li class="hidden-xs">
-          <form class="navbar-form navbar-left" role="search" id="searchform"
-                onsubmit="return search($(this))">
+          <form class="navbar-form navbar-left" role="search" id="searchform">
             <!--workaround for CHROME BUG  https://code.google.com/p/chromium/issues/detail?id=309483 -->
             <div class="input-group" style="width: 260px">
-              <input type="text" name="searchinput" class="searchinput form-control" placeholder="Search">
+              <input type="text" name="searchinput" class="searchinput form-control" placeholder="Search" ng-model='searchInput'>
                     <span class="input-group-btn">
-                        <button type="submit" class="btn btn-primary">Search</button>
+                        <button type="submit" class="btn btn-primary" ng-click="search(searchInput)">Search</button>
                     </span>
             </div>
           </form>
