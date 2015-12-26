@@ -189,9 +189,9 @@ PIPELINE_JS = {
             'client/js/resources/track.js',
             'client/js/resources/user.js',
             'client/js/resources/user_settings.js',
+            'client/js/resources/playback_service.js',
+            'client/js/resources/playback_service_jplayer.js',
             'client/js/hotkeys.js',
-            'client/js/playback_service.js',
-            'client/js/playback_service_jplayer.js',
         ),
         'output_filename': 'client/cherrymusic.js'
     }
