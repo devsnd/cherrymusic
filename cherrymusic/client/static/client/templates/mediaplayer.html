@@ -17,6 +17,7 @@
   <div id="playlistCommands" class="playlist-tab-border-left">
     <div class="playlist-command-buttons row">
       <div id="playlist-command-button-group" class="pull-left btn-group">
+<!--
         <button class="btn dropdown-toggle btn-default btn-xs" data-toggle="dropdown">
           sort <span class="caret"></span>
         </button>
@@ -28,9 +29,10 @@
           <li><a tabindex="-1" href="javascript:void(0)"
                  onclick="playlistManager.getEditingPlaylist().sort_by('artist')">by artist</a></li>
         </ul>
+-->
       </div>
       <div ng-if="currentPlaylist.type == 'queue'">
-        <a class="pull-left btn btn-xs btn-default">random!</a>
+        <a class="pull-left btn btn-xs btn-default" ng-click="currentPlaylist.tracks = shuffle(currentPlaylist.tracks)">random!</a>
         <a class="pull-left btn btn-xs btn-default" ng-click="openSavePlaylistModal()">save as playlist</a>
         <div class="btn-group pull-right">
           <button class="btn btn-xs btn-default" ng-click="clearPlaylist(currentPlaylist)">clear</button>
