@@ -62,11 +62,15 @@
       </div>
       <a ng-if="userMayDownload" class="btn btn-xs btn-default pull-left">download</a>
     </div>
-    <div class="playlist-progress row">
-      <span class="remaining-tracks-or-time bottom-corners label"></span>
-      <div class="playlist-progress-bar progress" style="height: 3px;">
-        <div class="progress-bar" style="width: {{ getRemaingingPercentage(currentPlaylist) }}"></div>
+    <div class="playlist-progress row" ng-if="remainingPlaylistDuration" >
+      <ul class="nav navbar-nav" style="width: 100%;">
+      <li style="float: left;">
+        <span class="label label-default">{{ remainingPlaylistDuration | timeformat }} remaining</span>
+      </li>
+      <div class="playlist-progress-bar progress" style="height: 3px;margin-top: 18px;">
+        <div class="progress-bar progress-bar-default" style="width: {{ remainingPlaylistPercentage }}%"></div>
       </div>
+      </ul>
     </div>
   </div>
   <!-- playlist content -->

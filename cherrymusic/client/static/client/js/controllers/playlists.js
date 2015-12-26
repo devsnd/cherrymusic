@@ -43,15 +43,58 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, Playlist
         };
     };
 
-    $scope.getRemainingTimeOrTracks = function (playlist) {
-        return playlist.tracks.length;
-    };
-    $scope.getTotalTimeOrTracks = function (playlist) {
-        return playlist.tracks.length;
+    var infinite = 1000000000;
+
+    $scope.updateRemainingPlaylistPercentage = function(remainingTrackDuration){
+        var remainingPlaylistDuration = remainingTrackDuration + getRemainingDurationOfTracks();
+            
+        if( remainingPlaylistDuration > infinite){
+            $scope.remainingPlaylistDuration = undefined;
+        }
+        else{
+            $scope.remainingPlaylistDuration = remainingPlaylistDuration;
+        };
+        $scope.remainingPlaylistPercentage = (1 - (remainingPlaylistDuration / getTotalDurationOfTracks())) * 100;
     };
 
-    $scope.getRemaingingPercentage = function (playlist) {
-        return $scope.getRemainingTimeOrTracks(playlist) / $scope.getTotalTimeOrTracks(playlist) * 100
+    var getRemainingDurationOfTracks = function () {
+        if($scope.isShuffle){
+            return infinite;
+        };
+
+        var remainingTracks = getRemainingTracks($scope.currentPlayingPlaylist.tracks, $scope.currentPlayingTrack)
+
+        return getTotalDuration(remainingTracks);
+    };
+
+    var getRemainingTracks = function(tracks, currentTrack){
+        var remainingTracks = [];
+        var isRemainingTrack = false;
+
+        tracks.forEach(function(track, index){
+            if(isRemainingTrack){
+                remainingTracks.push(track);
+            }
+            else if(track == currentTrack){
+                isRemainingTrack = true;
+            };
+        });
+
+        return remainingTracks;
+    }
+
+    var getTotalDurationOfTracks = function () {
+        return getTotalDuration($scope.currentPlayingPlaylist.tracks);
+    };
+
+    var getTotalDuration = function(tracks){
+        var time = 0;
+
+        tracks.forEach(function(track){
+            time += track.data.meta_duration;
+        });
+
+        return time;
     };
 
     var createEmptyPlaylist = function(name, type){

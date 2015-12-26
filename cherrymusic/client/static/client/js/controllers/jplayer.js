@@ -51,13 +51,21 @@ app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
     }
 
     $scope.currentPlaybackPercentage = 0;
+
     $rootScope.$on('PLAYBACK_TIME_UPDATE', function(event, currentTime, totalTime){
-        $scope.currentPlayTime = currentTime;
         // PlaybackService gives correct totalTime always from metada, totalTime comes from JPlayer and sometimes fail
-        $scope.currentPlaybackPercentage = currentTime / PlaybackService.totalTime() * 100;
+        totalTime = PlaybackService.totalTime();
+
+        $scope.currentPlayTime = currentTime;
+
+        $scope.currentPlaybackPercentage = currentTime / totalTime * 100;
         if(!$scope.$$phase) {
             $scope.$digest(); // HACK: force progress bar update
         }
+
+        var remainingTrackTime = totalTime - currentTime;
+
+        $scope.updateRemainingPlaylistPercentage(remainingTrackTime)
     });
     $rootScope.$on('PLAYBACK_ENDED', function(){
         $scope.playNextTrack();
