@@ -48,7 +48,7 @@
         </div>
       </div>
       <div ng-if="currentPlaylist.type != 'queue'" class="pull-left btn-group" uib-dropdown is-open="isOpenDropDown">
-        <button ng-if="currentPlaylist.pk && !currentPlaylist.saved" class="btn btn btn-xs btn-default">save</button>
+        <button ng-if="!currentPlaylist.saved" class="btn btn btn-xs btn-default" ng-click="updatePlaylist(currentPlaylist)">save</button>
         <button class="btn dropdown-toggle btn-default btn-xs" uib-dropdown-toggle ng-disabled="disabled">
           edit <span class="caret"></span>
         </button>
@@ -83,7 +83,7 @@
         dnd-list="currentPlaylist.tracks"
         dnd-placeholder-tpl="<tr class='dndPlaceholder'><td></td></tr>"
         dnd-drop="dropCallback(event, index, item)">
-      <li ng-repeat="track in currentPlaylist.tracks"
+      <li ng-repeat="track in currentPlaylist.tracks track by $index"
           ng-class="{'bg-primary': currentTrackIndex == $index}"
           dnd-draggable="track"
           dnd-moved="currentPlaylist.tracks.splice($index, 1)"
