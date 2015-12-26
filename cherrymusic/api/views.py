@@ -19,8 +19,7 @@ from .permissions import IsOwnerOrReadOnly, IsOwnUser
 from ext import audiotranscode
 from ext.tinytag import TinyTag
 from .serializers import FileSerializer, DirectorySerializer, UserSerializer, \
-    UserSettingsSerializer, PlaylistDetailSerializer, TrackSerializer, \
-    PlaylistListSerializer
+    UserSettingsSerializer, PlaylistSerializer, TrackSerializer
 
 from django.db.models import Q
 
@@ -89,16 +88,19 @@ class DirectoryViewSet(SlowServerMixin, viewsets.ReadOnlyModelViewSet):
 class PlaylistViewSet(SlowServerMixin, MultiSerializerViewSetMixin, viewsets.ModelViewSet):
     permission_classes = (IsOwnerOrReadOnly, )
     queryset = Playlist.objects.all()
-
-    serializer_class = PlaylistDetailSerializer
+    serializer_class = PlaylistSerializer
 
     def get_queryset(self):
         user = self.request.user
-        return Playlist.objects.filter(Q(owner=user) | Q(public=True))
-    #serializer_action_classes = {
-    #    'list': PlaylistListSerializer,
-    #    'retrieve': PlaylistDetailSerializer,
-    #}
+        query = self.request.QUERY_PARAMS.get('search', None)
+
+        playlists = Playlist.objects.filter(Q(owner=user) | Q(public=True))
+
+        if(query):
+            return playlists.filter(name__icontains=query)
+
+        return playlists
+
 
 class UserViewSet(SlowServerMixin, viewsets.ModelViewSet):
     authentication_classes = (SessionAuthentication, BasicAuthentication)

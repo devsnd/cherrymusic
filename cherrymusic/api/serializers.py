@@ -60,13 +60,13 @@ class TrackSerializer(serializers.ModelSerializer):
         else:
             raise KeyError('Cannot serialize Track %s of type %s' % (track, track.type))
 
-class PlayListSerializer(serializers.ModelSerializer):
+class PlaylistSerializer(serializers.ModelSerializer):
     tracks = serializers.SerializerMethodField()
     owner_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Playlist
-        fields = ('id', 'name', 'owner', 'public', 'tracks')
+        fields = ('id', 'name', 'owner', 'public', 'tracks', 'owner_name', 'created_at')
 
     @staticmethod
     def get_owner_name(obj):
@@ -76,20 +76,6 @@ class PlayListSerializer(serializers.ModelSerializer):
     def get_tracks(obj):
         serializer = TrackSerializer()
         return [serializer.to_representation(track) for track in obj.track_set.all().order_by('order')]
-
-class PlaylistDetailSerializer(PlayListSerializer):
-    tracks = serializers.SerializerMethodField()
-    owner_name = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Playlist
-        fields = ('id', 'name', 'owner', 'public', 'tracks', 'owner_name', 'created_at')
-
-
-class PlaylistListSerializer(PlayListSerializer):
-    class Meta:
-        model = Playlist
-        fields = ('id', 'name', 'owner', 'public')
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

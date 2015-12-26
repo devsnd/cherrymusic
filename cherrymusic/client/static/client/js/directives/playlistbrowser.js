@@ -1,5 +1,5 @@
-app.directive('playlistBrowser', ['$rootScope', 'UserList',
-    function($rootScope, UserList) {
+app.directive('playlistBrowser', ['$rootScope', 'UserList', 'PlaylistSearch',
+    function($rootScope, UserList, PlaylistSearch) {
         return {
             restrict: 'E',
             templateUrl: STATIC_FILES + 'client/templates/playlistbrowser.html',
@@ -17,6 +17,12 @@ app.directive('playlistBrowser', ['$rootScope', 'UserList',
                     else{
                         $scope.playlistSortBy = something
                     };
+                };
+
+                $scope.playlistSearch = function(query){
+                    PlaylistSearch.get(query, function(data){
+                        $scope.playlists = data;
+                    });
                 };
                 
                 $scope.loadPlaylist = function(playlist){

@@ -19,9 +19,9 @@
     </div>
     <div class="col-md-6">
     <div class="input-group input-group-sm">
-      <input class="playlist-filter-input form-control" placeholder="title or trackname" onchange="showPlaylists('', $('.playlist-filter-input').val())" type="text">
+      <input class="playlist-filter-input form-control" placeholder="title" ng-model="playlistSearchInput" type="text">
       <span class="input-group-btn">
-        <button class="btn btn-default">Search</button>
+        <button class="btn btn-default" ng-click="playlistSearch(playlistSearchInput)">Search</button>
       </span>
      </div>
     </div>
