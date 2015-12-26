@@ -8,6 +8,17 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, Playlist
             controller: function($scope, $uibModalInstance){
                 $scope.isPublic = false;
 
+                var getPlaylistTitle = function(){
+                    var currentName = $scope.currentPlaylist.name;
+
+                    if(currentName == 'Queue' || currentName == 'New Playlist'){
+                        return undefined;
+                    };
+                    return currentName;
+                };
+
+                $scope.newPlaylistTitle = getPlaylistTitle();
+
                 $scope.close = function(){
                     $uibModalInstance.dismiss('cancel');
                 };
@@ -120,6 +131,11 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, Playlist
     };
 
     $scope.setCurrentPlaylist = function(playlist){
+        var alreadyLoadedPlaylist = getIsAlreadyLoadedPlaylist(playlist);
+
+        if(!alreadyLoadedPlaylist){
+            $scope.openedPlaylists.push(playlist);
+        };
         $scope.currentTrackIndex = 0;
         $scope.currentPlaylist = playlist;
         $scope.indexHistory = [];
@@ -139,7 +155,13 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, Playlist
                 newTrack.order = order;
                 newTrack.type = track.type;
                 newTrack.file = track.data.id;
-                Track.save(newTrack, function(){});
+                Track.save(newTrack, function(track){
+                    if(track.order == (len - 1) ){
+                        $scope.openedPlaylists.push(playlist);
+                        $scope.setCurrentPlaylist(playlist);
+                        $scope.$emit('RELOAD_PLAYLIST', playlist);
+                    };
+                });
             };
         });
     });
@@ -150,10 +172,33 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, Playlist
             return;
         };
 
+        var alreadyLoadedPlaylist = getIsAlreadyLoadedPlaylist(playlist);
+
+        if(alreadyLoadedPlaylist){
+            var index = getPlaylistIndex(playlist);
+            console.log(index);
+            console.log($scope.openedPlaylists.length);
+            $scope.openedPlaylists.splice(index, 1);
+            if($scope.currentPlaylist.id == playlist.id){
+                $scope.setCurrentPlaylist($scope.openedPlaylists[index - 1]);
+            };
+        };
+
         Playlist.remove(playlist, function(){
             $scope.showPlaylists();
         });
     });
+
+    var getPlaylistIndex = function(playlist, playlists){
+        if(playlists == undefined){
+            playlists = $scope.openedPlaylists;
+        };
+
+        var index = playlists.map(function(element){
+                return element.id;
+            }).indexOf(playlist.id);
+        return index;
+    };
 
     $scope.$on('UPDATE_PLAYLIST', function(event, playlist){
         Playlist.update({ id:playlist.id}, playlist, function(){
@@ -162,23 +207,48 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, Playlist
     });
 
     $scope.$on('LOAD_PLAYLIST', function(event, playlist) {
-        playlistid = playlist.id;
-        var alreadyLoadedPlaylist = _.find(
-            $scope.openedPlaylists,
-            function(playlist){ return playlist.id == playlistid }
-        );
+        var playlistId = playlist.id;
+
+        var alreadyLoadedPlaylist = getIsAlreadyLoadedPlaylist(playlist);
+
         if(alreadyLoadedPlaylist){
-            $scope.currentPlaylist = alreadyLoadedPlaylist;
+            $scope.setCurrentPlaylist(alreadyLoadedPlaylist);
         } else {
             playlist.loading = true;
             $scope.openedPlaylists.push(playlist);
-            $scope.currentPlaylist = playlist;
-            Playlist.get({id: playlistid}, function(playlist_data){
+            $scope.setCurrentPlaylist(playlist);
+            Playlist.get({id: playlistId}, function(playlist_data){
                 playlist.loading = false;
                 playlist.tracks = playlist_data.tracks;
             });
         }
     });
+
+    $scope.$on('RELOAD_PLAYLIST', function(event, playlist){
+        Playlist.query(function(playlists){
+            $scope.playlists = playlists;
+            var index = getPlaylistIndex(playlist, playlists);
+            console.log($scope.openedPlaylists);
+            var openedIndex = getPlaylistIndex(playlist);
+            $scope.openedPlaylists.splice(openedIndex, 1);
+            console.log($scope.openedPlaylists);
+
+            $scope.openedPlaylists.push(playlists[index]);
+            console.log($scope.openedPlaylists);
+
+            $scope.setCurrentPlaylist(playlists[index]);
+        })
+    });
+
+    var getIsAlreadyLoadedPlaylist = function(playlist){
+        var playlistId = playlist.id;
+
+        var alreadyLoadedPlaylist = _.find($scope.openedPlaylists, function(playlist){
+                return playlist.id == playlistId 
+            });
+
+        return alreadyLoadedPlaylist;
+    };
 
     $scope.$on('ADD_FILE_TO_PLAYLIST', function(event, file){
         if(file.type == undefined){

@@ -47,17 +47,15 @@
           </ul>
         </div>
       </div>
-      <div ng-if="currentPlaylist.type != 'queue'" class="pull-left btn-group">
+      <div ng-if="currentPlaylist.type != 'queue'" class="pull-left btn-group" uib-dropdown is-open="isOpenDropDown">
         <button ng-if="currentPlaylist.pk && !currentPlaylist.saved" class="btn btn btn-xs btn-default">save</button>
-        <button class="btn dropdown-toggle btn-default btn-xs" data-toggle="dropdown">
+        <button class="btn dropdown-toggle btn-default btn-xs" uib-dropdown-toggle ng-disabled="disabled">
           edit <span class="caret"></span>
         </button>
-        <ul class="dropdown-menu">
-          <li><a>Save as new playlist</a></li>
+        <ul class="uib-dropdown-menu" role="menu">
+          <li><a ng-click="openSavePlaylistModal()">Save as new playlist</a></li>
           <li class="divider"></li>
-          <li><a>Delete playlist</a></li>
-          <li ng-if="!currentPlaylist.public"><a>set public</a></li>
-          <li ng-if="currentPlaylist.public"><a>set private</a></li>
+          <li><a ng-click="removePlaylist(currentPlaylist)">Delete playlist</a></li>
         </ul>
       </div>
       <a ng-if="userMayDownload" class="btn btn-xs btn-default pull-left">download</a>

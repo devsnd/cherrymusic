@@ -27,7 +27,11 @@ app.directive('mediaPlayer', [
                         array[randomIndex] = temporaryValue;
                     }
                     return array;
-                }
+                };
+
+                $scope.removePlaylist = function(playlist){
+                    $scope.$emit('REMOVE_PLAYLIST', playlist);
+                };
             }
         }
     }
