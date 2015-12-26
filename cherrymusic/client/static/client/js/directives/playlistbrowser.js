@@ -33,22 +33,23 @@ app.directive('playlistBrowser', ['$rootScope', 'UserList',
                     var r, g, b;
                     var h = step / numOfSteps;
                     var i = ~~(h * 6);
-                    var f = h * 6 - i;
-                    var q = 1 - f;
+                    var l = 0.5
+                    var f = (h * 6 - i)-l;
+                    var q = 1 - f - l;
                     switch(i % 6){
-                        case 0: r = 1; g = f; b = 0; break;
-                        case 1: r = q; g = 1; b = 0; break;
-                        case 2: r = 0; g = 1; b = f; break;
-                        case 3: r = 0; g = q; b = 1; break;
-                        case 4: r = f; g = 0; b = 1; break;
-                        case 5: r = 1; g = 0; b = q; break;
+                        case 0: r = l; g = q; b = 1; break; // pink - blue
+                        case 1: r = f; g = l; b = 1; break; // pink - blue
+                        case 2: r = l; g = 1; b = f; break; // green
+                        case 3: r = 1; g = f; b = l; break; // pink
+                        case 4: r = 1; g = l; b = q; break; // pink
+                        case 5: r = q; g = 1; b = l; break; // yellow
                     }
                     var c = "#" + ("00" + (~ ~(r * 255)).toString(16)).slice(-2) + ("00" + (~ ~(g * 255)).toString(16)).slice(-2) + ("00" + (~ ~(b * 255)).toString(16)).slice(-2);
                     return (c);
                 };
 
                 $scope.addUserBackgroundColor = function(userId){
-                    return {'background-color': rainbow($rootScope.userList.length, userId)}
+                    return {'background-color': rainbow($rootScope.userList.length*2+30, userId*2)}
                 }
             }
         }
