@@ -1,8 +1,34 @@
 <div class="cm-media-list-category">
   <h3>Playlists</h3>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="btn-group input-group-sm">
+        <span class="input-group-addon">sort by</span>
+        <div class="input-group-btn">
+          <button type="button" class="btn btn-default" ng-click="playlistSortBySomething('name')">
+            <span class="glyphicon glyphicon-sort-by-alphabet"></span> title
+          </button>
+          <button type="button" class="btn btn-default" ng-click="playlistSortBySomething('owner')">
+            <span class="glyphicon glyphicon-user"></span> user
+          </button>
+          <button type="button" class="btn btn-default" ng-click="playlistSortBySomething('-id')">
+            <span class="glyphicon glyphicon-time"></span> age
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+    <div class="input-group input-group-sm">
+      <input class="playlist-filter-input form-control" placeholder="title or trackname" onchange="showPlaylists('', $('.playlist-filter-input').val())" type="text">
+      <span class="input-group-btn">
+        <button class="btn btn-default">Search</button>
+      </span>
+     </div>
+    </div>
+  </div>
   <ul class="cm-media-list" >
     <li class="playlist-browser-list-item"
-        ng-repeat="playlist in playlists track by playlist.id">
+        ng-repeat="playlist in playlists | orderBy: playlistSortBy">
       <div class="playlist-browser-list-item-container">
         <div>
           <div class="playlist-detail-switch">

@@ -7,6 +7,18 @@ app.directive('playlistBrowser', ['$rootScope', 'UserList',
                 playlists: '='
             },
             controller: function ($scope) {
+                $scope.playlistSortBy = '-id';
+
+                $scope.playlistSortBySomething = function(something){
+                    console.log(something);
+                    if($scope.playlistSortBy == something){
+                        $scope.playlistSortBy = '-' + something
+                    }
+                    else{
+                        $scope.playlistSortBy = something
+                    };
+                };
+                
                 $scope.loadPlaylist = function(playlist){
                     $scope.$emit('LOAD_PLAYLIST', playlist);
                 };
