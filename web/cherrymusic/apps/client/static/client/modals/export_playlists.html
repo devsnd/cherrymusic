@@ -1,0 +1,46 @@
+<div id="exportPlaylists" class="modal fade">
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3>create playlist archive</h3>
+        </div>
+        <div class="modal-body">
+            <div class="content">
+            <form class="" action="export_playlists" method="GET" target="_blank">
+                <div class="form-group">
+                    Playlist file format:
+                    <div class="radio-inline">
+                        <label class="radio-inline">
+                            <input type="radio" name="format" value="m3u" checked/> m3u
+                        </label>
+                    </div>
+                    <div class="radio-inline">
+                        <label class="radio-inline">
+                            <input type="radio" name="format" value="pls"/> pls
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" name="all" value="True"/>
+                            include other people's public playlists
+                        </label>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <input type="hidden" name="hostaddr" value=""/>
+                    <a href="javascript:;" onclick="userExportPlaylists()" class="btn btn-default">
+                        export playlists as ZIP file
+                    </a>
+                </div>
+            </form>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+        </div>
+    </div>
+    </div>
+</div>

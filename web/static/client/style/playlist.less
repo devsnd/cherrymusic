@@ -1,0 +1,213 @@
+@import "variables.less";
+
+.cm-media-list{
+    position: relative;
+    padding: 0;
+    
+    &-busy{
+        overflow: hidden;
+        background-image: @spinning-loader;
+        background-position: 50% 120px;
+        background-repeat: no-repeat;
+    }
+
+    &-category{
+        position: relative;
+    }
+    
+    & a{
+       text-decoration: none; 
+    }
+
+    &-item{
+        list-style-type: none;
+        word-wrap: break-word;
+        margin: 5px 5px 5px 0;
+    }
+    &-wrench{
+        position: relative;
+        display: inline;
+        float: left;
+        color: #fff;
+        &:hover{
+            color: #444;
+            cursor: pointer;
+        }
+        padding: 0 2px;
+    }
+    
+    & > li:nth-child(odd) {
+        background-color: @gray-even-lighter;
+    }
+    & > li:nth-child(even) {
+        background-color: @gray-lighter;
+    }
+    
+    &-parent{
+        display: block;
+        height: 50px;
+        font-size: 30px;
+        padding: 5px 10px;
+        
+        &:hover{
+            background-color: @gray-light;
+        }
+        &-item{
+            margin-bottom: 20px;
+        }
+    }
+    
+    &-view-change-buttons{
+        display: inline-block;
+        margin: -10px 0 0px 5px;
+    }
+}
+
+
+.row {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+.bg-primary {
+    background-color: #92BCE0;
+    color: #000;
+}
+
+.btn-transparent {
+    background-color: transparent;
+    border: 0px none;
+}
+
+#playlist-panel{
+    padding-left: 0px;
+    padding-right: 0px;
+    box-shadow: -5px 0px 5px rgba(0, 0, 0, 0.4);
+}
+
+.playlist-tab{
+    &-list{
+        background-color: @navbar-inverse-bg;
+        padding-top: 1px;
+    }
+    
+    &-inactive a{
+        background-color: @nav-tabs-border-color;
+    }
+    
+    &-closer{
+        font-size: 20px;
+        height: 0;
+        line-height: 0;
+        margin-left: 8px;
+        
+        &:hover{
+            font-weight: 900;
+        }
+    }
+    
+    &-new a{
+        height: 41px;
+    }
+    
+    &-border-left{
+        border-left: 1px solid @nav-tabs-border-color;
+    }
+}
+
+#playlistCommands{
+    padding: 5px;
+}
+
+.playlist-container{
+    padding: 0;
+    
+    &-parent{
+        padding: 0 10px;
+    }
+
+    &-list{
+        /* leave room for one playlist item at the end, so that the
+        automatic scrolling does not need to be triggered twice */
+        padding: 0 0 @playlist-item-height 0;
+
+        & > li{
+            list-style-type: none;
+            margin: 5px 0;
+            padding: 0 5px;
+            min-height: @playlist-item-height;
+        }
+    }
+    
+    .jp-playlist{
+        &-item{
+            display: block;
+            &:hover{
+                text-decoration: none;
+            }
+            
+            &-remove{
+                float: right;
+                font-size: 20px;
+                line-height: 15px;
+                display: block;
+                color: #888;
+                &:hover{
+                    text-decoration: none;
+                    color: #000;
+                    
+                }
+            }
+            
+            &-action{
+                float: left;
+            }
+        }
+
+        &-current{
+            background-color: @main-color-bright;
+            color: #000000;
+        }
+
+        &-playtime{
+            float: left;
+            margin: 0 5px 0 0;
+        }
+    }
+}
+
+@media (min-width: 950px) {
+  .playlist-container-parent {
+    position: fixed;
+    bottom: 70px;
+    top: 150px;
+    overflow: auto;
+    width: 50%;
+  }
+  #playlist-panel {
+    position: absolute;
+    top: 50px;
+    bottom: 0;
+    left: 50%;
+  }
+  #search-panel {
+    position: fixed;
+    top: 50px;
+    bottom: 70px;
+    overflow: auto;
+  }
+}
+@media (min-width: 1200px) {
+  div.navbar-fixed-top {
+    right: 50%;
+  }
+  #playlist-panel {
+    top: 0;
+  }
+  .playlist-tab-list {
+    padding-top: 13px;
+  }
+  .playlist-container-parent {
+    top: 105px !important;
+  }
+}

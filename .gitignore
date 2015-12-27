@@ -63,7 +63,12 @@ doc/sphinx/_build
 
 cherrymusic/bin/
 cherrymusic/venv/
-cherrymusic/static/
 /static
 /venv
 
+*.db
+.DS_Store
+.idea
+venv
+env
+__pycache__

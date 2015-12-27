@@ -1,0 +1,124 @@
+@import "variables.less";
+
+
+#search-panel{
+  padding-bottom: @mediaplayer-height;
+}
+
+#options{
+    td{
+        height: 42px;
+        width: 100px;
+    }
+    .label{
+        margin-left: 20px;
+    }
+}
+
+// use pointer-cursor for ng-click-able elements:
+[ng-click],
+[data-ng-click],
+[x-ng-click] {
+    cursor: pointer;
+}
+
+ul.no-bullet {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+a {
+  color: #555555;
+  text-decoration: none;
+}
+a:hover,
+a:focus {
+  color: #2f2f2f;
+  text-decoration: underline;
+}
+a:focus {
+  outline: thin dotted #333;
+  outline: 5px auto -webkit-focus-ring-color;
+  outline-offset: -2px;
+}
+// make sure all dnd-list elements are relative to be draggable
+*[dnd-list], *[dnd-list] > * {
+    position: relative;
+}
+*[dnd-list] .dndDraggingSource {
+    display: none;
+}
+*[dnd-list] .dndPlaceholder {
+    display: block;
+    background-color: #ddd;
+    min-height: 42px;
+}
+
+/* preload progress indicator images, so they show up on first search */
+body:after{
+    display:none;
+    content: @spinning-loader @progress-bar-ani;
+}
+
+// add icon to navbar
+.navbar-brand {
+    background-image: url("../img/favicon32glow.png");
+    background-position: 49% 14px;
+    background-repeat: no-repeat;
+    min-width: 30px;
+    min-height: 50px;
+    margin: 0px 5px;
+}
+
+//message of the day
+.motd{
+    left: 50%;
+    position: relative;
+    width: 350px;
+    margin-left: -175px;
+    top: 20px;
+    text-align: center;
+    background-color: #F7F7F7;
+    border-radius: 15px;
+    padding: 10px;
+    color: #AAA;
+}
+
+#playback-controls{
+    height: @mediaplayer-height;
+    position: fixed;
+    bottom: 0px;
+    right: 0px;
+    left: 0px;
+    overflow: hidden;
+    background-color: #fff;
+    z-index: @zindex-player-panel;
+    /* .box-shadow(~"2px 2px 3px rgba(0,0,0,.4), 0px 0px 5px rgba(0,0,0,.8)"); */
+}
+
+.navbar-nav > li > a {
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
+.hidden-xs {
+    height: 50px;
+}
+
+//@media (min-width: 609px) {
+//  .hidden-xs {
+//    display: block !important;
+//}
+
+.navbar-form {
+    margin: 8px 0px;
+    padding: 0px;
+    box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.1) inset, 0px 1px 0px rgba(255, 255, 255, 0.1);
+}
+.navbar-brand {
+    float: left;
+    padding: 15px 0px;
+    font-size: 18px;
+    line-height: 20px;
+}

@@ -6,10 +6,58 @@ This is a rewrite of CherryMusic to be based on django.
 Development setup
 -----------------
 
-Install bower components:
+Install dependencies:
+* docker
+* docker-compose
+
+Create containers:
 ```bash
-python manage.py bower_install
+docker-compose build
+docker-compose up -d
 ```
 
-Django admin user/password: `cherrymusic/cherrymusic`
+Initialice database:
+```bash
+docker-compose run --rm web python3 manage.py migrate auth
+docker-compose run --rm web python3 manage.py migrate 
+```
 
+Install bower components:
+```bash
+docker-compose run --rm web python3 manage.py bower_install
+```
+
+Create admin user:
+```bash
+docker-compose run web python3 manage.py createsuperuser
+```
+
+Update static files
+-------------------
+Dependencies:
+* Bower
+* Less
+
+In `./web`:
+```bash
+python manage.py collectstatic
+```
+
+
+Reinstall cherrymusic
+---------------------
+```bash
+docker-compose stop
+docker-compose rm
+```
+And then reinstall.
+
+
+Update cherrymusic
+------------------
+```bash
+docker-compose stop
+docker-compose rm web nginx
+docker-compose build
+docker-compose up -d
+```

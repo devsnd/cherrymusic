@@ -1,0 +1,33 @@
+{
+  "name": "angular-dropdowns",
+  "version": "1.5.1",
+  "homepage": "https://github.com/jseppi/angular-dropdowns",
+  "authors": [
+    "James Seppi <james.seppi@gmail.com> (http://github.com/jseppi)",
+    "elliottregan",
+    "eddimonge",
+    "JustMaier",
+    "ramiroaraujo",
+    "tlvince",
+    "dinodsaurus",
+    "elishacook",
+    "alexisbg",
+    "BDomzalski",
+    "Chinokao",
+    "pistolete"
+  ],
+  "description": "AngularJS Dropdown Directives",
+  "main": [
+    "dist/angular-dropdowns.min.js",
+    "dist/angular-dropdowns.min.css"
+  ],
+  "keywords": [
+    "angular",
+    "dropdown",
+    "select"
+  ],
+  "ignore": [
+    "example", "index.html"
+  ],
+  "license": "MIT"
+}
