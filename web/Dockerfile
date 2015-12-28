@@ -1,16 +1,37 @@
-FROM stackbrew/debian:jessie
-RUN apt-get update && apt-get install -y python3 python3-pip libpq-dev python-dev
+FROM ubuntu:14.04
 
-RUN echo deb http://www.deb-multimedia.org jessie main non-free >>/etc/apt/sources.list
-RUN apt-get update && apt-get install -y --force-yes deb-multimedia-keyring
+# Locales
+RUN (apt-get clean \
+    && apt-key update \
+    && apt-get -q -y update --fix-missing \
+    && apt-get -q -y update \
+    && apt-get install -q -y apt-utils \
+    && apt-get install -q -y locales)
+
+ADD conf/locale.gen /etc/locale.gen
+RUN (locale-gen \
+    && locale-gen es_ES.UTF-8  \
+    && dpkg-reconfigure locales)
+
+ENV LANGUAGE es_ES.UTF-8 
+ENV LANG es_ES.UTF-8 
+ENV LC_ALL es_ES.UTF-8 
+ENV LC_CTYPE es_ES.UTF-8 
+
+# python
+RUN apt-get update && apt-get install -y python3 python3-pip libpq-dev python-dev libmysqlclient-dev \
+    software-properties-common
+
+# ffmpeg
+RUN add-apt-repository ppa:mc3man/trusty-media -y
 RUN apt-get update && apt-get install -y ffmpeg libmp3lame-dev libvorbis-dev flac lame
 
-## dev only
+# dev only
 RUN apt-get update && apt-get install -y nodejs npm
 RUN npm install -g bower less
 RUN ln -s /usr/bin/nodejs /usr/bin/node
-## 
-
+ 
+# app copy
 ADD . /usr/src/app
 
 WORKDIR /usr/src/app

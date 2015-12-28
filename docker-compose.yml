@@ -40,7 +40,7 @@ redis:
 
 data:
   restart: always
-  build: ./postgres
+  image: postgres:latest
   volumes:
     - /var/lib/postgresql
   command: "true"
