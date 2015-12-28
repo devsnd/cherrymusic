@@ -22,15 +22,7 @@ docker-compose run --rm web python3 manage.py migrate auth
 docker-compose run --rm web python3 manage.py migrate 
 ```
 
-Install bower components:
-```bash
-docker-compose run --rm web python3 manage.py bower_install
-```
-
-Create admin user:
-```bash
-docker-compose run web python3 manage.py createsuperuser
-```
+Default admin user: `admin/admin`
 
 Update static files
 -------------------
@@ -42,7 +34,6 @@ In `./web`:
 ```bash
 python manage.py collectstatic
 ```
-
 
 Reinstall cherrymusic
 ---------------------
@@ -60,4 +51,11 @@ docker-compose stop
 docker-compose rm web nginx
 docker-compose build
 docker-compose up -d
+```
+
+Development frotent
+-------------------
+Install bower components:
+```bash
+docker-compose run --rm web python3 manage.py bower_install
 ```
