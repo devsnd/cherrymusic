@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y python3 python3-pip libpq-dev python-de
 
 # ffmpeg
 RUN add-apt-repository ppa:mc3man/trusty-media -y
-RUN apt-get update && apt-get install -y ffmpeg libmp3lame-dev libvorbis-dev flac lame
+RUN apt-get update && apt-get install -y ffmpeg vorbis-tools flac lame
 
 # dev only
 RUN apt-get update && apt-get install -y nodejs npm
@@ -32,7 +32,7 @@ RUN npm install -g bower less
 RUN ln -s /usr/bin/nodejs /usr/bin/node
  
 # app copy
-ADD . /usr/src/app
+ADD ./requirements.txt /usr/src/app/
 
 WORKDIR /usr/src/app
 RUN pip3 install -r requirements.txt

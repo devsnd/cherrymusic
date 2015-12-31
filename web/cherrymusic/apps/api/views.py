@@ -151,16 +151,7 @@ def stream(request, path):
     )
 
 def stream_audio(audiofile, start_time):
-    print(start_time)
-    yield from audiotranscode.AudioTranscode().transcode_stream(audiofile, newformat='mp3', starttime=int(start_time))
-        #
-        #
-        #
-        # buffer = f.read(1024)
-        # while buffer:
-        #     yield buffer
-        #     buffer = f.read(1024)
-
+    yield from audiotranscode.AudioTranscode().transcode_stream(audiofile, newformat='ogg', starttime=int(start_time))
 
 class AlbumArtView(APIView):
     permission_classes = (IsAuthenticated,)

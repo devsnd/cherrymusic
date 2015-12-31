@@ -41,21 +41,28 @@ app.factory('PlaybackServiceJPlayer', ['$log', '$rootScope', function($log, $roo
                 trackurl += '?start_time=' + start_time;
             }
             console.log('jPlayer: set track url: "'+trackurl+'"');
-            jplayerInstance.jPlayer('setMedia', {'oga': trackurl, 'title': trackurl});
+            jplayerInstance.jPlayer('setMedia', {
+                'oga': trackurl});
         } else {
             $log.error('Cannot play track of type '+track.type);
         }
     };
 
-    var play = function(){
-        jplayerInstance.jPlayer('play');
+    var play = function(start_time){
+        if(start_time === 0){
+            jplayerInstance.jPlayer('play');
+        }
+        else{
+            console.log(start_time);
+            jplayerInstance.jPlayer('play', start_time);
+        }
     };
 
     return {
         play: play,
         seek: function(start_time){
-            setTrack(currentTrack, start_time);
-            play();
+            setTrack(currentTrack);
+            play(start_time);
         },
         setTrack: setTrack,
         stop: function(){

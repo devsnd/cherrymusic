@@ -100,8 +100,8 @@ app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
         $rootScope.title = getTitle(track);
 
         if(track.type == LOCAL_STORAGE){
-            PlaybackService.setTrack(track, starTime);
-            PlaybackService.play();
+            PlaybackService.setTrack(track);
+            PlaybackService.play(starTime);
         } else {
             console.error('Cannot play track of type '+track.type);
         }
