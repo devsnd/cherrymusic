@@ -161,7 +161,8 @@ class File(models.Model):
 
     def parse_metadata(self):
         tag = TinyTag.get(str(self.absolute_path()))
-        self.meta_track = tag.track.zfill(2)
+        
+        self.meta_track = tag.track.zfill(2) if tag.track else None
         self.meta_track_total = tag.track_total
         self.meta_title = tag.title
         self.meta_artist = tag.artist
