@@ -33,6 +33,16 @@ app.directive('fileBrowser', [
                     $scope.indexingStarted = true;
                 };
 
+                $scope.loadPreviousDirectory = function(directory){
+                    console.log(directory);
+                    var splitPaths = directory.split('/');
+                    var previousPath = splitPaths.slice(0, splitPaths.length - 1).join('/');
+                    if(previousPath == ''){
+                        previousPath = '.';
+                    };
+                    $scope.loadDirectory(previousPath);
+                }
+
                 $scope.loadDirectory = function(directoryid){
                     $scope.$emit('LOAD_DIRECTORY', directoryid);
                 };

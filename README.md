@@ -77,5 +77,5 @@ In development mode:
 
 In `./web`:
 ```bash
-docker-compose run --rm web python manage.py collectstatic
+docker-compose run --rm web python3 manage.py collectstatic
 ```

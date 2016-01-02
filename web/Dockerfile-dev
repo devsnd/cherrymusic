@@ -28,7 +28,7 @@ RUN apt-get update && apt-get install -y ffmpeg vorbis-tools flac lame
 
 # dev only
 RUN apt-get update && apt-get install -y nodejs npm
-RUN npm install -g bower less
+RUN npm install -g bower less yuglify
 RUN ln -s /usr/bin/nodejs /usr/bin/node
  
 # app copy
