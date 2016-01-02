@@ -48,8 +48,8 @@ To install and run development containers:
 ```bash
 docker-compose stop
 docker-compose rm web nginx
-docker-compose -f development.yml build
-docker-compose -f development.yml up -d
+docker-compose -f docker-compose.yml -f development.yml build
+docker-compose -f docker-compose.yml -f development.yml up -d
 ```
 
 Install bower components:

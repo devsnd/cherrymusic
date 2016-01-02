@@ -7,7 +7,7 @@ web:
     - postgres:postgres
   volumes:
     - ./web:/usr/src/app
-    - /mnt/data/test-cherrymusic:/usr/src/app/music
+    - /mnt/data/test-cherrymusic:/usr/src/app/music:ro
   env_file: .env
   command: /usr/local/bin/gunicorn cherrymusic.wsgi:application -w 2 -b :8000
 
