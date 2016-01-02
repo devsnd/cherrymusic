@@ -6,6 +6,9 @@ web:
   links:
     - postgres:postgres
     - redis:redis
+  volumes:
+    - ./web/static:/usr/src/app/static
+    - /mnt/data/test-cherrymusic:/usr/src/app/music
   env_file: .env
   command: /usr/local/bin/gunicorn cherrymusic.wsgi:application -w 2 -b :8000
 
