@@ -115,9 +115,6 @@ class UserViewSet(SlowServerMixin, viewsets.ModelViewSet):
         }
         return Response(content)
 
-#    def get_object(self):
-#        return self.request.user
-
     def get_queryset(self):
         if self.request.user.is_superuser:
             return User.objects.all()

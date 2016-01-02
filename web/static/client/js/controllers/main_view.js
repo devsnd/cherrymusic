@@ -124,7 +124,6 @@ app.controller('MainViewController', function($scope, $rootScope, $uibModal, $co
         if (!answer) {
             return;
         };
-        console.log(user);
         User.remove({id:user.id}, function(){
             User.query(function(userList){
                     $rootScope.userList  = userList;

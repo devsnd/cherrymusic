@@ -191,7 +191,7 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, Playlist
             };
         };
 
-        Playlist.remove(playlist, function(){
+        Playlist.remove({id: playlist.id}, function(){
             $scope.showPlaylists();
         });
     });

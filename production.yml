@@ -5,7 +5,6 @@ web:
     - "8000"
   links:
     - postgres:postgres
-    - redis:redis
   volumes:
     - ./web/static:/usr/src/app/static
     - /mnt/data/test-cherrymusic:/usr/src/app/music
@@ -31,12 +30,6 @@ postgres:
     - data
   ports:
     - "5432:5432"
-
-redis:
-  restart: always
-  image: redis:latest
-  ports:
-    - "6379:6379"
 
 data:
   restart: always

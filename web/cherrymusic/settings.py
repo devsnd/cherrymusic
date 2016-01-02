@@ -95,7 +95,6 @@ WSGI_APPLICATION = 'cherrymusic.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
 DATABASES = {
     'default': {
@@ -104,7 +103,7 @@ DATABASES = {
         'USER': 'postgres',
         'PASSWORD': 'postgres',
         'HOST': 'postgres',
-        'PORT': 5432
+        'PORT': 5432,
     }
 }
 
@@ -151,7 +150,6 @@ PIPELINE_CSS = {
             'client/style/filebrowser.less',
             'client/style/mediaplayer.less',
             'client/style/playlist.less',
-            'client/style/variables.less',
             'client/style/dropdowns.less',
         ),
         'output_filename': 'client/cherrymusic.css',
