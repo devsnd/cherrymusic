@@ -76,5 +76,5 @@ __pycache__
 # Django
 migrations
 
-# Music
-web/music
+# Configuration
+config.yml
