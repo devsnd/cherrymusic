@@ -160,14 +160,18 @@ class File(models.Model):
         return self.absolute_path().exists()
 
     def parse_metadata(self):
-        tag = TinyTag.get(str(self.absolute_path()))
-        
-        self.meta_track = tag.track.zfill(2) if tag.track else None
-        self.meta_track_total = tag.track_total
-        self.meta_title = tag.title
-        self.meta_artist = tag.artist
-        self.meta_album = tag.album
-        self.meta_year = tag.year
-        self.meta_genre = tag.genre
-        self.meta_duration = tag.duration
+        # Errors with some mp3 files
+        try:
+            tag = TinyTag.get(str(self.absolute_path()))
+
+            self.meta_track = tag.track.zfill(2) if tag.track else None
+            self.meta_track_total = tag.track_total
+            self.meta_title = tag.title
+            self.meta_artist = tag.artist
+            self.meta_album = tag.album
+            self.meta_year = tag.year
+            self.meta_genre = tag.genre
+            self.meta_duration = tag.duration
+        except:
+            logger.info('Fail to get meta data from %s', str(self.absolute_path()))
 

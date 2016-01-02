@@ -11,7 +11,7 @@ web:
   volumes:
     - ./web:/usr/src/app
   env_file: .env
-  command: /usr/local/bin/gunicorn cherrymusic.wsgi:application -w 6 -b :8000 --timeout 500
+  command: /usr/local/bin/gunicorn cherrymusic.wsgi:application -w 6 -b :8000 --timeout 5000
 
 nginx:
   restart: always
