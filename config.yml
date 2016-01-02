@@ -1,0 +1,3 @@
+web:
+  volumes:
+    - /home/user/My Music:/usr/src/app/music:ro

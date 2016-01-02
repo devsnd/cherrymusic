@@ -1,4 +1,7 @@
 web:
+  extends:
+    file: config.yml
+    service: web
   restart: always
   build: ./web
   expose:
@@ -7,9 +10,8 @@ web:
     - postgres:postgres
   volumes:
     - ./web:/usr/src/app
-    - /mnt/data/test-cherrymusic:/usr/src/app/music:ro
   env_file: .env
-  command: /usr/local/bin/gunicorn cherrymusic.wsgi:application -w 2 -b :8000
+  command: /usr/local/bin/gunicorn cherrymusic.wsgi:application -w 6 -b :8000 --timeout 500
 
 nginx:
   restart: always

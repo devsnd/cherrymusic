@@ -3,8 +3,23 @@ CherryMusic
 
 This is a rewrite of CherryMusic to be based on django.
 
-Development setup
------------------
+Setup
+-----
+
+Configure `config.yml` with your music directories:
+* One path:
+```docker-compose
+web:
+  volumes:
+    - /home/user/My Music:/usr/src/app/music:ro
+```
+* Multiple paths:
+```docker-compose
+web:
+  volumes:
+    - /home/user/Classic Music:/usr/src/app/music/Classic:ro
+    - /home/user/Punk Music:/usr/src/app/music/Punk:ro
+```
 
 Install dependencies:
 * docker
