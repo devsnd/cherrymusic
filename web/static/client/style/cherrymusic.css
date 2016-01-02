@@ -98,3 +98,13 @@ body:after {
   font-size: 18px;
   line-height: 20px;
 }
+.user-list-item {
+  list-style-type: none;
+}
+.user-list-item .col-md-1,
+.user-list-item .col-md-2,
+.user-list-item .col-md-3,
+.user-list-item .col-md-4 {
+  padding-left: 0px;
+  padding-right: 0px;
+}

@@ -2,7 +2,6 @@ import os
 import time
 import logging
 
-from django.contrib.auth import get_user_model
 from django.http import HttpResponse, StreamingHttpResponse, Http404
 from django.db.models import Q
 from rest_framework import viewsets, filters
@@ -11,26 +10,25 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import status
 
 from cherrymusic.apps.api.helper import ImageResponse, ImageRenderer
 from cherrymusic.apps.core import pathprovider
 from cherrymusic.apps.core.albumartfetcher import AlbumArtFetcher
 from cherrymusic.apps.core.config import Config
-from cherrymusic.apps.core.models import Playlist, Track, UserSettings
+from cherrymusic.apps.core.models import Playlist, Track, User, UserSettings
 from cherrymusic.apps.core.pluginmanager import PluginManager
 from cherrymusic.apps.ext import audiotranscode
 from cherrymusic.apps.ext.tinytag import TinyTag
 from cherrymusic.apps.storage.status import ServerStatus
 from cherrymusic.apps.storage.models import File, Directory
 
-from .permissions import IsOwnerOrReadOnly, IsOwnUser
+from .permissions import IsOwnerOrReadOnly, IsOwnUser, IsAccountAdminOrReadOnly
 from .serializers import FileSerializer, DirectorySerializer, UserSerializer, \
-    UserSettingsSerializer, PlaylistSerializer, TrackSerializer
+    CreateUserSerializer, UserSettingsSerializer, PlaylistSerializer, TrackSerializer
 
 
 logger = logging.getLogger(__name__)
-
-User = get_user_model()
 
 DEBUG_SLOW_SERVER = False
 
@@ -106,7 +104,7 @@ class PlaylistViewSet(SlowServerMixin, MultiSerializerViewSetMixin, viewsets.Mod
 
 class UserViewSet(SlowServerMixin, viewsets.ModelViewSet):
     authentication_classes = (SessionAuthentication, BasicAuthentication)
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAccountAdminOrReadOnly, )
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
@@ -117,8 +115,28 @@ class UserViewSet(SlowServerMixin, viewsets.ModelViewSet):
         }
         return Response(content)
 
-    def get_object(self):
-        return self.request.user
+#    def get_object(self):
+#        return self.request.user
+
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return User.objects.all()
+        else:
+            return User.objects.filter(id=self.request.user.id)
+
+    def create(self, request):
+        serializer = CreateUserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        
+        # Save password
+        user, created = User.objects.get_or_create(username=serializer.data['username'])
+        user.set_password(serializer.data['password'])
+        user.is_staff = user.is_superuser = serializer.data['is_superuser']
+        user.save()
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 class UserSettingsViewSet(SlowServerMixin, viewsets.ModelViewSet):
     permission_classes = (IsOwnUser, )

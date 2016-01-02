@@ -43,7 +43,7 @@
             <a ng-click="loadPlaylist(playlist)">{{ playlist.name }}</a>            
           </div>
           <div class="playlist-age">
-            created on {{ playlist.created_at | date : 'yyyy-MM-dd'}} &nbsp;&nbsp; 
+            created {{ playlist.created_at | timeago }} &nbsp;&nbsp; 
           </div>
           <div class="playlist-ispublic" ng-if="$root.user.username == playlist.owner_name">
               <span class="label" ng-class="{'label-default': !playlist.public, 'label-success': playlist.public}">
@@ -51,7 +51,7 @@
               </span>
           </div>
           <div class="playlist-usernamelabel">
-              <span class="badge" ng-style="addUserBackgroundColor(playlist.owner)">{{ playlist.owner_name }}</span>
+              <span class="badge" ng-style="$root.addUserBackgroundColor(playlist.owner)">{{ playlist.owner_name }}</span>
           </div>
           <div class="playlist-deletebutton">
             <a class="btn btn-xs btn-danger" ng-click=removePlaylist(playlist)>×</a>

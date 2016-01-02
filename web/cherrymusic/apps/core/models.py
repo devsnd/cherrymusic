@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.signals import user_logged_in ,user_logged_out
 from django.db import models
 from django.db.models import signals
 from django.conf import settings
@@ -6,8 +7,19 @@ from django.conf import settings
 from cherrymusic.apps.storage.models import File
 
 
+def set_logged_in(sender, user, **kwargs):
+    user.is_logged = True
+    user.save(update_fields=['is_logged'])
+
+def set_logged_out(sender, user, **kwargs):
+    user.is_logged = False
+    user.save(update_fields=['is_logged'])
+
+user_logged_in.connect(set_logged_in)
+user_logged_out.connect(set_logged_out)
+
 class User(AbstractUser):
-    pass
+    is_logged = models.BooleanField(default=False)
 
 class HotkeysSettings(models.Model):
     increase_volume = models.CharField(max_length=50, default='ctrl+up')

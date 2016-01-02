@@ -1,13 +1,21 @@
 app.controller('MainViewController', function($scope, $rootScope, $uibModal, $controller, $window,
-     Browse, Search, IndexDirectory, djangoAuth, UserSettings){
+     Browse, Search, IndexDirectory, djangoAuth, User, UserSettings){
     djangoAuth.authenticationStatus();
 
     $scope.userMayDownload = true;
     $scope.mediaBrowserMode = 'motd';
 
+    User.query(function(userList){
+        $rootScope.userList  = userList;
+    });
+
     var getSettings = function(){
         UserSettings.query(function(settings){
             $scope.userSettings = settings[0];
+
+            User.get({id: $scope.userSettings.user}, function(user){
+                $rootScope.user = user;
+            });
 
             $rootScope.increaseVolumeKey = $scope.userSettings.hotkeys.increase_volume;
             $rootScope.decreaseVolumeKey = $scope.userSettings.hotkeys.decrease_volume;
@@ -99,6 +107,31 @@ app.controller('MainViewController', function($scope, $rootScope, $uibModal, $co
        $scope.browse(directory);
     });
 
+    $scope.$on('CREATE_USER', function(event, username, password, isSuperuser){
+        var user = new User();
+        user.username = username;
+        user.password = password;
+        user.is_superuser = isSuperuser;
+        User.save(user, function(user){
+            User.query(function(userList){
+                    $rootScope.userList  = userList;
+                });
+        });
+    });
+
+    $scope.$on('DELETE_USER', function(event, user){
+        var answer = confirm("Are you sure you want to delete this user?")
+        if (!answer) {
+            return;
+        };
+        console.log(user);
+        User.remove({id:user.id}, function(){
+            User.query(function(userList){
+                    $rootScope.userList  = userList;
+                });
+        });
+    });
+
     $scope.albumArtUrl = function(filepath){
         return API_URL + 'albumart/' + filepath
     };
@@ -117,5 +150,28 @@ app.controller('MainViewController', function($scope, $rootScope, $uibModal, $co
         console.log($rootScope[key]);
         $rootScope[key] = event.key;
         $rootScope.changeKey = 'change';
+    }
+
+    var rainbow = function(numOfSteps, step) {
+        var r, g, b;
+        var h = step / numOfSteps;
+        var i = ~~(h * 6);
+        var l = 0.5
+        var f = (h * 6 - i)-l;
+        var q = 1 - f - l;
+        switch(i % 6){
+            case 0: r = l; g = q; b = 1; break; // pink - blue
+            case 1: r = f; g = l; b = 1; break; // pink - blue
+            case 2: r = l; g = 1; b = f; break; // green
+            case 3: r = 1; g = f; b = l; break; // pink
+            case 4: r = 1; g = l; b = q; break; // pink
+            case 5: r = q; g = 1; b = l; break; // yellow
+        }
+        var c = "#" + ("00" + (~ ~(r * 255)).toString(16)).slice(-2) + ("00" + (~ ~(g * 255)).toString(16)).slice(-2) + ("00" + (~ ~(b * 255)).toString(16)).slice(-2);
+        return (c);
+    };
+
+    $rootScope.addUserBackgroundColor = function(userId){
+        return {'background-color': rainbow($rootScope.userList.length*2+30, userId*2)}
     }
 });

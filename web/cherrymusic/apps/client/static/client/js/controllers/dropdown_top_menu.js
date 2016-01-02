@@ -1,5 +1,5 @@
 
-app.controller('DropdownTopMenuController', function($scope, $rootScope, $uibModal, djangoAuth, User) {
+app.controller('DropdownTopMenuController', function($scope, $rootScope, $uibModal, $filter, djangoAuth, User) {
 
     var openOptionsModal = function(){
         var uibModalInstance = $uibModal.open({
@@ -17,6 +17,34 @@ app.controller('DropdownTopMenuController', function($scope, $rootScope, $uibMod
             }
         });
     };
+
+    var openAdminPanelModal = function(){
+        var uibModalInstance = $uibModal.open({
+            animation: true,
+            templateUrl: STATIC_FILES + 'client/modals/admin_panel.html',
+            scope: $scope,
+            controller: function($scope, $rootScope, $uibModalInstance, User){
+                User.query(function(userList){
+                    $rootScope.userList  = userList;
+                });
+            
+                $scope.close = function(){
+                    $uibModalInstance.dismiss('cancel');
+                }
+                $scope.indexLibrary = function(path){
+                    $scope.$emit('INDEX_DIRECTORY', path)
+                    $scope.indexingStarted = true;
+                };
+                $scope.createUser = function(username, password, isSuperuser){
+                    $scope.$emit('CREATE_USER', username, password, isSuperuser);
+                };
+                $scope.deleteUser = function(user){
+                    $scope.$emit('DELETE_USER', user);
+                }
+            }
+        });
+    };
+
     $scope.ddTopMenu = {};
 
     $scope.ddSelectTopMenu = {};
@@ -44,7 +72,6 @@ app.controller('DropdownTopMenuController', function($scope, $rootScope, $uibMod
             menuOptions.splice(1, 0,{
                 text: 'Admin',
                 value: 'admin',
-                href: ADMIN_URL,
             });
         }
 
@@ -58,6 +85,9 @@ app.controller('DropdownTopMenuController', function($scope, $rootScope, $uibMod
         else if(selected.value == 'logout'){
             djangoAuth.logout();
             window.location.replace(LOGIN_URL);
+        }
+        else if(selected.value == 'admin'){
+            openAdminPanelModal();
         };
 
     };

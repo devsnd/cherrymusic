@@ -72,3 +72,6 @@ cherrymusic/venv/
 venv
 env
 __pycache__
+
+# Django
+migrations

@@ -189,6 +189,7 @@ PIPELINE_JS = {
             'client/js/directives/mediaplayer.js',
             'client/js/directives/playlist.js',
             'client/js/directives/playlistbrowser.js',
+            'client/js/filters/timeago.js',
             'client/js/filters/timeformat.js',
             'client/js/resources/browse.js',
             'client/js/resources/index_directory.js',

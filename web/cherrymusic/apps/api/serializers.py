@@ -1,11 +1,9 @@
-from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from cherrymusic.apps.storage.models import File, Directory
-from cherrymusic.apps.core.models import Playlist, Track, UserSettings, HotkeysSettings, MiscSettings
+from cherrymusic.apps.core.models import Playlist, Track, User, UserSettings, HotkeysSettings, MiscSettings
 
 
-User = get_user_model()
 
 
 class FileSerializer(serializers.ModelSerializer):
@@ -81,7 +79,12 @@ class PlaylistSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'is_superuser')
+        fields = ('id', 'username', 'last_login', 'is_logged', 'is_superuser')
+
+class CreateUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'is_superuser', 'email', 'password')
 
 class HotkeysSettingsSerializer(serializers.ModelSerializer):
     class Meta:
