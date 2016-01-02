@@ -75,3 +75,6 @@ __pycache__
 
 # Django
 migrations
+
+# Music
+web/music
