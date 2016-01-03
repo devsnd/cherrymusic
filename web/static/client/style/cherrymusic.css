@@ -44,11 +44,6 @@ a:focus {
   background-color: #ddd;
   min-height: 42px;
 }
-/* preload progress indicator images, so they show up on first search */
-body:after {
-  display: none;
-  content: url("../img/cherrymusic_loader.gif") url("../img/progress-bars.gif");
-}
 .navbar-brand {
   background-image: url("../img/favicon32glow.png");
   background-position: 49% 14px;

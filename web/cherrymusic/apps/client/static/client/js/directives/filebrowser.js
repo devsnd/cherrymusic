@@ -43,8 +43,8 @@ app.directive('fileBrowser', [
                     $scope.loadDirectory(previousPath);
                 }
 
-                $scope.loadDirectory = function(directoryid){
-                    $scope.$emit('LOAD_DIRECTORY', directoryid);
+                $scope.loadDirectory = function(directory){
+                    $scope.$emit('LOAD_DIRECTORY', directory);
                 };
 
                 $scope.addToPlaylist = function(file){

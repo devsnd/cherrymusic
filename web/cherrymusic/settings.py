@@ -192,6 +192,7 @@ PIPELINE_JS = {
             'client/js/filters/timeago.js',
             'client/js/filters/timeformat.js',
             'client/js/resources/browse.js',
+            'client/js/resources/directory.js',
             'client/js/resources/index_directory.js',
             'client/js/resources/playlist.js',
             'client/js/resources/search.js',

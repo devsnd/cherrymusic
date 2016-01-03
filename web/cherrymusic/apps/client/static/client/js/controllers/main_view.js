@@ -1,6 +1,17 @@
 app.controller('MainViewController', function($scope, $rootScope, $uibModal, $controller, $window,
-     Browse, Search, IndexDirectory, djangoAuth, User, UserSettings){
+     Browse, Search, IndexDirectory, djangoAuth, User, UserSettings, Directory){
     djangoAuth.authenticationStatus();
+
+    $rootScope.loadingFilebrowser = true;
+
+    var updateDirectoryList = function(){
+        Directory.query(function(directoryList){
+            $scope.directoryList = directoryList;
+            $rootScope.loadingFilebrowser = false;
+        });
+    };
+
+    updateDirectoryList();
 
     $scope.userMayDownload = true;
     $scope.mediaBrowserMode = 'motd';
@@ -101,11 +112,34 @@ app.controller('MainViewController', function($scope, $rootScope, $uibModal, $co
 
     $scope.$on('INDEX_DIRECTORY', function(event, path){
         IndexDirectory.index(path);
+        updateDirectoryList();
     });
 
     $scope.$on('LOAD_DIRECTORY', function(event, directory){
-       $scope.browse(directory);
+        if(directory.parent === undefined){
+            $scope.browse(directory);            
+        }
+        else{
+            var absolutePath = getAbsolutePath(directory);
+            $scope.browse(absolutePath);
+        }
     });
+
+    var getAbsolutePath = function(directory, absolutePath){
+        if(absolutePath == undefined){
+            var absolutePath = [];
+        }
+        if(directory.parent != null){
+            absolutePath.unshift(directory.path);        
+            directory = getParentDirectory(directory);
+            return getAbsolutePath(directory, absolutePath);
+        }
+        return absolutePath.join('/');
+    };
+
+    var getParentDirectory = function(directory){
+        return $scope.directoryList[directory.parent - 1];
+    };
 
     $scope.$on('CREATE_USER', function(event, username, password, isSuperuser){
         var user = new User();

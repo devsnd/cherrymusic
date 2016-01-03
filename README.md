@@ -23,7 +23,7 @@ web:
 
 Install dependencies:
 * docker
-* docker-compose
+* docker-compose>=1.5.0
 
 Create containers:
 ```bash
