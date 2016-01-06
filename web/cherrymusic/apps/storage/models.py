@@ -82,7 +82,7 @@ class Directory(models.Model):
                         # check if the file was already indexed:
                         f = File.objects.get(filename=sub_path.name, directory=self)
                     except File.DoesNotExist:
-                        f.parse_metadata()
+                        f.index_unindexed_metadata()
                         f.save()
                         indexed_files += 1
 
