@@ -1,4 +1,4 @@
-app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, Playlist, Track) {
+app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter, Playlist, Track) {
 
     $scope.openSavePlaylistModal = function(){
         var uibModalInstance = $uibModal.open({
@@ -287,5 +287,11 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, Playlist
             type: LOCAL_STORAGE,
             data: file,
         }
+    };
+
+    $scope.sortPlaylistBy = function(playlist, expression){
+        $scope.currentPlaylist.tracks = $filter('orderBy')(playlist.tracks, function(track){
+            return track.data[expression];
+        });
     };
 });

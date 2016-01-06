@@ -16,20 +16,15 @@
   <!-- action buttons -->
   <div id="playlistCommands" class="playlist-tab-border-left">
     <div class="playlist-command-buttons row">
-      <div id="playlist-command-button-group" class="pull-left btn-group">
-<!--
-        <button class="btn dropdown-toggle btn-default btn-xs" data-toggle="dropdown">
+      <div id="playlist-command-button-group" class="pull-left btn-group" uib-dropdown is-open="isOpenDropDown">
+        <button class="btn dropdown-toggle btn-default btn-xs" uib-dropdown-toggle ng-disabled="disabled">
           sort <span class="caret"></span>
         </button>
         <ul class="dropdown-menu">
-          <li><a tabindex="-1" href="javascript:void(0)"
-                 onclick="playlistManager.getEditingPlaylist().sort_by('track')">by track number</a></li>
-          <li><a tabindex="-1" href="javascript:void(0)"
-                 onclick="playlistManager.getEditingPlaylist().sort_by('title')">by title</a></li>
-          <li><a tabindex="-1" href="javascript:void(0)"
-                 onclick="playlistManager.getEditingPlaylist().sort_by('artist')">by artist</a></li>
+          <li><a ng-click="sortPlaylistBy(currentPlaylist, 'meta_track' )">by track number</a></li>
+          <li><a ng-click="sortPlaylistBy(currentPlaylist, 'meta_title' )">by title</a></li>
+          <li><a ng-click="sortPlaylistBy(currentPlaylist, 'meta_artist' )">by artist</a></li>
         </ul>
--->
       </div>
       <div ng-if="currentPlaylist.type == 'queue'">
         <a class="pull-left btn btn-xs btn-default" ng-click="currentPlaylist.tracks = shuffle(currentPlaylist.tracks)">random!</a>
