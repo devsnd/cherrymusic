@@ -23,6 +23,7 @@ class FileSerializer(serializers.ModelSerializer):
             'meta_year',
             'meta_genre',
             'meta_duration',
+            'meta_index_date',
         )
 
     @staticmethod

@@ -80,6 +80,15 @@ SENDFILE_BACKEND = 'sendfile.backends.nginx'
 SENDFILE_ROOT = '/usr/src/app/music'
 SENDFILE_URL = '/proxied-download'
 
+CACHES = {
+    'default': {
+        'BACKEND': 'redis_cache.RedisCache',
+        'LOCATION': 'redis:6379',
+    },
+}
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+
 ROOT_URLCONF = 'cherrymusic.urls'
 
 TEMPLATES = [

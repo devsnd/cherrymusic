@@ -1,10 +1,13 @@
 import os
 import time
 import logging
+import threading
 
 from sendfile import sendfile
 from django.http import HttpResponse, StreamingHttpResponse, Http404
 from django.db.models import Q
+from django.conf import settings
+
 from rest_framework import viewsets, filters
 from rest_framework.exceptions import NotFound
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
@@ -170,9 +173,25 @@ def stream(request, path):
             mimetype=mime_type,     
         )
 
-    return StreamingHttpResponse(
-        stream_audio(str(basedir / path)),
-        content_type=mime_type
+    file_path_without_ext, ext = os.path.splitext(file_path)
+    new_file_path = '/tmp' + file_path_without_ext + '.ogg'
+
+    if not os.path.isfile(new_file_path):
+        transcode_thread = threading.Thread(target=audiotranscode.AudioTranscode().transcode, args=(file_path, new_file_path))
+        transcode_thread.start()
+
+        return StreamingHttpResponse(
+            stream_audio(file_path),
+            content_type=mime_type
+        )
+
+    return sendfile(
+        request,
+        new_file_path,
+        root_url='/tmp' + settings.SENDFILE_URL,
+        root_directory='/tmp' + settings.SENDFILE_ROOT,
+        attachment=False,
+        mimetype=mime_type,
     )
 
 def stream_audio(audiofile):

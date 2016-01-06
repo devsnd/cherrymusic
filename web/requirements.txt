@@ -1,6 +1,8 @@
 Django==1.8.6
 gunicorn==19.3.0
 psycopg2==2.6
+django-redis-cache==1.6.5
+redis==2.10.3
 django-bower==5.0.4
 django-pipeline==1.5.1
 django-rest-auth==0.6.0

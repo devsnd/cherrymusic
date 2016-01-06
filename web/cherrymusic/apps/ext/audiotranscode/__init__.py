@@ -258,6 +258,10 @@ class AudioTranscode:
         determined using the file extension of those files"""
         audioformat = _filetype(out_file)
         self.check_encoder_available(audioformat)
+        output_dir = os.path.dirname(out_file)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+            
         with open(out_file, 'wb') as fhandler:
             for data in self.transcode_stream(in_file, audioformat, bitrate):
                 fhandler.write(data)

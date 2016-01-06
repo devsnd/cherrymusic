@@ -8,7 +8,9 @@ web:
     - "8000"
   links:
     - postgres:postgres
+    - redis:redis
   volumes:
+    - /tmp
     - ./web:/usr/src/app
   env_file: .env
   command: /usr/local/bin/gunicorn cherrymusic.wsgi:application -w 6 -b :8000 --timeout 5000
@@ -32,6 +34,12 @@ postgres:
     - data
   ports:
     - "5432:5432"
+
+redis:
+  restart: always
+  image: redis:latest
+  ports:
+    - "6379:6379"
 
 data:
   restart: always
