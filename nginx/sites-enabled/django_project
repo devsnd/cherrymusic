@@ -8,6 +8,11 @@ server {
         alias /usr/src/app/static;
     }
 
+    location /proxied-download {
+        internal;
+        alias /usr/src/app/music/;
+    }
+
     location / {
         proxy_pass http://web:8000;
         proxy_set_header Host $host;

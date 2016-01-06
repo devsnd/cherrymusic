@@ -2,6 +2,7 @@ import os
 import time
 import logging
 
+from sendfile import sendfile
 from django.http import HttpResponse, StreamingHttpResponse, Http404
 from django.db.models import Q
 from rest_framework import viewsets, filters
@@ -157,16 +158,25 @@ class ServerStatusView(SlowServerMixin, APIView):
         return Response([ServerStatus.get_latest()])
 
 def stream(request, path):
-    start_time = float(request.GET.get('start_time', 0))
     basedir = Directory.get_basedir().absolute_path()
+    file_path = str(basedir / path)
     mime_type = 'audio/ogg'
+
+    if(file_path.lower().endswith(('mp3', 'ogg'))):
+        return sendfile(
+            request,
+            file_path,
+            attachment=False,
+            mimetype=mime_type,     
+        )
+
     return StreamingHttpResponse(
-        stream_audio(str(basedir / path), start_time),
+        stream_audio(str(basedir / path)),
         content_type=mime_type
     )
 
-def stream_audio(audiofile, start_time):
-    yield from audiotranscode.AudioTranscode().transcode_stream(audiofile, newformat='ogg', starttime=int(start_time))
+def stream_audio(audiofile):
+    yield from audiotranscode.AudioTranscode().transcode_stream(audiofile, newformat='ogg')
 
 class AlbumArtView(APIView):
     permission_classes = (IsAuthenticated,)

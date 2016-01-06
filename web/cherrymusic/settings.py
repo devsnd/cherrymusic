@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_auth',
     'pipeline',
     'djangobower',
+    'sendfile',
     # apps
     'cherrymusic.apps.storage',
     'cherrymusic.apps.core',
@@ -74,6 +75,10 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.gzip.GZipMiddleware',
     'pipeline.middleware.MinifyHTMLMiddleware',
 )
+
+SENDFILE_BACKEND = 'sendfile.backends.nginx'
+SENDFILE_ROOT = '/usr/src/app/music'
+SENDFILE_URL = '/proxied-download'
 
 ROOT_URLCONF = 'cherrymusic.urls'
 
