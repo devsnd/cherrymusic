@@ -36,7 +36,7 @@
             dnd-list="content.files"
             dnd-placeholder-tpl="<tr class='dndPlaceholder'><td></td></tr>"
             dnd-drop="false">
-          <li ng-repeat="file in content.files track by file.id"
+          <li ng-repeat="file in content.files | orderBy:'meta_track'"
               dnd-draggable="file"
               dnd-effect-allowed="copy"
               dnd-selected="addToPlaylist(file)"
