@@ -26,6 +26,9 @@ RUN apt-get update && apt-get install -y python3 python3-pip libpq-dev python-de
 RUN add-apt-repository ppa:mc3man/trusty-media -y
 RUN apt-get update && apt-get install -y ffmpeg vorbis-tools flac lame
 
+# git
+RUN apt-get update && apt-get install -y git
+
 # app copy
 ADD ./requirements.txt /usr/src/app/
 
