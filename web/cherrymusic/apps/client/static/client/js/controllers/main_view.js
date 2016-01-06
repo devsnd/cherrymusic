@@ -138,7 +138,8 @@ app.controller('MainViewController', function($scope, $rootScope, $uibModal, $co
     };
 
     var getParentDirectory = function(directory){
-        return $scope.directoryList[directory.parent - 1];
+        var parentId = directory.parent;
+        return _.find($scope.directoryList, function(directory){ return directory.id == parentId });
     };
 
     $scope.$on('CREATE_USER', function(event, username, password, isSuperuser){
