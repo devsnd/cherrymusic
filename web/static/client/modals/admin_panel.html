@@ -41,9 +41,11 @@
                             <div class="col-md-4"> 
                                 last seen: <time ng-attr-title="{{ user.last_login | date : 'dd MMM yyyy HH:mm'}}">{{ user.last_login | timeago }}</time>
                             </div>
+<!--
                             <div class="col-md-3" ng-if="!user.is_superuser">
                                 permit download<input onchange="userSetPermitDownload(5, $(this).is(':checked'))" id="misc-autoplay_on_add" value="option1" checked="checked" type="checkbox">
                             </div>
+-->
                             <div class="col-md-1" ng-if="!user.is_superuser">
                                 <a class="btn btn-mini btn-danger" ng-click="deleteUser(user)">delete</a>
                             </div>
