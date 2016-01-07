@@ -45,7 +45,7 @@
                 <a ng-click="loadPlaylist(playlist)">{{ playlist.name }}</a>            
               </div>
               <div class="playlist-age">
-                created {{ playlist.created_at | timeago }} &nbsp;&nbsp; 
+                created <time ng-attr-title="{{ playlist.created_at | date : 'dd MMM yyyy HH:mm'}}">{{ playlist.created_at | timeago }}</time> &nbsp;&nbsp; 
               </div>
               <div class="playlist-ispublic" ng-if="$root.user.username == playlist.owner_name">
                   <span class="label" ng-class="{'label-default': !playlist.public, 'label-success': playlist.public}">

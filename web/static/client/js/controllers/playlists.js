@@ -31,6 +31,11 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
         });
     };
 
+    Playlist.query(function(playlists){
+            $scope.playlists = playlists;
+            $rootScope.loadingPlaylistbrowser = false;
+    });
+
     $scope.currentTrackIndex = 0;
 
     $scope.isShuffle = false;
@@ -278,11 +283,6 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
     }
 
     $rootScope.loadingPlaylistbrowser = true;
-
-    Playlist.query(function(playlists){
-            $scope.playlists = playlists;
-            $rootScope.loadingPlaylistbrowser = false;
-    });
 
     $scope.showPlaylists = function(){
         $scope.mediaBrowserMode = 'playlist';

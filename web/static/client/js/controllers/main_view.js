@@ -13,7 +13,7 @@ app.controller('MainViewController', function($scope, $rootScope, $uibModal, $co
 
     updateDirectoryList();
 
-    $scope.userMayDownload = true;
+    $scope.userMayDownload = false;
     $scope.mediaBrowserMode = 'motd';
 
     User.query(function(userList){
