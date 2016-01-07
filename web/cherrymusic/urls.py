@@ -14,7 +14,7 @@ if len(Directory.objects.all())== 0:
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^api/', include('cherrymusic.apps.api.urls', namespace='rest_framework')),
+    url(r'^api/v1/', include('cherrymusic.apps.api.urls', namespace='rest_framework')),
     url(r'^', include('cherrymusic.apps.client.urls')),
 ]
 
