@@ -11,6 +11,7 @@ app = angular.module('CherryMusicClient', [
     'ngSanitize',
     'ngRoute',
     'cfp.hotkeys',
+    'ngFileUpload',
 ]);
 
 angular.module('angularDjangoRegistrationAuthApp', [

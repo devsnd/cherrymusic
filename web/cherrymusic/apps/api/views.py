@@ -8,13 +8,13 @@ from django.http import HttpResponse, StreamingHttpResponse, Http404
 from django.db.models import Q
 from django.conf import settings
 
-from rest_framework import viewsets, filters
+from rest_framework import viewsets, filters, status
 from rest_framework.exceptions import NotFound
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.parsers import FileUploadParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
 
 from cherrymusic.apps.api.helper import ImageResponse, ImageRenderer
 from cherrymusic.apps.core import pathprovider
@@ -105,6 +105,46 @@ class PlaylistViewSet(SlowServerMixin, MultiSerializerViewSetMixin, viewsets.Mod
 
         return playlists
 
+class ImportPlaylistViewSet(APIView):
+    permission_classes = (IsAuthenticated,)
+    parser_classes = (FileUploadParser,)
+
+    def put(self, request, filename, format=None):
+        playlist_name = os.path.splitext(filename)[0]
+        playlist_file_obj = request.data['file']
+
+        tracks_file = self._get_track_files(playlist_file_obj)
+
+        if any(track_file is None for track_file in tracks_file):
+            return HttpResponse('<h1>Not all tracks where found</h1>')
+
+        if Playlist.objects.filter(name=playlist_name).exists():
+            return HttpResponse('<h1>Playlist with that name already exists</h1>')
+
+        playlist = Playlist.objects.create(name=playlist_name, owner=self.request.user)
+        playlist.tracks = [Track.objects.create(playlist=playlist, order=track_number, file=track_file)
+            for track_number, track_file in enumerate(tracks_file)]
+        playlist.save()
+
+        return Response(status=204)
+
+    def _get_track_files(self, playlist_file_obj):
+        playlist_content = playlist_file_obj.read().decode('UTF-8')
+        playlist_content = playlist_content.replace('\r', '')
+        tracks_path = playlist_content.split('\n')[4:-2]
+        tracks_filename = [os.path.basename(track_path) for track_path in tracks_path]
+
+        tracks_file = [self._find_track_file(track_filename) for track_filename in tracks_filename]
+
+        return tracks_file
+
+    def _find_track_file(self, track_filename):
+        try:
+            track_file = File.objects.filter(filename__icontains=track_filename)[0]
+        except IndexError:
+            track_file = None
+
+        return track_file
 
 class UserViewSet(SlowServerMixin, viewsets.ModelViewSet):
     authentication_classes = (SessionAuthentication, BasicAuthentication)
@@ -173,11 +213,12 @@ def stream(request, path):
             mimetype=mime_type,     
         )
 
-    file_path_without_ext, ext = os.path.splitext(file_path)
+    file_path_without_ext = os.path.splitext(file_path)[0]
     new_file_path = '/tmp' + file_path_without_ext + '.ogg'
 
     if not os.path.isfile(new_file_path):
-        transcode_thread = threading.Thread(target=audiotranscode.AudioTranscode().transcode, args=(file_path, new_file_path))
+        transcode_thread = threading.Thread(target=audiotranscode.AudioTranscode().transcode,
+            args=(file_path, new_file_path))
         transcode_thread.start()
 
         return StreamingHttpResponse(

@@ -275,10 +275,13 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
         $scope.setCurrentPlaylist($scope.openedPlaylists[index - 1]);
     }
 
+    $rootScope.loadingPlaylistbrowser = true;
+
     $scope.showPlaylists = function(){
         $scope.mediaBrowserMode = 'playlist';
         Playlist.query(function(playlists){
             $scope.playlists = playlists;
+            $rootScope.loadingPlaylistbrowser = false;
         })
     };
 
@@ -290,11 +293,8 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
     };
 
     $scope.sortPlaylistBy = function(playlist, expression){
-        console.log(playlist);
-        console.log(expression);
         $scope.currentPlaylist.tracks = $filter('orderBy')(playlist.tracks, function(track){
             return track.data[expression];
         });
-        console.log($scope.currentPlaylist);
     };
 });

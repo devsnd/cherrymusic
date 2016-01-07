@@ -69,7 +69,7 @@ docker-compose -f docker-compose.yml -f development.yml up -d
 
 Install bower components:
 ```bash
-docker-compose run --rm web python3 manage.py bower_install
+docker-compose run --rm web python3 manage.py bower_install -- --allow-root
 ```
 Update static files
 -------------------

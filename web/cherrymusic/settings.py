@@ -140,6 +140,7 @@ BOWER_INSTALLED_APPS = (
     'angular-sanitize',
     'angular-route',
     'chieffancypants/angular-hotkeys',
+    'ng-file-upload',
 )
 
 # pipeline config
@@ -189,6 +190,8 @@ PIPELINE_JS = {
             'client/bower_components/angular-sanitize/angular-sanitize.js',
             'client/bower_components/angular-route/angular-route.js',
             'client/bower_components/angular-hotkeys/build/hotkeys.js',
+            'client/bower_components/ng-file-upload/ng-file-upload-shim.js',
+            'client/bower_components/ng-file-upload/ng-file-upload.js',
             'client/js/main.js',
             'client/js/auth-user/django_auth.js',
             'client/js/auth-user/validate.js',
