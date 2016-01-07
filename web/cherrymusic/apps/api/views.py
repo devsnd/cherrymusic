@@ -126,17 +126,29 @@ class ImportPlaylistViewSet(APIView):
             for track_number, track_file in enumerate(tracks_file)]
         playlist.save()
 
-        return Response(status=204)
+        playlist_serializer = PlaylistSerializer()
+
+        return Response(
+            {'playlist': playlist_serializer.to_representation(playlist)})
 
     def _get_track_files(self, playlist_file_obj):
-        playlist_content = playlist_file_obj.read().decode('UTF-8')
-        playlist_content = playlist_content.replace('\r', '')
-        tracks_path = playlist_content.split('\n')[4:-2]
+        tracks_path = self._get_tracks_path(playlist_file_obj)
         tracks_filename = [os.path.basename(track_path) for track_path in tracks_path]
 
         tracks_file = [self._find_track_file(track_filename) for track_filename in tracks_filename]
 
         return tracks_file
+
+    def _get_tracks_path(self, playlist_file_obj):
+        playlist_content = playlist_file_obj.read().decode('UTF-8')
+        playlist_content = playlist_content.replace('\r', '')
+        lines = playlist_content.split('\n')[4:-2]
+        tracks_path = []
+        for line in lines:
+            if not line.startswith('#') and not line == '':
+                tracks_path.append(line)
+
+        return tracks_path
 
     def _find_track_file(self, track_filename):
         try:

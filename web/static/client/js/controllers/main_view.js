@@ -1,5 +1,5 @@
 app.controller('MainViewController', function($scope, $rootScope, $uibModal, $controller, $window,
-     Browse, Search, IndexDirectory, djangoAuth, User, UserSettings, Directory, Upload, $timeout){
+     Browse, Search, IndexDirectory, djangoAuth, User, UserSettings, Directory){
     djangoAuth.authenticationStatus();
 
     $rootScope.loadingFilebrowser = true;
@@ -207,29 +207,5 @@ app.controller('MainViewController', function($scope, $rootScope, $uibModal, $co
 
     $rootScope.addUserBackgroundColor = function(userId){
         return {'background-color': rainbow($rootScope.userList.length*2+30, userId*2)}
-    }
-
-    $scope.uploadFiles = function(files, errFiles) {
-        $scope.files = files;
-        $scope.errFiles = errFiles;
-        angular.forEach(files, function(file) {
-            file.upload = Upload.upload({
-                url: API_URL + 'import-playlist/' + file.name,
-                data: {file: file},
-                method: 'PUT',
-            });
-
-            file.upload.then(function (response) {
-                $timeout(function () {
-                    file.result = response.data;
-                });
-            }, function (response) {
-                if (response.status > 0)
-                    $scope.errorMsg = response.status + ': ' + response.data;
-            }, function (evt) {
-                file.progress = Math.min(100, parseInt(100.0 * 
-                                         evt.loaded / evt.total));
-            });
-        });
     }
 });

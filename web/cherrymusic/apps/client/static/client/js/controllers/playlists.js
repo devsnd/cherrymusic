@@ -1,4 +1,4 @@
-app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter, Playlist, Track) {
+app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter, Playlist, Track, Upload, $timeout) {
 
     $scope.openSavePlaylistModal = function(){
         var uibModalInstance = $uibModal.open({
@@ -300,4 +300,34 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
             return track.data[expression];
         });
     };
+
+    $scope.uploadPlaylist = function(files, errFiles) {
+        $scope.files = files;
+        $scope.errFiles = errFiles;
+        angular.forEach(files, function(file) {
+            file.upload = Upload.upload({
+                url: API_URL + 'import-playlist/' + file.name,
+                data: {file: file},
+                method: 'PUT',
+            });
+
+            file.upload.then(function (response) {
+                $timeout(function () {
+                    var playlist = response.data;
+                    if(playlist.id){
+                        playlist.loading = false;
+                        playlist.saved = true;
+                        $scope.playlists.push(playlist);
+                    }
+                    else{
+                        console.log(response.data);
+                    }
+                });
+            }, function (response) {
+                if (response.status > 0)
+                    console.log('Error');
+            });
+        });
+    }
+
 });
