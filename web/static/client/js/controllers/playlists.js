@@ -166,13 +166,26 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
                 newTrack.file = track.data.id;
                 Track.save(newTrack, function(track){
                     if(track.order == (len - 1) ){
-                        $scope.openedPlaylists.push(playlist);
-                        $scope.setCurrentPlaylist(playlist);
                         $scope.$emit('RELOAD_PLAYLIST', playlist);
                     };
                 });
             };
         });
+    });
+
+    $scope.$on('RELOAD_PLAYLIST', function(event, playlist){
+        Playlist.get({id: playlist.id}, function(playlist_data){
+                playlist.loading = false;
+                playlist.tracks = playlist_data.tracks;
+                playlist.saved = true;
+
+                var openedPlaylistIndex = getPlaylistIndex(playlist, $scope.openedPlaylists)
+                $scope.openedPlaylists
+
+                $scope.openedPlaylists.push(playlist);
+                $scope.playlists.push(playlist);
+                $scope.setCurrentPlaylist(playlist);
+            });
     });
 
     $scope.$on ('REMOVE_PLAYLIST', function(event, playlist){
@@ -192,7 +205,8 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
         };
 
         Playlist.remove({id: playlist.id}, function(){
-            $scope.showPlaylists();
+            var removedPlaylistIndex = getPlaylistIndex(playlist, $scope.playlists)
+            $scope.playlists.splice(removedPlaylistIndex, 1);
         });
     });
 
@@ -213,7 +227,9 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
 
     $scope.$on('UPDATE_PLAYLIST', function(event, playlist){
         Playlist.update({ id:playlist.id}, playlist, function(){
-            $scope.showPlaylists();
+            var updatedPlaylistIndex = getPlaylistIndex(playlist, $scope.playlists)
+            $scope.playlists.splice(updatedPlaylistIndex, 1);
+            $scope.playlists.push(playlist);
             $scope.currentPlaylist.saved = true;
         });
     });
@@ -235,20 +251,6 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
                 playlist.saved = true;
             });
         }
-    });
-
-    $scope.$on('RELOAD_PLAYLIST', function(event, playlist){
-        Playlist.query(function(playlists){
-            $scope.playlists = playlists;
-            var index = getPlaylistIndex(playlist, playlists);
-            var openedIndex = getPlaylistIndex(playlist);
-            $scope.openedPlaylists.splice(openedIndex, 1);
-
-            $scope.openedPlaylists.push(playlists[index]);
-
-            $scope.setCurrentPlaylist(playlists[index]);
-            $scope.currentPlaylist.saved = true;
-        })
     });
 
     $scope.$on('ADD_FILE_TO_PLAYLIST', function(event, file){
@@ -277,12 +279,13 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
 
     $rootScope.loadingPlaylistbrowser = true;
 
-    $scope.showPlaylists = function(){
-        $scope.mediaBrowserMode = 'playlist';
-        Playlist.query(function(playlists){
+    Playlist.query(function(playlists){
             $scope.playlists = playlists;
             $rootScope.loadingPlaylistbrowser = false;
-        })
+    });
+
+    $scope.showPlaylists = function(){
+        $scope.mediaBrowserMode = 'playlist';
     };
 
     $scope.trackFromFile = function(file){
