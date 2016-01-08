@@ -74,7 +74,7 @@
                 dnd-list="playlist.tracks"
                 dnd-placeholder-tpl="<tr class='dndPlaceholder'><td></td></tr>"
                 dnd-drop="false">
-              <li ng-repeat="track in playlist.tracks track by track.data.id"
+              <li ng-repeat="track in playlist.tracks track by $index"
                   dnd-draggable="track"
                   dnd-effect-allowed="copy"
                   dnd-selected="addToPlaylist(track)">

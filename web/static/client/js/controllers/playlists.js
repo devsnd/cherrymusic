@@ -270,14 +270,18 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
             $scope.currentPlaylist.tracks.push(file);
         }
 
-        var isSavedPlaylist = getIsPlaylistInList($scope.currentPlaylist, $scope.playlists);
-
-        if(isSavedPlaylist){
-            $scope.currentPlaylist.saved = false;
-        };
+        $scope.$emit('SET_SAVED_FALSE', $scope.currentPlaylist);
 
         if(($scope.currentPlaylist.tracks.length == 1) && $rootScope.autoPlay){
             $scope.playTrack();
+        };
+    });
+
+    $scope.$on('SET_SAVED_FALSE', function(event, playlist){
+        var isSavedPlaylist = getIsPlaylistInList(playlist, $scope.playlists);
+
+        if(isSavedPlaylist){
+            playlist.saved = false;
         };
     });
 
