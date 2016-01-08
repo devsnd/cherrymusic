@@ -240,15 +240,13 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
     });
 
     $scope.$on('LOAD_PLAYLIST', function(event, playlist) {
-        var playlistId = playlist.id;
-
         var isAlreadyLoadedPlaylist = getIsPlaylistInList(playlist, $scope.openedPlaylists);
 
         if(isAlreadyLoadedPlaylist){
             $scope.setCurrentPlaylist(isAlreadyLoadedPlaylist);
         } else {
-            playlist.loading = true;
             $scope.openedPlaylists.push(playlist);
+            console.log(playlist);
             $scope.setCurrentPlaylist(playlist);
             $scope.$emit('LOAD_PLAYLIST_TRACKS', playlist);
         }
