@@ -50,12 +50,6 @@ app.directive('playlistBrowser', ['$rootScope', 'PlaylistSearch',
                         $scope.addToPlaylist(track);
                     });
                 };
-                $scope.removeFromPlaylist = function(index, playlist){
-                    console.log(index);
-                    console.log(playlist);
-                    playlist.tracks.splice(index, 1);
-                    $scope.$emit('REMOVE_FILE_FROM_PLAYLIST', index, playlist);
-                };
             }
         }
     }
