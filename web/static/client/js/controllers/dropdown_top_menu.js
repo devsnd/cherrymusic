@@ -37,9 +37,15 @@ app.controller('DropdownTopMenuController', function($scope, $rootScope, $uibMod
                 };
                 $scope.createUser = function(username, password, isSuperuser){
                     $scope.$emit('CREATE_USER', username, password, isSuperuser);
+                    resetForm();
                 };
                 $scope.deleteUser = function(user){
                     $scope.$emit('DELETE_USER', user);
+                }
+                var resetForm = function(){
+                    $scope.newUsername = null;
+                    $scope.newPassword = null;
+                    $scope.isSuperuser = false;
                 }
             }
         });

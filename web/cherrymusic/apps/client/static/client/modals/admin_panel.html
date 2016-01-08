@@ -5,14 +5,14 @@
 <div class="modal-body">
     <div class="content">
         <h4>Create new user:</h4>
-        <form role="form" >
+        <form novalidate class="css-form" >
           <div class="form-group">
             <label for="newusername">User Name</label>
-            <input type="text" class="form-control" ng-model="newUsername" placeholder="Enter new user name">
+            <input type="text" class="form-control" ng-model="newUsername" placeholder="Enter new user name" required>
           </div>
           <div class="form-group">
             <label for="newpassword">Password</label>
-            <input type="password" class="form-control" ng-model="newPassword" placeholder="Password">
+            <input type="password" class="form-control" ng-model="newPassword" placeholder="Password" required>
           </div>
           <div class="checkbox">
             <label>
