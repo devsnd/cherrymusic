@@ -30,10 +30,7 @@ app.directive('playlistBrowser', ['$rootScope', 'PlaylistSearch',
                 };
 
                 $scope.loadPlaylistTracks= function(playlist){
-                    if(playlist.tracks == undefined){
-                        playlist.loading = true;
-                        $scope.$emit('LOAD_PLAYLIST_TRACKS', playlist);
-                    }
+                    $scope.$emit('LOAD_PLAYLIST_TRACKS', playlist);
                 };
                 
                 $scope.removePlaylist = function(playlist){

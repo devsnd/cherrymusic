@@ -255,11 +255,14 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
     });
 
     $scope.$on('LOAD_PLAYLIST_TRACKS', function(event, playlist){
-        Playlist.get({id: playlist.id}, function(playlist_data){
-            playlist.loading = false;
-            playlist.tracks = playlist_data.tracks;
-            playlist.saved = true;
-        }); 
+        if(playlist.tracks == undefined){
+            playlist.loading = true;
+            Playlist.get({id: playlist.id}, function(playlist_data){
+                playlist.loading = false;
+                playlist.tracks = playlist_data.tracks;
+                playlist.saved = true;
+            });
+        }
     });
 
     $scope.$on('ADD_FILE_TO_PLAYLIST', function(event, file){
