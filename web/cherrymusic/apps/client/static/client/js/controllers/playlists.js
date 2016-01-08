@@ -246,7 +246,6 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
             $scope.setCurrentPlaylist(isAlreadyLoadedPlaylist);
         } else {
             $scope.openedPlaylists.push(playlist);
-            console.log(playlist);
             $scope.setCurrentPlaylist(playlist);
             $scope.$emit('LOAD_PLAYLIST_TRACKS', playlist);
         }
