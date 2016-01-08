@@ -66,7 +66,7 @@ class PlaylistSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Playlist
-        fields = ('id', 'name', 'owner', 'public', 'tracks', 'owner_name', 'created_at')
+        fields = ('id', 'name', 'owner', 'public', 'tracks')
 
     @staticmethod
     def get_owner_name(obj):
@@ -76,6 +76,19 @@ class PlaylistSerializer(serializers.ModelSerializer):
     def get_tracks(obj):
         serializer = TrackSerializer()
         return [serializer.to_representation(track) for track in obj.track_set.all().order_by('order')]
+
+class PlaylistDetailSerializer(PlaylistSerializer):
+    tracks = serializers.SerializerMethodField()
+    owner_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Playlist
+        fields = ('id', 'name', 'owner', 'public', 'tracks', 'owner_name', 'created_at')
+
+class PlaylistListSerializer(PlaylistSerializer):
+    class Meta:
+        model = Playlist
+        fields = ('id', 'name', 'owner', 'owner_name', 'public')
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

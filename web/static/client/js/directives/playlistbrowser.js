@@ -28,6 +28,11 @@ app.directive('playlistBrowser', ['$rootScope', 'PlaylistSearch',
                 $scope.loadPlaylist = function(playlist){
                     $scope.$emit('LOAD_PLAYLIST', playlist);
                 };
+
+                $scope.loadPlaylistTracks= function(playlist){
+                    playlist.loading = true;
+                    $scope.$emit('LOAD_PLAYLIST_TRACKS', playlist);
+                };
                 
                 $scope.removePlaylist = function(playlist){
                     $scope.$emit('REMOVE_PLAYLIST', playlist);

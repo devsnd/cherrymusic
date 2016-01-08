@@ -250,12 +250,16 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
             playlist.loading = true;
             $scope.openedPlaylists.push(playlist);
             $scope.setCurrentPlaylist(playlist);
-            Playlist.get({id: playlistId}, function(playlist_data){
-                playlist.loading = false;
-                playlist.tracks = playlist_data.tracks;
-                playlist.saved = true;
-            });
+            $scope.$emit('LOAD_PLAYLIST_TRACKS', playlist);
         }
+    });
+
+    $scope.$on('LOAD_PLAYLIST_TRACKS', function(event, playlist){
+        Playlist.get({id: playlist.id}, function(playlist_data){
+            playlist.loading = false;
+            playlist.tracks = playlist_data.tracks;
+            playlist.saved = true;
+        }); 
     });
 
     $scope.$on('ADD_FILE_TO_PLAYLIST', function(event, file){

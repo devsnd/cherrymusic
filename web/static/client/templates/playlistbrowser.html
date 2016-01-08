@@ -37,7 +37,7 @@
                 <a>
                   <span class="glyphicon" 
                         ng-class="{'glyphicon-chevron-right': !showTracks, 'glyphicon-chevron-down': showTracks}"
-                        ng-click="showTracks = !showTracks">
+                        ng-click="showTracks = !showTracks; loadPlaylistTracks(playlist)">
                   </span>
                 </a>
               </div>

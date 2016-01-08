@@ -29,7 +29,8 @@ from cherrymusic.apps.storage.models import File, Directory
 
 from .permissions import IsOwnerOrReadOnly, IsOwnUser, IsAccountAdminOrReadOnly
 from .serializers import FileSerializer, DirectorySerializer, UserSerializer, \
-    CreateUserSerializer, UserSettingsSerializer, PlaylistSerializer, TrackSerializer
+    CreateUserSerializer, UserSettingsSerializer, PlaylistDetailSerializer, \
+    PlaylistListSerializer, TrackSerializer
 
 
 logger = logging.getLogger(__name__)
@@ -92,7 +93,14 @@ class DirectoryViewSet(SlowServerMixin, viewsets.ReadOnlyModelViewSet):
 class PlaylistViewSet(SlowServerMixin, MultiSerializerViewSetMixin, viewsets.ModelViewSet):
     permission_classes = (IsOwnerOrReadOnly, )
     queryset = Playlist.objects.all()
-    serializer_class = PlaylistSerializer
+    serializer_class = PlaylistDetailSerializer
+
+    serializer_class = PlaylistDetailSerializer
+
+    serializer_action_classes = {
+        'list': PlaylistListSerializer,
+        'retrieve': PlaylistDetailSerializer,
+    }
 
     def get_queryset(self):
         user = self.request.user
@@ -126,7 +134,7 @@ class ImportPlaylistViewSet(APIView):
             for track_number, track_file in enumerate(tracks_file)]
         playlist.save()
 
-        playlist_serializer = PlaylistSerializer()
+        playlist_serializer = PlaylistDetailSerializer()
 
         return Response(
             {'playlist': playlist_serializer.to_representation(playlist)})
