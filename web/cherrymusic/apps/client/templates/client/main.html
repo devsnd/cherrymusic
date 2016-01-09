@@ -134,7 +134,13 @@
       </div>
     </div>
   </div>
-
+  <growl-notifications>
+    <div ng-repeat="(id, notification) in notifications track by id">
+        <growl-notification>
+            {{notification}}
+        </growl-notification>
+    </div>
+  </growl-notifications>
   <div id="playback-controls">
     <div class="cm-songtitle-container" >
       <div class="cm-songtitle">

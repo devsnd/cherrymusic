@@ -326,19 +326,16 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
 
             file.upload.then(function (response) {
                 $timeout(function () {
-                    var playlist = response.data;
-                    if(playlist.id){
+                    var playlist = response.data.playlist;
+                    if(playlist != undefined){
                         playlist.loading = false;
                         playlist.saved = true;
                         $scope.playlists.push(playlist);
-                    }
-                    else{
-                        console.log(response.data);
-                    }
+                        $scope.addNotification('Added playlist: ' + response.data.playlist.name);
+                    }                   
                 });
             }, function (response) {
-                if (response.status > 0)
-                    console.log('Error');
+                $scope.addNotification('Error: ' + response.data);
             });
         });
     }

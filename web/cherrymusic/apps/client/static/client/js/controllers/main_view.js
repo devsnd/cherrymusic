@@ -147,10 +147,14 @@ app.controller('MainViewController', function($scope, $rootScope, $uibModal, $co
         user.username = username;
         user.password = password;
         user.is_superuser = isSuperuser;
-        User.save(user, function(user){
+        user.$save(user, function(user){
             User.query(function(userList){
                     $rootScope.userList  = userList;
                 });
+        }).then(function(response){
+            $scope.addNotification('Successfully created user: ' + response.username);
+        }, function(response){
+            $scope.addNotification('Failed to create user.');
         });
     });
 
@@ -208,4 +212,11 @@ app.controller('MainViewController', function($scope, $rootScope, $uibModal, $co
     $rootScope.addUserBackgroundColor = function(userId){
         return {'background-color': rainbow($rootScope.userList.length*2+30, userId*2)}
     }
+
+    $scope.notifications = [];
+
+    $scope.addNotification = function(notification){
+      $scope.notifications.push(notification);
+    };
+
 });

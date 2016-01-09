@@ -12,6 +12,8 @@ app = angular.module('CherryMusicClient', [
     'ngRoute',
     'cfp.hotkeys',
     'ngFileUpload',
+    'ngAnimate',
+    'growlNotifications',
 ]);
 
 angular.module('angularDjangoRegistrationAuthApp', [

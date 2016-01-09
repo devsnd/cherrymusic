@@ -140,6 +140,8 @@ BOWER_INSTALLED_APPS = (
     'angular-route',
     'chieffancypants/angular-hotkeys',
     'ng-file-upload',
+    'angular-growl-notifications',
+    'angular-animate',
 )
 
 # pipeline config
@@ -191,6 +193,8 @@ PIPELINE_JS = {
             'client/bower_components/angular-hotkeys/build/hotkeys.js',
             'client/bower_components/ng-file-upload/ng-file-upload-shim.js',
             'client/bower_components/ng-file-upload/ng-file-upload.js',
+            'client/bower_components/angular-growl-notifications/dist/angular-growl-notifications.js',
+            'client/bower_components/angular-animate/angular-animate.js',
             'client/js/main.js',
             'client/js/auth-user/django_auth.js',
             'client/js/auth-user/validate.js',

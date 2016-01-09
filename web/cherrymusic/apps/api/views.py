@@ -145,10 +145,10 @@ class ImportPlaylistViewSet(APIView):
         tracks_file = self._get_track_files(playlist_file_obj)
 
         if any(track_file is None for track_file in tracks_file):
-            return HttpResponse('<h1>Not all tracks where found</h1>')
+            return HttpResponse('Not all tracks where found', status=406)
 
         if Playlist.objects.filter(name=playlist_name).exists():
-            return HttpResponse('<h1>Playlist with that name already exists</h1>')
+            return HttpResponse('Playlist with that name already exists', status=406)
 
         playlist = Playlist.objects.create(name=playlist_name, owner=self.request.user)
         playlist.tracks = [Track.objects.create(playlist=playlist, order=track_number, file=track_file)

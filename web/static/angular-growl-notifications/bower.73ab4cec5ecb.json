@@ -1,0 +1,39 @@
+{
+  "name": "angular-growl-notifications",
+  "version": "2.2.0",
+  "main": [
+    "dist/angular-growl-notifications.js"
+  ],
+  "keywords": [
+    "angular",
+    "angularjs",
+    "growl",
+    "notification",
+    "notifications"
+  ],
+  "authors": [
+    {
+      "name": "Jurgen Van de Moere",
+      "email": "jurgen.van.de.moere@gmail.com",
+      "homepage": "http://www.jvandemo.com"
+    }
+  ],
+  "ignore": [
+    "src",
+    "test",
+    ".bowerrc",
+    ".editorconfig",
+    ".gitignore",
+    ".jshintrc",
+    ".travis.yml",
+    "Gruntfile.js",
+    "package.json"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jvandemo/angular-growl-notifications.git"
+  },
+  "dependencies": {
+    "angular": "~1.2.22"
+  }
+}
