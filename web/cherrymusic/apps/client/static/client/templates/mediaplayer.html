@@ -85,7 +85,7 @@
           dnd-effect-allowed="move">
         <div ng-if="track.type == 0">
           <file on-remove="currentPlaylist.tracks.splice($index, 1); $emit('SET_SAVED_FALSE', currentPlaylist)" 
-                ng-click="startPlaylingTrack($index)" 
+                on-play="startPlaylingTrack($index)" 
                 file="track.data">
           </file>
         </div>

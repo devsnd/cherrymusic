@@ -19,7 +19,8 @@ app.directive('file', [
             scope: {
                 file: '=',
                 model: '=',
-                onRemove:'&'
+                onRemove: '&',
+                onPlay: '&'
             },
             replace: true
         }
