@@ -235,7 +235,7 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
             var updatedPlaylistIndex = getPlaylistIndex(playlist, $scope.playlists)
             $scope.playlists.splice(updatedPlaylistIndex, 1);
             $scope.playlists.push(playlist);
-            $scope.currentPlaylist.saved = true;
+            playlist.saved = true;
         });
     });
 

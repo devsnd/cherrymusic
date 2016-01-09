@@ -95,8 +95,6 @@ class PlaylistViewSet(SlowServerMixin, MultiSerializerViewSetMixin, viewsets.Mod
     queryset = Playlist.objects.all()
     serializer_class = PlaylistDetailSerializer
 
-    serializer_class = PlaylistDetailSerializer
-
     serializer_action_classes = {
         'list': PlaylistListSerializer,
         'retrieve': PlaylistDetailSerializer,
@@ -112,6 +110,29 @@ class PlaylistViewSet(SlowServerMixin, MultiSerializerViewSetMixin, viewsets.Mod
             return playlists.filter(name__icontains=query)
 
         return playlists
+
+    def update(self, request, *args, **kwargs):
+        playlist = self.get_object()
+        playlist.track_set.all().delete()
+        tracks = request.data['tracks']
+
+        tracks = self._set_playlist_values_to_tracks(playlist.id, tracks)
+
+        tracks_serializer = [TrackSerializer(data=track) for track in tracks]
+
+        for track_serializer in tracks_serializer:
+            track_serializer.is_valid()
+            track_serializer.save()
+
+        return super(PlaylistViewSet, self).update(request, *args, **kwargs)
+
+    def _set_playlist_values_to_tracks(self, playlist_id, tracks):
+        for index, track in enumerate(tracks):
+            track['playlist'] = playlist_id
+            track['order'] = index
+            track['file'] = track['data']['id']
+
+        return tracks
 
 class ImportPlaylistViewSet(APIView):
     permission_classes = (IsAuthenticated,)
