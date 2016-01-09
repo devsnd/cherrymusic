@@ -144,9 +144,14 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
         if(!isAlreadyLoadedPlaylist){
             $scope.openedPlaylists.push(playlist);
         };
-        $scope.currentTrackIndex = 0;
+
         $scope.currentPlaylist = playlist;
-        $scope.indexHistory = [];
+        if($scope.currentPlaylist == $scope.currentPlayingPlaylist){
+            $scope.currentTrackIndex = $scope.currentPlayingTrackIndex
+        }
+        else{
+            $scope.currentTrackIndex = 0;
+        }
     };
 
     var defaultPlaylist = createEmptyPlaylist('Queue', 'queue')

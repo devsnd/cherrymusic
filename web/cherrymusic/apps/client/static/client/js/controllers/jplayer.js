@@ -73,7 +73,10 @@ app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
     });
 
     $scope.startPlaylingTrack = function(index){
-        $scope.currentPlayingPlaylist = $scope.currentPlaylist;
+        if($scope.currentPlayingPlaylist != $scope.currentPlaylist){
+            $scope.currentPlayingPlaylist = $scope.currentPlaylist;
+            $scope.indexHistory = [];
+        }
         $scope.playTrack(index);
     }
 
@@ -92,10 +95,15 @@ app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
             };   
         }
         else{
-            $scope.currentTrackIndex = index;
             track = trackFromIndex(index);
         };
         $scope.currentPlayingTrack = track;
+
+        $scope.currentPlayingTrackIndex = indexFromTrack($scope.currentPlayingTrack);
+
+        if($scope.currentPlaylist == $scope.currentPlayingPlaylist){
+            $scope.currentTrackIndex = $scope.currentPlayingTrackIndex;
+        }
 
         $rootScope.title = getTitle(track);
 
@@ -111,6 +119,10 @@ app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
         return $scope.currentPlayingPlaylist.tracks[index];
     };
 
+    var indexFromTrack = function(track){
+        return $scope.currentPlayingPlaylist.tracks.indexOf(track);
+    };
+
     $scope.playNextTrack = function(){
         var nextIndex = getNextIndex();
         if(nextIndex == null){
@@ -122,7 +134,7 @@ app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
     };
 
     var getNextIndex = function(){
-        var currentIndex = $scope.currentTrackIndex;
+        var currentIndex = $scope.currentPlayingTrackIndex;
         var tracksInPlaylist = $scope.currentPlayingPlaylist.tracks.length;
 
         if($scope.currentPlayingPlaylist.type == 'queue' && $rootScope.removeWhenQueue){
@@ -159,7 +171,7 @@ app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
     };
 
     var getPreviousIndex = function(){
-        var currentIndex = $scope.currentTrackIndex;
+        var currentIndex = $scope.currentPlayingTrackIndex;
         var followedIndex = ((currentIndex - 1) >= 0) ? currentIndex - 1 : null;
         var historyLength = $scope.indexHistory.length;
 
