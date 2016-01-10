@@ -52,7 +52,7 @@ Update cherrymusic
 ------------------
 ```bash
 docker-compose stop
-docker-compose rm web nginx
+docker-compose rm web
 docker-compose build
 docker-compose up -d
 ```
@@ -62,14 +62,13 @@ Development frotent
 To install and run development containers:
 ```bash
 docker-compose stop
-docker-compose rm web nginx
-docker-compose -f docker-compose.yml -f development.yml build
-docker-compose -f docker-compose.yml -f development.yml up -d
+docker-compose -f development.yml build
+docker-compose -f development.yml up -d
 ```
 
 Install bower components:
 ```bash
-docker-compose run --rm web python3 manage.py bower_install -- --allow-root
+docker-compose -f development.yml run  --rm web_dev python3 manage.py bower_install -- --allow-root
 ```
 Update static files
 -------------------
@@ -77,5 +76,19 @@ In development mode:
 
 In `./web`:
 ```bash
-docker-compose run --rm web python3 manage.py collectstatic
+docker-compose -f development.yml run --rm web_dev python3 manage.py collectstatic
+```
+
+Tests
+-----
+To install test containers:
+```bash
+docker-compose stop
+docker-compose -f test.yml build
+```
+
+Test server:
+```bash
+docker-compose -f test.yml run --rm web_test python3 manage.py test cherrymusic.apps && \
+docker-compose -f test.yml stop
 ```

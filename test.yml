@@ -1,23 +1,21 @@
-web:
+web_test:
   extends:
     file: docker-compose.base.yml
     service: web
-  restart: always
   links:
     - postgres:postgres
     - redis:redis
-  build: ./web
+  build: ./web-test
   env_file: .env
 
 nginx:
   extends:
     file: docker-compose.base.yml
     service: nginx
-  restart: always
   volumes_from:
-    - web
+    - web_test
   links:
-    - web:web
+    - web_test:web
     - postgres:postgres
     - redis:redis
 
@@ -25,7 +23,6 @@ postgres:
   extends:
     file: docker-compose.base.yml
     service: postgres
-  restart: always
   volumes_from:
     - data
 
@@ -33,10 +30,8 @@ redis:
   extends:
     file: docker-compose.base.yml
     service: redis
-  restart: always
 
 data:
   extends:
     file: docker-compose.base.yml
     service: data
-  restart: always

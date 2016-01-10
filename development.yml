@@ -1,4 +1,37 @@
-web:
-  build: ./web
-  dockerfile: Dockerfile-dev
+web_dev:
+  extends:
+    file: docker-compose.base.yml
+    service: web
+  links:
+    - postgres:postgres
+    - redis:redis
+  build: ./web-dev
   env_file: .env_dev
+
+nginx:
+  extends:
+    file: docker-compose.base.yml
+    service: nginx
+  volumes_from:
+    - web_dev
+  links:
+    - web_dev:web
+    - postgres:postgres
+    - redis:redis
+
+postgres:
+  extends:
+    file: docker-compose.base.yml
+    service: postgres
+  volumes_from:
+    - data
+
+redis:
+  extends:
+    file: docker-compose.base.yml
+    service: redis
+
+data:
+  extends:
+    file: docker-compose.base.yml
+    service: data
