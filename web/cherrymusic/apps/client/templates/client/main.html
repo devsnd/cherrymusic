@@ -121,8 +121,8 @@
   <div class="">
     <div class="row">
       <div id="search-panel" class="col-md-6 row">
-        <playlist-browser playlists="playlists" ng-show="mediaBrowserMode == 'playlist'"></playlist-browser>
-        <file-browser content="fileBrowserContent" ng-show="mediaBrowserMode == 'file'"></file-browser>
+        <playlist-browser playlists="playlists" ng-if="mediaBrowserMode == 'playlist'"></playlist-browser>
+        <file-browser content="fileBrowserContent" ng-if="mediaBrowserMode == 'file'"></file-browser>
         <div class="motd" ng-show="mediaBrowserMode == 'motd'">
           useless wisdom
           <hr>

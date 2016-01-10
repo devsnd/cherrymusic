@@ -4,12 +4,11 @@ from django.contrib import admin
 from cherrymusic.apps.core.models import User
 from cherrymusic.apps.storage.models import Directory
 
-base_dir = Directory(path='/usr/src/app/music')
 if len(Directory.objects.all())== 0:
+    base_dir = Directory(path='/usr/src/app/music')
     base_dir.save(is_basedir=True)
-    user, created = User.objects.get_or_create(username='admin', email='Admin@admin.com')
+    user = User.objects.create_user(username='admin', email='Admin@admin.com', password='admin')
     user.is_staff = user.is_superuser = True
-    user.set_password('admin')
     user.save()
 
 urlpatterns = [

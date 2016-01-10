@@ -15,7 +15,7 @@ router.register(r'track', TrackViewSet)
 
 urlpatterns = [
     url(r'status/$', ServerStatusView.as_view()),
-    url(r'stream/(?P<path>.*)', stream),
+    url(r'stream/(?P<path>.*)', stream, name="stream"),
     url(r'browse/(?P<path>.*)', BrowseView.as_view()),
     url(r'^search/$', GlobalSearchList.as_view(), name="search"),
     url(r'^import-playlist/(?P<filename>.*)', ImportPlaylistViewSet.as_view(), name="import_playlist"),
