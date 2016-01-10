@@ -145,7 +145,7 @@ BOWER_INSTALLED_APPS = (
 )
 
 # pipeline config
-STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+STATICFILES_STORAGE = 'pipeline.storage.PipelineStorage'
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
@@ -158,12 +158,14 @@ STATICFILES_FINDERS = (
 PIPELINE_COMPILERS = (
     'pipeline.compilers.less.LessCompiler',
 )
+
 PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
+PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.yuglify.YuglifyCompressor'
 
 PIPELINE_CSS = {
     'client': {
         'source_filenames': (
-            'client/bower_components/bootstrap/dist/css/bootstrap.css',
+            'client/bower_components/bootstrap/dist/css/bootstrap.min.css',
             'client/style/cherrymusic.less',
             'client/style/filebrowser.less',
             'client/style/mediaplayer.less',
@@ -176,25 +178,25 @@ PIPELINE_CSS = {
 PIPELINE_JS = {
     'client': {
         'source_filenames': (
-            'client/bower_components/angular/angular.js',
-            'client/bower_components/angular-resource/angular-resource.js',
-            'client/bower_components/angular-drag-and-drop-lists/angular-drag-and-drop-lists.js',
-            'client/bower_components/angular-bootstrap/ui-bootstrap.js',
-            'client/bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
-            'client/bower_components/jquery/dist/jquery.js',
-            'client/bower_components/jPlayer/dist/jplayer/jquery.jplayer.js',
-            'client/bower_components/underscore/underscore.js',
-            'client/bower_components/angular-dropdowns/dist/angular-dropdowns.js',
-            'client/bower_components/angular-cookies/angular-cookies.js',
-            'client/bower_components/json3/lib/json3.js',
-            'client/bower_components/es5-shim/es5-shim.js',
-            'client/bower_components/angular-sanitize/angular-sanitize.js',
-            'client/bower_components/angular-route/angular-route.js',
-            'client/bower_components/angular-hotkeys/build/hotkeys.js',
-            'client/bower_components/ng-file-upload/ng-file-upload-shim.js',
-            'client/bower_components/ng-file-upload/ng-file-upload.js',
-            'client/bower_components/angular-growl-notifications/dist/angular-growl-notifications.js',
-            'client/bower_components/angular-animate/angular-animate.js',
+            'client/bower_components/angular/angular.min.js',
+            'client/bower_components/angular-resource/angular-resource.min.js',
+            'client/bower_components/angular-drag-and-drop-lists/angular-drag-and-drop-lists.min.js',
+            'client/bower_components/angular-bootstrap/ui-bootstrap.min.js',
+            'client/bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js',
+            'client/bower_components/jquery/dist/jquery.min.js',
+            'client/bower_components/jPlayer/dist/jplayer/jquery.jplayer.min.js',
+            'client/bower_components/underscore/underscore-min.js',
+            'client/bower_components/angular-dropdowns/dist/angular-dropdowns.min.js',
+            'client/bower_components/angular-cookies/angular-cookies.min.js',
+            'client/bower_components/json3/lib/json3.min.js',
+            'client/bower_components/es5-shim/es5-shim.min.js',
+            'client/bower_components/angular-sanitize/angular-sanitize.min.js',
+            'client/bower_components/angular-route/angular-route.min.js',
+            'client/bower_components/angular-hotkeys/build/hotkeys.min.js',
+            'client/bower_components/ng-file-upload/ng-file-upload-shim.min.js',
+            'client/bower_components/ng-file-upload/ng-file-upload.min.js',
+            'client/bower_components/angular-growl-notifications/dist/angular-growl-notifications.min.js',
+            'client/bower_components/angular-animate/angular-animate.min.js',
             'client/js/main.js',
             'client/js/auth-user/django_auth.js',
             'client/js/auth-user/validate.js',
