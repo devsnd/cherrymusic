@@ -32,8 +32,50 @@ ALLOWED_HOSTS = ['*']
 
 AUTH_USER_MODEL = 'core.User'
 
-# Application definition
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt' : "%d/%b/%Y %H:%M:%S"
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'cherrymusic.log'),
+            'formatter': 'verbose'
+        },
+        'file_error': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'cherrymusic.error.log'),
+            'formatter': 'verbose'
+        },
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers':['console', 'file', 'file_error'],
+            'propagate': True,
+            'level':'INFO',
+        },
+        'cherrymusic': {
+            'handlers': ['console', 'file', 'file_error'],
+            'level': 'INFO',
+        },
+    }
+}
 
+
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.admin',

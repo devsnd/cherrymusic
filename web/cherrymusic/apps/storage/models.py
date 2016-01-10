@@ -63,7 +63,7 @@ class Directory(models.Model):
         indexed_directories = 0
         # remove all stale files
         for f in self.file_set.all():
-            print(f)
+            logger.debug('Indexing %s' % f)
             if not f.exists():
                 f.delete()
                 deleted_files += 1

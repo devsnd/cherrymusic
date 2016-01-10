@@ -79,3 +79,7 @@ migrations
 # Configuration
 config.yml
 .env
+
+# Log file
+web/cherrymusic.log
+web/cherrymusic.error.log
