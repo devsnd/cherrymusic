@@ -1435,6 +1435,12 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
         playlist.tracks = [];
     };
 
+    $scope.removedPlayed = function(playlist){
+        playlist.tracks.splice(0, $scope.currentTrackIndex);
+        $scope.currentTrackIndex = 0;
+        $scope.indexHistory = [];
+    };
+
     var getIsPlaylistInList = function(playlist, playlists){
         var playlistId = playlist.id;
 
@@ -1557,9 +1563,10 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
         if(isAlreadyLoadedPlaylist){
             $scope.setCurrentPlaylist(isAlreadyLoadedPlaylist);
         } else {
-            $scope.openedPlaylists.push(playlist);
-            $scope.setCurrentPlaylist(playlist);
-            $scope.$emit('LOAD_PLAYLIST_TRACKS', playlist);
+            var new_playlist = angular.copy(playlist);
+            $scope.openedPlaylists.push(new_playlist);
+            $scope.setCurrentPlaylist(new_playlist);
+            $scope.$emit('LOAD_PLAYLIST_TRACKS', new_playlist);
         }
     });
 

@@ -29,15 +29,15 @@
       <div ng-if="currentPlaylist.type == 'queue'">
         <a class="pull-left btn btn-xs btn-default" ng-click="currentPlaylist.tracks = shuffle(currentPlaylist.tracks)">random!</a>
         <a class="pull-left btn btn-xs btn-default" ng-click="openSavePlaylistModal()">save as playlist</a>
-        <div class="btn-group pull-right">
+        <div class="btn-group pull-right" uib-dropdown is-open="isOpenDropDown">
           <button class="btn btn-xs btn-default" ng-click="clearPlaylist(currentPlaylist)">clear</button>
-          <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+          <button class="btn dropdown-toggle btn-default btn-xs" uib-dropdown-toggle ng-disabled="disabled">
             <span class="caret"></span>
             <span class="sr-only">Toggle Dropdown</span>
           </button>
-          <ul class="dropdown-menu" role="menu">
+          <ul class="dropdown-menu">
             <li>
-              <a>remove played</a>
+              <a ng-click="removedPlayed(currentPlaylist)">remove played</a>
             </li>
           </ul>
         </div>
