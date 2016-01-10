@@ -89,6 +89,6 @@ docker-compose -f test.yml build
 
 Test server:
 ```bash
-docker-compose -f test.yml run --rm web_test python3 manage.py test cherrymusic.apps && \
+docker-compose -f test.yml run --rm web_test /usr/src/test.sh && \
 docker-compose -f test.yml stop
 ```
