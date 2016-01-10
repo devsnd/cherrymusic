@@ -19,7 +19,6 @@ from rest_framework.views import APIView
 from cherrymusic.apps.api.helper import ImageResponse, ImageRenderer
 from cherrymusic.apps.core import pathprovider
 from cherrymusic.apps.core.albumartfetcher import AlbumArtFetcher
-from cherrymusic.apps.core.config import Config
 from cherrymusic.apps.core.models import Playlist, Track, User, UserSettings
 from cherrymusic.apps.core.pluginmanager import PluginManager
 from cherrymusic.apps.ext import audiotranscode
@@ -34,15 +33,6 @@ from .serializers import FileSerializer, DirectorySerializer, UserSerializer, \
 
 
 logger = logging.getLogger(__name__)
-
-DEBUG_SLOW_SERVER = False
-
-class SlowServerMixin(object):
-    def get_object(self):
-        if DEBUG_SLOW_SERVER:
-            time.sleep(2)
-
-        return super().get_object()
 
 
 # http://stackoverflow.com/a/22922156/1191373
@@ -76,7 +66,7 @@ class MultiSerializerViewSetMixin(object):
             return super(MultiSerializerViewSetMixin, self).get_serializer_class()
 
 
-class FileViewSet(SlowServerMixin, viewsets.ReadOnlyModelViewSet):
+class FileViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = File.objects.all()
     serializer_class = FileSerializer
@@ -84,13 +74,13 @@ class FileViewSet(SlowServerMixin, viewsets.ReadOnlyModelViewSet):
     search_fields = ('filename', 'meta_title', 'meta_artist', 'meta_genre')   
 
 
-class DirectoryViewSet(SlowServerMixin, viewsets.ReadOnlyModelViewSet):
+class DirectoryViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = Directory.objects.all()
     serializer_class = DirectorySerializer
 
 
-class PlaylistViewSet(SlowServerMixin, MultiSerializerViewSetMixin, viewsets.ModelViewSet):
+class PlaylistViewSet(MultiSerializerViewSetMixin, viewsets.ModelViewSet):
     permission_classes = (IsOwnerOrReadOnly, )
     queryset = Playlist.objects.all()
     serializer_class = PlaylistDetailSerializer
@@ -187,7 +177,7 @@ class ImportPlaylistViewSet(APIView):
 
         return track_file
 
-class UserViewSet(SlowServerMixin, viewsets.ModelViewSet):
+class UserViewSet(viewsets.ModelViewSet):
     authentication_classes = (SessionAuthentication, BasicAuthentication)
     permission_classes = (IsAccountAdminOrReadOnly, )
     queryset = User.objects.all()
@@ -220,7 +210,7 @@ class UserViewSet(SlowServerMixin, viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-class UserSettingsViewSet(SlowServerMixin, viewsets.ModelViewSet):
+class UserSettingsViewSet(viewsets.ModelViewSet):
     permission_classes = (IsOwnUser, )
     queryset = UserSettings.objects.all()
     serializer_class = UserSettingsSerializer
@@ -229,13 +219,13 @@ class UserSettingsViewSet(SlowServerMixin, viewsets.ModelViewSet):
         user = self.request.user
         return UserSettings.objects.filter(user=user)
 
-class TrackViewSet(SlowServerMixin, viewsets.ModelViewSet):
+class TrackViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, )
     queryset = Track.objects.all()
     serializer_class = TrackSerializer
 
 
-class ServerStatusView(SlowServerMixin, APIView):
+class ServerStatusView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, format=None):
@@ -284,7 +274,6 @@ class AlbumArtView(APIView):
     renderer_classes = (ImageRenderer, )
 
     def get(self, request, path):
-        config = Config.get_config()
         file_path = Directory.get_basedir().absolute_path() / path
         if not file_path.exists():
             raise NotFound()
@@ -314,12 +303,12 @@ class AlbumArtView(APIView):
                 with open(file_cache_path, 'wb') as fh:
                     fh.write(data)
             return ImageResponse(image_data=data)
-        elif config.get('media.fetch_album_art', False):
+        else:
             #fetch album art from online source
             try:
                 foldername = os.path.basename(file_path)
                 keywords = foldername
-                logger.info(_("Fetching album art for keywords {keywords!r}").format(keywords=keywords))
+                logger.info("Fetching album art for keywords: %s" % keywords)
                 header, data = fetcher.fetch(keywords)
                 if header:
                     with open(file_cache_path, 'wb') as fh:
@@ -344,7 +333,7 @@ class IndexDirectoryView(APIView):
         return Response()
 
 
-class BrowseView(SlowServerMixin, APIView):
+class BrowseView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, path):
@@ -368,7 +357,7 @@ class BrowseView(SlowServerMixin, APIView):
             'directories': [dir_serializer.to_representation(directory) for directory in directories],
         })
 
-class GlobalSearchList(SlowServerMixin, APIView):
+class GlobalSearchList(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):

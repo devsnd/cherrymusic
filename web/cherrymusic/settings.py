@@ -32,6 +32,11 @@ ALLOWED_HOSTS = ['*']
 
 AUTH_USER_MODEL = 'core.User'
 
+if DEBUG:
+    DEBUG_LEVEL = 'DEBUG'
+else:
+    DEBUG_LEVEL = 'INFO' 
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -63,13 +68,13 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers':['console', 'file', 'file_error'],
+            'handlers': ['console', 'file', 'file_error'],
             'propagate': True,
-            'level':'INFO',
+            'level': 'INFO',
         },
         'cherrymusic': {
             'handlers': ['console', 'file', 'file_error'],
-            'level': 'INFO',
+            'level': DEBUG_LEVEL,
         },
     }
 }
