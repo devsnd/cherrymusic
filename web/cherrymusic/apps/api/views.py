@@ -92,7 +92,7 @@ class PlaylistViewSet(MultiSerializerViewSetMixin, viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        query = self.request.QUERY_PARAMS.get('search', None)
+        query = self.request.query_params.get('search', None)
 
         playlists = Playlist.objects.filter(Q(owner=user) | Q(public=True))
 
@@ -361,7 +361,7 @@ class GlobalSearchList(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
-        query = self.request.QUERY_PARAMS.get('q', '')
+        query = self.request.query_params.get('q', '')
 
         max_directories = 10
         max_files = 50
