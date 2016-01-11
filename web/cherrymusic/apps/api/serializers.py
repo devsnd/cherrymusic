@@ -112,22 +112,23 @@ class MiscSettingsSerializer(serializers.ModelSerializer):
         fields = ('auto_play', 'confirm_closing', 'show_album_art', 'remove_when_queue')
 
 class UserSettingsSerializer(serializers.ModelSerializer):
-    hotkeys = HotkeysSettingsSerializer()
-    misc = MiscSettingsSerializer()
     class Meta:
         model = UserSettings
         fields = ('user', 'hotkeys', 'misc')
 
+    hotkeys = HotkeysSettingsSerializer(source='hotkeyssettings')
+    misc = MiscSettingsSerializer(source='miscsettings')
+
     def update(self, instance, validated_data):
-        misc_data = validated_data.pop('misc')
-        misc = instance.misc
+        misc_data = validated_data.pop('miscsettings')
+        misc = instance.miscsettings
 
         for key, value in misc_data.items():
             setattr(misc, key, value)
         misc.save()
 
-        hotkeys_data = validated_data.pop('hotkeys')
-        hotkeys = instance.hotkeys
+        hotkeys_data = validated_data.pop('hotkeyssettings')
+        hotkeys = instance.hotkeyssettings
 
         for key, value in hotkeys_data.items():
             setattr(hotkeys, key, value)

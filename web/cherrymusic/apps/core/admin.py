@@ -1,7 +1,7 @@
 from django.contrib import admin
-from .models import User, Playlist, Track
+from .models import User, Playlist, Track, UserSettings, HotkeysSettings, MiscSettings
 
 
-@admin.register(User, Playlist, Track)
+@admin.register(User, Playlist, Track, UserSettings, HotkeysSettings, MiscSettings)
 class CoreAdmin(admin.ModelAdmin):
     pass

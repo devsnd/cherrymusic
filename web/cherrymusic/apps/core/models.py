@@ -46,7 +46,11 @@ class User(AbstractUser):
 
     objects = UserManagerCaseInsensitive()
 
+class UserSettings(models.Model):
+    user = models.OneToOneField(User)
+
 class HotkeysSettings(models.Model):
+    user_settings = models.OneToOneField(UserSettings)
     increase_volume = models.CharField(max_length=50, default='ctrl+up')
     decrease_volume = models.CharField(max_length=50, default='ctrl+down')
     toggle_mute = models.CharField(max_length=50, default='ctrl+m')
@@ -55,22 +59,18 @@ class HotkeysSettings(models.Model):
     toggle_play = models.CharField(max_length=50, default='space')
 
 class MiscSettings(models.Model):
+    user_settings = models.OneToOneField(UserSettings)
     auto_play = models.BooleanField(default=False)
     confirm_closing = models.BooleanField(default=True)
     show_album_art = models.BooleanField(default=True)
     remove_when_queue = models.BooleanField(default=True)
 
-class UserSettings(models.Model):
-    user = models.OneToOneField(User)
-    hotkeys = models.OneToOneField(HotkeysSettings)
-    misc = models.OneToOneField(MiscSettings)
-
 def create_user_settings(sender, instance, created, **kwargs):
     """Create UserSettings for every new User."""
     if created:
-        hotkeys = HotkeysSettings.objects.create()
-        misc = MiscSettings.objects.create()
-        UserSettings.objects.create(user=instance, hotkeys=hotkeys, misc=misc)
+        user_settings = UserSettings.objects.create(user=instance)
+        HotkeysSettings.objects.create(user_settings=user_settings)
+        MiscSettings.objects.create(user_settings=user_settings)
 
 signals.post_save.connect(create_user_settings, sender=User, weak=False,
                           dispatch_uid='models.create_user_settings')
