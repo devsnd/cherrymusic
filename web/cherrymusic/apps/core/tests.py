@@ -24,7 +24,7 @@ class UsernameCaseInsensitiveTests(TestCase):
             self.fail("User exception not thrown")
         except AssertionError:
             raise
-        except:
+        except IntegrityError:
             pass
 
 ## AlbumArtFetecher
