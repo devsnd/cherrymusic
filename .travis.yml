@@ -18,3 +18,5 @@ before_install:
 install: echo OK
 
 script: ./run_tests.sh
+
+after_success: docker-compose -f test.yml run --rm web_test /usr/src/test_coveralls.sh
