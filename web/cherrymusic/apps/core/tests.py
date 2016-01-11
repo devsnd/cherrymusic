@@ -22,8 +22,6 @@ class UsernameCaseInsensitiveTests(TestCase):
         try:
             user = User.objects.create_user('Temporary', 'temporary@temporary.com', 'temporary')
             self.fail("User exception not thrown")
-        except AssertionError:
-            raise
         except IntegrityError:
             pass
 
