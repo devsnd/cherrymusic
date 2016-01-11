@@ -15,4 +15,6 @@ before_install:
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
 
-script:
+install: echo OK
+
+script: run_tests.sh
