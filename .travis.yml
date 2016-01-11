@@ -18,5 +18,3 @@ before_install:
 install: echo OK
 
 script: ./run_tests.sh
-
-after_success: ./run_tests.sh
