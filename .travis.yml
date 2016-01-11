@@ -15,6 +15,11 @@ before_install:
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
 
+  # TODO: Remove this temporary fix when it's safe to:
+  # https://github.com/travis-ci/travis-ci/issues/4778
+  - sudo iptables -N DOCKER || true
+  - sleep 10
+
 install: echo OK
 
 script: ./run_tests.sh
