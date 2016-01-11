@@ -10,7 +10,6 @@ app.directive('playlistBrowser', ['$rootScope', 'PlaylistSearch',
                 $scope.playlistSortBy = '-id';
 
                 $scope.playlistSortBySomething = function(something){
-                    console.log(something);
                     if($scope.playlistSortBy == something){
                         $scope.playlistSortBy = '-' + something
                     }

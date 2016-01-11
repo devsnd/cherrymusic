@@ -779,7 +779,6 @@ app.service('Validate', function Validate() {
 app.controller('ChangePasswordController', function($scope, djangoAuth) {
     $scope.changePassword = function(oldpassword, newpassword, repeatnewpassword){
 
-        console.log(oldpassword);
         djangoAuth.changePassword(newpassword, repeatnewpassword, oldpassword)
             .then(function(response){
                 $scope.addNotification('Successfully password changed');
@@ -1890,7 +1889,6 @@ app.directive('playlistBrowser', ['$rootScope', 'PlaylistSearch',
                 $scope.playlistSortBy = '-id';
 
                 $scope.playlistSortBySomething = function(something){
-                    console.log(something);
                     if($scope.playlistSortBy == something){
                         $scope.playlistSortBy = '-' + something
                     }
