@@ -17,4 +17,4 @@ before_install:
 
 install: echo OK
 
-script: run_tests.sh
+script: ./run_tests.sh
