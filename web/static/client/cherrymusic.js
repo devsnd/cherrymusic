@@ -1205,6 +1205,10 @@ app.controller('JPlayerCtrl', function($scope, $rootScope, PlaybackService) {
         var starTime = 0;
         var track = null;
 
+        if($scope.currentPlayingPlaylist == undefined){
+            $scope.startPlaylingTrack();
+        }
+
         if(index == undefined){
             if($scope.currentPlayingTrack){
                 starTime = $scope.currentPlayTime;
