@@ -1,7 +1,8 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.contrib.auth.signals import user_logged_in ,user_logged_out
 from django.db import models
 from django.db.models import signals
+from django.utils import timezone
 from django.conf import settings
 
 from cherrymusic.apps.storage.models import File
@@ -18,8 +19,32 @@ def set_logged_out(sender, user, **kwargs):
 user_logged_in.connect(set_logged_in)
 user_logged_out.connect(set_logged_out)
 
+class UserManagerCaseInsensitive(UserManager):
+    ## change when update django to 1.9
+    def _create_user(self, username, email, password,
+                     is_staff, is_superuser, **extra_fields):
+        """
+        Creates and saves a User with the given username, email and password.
+        """
+        now = timezone.now()
+        if not username:
+            raise ValueError('The given username must be set')
+        email = self.normalize_email(email)
+        user = self.model(username=username.lower(), email=email,
+                          is_staff=is_staff, is_active=True,
+                          is_superuser=is_superuser,
+                          date_joined=now, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def get_by_natural_key(self, username):
+        return self.get(username__iexact=username)
+
 class User(AbstractUser):
     is_logged = models.BooleanField(default=False)
+
+    objects = UserManagerCaseInsensitive()
 
 class HotkeysSettings(models.Model):
     increase_volume = models.CharField(max_length=50, default='ctrl+up')

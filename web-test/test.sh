@@ -1,2 +1,3 @@
 #!/bin/bash
-coverage run manage.py test cherrymusic.apps -v 2
+coverage run --source='.' manage.py test cherrymusic.apps -v 2 && \
+coverage report --skip-covered
