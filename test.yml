@@ -2,36 +2,5 @@ web_test:
   extends:
     file: docker-compose.base.yml
     service: web
-  links:
-    - postgres:postgres
-    - redis:redis
   build: ./web-test
   env_file: .env
-
-nginx:
-  extends:
-    file: docker-compose.base.yml
-    service: nginx
-  volumes_from:
-    - web_test
-  links:
-    - web_test:web
-    - postgres:postgres
-    - redis:redis
-
-postgres:
-  extends:
-    file: docker-compose.base.yml
-    service: postgres
-  volumes_from:
-    - data
-
-redis:
-  extends:
-    file: docker-compose.base.yml
-    service: redis
-
-data:
-  extends:
-    file: docker-compose.base.yml
-    service: data
