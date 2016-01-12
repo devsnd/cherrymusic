@@ -1,0 +1,6 @@
+[submodule "web/cherrymusic/ext/audiotranscode"]
+	path = web/cherrymusic/ext/audiotranscode
+	url = git@github.com:pando85/audiotranscode.git
+[submodule "web/cherrymusic/ext/tinytag"]
+	path = web/cherrymusic/ext/tinytag
+	url = git@github.com:pando85/tinytag.git
