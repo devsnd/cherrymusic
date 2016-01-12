@@ -4,7 +4,7 @@ import logging
 from django.db import models
 from django.utils import timezone
 
-from cherrymusic.apps.ext.tinytag import TinyTag
+from cherrymusic.ext.tinytag.tinytag import TinyTag
 
 logger = logging.getLogger(__name__)
 

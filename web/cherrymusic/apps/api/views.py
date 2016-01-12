@@ -21,10 +21,10 @@ from cherrymusic.apps.core import pathprovider
 from cherrymusic.apps.core.albumartfetcher import AlbumArtFetcher
 from cherrymusic.apps.core.models import Playlist, Track, User, UserSettings
 from cherrymusic.apps.core.pluginmanager import PluginManager
-from cherrymusic.apps.ext import audiotranscode
-from cherrymusic.apps.ext.tinytag import TinyTag
 from cherrymusic.apps.storage.status import ServerStatus
 from cherrymusic.apps.storage.models import File, Directory
+from cherrymusic.ext.audiotranscode import audiotranscode
+from cherrymusic.ext.tinytag.tinytag import TinyTag
 
 from .permissions import IsOwnerOrReadOnly, IsOwnUser, IsAccountAdminOrReadOnly
 from .serializers import FileSerializer, DirectorySerializer, UserSerializer, \
