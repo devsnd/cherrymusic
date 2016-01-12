@@ -10,4 +10,6 @@ djangorestframework==3.3.2
 futures==3.0.3
 six==1.10.0
 wheel==0.24.0
+tinytag
 git+https://github.com/pando85/django-sendfile
+git+https://github.com/pando85/audiotranscode

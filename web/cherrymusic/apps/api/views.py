@@ -3,6 +3,9 @@ import time
 import logging
 import threading
 
+from tinytag import TinyTag
+from audiotranscode import audiotranscode
+
 from sendfile import sendfile
 from django.http import HttpResponse, StreamingHttpResponse, Http404
 from django.db.models import Q
@@ -23,8 +26,6 @@ from cherrymusic.apps.core.models import Playlist, Track, User, UserSettings
 from cherrymusic.apps.core.pluginmanager import PluginManager
 from cherrymusic.apps.storage.status import ServerStatus
 from cherrymusic.apps.storage.models import File, Directory
-from cherrymusic.ext.audiotranscode import audiotranscode
-from cherrymusic.ext.tinytag.tinytag import TinyTag
 
 from .permissions import IsOwnerOrReadOnly, IsOwnUser, IsAccountAdminOrReadOnly
 from .serializers import FileSerializer, DirectorySerializer, UserSerializer, \

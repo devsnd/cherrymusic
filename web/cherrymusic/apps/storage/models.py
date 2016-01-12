@@ -1,10 +1,10 @@
 from pathlib import Path
 import logging
 
+from tinytag import TinyTag
+
 from django.db import models
 from django.utils import timezone
-
-from cherrymusic.ext.tinytag.tinytag import TinyTag
 
 logger = logging.getLogger(__name__)
 
