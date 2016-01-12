@@ -16,7 +16,7 @@ router.register(r'user-settings', UserSettingsViewSet)
 router.register(r'track', TrackViewSet)
 
 urlpatterns = [
-    url(r'status/$', ServerStatusView.as_view()),
+    url(r'status/$', ServerStatusView.as_view(), name="status"),
     url(r'stream/(?P<path>.*)', stream, name="stream"),
     url(r'browse/(?P<path>.*)', BrowseView.as_view()),
     url(r'^search/$', GlobalSearchList.as_view(), name="search"),

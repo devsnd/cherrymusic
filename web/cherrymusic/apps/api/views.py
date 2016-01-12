@@ -68,7 +68,6 @@ class MultiSerializerViewSetMixin(object):
 
 
 class FileViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = (IsAuthenticated,)
     queryset = File.objects.all()
     serializer_class = FileSerializer
     filter_backends = (filters.SearchFilter,)
@@ -76,13 +75,12 @@ class FileViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class DirectoryViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = (IsAuthenticated,)
     queryset = Directory.objects.all()
     serializer_class = DirectorySerializer
 
 
 class PlaylistViewSet(MultiSerializerViewSetMixin, viewsets.ModelViewSet):
-    permission_classes = (IsOwnerOrReadOnly, )
+    permission_classes = (IsOwnerOrReadOnly, IsAuthenticated)
     queryset = Playlist.objects.all()
     serializer_class = PlaylistDetailSerializer
 
@@ -126,7 +124,6 @@ class PlaylistViewSet(MultiSerializerViewSetMixin, viewsets.ModelViewSet):
         return tracks
 
 class ImportPlaylistViewSet(APIView):
-    permission_classes = (IsAuthenticated,)
     parser_classes = (FileUploadParser,)
 
     def put(self, request, filename, format=None):
@@ -180,7 +177,7 @@ class ImportPlaylistViewSet(APIView):
 
 class UserViewSet(viewsets.ModelViewSet):
     authentication_classes = (SessionAuthentication, BasicAuthentication)
-    permission_classes = (IsAccountAdminOrReadOnly, )
+    permission_classes = (IsAccountAdminOrReadOnly, IsAuthenticated)
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
@@ -212,7 +209,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 class UserSettingsViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsOwnUser, )
+    permission_classes = (IsOwnUser, IsAuthenticated)
     queryset = UserSettings.objects.all()
     serializer_class = UserSettingsSerializer
 
@@ -221,14 +218,10 @@ class UserSettingsViewSet(viewsets.ModelViewSet):
         return UserSettings.objects.filter(user=user)
 
 class TrackViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, )
     queryset = Track.objects.all()
     serializer_class = TrackSerializer
 
-
 class ServerStatusView(APIView):
-    permission_classes = (IsAuthenticated,)
-
     def get(self, request, format=None):
         return Response([ServerStatus.get_latest()])
 
@@ -271,7 +264,6 @@ def stream_audio(audiofile):
     yield from audiotranscode.AudioTranscode().transcode_stream(audiofile, newformat='ogg')
 
 class AlbumArtView(APIView):
-    permission_classes = (IsAuthenticated,)
     renderer_classes = (ImageRenderer, )
 
     def get(self, request, path):
@@ -321,8 +313,6 @@ class AlbumArtView(APIView):
 
 
 class IndexDirectoryView(APIView):
-    permission_classes = (IsAuthenticated,)
-
     def get(self, request, path):
         basedir = Directory.get_basedir()
         if path:
@@ -335,8 +325,6 @@ class IndexDirectoryView(APIView):
 
 
 class BrowseView(APIView):
-    permission_classes = (IsAuthenticated,)
-
     def get(self, request, path):
         basedir = Directory.get_basedir()
         if path:
@@ -359,8 +347,6 @@ class BrowseView(APIView):
         })
 
 class GlobalSearchList(APIView):
-    permission_classes = (IsAuthenticated,)
-
     def get(self, request):
         query = self.request.query_params.get('q', '')
 
@@ -381,8 +367,6 @@ class GlobalSearchList(APIView):
 
 
 class MessageOfTheDayView(APIView):
-    permission_classes = (IsAuthenticated,)
-
     def get(self, request):
         message_of_the_day = 'Hello good sir.'
         Response(
