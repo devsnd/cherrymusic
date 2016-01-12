@@ -1,0 +1,28 @@
+[
+{
+    "model": "core.hotkeyssettings",
+    "fields": {
+        "toggle_mute": "ctrl+m",
+        "user_settings": 1,
+        "increase_volume": "ctrl+up",
+        "decrease_volume": "ctrl+down",
+        "next_track": "ctrl+right",
+        "previous_track": "ctrl+left",
+        "toggle_play": "space"
+    },
+    "pk": 1
+},
+{
+    "model": "core.hotkeyssettings",
+    "fields": {
+        "toggle_mute": "ctrl+m",
+        "user_settings": 2,
+        "increase_volume": "ctrl+up",
+        "decrease_volume": "ctrl+down",
+        "next_track": "ctrl+right",
+        "previous_track": "ctrl+left",
+        "toggle_play": "space"
+    },
+    "pk": 2
+}
+]

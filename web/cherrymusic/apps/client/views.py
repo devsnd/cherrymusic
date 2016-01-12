@@ -31,8 +31,8 @@ class LoginView(TemplateView):
                 if user.is_active:
                     print('active')
                     login(request, user)
-                    return HttpResponseRedirect(reverse('main_view'))
+                    return HttpResponseRedirect(reverse('main-view'))
         else:
             print(form.error_messages)
 
-        return HttpResponseRedirect(reverse('login_view'))
+        return HttpResponseRedirect(reverse('login-view'))

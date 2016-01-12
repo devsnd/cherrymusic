@@ -19,11 +19,8 @@ class UsernameCaseInsensitiveTests(TestCase):
         self.assertTrue(form.is_valid())
 
     def test_invalid_user_name(self):
-        try:
+        with self.assertRaises(IntegrityError) as cm:
             user = User.objects.create_user('Temporary', 'temporary@temporary.com', 'temporary')
-            self.fail("User exception not thrown")
-        except IntegrityError:
-            pass
 
 ## AlbumArtFetecher
 

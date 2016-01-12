@@ -1,0 +1,322 @@
+[
+{
+    "fields": {
+        "playlist": 1,
+        "file": 45,
+        "order": 0,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 1
+},
+{
+    "fields": {
+        "playlist": 1,
+        "file": 41,
+        "order": 2,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 2
+},
+{
+    "fields": {
+        "playlist": 1,
+        "file": 48,
+        "order": 3,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 3
+},
+{
+    "fields": {
+        "playlist": 1,
+        "file": 44,
+        "order": 1,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 4
+},
+{
+    "fields": {
+        "playlist": 1,
+        "file": 47,
+        "order": 4,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 5
+},
+{
+    "fields": {
+        "playlist": 1,
+        "file": 49,
+        "order": 5,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 6
+},
+{
+    "fields": {
+        "playlist": 1,
+        "file": 37,
+        "order": 6,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 7
+},
+{
+    "fields": {
+        "playlist": 1,
+        "file": 43,
+        "order": 7,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 8
+},
+{
+    "fields": {
+        "playlist": 1,
+        "file": 39,
+        "order": 8,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 9
+},
+{
+    "fields": {
+        "playlist": 1,
+        "file": 42,
+        "order": 11,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 10
+},
+{
+    "fields": {
+        "playlist": 1,
+        "file": 46,
+        "order": 9,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 11
+},
+{
+    "fields": {
+        "playlist": 1,
+        "file": 40,
+        "order": 10,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 12
+},
+{
+    "fields": {
+        "playlist": 1,
+        "file": 38,
+        "order": 12,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 13
+},
+{
+    "fields": {
+        "playlist": 2,
+        "file": 31,
+        "order": 0,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 14
+},
+{
+    "fields": {
+        "playlist": 2,
+        "file": 23,
+        "order": 1,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 15
+},
+{
+    "fields": {
+        "playlist": 2,
+        "file": 35,
+        "order": 3,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 16
+},
+{
+    "fields": {
+        "playlist": 2,
+        "file": 28,
+        "order": 2,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 17
+},
+{
+    "fields": {
+        "playlist": 2,
+        "file": 32,
+        "order": 4,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 18
+},
+{
+    "fields": {
+        "playlist": 2,
+        "file": 22,
+        "order": 5,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 19
+},
+{
+    "fields": {
+        "playlist": 2,
+        "file": 25,
+        "order": 9,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 20
+},
+{
+    "fields": {
+        "playlist": 2,
+        "file": 26,
+        "order": 6,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 21
+},
+{
+    "fields": {
+        "playlist": 2,
+        "file": 30,
+        "order": 8,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 22
+},
+{
+    "fields": {
+        "playlist": 2,
+        "file": 34,
+        "order": 10,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 23
+},
+{
+    "fields": {
+        "playlist": 2,
+        "file": 29,
+        "order": 7,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 24
+},
+{
+    "fields": {
+        "playlist": 2,
+        "file": 18,
+        "order": 11,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 25
+},
+{
+    "fields": {
+        "playlist": 2,
+        "file": 24,
+        "order": 12,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 26
+},
+{
+    "fields": {
+        "playlist": 2,
+        "file": 27,
+        "order": 13,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 27
+},
+{
+    "fields": {
+        "playlist": 2,
+        "file": 20,
+        "order": 14,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 28
+},
+{
+    "fields": {
+        "playlist": 2,
+        "file": 21,
+        "order": 16,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 29
+},
+{
+    "fields": {
+        "playlist": 2,
+        "file": 19,
+        "order": 15,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 30
+},
+{
+    "fields": {
+        "playlist": 2,
+        "file": 33,
+        "order": 17,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 31
+},
+{
+    "fields": {
+        "playlist": 2,
+        "file": 36,
+        "order": 18,
+        "type": 0
+    },
+    "model": "core.track",
+    "pk": 32
+}
+]

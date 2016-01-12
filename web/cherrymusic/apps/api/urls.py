@@ -1,4 +1,6 @@
+from django.core.urlresolvers import reverse
 from django.conf.urls import url, include
+
 from rest_framework import routers
 
 from .views import FileViewSet, DirectoryViewSet, ServerStatusView, PlaylistViewSet, \
@@ -18,10 +20,10 @@ urlpatterns = [
     url(r'stream/(?P<path>.*)', stream, name="stream"),
     url(r'browse/(?P<path>.*)', BrowseView.as_view()),
     url(r'^search/$', GlobalSearchList.as_view(), name="search"),
-    url(r'^import-playlist/(?P<filename>.*)', ImportPlaylistViewSet.as_view(), name="import_playlist"),
+    url(r'^import-playlist/(?P<filename>.*)', ImportPlaylistViewSet.as_view(), name="import-playlist"),
     url(r'index/(?P<path>.*)', IndexDirectoryView.as_view()),
     url(r'albumart/(?P<path>.*)', AlbumArtView.as_view()),
     url(r'^', include(router.urls)),
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'^api-auth/', include('rest_framework.urls', namespace='api-auth')),
     url(r'^rest-auth/', include('rest_auth.urls'))
 ]

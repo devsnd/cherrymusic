@@ -107,7 +107,8 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
-    )
+    ),
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
 }
 
 MIDDLEWARE_CLASSES = (
@@ -170,6 +171,7 @@ DATABASES = {
     }
 }
 
+# Test
 if 'test' in sys.argv:
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -184,7 +186,11 @@ if 'test' in sys.argv:
             'LOCATION': 'my_cache_table',
         }
     }
-    
+
+FIXTURE_DIRS = (
+   os.path.join(BASE_DIR, 'cherrymusic/fixtures'),
+)
+
 # bower config
 BOWER_INSTALLED_APPS = (
     'angular',

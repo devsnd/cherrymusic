@@ -1,0 +1,16 @@
+[
+{
+    "fields": {
+        "user": 1
+    },
+    "model": "core.usersettings",
+    "pk": 1
+},
+{
+    "fields": {
+        "user": 2
+    },
+    "model": "core.usersettings",
+    "pk": 2
+}
+]

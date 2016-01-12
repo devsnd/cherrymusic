@@ -6,6 +6,6 @@ from . import views
 
 urlpatterns = patterns(
     '',
-    url(r'^$', login_required(views.MainView.as_view(), login_url=None), name='main_view'),
-    url(r'^accounts/login/$', views.LoginView.as_view(), name='login_view'),
+    url(r'^$', login_required(views.MainView.as_view(), login_url=None), name='main-view'),
+    url(r'^accounts/login/$', views.LoginView.as_view(), name='login-view'),
 )
