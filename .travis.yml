@@ -18,5 +18,3 @@ before_install:
 install: echo OK
 
 script: ./test_scripts/run_tests.sh 
-
-after_success: docker-compose -f test.yml run --rm web_test /usr/src/test_coveralls.sh -e TRAVIS_JOB_ID=$TRAVIS_JOB_ID
