@@ -211,7 +211,7 @@ class TestUserViewSet(APITestCase):
             "username": "test",
             "password": "test",
             "is_superuser": False,
-            "is_staff": False,
+            "email": "test@test.com",
         }
 
     def test_anonymous_query(self):

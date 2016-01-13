@@ -103,17 +103,22 @@ class PlaylistViewSet(MultiSerializerViewSetMixin, viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         playlist_json = request.data
         playlist_json['owner'] = request.user.id
+
+        if Playlist.objects.filter(name=playlist_json['name'], owner=request.user).count() > 0:
+            return Response({'detail': ['Already exits a playlist with that name and user.']},
+                    status=status.HTTP_400_BAD_REQUEST)
+
         serializer = self.get_serializer(data=playlist_json)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
-        playlist = Playlist.objects.get(name=playlist_json['name'])
+        playlist = Playlist.objects.get(name=playlist_json['name'], owner=request.user)
         
-        try:
-            tracks = request.data['tracks']
-        except KeyError:
+        if not 'tracks' in request.data:
             return Response({'tracks': ['This field is required.']},
                      status=status.HTTP_400_BAD_REQUEST)
+        
+        tracks = request.data['tracks']
             
         tracks = self._set_playlist_values_to_tracks(playlist.id, tracks)
         self._save_tracks(tracks)
@@ -123,12 +128,13 @@ class PlaylistViewSet(MultiSerializerViewSetMixin, viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
-        playlist = self.get_object()
-        playlist.track_set.all().delete()
-
-        tracks = request.data['tracks']
-        tracks = self._set_playlist_values_to_tracks(playlist.id, tracks)
-        self._save_tracks(tracks)
+        if 'tracks' in request.data:
+            playlist = self.get_object()
+            playlist.track_set.all().delete()
+    
+            tracks = request.data['tracks']
+            tracks = self._set_playlist_values_to_tracks(playlist.id, tracks)
+            self._save_tracks(tracks)
 
         return super(PlaylistViewSet, self).update(request, *args, **kwargs)
 
