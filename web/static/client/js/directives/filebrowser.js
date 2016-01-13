@@ -58,7 +58,7 @@ app.directive('fileBrowser', [
                 };
 
                 $scope.albumArtUrl = function(filepath){
-                    return API_URL + 'albumart/' + filepath
+                    return API_ALBUMART_URL + filepath
                 };
 
                 $scope.getBreadcrumbs = function(currentPath){

@@ -36,7 +36,7 @@ app.factory('PlaybackServiceJPlayer', ['$log', '$rootScope', function($log, $roo
 
         if(track.type == LOCAL_STORAGE){
             currentTrack = track;
-            var trackurl = STREAM_URL + track.data.path;
+            var trackurl = API_STREAM_URL + track.data.path;
             if(start_time !== undefined){
                 trackurl += '?start_time=' + start_time;
             }

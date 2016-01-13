@@ -6,7 +6,7 @@ app.service('djangoAuth', function djangoAuth($q, $http, $cookies, $rootScope) {
         /* START CUSTOMIZATION HERE */
         // Change this to point to your Django REST Auth API
         // e.g. /api/rest-auth  (DO NOT INCLUDE ENDING SLASH)
-        'API_URL': API_URL + 'rest-auth',
+        'API_URL': API_REST_AUTH_URL,
         // Set use_session to true to use Django sessions to store security token.
         // Set use_session to false to store the security token locally and transmit it as a custom header.
         'use_session': true,

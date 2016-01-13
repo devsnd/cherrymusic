@@ -171,7 +171,7 @@ app.controller('MainViewController', function($scope, $rootScope, $uibModal, $co
     });
 
     $scope.albumArtUrl = function(filepath){
-        return API_URL + 'albumart/' + filepath
+        return API_ALBUMART_URL + filepath
     };
 
     $window.onbeforeunload = function( event ) {

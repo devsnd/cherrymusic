@@ -3,7 +3,7 @@ app.factory('IndexDirectory', ['$http',
     function($http){
         IndexDirectory = {};
         IndexDirectory.index = function(path, success, error) {
-            return $http.get(API_URL + 'index/' + path)
+            return $http.get(API_INDEX_URL + path)
                 .success(function (data) {
                     if(success !== undefined){
                         success(data);

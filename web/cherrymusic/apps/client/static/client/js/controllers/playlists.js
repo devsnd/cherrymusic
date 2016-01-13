@@ -313,7 +313,7 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
         $scope.errFiles = errFiles;
         angular.forEach(files, function(file) {
             file.upload = Upload.upload({
-                url: API_URL + 'import-playlist/' + file.name,
+                url: API_IMPORT_API_PLAYLIST_URL  + file.name,
                 data: {file: file},
                 method: 'PUT',
             });

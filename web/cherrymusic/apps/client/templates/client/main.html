@@ -48,8 +48,19 @@
 <script>
   // make sure the js knows where to load the static files from
   STATIC_FILES = '{% static "" %}'
-  API_URL = '/api/v1/';
-  STREAM_URL = '/api/v1/stream/';
+  API_ALBUMART_URL = '{% url "api:albumart" "" %}';
+  API_BROWSE_URL = '{% url "api:browse" "" %}';
+  API_DIRECTORY_URL = '{% url "api:directory-list" %}';
+  API_INDEX_URL = '{% url "api:index-files" "" %}';
+  API_IMPORT_API_PLAYLIST_URL  = '{% url "api:import-playlist" "" %}';
+  API_PLAYLIST_URL  = '{% url "api:playlist-list" %}';
+  API_SEARCH_URL = '{% url "api:search" %}';
+  API_STREAM_URL = '{% url "api:stream" "" %}';
+  API_TRACK_URL = '{% url "api:track-list" %}';
+  API_USER_URL = '{% url "api:user-list" %}';
+  API_USER_SETTINGS_URL = '{% url "api:usersettings-list" %}';
+  API_REST_AUTH_URL = '/api/v1/rest-auth';
+
   ADMIN_URL = '{% url "admin:index" %}';
   LOGIN_URL = '{% url "login-view" %}';
 </script>

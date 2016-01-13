@@ -527,7 +527,7 @@ app.service('djangoAuth', function djangoAuth($q, $http, $cookies, $rootScope) {
         /* START CUSTOMIZATION HERE */
         // Change this to point to your Django REST Auth API
         // e.g. /api/rest-auth  (DO NOT INCLUDE ENDING SLASH)
-        'API_URL': API_URL + 'rest-auth',
+        'API_URL': API_REST_AUTH_URL,
         // Set use_session to true to use Django sessions to store security token.
         // Set use_session to false to store the security token locally and transmit it as a custom header.
         'use_session': true,
@@ -1068,7 +1068,7 @@ app.controller('MainViewController', function($scope, $rootScope, $uibModal, $co
     });
 
     $scope.albumArtUrl = function(filepath){
-        return API_URL + 'albumart/' + filepath
+        return API_ALBUMART_URL + filepath
     };
 
     $window.onbeforeunload = function( event ) {
@@ -1623,7 +1623,7 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
         $scope.errFiles = errFiles;
         angular.forEach(files, function(file) {
             file.upload = Upload.upload({
-                url: API_URL + 'import-playlist/' + file.name,
+                url: API_IMPORT_API_PLAYLIST_URL  + file.name,
                 data: {file: file},
                 method: 'PUT',
             });
@@ -1772,7 +1772,7 @@ app.directive('fileBrowser', [
                 };
 
                 $scope.albumArtUrl = function(filepath){
-                    return API_URL + 'albumart/' + filepath
+                    return API_ALBUMART_URL + filepath
                 };
 
                 $scope.getBreadcrumbs = function(currentPath){
@@ -1979,7 +1979,7 @@ app.factory('Browse', ['$http',
     function($http){
         Browse = {};
         Browse.get = function(path, success, error) {
-            return $http.get(API_URL + 'browse/' + path, {cache: true})
+            return $http.get(API_BROWSE_URL + path, {cache: true})
                 .success(function (data) {
                     success(data);
                 })
@@ -1993,7 +1993,7 @@ app.factory('Browse', ['$http',
 
 app.factory('Directory', ['$resource',
     function($resource){
-        return $resource(API_URL + 'directory/:id/');
+        return $resource(API_DIRECTORY_URL + ':id/');
     }
 ]);
 
@@ -2001,7 +2001,7 @@ app.factory('IndexDirectory', ['$http',
     function($http){
         IndexDirectory = {};
         IndexDirectory.index = function(path, success, error) {
-            return $http.get(API_URL + 'index/' + path)
+            return $http.get(API_INDEX_URL + path)
                 .success(function (data) {
                     if(success !== undefined){
                         success(data);
@@ -2018,7 +2018,7 @@ app.factory('IndexDirectory', ['$http',
 ]);
 app.factory('Playlist', ['$resource',
     function($resource){
-        return $resource(API_URL + 'playlist/:id/', null,
+        return $resource(API_PLAYLIST_URL  + ':id/', null,
         {
             'update': { method:'PUT' }
         });
@@ -2029,7 +2029,7 @@ app.factory('PlaylistSearch', ['$http',
     function($http){
         PlaylistSearch = {};
         PlaylistSearch.get = function(query, success, error) {
-            return $http.get(API_URL + 'playlist/?search=' + query, {cache: true})
+            return $http.get(API_PLAYLIST_URL  + '?search=' + query, {cache: true})
                 .success(function (data) {
                     success(data);
                 })
@@ -2045,7 +2045,7 @@ app.factory('Search', ['$http',
     function($http){
         Search = {};
         Search.get = function(query, success, error) {
-            return $http.get(API_URL + 'search/?q=' + query, {cache: true})
+            return $http.get(API_SEARCH_URL + '?q=' + query, {cache: true})
                 .success(function (data) {
                     success(data);
                 })
@@ -2059,17 +2059,17 @@ app.factory('Search', ['$http',
 
 app.factory('Track', ['$resource',
     function($resource){
-        return $resource(API_URL + 'track/:id');
+        return $resource(API_TRACK_URL + '/:id');
     }
 ]);
 app.factory('User', ['$resource',
     function($resource){
-        return $resource(API_URL + 'user/:id/', null);
+        return $resource(API_USER_URL + ':id/', null);
     }
 ]);
 app.factory('UserSettings', ['$resource',
     function($resource){
-        return $resource(API_URL + 'user-settings/:id/', null,
+        return $resource(API_USER_SETTINGS_URL + ':id/', null,
         {
             'update': { method:'PUT' }
         });
@@ -2167,7 +2167,7 @@ app.factory('PlaybackServiceJPlayer', ['$log', '$rootScope', function($log, $roo
 
         if(track.type == LOCAL_STORAGE){
             currentTrack = track;
-            var trackurl = STREAM_URL + track.data.path;
+            var trackurl = API_STREAM_URL + track.data.path;
             if(start_time !== undefined){
                 trackurl += '?start_time=' + start_time;
             }

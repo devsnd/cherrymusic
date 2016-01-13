@@ -18,12 +18,12 @@ router.register(r'track', TrackViewSet)
 urlpatterns = [
     url(r'status/$', ServerStatusView.as_view(), name="status"),
     url(r'stream/(?P<path>.*)', stream, name="stream"),
-    url(r'browse/(?P<path>.*)', BrowseView.as_view()),
+    url(r'browse/(?P<path>.*)', BrowseView.as_view(), name="browse"),
     url(r'^search/$', GlobalSearchList.as_view(), name="search"),
     url(r'^import-playlist/(?P<filename>.*)', ImportPlaylistViewSet.as_view(), name="import-playlist"),
-    url(r'index/(?P<path>.*)', IndexDirectoryView.as_view()),
-    url(r'albumart/(?P<path>.*)', AlbumArtView.as_view()),
+    url(r'index/(?P<path>.*)', IndexDirectoryView.as_view(), name="index-files"),
+    url(r'albumart/(?P<path>.*)', AlbumArtView.as_view(), name="albumart"),
     url(r'^', include(router.urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='api-auth')),
-    url(r'^rest-auth/', include('rest_auth.urls'))
+    url(r'^rest-auth/', include('rest_auth.urls', namespace='rest-auth'))
 ]
