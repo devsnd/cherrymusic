@@ -20,7 +20,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from cherrymusic.apps.api.helper import ImageResponse, ImageRenderer
+from cherrymusic.apps.api.v1.helper import ImageResponse, ImageRenderer
 from cherrymusic.apps.core import pathprovider
 from cherrymusic.apps.core.albumartfetcher import AlbumArtFetcher
 from cherrymusic.apps.core.models import Playlist, Track, User, UserSettings

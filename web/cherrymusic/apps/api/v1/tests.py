@@ -5,7 +5,7 @@ from django.db.models import Q
 
 from cherrymusic.apps.core.models import Playlist, Track, User, UserSettings
 from cherrymusic.apps.storage.models import File, Directory
-from cherrymusic.apps.api.serializers import FileSerializer, DirectorySerializer, UserSerializer, \
+from cherrymusic.apps.api.v1.serializers import FileSerializer, DirectorySerializer, UserSerializer, \
     CreateUserSerializer, UserSettingsSerializer, PlaylistDetailSerializer, \
     PlaylistListSerializer, TrackSerializer
 
