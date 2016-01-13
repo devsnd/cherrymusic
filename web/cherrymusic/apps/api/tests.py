@@ -268,17 +268,34 @@ class TestUserSettingsView(APITestCase):
         self.client = APIClient(enforce_csrf_checks=True)
         self.client.force_authenticate(user=self.user)
         self.serializer = UserSettingsSerializer()
+        self.url = reverse('api:usersettings-list')
+        self.user_settings_json = {
+            "user": 1,
+            "hotkeys": {
+                "increase_volume": "ctrl+up",
+                "decrease_volume": "ctrl+down",
+                "toggle_mute": "ctrl+m",
+                "previous_track": "ctrl+left",
+                "next_track": "ctrl+right",
+                "toggle_play": "space"
+            },
+            "misc": {
+                "auto_play": False,
+                "confirm_closing": True,
+                "show_album_art": True,
+                "remove_when_queue": True
+            }
+        }
+
 
     def test_unauthenticated_user_settings_query(self):
-        url = reverse('api:usersettings-list')
         client = APIClient()
-        response = client.get(url)
+        response = client.get(self.url)
 
         self.assertEqual(response.data, unauthenticated_response)
 
     def test_user_settings_query(self):
-        url = reverse('api:usersettings-list')
-        response = self.client.get(url)
+        response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -292,6 +309,19 @@ class TestUserSettingsView(APITestCase):
         response = self.client.get(url)
         
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_user_settings_create(self):
+        response = self.client.post(self.url, self.user_settings_json)
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_user_settings_update(self):
+        pk = self.user.id
+        url = reverse('api:usersettings-detail', args=[pk])
+        response = self.client.put(url, self.user_settings_json)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertEqual(response.data, self.user_settings_json)
 
 class TestTrackView(APITestCase):
     fixtures = ['directory', 'file', 'playlist', 'track', 'user']
@@ -359,3 +389,5 @@ class TestStatusView(APITestCase):
         }
 
         self.assertEqual(response.data[0], status_json)
+
+

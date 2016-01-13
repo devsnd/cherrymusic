@@ -429,3 +429,217 @@ Status: 201 CREATED
 
 
 
+
+UserSettings
+----
+
+### List all user-settings
+Only return your own user-settings
+```
+GET /api/v1/user-settings
+```
+
+**Response**
+
+```
+Status: 200 OK
+```
+```
+[
+    {
+        "user": 1,
+        "hotkeys": {
+            "increase_volume": "ctrl+up",
+            "decrease_volume": "ctrl+down",
+            "toggle_mute": "ctrl+m",
+            "previous_track": "ctrl+left",
+            "next_track": "ctrl+right",
+            "toggle_play": "space"
+        },
+        "misc": {
+            "auto_play": false,
+            "confirm_closing": true,
+            "show_album_art": true,
+            "remove_when_queue": true
+        }
+    }
+]
+```
+
+### Get a single user-settings
+User only can access its own user-settings.
+```
+GET /api/v1/user-settings/<id>
+```
+
+**Response**
+
+```
+Status: 200 OK
+```
+```
+{
+    "user": 1,
+    "hotkeys": {
+        "increase_volume": "ctrl+up",
+        "decrease_volume": "ctrl+down",
+        "toggle_mute": "ctrl+m",
+        "previous_track": "ctrl+left",
+        "next_track": "ctrl+right",
+        "toggle_play": "space"
+    },
+    "misc": {
+        "auto_play": false,
+        "confirm_closing": true,
+        "show_album_art": true,
+        "remove_when_queue": true
+    }
+}
+```
+
+### Update user-settings
+```
+PUT /api/v1/user-settings/<id>
+```
+**Example**
+
+```
+{
+    "hotkeys": {
+        "increase_volume": "ctrl+up",
+        "decrease_volume": "ctrl+down",
+        "toggle_mute": "ctrl+m",
+        "previous_track": "ctrl+left",
+        "next_track": "ctrl+right",
+        "toggle_play": "space"
+    },
+    "misc": {
+        "auto_play": False,
+        "confirm_closing": True,
+        "show_album_art": True,
+        "remove_when_queue": True
+    }
+}
+```
+
+**Response**
+
+```
+Status: 200 OK
+```
+
+```
+{
+    "user": 1,
+    "hotkeys": {
+        "increase_volume": "ctrl+up",
+        "decrease_volume": "ctrl+down",
+        "toggle_mute": "ctrl+m",
+        "previous_track": "ctrl+left",
+        "next_track": "ctrl+right",
+        "toggle_play": "space"
+    },
+    "misc": {
+        "auto_play": False,
+        "confirm_closing": True,
+        "show_album_art": True,
+        "remove_when_queue": True
+    }
+}
+```
+
+Tracks
+-----
+
+### List all tracks
+```
+GET /api/v1/track
+```
+
+**Response**
+
+```
+Status: 200 OK
+```
+```
+[
+    {
+        "playlist": 1,
+        "order": 5,
+        "type": 0,
+        "file": 49,
+        "data": {
+            "id": 49,
+            "filename": "06.- Astronauta.mp3",
+            "path": "Paisano/Revolucion/06.- Astronauta.mp3",
+            "meta_track": "06",
+            "meta_track_total": "13",
+            "meta_title": "Astronauta",
+            "meta_artist": "Paisano",
+            "meta_album": "Revolucion",
+            "meta_year": "2014",
+            "meta_genre": "Acustico",
+            "meta_duration": 238.236734693878,
+            "meta_index_date": "2016-01-12"
+        }
+    },
+]
+```
+
+### Get a single track
+```
+GET /api/v1/track/<id>
+```
+
+**Response**
+
+```
+Status: 200 OK
+```
+```
+{
+    "playlist": 1,
+    "order": 5,
+    "type": 0,
+    "file": 49,
+    "data": {
+        "id": 49,
+        "filename": "06.- Astronauta.mp3",
+        "path": "Paisano/Revolucion/06.- Astronauta.mp3",
+        "meta_track": "06",
+        "meta_track_total": "13",
+        "meta_title": "Astronauta",
+        "meta_artist": "Paisano",
+        "meta_album": "Revolucion",
+        "meta_year": "2014",
+        "meta_genre": "Acustico",
+        "meta_duration": 238.236734693878,
+        "meta_index_date": "2016-01-12"
+    }
+}
+```
+
+Server Status
+-----
+
+### Get server status
+```
+GET /api/v1/status
+
+**Response**
+
+```
+Status: 200 OK
+```
+```
+[
+    {
+        "indexed_files": 67,
+        "meta_indexed_files": 66,
+        "active_users": 0
+    }
+]
+```
+
+
+
