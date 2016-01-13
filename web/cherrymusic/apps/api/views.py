@@ -10,6 +10,7 @@ from sendfile import sendfile
 from django.http import HttpResponse, StreamingHttpResponse, Http404
 from django.db.models import Q
 from django.conf import settings
+from django.core.cache import cache
 
 from rest_framework import viewsets, filters, status
 from rest_framework.exceptions import NotFound
@@ -349,13 +350,24 @@ class AlbumArtView(APIView):
 
 class IndexDirectoryView(APIView):
     def get(self, request, path):
-        basedir = Directory.get_basedir()
-        if path:
-            path_elements = path.split('/')
-            *parent_dirs, current_dir = basedir.get_sub_path_directories(path_elements)
-            current_dir.reindex()
-        else:
-            basedir.reindex()
+        if cache.get('is_block_indexing'):
+            raise Http404()
+        cache.set('is_block_indexing', True)
+        try:
+            basedir = Directory.get_basedir()
+            if path:
+                path_elements = path.split('/')
+                *parent_dirs, current_dir = basedir.get_sub_path_directories(path_elements)
+                current_dir.reindex()
+            else:
+                basedir.reindex()
+        except:
+            raise
+        finally:
+            cache.set('is_block_indexing', False)
+
+        cache.set('is_block_indexing', False)
+
         return Response()
 
 
