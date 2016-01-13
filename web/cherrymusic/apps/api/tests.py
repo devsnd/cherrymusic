@@ -133,7 +133,18 @@ class TestPlaylistView(APITestCase):
 
     def test_create_playlist(self):
         url = reverse('api:playlist-list')
-        playlist_json = {"name": "TestPlaylist", "owner": 1, "public": False}
+        playlist_json = {
+            "name": "TestPlaylist",
+            "tracks":[
+                {
+                    "type": 0,
+                    "data":{
+                        "id":49
+                    }
+                }
+            ],
+            "public": False
+        }
 
         response = self.client.post(url, playlist_json)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

@@ -24,7 +24,7 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
                 };
 
                 $scope.savePlaylist = function(playlist, title, isPublic){
-                    $scope.$emit('SAVE_PLAYLIST', playlist, title, isPublic); 
+                    $scope.$emit('CREATE_PLAYLIST', playlist, title, isPublic); 
                     $scope.close();
                 } 
             }
@@ -166,26 +166,13 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
     $scope.setCurrentPlaylist(defaultPlaylist);
     $scope.indexHistory = [];
 
-    $scope.$on('SAVE_PLAYLIST', function(event, playlist, title, isPublic){
-        var newPlaylist = new Playlist();
+    $scope.$on('CREATE_PLAYLIST', function(event, playlist, title, isPublic){
+        var newPlaylist = angular.copy(playlist);
         newPlaylist.name = title;
-        newPlaylist.owner = $rootScope.user.id;
         newPlaylist.public = isPublic;
 
-        Playlist.save(newPlaylist, function(playlist){
-            for(var order = 0, len = $scope.currentPlaylist.tracks.length; order < len; order++){
-                var track = $scope.currentPlaylist.tracks[order];
-                var newTrack = new Track();
-                newTrack.playlist = playlist.id;
-                newTrack.order = order;
-                newTrack.type = track.type;
-                newTrack.file = track.data.id;
-                Track.save(newTrack, function(track){
-                    if(track.order == (len - 1) ){
-                        $scope.$emit('RELOAD_PLAYLIST', playlist);
-                    };
-                });
-            };
+        Playlist.save(newPlaylist, function(createdPlaylist){
+            $scope.$emit('RELOAD_PLAYLIST', createdPlaylist);
         });
     });
 

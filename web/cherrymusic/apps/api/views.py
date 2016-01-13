@@ -100,18 +100,35 @@ class PlaylistViewSet(MultiSerializerViewSetMixin, viewsets.ModelViewSet):
 
         return playlists
 
+    def create(self, request, *args, **kwargs):
+        playlist_json = request.data
+        playlist_json['owner'] = request.user.id
+        serializer = self.get_serializer(data=playlist_json)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        playlist = Playlist.objects.get(name=playlist_json['name'])
+        
+        try:
+            tracks = request.data['tracks']
+        except KeyError:
+            return Response({'tracks': ['This field is required.']},
+                     status=status.HTTP_400_BAD_REQUEST)
+            
+        tracks = self._set_playlist_values_to_tracks(playlist.id, tracks)
+        self._save_tracks(tracks)
+        
+        headers = self.get_success_headers(serializer.data)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     def update(self, request, *args, **kwargs):
         playlist = self.get_object()
         playlist.track_set.all().delete()
+
         tracks = request.data['tracks']
-
         tracks = self._set_playlist_values_to_tracks(playlist.id, tracks)
-
-        tracks_serializer = [TrackSerializer(data=track) for track in tracks]
-
-        for track_serializer in tracks_serializer:
-            track_serializer.is_valid()
-            track_serializer.save()
+        self._save_tracks(tracks)
 
         return super(PlaylistViewSet, self).update(request, *args, **kwargs)
 
@@ -123,6 +140,15 @@ class PlaylistViewSet(MultiSerializerViewSetMixin, viewsets.ModelViewSet):
 
         return tracks
 
+    def _save_tracks(self, tracks):
+        tracks_serializer = [TrackSerializer(data=track) for track in tracks]
+
+        for track_serializer in tracks_serializer:
+            track_serializer.is_valid()
+            track_serializer.save()
+
+        return True
+
 class ImportPlaylistViewSet(APIView):
     parser_classes = (FileUploadParser,)
 
@@ -133,10 +159,10 @@ class ImportPlaylistViewSet(APIView):
         tracks_file = self._get_track_files(playlist_file_obj)
 
         if any(track_file is None for track_file in tracks_file):
-            return HttpResponse('Not all tracks where found', status=406)
+            return Response({'detail': 'Not all tracks where found'}, status=status.HTTP_400_BAD_REQUEST)
 
         if Playlist.objects.filter(name=playlist_name).exists():
-            return HttpResponse('Playlist with that name already exists', status=406)
+            return Response({'detail': 'Playlist with that name already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
         playlist = Playlist.objects.create(name=playlist_name, owner=self.request.user)
         playlist.tracks = [Track.objects.create(playlist=playlist, order=track_number, file=track_file)
@@ -217,7 +243,7 @@ class UserSettingsViewSet(viewsets.ModelViewSet):
         user = self.request.user
         return UserSettings.objects.filter(user=user)
 
-class TrackViewSet(viewsets.ModelViewSet):
+class TrackViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Track.objects.all()
     serializer_class = TrackSerializer
 
