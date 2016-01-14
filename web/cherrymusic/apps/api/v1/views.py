@@ -30,10 +30,12 @@ from cherrymusic.apps.core.pluginmanager import PluginManager
 from cherrymusic.apps.storage.status import ServerStatus
 from cherrymusic.apps.storage.models import File, Directory
 
-from .permissions import IsOwnerOrReadOnly, IsOwnUser, IsAccountAdminOrReadOnly
-from .serializers import FileSerializer, DirectorySerializer, UserSerializer, \
-    CreateUserSerializer, UserSettingsSerializer, PlaylistDetailSerializer, \
-    PlaylistListSerializer, TrackSerializer
+from cherrymusic.apps.api.v1.permissions import IsOwnerOrReadOnly, IsOwnUser, IsAccountAdminOrReadOnly
+from cherrymusic.apps.api.v1.serializers import (
+    FileSerializer, DirectorySerializer, UserSerializer, CreateUserSerializer, UserSettingsSerializer,
+    PlaylistDetailSerializer, PlaylistListSerializer, TrackSerializer
+    )
+    
 
 
 logger = logging.getLogger(__name__)
@@ -168,10 +170,16 @@ class ImportPlaylistViewSet(APIView):
         tracks_file = self._get_track_files(playlist_file_obj)
 
         if any(track_file is None for track_file in tracks_file):
-            return Response({'detail': 'Not all tracks where found'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'detail': 'Not all tracks where found'},
+                status=status.HTTP_400_BAD_REQUEST
+                )
 
         if Playlist.objects.filter(name=playlist_name).exists():
-            return Response({'detail': 'Playlist with that name already exists'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'detail': 'Playlist with that name already exists'},
+                status=status.HTTP_400_BAD_REQUEST
+                )
 
         playlist = Playlist.objects.create(name=playlist_name, owner=self.request.user)
         playlist.tracks = [Track.objects.create(playlist=playlist, order=track_number, file=track_file)
@@ -215,9 +223,13 @@ class ExportPlaylistViewSet(APIView):
         base_url = request.build_absolute_uri().replace(reverse('api:export-playlist'), "")
 
         playlists = Playlist.objects.filter(owner=request.user)
-        playlist_zip_path = os.path.join('/tmp' + settings.SENDFILE_ROOT, request.user.username + '.zip')
+        playlists_zip_directory = '/tmp' + settings.SENDFILE_ROOT
+        playlists_zip_path = os.path.join(playlists_zip_directory, request.user.username + '.zip')
 
-        with zipfile.ZipFile(playlist_zip_path, 'w') as playlists_zip:
+        if not os.path.exists(playlists_zip_directory):
+            os.makedirs(playlists_zip_directory)
+
+        with zipfile.ZipFile(playlists_zip_path, 'w') as playlists_zip:
             for playlist in playlists:
                 tracks = playlist.track_set.all()
                 tracks_url = [
@@ -229,7 +241,7 @@ class ExportPlaylistViewSet(APIView):
 
         return sendfile(
             request,
-            playlist_zip_path,
+            playlists_zip_path,
             root_url='/tmp' + settings.SENDFILE_URL,
             root_directory='/tmp' + settings.SENDFILE_ROOT,
             attachment=True,

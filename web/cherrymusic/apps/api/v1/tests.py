@@ -1,5 +1,4 @@
-import json
-import hashlib
+import os
 
 from django.core.urlresolvers import reverse
 from django.db.models import Q
@@ -212,6 +211,12 @@ class TestExportPlaylistView(APITestCase):
         response = client.get(self.url)
 
         self.assertEqual(response.data, unauthenticated_response)
+
+    def test_export_playlist_query(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertTrue(os.path.exists('/tmp/usr/src/app/music/admin.zip'))
 
 class TestUserViewSet(APITestCase):
     fixtures = ['user']
