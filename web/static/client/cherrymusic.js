@@ -803,6 +803,7 @@ app.controller('DropdownTopMenuController', function($scope, $rootScope, $uibMod
             templateUrl: STATIC_FILES + 'client/modals/user_options.html',
             scope: $scope,
             controller: function($scope, $uibModalInstance){
+                $scope.downloadPlaylistURL = API_EXPORT_PLAYLIST_URL;
                 $scope.close = function(){
                     $uibModalInstance.dismiss('cancel');
                 };
@@ -1623,7 +1624,7 @@ app.controller('PlaylistsCtrl', function($scope, $rootScope, $uibModal, $filter,
         $scope.errFiles = errFiles;
         angular.forEach(files, function(file) {
             file.upload = Upload.upload({
-                url: API_IMPORT_API_PLAYLIST_URL  + file.name,
+                url: API_IMPORT_PLAYLIST_URL  + file.name,
                 data: {file: file},
                 method: 'PUT',
             });

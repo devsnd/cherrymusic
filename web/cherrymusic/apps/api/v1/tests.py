@@ -1,4 +1,5 @@
 import json
+import hashlib
 
 from django.core.urlresolvers import reverse
 from django.db.models import Q
@@ -195,6 +196,22 @@ class TestPlaylistView(APITestCase):
         tracks_number = len(playlist.track_set.all())
         self.assertEqual(tracks_number, len(playlist_json['tracks']))
 
+
+
+class TestExportPlaylistView(APITestCase):
+    fixtures = ['directory', 'file', 'playlist', 'track', 'user']
+
+    def setUp(self):
+        self.user = User.objects.get(pk=1)
+        self.client = APIClient(enforce_csrf_checks=True)
+        self.client.force_authenticate(user=self.user)
+        self.url = reverse('api:export-playlist')
+
+    def test_unauthenticated_export_playlist_query(self):
+        client = APIClient()
+        response = client.get(self.url)
+
+        self.assertEqual(response.data, unauthenticated_response)
 
 class TestUserViewSet(APITestCase):
     fixtures = ['user']
@@ -470,3 +487,5 @@ class TestBrowseView(APITestCase):
             "path": []
         }
         self.assertEqual(response.data, expected_data)
+
+

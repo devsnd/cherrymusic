@@ -2,6 +2,7 @@ import os
 import time
 import logging
 import threading
+import zipfile
 
 from tinytag import TinyTag
 from audiotranscode import audiotranscode
@@ -11,6 +12,7 @@ from django.http import HttpResponse, StreamingHttpResponse, Http404
 from django.db.models import Q
 from django.conf import settings
 from django.core.cache import cache
+from django.core.urlresolvers import reverse
 
 from rest_framework import viewsets, filters, status
 from rest_framework.exceptions import NotFound
@@ -207,6 +209,33 @@ class ImportPlaylistViewSet(APIView):
             track_file = None
 
         return track_file
+
+class ExportPlaylistViewSet(APIView):
+    def get(self, request, format=None):
+        base_url = request.build_absolute_uri().replace(reverse('api:export-playlist'), "")
+
+        playlists = Playlist.objects.filter(owner=request.user)
+        playlist_zip_path = os.path.join('/tmp' + settings.SENDFILE_ROOT, request.user.username + '.zip')
+
+        with zipfile.ZipFile(playlist_zip_path, 'w') as playlists_zip:
+            for playlist in playlists:
+                tracks = playlist.track_set.all()
+                tracks_url = [
+                    base_url + reverse('api:stream', args=['']) + str(track.file.relative_path())
+                    for track in tracks
+                    ]
+                playlist_string = '\n'.join(tracks_url)
+                playlists_zip.writestr(playlist.name + '.m3u' , playlist_string)
+
+        return sendfile(
+            request,
+            playlist_zip_path,
+            root_url='/tmp' + settings.SENDFILE_URL,
+            root_directory='/tmp' + settings.SENDFILE_ROOT,
+            attachment=True,
+            attachment_filename='playlists.zip',
+            mimetype='application/x-zip-compressed',
+        )
 
 class UserViewSet(viewsets.ModelViewSet):
     authentication_classes = (SessionAuthentication, BasicAuthentication)

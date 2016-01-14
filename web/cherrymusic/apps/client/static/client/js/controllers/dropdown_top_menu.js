@@ -7,6 +7,7 @@ app.controller('DropdownTopMenuController', function($scope, $rootScope, $uibMod
             templateUrl: STATIC_FILES + 'client/modals/user_options.html',
             scope: $scope,
             controller: function($scope, $uibModalInstance){
+                $scope.downloadPlaylistURL = API_EXPORT_PLAYLIST_URL;
                 $scope.close = function(){
                     $uibModalInstance.dismiss('cancel');
                 };
