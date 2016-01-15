@@ -23,11 +23,11 @@
   position: relative;
   display: inline;
   float: left;
-  color: #fff;
+  color: #FFF;
   padding: 0 2px;
 }
 .cm-media-list-wrench:hover {
-  color: #444;
+  color: #444444;
   cursor: pointer;
 }
 .cm-media-list > li:nth-child(odd) {
@@ -69,12 +69,25 @@
   padding-right: 0px;
   box-shadow: -5px 0px 5px rgba(0, 0, 0, 0.4);
 }
+.nav-tabs {
+  border-bottom: 1px solid #ebebeb;
+}
+.nav-tabs > li.active > a {
+  background-color: #FFF;
+  border-color: #ebebeb #ebebeb transparent;
+}
+.nav-tabs > li.active > a:hover {
+  background-color: #FFF;
+}
+.nav-tabs > li > a:hover {
+  background-color: #ebebeb;
+}
 .playlist-tab-list {
   background-color: #222;
   padding-top: 1px;
 }
 .playlist-tab-inactive a {
-  background-color: #ddd;
+  background-color: #dbdbdb;
 }
 .playlist-tab-closer {
   font-size: 20px;
@@ -89,7 +102,7 @@
   height: 41px;
 }
 .playlist-tab-border-left {
-  border-left: 1px solid #ddd;
+  border-left: 1px solid #ebebeb;
 }
 #playlistCommands {
   padding: 5px;

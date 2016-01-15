@@ -6,7 +6,7 @@
     font-size: 20px;
     line-height: 15px;
     display: block;
-    color: #888;
+    color: lighten(@theme-main-color, 20%);
 }
 .fill-height{
     height: 100%;
@@ -14,10 +14,11 @@
 
 .fill-height-with-jp{
     height: calc(~'100vh - 70px');
+    background-color: @theme-background-color;
 }
 
 #albumart{
-    background-color: #eee;
+    background-color: darken(@theme-background-color, 6.6%);
     float: left;
     width: @mediaplayer-height;
     height: @mediaplayer-height;
@@ -126,7 +127,7 @@
 // *****************************************************************************
 // Added bootstrap components, probably there are better ways to add it
 #gradient {
-  .striped(@color: rgba(255,255,255,.15); @angle: 45deg) {
+  .striped(@color: darken(@theme-main-color, 5.3%); @angle: 45deg) {
     background-image: -webkit-linear-gradient(@angle, @color 25%, transparent 25%, transparent 50%, @color 50%, @color 75%, transparent 75%, transparent);
     background-image: -o-linear-gradient(@angle, @color 25%, transparent 25%, transparent 50%, @color 50%, @color 75%, transparent 75%, transparent);
     background-image: linear-gradient(@angle, @color 25%, transparent 25%, transparent 50%, @color 50%, @color 75%, transparent 75%, transparent);

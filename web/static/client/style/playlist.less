@@ -28,19 +28,19 @@
         position: relative;
         display: inline;
         float: left;
-        color: #fff;
+        color: @theme-background-color;
         &:hover{
-            color: #444;
+            color: darken(@theme-main-color, 6.8%);
             cursor: pointer;
         }
         padding: 0 2px;
     }
     
     & > li:nth-child(odd) {
-        background-color: @gray-even-lighter;
+        background-color: @theme-list-background;
     }
     & > li:nth-child(even) {
-        background-color: @gray-lighter;
+        background-color: @theme-list-background-high-contrast;
     }
     
     &-parent{
@@ -85,6 +85,22 @@
     box-shadow: -5px 0px 5px rgba(0, 0, 0, 0.4);
 }
 
+.nav-tabs{
+    border-bottom: 1px solid darken(@theme-background-color, 8%);
+    
+    > li.active > a{
+        background-color: @theme-background-color;
+        border-color: darken(@theme-background-color, 8%)
+             darken(@theme-background-color, 8%) transparent;
+        &:hover{
+            background-color: @theme-background-color;
+        }
+    }
+    > li > a:hover{
+        background-color: darken(@theme-background-color, 8%);
+    }
+}
+
 .playlist-tab{
     &-list{
         background-color: @navbar-inverse-bg;
@@ -92,7 +108,7 @@
     }
     
     &-inactive a{
-        background-color: @nav-tabs-border-color;
+        background-color: darken(@theme-background-color, 14%);
     }
     
     &-closer{
@@ -111,9 +127,9 @@
     }
     
     &-border-left{
-        border-left: 1px solid @nav-tabs-border-color;
+        border-left: 1px solid darken(@theme-background-color, 8%);
     }
-}
+}   
 
 #playlistCommands{
     padding: 5px;

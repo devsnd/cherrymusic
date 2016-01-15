@@ -7,14 +7,15 @@ growl-notifications{
 }
 
 growl-notification {
-    background: #FFF none repeat scroll 0% 0%;
+    background: @theme-background-color none repeat scroll 0% 0%;
     padding: 15px 30px;
     width: 200px;
     display: block;
     margin-top: 15px;
     border-width: 1px 1px 1px 5px;
     border-style: solid;
-    border-color: #EEE #EEE #EEE red;
+    border-color: @theme-background-color @theme-background-color
+        @theme-background-color red;
     border-radius: 3px 0px 0px 3px;
 }
 
@@ -26,6 +27,7 @@ growl-notification {
 
 #search-panel{
   padding-bottom: @mediaplayer-height;
+  background-color: @theme-background-color;
 }
 
 #options{
@@ -52,19 +54,20 @@ ul.no-bullet {
 }
 
 a {
-  color: #555555;
-  text-decoration: none;
+    color: @theme-main-color;
+    text-decoration: none;
+    &:hover,
+    &:focus {
+        color: darken(@theme-main-color, 15%);
+        text-decoration: underline;
+    }
+    &:focus {
+        outline: thin dotted darken(@theme-main-color, 13.4%);
+        outline: 5px auto -webkit-focus-ring-color;
+        outline-offset: -2px;
+    }
 }
-a:hover,
-a:focus {
-  color: #2f2f2f;
-  text-decoration: underline;
-}
-a:focus {
-  outline: thin dotted #333;
-  outline: 5px auto -webkit-focus-ring-color;
-  outline-offset: -2px;
-}
+
 // make sure all dnd-list elements are relative to be draggable
 *[dnd-list], *[dnd-list] > * {
     position: relative;
@@ -74,18 +77,8 @@ a:focus {
 }
 *[dnd-list] .dndPlaceholder {
     display: block;
-    background-color: #ddd;
+    background-color: darken(@theme-background-color, 13.5%);
     min-height: 42px;
-}
-
-// add icon to navbar
-.navbar-brand {
-    background-image: url("../img/favicon32glow.png");
-    background-position: 49% 14px;
-    background-repeat: no-repeat;
-    min-width: 30px;
-    min-height: 50px;
-    margin: 0px 5px;
 }
 
 //message of the day
@@ -96,10 +89,10 @@ a:focus {
     margin-left: -175px;
     top: 20px;
     text-align: center;
-    background-color: #F7F7F7;
+    background-color: darken(@theme-background-color, 3%);
     border-radius: 15px;
     padding: 10px;
-    color: #AAA;
+    color: lighten(@theme-main-color, 33.5%);
 }
 
 #playback-controls{
@@ -109,14 +102,37 @@ a:focus {
     right: 0px;
     left: 0px;
     overflow: hidden;
-    background-color: #fff;
+    background-color: @theme-background-color;
     z-index: @zindex-player-panel;
     /* .box-shadow(~"2px 2px 3px rgba(0,0,0,.4), 0px 0px 5px rgba(0,0,0,.8)"); */
 }
 
-.navbar-nav > li > a {
-    padding-left: 7px;
-    padding-right: 7px;
+// add icon to navbar
+.navbar{
+    &-brand{
+        background-image: url("../img/favicon32glow.png");
+        background-position: 49% 14px;
+        background-repeat: no-repeat;
+        min-width: 30px;
+        min-height: 50px;
+        margin: 0px 5px;
+        float: left;
+        padding: 15px 0px;
+        font-size: 18px;
+        line-height: 20px;
+    }
+    
+    &-nav > li > a {
+        padding-left: 7px;
+        padding-right: 7px;
+    }
+    
+    &-form {
+        margin: 8px 0px;
+        padding: 0px;
+        box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.1) inset, 0px 1px 0px rgba(255, 255, 255, 0.1);
+    }
+
 }
 
 .hidden-xs {
@@ -128,22 +144,21 @@ a:focus {
 //    display: block !important;
 //}
 
-.navbar-form {
-    margin: 8px 0px;
-    padding: 0px;
-    box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.1) inset, 0px 1px 0px rgba(255, 255, 255, 0.1);
-}
-.navbar-brand {
-    float: left;
-    padding: 15px 0px;
-    font-size: 18px;
-    line-height: 20px;
-}
-
 .user-list-item {
     list-style-type: none;
     .col-md-1, .col-md-2, .col-md-3, .col-md-4{
         padding-left: 0px;
         padding-right: 0px;
     }
+}
+
+.btn{
+    &-default{
+        background-color: @theme-background-color;
+        border-color: darken(@theme-background-color, 18%);
+    }
+}
+
+hr {
+    border-color: darken(@theme-background-color, 8%);
 }

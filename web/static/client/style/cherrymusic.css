@@ -11,7 +11,7 @@ growl-notification {
   margin-top: 15px;
   border-width: 1px 1px 1px 5px;
   border-style: solid;
-  border-color: #EEE #EEE #EEE red;
+  border-color: #FFF #FFF #FFF red;
   border-radius: 3px 0px 0px 3px;
 }
 /* preload progress indicator images, so they show up on first search */
@@ -21,6 +21,7 @@ growl-notification {
 }
 #search-panel {
   padding-bottom: 70px;
+  background-color: #FFF;
 }
 #options td {
   height: 42px;
@@ -40,7 +41,7 @@ ul.no-bullet {
   margin: 0;
 }
 a {
-  color: #555555;
+  color: #555;
   text-decoration: none;
 }
 a:hover,
@@ -49,7 +50,7 @@ a:focus {
   text-decoration: underline;
 }
 a:focus {
-  outline: thin dotted #333;
+  outline: thin dotted #333333;
   outline: 5px auto -webkit-focus-ring-color;
   outline-offset: -2px;
 }
@@ -62,16 +63,8 @@ a:focus {
 }
 *[dnd-list] .dndPlaceholder {
   display: block;
-  background-color: #ddd;
+  background-color: #dddddd;
   min-height: 42px;
-}
-.navbar-brand {
-  background-image: url("../img/favicon32glow.png");
-  background-position: 49% 14px;
-  background-repeat: no-repeat;
-  min-width: 30px;
-  min-height: 50px;
-  margin: 0px 5px;
 }
 .motd {
   left: 50%;
@@ -80,10 +73,10 @@ a:focus {
   margin-left: -175px;
   top: 20px;
   text-align: center;
-  background-color: #F7F7F7;
+  background-color: #f7f7f7;
   border-radius: 15px;
   padding: 10px;
-  color: #AAA;
+  color: #aaaaaa;
 }
 #playback-controls {
   height: 70px;
@@ -92,27 +85,33 @@ a:focus {
   right: 0px;
   left: 0px;
   overflow: hidden;
-  background-color: #fff;
+  background-color: #FFF;
   z-index: 1032;
   /* .box-shadow(~"2px 2px 3px rgba(0,0,0,.4), 0px 0px 5px rgba(0,0,0,.8)"); */
+}
+.navbar-brand {
+  background-image: url("../img/favicon32glow.png");
+  background-position: 49% 14px;
+  background-repeat: no-repeat;
+  min-width: 30px;
+  min-height: 50px;
+  margin: 0px 5px;
+  float: left;
+  padding: 15px 0px;
+  font-size: 18px;
+  line-height: 20px;
 }
 .navbar-nav > li > a {
   padding-left: 7px;
   padding-right: 7px;
-}
-.hidden-xs {
-  height: 50px;
 }
 .navbar-form {
   margin: 8px 0px;
   padding: 0px;
   box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.1) inset, 0px 1px 0px rgba(255, 255, 255, 0.1);
 }
-.navbar-brand {
-  float: left;
-  padding: 15px 0px;
-  font-size: 18px;
-  line-height: 20px;
+.hidden-xs {
+  height: 50px;
 }
 .user-list-item {
   list-style-type: none;
@@ -123,4 +122,11 @@ a:focus {
 .user-list-item .col-md-4 {
   padding-left: 0px;
   padding-right: 0px;
+}
+.btn-default {
+  background-color: #FFF;
+  border-color: #d1d1d1;
+}
+hr {
+  border-color: #ebebeb;
 }

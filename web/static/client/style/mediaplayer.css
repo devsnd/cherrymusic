@@ -3,16 +3,17 @@
   font-size: 20px;
   line-height: 15px;
   display: block;
-  color: #888;
+  color: #888888;
 }
 .fill-height {
   height: 100%;
 }
 .fill-height-with-jp {
   height: calc(100vh - 70px);
+  background-color: #FFF;
 }
 #albumart {
-  background-color: #eee;
+  background-color: #eeeeee;
   float: left;
   width: 70px;
   height: 70px;
@@ -36,18 +37,18 @@
   cursor: pointer;
 }
 .progress-striped .jp-bar-seek {
-  background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
-  background-image: -o-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
-  background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+  background-image: -webkit-linear-gradient(45deg, #474747 25%, transparent 25%, transparent 50%, #474747 50%, #474747 75%, transparent 75%, transparent);
+  background-image: -o-linear-gradient(45deg, #474747 25%, transparent 25%, transparent 50%, #474747 50%, #474747 75%, transparent 75%, transparent);
+  background-image: linear-gradient(45deg, #474747 25%, transparent 25%, transparent 50%, #474747 50%, #474747 75%, transparent 75%, transparent);
 }
 .jp-bar-played {
   background-color: #337ab7;
   cursor: pointer;
 }
 .progress-striped .jp-bar-played {
-  background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
-  background-image: -o-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
-  background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+  background-image: -webkit-linear-gradient(45deg, #474747 25%, transparent 25%, transparent 50%, #474747 50%, #474747 75%, transparent 75%, transparent);
+  background-image: -o-linear-gradient(45deg, #474747 25%, transparent 25%, transparent 50%, #474747 50%, #474747 75%, transparent 75%, transparent);
+  background-image: linear-gradient(45deg, #474747 25%, transparent 25%, transparent 50%, #474747 50%, #474747 75%, transparent 75%, transparent);
 }
 .jp-controls {
   position: absolute;

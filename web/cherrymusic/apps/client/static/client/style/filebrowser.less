@@ -32,19 +32,19 @@
         position: relative;
         display: inline;
         float: left;
-        color: #fff;
+        color: @theme-background-color;
         &:hover{
-            color: #444;
+            color: darken(@theme-main-color, 6.6%);
             cursor: pointer;
         }
         padding: 0 2px;
     }
     
     & > li:nth-child(odd) {
-        background-color: @gray-even-lighter;
+        background-color: @theme-list-background;
     }
     & > li:nth-child(even) {
-        background-color: @gray-lighter;
+        background-color: @theme-list-background-high-contrast;
     }
     
     &-parent{
@@ -103,7 +103,7 @@ file{
     }
 
     &-info-bar{
-        background-color: #ddd;
+        background-color: darken(@theme-background-color, 13%);
     }
 
     &-name{
@@ -115,7 +115,7 @@ file{
     }
 
     &-folder-files-count{
-        color: #999;
+        color: lighten(@theme-main-color, 40%);
         display: inline;
     }
 
