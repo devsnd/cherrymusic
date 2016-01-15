@@ -55,7 +55,7 @@
               <div class="playlist-usernamelabel">
                   <span class="badge" ng-style="$root.addUserBackgroundColor(playlist.owner)">{{ playlist.owner_name }}</span>
               </div>
-              <div class="playlist-deletebutton">
+              <div class="playlist-deletebutton" ng-if="playlist.owner == $root.user.id">
                 <a class="btn btn-xs btn-danger" ng-click=removePlaylist(playlist)>×</a>
               </div>
             </div>  
