@@ -19,7 +19,7 @@ ENV LC_ALL es_ES.UTF-8
 ENV LC_CTYPE es_ES.UTF-8 
 
 # python
-RUN apt-get update && apt-get install -y python3 python3-pip libpq-dev python-dev libmysqlclient-dev \
+RUN apt-get update && apt-get install -y python3 python3-pip libpq-dev libjpeg-dev python-dev libmysqlclient-dev \
     software-properties-common
 
 # ffmpeg

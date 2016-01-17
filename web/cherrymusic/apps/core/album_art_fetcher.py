@@ -37,8 +37,11 @@ except ImportError:
 import os.path
 import codecs
 import re
-import subprocess
 import logging
+from io import BytesIO
+
+from PIL import Image
+
 
 logger = logging.getLogger(__name__)
 
@@ -49,27 +52,11 @@ except ImportError:
     unidecode = lambda x: x
 
 
-def programAvailable(name):
-        """
-        check if a program is available in the system PATH
-        """
-        try:
-            with open(os.devnull, 'w') as devnull:
-                process = subprocess.Popen([name], stdout=subprocess.PIPE,
-                                           stderr=devnull)
-                out, err = process.communicate()
-                return 'ImageMagick' in codecs.decode(out, 'UTF-8')
-        except OSError:
-            return False
-
-
 class AlbumArtFetcher:
     """
     provide the means to fetch images from different web services by
     searching for certain keywords
     """
-
-    imageMagickAvailable = programAvailable('convert')
 
     methods = {
         'amazon': {
@@ -109,29 +96,33 @@ class AlbumArtFetcher:
         self.method = method
         self.timeout = timeout
 
-    def resize(self, imagepath, size):
+    def resize(self, image_path, size):
         """
         resize an image using image magick
 
         Returns:
             the binary data of the image and a matching http header
         """
-        if AlbumArtFetcher.imageMagickAvailable:
-            with open(os.devnull, 'w') as devnull:
-                cmd = ['convert', imagepath,
-                       '-resize', str(size[0])+'x'+str(size[1]),
-                       'jpeg:-']
-                print(' '.join(cmd))
-                im = subprocess.Popen(cmd,
-                                      stdout=subprocess.PIPE,
-                                      stderr=subprocess.PIPE)
-                data = im.communicate()[0]
-                header = {'Content-Type': "image/jpeg",
-                          'Content-Length': len(data)}
-                return header, data
-        return None, ''
 
-    def fetchurls(self, searchterm):
+        logger.debug('Resizing image: %s' % image_path)
+
+        try:
+            image = Image.open(image_path)
+            image.thumbnail(size, Image.ANTIALIAS)
+            jpeg_image_buffer = BytesIO()
+            image.save(jpeg_image_buffer, format="JPEG")
+            data = jpeg_image_buffer.getvalue()
+
+        except IOError:
+            logger.error('Cannot resize album art: %s' % image_path)
+            return None, ''
+
+        header = {'Content-Type': "image/jpeg",
+                  'Content-Length': len(data)}
+
+        return header, data
+
+    def fetch_urls(self, searchterm):
         """fetch image urls based on the provided searchterms
 
         Returns:
@@ -146,7 +137,7 @@ class AlbumArtFetcher:
         # the keywords must always be appenable to the method-url
         url = method['url']+urllib.parse.quote(searchterm)
         #download the webpage and decode the data to utf-8
-        html = codecs.decode(self.retrieveData(url)[0], 'UTF-8')
+        html = codecs.decode(self.retrieve_data(url)[0], 'UTF-8')
         # fetch all urls in the page
         matches = []
         for regex in method['regexes']:
@@ -162,19 +153,19 @@ class AlbumArtFetcher:
         Returns:
             an http header and binary data
         """
-        matches = self.fetchurls(searchterm)
+        matches = self.fetch_urls(searchterm)
         if matches:
             imgurl = matches[0]
             if 'urltransformer' in self.method:
                 imgurl = self.method['urltransformer'](imgurl)
             if imgurl.startswith('//'):
                 imgurl = 'http:'+imgurl
-            raw_data, header = self.retrieveData(imgurl)
+            raw_data, header = self.retrieve_data(imgurl)
             return header, raw_data
         else:
             return None, ''
 
-    def retrieveData(self, url):
+    def retrieve_data(self, url):
         """
         use a fake user agent to retrieve data from a webaddress
 
@@ -189,7 +180,7 @@ class AlbumArtFetcher:
         urlhandler = urllib.request.urlopen(req, timeout=self.timeout)
         return urlhandler.read(), urlhandler.info()
 
-    def fetchLocal(self, path):
+    def fetch_local(self, path):
         """ search a local path for image files.
         @param path: directory path
         @type path: string

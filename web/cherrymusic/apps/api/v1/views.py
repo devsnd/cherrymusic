@@ -24,7 +24,7 @@ from rest_framework.views import APIView
 
 from cherrymusic.apps.api.v1.helper import ImageResponse, ImageRenderer
 from cherrymusic.apps.core import pathprovider
-from cherrymusic.apps.core.albumartfetcher import AlbumArtFetcher
+from cherrymusic.apps.core.album_art_fetcher import AlbumArtFetcher
 from cherrymusic.apps.core.models import Playlist, Track, User, UserSettings
 from cherrymusic.apps.core.pluginmanager import PluginManager
 from cherrymusic.apps.storage.status import ServerStatus
@@ -357,35 +357,35 @@ class AlbumArtView(APIView):
             # try the parent directory of the file
             file_path = file_path / '..'
 
-        #try getting a cached album art image
-        file_cache_path = pathprovider.albumArtFilePath(str(file_path))
+        file_cache_path = pathprovider.album_art_file_path(str(file_path))
         if os.path.exists(file_cache_path):
+            logger.debug('Getting cached thumbnail: %s' % file_cache_path)
             with open(file_cache_path, 'rb') as fh:
                 return ImageResponse(image_data=fh.read())
 
-        #try getting album art inside local folder
         fetcher = AlbumArtFetcher()
-        header, data, resized = fetcher.fetchLocal(str(file_path))
+        header, data, resized = fetcher.fetch_local(str(file_path))
 
         if header:
+            logger.debug('Getting album art from local: %s' % file_path)
             if resized:
-                #cache resized image for next time
                 with open(file_cache_path, 'wb') as fh:
                     fh.write(data)
+
             return ImageResponse(image_data=data)
-        else:
-            #fetch album art from online source
-            try:
-                foldername = os.path.basename(file_path)
-                keywords = foldername
-                logger.info("Fetching album art for keywords: %s" % keywords)
-                header, data = fetcher.fetch(keywords)
-                if header:
-                    with open(file_cache_path, 'wb') as fh:
-                        fh.write(data)
-                    return ImageResponse(image_data=data)
-            except:
-                pass
+#        else:
+#            logger.debug('Getting album art from online source.')
+#            try:
+#                foldername = os.path.basename(file_path)
+#                keywords = foldername
+#                logger.info("Fetching album art for keywords: %s" % keywords)
+#                header, data = fetcher.fetch(keywords)
+#                if header:
+#                    with open(file_cache_path, 'wb') as fh:
+#                        fh.write(data)
+#                    return ImageResponse(image_data=data)
+#            except:
+#                logger.error('Unable to get album art from online source.')
         raise Http404()
 
 
