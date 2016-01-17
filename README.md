@@ -4,6 +4,11 @@ CherryMusic
 
 This is a rewrite of CherryMusic to be based on django.
 
+You can test it at:
+http://music.openrock.mooo.com/
+* User: `test`
+* Password: `1234`
+
 Setup
 -----
 
