@@ -73,9 +73,6 @@ venv
 env
 __pycache__
 
-# Django
-migrations
-
 # Configuration
 config.yml
 .env
