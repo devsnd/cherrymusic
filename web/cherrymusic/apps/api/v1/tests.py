@@ -412,6 +412,28 @@ class TestStatusView(APITestCase):
         self.assertEqual(response.data[0], status_json)
 
 
+class TestAlbumArtView(APITestCase):
+    fixtures = ['directory', 'file', 'user']
+
+    def setUp(self):
+        self.user = User.objects.get(pk=1)
+        self.client = APIClient(enforce_csrf_checks=True)
+        self.client.force_authenticate(user=self.user)
+        path = 'Paisano'
+        self.url = reverse('api:album-art', args=[path])
+
+    def test_unauthenticated_album_art_query(self):
+        client = APIClient()
+        response = client.get(self.url)
+
+        self.assertEqual(response.data, unauthenticated_response)
+
+    def test_album_art_query(self):
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
 class TestGlobalSearchList(APITestCase):
     fixtures = ['directory', 'file', 'user']
 

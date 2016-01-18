@@ -23,7 +23,7 @@ urlpatterns = [
     url(r'^playlist/import/(?P<filename>.*)', ImportPlaylistViewSet.as_view(), name="import-playlist"),
     url(r'^playlist/export/$', ExportPlaylistViewSet.as_view(), name="export-playlist"),
     url(r'index/(?P<path>.*)', IndexDirectoryView.as_view(), name="index-files"),
-    url(r'albumart/(?P<path>.*)', AlbumArtView.as_view(), name="albumart"),
+    url(r'albumart/(?P<path>.*)', AlbumArtView.as_view(), name="album-art"),
     url(r'^', include(router.urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='api-auth')),
     url(r'^rest-auth/', include('rest_auth.urls', namespace='rest-auth'))
