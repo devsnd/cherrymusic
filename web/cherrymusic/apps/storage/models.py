@@ -140,7 +140,6 @@ class File(models.Model):
     def index_unindexed_metadata(cls):
         for f in File.objects.filter(meta_index_date__isnull=True):
             f.parse_metadata()
-            f.meta_index_date = timezone.now()
             f.save()
 
     def __str__(self):
@@ -172,6 +171,7 @@ class File(models.Model):
             self.meta_year = tag.year
             self.meta_genre = tag.genre
             self.meta_duration = tag.duration
+            self.meta_index_date = timezone.now()
         except:
             logger.info('Fail to get meta data from %s', str(self.absolute_path()))
 
