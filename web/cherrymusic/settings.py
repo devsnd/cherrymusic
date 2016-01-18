@@ -174,22 +174,6 @@ DATABASES = {
     }
 }
 
-# Test
-if 'test' in sys.argv:
-    DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'TEST_CHARSET': 'UTF8', # if your normal db is utf8
-        'NAME': ':memory:', # in memory
-        'TEST_NAME': ':memory:', # in memory
-    }
-
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-            'LOCATION': 'my_cache_table',
-        }
-    }
-
 FIXTURE_DIRS = (
    os.path.join(BASE_DIR, 'cherrymusic/fixtures'),
 )

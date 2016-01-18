@@ -7,9 +7,7 @@ from cherrymusic.apps.storage.models import Directory
 if len(Directory.objects.all())== 0:
     base_dir = Directory(path='/usr/src/app/music')
     base_dir.save(is_basedir=True)
-    user = User.objects.create_user(username='admin', email='Admin@admin.com', password='admin')
-    user.is_staff = user.is_superuser = True
-    user.save()
+    user = User.objects.create_superuser(username='admin', email='Admin@admin.com', password='admin')
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),

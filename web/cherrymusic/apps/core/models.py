@@ -68,9 +68,10 @@ class MiscSettings(models.Model):
 def create_user_settings(sender, instance, created, **kwargs):
     """Create UserSettings for every new User."""
     if created:
-        user_settings = UserSettings.objects.create(user=instance)
-        HotkeysSettings.objects.create(user_settings=user_settings)
-        MiscSettings.objects.create(user_settings=user_settings)
+        user_settings, created = UserSettings.objects.get_or_create(user=instance)
+        if created:
+            HotkeysSettings.objects.get_or_create(user_settings=user_settings)
+            MiscSettings.objects.get_or_create(user_settings=user_settings)
 
 signals.post_save.connect(create_user_settings, sender=User, weak=False,
                           dispatch_uid='models.create_user_settings')

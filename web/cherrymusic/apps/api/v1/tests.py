@@ -283,7 +283,7 @@ class TestUserViewSet(APITestCase):
 
 
 class TestUserSettingsView(APITestCase):
-    fixtures = ['user', 'user_settings', 'hotkeys_settings', 'misc_settings']
+    fixtures = ['user_settings', 'hotkeys_settings', 'misc_settings', 'user']
 
     def setUp(self):
         self.user = User.objects.get(pk=1)
@@ -335,7 +335,7 @@ class TestUserSettingsView(APITestCase):
     def test_user_settings_create(self):
         response = self.client.post(self.url, self.user_settings_json)
 
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_user_settings_update(self):
         pk = self.user.id

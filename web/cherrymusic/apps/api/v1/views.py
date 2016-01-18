@@ -287,9 +287,6 @@ class UserSettingsViewSet(viewsets.ModelViewSet):
     queryset = UserSettings.objects.all()
     serializer_class = UserSettingsSerializer
 
-    def create(self, request):
-        raise Http404()
-
     def get_queryset(self):
         user = self.request.user
         return UserSettings.objects.filter(user=user)

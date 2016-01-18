@@ -4,3 +4,23 @@ web_test:
     service: web
   build: ./web-test
   env_file: .env
+  links:
+    - postgres_test:postgres
+    - redis_test:redis
+
+postgres_test:
+  extends:
+    file: docker-compose.base.yml
+    service: postgres
+  volumes_from:
+    - data_test
+
+redis_test:
+  extends:
+    file: docker-compose.base.yml
+    service: redis
+
+data_test:
+  extends:
+    file: docker-compose.base.yml
+    service: data
