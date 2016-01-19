@@ -138,7 +138,7 @@
 {
     "model": "storage.file",
     "fields": {
-        "meta_title": "Tension",
+        "meta_title": "Tensión",
         "meta_index_date": "2016-01-11",
         "meta_artist": "Tipico pero cierto",
         "meta_album": "Existimos porque nos necesitamos",

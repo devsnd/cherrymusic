@@ -101,7 +101,7 @@ class PlaylistViewSet(MultiSerializerViewSetMixin, viewsets.ModelViewSet):
         playlists = Playlist.objects.filter(Q(owner=user) | Q(public=True))
 
         if(query):
-            return playlists.filter(name__icontains=query)
+            return playlists.filter(name__unaccent__icontains=query)
 
         return playlists
 
@@ -212,7 +212,7 @@ class ImportPlaylistViewSet(APIView):
 
     def _find_track_file(self, track_filename):
         try:
-            track_file = File.objects.filter(filename__icontains=track_filename)[0]
+            track_file = File.objects.filter(filename__unaccent__icontains=track_filename)[0]
         except IndexError:
             track_file = None
 
@@ -438,9 +438,9 @@ class GlobalSearchList(APIView):
         max_directories = 10
         max_files = 50
         
-        directories = Directory.objects.filter(path__icontains=query)[: max_directories]
-        files = File.objects.filter(Q(filename__icontains=query) |
-            Q(meta_title__icontains=query) | Q(meta_artist__icontains=query))[: max_files]
+        directories = Directory.objects.filter(path__unaccent__icontains=query)[: max_directories]
+        files = File.objects.filter(Q(filename__unaccent__icontains=query) |
+            Q(meta_title__unaccent__icontains=query) | Q(meta_artist__unaccent__icontains=query))[: max_files]
 
         dir_serializer = DirectorySerializer()
         file_serializer = FileSerializer()
