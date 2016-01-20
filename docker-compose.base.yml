@@ -10,9 +10,10 @@ web:
   command: /usr/local/bin/gunicorn cherrymusic.wsgi:application -w 6 -b :8000 --timeout 5000
 
 nginx:
+  extends:
+    file: config.yml
+    service: nginx
   build: ./nginx/
-  ports:
-    - "80:80"
 
 postgres:
   image: postgres:latest
