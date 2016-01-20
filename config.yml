@@ -1,3 +1,7 @@
 web:
   volumes:
     - /home/user/My Music:/usr/src/app/music:ro
+
+nginx:
+  ports:
+    - "80:80"
