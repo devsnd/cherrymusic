@@ -352,7 +352,7 @@ class AlbumArtView(APIView):
             if image_data:
                 return ImageResponse(image_data=image_data)
             # try the parent directory of the file
-            file_path = file_path / '..'
+            file_path = os.path.dirname(str(file_path))
 
         file_cache_path = pathprovider.album_art_file_path(str(file_path))
         if os.path.exists(file_cache_path):
