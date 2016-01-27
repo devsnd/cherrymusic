@@ -1,7 +1,9 @@
 <div class="fill-height-with-jp" role="tabpanel">
   <!-- tabs -->
   <ul class="playlist-tab-list nav nav-tabs" role="tablist">
-    <li role="presentation" ng-class="{'active': playlist==currentPlaylist, 'playlist-tab-inactive': playlist!==currentPlaylist}" ng-repeat="playlist in openedPlaylists">
+    <li role="presentation" 
+        ng-class="{'active': playlist==currentPlaylist, 'playlist-tab-inactive': playlist!==currentPlaylist}"
+        ng-repeat="playlist in openedPlaylists">
       <playlist-tab playlist="playlist" 
                     current-playing-playlist="currentPlayingPlaylist"
                     on-remove="closePlaylist($index)"
@@ -27,11 +29,19 @@
         </ul>
       </div>
       <div ng-if="currentPlaylist.type == 'queue'">
-        <a class="pull-left btn btn-xs btn-default" ng-click="currentPlaylist.tracks = shuffle(currentPlaylist.tracks)">random!</a>
-        <a class="pull-left btn btn-xs btn-default" ng-click="openSavePlaylistModal()">save as playlist</a>
+        <a class="pull-left btn btn-xs btn-default"
+           ng-click="currentPlaylist.tracks = shuffle(currentPlaylist.tracks)">
+           random!
+        </a>
+        <a class="pull-left btn btn-xs btn-default" ng-click="openSavePlaylistModal()">
+          save as playlist
+        </a>
         <div class="btn-group pull-right" uib-dropdown is-open="isOpenDropDown">
-          <button class="btn btn-xs btn-default" ng-click="clearPlaylist(currentPlaylist)">clear</button>
-          <button class="btn dropdown-toggle btn-default btn-xs" uib-dropdown-toggle ng-disabled="disabled">
+          <button class="btn btn-xs btn-default" ng-click="clearPlaylist(currentPlaylist)">
+            clear
+          </button>
+          <button class="btn dropdown-toggle btn-default btn-xs"
+                  uib-dropdown-toggle ng-disabled="disabled">
             <span class="caret"></span>
             <span class="sr-only">Toggle Dropdown</span>
           </button>
@@ -42,9 +52,16 @@
           </ul>
         </div>
       </div>
-      <div ng-if="currentPlaylist.type != 'queue'" class="pull-left btn-group" uib-dropdown is-open="isOpenDropDown">
-        <button ng-if="!currentPlaylist.saved" class="btn btn btn-xs btn-default" ng-click="updatePlaylist(currentPlaylist)">save</button>
-        <button class="btn dropdown-toggle btn-default btn-xs" uib-dropdown-toggle ng-disabled="disabled">
+      <div ng-if="currentPlaylist.type != 'queue'" 
+           class="pull-left btn-group"
+           uib-dropdown is-open="isOpenDropDown">
+        <button ng-if="!currentPlaylist.saved" 
+                class="btn btn btn-xs btn-default"
+                ng-click="updatePlaylist(currentPlaylist)">
+          save
+        </button>
+        <button class="btn dropdown-toggle btn-default btn-xs"
+                uib-dropdown-toggle ng-disabled="disabled">
           edit <span class="caret"></span>
         </button>
         <ul class="dropdown-menu">
@@ -58,10 +75,14 @@
     <div class="playlist-progress row" ng-if="remainingPlaylistDuration" >
       <ul class="nav navbar-nav" style="width: 100%;">
       <li style="float: left;">
-        <span class="label label-default">{{ remainingPlaylistDuration | timeformat }} remaining</span>
+        <span class="label label-default">
+          {{ remainingPlaylistDuration | timeformat }} remaining
+        </span>
       </li>
       <div class="playlist-progress-bar progress" style="height: 3px;margin-top: 18px;">
-        <div class="progress-bar progress-bar-default" style="width: {{ remainingPlaylistPercentage }}%"></div>
+        <div class="progress-bar progress-bar-default" 
+             style="width: {{ remainingPlaylistPercentage }}%">
+        </div>
       </div>
       </ul>
     </div>
@@ -81,7 +102,8 @@
       <li ng-repeat="track in currentPlaylist.tracks track by $index"
           ng-class="{'bg-primary': currentTrackIndex == $index}"
           dnd-draggable="track"
-          dnd-moved="currentPlaylist.tracks.splice($index, 1)"
+
+          dnd-moved="moveTrack(event, $index, track)"
           dnd-effect-allowed="move">
         <div ng-if="track.type == 0">
           <file on-remove="currentPlaylist.tracks.splice($index, 1); $emit('SET_SAVED_FALSE', currentPlaylist)" 
@@ -92,5 +114,4 @@
       </li>
     </ul>
   </div>
-
 </div>

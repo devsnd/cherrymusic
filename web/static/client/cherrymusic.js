@@ -1823,9 +1823,21 @@ app.directive('mediaPlayer', [
             controller: function ($scope) {
                 $scope.dropCallback = function(event, index, item){
                     if(item.type === undefined){
-                        return $scope.trackFromFile(item);
+                        item = $scope.trackFromFile(item);
                     }
+                    item.order = index;
+                    // workaround to fix drag n drop move bug #173
+                    $scope.lastAdded = item
                     return item;
+                };
+
+                $scope.moveTrack = function(event, index, track){
+                    if($scope.lastAdded.order < index){
+                        $scope.currentPlaylist.tracks.splice(index + 1, 1);
+                    }
+                    else{
+                        $scope.currentPlaylist.tracks.splice(index, 1);
+                    }
                 };
   
                 $scope.shuffle = function(array) {
