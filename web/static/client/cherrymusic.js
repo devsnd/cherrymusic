@@ -1838,6 +1838,7 @@ app.directive('mediaPlayer', [
                     else{
                         $scope.currentPlaylist.tracks.splice(index, 1);
                     }
+                    $scope.$emit('SET_SAVED_FALSE', $scope.currentPlaylist);
                 };
   
                 $scope.shuffle = function(array) {
