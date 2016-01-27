@@ -1,0 +1,55 @@
+<div ng-class="{'loading': $root.loadingFilebrowser}">
+  <div ng-if="!$root.loadingFilebrowser">
+    <div class="cm-media-list-item cm-media-list-parent-item"
+         ng-if="content.current_path !=='.'"
+         ng-click="loadPreviousDirectory(content.current_path)">
+      <a class="cm-media-list-parent" >
+        <span class="glyphicon glyphicon-arrow-left"></span>
+      </a>
+    </div>
+    <ol class="breadcrumb">
+      <li ng-repeat="breadcrumb in breadcrumbs track by breadcrumb.path">
+        <a ng-click="loadDirectory(breadcrumb.path)">{{ breadcrumb.name }}</a>
+      </li>
+    </ol>
+
+    <div ng-if="content.directories.length">
+      <h3>Directories</h3>
+      <li ng-repeat="directory in content.directories track by directory.id"
+          ng-click="loadDirectory(directory)"
+          class="list-dir list-dir-item cm-media-list-item">
+        <div class="list-dir-cover-area">
+          <div class="list-dir-albumart">
+          <img ng-src="{{ albumArtUrl(content.current_path + '/' + directory.path) }}" err-src="static/client/img/folder.png"></img>
+          </div>
+          <div class="list-dir-name-wrap">
+            <span class="list-dir-name">{{ directory.path }}</span>
+          </div>
+        </div>
+      </li>
+    </div>
+    <div class="tab-content">
+      <div ng-if="content.files.length">
+        {{ content.selected | json }}
+        <h3>Files <a ng-click="addAllFilesToPlaylist(content.files)" class="btn btn-default">add all files to current playlist</a></h3>
+        <ul class="no-bullet cm-media-list" 
+            dnd-list="content.files"
+            dnd-placeholder-tpl="<tr class='dndPlaceholder'><td></td></tr>"
+            dnd-drop="false">
+          <li ng-repeat="file in content.files | orderBy:'meta_track'"
+              dnd-draggable="file"
+              dnd-effect-allowed="copy"
+              dnd-selected="addToPlaylist(file)"
+              ng-class="{'selected': models.selected === file}">
+            <file file="file"></file>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div ng-if="baseDirNotIndexed(content)">
+      It seems you have not indexed your music library yet.
+      <button ng-disabled="indexingStarted" ng-click="indexLibrary('')">Index library now</button>
+    </div>
+  </div>
+</div>

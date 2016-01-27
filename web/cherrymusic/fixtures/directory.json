@@ -1,0 +1,114 @@
+[
+{
+    "model": "storage.directory",
+    "fields": {
+        "path": "/usr/src/app/music",
+        "parent": null
+    },
+    "pk": 1
+},
+{
+    "model": "storage.directory",
+    "fields": {
+        "path": "Mala Reputacion 223",
+        "parent": 1
+    },
+    "pk": 2
+},
+{
+    "model": "storage.directory",
+    "fields": {
+        "path": "Tipico pero cierto",
+        "parent": 1
+    },
+    "pk": 3
+},
+{
+    "model": "storage.directory",
+    "fields": {
+        "path": "Existimos porque nos necesitamos",
+        "parent": 3
+    },
+    "pk": 4
+},
+{
+    "model": "storage.directory",
+    "fields": {
+        "path": "TPC - Libreto",
+        "parent": 4
+    },
+    "pk": 5
+},
+{
+    "model": "storage.directory",
+    "fields": {
+        "path": "TPC - Disco",
+        "parent": 4
+    },
+    "pk": 6
+},
+{
+    "model": "storage.directory",
+    "fields": {
+        "path": "TPC - Zine",
+        "parent": 4
+    },
+    "pk": 7
+},
+{
+    "model": "storage.directory",
+    "fields": {
+        "path": "Corren malos tiempos para ser anarquista... sincronicemos la utop\u00eda",
+        "parent": 3
+    },
+    "pk": 8
+},
+{
+    "model": "storage.directory",
+    "fields": {
+        "path": "Libreto",
+        "parent": 8
+    },
+    "pk": 9
+},
+{
+    "model": "storage.directory",
+    "fields": {
+        "path": "zine",
+        "parent": 8
+    },
+    "pk": 10
+},
+{
+    "model": "storage.directory",
+    "fields": {
+        "path": "Paisano",
+        "parent": 1
+    },
+    "pk": 11
+},
+{
+    "model": "storage.directory",
+    "fields": {
+        "path": "Revolucion",
+        "parent": 11
+    },
+    "pk": 12
+},
+{
+    "model": "storage.directory",
+    "fields": {
+        "path": "Todo o nada",
+        "parent": 1
+    },
+    "pk": 13
+},
+{
+    "model": "storage.directory",
+    "fields": {
+        "path": "Despierto de repente",
+        "parent": 13
+    },
+    "pk": 14
+}
+]

@@ -1,0 +1,275 @@
+{% load staticfiles %}
+{% load pipeline %}
+<!DOCTYPE html>
+<html ng-controller="MainViewController" ng-app="CherryMusicClient">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <!--
+  #
+  # CherryMusic - a standalone music server
+  # Copyright (c) 2012 - 2014 Tom Wallroth & Tilman Boerner
+  #
+  # Project page:
+  #   http://fomori.org/cherrymusic/
+  # Sources on github:
+  #   http://github.com/devsnd/cherrymusic/
+  #
+  # CherryMusic is based on
+  #   jPlayer (GPL/MIT license) http://www.jplayer.org/
+  #   CherryPy (BSD license) http://www.cherrypy.org/
+  #
+  # licensed under GNU GPL version 3 (or later)
+  #
+  # This program is free software: you can redistribute it and/or modify
+  # it under the terms of the GNU General Public License as published by
+  # the Free Software Foundation, either version 3 of the License, or
+  # (at your option) any later version.
+  #
+  # This program is distributed in the hope that it will be useful,
+  # but WITHOUT ANY WARRANTY; without even the implied warranty of
+  # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  # GNU General Public License for more details.
+  #
+  # You should have received a copy of the GNU General Public License
+  # along with this program.  If not, see <http://www.gnu.org/licenses/>
+  #
+  -->
+  {% stylesheet 'client' %}
+  {% javascript 'client' %}
+
+
+  <link rel="icon" href="{% static "client/img/favicon32.png" %}" type="image/png">
+  <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+
+  <title ng-bind-html="title" >CherryMusic</title>
+</head>
+<body style="margin-top: 50px">
+
+<script>
+  // make sure the js knows where to load the static files from
+  STATIC_FILES = '{% static "" %}'
+  API_ALBUMART_URL = '{% url "api:album-art" "" %}';
+  API_BROWSE_URL = '{% url "api:browse" "" %}';
+  API_DIRECTORY_URL = '{% url "api:directory-list" %}';
+  API_INDEX_URL = '{% url "api:index-files" "" %}';
+  API_IMPORT_PLAYLIST_URL  = '{% url "api:import-playlist" "" %}';
+  API_EXPORT_PLAYLIST_URL  = '{% url "api:export-playlist" %}';
+  API_PLAYLIST_URL  = '{% url "api:playlist-list" %}';
+  API_SEARCH_URL = '{% url "api:search" %}';
+  API_STREAM_URL = '{% url "api:stream" "" %}';
+  API_TRACK_URL = '{% url "api:track-list" %}';
+  API_USER_URL = '{% url "api:user-list" %}';
+  API_USER_SETTINGS_URL = '{% url "api:usersettings-list" %}';
+  API_REST_AUTH_URL = '/api/v1/rest-auth';
+
+  ADMIN_URL = '{% url "admin:index" %}';
+  LOGIN_URL = '{% url "login-view" %}';
+</script>
+
+{% verbatim %}
+<div>
+  <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" ng-click="isShowCollapsed = !isShowCollapsed">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a id="brandname" data-toggle="modal" role="button" ng-click="openAboutModal()" class="navbar-brand">
+        <span class="hidden-xs">Cherry&nbsp;&nbsp;Music</span>
+      </a>
+      <div class="visible-xs">
+        <form class="navbar-form navbar-left" role="search" id="searchform">
+          <div class="input-group">
+            <input type="text" name="searchinput" class="searchinput form-control" placeholder="Search" ng-model='searchInput'>
+                <span class="input-group-btn">
+                    <button type="submit" class="btn btn-primary" ng-click="search(searchInput)">Search</button>
+                </span>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="collapse navbar-collapse navbar-ex1-collapse"
+         ng-class="{in: isShowCollapsed}" id="searchfield">
+      <ul class="nav navbar-nav">
+        <li class="hidden-xs">
+          <form class="navbar-form navbar-left" role="search" id="searchform">
+            <!--workaround for CHROME BUG  https://code.google.com/p/chromium/issues/detail?id=309483 -->
+            <div class="input-group" style="width: 260px">
+              <input type="text" name="searchinput" class="searchinput form-control" placeholder="Search" ng-model='searchInput'>
+                    <span class="input-group-btn">
+                        <button type="submit" class="btn btn-primary" ng-click="search(searchInput)">Search</button>
+                    </span>
+            </div>
+          </form>
+        </li>
+        <li>
+          <a ng-click="browse('')">browse files</a>
+        </li>
+        <li>
+          <a ng-click="showPlaylists()">load playlist</a>
+        </li>
+      </ul>
+      <ul class="nav navbar-nav" ng-controller="DropdownTopMenuController">
+        <div class="wrap-dd-menu-padding"
+             ng-click="updateDdTopMenu()"
+             dropdown-menu="ddTopMenu"
+             dropdown-model="ddSelectTopMenu"
+             dropdown-onchange="ddLauncher(selected)">
+        <li >
+          <a href="#">
+            <b class="caret"></b>
+            <span class="glyphicon glyphicon-wrench"></span>
+          </a>
+        </li>
+        </div>
+      </ul>
+
+    </div>
+  </div>
+
+  <div class="">
+    <div class="row">
+      <div id="search-panel" class="col-md-6 row">
+        <playlist-browser playlists="playlists" ng-if="mediaBrowserMode == 'playlist'"></playlist-browser>
+        <file-browser content="fileBrowserContent" ng-if="mediaBrowserMode == 'file'"></file-browser>
+        <div class="motd" ng-show="mediaBrowserMode == 'motd'">
+          useless wisdom
+          <hr>
+          Something funny
+        </div>
+      </div>
+      <div id="playlist-panel" class="col-md-6 row">
+        <media-player></media-player>
+      </div>
+    </div>
+  </div>
+  <growl-notifications>
+    <div ng-repeat="(id, notification) in notifications track by id">
+        <growl-notification>
+            {{notification}}
+        </growl-notification>
+    </div>
+  </growl-notifications>
+  <div id="playback-controls">
+    <div class="cm-songtitle-container" >
+      <div class="cm-songtitle">
+        <file file="currentPlayingTrack.data"></file>
+      </div>
+    </div>  
+  
+    <div >
+      <img id="albumart" 
+           ng-src="{{ albumArtUrl(currentPlayingTrack.data.path) }}" 
+           err-src="static/client/img/folder.png"
+           ng-if="$root.showAlbumArt"> </img>
+      <div id="jquery_jplayer_1" class="jp-jplayer"></div>
+      <div id="jp_ancestor" class="jp-audio">
+        <div class="jp-type-playlist">
+          <div class="jp-gui jp-interface">
+            <div class="jp-center-progress-bar pointer">
+              <progress-bar percentage="{{ currentPlaybackPercentage }}"  kind-of-bar='jp'></progress-bar>
+              <div class="jp-time-holder">
+                <div ng-if="currentPlayingTrack" class="jp-current-time">{{ currentPlayTime | timeformat }} </div>
+                <div ng-if="currentPlayingTrack" class="jp-duration">{{ currentPlayingTrack.data.meta_duration | timeformat }}</div>
+              </div>
+            </div>
+            <div class="jp-control-buttons">
+              <ul class="jp-controls">
+                <li ng-click="playPreviousTrack()"><a class="jp-previous btn btn-default" tabindex="1">
+                  <span class="glyphicon glyphicon-step-backward"></span>
+                </a></li>
+                <li ng-click="playTrack()"><a  class="jp-play  btn btn-default" tabindex="1" ng-if="!$root.isPlaying">
+                  <span class="glyphicon glyphicon-play"></span>
+                </a></li>
+                <li ng-click="playback.pause()"><a  class="jp-pause btn btn-default" tabindex="1" ng-if="$root.isPlaying">
+                  <span class="glyphicon glyphicon-pause"></span>
+                </a></li>
+                <li ng-click="playNextTrack()"><a class="jp-next btn btn-default" tabindex="1">
+                  <span class="glyphicon glyphicon-step-forward"></span>
+                </a></li>
+                <li ng-click="playback.stop()"><a class="jp-stop btn btn-default" tabindex="1">
+                  <span class="glyphicon glyphicon-stop"></span>
+                </a></li>
+                <li>
+                </li>
+              </ul>
+              <ul class="jp-volume-toggles">
+                <li ng-click="mute()"><a class="jp-mute btn btn-default btn-xs" tabindex="1" title="mute" ng-if="!isMute">
+                  <span class="glyphicon glyphicon-volume-off"></span>
+                </a></li>
+                <li ng-click="unmute()"><a class="jp-unmute btn btn-default btn-xs" tabindex="1" title="unmute" ng-if="isMute">
+                  <span class="glyphicon glyphicon-volume-down"></span>
+                </a></li>
+                <li ng-click="maxVolume()"><a class="jp-volume-max btn btn-default btn-xs" tabindex="1" title="max volume">
+                  <span class="glyphicon glyphicon-volume-up"></span>
+                </a></li>
+                <li>
+                  <progress-bar percentage="{{ $root.volume * 100 }}"  kind-of-bar='volume'></progress-bar>
+                </li>
+              </ul>
+            </div>
+  
+            <div class="cm-playlistplaytime"></div>
+  
+            <ul class="jp-toggles">
+              <li ng-click="toggleShuffle()"><a class="jp-shuffle btn btn-default btn-xs" tabindex="1" title="turn shuffle on" ng-if="!isShuffle">
+                <span class="glyphicon glyphicon-random"></span>
+              </a></li>
+              <li ng-click="toggleShuffle()"><a class="jp-shuffle-off btn btn-default btn-xs" tabindex="1" title="turn shuffle off" ng-if="isShuffle">
+                <span class="glyphicon glyphicon-arrow-right"></span>
+              </a></li>
+              <li ng-click="toggleRepeat()"><a class="jp-repeat btn btn-default btn-xs" tabindex="1" title="activate repeat" ng-if="!isRepeat">
+                <span class="glyphicon glyphicon-retweet"></span>
+              </a></li>
+              <li ng-click="toggleRepeat()"><a class="jp-repeat-off btn btn-default btn-xs" tabindex="1" title="deactivate repeat off" ng-if="isRepeat">
+                <span class="glyphicon glyphicon-arrow-down"></span>
+              </a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endverbatim %}
+
+<!--keyboard shortcut changer overlay -->
+<div id="shortcut-changer" style="display:none;">
+  <span></span>
+  <input value="" onkeyup="" />
+</div>
+<!--keyboard shortcut changer overlay end -->
+
+{% comment %}
+{% include 'client/modals/user_options.html' %}
+{% include 'client/modals/change_password.html' %}
+{% include 'client/modals/export_playlists.html' %}
+{% include 'client/modals/change_album_art.html' %}
+{% include 'client/modals/admin_panel.html' %}
+{% include 'client/modals/save_playlist.html' %}
+{% include 'client/modals/delete_playlist.html' %}
+{% endcomment %}
+
+
+<div class="cm-songtitle-container">
+  <div class="cm-songtitle"></div>
+</div>
+
+<!-- JPLAYER END -->
+
+<!-- UPPER NAVIGATION ELEMENTS -->
+
+<!-- END UPPER NAVIGATION ELEMENTS -->
+
+
+<!-- <a id="errormessage" href="#" title="click to dismiss" onclick="$(this).html('')"></a> -->
+<!-- TABS START -->
+<div id="errormessage"></div>
+<!-- TABS END -->
+<div id="jplayer_inspector"></div>
+</body>
+</html>

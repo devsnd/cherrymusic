@@ -1,0 +1,71 @@
+.wrap-dd-menu {
+  /* Size and position */
+  position: relative;
+  padding: 0px;
+}
+.wrap-dd-menu-padding {
+  padding: 15px 7px;
+}
+.wrap-dd-menu-padding a:hover {
+  color: #FFF;
+}
+.wrap-dd-menu-padding span {
+  color: #FFF;
+  margin-left: -4px;
+}
+.wrap-dd-menu .dropdown {
+  /* Size & position */
+  position: absolute;
+  z-index: 1000;
+  top: 50px;
+  left: 0;
+  min-width: 160px;
+  float: left;
+  /* Styles */
+  background: #FFF;
+  padding: 5px 0px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.176);
+  font-weight: normal;
+  transition: all 0.2s ease-in;
+  list-style: none;
+  background-clip: padding-box;
+  /* Hiding */
+  opacity: 0;
+  pointer-events: none;
+}
+.wrap-dd-menu .dropdown li a {
+  display: block;
+  padding: 3px 20px;
+  clear: both;
+  font-weight: normal;
+  line-height: 1.42857;
+  color: #333;
+  white-space: nowrap;
+  transition: all 0.3s ease-out;
+}
+.wrap-dd-menu .dropdown li i {
+  float: right;
+  color: inherit;
+}
+.wrap-dd-menu .dropdown li.divider {
+  height: 1px;
+  margin: 9px 0px;
+  overflow: hidden;
+  background-color: #e8e8e8;
+}
+.wrap-dd-menu .dropdown li:first-of-type a {
+  border-radius: 7px 7px 0 0;
+}
+.wrap-dd-menu .dropdown li:last-of-type a {
+  border-radius: 0 0 7px 7px;
+  border: none;
+}
+.wrap-dd-menu .dropdown li:hover a {
+  background: #f8f8f8;
+}
+.wrap-dd-menu .dropdown.active {
+  opacity: 1;
+  pointer-events: auto;
+}

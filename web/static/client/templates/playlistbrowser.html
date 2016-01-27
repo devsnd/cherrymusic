@@ -1,0 +1,91 @@
+<div ng-class="{'loading': $root.loadingPlaylistbrowser}">
+  <div ng-if="!$root.loadingPlaylistbrowser">
+    <div class="cm-media-list-category">
+      <h3>Playlists</h3>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="btn-group input-group-sm">
+            <span class="input-group-addon">sort by</span>
+            <div class="input-group-btn">
+              <button type="button" class="btn btn-default" ng-click="playlistSortBySomething('name')">
+                <span class="glyphicon glyphicon-sort-by-alphabet"></span> title
+              </button>
+              <button type="button" class="btn btn-default" ng-click="playlistSortBySomething('owner')">
+                <span class="glyphicon glyphicon-user"></span> user
+              </button>
+              <button type="button" class="btn btn-default" ng-click="playlistSortBySomething('-id')">
+                <span class="glyphicon glyphicon-time"></span> age
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+        <div class="input-group input-group-sm">
+          <input class="playlist-filter-input form-control" placeholder="title" ng-model="playlistSearchInput" type="text">
+          <span class="input-group-btn">
+            <button class="btn btn-default" ng-click="playlistSearch(playlistSearchInput)">Search</button>
+          </span>
+         </div>
+        </div>
+      </div>
+      <ul class="cm-media-list" >
+        <li class="playlist-browser-list-item"
+            ng-repeat="playlist in playlists | orderBy: playlistSortBy">
+          <div class="playlist-browser-list-item-container">
+            <div>
+              <div class="playlist-detail-switch">
+                <a>
+                  <span class="glyphicon" 
+                        ng-class="{'glyphicon-chevron-right': !showTracks, 'glyphicon-chevron-down': showTracks}"
+                        ng-click="showTracks = !showTracks; loadPlaylistTracks(playlist)">
+                  </span>
+                </a>
+              </div>
+              <div class="playlist-title">
+                <a ng-click="loadPlaylist(playlist)">{{ playlist.name }}</a>            
+              </div>
+              <div class="playlist-age">
+                created <time ng-attr-title="{{ playlist.created_at | date : 'dd MMM yyyy HH:mm'}}">{{ playlist.created_at | timeago }}</time> &nbsp;&nbsp; 
+              </div>
+              <div class="playlist-ispublic" ng-if="$root.user.username == playlist.owner_name">
+                  <span class="label" ng-class="{'label-default': !playlist.public, 'label-success': playlist.public}">
+                    public<input type="checkbox" ng-model="playlist.public" ng-click="updatePlaylist(playlist)"></input>                
+                  </span>
+              </div>
+              <div class="playlist-usernamelabel">
+                  <span class="badge" ng-style="$root.addUserBackgroundColor(playlist.owner)">{{ playlist.owner_name }}</span>
+              </div>
+              <div class="playlist-deletebutton" ng-if="playlist.owner == $root.user.id">
+                <a class="btn btn-xs btn-danger" ng-click=removePlaylist(playlist)>×</a>
+              </div>
+            </div>  
+          </div>
+          <div class="playlist-content" style="left: 0px;" ng-if="showTracks">
+            <div class="cm-media-list-category">
+              <h3>Tracks <a ng-click="addAllTracksToPlaylist(playlist.tracks)" class="btn btn-default">add all tracks to current playlist</a></h3>
+            </div>
+            <!-- unloaded playlists are shown immediately when loading them, but the content is filled in later -->
+            <div ng-if="playlist.loading">
+              Loading...
+            </div>
+            <!-- render all tracks of the current playlist -->
+            <ul class="no-bullet fill-height cm-media-list"
+                ng-if="!playlist.loading" 
+                dnd-list="playlist.tracks"
+                dnd-placeholder-tpl="<tr class='dndPlaceholder'><td></td></tr>"
+                dnd-drop="false">
+              <li ng-repeat="track in playlist.tracks track by $index"
+                  dnd-draggable="track"
+                  dnd-effect-allowed="copy"
+                  dnd-selected="addToPlaylist(track)">
+                <div ng-if="track.type == 0">
+                  <file file="track.data" model="track"></file>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

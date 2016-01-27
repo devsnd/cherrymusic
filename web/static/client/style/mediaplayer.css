@@ -1,0 +1,118 @@
+.jp-playlist-item-remove {
+  float: right;
+  font-size: 20px;
+  line-height: 15px;
+  display: block;
+  color: #888888;
+}
+.fill-height {
+  height: 100%;
+}
+.fill-height-with-jp {
+  height: calc(100vh - 70px);
+  background-color: #FFF;
+}
+#albumart {
+  background-color: #eeeeee;
+  float: left;
+  width: 70px;
+  height: 70px;
+  left: 0px;
+}
+.cm-songtitle {
+  float: left;
+  left: -50%;
+  position: relative;
+  white-space: nowrap;
+}
+.cm-songtitle-container {
+  position: fixed;
+  left: 50%;
+  bottom: 49px;
+  z-index: 1033;
+  pointer-events: none;
+}
+.jp-bar-seek {
+  background-color: #78acd9;
+  cursor: pointer;
+}
+.progress-striped .jp-bar-seek {
+  background-image: -webkit-linear-gradient(45deg, #474747 25%, transparent 25%, transparent 50%, #474747 50%, #474747 75%, transparent 75%, transparent);
+  background-image: -o-linear-gradient(45deg, #474747 25%, transparent 25%, transparent 50%, #474747 50%, #474747 75%, transparent 75%, transparent);
+  background-image: linear-gradient(45deg, #474747 25%, transparent 25%, transparent 50%, #474747 50%, #474747 75%, transparent 75%, transparent);
+}
+.jp-bar-played {
+  background-color: #337ab7;
+  cursor: pointer;
+}
+.progress-striped .jp-bar-played {
+  background-image: -webkit-linear-gradient(45deg, #474747 25%, transparent 25%, transparent 50%, #474747 50%, #474747 75%, transparent 75%, transparent);
+  background-image: -o-linear-gradient(45deg, #474747 25%, transparent 25%, transparent 50%, #474747 50%, #474747 75%, transparent 75%, transparent);
+  background-image: linear-gradient(45deg, #474747 25%, transparent 25%, transparent 50%, #474747 50%, #474747 75%, transparent 75%, transparent);
+}
+.jp-controls {
+  position: absolute;
+  padding: 0;
+}
+.jp-control-buttons {
+  position: absolute;
+  left: 50%;
+  width: 240px;
+  margin-left: -120px;
+  bottom: 42px;
+}
+.jp-time-holder {
+  left: 0;
+  top: 10px;
+  width: 100%;
+}
+.jp-current-time {
+  float: left;
+  margin-left: 5px;
+}
+.jp-duration {
+  float: right;
+  margin-right: 5px;
+}
+.jp-toggles {
+  list-style-type: none;
+  padding: 0;
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  margin-left: 130px;
+}
+.jp-toggles li {
+  display: inline-block;
+}
+.jp-controls li {
+  display: inline;
+}
+.jp-volume-toggles {
+  list-style: none outside none;
+  position: absolute;
+  left: 180px;
+  padding: 0;
+}
+.jp-volume-bar {
+  height: 6px !important;
+  position: absolute;
+  width: 60px;
+  top: 28px;
+}
+.jp-volume-toggles li {
+  display: inline;
+}
+.jp-volume jp-mute {
+  padding: 1px 4px !important;
+  top: 0;
+}
+.jp-volume jp-unmute {
+  padding: 1px 4px !important;
+  top: 0;
+}
+.jp-volume-max {
+  margin-left: 6px;
+  padding: 1px 4px !important;
+  top: 0;
+}

@@ -1,72 +1,21 @@
-# Continuous Integration config
-# travis-ci.org
-#
-# see http://about.travis-ci.org/docs/user/build-configuration/
-#
+
+sudo: required
 
 language: python
-python:
-  - "2.6"
-  - "2.7"
-  - "3.2"
-  - "3.3"
-  - "3.4"
-  - "pypy"
-  - "pypy3"
+
+services:
+  - docker
 
 env:
-  - CHERRYPY_VERSION=""
+  DOCKER_COMPOSE_VERSION: 1.5.2
 
-matrix:
-  include:
-    - python: "2.7"
-      env: "CHERRYPY_VERSION='>=3.2,<3.3'"
-    - python: "2.7"
-      env: "CHERRYPY_VERSION='>=3.3,<3.4'"
-    - python: "2.7"
-      env: "CHERRYPY_VERSION='>=3.4,<3.5'"
-    - python: "2.7"
-      env: "CHERRYPY_VERSION='>=3.5,<3.6'"
-    - python: "3.3"
-      env: "CHERRYPY_VERSION='>=3.2,<3.3'"
-    - python: "3.3"
-      env: "CHERRYPY_VERSION='>=3.3,<3.4'"
-    - python: "3.3"
-      env: "CHERRYPY_VERSION='>=3.4,<3.5'"
-    - python: "3.3"
-      env: "CHERRYPY_VERSION='>=3.5,<3.6'"
-  allow_failures:
-    - env: "CHERRYPY_VERSION='>=3.2,<3.3'"
-    - env: "CHERRYPY_VERSION='>=3.3,<3.4'"
-    - env: "CHERRYPY_VERSION='>=3.4,<3.5'"
-    - env: "CHERRYPY_VERSION='>=3.5,<3.6'"
+before_install:
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
 
-# command to install dependencies
-install:
-  - "pip install cherrypy${CHERRYPY_VERSION} --no-use-wheel --use-mirrors"
-  - "pip install coveralls pyyaml"
-  - "if [[ $TRAVIS_PYTHON_VERSION = 2.6 ]]; then pip install unittest2 --use-mirrors; fi"
+install: echo OK
 
-# prepare test run; test local install
-before_script:
-  - python setup.py -q install
+script: ./test_scripts/run_tests.sh 
 
-# command to run tests
-script:
-  coverage run --source=cherrymusicserver,cmbootstrap,audiotranscode $(command -v nosetests)
-
-after_success:
-  coveralls
-
-branches:
-  # whitelist
-  only:
-    - master
-    - devel
-
-# notifications:
-# email:
-#   recipients:
-#     - tilman.boerner@gmx.de
-#   on_success: change  # [always|never|change] # default: change
-#   on_failure: always  # [always|never|change] # default: always

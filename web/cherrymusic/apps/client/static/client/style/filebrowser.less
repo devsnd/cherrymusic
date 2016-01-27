@@ -1,0 +1,237 @@
+@import "variables.less";
+
+.media-browser{
+    
+}
+
+.cm-media-list{
+    position: relative;
+    padding: 0;
+    
+    &-busy{
+        overflow: hidden;
+        background-image: @spinning-loader;
+        background-position: 50% 120px;
+        background-repeat: no-repeat;
+    }
+
+    &-category{
+        position: relative;
+    }
+    
+    & a{
+       text-decoration: none; 
+    }
+
+    &-item{
+        list-style-type: none;
+        word-wrap: break-word;
+        margin: 5px 5px 5px 0;
+    }
+    &-wrench{
+        position: relative;
+        display: inline;
+        float: left;
+        color: @theme-background-color;
+        &:hover{
+            color: darken(@theme-main-color, 6.6%);
+            cursor: pointer;
+        }
+        padding: 0 2px;
+    }
+    
+    & > li:nth-child(odd) {
+        background-color: @theme-list-background;
+    }
+    & > li:nth-child(even) {
+        background-color: @theme-list-background-high-contrast;
+    }
+    
+    &-parent{
+        display: block;
+        height: 50px;
+        font-size: 30px;
+        padding: 5px 10px;
+        
+        &:hover{
+            background-color: @gray-light;
+        }
+        &-item{
+            margin-bottom: 20px;
+        }
+    }
+    
+    &-view-change-buttons{
+        display: inline-block;
+        margin: -10px 0 0px 5px;
+    }
+}
+
+file{
+    display: block;
+
+    & > .fullpathlabel{
+        font-size: @font-size-tiny;
+        display: block;
+        white-space: nowrap;
+        color: @gray-light;
+        overflow: hidden;
+    }
+    
+    & > .simplelabel{
+        padding-left: 5px;
+    }
+}
+
+.list-dir{
+    display: block;
+    width: 100%;
+    height: 100%;
+    
+    & > div{
+        display: block;
+    }
+    
+    &-albumart{
+        width: 80px;
+        margin: 0 auto;
+        text-align: center;
+        & img {
+            max-width: @albumart-img-size;
+            max-height: @albumart-img-size;
+        }
+    }
+
+    &-info-bar{
+        background-color: darken(@theme-background-color, 13%);
+    }
+
+    &-name{
+        font-size: @font-size-small;
+        display: block;
+        text-align: center;
+        &-wrap{
+        }
+    }
+
+    &-folder-files-count{
+        color: lighten(@theme-main-color, 40%);
+        display: inline;
+    }
+
+    &-item{
+        display: inline-block;
+        width: @cover-view-item-width;
+        height: @cover-view-item-height;
+        vertical-align: middle;
+        overflow: hidden;
+        
+        &-listview {
+            /* overrides normal coverview to display folders as list */
+            display: table-row;
+            width: 100%;
+            height: @list-view-item-height;
+            
+            & > div {
+                display: table-cell;
+            }
+            
+            & > .list-dir-info-bar{
+                min-width: 80px;
+            }
+            
+            & > .list-dir-cover-area{
+                height: @list-view-img-size;
+                width: 100%;
+            }
+            
+            & .list-dir-albumart {
+                margin: 0;
+                display: inline-block;
+                width: @list-view-img-size;
+                
+                & img{
+                    width: @list-view-img-size;
+                    height: @list-view-img-size;
+                }
+            }
+            & .list-dir-name{
+                text-align: left;
+                
+                &-wrap {
+                    display: inline-block;
+                    position: absolute;
+                    height: @list-view-item-height;
+                    overflow: hidden;
+                }
+            }
+        }
+    }
+    
+    &:hover{
+        background-color: @gray-light;
+    }
+
+    &-cover-area{
+        height: 100%;
+    }
+}
+
+.compact-list {
+    &-item {
+        
+    }
+
+    &-dir {
+        display: block;
+        font-size: 120%;
+        padding: 0 0 0 10px;
+        &:hover{
+            background-color: @gray-light;
+        }
+    }
+}
+
+.playlist{
+    &-browser-list-item{
+        list-style-type: none;
+        margin-right: 20px;
+        
+        &-container{
+            display: table;
+            width: 100%;
+            
+            & > div{
+                display: table-row;
+                & > div{
+                    display: table-cell;
+                }
+            }
+        }
+    }
+    &-detail-switch{
+        width: 1%;
+        & > a{
+            display: block;
+            padding: 5px;
+        }
+    }
+    &-age{
+        white-space: nowrap;
+    }
+    &-title{
+        width: 99%;
+    }
+    &-ispublic{
+        width: 1%;
+    }
+    &-usernamelabel{
+        width: 1%;
+    }
+    &-deletebutton{
+        width: 1%;
+    }
+    &-content{
+        margin-left: 30px;
+    }
+}

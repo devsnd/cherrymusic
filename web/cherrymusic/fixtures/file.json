@@ -1,0 +1,1005 @@
+[
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": null,
+        "meta_index_date": "2016-01-11",
+        "meta_artist": null,
+        "meta_album": null,
+        "meta_track": null,
+        "meta_duration": 229.943922902494,
+        "meta_track_total": null,
+        "filename": "04. Mala Reputaci\u00f3n - Ceremonia.ogg",
+        "directory": 2,
+        "meta_year": null,
+        "meta_genre": null
+    },
+    "pk": 1
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "No te dejare caer",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Existimos porque nos necesitamos",
+        "meta_track": "13",
+        "meta_duration": 202.361591993119,
+        "meta_track_total": "16",
+        "filename": "13 No te dejar\u00e9 caer.mp3",
+        "directory": 6,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 2
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Una ventana rota",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Existimos porque nos necesitamos",
+        "meta_track": "11",
+        "meta_duration": 207.198373602314,
+        "meta_track_total": "16",
+        "filename": "11 Una ventana rota.mp3",
+        "directory": 6,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 3
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Desde la ventana",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Existimos porque nos necesitamos",
+        "meta_track": "04",
+        "meta_duration": 148.816764406912,
+        "meta_track_total": "16",
+        "filename": "04 Desde la ventana.mp3",
+        "directory": 6,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 4
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Sue\u00f1os de imsomnio",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Existimos porque nos necesitamos",
+        "meta_track": "03",
+        "meta_duration": 249.579294706388,
+        "meta_track_total": "16",
+        "filename": "03 Sue\u00f1os de imsomnio.mp3",
+        "directory": 6,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 5
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "A lxs que se han apagado (Eterna Inocencia)",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Existimos porque nos necesitamos",
+        "meta_track": "05",
+        "meta_duration": 136.162639768551,
+        "meta_track_total": "16",
+        "filename": "05 A lxs que se han apagado ( Eterna Inocencia ).mp3",
+        "directory": 6,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 6
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Salud y violencia",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Existimos porque nos necesitamos",
+        "meta_track": "10",
+        "meta_duration": 178.569708343107,
+        "meta_track_total": "16",
+        "filename": "10 Salud y violencia.mp3",
+        "directory": 6,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 7
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "De cara a cualquier intento",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Existimos porque nos necesitamos",
+        "meta_track": "15",
+        "meta_duration": 155.875893345844,
+        "meta_track_total": "16",
+        "filename": "15 De cara a cualquier intento.mp3",
+        "directory": 6,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 8
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Tensión",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Existimos porque nos necesitamos",
+        "meta_track": "02",
+        "meta_duration": 268.926546250684,
+        "meta_track_total": "16",
+        "filename": "02 Tension.mp3",
+        "directory": 6,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 9
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Contigo",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Existimos porque nos necesitamos",
+        "meta_track": "09",
+        "meta_duration": 84.4480100086011,
+        "meta_track_total": "16",
+        "filename": "09 Contigo.mp3",
+        "directory": 6,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 10
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Medias tintas de oscuridad",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Existimos porque nos necesitamos",
+        "meta_track": "12",
+        "meta_duration": 204.949941355853,
+        "meta_track_total": "16",
+        "filename": "12 Medias tintas de oscuridad.mp3",
+        "directory": 6,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 11
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Bajo el mismo cielo",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Existimos porque nos necesitamos",
+        "meta_track": "16",
+        "meta_duration": 455.209070294785,
+        "meta_track_total": "16",
+        "filename": "16 Bajo el mismo cielo.mp3",
+        "directory": 6,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 12
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Sin remite",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Existimos porque nos necesitamos",
+        "meta_track": "08",
+        "meta_duration": 218.205395261553,
+        "meta_track_total": "16",
+        "filename": "08 Sin remite.mp3",
+        "directory": 6,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 13
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Muera quien espere",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Existimos porque nos necesitamos",
+        "meta_track": "06",
+        "meta_duration": 308.692970521542,
+        "meta_track_total": "16",
+        "filename": "06 Muera quien espere.mp3",
+        "directory": 6,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 14
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "En tu ausencia",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Existimos porque nos necesitamos",
+        "meta_track": "07",
+        "meta_duration": 183.406489952303,
+        "meta_track_total": "16",
+        "filename": "07 En tu ausencia.mp3",
+        "directory": 6,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 15
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Hoy,como tantxs",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Existimos porque nos necesitamos",
+        "meta_track": "14",
+        "meta_duration": 303.124059738838,
+        "meta_track_total": "16",
+        "filename": "14 Hoy, como tantxs.mp3",
+        "directory": 6,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 16
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Sigue sonando una guitarra",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Existimos porque nos necesitamos",
+        "meta_track": "01",
+        "meta_duration": 86.3042927515834,
+        "meta_track_total": "16",
+        "filename": "01 Sigue sonando una guitarra.mp3",
+        "directory": 6,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 17
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Marchate",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Corren malos tiempos para ser anarquista... sincronicemos la utopia",
+        "meta_track": "12",
+        "meta_duration": 174.229666119321,
+        "meta_track_total": "19",
+        "filename": "12-Marchate.mp3",
+        "directory": 8,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 18
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Tiempo De Cemento",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Corren malos tiempos para ser anarquista... sincronicemos la utopia",
+        "meta_track": "16",
+        "meta_duration": 146.202267573696,
+        "meta_track_total": "19",
+        "filename": "16-Tiempo de cemento.mp3",
+        "directory": 8,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 19
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Una Bala En Mi Cabeza",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Corren malos tiempos para ser anarquista... sincronicemos la utopia",
+        "meta_track": "15",
+        "meta_duration": 208.976213933849,
+        "meta_track_total": "19",
+        "filename": "15-Una bala en mi cabeza.mp3",
+        "directory": 8,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 20
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Dejame Imaginar",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Corren malos tiempos para ser anarquista... sincronicemos la utopia",
+        "meta_track": "17",
+        "meta_duration": 209.263836109156,
+        "meta_track_total": "19",
+        "filename": "17-Dejame imaginar.mp3",
+        "directory": 8,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 21
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Antes Del Amanecer",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Corren malos tiempos para ser anarquista... sincronicemos la utopia",
+        "meta_track": "06",
+        "meta_duration": 203.250480882008,
+        "meta_track_total": "19",
+        "filename": "06-Antes del amanecer.mp3",
+        "directory": 8,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 22
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Protege Tus Sue?os",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Corren malos tiempos para ser anarquista... sincronicemos la utopia",
+        "meta_track": "02",
+        "meta_duration": 190.23035421065,
+        "meta_track_total": "19",
+        "filename": "02-Protege tus suenos.mp3",
+        "directory": 8,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 23
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Las Perras Al Sol, Las Guarras A La Luna",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Corren malos tiempos para ser anarquista... sincronicemos la utopia",
+        "meta_track": "13",
+        "meta_duration": 193.237000547345,
+        "meta_track_total": "19",
+        "filename": "13-Las perras al sol las guarras a la luna.mp3",
+        "directory": 8,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 24
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Sindrome De Expresion",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Corren malos tiempos para ser anarquista... sincronicemos la utopia",
+        "meta_track": "10",
+        "meta_duration": 174.203518648839,
+        "meta_track_total": "19",
+        "filename": "10-Sindrome de expresion.mp3",
+        "directory": 8,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 25
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Sin Remite",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Corren malos tiempos para ser anarquista... sincronicemos la utopia",
+        "meta_track": "07",
+        "meta_duration": 209.263836109156,
+        "meta_track_total": "19",
+        "filename": "07-Sin remite.mp3",
+        "directory": 8,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 26
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "El Rey Skaparrapid, Regocijo En El Fango)",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Corren malos tiempos para ser anarquista... sincronicemos la utopia",
+        "meta_track": "14",
+        "meta_duration": 133.182140902338,
+        "meta_track_total": "19",
+        "filename": "14-Que trabaje el rey.mp3",
+        "directory": 8,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 27
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Comunica",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Corren malos tiempos para ser anarquista... sincronicemos la utopia",
+        "meta_track": "03",
+        "meta_duration": 140.973273907264,
+        "meta_track_total": "19",
+        "filename": "03-Comunica.mp3",
+        "directory": 8,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 28
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Agita Y Dispara",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Corren malos tiempos para ser anarquista... sincronicemos la utopia",
+        "meta_track": "08",
+        "meta_duration": 193.237000547345,
+        "meta_track_total": "19",
+        "filename": "08-Agita y dispara.mp3",
+        "directory": 8,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 29
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Esconde La Cara",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Corren malos tiempos para ser anarquista... sincronicemos la utopia",
+        "meta_track": "09",
+        "meta_duration": 148.215435139573,
+        "meta_track_total": "19",
+        "filename": "09-Esconde la cara.mp3",
+        "directory": 8,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 30
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Introvisando",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Corren malos tiempos para ser anarquista... sincronicemos la utopia",
+        "meta_track": "01",
+        "meta_duration": 26.0925482836813,
+        "meta_track_total": "19",
+        "filename": "01-Introvisando.mp3",
+        "directory": 8,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 31
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Dias Gilipollas",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Corren malos tiempos para ser anarquista... sincronicemos la utopia",
+        "meta_track": "05",
+        "meta_duration": 227.591398858394,
+        "meta_track_total": "19",
+        "filename": "05-Dias gilipollas.mp3",
+        "directory": 8,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 32
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Maitasuna Eta Iraultza",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Corren malos tiempos para ser anarquista... sincronicemos la utopia",
+        "meta_track": "18",
+        "meta_duration": 183.223520212683,
+        "meta_track_total": "19",
+        "filename": "18-Maitasuna eta iraultza.mp3",
+        "directory": 8,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 33
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "A Punto (paso A Paso)",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Corren malos tiempos para ser anarquista... sincronicemos la utopia",
+        "meta_track": "11",
+        "meta_duration": 37.5178669168817,
+        "meta_track_total": "19",
+        "filename": "11-A punto.mp3",
+        "directory": 8,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 34
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Oceanos De Esperanza",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Corren malos tiempos para ser anarquista... sincronicemos la utopia",
+        "meta_track": "04",
+        "meta_duration": 196.871123621863,
+        "meta_track_total": "19",
+        "filename": "04-Oceanos de esperanza.mp3",
+        "directory": 8,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 35
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Una Guitarra Sin Cuerdas",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Tipico pero cierto",
+        "meta_album": "Corren malos tiempos para ser anarquista... sincronicemos la utopia",
+        "meta_track": "19",
+        "meta_duration": 530.715583704746,
+        "meta_track_total": "19",
+        "filename": "19-Una guitarra sin cuerdas.mp3",
+        "directory": 8,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 36
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Vagomundo",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Paisano",
+        "meta_album": "Revolucion",
+        "meta_track": "07",
+        "meta_duration": 201.717551020408,
+        "meta_track_total": "13",
+        "filename": "07.- Vagomundo.mp3",
+        "directory": 12,
+        "meta_year": "2014",
+        "meta_genre": "Acustico"
+    },
+    "pk": 37
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "La hidra",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Paisano",
+        "meta_album": "Revolucion",
+        "meta_track": "13",
+        "meta_duration": 420.048979591837,
+        "meta_track_total": "13",
+        "filename": "13.- La hidra.mp3",
+        "directory": 12,
+        "meta_year": "2014",
+        "meta_genre": "Acustico"
+    },
+    "pk": 38
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Mujer caleidoscopio",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Paisano",
+        "meta_album": "Revolucion",
+        "meta_track": "09",
+        "meta_duration": 202.657959183673,
+        "meta_track_total": "13",
+        "filename": "09.- Mujer caleidoscopio.mp3",
+        "directory": 12,
+        "meta_year": "2014",
+        "meta_genre": "Acustico"
+    },
+    "pk": 39
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Polen",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Paisano",
+        "meta_album": "Revolucion",
+        "meta_track": "11",
+        "meta_duration": 224.104489795918,
+        "meta_track_total": "13",
+        "filename": "11.- Polen.mp3",
+        "directory": 12,
+        "meta_year": "2014",
+        "meta_genre": "Acustico"
+    },
+    "pk": 40
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "En una noche",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Paisano",
+        "meta_album": "Revolucion",
+        "meta_track": "03",
+        "meta_duration": 273.423673469388,
+        "meta_track_total": "13",
+        "filename": "03.- En una noche.mp3",
+        "directory": 12,
+        "meta_year": "2014",
+        "meta_genre": "Acustico"
+    },
+    "pk": 41
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Ficha de porteccion social",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Paisano",
+        "meta_album": "Revolucion",
+        "meta_track": "12",
+        "meta_duration": 237.609795918367,
+        "meta_track_total": "13",
+        "filename": "12.- Ficha de porteccion social.mp3",
+        "directory": 12,
+        "meta_year": "2014",
+        "meta_genre": "Acustico"
+    },
+    "pk": 42
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Fabricante de canciones",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Paisano",
+        "meta_album": "Revolucion",
+        "meta_track": "08",
+        "meta_duration": 326.556734693878,
+        "meta_track_total": "13",
+        "filename": "08.- Fabricante de canciones.mp3",
+        "directory": 12,
+        "meta_year": "2014",
+        "meta_genre": "Acustico"
+    },
+    "pk": 43
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Animal de ciudad",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Paisano",
+        "meta_album": "Revolucion",
+        "meta_track": "02",
+        "meta_duration": 250.749387755102,
+        "meta_track_total": "13",
+        "filename": "02.- Animal de ciudad.mp3",
+        "directory": 12,
+        "meta_year": "2014",
+        "meta_genre": "Acustico"
+    },
+    "pk": 44
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Contra la usura, oficio",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Paisano",
+        "meta_album": "Revolucion",
+        "meta_track": "01",
+        "meta_duration": 208.718367346939,
+        "meta_track_total": "13",
+        "filename": "01.- Contra la usura, oficio.mp3",
+        "directory": 12,
+        "meta_year": "2014",
+        "meta_genre": "Acustico"
+    },
+    "pk": 45
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Nomade navegante NN",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Paisano",
+        "meta_album": "Revolucion",
+        "meta_track": "10",
+        "meta_duration": 285.831836734694,
+        "meta_track_total": "13",
+        "filename": "10.- Nomade navegante NN.mp3",
+        "directory": 12,
+        "meta_year": "2014",
+        "meta_genre": "Acustico"
+    },
+    "pk": 46
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Danza para ti",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Paisano",
+        "meta_album": "Revolucion",
+        "meta_track": "05",
+        "meta_duration": 201.351836734694,
+        "meta_track_total": "13",
+        "filename": "05.- Danza para ti.mp3",
+        "directory": 12,
+        "meta_year": "2014",
+        "meta_genre": "Acustico"
+    },
+    "pk": 47
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Revolucion",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Paisano",
+        "meta_album": "Revolucion",
+        "meta_track": "04",
+        "meta_duration": 334.837551020408,
+        "meta_track_total": "13",
+        "filename": "04.- Revolucion.mp3",
+        "directory": 12,
+        "meta_year": "2014",
+        "meta_genre": "Acustico"
+    },
+    "pk": 48
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Astronauta",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Paisano",
+        "meta_album": "Revolucion",
+        "meta_track": "06",
+        "meta_duration": 238.236734693878,
+        "meta_track_total": "13",
+        "filename": "06.- Astronauta.mp3",
+        "directory": 12,
+        "meta_year": "2014",
+        "meta_genre": "Acustico"
+    },
+    "pk": 49
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Militante excepcional",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Todo o Nada",
+        "meta_album": "Despierto de repente",
+        "meta_track": "04",
+        "meta_duration": 96.4269900303153,
+        "meta_track_total": "10",
+        "filename": "04 - Militante excepcional.mp3",
+        "directory": 14,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 50
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Disolvente",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Todo o Nada",
+        "meta_album": "Despierto de repente",
+        "meta_track": "09",
+        "meta_duration": 411.51937994187,
+        "meta_track_total": "10",
+        "filename": "09 - Disolvente.mp3",
+        "directory": 14,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 51
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Sin mirar",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Todo o Nada",
+        "meta_album": "Despierto de repente",
+        "meta_track": "01",
+        "meta_duration": 224.438991155421,
+        "meta_track_total": "10",
+        "filename": "01 - Sin mirar.mp3",
+        "directory": 14,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 52
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Para siempre",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Todo o Nada",
+        "meta_album": "Despierto de repente",
+        "meta_track": "03",
+        "meta_duration": 87.7796793449386,
+        "meta_track_total": "10",
+        "filename": "03 - Para siempre.mp3",
+        "directory": 14,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 53
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Cada vez mas...",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Todo o Nada",
+        "meta_album": "Despierto de repente",
+        "meta_track": "07",
+        "meta_duration": 71.8957402256462,
+        "meta_track_total": "10",
+        "filename": "07 - Cada vez m\u00e1s....mp3",
+        "directory": 14,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 54
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Despierto de repenete",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Todo o Nada",
+        "meta_album": "Despierto de repente",
+        "meta_track": "05",
+        "meta_duration": 338.134550114073,
+        "meta_track_total": "10",
+        "filename": "05 - Despierto de repente.mp3",
+        "directory": 14,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 55
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Desesperacion",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Todo o Nada",
+        "meta_album": "Despierto de repente",
+        "meta_track": "10",
+        "meta_duration": 1032.69111479201,
+        "meta_track_total": "10",
+        "filename": "10 - Desesperaci\u00f3n.mp3",
+        "directory": 14,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 56
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Disfrazame es...",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Todo o Nada",
+        "meta_album": "Despierto de repente",
+        "meta_track": "06",
+        "meta_duration": 188.282151451699,
+        "meta_track_total": "10",
+        "filename": "06 - Disfrazarme es....mp3",
+        "directory": 14,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 57
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": "Guerra al tiempo",
+        "meta_index_date": "2016-01-11",
+        "meta_artist": "Todo o Nada",
+        "meta_album": "Despierto de repente",
+        "meta_track": "02",
+        "meta_duration": 231.597212238647,
+        "meta_track_total": "10",
+        "filename": "02 - Guerra al tiempo.mp3",
+        "directory": 14,
+        "meta_year": "    ",
+        "meta_genre": "Other"
+    },
+    "pk": 58
+},
+{
+    "model": "storage.file",
+    "fields": {
+        "meta_title": null,
+        "meta_index_date": null,
+        "meta_artist": null,
+        "meta_album": null,
+        "meta_track": null,
+        "meta_duration": null,
+        "meta_track_total": null,
+        "filename": "08 - ...complicado.mp3",
+        "directory": 14,
+        "meta_year": null,
+        "meta_genre": null
+    },
+    "pk": 59
+}
+]

@@ -1,0 +1,117 @@
+<div class="fill-height-with-jp" role="tabpanel">
+  <!-- tabs -->
+  <ul class="playlist-tab-list nav nav-tabs" role="tablist">
+    <li role="presentation" 
+        ng-class="{'active': playlist==currentPlaylist, 'playlist-tab-inactive': playlist!==currentPlaylist}"
+        ng-repeat="playlist in openedPlaylists">
+      <playlist-tab playlist="playlist" 
+                    current-playing-playlist="currentPlayingPlaylist"
+                    on-remove="closePlaylist($index)"
+                    ng-click="setCurrentPlaylist(playlist)" > </playlist-tab>
+    </li>
+    <li class="playlist-tab-inactive playlist-tab-new" role="presentation">
+      <a ng-click="createNewPlaylist()" aria-controls="new playlist" role="tab">
+        <b>+</b>
+      </a>
+    </li>
+  </ul>
+  <!-- action buttons -->
+  <div id="playlistCommands" class="playlist-tab-border-left">
+    <div class="playlist-command-buttons row">
+      <div id="playlist-command-button-group" class="pull-left btn-group" uib-dropdown is-open="isOpenDropDown">
+        <button class="btn dropdown-toggle btn-default btn-xs" uib-dropdown-toggle ng-disabled="disabled">
+          sort <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+          <li><a ng-click="sortPlaylistBy(currentPlaylist, 'meta_track' )">by track number</a></li>
+          <li><a ng-click="sortPlaylistBy(currentPlaylist, 'meta_title' )">by title</a></li>
+          <li><a ng-click="sortPlaylistBy(currentPlaylist, 'meta_artist' )">by artist</a></li>
+        </ul>
+      </div>
+      <div ng-if="currentPlaylist.type == 'queue'">
+        <a class="pull-left btn btn-xs btn-default"
+           ng-click="currentPlaylist.tracks = shuffle(currentPlaylist.tracks)">
+           random!
+        </a>
+        <a class="pull-left btn btn-xs btn-default" ng-click="openSavePlaylistModal()">
+          save as playlist
+        </a>
+        <div class="btn-group pull-right" uib-dropdown is-open="isOpenDropDown">
+          <button class="btn btn-xs btn-default" ng-click="clearPlaylist(currentPlaylist)">
+            clear
+          </button>
+          <button class="btn dropdown-toggle btn-default btn-xs"
+                  uib-dropdown-toggle ng-disabled="disabled">
+            <span class="caret"></span>
+            <span class="sr-only">Toggle Dropdown</span>
+          </button>
+          <ul class="dropdown-menu">
+            <li>
+              <a ng-click="removedPlayed(currentPlaylist)">remove played</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div ng-if="currentPlaylist.type != 'queue'" 
+           class="pull-left btn-group"
+           uib-dropdown is-open="isOpenDropDown">
+        <button ng-if="!currentPlaylist.saved" 
+                class="btn btn btn-xs btn-default"
+                ng-click="updatePlaylist(currentPlaylist)">
+          save
+        </button>
+        <button class="btn dropdown-toggle btn-default btn-xs"
+                uib-dropdown-toggle ng-disabled="disabled">
+          edit <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+          <li><a ng-click="openSavePlaylistModal()">Save as new playlist</a></li>
+          <li class="divider"></li>
+          <li><a ng-click="removePlaylist(currentPlaylist)">Delete playlist</a></li>
+        </ul>
+      </div>
+      <a ng-if="userMayDownload" class="btn btn-xs btn-default pull-left">download</a>
+    </div>
+    <div class="playlist-progress row" ng-if="remainingPlaylistDuration" >
+      <ul class="nav navbar-nav" style="width: 100%;">
+      <li style="float: left;">
+        <span class="label label-default">
+          {{ remainingPlaylistDuration | timeformat }} remaining
+        </span>
+      </li>
+      <div class="playlist-progress-bar progress" style="height: 3px;margin-top: 18px;">
+        <div class="progress-bar progress-bar-default" 
+             style="width: {{ remainingPlaylistPercentage }}%">
+        </div>
+      </div>
+      </ul>
+    </div>
+  </div>
+  <!-- playlist content -->
+  <div class="playlist-container-parent playlist-tab-border-left">
+    <!-- unloaded playlists are shown immediately when loading them, but the content is filled in later -->
+    <div ng-if="currentPlaylist.loading">
+      Loading...
+    </div>
+    <!-- render all tracks of the current playlist -->
+    <ul class="no-bullet fill-height"
+        ng-if="!currentPlaylist.loading" 
+        dnd-list="currentPlaylist.tracks"
+        dnd-placeholder-tpl="<tr class='dndPlaceholder'><td></td></tr>"
+        dnd-drop="dropCallback(event, index, item)">
+      <li ng-repeat="track in currentPlaylist.tracks track by $index"
+          ng-class="{'bg-primary': currentTrackIndex == $index}"
+          dnd-draggable="track"
+
+          dnd-moved="moveTrack(event, $index, track)"
+          dnd-effect-allowed="move">
+        <div ng-if="track.type == 0">
+          <file on-remove="currentPlaylist.tracks.splice($index, 1); $emit('SET_SAVED_FALSE', currentPlaylist)" 
+                on-play="startPlaylingTrack($index)" 
+                file="track.data">
+          </file>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>

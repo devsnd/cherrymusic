@@ -1,0 +1,24 @@
+[
+{
+    "pk": 1,
+    "fields": {
+        "remove_when_queue": false,
+        "auto_play": false,
+        "show_album_art": true,
+        "user_settings": 1,
+        "confirm_closing": true
+    },
+    "model": "core.miscsettings"
+},
+{
+    "pk": 2,
+    "fields": {
+        "remove_when_queue": true,
+        "auto_play": false,
+        "show_album_art": true,
+        "user_settings": 2,
+        "confirm_closing": true
+    },
+    "model": "core.miscsettings"
+}
+]

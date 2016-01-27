@@ -1,0 +1,145 @@
+@import "variables.less";
+
+
+.jp-playlist-item-remove {
+    float: right;
+    font-size: 20px;
+    line-height: 15px;
+    display: block;
+    color: lighten(@theme-main-color, 20%);
+}
+.fill-height{
+    height: 100%;
+}
+
+.fill-height-with-jp{
+    height: calc(~'100vh - 70px');
+    background-color: @theme-background-color;
+}
+
+#albumart{
+    background-color: darken(@theme-background-color, 6.6%);
+    float: left;
+    width: @mediaplayer-height;
+    height: @mediaplayer-height;
+    left: 0px;
+}
+
+.cm-songtitle{
+    &-container{
+        position: fixed;
+        left: 50%;
+        bottom: 49px;
+        z-index: @zindex-player-panel + 1;
+        pointer-events: none;
+    }
+    float: left;
+    left: -50%;
+    position:relative;
+    white-space: nowrap;
+}
+
+.jp{
+    &-bar-seek{
+        .progress-bar-variant(@main-color-bright);
+        cursor: pointer;
+    }
+    
+    &-bar-played{
+        .progress-bar-variant(@main-color);
+        cursor: pointer;
+    }
+    
+    &-controls{
+        position: absolute;
+        padding: 0;
+    }
+
+    &-control-buttons{
+        position: absolute;
+        left: 50%;
+        width: 240px;
+        margin-left: -120px;
+        bottom: 42px
+    }
+
+    &-time-holder{
+        left: 0;
+        top: 10px;
+        width: 100%;
+    }
+    &-current-time{
+        float: left;
+        margin-left: 5px;
+    }
+    &-duration{
+        float: right;
+        margin-right: 5px;
+    }
+
+    &-toggles{
+        list-style-type: none;
+        padding: 0;
+        position: absolute;
+        bottom: 4px;
+        left: 50%;
+        margin-left: 130px
+    }
+    &-toggles li{
+        display: inline-block;
+    }
+
+    &-controls li{
+        display: inline;
+    }
+    &-volume{    
+        &-toggles{
+            list-style: none outside none;
+            position: absolute;
+            left: 180px;
+            padding: 0;
+        }
+        &-bar{
+            height: 6px !important;
+            position: absolute;
+            width: 60px;
+            top: 28px;
+        }
+        &-toggles li{
+            display: inline;
+        }
+        jp-mute{
+            padding: 1px 4px !important;
+            top: 0;
+        }
+        jp-unmute{
+            padding: 1px 4px !important;
+            top: 0;
+        }
+        &-max{
+            margin-left: 6px;
+            padding: 1px 4px !important;
+            top: 0;
+        }
+    }
+}
+
+// *****************************************************************************
+// Added bootstrap components, probably there are better ways to add it
+#gradient {
+  .striped(@color: darken(@theme-main-color, 5.3%); @angle: 45deg) {
+    background-image: -webkit-linear-gradient(@angle, @color 25%, transparent 25%, transparent 50%, @color 50%, @color 75%, transparent 75%, transparent);
+    background-image: -o-linear-gradient(@angle, @color 25%, transparent 25%, transparent 50%, @color 50%, @color 75%, transparent 75%, transparent);
+    background-image: linear-gradient(@angle, @color 25%, transparent 25%, transparent 50%, @color 50%, @color 75%, transparent 75%, transparent);
+  }
+}
+
+
+.progress-bar-variant(@color) {
+  background-color: @color;
+
+  // Deprecated parent class requirement as of v3.2.0
+  .progress-striped & {
+    #gradient > .striped();
+  }
+}

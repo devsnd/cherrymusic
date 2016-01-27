@@ -1,0 +1,67 @@
+<div class="modal-header">
+    <button type="button" ng-click="close()" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3>Options</h3>
+</div>
+<div class="modal-body">
+    <div class="content">
+        <h4>Create new user:</h4>
+        <form novalidate class="css-form" >
+          <div class="form-group">
+            <label for="newusername">User Name</label>
+            <input type="text" class="form-control" ng-model="newUsername" placeholder="Enter new user name" required>
+          </div>
+          <div class="form-group">
+            <label for="newpassword">Password</label>
+            <input type="password" class="form-control" ng-model="newPassword" placeholder="Password" required>
+          </div>
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" id="newisadmin" ng-model="isSuperuser"> admin
+            </label>
+          </div>
+          <button type="submit" class="btn btn-default" ng-click="createUser(newUsername, newPassword, isSuperuser)">Submit</button>
+        </form>
+        <h4>User List:</h4>
+        <div class="row-fluid">
+            <div id="adminuserlist">
+                <ul class="user-list">
+                    <li class="user-list-item admin" ng-repeat="user in $root.userList | orderBy: '-last_login'">
+                        <div class="row">
+                            <div class="col-md-1">
+                                <span class="label" ng-class="{'label-success': user.is_logged, 'label-danger': !user.is_logged}">•
+                                </span>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="usernamelabel">
+                                <span class="badge" ng-style="$root.addUserBackgroundColor(user.id)">
+                                    {{ user.username }}
+                                </span>
+                                </div>
+                            </div>
+                            <div class="col-md-4"> 
+                                last seen: <time ng-attr-title="{{ user.last_login | date : 'dd MMM yyyy HH:mm'}}">{{ user.last_login | timeago }}</time>
+                            </div>
+<!--
+                            <div class="col-md-3" ng-if="!user.is_superuser">
+                                permit download<input onchange="userSetPermitDownload(5, $(this).is(':checked'))" id="misc-autoplay_on_add" value="option1" checked="checked" type="checkbox">
+                            </div>
+-->
+                            <div class="col-md-1" ng-if="!user.is_superuser">
+                                <a class="btn btn-mini btn-danger" ng-click="deleteUser(user)">delete</a>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <h4>Advanced:</h4>
+        <div class="row-fluid">
+            <a class="btn btn-default" ng-click="indexLibrary('')" class="button">
+            Update Music Library (may take some time!)
+            </a>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn" ng-click="close()" data-dismiss="modal" aria-hidden="true">Close</button>
+</div>

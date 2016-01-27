@@ -1,3 +1,0 @@
-Django==1.8
-django-pipeline==1.5.1
-djangorestframework==3.1.3

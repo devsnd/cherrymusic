@@ -1,70 +1,100 @@
 CherryMusic
 ===========
+[![Build Status](https://travis-ci.org/pando85/cherrymusic.svg?branch=devel-django)](https://travis-ci.org/pando85/cherrymusic)
 
-CherryMusic is a music streaming server based on CherryPy and jPlayer.
-It plays the music inside your PC, smartphone, tablet, toaster or whatever 
-device has a HTML5 compliant browser installed.
+This is a rewrite of CherryMusic to be based on django.
 
+You can test it at:
+http://music.openrock.mooo.com/
+* User: `test`
+* Password: `1234`
 
-current features:
+Setup
+-----
 
-  - stream your music inside the browser (locally or remote)
-  - browse and search your music
-  - completely AJAX based (no page reloads on click, therefore fast)
-  - create and share playlists
-  - multiple user authentication
-  - HTTPS support
-  - automatic album cover art fetching
-  - see CHANGES for all the features
-  
-You can find more information on the [CherryMusic website](http://www.fomori.org/cherrymusic)
-and in our [wiki](https://github.com/devsnd/cherrymusic/wiki).
+Configure `config.yml` with your music directories:
+* One path:
+```docker-compose
+web:
+  volumes:
+    - /home/user/My Music:/usr/src/app/music:ro
+```
+* Multiple paths:
+```docker-compose
+web:
+  volumes:
+    - /home/user/Classic Music:/usr/src/app/music/Classic:ro
+    - /home/user/Punk Music:/usr/src/app/music/Punk:ro
+```
 
-master: [![Build Status Master](https://travis-ci.org/devsnd/cherrymusic.png?branch=master)](https://travis-ci.org/devsnd/cherrymusic)
+Install dependencies:
+* docker
+* docker-compose>=1.5.0
 
-devel: [![Build Status Devel](https://travis-ci.org/devsnd/cherrymusic.png?branch=devel)](https://travis-ci.org/devsnd/cherrymusic)
+Create containers:
+```bash
+docker-compose build
+docker-compose up -d
+```
 
+Initialice database:
+```bash
+docker-compose run --rm web python3 manage.py migrate auth
+docker-compose run --rm web python3 manage.py migrate 
+```
 
- 
+Default admin user: `admin/admin`
 
-
-Getting Started
----------------
-
-See the [Setup Guide](https://github.com/devsnd/cherrymusic/wiki/Setup-Guide) for quickstart instructions and more.
-
-Basically, you can just 
-
-    $ git clone git://github.com/devsnd/cherrymusic.git
-
-and then start the server and follow the instructions:
-
-    $ python cherrymusic --setup --port 8080
-    
-(Leave out the --options for subsequent starts.)
-
-
-Requirements
-------------
-* [Python](http://python.org/download/releases/) >= 2.6, >= 3.2 preferred
-* [CherryPy](http://www.cherrypy.org) >= 3
-
-
-More
-----
-
-See our [wiki](https://github.com/devsnd/cherrymusic/wiki) for user and developer information.
+Reinstall cherrymusic
+---------------------
+```bash
+docker-compose stop
+docker-compose rm
+```
+And then reinstall.
 
 
-Troubleshooting
----------------
+Update cherrymusic
+------------------
+```bash
+docker-compose stop
+docker-compose rm web
+docker-compose build
+docker-compose up -d
+```
 
-Please see the [Troubleshooting wiki page](https://github.com/devsnd/cherrymusic/wiki/Setup-Guide#wiki-troubleshooting).
+Development frotent
+-------------------
+To install and run development containers:
+```bash
+docker-compose stop
+docker-compose -f development.yml build
+docker-compose -f development.yml up -d
+```
 
+Install bower components:
+```bash
+docker-compose -f development.yml run  --rm web_dev python3 manage.py bower_install -- --allow-root
+```
+Update static files
+-------------------
+In development mode:
 
-Contribute
-----------
+In `./web`:
+```bash
+docker-compose -f development.yml run --rm web_dev python3 manage.py collectstatic
+```
 
-There's also a wiki section listing the 
-[101 ways to lend a hand](https://github.com/devsnd/cherrymusic/wiki/Contribute).
+Tests
+-----
+To install test containers:
+```bash
+docker-compose stop
+docker-compose -f test.yml build
+```
 
+Test server:
+```bash
+docker-compose -f test.yml run --rm web_test /usr/src/test.sh && \
+docker-compose -f test.yml stop
+```

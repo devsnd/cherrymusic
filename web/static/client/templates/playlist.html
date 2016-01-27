@@ -1,0 +1,6 @@
+
+<a ng-click="setCurrentPlaylist(playlist)" aria-controls="home" role="tab" data-toggle="tab">
+    <span ng-if="playlist == currentPlayingPlaylist">▶</span>
+    {{ playlist.name }} <i ng-if="!playlist.saved"> (unsaved)</i>
+    <span ng-if="playlist.name!=='Queue'" class="playlist-tab-closer pointer" ng-click="onRemove()">x</span>
+</a>

@@ -1,0 +1,42 @@
+web:
+  extends:
+    file: docker-compose.base.yml
+    service: web
+  restart: always
+  links:
+    - postgres:postgres
+    - redis:redis
+  build: ./web
+  env_file: .env
+
+nginx:
+  extends:
+    file: docker-compose.base.yml
+    service: nginx
+  restart: always
+  volumes_from:
+    - web
+  links:
+    - web:web
+    - postgres:postgres
+    - redis:redis
+
+postgres:
+  extends:
+    file: docker-compose.base.yml
+    service: postgres
+  restart: always
+  volumes_from:
+    - data
+
+redis:
+  extends:
+    file: docker-compose.base.yml
+    service: redis
+  restart: always
+
+data:
+  extends:
+    file: docker-compose.base.yml
+    service: data
+  restart: always

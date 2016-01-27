@@ -1,0 +1,105 @@
+<!-- USER OPTIONS -->
+<div class="modal-header">
+    <button type="button" ng-click="close()" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3>Options</h3>
+</div>
+<div id="options" class="modal-body">
+    <div class="content">
+        <h3>keyboard shortcuts (needs reload to work)</h3>
+        <table>
+            <tr>
+                <td>increase volume</td>
+                <td><span class="label label-default">{{ $root.increaseVolumeKey }}</span></td>
+                <td><a ng-keydown="$root.updateKey($event, 'increaseVolumeKey')"
+                       ng-click="$root.changeKey = 'Press keys' "
+                       class="btn btn-default" tabindex="0">{{ $root.changeKey }}</a></td>
+            </tr>
+            <tr>
+                <td>decrease volume</td>
+                <td><span class="label label-default">{{ $root.decreaseVolumeKey }}</span></td>
+                <td><a ng-keydown="$root.updateKey($event, 'decreaseVolumeKey')"
+                       ng-click="$root.changeKey = 'Press keys' "
+                       class="btn btn-default" tabindex="0">{{ $root.changeKey }}</a></td>
+            </tr>
+            <tr>
+                <td>play</td>
+                <td><span class="label label-default">{{ $root.togglePlayKey }}</span></td>
+                <td><a ng-keydown="$root.updateKey($event, 'togglePlayKey')"
+                       ng-click="$root.changeKey = 'Press keys' "
+                       class="btn btn-default" tabindex="0">{{ $root.changeKey }}</a></td>
+            </tr>
+            <tr>
+                <td>next track</td>
+                <td><span class="label label-default">{{ $root.nextTrackKey }}</span></td>
+                <td><a ng-keydown="$root.updateKey($event, 'nextTrackKey')"
+                       ng-click="$root.changeKey = 'Press keys' "
+                       class="btn btn-default" tabindex="0">{{ $root.changeKey }}</a></td>
+            </tr>
+            <tr>
+                <td>previous track</td>
+                <td><span class="label label-default">{{ $root.previousTrackKey }}</span></td>
+                <td><a ng-keydown="$root.updateKey($event, 'previousTrackKey')"
+                       ng-click="$root.changeKey = 'Press keys' "
+                       class="btn btn-default" tabindex="0">{{ $root.changeKey }}</a></td>
+            </tr>
+            <tr>
+                <td>search</td>
+                <td><span class="label label-default"></span></td>
+                <td><a ng-keydown="$root.updateKey($event, 'searchKey')"
+                       ng-click="$root.changeKey = 'Press keys' "
+                       class="btn btn-default" tabindex="0">{{ $root.changeKey }}</a></td>
+            </tr>
+        </table>
+        <h3>misc</h3>
+        <div class="control-group">
+            Autoplay when adding first track <input ng-model="$root.autoPlay" type="checkbox" id="misc-autoplay_on_add" value="option1">
+        </div>
+        <div class="control-group">
+            Confirm closing if music is playing <input  ng-model="$root.confirmClosing" type="checkbox" id="ui-confirm_quit_dialog" value="option1">
+        </div>
+        <div class="control-group">
+            Display album art when playing <input ng-model="$root.showAlbumArt" type="checkbox" id="ui-display_album_art" value="option1">
+        </div>
+        <div class="control-group">
+            Remove played tracks in Queue playlist <input ng-model="$root.removeWhenQueue" type="checkbox" id="ui-display_album_art" value="option1">
+        </div>
+<!--        <div id="media-force_transcode_to_bitrate-container" class="control-group">
+            <div class="success">
+                Limit audio bitrate
+                <select name="media-force_transcode_to_bitrate">
+                    <option value="0">Unlimited</option>
+                    <option value="48">48 (Super Low)</option>
+                    <option value="64">64 (Very Low)</option>
+                    <option value="96">96 (Low)</option>
+                    <option value="128">128 (Medium)</option>
+                    <option value="320">320 (Very High)</option>
+                </select>
+                &nbsp;<input id="media-force_transcode_to_bitrate-display" type="text" disabled value="" size="3" style="text-align:right;"/>&nbsp;kbps
+            </div>
+            <div class="error" style="display: none; text-align: center; margin: 5px;">
+                <span class="msg"></span>
+                <button id="media-force_transcode_to_bitrate-disable" class="btn btn-danger">
+                    Remove personal bitrate limit
+                </button>
+            </div>
+-->
+        </div>
+        <h3>change password</h3>
+        <a class="btn btn-default" href="#changePassword" ng-click="openChangePasswordModal()" role="button" data-toggle="modal">change password</a>
+        <h3>import playlists</h3>
+        <a class="btn btn-default" 
+           ngf-select="uploadPlaylist($files, $invalidFiles)" multiple
+           accept="audio/x-mpequrl" 
+           ngf-max-height="1000" 
+           ngf-max-size="1MB">
+            import archive(s)
+        </a>
+        <h3>export playlists</h3>
+        <a class="btn btn-default" href="{{ downloadPlaylistURL }}" target="_blank">download zip</a>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn" ng-click="close()" data-dismiss="modal" aria-hidden="true">Close</button>
+    <a class="btn btn-primary" ng-click="saveSettings()">Save</a>
+</div>
+

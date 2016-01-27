@@ -1,0 +1,32 @@
+server {
+
+    listen 80;
+    server_name _;
+    charset utf-8;
+
+    location /static {
+        alias /usr/src/app/static;
+    }
+
+    location /proxied-download {
+        internal;
+        alias /usr/src/app/music/;
+    }
+
+    location /tmp/proxied-download {
+        internal;
+        alias /tmp/usr/src/app/music/;
+    }
+
+    location / {
+        proxy_pass http://web:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_connect_timeout       6000;
+        proxy_send_timeout          6000;
+        proxy_read_timeout          6000;
+        send_timeout                6000;
+    }
+
+}

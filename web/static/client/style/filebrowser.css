@@ -1,0 +1,190 @@
+.cm-media-list {
+  position: relative;
+  padding: 0;
+}
+.cm-media-list-busy {
+  overflow: hidden;
+  background-image: url("../img/cherrymusic_loader.gif");
+  background-position: 50% 120px;
+  background-repeat: no-repeat;
+}
+.cm-media-list-category {
+  position: relative;
+}
+.cm-media-list a {
+  text-decoration: none;
+}
+.cm-media-list-item {
+  list-style-type: none;
+  word-wrap: break-word;
+  margin: 5px 5px 5px 0;
+}
+.cm-media-list-wrench {
+  position: relative;
+  display: inline;
+  float: left;
+  color: #FFF;
+  padding: 0 2px;
+}
+.cm-media-list-wrench:hover {
+  color: #444444;
+  cursor: pointer;
+}
+.cm-media-list > li:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+.cm-media-list > li:nth-child(even) {
+  background-color: #eeeeee;
+}
+.cm-media-list-parent {
+  display: block;
+  height: 50px;
+  font-size: 30px;
+  padding: 5px 10px;
+}
+.cm-media-list-parent:hover {
+  background-color: #777777;
+}
+.cm-media-list-parent-item {
+  margin-bottom: 20px;
+}
+.cm-media-list-view-change-buttons {
+  display: inline-block;
+  margin: -10px 0 0px 5px;
+}
+file {
+  display: block;
+}
+file > .fullpathlabel {
+  font-size: 11px;
+  display: block;
+  white-space: nowrap;
+  color: #777777;
+  overflow: hidden;
+}
+file > .simplelabel {
+  padding-left: 5px;
+}
+.list-dir {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.list-dir > div {
+  display: block;
+}
+.list-dir-albumart {
+  width: 80px;
+  margin: 0 auto;
+  text-align: center;
+}
+.list-dir-albumart img {
+  max-width: 80px;
+  max-height: 80px;
+}
+.list-dir-info-bar {
+  background-color: #dedede;
+}
+.list-dir-name {
+  font-size: 12px;
+  display: block;
+  text-align: center;
+}
+.list-dir-folder-files-count {
+  color: #bbbbbb;
+  display: inline;
+}
+.list-dir-item {
+  display: inline-block;
+  width: 105px;
+  height: 130px;
+  vertical-align: middle;
+  overflow: hidden;
+}
+.list-dir-item-listview {
+  /* overrides normal coverview to display folders as list */
+  display: table-row;
+  width: 100%;
+  height: 30px;
+}
+.list-dir-item-listview > div {
+  display: table-cell;
+}
+.list-dir-item-listview > .list-dir-info-bar {
+  min-width: 80px;
+}
+.list-dir-item-listview > .list-dir-cover-area {
+  height: 30px;
+  width: 100%;
+}
+.list-dir-item-listview .list-dir-albumart {
+  margin: 0;
+  display: inline-block;
+  width: 30px;
+}
+.list-dir-item-listview .list-dir-albumart img {
+  width: 30px;
+  height: 30px;
+}
+.list-dir-item-listview .list-dir-name {
+  text-align: left;
+}
+.list-dir-item-listview .list-dir-name-wrap {
+  display: inline-block;
+  position: absolute;
+  height: 30px;
+  overflow: hidden;
+}
+.list-dir:hover {
+  background-color: #777777;
+}
+.list-dir-cover-area {
+  height: 100%;
+}
+.compact-list-dir {
+  display: block;
+  font-size: 120%;
+  padding: 0 0 0 10px;
+}
+.compact-list-dir:hover {
+  background-color: #777777;
+}
+.playlist-browser-list-item {
+  list-style-type: none;
+  margin-right: 20px;
+}
+.playlist-browser-list-item-container {
+  display: table;
+  width: 100%;
+}
+.playlist-browser-list-item-container > div {
+  display: table-row;
+}
+.playlist-browser-list-item-container > div > div {
+  display: table-cell;
+}
+.playlist-detail-switch {
+  width: 1%;
+}
+.playlist-detail-switch > a {
+  display: block;
+  padding: 5px;
+}
+.playlist-age {
+  white-space: nowrap;
+}
+.playlist-title {
+  width: 99%;
+}
+.playlist-ispublic {
+  width: 1%;
+}
+.playlist-usernamelabel {
+  width: 1%;
+}
+.playlist-deletebutton {
+  width: 1%;
+}
+.playlist-content {
+  margin-left: 30px;
+}
