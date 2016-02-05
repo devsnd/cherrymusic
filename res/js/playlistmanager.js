@@ -293,7 +293,20 @@ PlaylistManager = function(){
 PlaylistManager.prototype = {
     initJPlayer : function(){
         "use strict";
+        var sortByPref = function (arr, pref) {
+                return arr.slice(0).sort(function (a, b) {
+                    var aPref = pref.indexOf(a),
+                        bPref = pref.indexOf(b);
 
+                    if (aPref > -1) {
+                        return bPref > -1 ? aPref > bPref : false;
+                    } else {
+                        return bPref > -1 ? true : arr.indexOf(a) > arr.indexOf(b);
+                    }
+                });
+            };
+
+        availablejPlayerFormats = $.map(sortByPref(availableEncoders, encoderPreferenceOrder), function (encoder) { return ext2jPlayerFormat(encoder); });
         //hack to use flash AND HTML solution in every case
         //https://github.com/happyworm/jPlayer/issues/136#issuecomment-12941923
         availablejPlayerFormats.push("m4v");
@@ -310,7 +323,7 @@ PlaylistManager.prototype = {
                 swfPath: "res/js/ext",
                 solution: usedSolution,
                 preload: 'metadata',
-                supplied: "mp3, oga, m4v",
+                supplied: availablejPlayerFormats.join(","),
                 wmode: "window",
                 cssSelectorAncestor: self.cssSelectorJPlayerControls,
                 errorAlerts: false,
