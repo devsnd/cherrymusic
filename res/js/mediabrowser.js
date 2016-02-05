@@ -73,24 +73,24 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
         var error = function(){
             $(self.cssSelector).removeClass('cm-media-list-busy');
             errorFunc('unable to list compact directory');
-        }
+        };
         api(action,
             dirdata,
             success,
             error);
         $(this).blur();
         return false;
-    }
+    };
 
     var view_list_enable = function(){
         self.listing_data_stack[self.listing_data_stack.length-1].listview = true;
         self.render();
-    }
+    };
 
     var view_cover_enable = function(){
         self.listing_data_stack[self.listing_data_stack.length-1].listview = false;
         self.render();
-    }
+    };
 
     this.go_to_parent = function(levels){
         if(typeof levels === 'undefined'){
@@ -99,7 +99,7 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
         for(var i=0; i<levels; i++){
             self.listing_data_stack.pop();
         }
-    }
+    };
 
     this.render = function(){
         var stack_top = self.listing_data_stack[self.listing_data_stack.length-1]['data'];
@@ -197,7 +197,7 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
                 self.go_to_parent(self.listing_data_stack.length - 1 - i);
                 self.render();
             };
-        }
+        };
         if(self.listing_data_stack.length > 1){
             var node = $('<div class="cm-media-list-item cm-media-list-parent-item">'+
             '   <a class="cm-media-list-parent" href="javascript:;">'+
@@ -223,7 +223,7 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
 
         playlistManager.setTrackDestinationLabel();
         MediaBrowser.static.albumArtLoader('#search-panel');
-    }
+    };
 
     this.render();
     // remove all old click handlers
@@ -235,7 +235,7 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
     $(cssSelector).on('click', '.cm-media-list-wrench', function(){
         var dirname = decodeURIComponent($(this).attr('data-dirname'));
         $('#changeAlbumArt').attr('data-dirname', $(this).attr('data-dirname'));
-        $('#changeAlbumArt .foldername').text(dirname)
+        $('#changeAlbumArt .foldername').text(dirname);
         $('#changeAlbumArt').modal('show');
     });
     // register list and cover view buttons
@@ -255,7 +255,7 @@ MediaBrowser = function(cssSelector, json, title, enable_breadcrumbs, options){
         $(this).blur();
         return false;
     });
-}
+};
 
 MediaBrowser.static = {
     _renderList: function (l, listview){
@@ -342,7 +342,7 @@ MediaBrowser.static = {
     },
 
     addThisTrackToPlaylist : function(){
-        "use strict"
+        "use strict";
         playlistManager.addSong( $(this).attr("path"), $(this).attr("title") );
         $(this).blur();
         return false;
@@ -397,7 +397,7 @@ MediaBrowser.static = {
                     '('+jPlayerPlaylist.prototype._formatTime(metainfo.length) + ')'
                 );
             }
-        }
+        };
 
         var fetch_meta_data = function(elem){
             var jqelem = $(elem);
@@ -412,11 +412,11 @@ MediaBrowser.static = {
                     $(self).show();
                     var metainfo = $.parseJSON(data);
                     renderMetaData($(self), metainfo);
-                }
+                };
                 var complete = function(){
                     jqelem.removeClass('unloaded');
                     load_unloaded_meta_data(cssSelector);
-                }
+                };
                 api(
                     'getsonginfo',
                     {'path': decodeURIComponent(path_url_enc)},
@@ -425,7 +425,7 @@ MediaBrowser.static = {
                     complete
                 );
             }
-        }
+        };
 
         var load_unloaded_meta_data = function(cssSelector){
             console.log('load_unloaded_meta_data');
@@ -433,9 +433,9 @@ MediaBrowser.static = {
             if(unloaded_metadata.length > 0){
                 fetch_meta_data(unloaded_metadata[0]);
             }
-        }
+        };
         load_unloaded_meta_data(cssSelector);
 
     },
-}
+};
 

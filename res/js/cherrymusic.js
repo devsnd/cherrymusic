@@ -48,9 +48,9 @@ var CHECK_MUSIC_PLAYING_INTERVAL = 2000;
 var HEARTBEAT_INTERVAL_MS = 30*1000;
 
 var playlistSelector = '.jp-playlist';
-var previousSorted = undefined
+var previousSorted = undefined;
 
-var executeAfterConfigLoaded = []
+var executeAfterConfigLoaded = [];
 
 
 /**
@@ -83,8 +83,8 @@ function api(){
                 successNotify(result.flash);
             }
             successFunc(result.data);
-        }
-    }
+        };
+    };
 
     //wrapper for all error handlers:
     var errorFuncWrapper = function(errorFunc){
@@ -95,8 +95,8 @@ function api(){
                 reloadPage();
             }
             errorFunc();
-        }
-    }
+        };
+    };
     if(!errorfunc){
         //default error handler
         errorfunc = function(){
@@ -116,10 +116,10 @@ function api(){
 
 htmlencode = function(val){
     return $('<div />').text(val?val:'').html();
-}
+};
 htmldecode = function(val){
     return $('<div />').html(val?val:'').text();
-}
+};
 
 function errorFunc(msg){
     "use strict";
@@ -170,7 +170,7 @@ function displayNotification(msg, type, duration){
         },
         $('#errormessage')
     );
-    window.setTimeout('hideNotification(".'+unique_class_id+'")', duration)
+    window.setTimeout('hideNotification(".'+unique_class_id+'")', duration);
 }
 
 /*******************
@@ -198,7 +198,7 @@ function loadConfig(executeAfter){
             'transcode_path': dictatedClientConfig.transcodepath,
             'auto_login': dictatedClientConfig.auto_login,
             'version': dictatedClientConfig.version,
-        }
+        };
 
         executeAfter();
         if(isAdmin){
@@ -209,7 +209,7 @@ function loadConfig(executeAfter){
             $('#logout-menu-button').attr('onclick', '');
             $('#logout-menu-button').attr('title', 'Cannot logout: Auto-Login enabled');
         }
-        $('#aboutModal #cherrymusic-version').html(SERVER_CONFIG.version)
+        $('#aboutModal #cherrymusic-version').html(SERVER_CONFIG.version);
     };
     var error = errorFunc("Could not fetch client configuration, CherryMusic will not work. Clearing the browser cache might help.");
     api('getconfiguration', {}, success, error);
@@ -296,8 +296,8 @@ var optionSetter = function(name, val, success, error){
         function(){ success(); loadUserOptions(); },
         error,
         function(){ busy('#userOptions .content').fadeOut('fast'); }
-    )
-}
+    );
+};
 keyboard_shortcut_setter = function(option, optionname){
     $('#shortcut-changer span').html('Hit any key to set shortcut for<br><b><i>'+optionname+'</i></b><br><br>Press <b>escape</b> or <b>space</b> to cancel.');
     $('#shortcut-changer').fadeIn('fast');
@@ -312,16 +312,16 @@ keyboard_shortcut_setter = function(option, optionname){
             $('#shortcut-changer input').unbind('keydown',keydownhandler);
             $('html').unbind('keydown',keydownhandler);
             $('#shortcut-changer').fadeOut('fast');
-        }
+        };
         if(e.which && e.which !== 27 && e.which !== 32){ //do not bind unrecognised keys or escape / space
             optionSetter(option,e.which,keyboardsetterend,keyboardsetterend);
         }
         keyboardsetterend();
         return false;
-    }
+    };
     $('#shortcut-changer input').bind('keydown',keydownhandler);
     $('html').bind('keydown',keydownhandler);
-}
+};
 
 function busy(selector, rect){
     "use strict";
@@ -390,13 +390,13 @@ ext2jPlayerFormat = function(ext){
         case "mp4":
         case "aac": return "m4a";
 
-        case "flac" : return "flac"
+        case "flac" : return "flac";
 
         case "wav": return "wav";
 
         case "weba": return "webma";
     }
-}
+};
 
 
 /******************
@@ -427,7 +427,7 @@ function savePlaylist(plid,playlistname,ispublic,overwrite){
         playlistManager.getPlaylistById(plid).saved = true;
         playlistManager.refresh();
         playlistManager.showPlaylist(plid);
-    }
+    };
     busy('#playlist-panel').hide().fadeIn('fast');
     api('saveplaylist',
         {
@@ -438,7 +438,7 @@ function savePlaylist(plid,playlistname,ispublic,overwrite){
         },
         success,
         errorFunc('error saving playlist'),
-        function(){busy('#playlist-panel').fadeOut('fast')});
+        function(){busy('#playlist-panel').fadeOut('fast');});
 }
 function getAddrPort(){
     m = (window.location+"").match(/(https?):\/\/([^/:]+)(?::(\d+))?/);   // won't work for URLs with "user:passw@host"
@@ -473,7 +473,7 @@ function showPlaylists(sortby, filterby){
          'filterby': filterby},
         success,
         error,
-        function(){busy('.search-results').fadeOut('fast')}
+        function(){busy('.search-results').fadeOut('fast');}
     );
 }
 
@@ -492,7 +492,7 @@ function changePlaylist(plid,attrname,value){
             showPlaylists();
         },
         errorFunc('error changing playlist attribute'),
-        function(){busy('#playlist-panel').fadeOut('fast')}
+        function(){busy('#playlist-panel').fadeOut('fast');}
     );
 }
 
@@ -504,7 +504,7 @@ function confirmDeletePlaylist(id,title){
             {'playlistid':  id},
             false,
             errorFunc('error deleting playlist'),
-            function(){busy('#playlist-panel').fadeOut('fast')}
+            function(){busy('#playlist-panel').fadeOut('fast');}
         );
         $('#dialog').fadeOut('fast');
         showPlaylists();
@@ -525,13 +525,13 @@ function loadPlaylist(playlistid, playlistlabel){
         }
         pl.setSaved(true);
         pl.scrollToTrack(0);
-    }
+    };
     api('loadplaylist',
         {'playlistid': playlistid},
         success,
         errorFunc('error loading external playlist'),
-        function(){busy('#playlist-panel').fadeOut('fast')}
-    )
+        function(){busy('#playlist-panel').fadeOut('fast');}
+    );
 }
 
 function loadPlaylistContent(playlistid, playlistlabel){
@@ -549,7 +549,7 @@ function loadPlaylistContent(playlistid, playlistlabel){
             {'playlistid': playlistid},
             success,
             errorFunc('error loading external playlist'),
-            function(){busy('#playlist-panel').fadeOut('fast')}
+            function(){busy('#playlist-panel').fadeOut('fast');}
         );
     } else {
         $(pldomid).slideToggle('slow');
@@ -565,14 +565,14 @@ function randomPlaylist() {
     var success = function(tracks){
         for (var i = 0; i < tracks.length; i++) {
             var track = tracks[i];
-            playlistManager.addSong(track.urlpath, track.label)
+            playlistManager.addSong(track.urlpath, track.label);
         }
     };
     busy('#jplayer').hide().fadeIn('fast');
     api('generaterandomplaylist',
         success,
         errorFunc('error loading random playlist'),
-        function(){busy('#jplayer').fadeOut('fast')}
+        function(){busy('#jplayer').fadeOut('fast');}
     );
 }
 
@@ -599,7 +599,7 @@ function download_editing_playlist(){
                 //add tracks to hidden form and call to call download using post data
                 $('#download-redirect-files').val(encodeURIComponent(JSON.stringify(track_urls)));
                 // disable confirm-to-quit for the download link (will be reenabled automatically)
-                window.onbeforeunload = null
+                window.onbeforeunload = null;
                 $('#download-redirect').submit();
             } else {
                 alert(msg);
@@ -645,12 +645,12 @@ function TemplateLoader(template_path){
                 }
             );
         }
-    }
+    };
     this.render = function(template_name, content, $jqobj){
         this.get(template_name, function(template){
             $jqobj.html(Mustache.render(template, content));
         });
-    }
+    };
     this.render_append = function(template_name, content, $jqobj){
         this.get(template_name, function(template){
             $jqobj.append(Mustache.render(template, content));
@@ -663,7 +663,7 @@ function TemplateLoader(template_path){
             window.console.error('Can not return unloaded template '+template_name+'!');
             return '';
         }
-    }
+    };
 }
 var templateLoader = new TemplateLoader('res/templates');
 //preload templates for mediabrowser
@@ -707,7 +707,7 @@ function updateUserList(){
     api('getuserlist',
         success,
         errorFunc('cannot fetch user list'),
-        function(){busy('#adminuserlist').fadeOut('fast')}
+        function(){busy('#adminuserlist').fadeOut('fast');}
     );
 }
 function addNewUser(){
@@ -733,7 +733,7 @@ function addNewUser(){
         },
         success,
         errorFunc('failed to add new user'),
-        function(){busy('#adminpanel').fadeOut('fast')}
+        function(){busy('#adminpanel').fadeOut('fast');}
     );
 }
 
@@ -746,7 +746,7 @@ function userDelete(userid){
         { 'userid':userid },
         success,
         errorFunc('failed to delete user'),
-        function(){ busy('#adminuserlist').fadeOut('fast') }
+        function(){ busy('#adminuserlist').fadeOut('fast'); }
     );
 }
 
@@ -763,7 +763,7 @@ function userSetPermitDownload(userid, allow_download){
         },
         success,
         errorFunc('Failed to set user download state'),
-        function(){busy('#adminuserlist').fadeOut('fast')}
+        function(){busy('#adminuserlist').fadeOut('fast');}
     );
 }
 
@@ -835,7 +835,7 @@ function loadBrowser(directory, title){
         {'directory' : directory},
         success,
         errorFunc('failed to load file browser'),
-        function(){busy('#searchfield').fadeOut('fast')});
+        function(){busy('#searchfield').fadeOut('fast');});
 }
 
 /***
@@ -875,14 +875,14 @@ function unixtime(){
 function time2text(sec){
     var abssec = Math.abs(sec);
     var minutes = parseInt(abssec/60);
-    var hours = parseInt(minutes/60)
+    var hours = parseInt(minutes/60);
     var days = parseInt(hours/24);
     var weeks = parseInt(days/7);
     var months = parseInt(days/30);
     var years = parseInt(days/365);
     var t='';
     if(abssec < 30){
-        return 'just now'
+        return 'just now';
     } else {
         if(years != 0){
             t = years == 1 ? 'a year' : years+' years';
@@ -903,7 +903,7 @@ function time2text(sec){
                 t = 'a minute';
             }
         } else {
-            t = 'a few seconds'
+            t = 'a few seconds';
         }
         return sec > 0 ? t+' ago' : 'in '+t;
     }
@@ -946,12 +946,12 @@ function keyboardShortcuts(e){
     if (e.ctrlKey) return;
     if (e.metaKey) return;
 
-    var actions = { 'next' :    function(e){playlistManager.cmd_next()},
-                    'pause' :   function(e){playlistManager.cmd_pause()},
-                    'play' :    function(e){playlistManager.cmd_play()},
-                    'prev' :    function(e){playlistManager.cmd_previous()},
+    var actions = { 'next' :    function(e){playlistManager.cmd_next();},
+                    'pause' :   function(e){playlistManager.cmd_pause();},
+                    'play' :    function(e){playlistManager.cmd_play();},
+                    'prev' :    function(e){playlistManager.cmd_previous();},
                     'search' :  function(e){$('#searchform input').focus().select(); e.preventDefault();},
-                    'stop' :    function(e){playlistManager.cmd_stop()},
+                    'stop' :    function(e){playlistManager.cmd_stop();},
                     };
     var mediaKeys = { 'MediaNextTrack' :        'next',
                       'MediaPlayPause' :        'pause', //The pause action is really play/pause, while the play action is only play.
@@ -990,7 +990,7 @@ function sendHeartBeat(){
     api('heartbeat',
         function(){ /*removeError('connection to server lost') */ },
         errorFunc('connection to server lost'),
-        true)
+        true);
     window.setTimeout('sendHeartBeat()', HEARTBEAT_INTERVAL_MS);
 }
 
@@ -1003,7 +1003,7 @@ function userOptionCheckboxListener(htmlid, optionname){
                         function(){
                             if($(self).is(':checked')){
                                 if(REQUIRES_RELOAD_ON_ENABLE.indexOf(htmlid) != -1){
-                                    alert('You need to reload the page for this setting to take effect.')
+                                    alert('You need to reload the page for this setting to take effect.');
                                 }
                             }
                         },
@@ -1068,7 +1068,7 @@ function dontCloseWindowIfMusicPlays(){
                 // register close dialog if music is playing
                 window.onbeforeunload = function() {
                   return "This will stop the playback. Do you really want to close CherryMusic?";
-                }
+                };
             }
         } else {
             if(window.onbeforeunload !== null){
@@ -1076,7 +1076,7 @@ function dontCloseWindowIfMusicPlays(){
                 window.onbeforeunload = null;
             }
         }
-        window.setTimeout("dontCloseWindowIfMusicPlays()", CHECK_MUSIC_PLAYING_INTERVAL)
+        window.setTimeout("dontCloseWindowIfMusicPlays()", CHECK_MUSIC_PLAYING_INTERVAL);
     } else {
         window.onbeforeunload = null;
     }
@@ -1094,12 +1094,12 @@ function searchAlbumArt(){
                         '</div>';
             $('.coverart-tryout').append(html);
         }
-    }
+    };
     api('fetchalbumarturls',
         {'searchterm': $('#albumart-search-term').val()},
         success,
         errorFunc('Error fetching image urls'),
-        function(){busy('#changeAlbumArt .modal-body').fadeOut('fast')});
+        function(){busy('#changeAlbumArt .modal-body').fadeOut('fast');});
 }
 
 function pickCoverArt(img){
@@ -1108,11 +1108,11 @@ function pickCoverArt(img){
     var success = function(){
         $('#changeAlbumArt').modal('hide');
         //reload cover art:
-        var folder_div = $('.list-dir[dir="'+dirname+'"]')
+        var folder_div = $('.list-dir[dir="'+dirname+'"]');
         //force reload image
         var folder_image = folder_div.find('img');
         folder_image.attr('src', folder_image.attr('src')+'&reload=1');
-    }
+    };
     api('albumart_set',
         {
             'directory': dirname,
@@ -1178,7 +1178,7 @@ $(document).ready(function(){
     loadUserOptions(function(){
         initKeyboardshortcuts();
         dontCloseWindowIfMusicPlays();
-        $('#albumart').toggle(userOptions.ui.display_album_art)
+        $('#albumart').toggle(userOptions.ui.display_album_art);
     });
     $('#search-panel').on('scroll', function(){
         //enable loading of images when in viewport
