@@ -933,7 +933,7 @@ function initKeyboardshortcuts(){
     $(window.document).bind('keydown', keyboardShortcuts);
     //disable space bar scrolling
     $(document).keydown(function (e) {
-        var focusedElement = $("*:focus");
+        var focusedElement = $("*:focusable:focus");
         var inputFieldFocused = focusedElement.length > 0;
         var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
         if (key === 32 && !inputFieldFocused) e.preventDefault();
@@ -967,7 +967,7 @@ function keyboardShortcuts(e){
     if (e.key && mediaKeys[e.key]){
         triggerAction(mediaKeys[e.key]);
     } else {
-        var focusedElement = $("*:focus");
+        var focusedElement = $("*:focusable:focus");
         var inputFieldFocused = focusedElement.length > 0;
         if(inputFieldFocused){
             if(e.which === 27){ //escape -> unfocus
