@@ -1,7 +1,7 @@
 .\" Manpage for CherryMusic.
 .\" Contact us on github.com/devsnd/cherrymusic to correct errors or typos.
 
-.TH "CHERRYMUSIC" "1" "2014\-03\-15" "CherryMusic" "CherryMusic man page"
+.TH "CHERRYMUSIC" "1" "2016\-04\-09" "CherryMusic" "CherryMusic man page"
 
 .SH "NAME"
 cherrymusic \- a standalone HTML5 (with Flash fallback) music streaming server written in Python
@@ -33,6 +33,12 @@ If invoked with this switch, CherryMusic will walk you through the basic configu
 
 .IP "\fB\-\-adduser USER PASSWORD\fP"
 Creates a new USER with the given PASSWORD.
+
+.IP "\fB\-\-deleteuser USER\fP"
+Deletes an existing USER.
+
+.IP "\fB\-\-changepassword USER NEWPASSWORD\fP"
+Changes the password of an existing USER to NEWPASSWORD.
 
 .IP "\fB\-\-port PORT\fP"
 Overrides the port specified in \fBcherrymusic.conf\fP(5).
@@ -75,7 +81,7 @@ Christian Maximilian Blasius for the logo
 .IP o
 Bootstrap
 .IP o
-6arms1leg for maintaining the AUR packages for Arch Linux and creating this man page
+6arms1leg for creating these man pages and maintaining the AUR packages for Arch Linux
 .IP o
 Adrian Sampson for audioread
 
