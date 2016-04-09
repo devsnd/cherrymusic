@@ -420,6 +420,9 @@ If you are sure that cherrymusic is not running, you can delete this file and re
                 'server.socket_port': config['server.port'],
             })
 
+        # allow enabling CORS headers using environment variable
+        cors_host = os.environ.get('CM_CORS_HOST')
+
         cherrypy.config.update({
             'log.error_file': os.path.join(
                 pathprovider.getUserDataPath(), 'server.log'),
@@ -428,7 +431,16 @@ If you are sure that cherrymusic is not running, you can delete this file and re
             'server.thread_pool': 30,
             'tools.sessions.on': True,
             'tools.sessions.timeout': 60 * 24,
+            'tools.CORS.on': bool(cors_host),
         })
+
+        if cors_host:
+            def CORS():
+                cherrypy.response.headers['Access-Control-Allow-Origin'] = cors_host
+                cherrypy.response.headers['Access-Control-Allow-Credentials'] = 'true'
+                cherrypy.response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE'
+                cherrypy.response.headers["Access-Control-Allow-Headers"] = "Origin, X-Requested-With, Content-Type, Accept"
+            cherrypy.tools.CORS = cherrypy.Tool('before_finalize', CORS)
 
         if not config['server.keep_session_in_ram']:
             sessiondir = os.path.join(
