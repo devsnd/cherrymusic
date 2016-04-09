@@ -32,6 +32,8 @@
 """This class provides the api to talk to the client.
 It will then call the cherrymodel, to get the
 requested information"""
+import binascii
+import inspect
 
 import os  # shouldn't have to list any folder in the future!
 import json
@@ -71,6 +73,24 @@ debug = True
 @service.user(model='cherrymodel', playlistdb='playlist',
               useroptions='useroptions', userdb='users')
 class HTTPHandler(object):
+    USER_BY_AUTH_TOKEN = {}
+
+    @classmethod
+    def get_user_by_auth_token(cls, authtoken):
+        return cls.USER_BY_AUTH_TOKEN.get(authtoken)
+
+    @classmethod
+    def create_user_auth_token(cls, user):
+        authed_user = userdb.User.nobody()
+        new_auth_token = None
+        while user != authed_user:
+            # check if by chance someone else is already registered using this
+            # token (incredibly unlikely!).
+            # note: setdefault is atomic. https://bugs.python.org/issue13521
+            new_auth_token = codecs.decode(binascii.b2a_hex(os.urandom(32)), 'ascii')
+            authed_user = cls.USER_BY_AUTH_TOKEN.setdefault(new_auth_token, user)
+        return new_auth_token
+
     def __init__(self, config):
         self.config = config
 
@@ -83,6 +103,7 @@ class HTTPHandler(object):
         self.firstrunpage = readRes(template_firstrun)
 
         self.handlers = {
+            'login': self.api_login,
             'search': self.api_search,
             'rememberplaylist': self.api_rememberplaylist,
             'saveplaylist': self.api_saveplaylist,
@@ -171,7 +192,16 @@ class HTTPHandler(object):
                 return self.loginpage
     index.exposed = True
 
-    def isAuthorized(self):
+    def isAuthorized(self, authtoken=None):
+        # try authenticating using the authtoken
+        if authtoken is not None:
+            user = self.__class__.get_user_by_auth_token(authtoken)
+            if user:
+                # inject user into session for backwards compability
+                cherrypy.session['username'] = user.name
+                cherrypy.session['userid'] = user.uid
+                cherrypy.session['admin'] = user.isadmin
+                return True
         try:
             sessionUsername = cherrypy.session.get('username', None)
             sessionUserId = cherrypy.session.get('userid', -1)
@@ -279,7 +309,9 @@ class HTTPHandler(object):
         #authorize if not explicitly deactivated
         handler = self.handlers[action]
         needsAuth = not ('noauth' in dir(handler) and handler.noauth)
-        if needsAuth and not self.isAuthorized():
+        # either auth using session or an auth token
+        authtoken = kwargs.get('authtoken')
+        if needsAuth and not self.isAuthorized(authtoken):
             raise cherrypy.HTTPError(401, 'Unauthorized')
         handler_args = {}
         if 'data' in kwargs:
@@ -288,9 +320,20 @@ class HTTPHandler(object):
         if is_binary:
             return handler(**handler_args)
         else:
+            required_args= inspect.getargspec(handler)[0][1:] # remove 'self'
+            if set(handler_args.keys()) != set(required_args):
+                msg = 'Invalid API arguments. Required arguments are: %s' % required_args
+                raise cherrypy.HTTPError(400, msg)
             return json.dumps({'data': handler(**handler_args)})
-
     api.exposed = True
+
+    def api_login(self, username, password):
+        user = self.userdb.auth(username, password)
+        if user != userdb.User.nobody():
+            return {'authtoken': self.__class__.create_user_auth_token(user)}
+        else:
+            raise cherrypy.HTTPError(401, 'Unauthorized')
+    api_login.noauth = True
 
     def download_check_files(self, filelist):
         # only admins and allowed users may download
