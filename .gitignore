@@ -12,7 +12,7 @@ var
 sdist
 develop-eggs
 .installed.cfg
-src
+# src
 pkg
 
 # Installer logs
@@ -61,7 +61,5 @@ doc/sphinx/_build
 *.ipynb
 .ipynb*
 
-res/ngclient/node_modules/
-res/ngclient/app/components/
 /venv
 /venv2

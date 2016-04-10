@@ -1,0 +1,21 @@
+.CMAudioPlayer {
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  height: 70px;
+  overflow: hidden;
+  border-top: 1px solid #ddd;
+}
+
+.buttonContainer {
+  width: 320px;
+  left: 50%;
+  margin-left: -160px;
+  position: relative;
+  padding: 5px 0;
+}
+
+body {
+  padding-bottom: 70px;
+}

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Cherry Music</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <link href='https://fonts.googleapis.com/css?family=Raleway:400,100,700' rel='stylesheet' type='text/css'>
+  <style>
+    * {
+      font-family: 'Raleway', sans-serif;
+    }
+    html {
+      font-size: 80%;
+    }
+  </style>
+</head>
+<body>
+    <!-- HACKED STUFF THAT SHOULD BE FIGURED OUT LATER -->
+    <style>
+        /* hack so that the navbar is not higher than it should be when
+        it contains a search field */
+        .navItemSearchHack>a {
+            padding: 8px 0 0 0 !important;
+        }
+        .navItemSearchHack>a>div{
+            margin-bottom: 0 !important;
+        }
+
+        /* shake animation */
+        .shake-animation {
+          animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+          transform: translate3d(0, 0, 0);
+          backface-visibility: hidden;
+          perspective: 1000px;
+        }
+
+        @keyframes shake {
+          10%, 90% {
+            transform: translate3d(-1px, 0, 0);
+          }
+
+          20%, 80% {
+            transform: translate3d(2px, 0, 0);
+          }
+
+          30%, 50%, 70% {
+            transform: translate3d(-4px, 0, 0);
+          }
+
+          40%, 60% {
+            transform: translate3d(4px, 0, 0);
+          }
+        }
+        /* shake animation end*/
+
+        /* compress nav bar items so that the tabs can reach into the navbar
+        space */
+        .nav > li > a {
+          padding: 15px 8px;
+        }
+        .nav-tabs > li > a { /* but do not override the style of the tabs! */
+          padding: 10px 15px;
+        }
+        /* position the progressbar label always in the center */
+        .progress-bar > span > span{
+          position: absolute;
+          left: 50%;
+          width: 320px;
+          margin-left: -160px;
+          color: #000000;
+        }
+    </style>
+  <div id="root" style="height: 100%"></div>
+</body>
+</html>
