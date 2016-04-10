@@ -1,9 +1,11 @@
 // Constants
+import {notifyPlaybackEnded} from 'redux/modules/Playlist';
 
 export const INIT_PLAYER = 'redux/cherrymusic/player/INIT_PLAYER';
 export const PLAY_TRACK = 'redux/cherrymusic/player/PLAY_TRACK';
 export const TIME_UPDATE = 'redux/cherrymusic/player/TIME_UPDATE';
 export const PLAYBACK_ENDED = 'redux/cherrymusic/player/PLAYBACK_ENDED';
+export const JUMP_TO_POSITION = 'redux/cherrymusic/player/JUMP_TO_POSITION';
 
 function actionInit (audioElement) {
   return {type: INIT_PLAYER, payload: {audioElement: audioElement}};
@@ -16,8 +18,8 @@ export function initPlayer (domElement) {
     audioNode.ontimeupdate = (evt) => {
       dispatch(actionTimeUpdate(evt.target.currentTime, evt.target.duration));
     };
-    audioNode.ended = (evt) => {
-      dispatch(actionPlaybackEnded())
+    audioNode.onended = (evt) => {
+      notifyPlaybackEnded(dispatch, getState);
     };
     dispatch(actionInit(audioNode));
   }
@@ -31,6 +33,28 @@ function actionTimeUpdate (currentTime, duration) {
   return {
     type: TIME_UPDATE,
     payload: {currentTime: currentTime, duration: duration}
+  }
+}
+
+function _selectOwnState (state) {
+  return state.player
+}
+
+function _selectAudioElement (state) {
+  return state.audioElement;
+}
+
+function actionJumpToPosition (positionSecs) {
+  return {type: JUMP_TO_POSITION, payload: {positionSecs: positionSecs}}
+}
+
+function jumpToPercentage (percentage) {
+  return (dispatch, getState) => {
+    const state = _selectOwnState(getState());
+    const newPositionSecs = state.duration * percentage;
+    const audioElement = _selectAudioElement(state);
+    audioElement.currentTime = newPositionSecs;
+    dispatch(actionJumpToPosition(newPositionSecs));
   }
 }
 
@@ -80,6 +104,16 @@ const ACTION_HANDLERS = {
       state: playerStates.startingPlay,
       trackUrl: action.payload.trackUrl,
       trackLabel: action.payload.trackLabel,
+    }
+  },
+  [JUMP_TO_POSITION]: (state, action) => {
+    const {positionSecs, duration} = action.payload;
+    const percentage = (positionSecs / duration) * 100;
+    return {
+      ...state,
+      state: playerStates.startingPlay,
+      currentTime: positionSecs,
+      percentage: percentage,
     }
   },
   [TIME_UPDATE]: (state, action) => {

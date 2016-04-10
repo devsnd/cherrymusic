@@ -36,6 +36,13 @@ export class MainView extends React.Component {
     if (this.props.loginState !== loginStates.logInSuccess){
       this.props.dispatch(push('/login'));
     }
+
+    // hitting enter in the search bar starts a search:
+    this.refs.navBarSearchInput.refs.input.addEventListener("keydown", (evt) => {
+      if (evt.keyCode == 13) {
+        this.handleNavBarSearch();
+      }
+    })
   }
 
   handleNavBarSearch () {

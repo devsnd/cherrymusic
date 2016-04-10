@@ -7,6 +7,8 @@ export const ACTIVATE_PLAYLIST = 'redux/cmplaylists/ACTIVATE_PLAYLIST';
 export const SET_PLAYING_PLAYLIST = 'redux/cmplaylists/SET_PLAYING_PLAYLIST';
 export const ADD_TRACK_TO_OPEN_PLAYLIST = 'redux/cmplaylists/ADD_TRACK_TO_OPEN_PLAYLIST';
 export const PLAY_TRACK_IN_PLAYLIST = 'redux/cmplaylists/PLAY_TRACK_IN_PLAYLIST';
+export const PLAY_NEXT_TRACK = 'redux/cmplaylists/PLAY_NEXT_TRACK';
+export const PLAY_PREVIOUS_TRACK = 'redux/cmplaylists/PLAY_PREVIOUS_TRACK';
 
 function makeEmptyPlaylist(){
   return {
@@ -62,6 +64,27 @@ export function createPlaylist (activate = false) {
   }
 }
 
+export function playNextTrack () {
+  dispatch({type: PLAY_NEXT_TRACK, payload: {}});
+  const state = _selectOwnState(getState());
+  if (
+    state.playingPlaylist !== null &&
+    state.playingPlaylist.length - 1 > state.playingTrackIdx
+  ) {
+    playTrackInPlaylist(state.playingPlaylist, state.playingTrackIdx + 1);
+  }
+}
+export function playPreviousTrack () {
+  dispatch({type: PLAY_PREVIOUS_TRACK, payload: {}});
+  const state = _selectOwnState(getState());
+  if (
+    state.playingPlaylist !== null &&
+    state.playingTrackIdx > 0
+  ) {
+    playTrackInPlaylist(state.playingPlaylist, state.playingTrackIdx - 1);
+  }
+}
+
 function actionAddTrackToOpenPlaylist (track) {
   return {type: ADD_TRACK_TO_OPEN_PLAYLIST, payload: {track: track}};
 }
@@ -89,13 +112,20 @@ function actionPlayTrackInPlaylist (playlist, trackidx) {
 export function playTrackInPlaylist (playlist, trackidx) {
   return (dispatch, getState) => {
     dispatch(actionPlayTrackInPlaylist(playlist, trackidx));
-    console.log(playlist);
-    console.log(trackidx);
     const trackUrl = SERVER_MEDIA_HOST + playlist.tracks[trackidx].urlpath;
     const trackLabel = playlist.tracks[trackidx].label;
     playTrack(trackUrl, trackLabel)(dispatch, getState);
   }
 }
+
+function _selectOwnState (state) {
+  return state.playlist;
+}
+
+export function notifyPlaybackEnded (dispatch, getState) {
+  playNextTrack(dispatch, getState);
+}
+
 
 const _someEmptyPlaylist = makeEmptyPlaylist();
 

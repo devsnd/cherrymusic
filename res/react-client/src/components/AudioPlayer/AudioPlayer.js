@@ -2,7 +2,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux'
 
-import {initPlayer, playerStates} from 'redux/modules/Player'
+import {initPlayer, playerStates, jumpToPercentage} from 'redux/modules/Player'
+import {playNextTrack, playPreviousTrack} from 'redux/modules/Playlist'
 
 import classes from './AudioPlayer.scss';
 import {ProgressBar, Glyphicon, Button, ButtonGroup} from 'react-bootstrap';
@@ -17,6 +18,7 @@ export class AudioPlayer extends React.Component {
     // attach the HTML5 Player to the DOM element of this component
     this.initPlayer = bindActionCreators(this.props.initPlayer, this.props.dispatch);
     this.initPlayer(this.refs.audioPlayer);
+    console.log(this);
   }
 
   render () {
@@ -42,8 +44,10 @@ export class AudioPlayer extends React.Component {
             </ButtonGroup>
           </div>
           <ProgressBar
+            ref="progressBar"
             now={this.props.percentage}
             label={this.props.trackLabel}
+            striped={this.props.playerState === playerStates.startingPlay}
           />
         </div>
         }
