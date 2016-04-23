@@ -1,7 +1,15 @@
 import React from 'react';
 import {LoadingStates} from 'redux/modules/CherryMusicApi';
 import {MessageOfTheDay} from 'components/MessageOfTheDay/MessageOfTheDay';
-import {Panel, ListGroup, ListGroupItem, Table, Label} from 'react-bootstrap';
+import {
+  Panel,
+  ListGroup,
+  ListGroupItem,
+  Table,
+  Label,
+  Breadcrumb,
+  BreadcrumbItem
+} from 'react-bootstrap';
 import SpinnerImage from 'static/img/cherrymusic_loader.gif';
 import classes from './Browser.scss';
 
@@ -14,7 +22,7 @@ export class Browser extends React.Component {
   }
 
   render () {
-    const {collections, tracks, state, path} = this.props.fileBrowser;
+    const {collections, tracks, entities, state, path} = this.props.fileBrowser;
     const {loadDirectory, selectTrack} = this.props;
 
     if (state === LoadingStates.idle) {
@@ -33,33 +41,41 @@ export class Browser extends React.Component {
 
     // build breadcrumbs
     const breadCrumbs = [
-      <span key={'rootBreadcrumb'} onClick={() => loadDirectory('')}>Basedir</span>
+      {label: 'Basedir', path: ''}
     ];
     if (path) {
       const splitPaths = path.split('/');
-      let assembledPaths = null;
+      let fullPath = null;
       for (let i=0; i < splitPaths.length; i++){
-        breadCrumbs.push(<span> / </span>);
         const label = splitPaths[i];
         let fullPathToPart;
         if (i === 0) {
-          assembledPaths = splitPaths[i];
+          fullPath = splitPaths[i];
         } else {
-          assembledPaths = assembledPaths + '/' + splitPaths[i];
+          fullPath = fullPath + '/' + splitPaths[i];
         }
-        fullPathToPart = assembledPaths;
-        breadCrumbs.push(<span key={fullPathToPart} onClick={() => loadDirectory(fullPathToPart)}>{label}</span>);
+        breadCrumbs.push({label: label, path: fullPath});
       }
     }
 
     return (
       <div>
-        {breadCrumbs}
-        <br/>
-        <br/>
+        <Breadcrumb>
+          {breadCrumbs.map((bc) => {
+            return (
+              <Breadcrumb.Item
+                onClick={() => loadDirectory(bc.path)}
+                key={bc.path}
+              >
+                {bc.label}
+              </Breadcrumb.Item>
+            );
+          })}
+        </Breadcrumb>
         {!!collections.length &&
         <ListGroup>
-          {collections.map((collection) => {
+          {collections.map((collectionId) => {
+            const collection = entities.collection[collectionId];
             return (
               <ListGroupItem
                 key={collection.path}
@@ -82,9 +98,10 @@ export class Browser extends React.Component {
               </tr>
             </thead>
             <tbody>
-              {tracks.map((track) => {
+              {tracks.map((trackId) => {
+                const track = entities.track[trackId];
                 return (
-                  <tr key={track.path} onClick={() => {selectTrack(track)}}>
+                  <tr key={track.path} onClick={() => {selectTrack(trackId)}}>
                     <td>{track.label}</td>
                     <td>{track.path}</td>
                   </tr>

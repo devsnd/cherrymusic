@@ -26,7 +26,9 @@ export class LoginView extends React.Component {
       if (evt.keyCode == 13) {
         this.handleLogin();
       }
-    })
+    });
+    console.log("HACKED AUTOLOGIN!!!!");
+    this.props.login('a', 'a');
   }
 
   handleLogin () {

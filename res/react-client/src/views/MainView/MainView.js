@@ -8,10 +8,13 @@ import TabbedPlaylists from 'components/TabbedPlaylists/TabbedPlaylists';
 
 import { loadDirectory, search } from 'redux/modules/CherryMusicApi';
 import { loginStates } from 'redux/modules/Auth';
-import { addTrackToOpenPlaylist } from 'redux/modules/Playlist';
+import { addTrackIdToOpenPlaylist } from 'redux/modules/Playlist';
 
 import { push } from 'react-router-redux';
-import { bindActionCreators } from 'redux'
+import { bindActionCreators } from 'redux';
+
+import navbarBrandLogoPng from 'static/img/favicon32-black.png';
+import cssClasses from './MainView.scss';
 
 export class MainView extends React.Component {
   static propTypes = {
@@ -28,7 +31,7 @@ export class MainView extends React.Component {
     this.state = {}; // initial UI state
     this.loadDirectory = bindActionCreators(this.props.loadDirectory, this.props.dispatch);
     this.search = bindActionCreators(this.props.search, this.props.dispatch);
-    this.addTrackToOpenPlaylist = bindActionCreators(this.props.addTrackToOpenPlaylist, this.props.dispatch);
+    this.addTrackIdToOpenPlaylist = bindActionCreators(this.props.addTrackIdToOpenPlaylist, this.props.dispatch);
   }
 
   componentDidMount () {
@@ -55,7 +58,13 @@ export class MainView extends React.Component {
         <Navbar>
           <Nav>
             <Navbar.Brand>
-              <a href="#">Cherry Music</a>
+              <a
+                href="#"
+                className={cssClasses.navbarBrandLogo}
+                style={{backgroundImage: 'url("' + navbarBrandLogoPng + '")'}}
+              >
+                Cherry&nbsp;&nbsp;Music
+              </a>
             </Navbar.Brand>
             <NavItem eventKey={1} href="#" className="navItemSearchHack" >
                 <Input
@@ -83,7 +92,7 @@ export class MainView extends React.Component {
               <Browser
                 fileBrowser={this.props.fileBrowser}
                 loadDirectory={this.loadDirectory}
-                selectTrack={this.addTrackToOpenPlaylist}
+                selectTrack={this.addTrackIdToOpenPlaylist}
               />
             </Col>
 
@@ -116,7 +125,7 @@ export default connect(
       dispatch: dispatch,
       loadDirectory: loadDirectory,
       search: search,
-      addTrackToOpenPlaylist: addTrackToOpenPlaylist,
+      addTrackIdToOpenPlaylist: addTrackIdToOpenPlaylist,
     };
   }
 )(MainView);

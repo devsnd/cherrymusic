@@ -92,7 +92,8 @@ class TabbedPlaylists extends React.Component {
                 height: '200px',
                 borderLeft: '1px solid #ddd',
               }}>
-                  {playlist.tracks.map((track, idx) => {
+                  {playlist.trackIds.map((trackId, idx) => {
+                    const track = this.props.entities.track[trackId];
                     return (
                       <div
                         key={idx}
@@ -121,6 +122,7 @@ export default connect(
       activePlaylist: state.playlist.activePlaylist,
       playingPlaylist: state.playlist.playingPlaylist,
       playingTrackIdx: state.playlist.playingTrackIdx,
+      entities: state.api.entities,
     };
   },
   (dispatch) => {

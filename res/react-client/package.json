@@ -108,6 +108,7 @@
     "koa-proxy": "^0.5.0",
     "koa-static": "^2.0.0",
     "node-sass": "^3.3.3",
+    "normalizr": "^2.0.1",
     "postcss-loader": "^0.8.0",
     "react": "^0.14.0",
     "react-bootstrap": "^0.28.5",

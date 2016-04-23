@@ -1,11 +1,12 @@
 // Constants
 import {notifyPlaybackEnded} from 'redux/modules/Playlist';
+import {SERVER_MEDIA_HOST} from 'constants';
 
 export const INIT_PLAYER = 'redux/cherrymusic/player/INIT_PLAYER';
 export const PLAY_TRACK = 'redux/cherrymusic/player/PLAY_TRACK';
 export const TIME_UPDATE = 'redux/cherrymusic/player/TIME_UPDATE';
 export const PLAYBACK_ENDED = 'redux/cherrymusic/player/PLAYBACK_ENDED';
-export const JUMP_TO_POSITION = 'redux/cherrymusic/player/JUMP_TO_POSITION';
+export const SEEK = 'redux/cherrymusic/player/SEEK';
 
 function actionInit (audioElement) {
   return {type: INIT_PLAYER, payload: {audioElement: audioElement}};
@@ -44,30 +45,28 @@ function _selectAudioElement (state) {
   return state.audioElement;
 }
 
-function actionJumpToPosition (positionSecs) {
-  return {type: JUMP_TO_POSITION, payload: {positionSecs: positionSecs}}
+function actionSeek (positionSecs) {
+  return {type: SEEK, payload: {positionSecs: positionSecs}}
 }
 
-function jumpToPercentage (percentage) {
+export function seek (percentage) {
   return (dispatch, getState) => {
     const state = _selectOwnState(getState());
-    const newPositionSecs = state.duration * percentage;
+    const newPositionSecs = state.duration * (percentage / 100);
     const audioElement = _selectAudioElement(state);
     audioElement.currentTime = newPositionSecs;
-    dispatch(actionJumpToPosition(newPositionSecs));
+    dispatch(actionSeek (newPositionSecs));
   }
 }
 
-function actionPlayTrack (trackUrl, trackLabel) {
-  return {type: PLAY_TRACK, payload: {trackUrl: trackUrl, trackLabel: trackLabel}};
-}
-
-export function playTrack (trackUrl, trackLabel) {
+export function playTrack (trackId) {
   return (dispatch, getState) => {
-    dispatch(actionPlayTrack(trackUrl, trackLabel));
-    const state = getState().player;
-    state.audioElement.src = trackUrl;
-    state.audioElement.play()
+    const state = getState();
+    const track = state.api.entities.track[trackId];
+    dispatch({type: PLAY_TRACK, payload: {trackId: trackId}});
+    const playerState = state.player;
+    playerState.audioElement.src = SERVER_MEDIA_HOST + track.urlpath;
+    playerState.audioElement.play()
   }
 }
 
@@ -106,7 +105,7 @@ const ACTION_HANDLERS = {
       trackLabel: action.payload.trackLabel,
     }
   },
-  [JUMP_TO_POSITION]: (state, action) => {
+  [SEEK]: (state, action) => {
     const {positionSecs, duration} = action.payload;
     const percentage = (positionSecs / duration) * 100;
     return {
