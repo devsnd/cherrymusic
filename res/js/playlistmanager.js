@@ -498,42 +498,65 @@ PlaylistManager.prototype = {
             var completetimesec = epl.getPlayTimeSec(epl.jplayerplaylist.playlist);
             var remaintimesec = epl.getPlayTimeSec(remaintracks);
             var playingPlaylist = this.getPlayingPlaylist();
-            if(playingPlaylist && epl.id === playingPlaylist.id){
-                remaintimesec -= $(this.cssSelectorjPlayer).data("jPlayer").status.currentTime;
-            }
-            remaintimesec = remaintimesec < 0 ? 0 : remaintimesec;
-
-            var littleTimeLeft = false;
             var remainingStr = '';
             var proc = 0;
-            if(typeof remaintimesec !== 'undefined' && typeof completetimesec !== 'undefined' ){
-                //if there is enough time info, show remaining time
-                if(completetimesec != 0){
-                    proc = remaintimesec/completetimesec;
-                } else {
+
+            // check if we are in shuffle mode, in this case just show the
+            // complete playtime
+            if (playlistManager.shuffled) {
+                if (typeof completetimesec !== 'undefined' ) {
+                    remainingStr = epl.jplayerplaylist._formatTime(completetimesec) + ' total'
                     proc = 1;
                 }
-                littleTimeLeft = remaintimesec < 300;
-                remainingStr = epl.jplayerplaylist._formatTime(remaintimesec)+' remaining'
             } else {
-                //show remaining tracks
-                proc = remaintracks.length/epl.jplayerplaylist.playlist.length;
-                littleTimeLeft = remaintracks.length < 3;
-                remainingStr = remaintracks.length+' remaining tracks';
+                if(playingPlaylist && epl.id === playingPlaylist.id){
+                    remaintimesec -= $(this.cssSelectorjPlayer).data("jPlayer").status.currentTime;
+                }
+                remaintimesec = remaintimesec < 0 ? 0 : remaintimesec;
+
+                var littleTimeLeft = false;
+
+                if(typeof remaintimesec !== 'undefined' && typeof completetimesec !== 'undefined' ){
+                    //if there is enough time info, show remaining time
+                    if(completetimesec != 0){
+                        proc = remaintimesec/completetimesec;
+                    } else {
+                        proc = 1;
+                    }
+                    littleTimeLeft = remaintimesec < 300;
+                    remainingStr = (
+                        epl.jplayerplaylist._formatTime(remaintimesec) +
+                        ' / ' +
+                        epl.jplayerplaylist._formatTime(completetimesec) +
+                        ' remaining'
+                    );
+                } else {
+                    //show remaining tracks
+                    proc = remaintracks.length/epl.jplayerplaylist.playlist.length;
+                    littleTimeLeft = remaintracks.length < 3;
+                    remainingStr = (
+                        remaintracks.length +
+                        ' / ' +
+                        epl.jplayerplaylist.playlist.length +
+                        ' remaining tracks'
+                    );
+                }
+                if(littleTimeLeft){
+                    $('.remaining-tracks-or-time').removeClass('label-default');
+                    $('.remaining-tracks-or-time').addClass('label-danger');
+                    $('.playlist-progress-bar .progress-bar').addClass('progress-bar-danger');
+                    $('.playlist-progress-bar .progress-bar').removeClass('progress-bar-default');
+                } else {
+                    $('.remaining-tracks-or-time').addClass('label-default');
+                    $('.remaining-tracks-or-time').removeClass('label-danger');
+                    $('.playlist-progress-bar .progress-bar').addClass('progress-bar-default');
+                    $('.playlist-progress-bar .progress-bar').removeClass('progress-bar-danger');
+                }
             }
-            if(littleTimeLeft){
-                $('.remaining-tracks-or-time').removeClass('label-default');
-                $('.remaining-tracks-or-time').addClass('label-danger');
-                $('.playlist-progress-bar .progress-bar').addClass('progress-bar-danger');
-                $('.playlist-progress-bar .progress-bar').removeClass('progress-bar-default');
-            } else {
-                $('.remaining-tracks-or-time').addClass('label-default');
-                $('.remaining-tracks-or-time').removeClass('label-danger');
-                $('.playlist-progress-bar .progress-bar').addClass('progress-bar-default');
-                $('.playlist-progress-bar .progress-bar').removeClass('progress-bar-danger');
-            }
+
             $('.remaining-tracks-or-time').html(remainingStr);
             $('.playlist-progress-bar .progress-bar').css('width',parseInt(100-proc*100)+'%');
+
         }
     },
     refreshTabs : function(){
