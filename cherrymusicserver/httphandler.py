@@ -128,7 +128,10 @@ class HTTPHandler(object):
         ssl_enabled = cherry.config['server.ssl_enabled']
         if ssl_enabled and not is_secure_connection:
             log.d(_('Not secure, redirecting...'))
-            ip = ipAndPort[:ipAndPort.rindex(':')]
+            try:
+                ip = ipAndPort[:ipAndPort.rindex(':')]
+            except ValueError:
+                ip = ipAndPort  # when using port 80: port is not in ipAndPort
             url = 'https://' + ip + ':' + str(cherry.config['server.ssl_port'])
             if redirect_unencrypted:
                 raise cherrypy.HTTPRedirect(url, 302)
