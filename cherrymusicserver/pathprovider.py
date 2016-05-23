@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # CherryMusic - a standalone music server
-# Copyright (c) 2012 - 2015 Tom Wallroth & Tilman Boerner
+# Copyright (c) 2012 - 2016 Tom Wallroth & Tilman Boerner
 #
 # Project page:
 #   http://fomori.org/cherrymusic/
@@ -40,16 +40,25 @@ configFolderName = 'cherrymusic'    # $XDG_CONFIG_HOME/configFolderName
 configFileName = 'cherrymusic.conf' # $XDG_CONFIG_HOME/configFolderName/cherrymusic.conf
 sharedFolderName = 'cherrymusic'    # /usr/share/sharedFolderName
 
+def isWindows():
+    return sys.platform.startswith('win')
+
+def isLinux():
+    return sys.platform.startswith('linux')
+
+def isOSX():
+    return sys.platform.startswith('darwin')
+
 def getUserDataPath():
     userdata = ''
-    if sys.platform.startswith('linux'):  # linux
+    if isLinux():
         if 'XDG_DATA_HOME' in os.environ:
             userdata = os.path.join(os.environ['XDG_DATA_HOME'],userDataFolderName)
         else:
             userdata = os.path.join(os.path.expanduser('~'), '.local', 'share', userDataFolderName)
-    elif sys.platform.startswith('win'): # windows
+    elif isWindows():
         userdata = os.path.join(os.environ['APPDATA'],'cherrymusic')
-    elif sys.platform.startswith('darwin'): # osx
+    elif isOSX():
         userdata = os.path.join(os.path.expanduser('~'), 'Library', 'Application Support',userDataFolderName)
 
     if not userdata:
@@ -62,14 +71,14 @@ def getConfigPath():
         return sys.argv[2]
     else:
         configpath = ''
-        if sys.platform.startswith('linux'):  # linux
+        if isLinux():
             if 'XDG_CONFIG_HOME' in os.environ:
                 configpath = os.path.join(os.environ['XDG_CONFIG_HOME'], configFolderName)
             else:
                 configpath = os.path.join(os.path.expanduser('~'), '.config', configFolderName)
-        elif sys.platform.startswith('win'): #windows
+        elif isWindows():
             configpath = os.path.join(os.environ['APPDATA'],configFolderName)
-        elif sys.platform.startswith('darwin'): #osx
+        elif isOSX():
             configpath = os.path.join(os.path.expanduser('~'), 'Library', 'Application Support', configFolderName)
 
         if not configpath:
@@ -134,32 +143,28 @@ def assureFolderExists(folder,subfolders=['']):
             os.makedirs(dirpath)
 
 def readRes(path):
-    with codecs.open(getResourcePath(path),encoding="utf-8") as f:
+    with codecs.open(getResourcePath(path), encoding="utf-8") as f:
         return f.read()
 
 def getResourcePath(path):
-    #check share first
-    resourceprefix = os.path.join(sys.prefix, 'share', sharedFolderName)
-    respath = os.path.join(resourceprefix, path)
-    if not os.path.exists(respath):
-        #log.w("Couldn't find " + respath + ". Trying local install path.")
-        #otherwise check local/share
-        resourceprefix = os.path.join(sys.prefix, 'local', 'share', sharedFolderName)
-        respath = os.path.join(resourceprefix, path)
-    if not os.path.exists(respath):
-        #log.w("Couldn't find " + respath + ". Trying local install path.")
-        #otherwise check local install
-        resourceprefix = os.path.dirname(os.path.dirname(__file__))
-        respath = os.path.join(resourceprefix, path)
-    if not os.path.exists(respath):
-        #log.w("Couldn't find " + respath + ". Trying home dir.")
-        #lastly check homedir
-        resourceprefix = getUserDataPath()
-        respath = os.path.join(resourceprefix, path)
-    if not os.path.exists(respath):
-        raise ResourceNotFound("Couldn't locate {path!r} in {res!r}!".format(
-            path=path, res=resourceprefix))
-    return os.path.join(resourceprefix, path)
+    RESOURCE_PATHS = []
+    if isLinux():
+        # check share first
+        RESOURCE_PATHS.append(os.path.join(sys.prefix, 'share', sharedFolderName))
+        # otherwise check local/share
+        RESOURCE_PATHS.append(os.path.join(sys.prefix, 'local', 'share', sharedFolderName))
+    # otherwise check local install
+    RESOURCE_PATHS.append(os.path.dirname(os.path.dirname(__file__)))
+    # lastly check homedir
+    RESOURCE_PATHS.append(getUserDataPath())
+
+    for prefixpath in RESOURCE_PATHS:
+        respath = os.path.join(prefixpath, path)
+        if os.path.exists(respath):
+            return respath
+    raise ResourceNotFound(
+        "Couldn't locate {path!r} in any {res!r}!".format(path=path, res=RESOURCE_PATHS)
+    )
 
 class ResourceNotFound(Exception):
     def __init__(self, msg):
