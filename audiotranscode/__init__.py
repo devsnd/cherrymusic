@@ -298,6 +298,7 @@ class AudioTranscode:
                     time.sleep(0.1)  # wait for new data...
                     break
                 yield data
+            yield encoder_process.stdout.read()
         finally:
             if decoder_process and decoder_process.poll() is None:
                 if decoder_process.stderr:
@@ -308,7 +309,6 @@ class AudioTranscode:
                     decoder_process.stdin.close()
                 decoder_process.terminate()
             if encoder_process:
-                encoder_process.stdout.read()
                 encoder_process.stdout.close()
                 if encoder_process.stdin:
                     encoder_process.stdin.close()
