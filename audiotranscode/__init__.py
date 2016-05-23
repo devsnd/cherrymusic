@@ -70,6 +70,8 @@ class Encoder(Transcoder):
         cmd = [find_executable(self.command[0])] + self.command[1:]
         if 'BITRATE' in cmd:
             cmd[cmd.index('BITRATE')] = str(bitrate)
+        if 'KBITRATE' in cmd:
+            cmd[cmd.index('KBITRATE')] = str(bitrate) + 'k'
         return subprocess.Popen(cmd,
                                 stdin=decoder_process.stdout,
                                 stdout=subprocess.PIPE,
@@ -161,11 +163,9 @@ class AudioTranscode:
     or transcode_stream to get a generator of the encoded stream"""
     READ_BUFFER = 1024
     Encoders = [
-        #encoders take input from stdin and write output to stout
-        Encoder('ogg', ['oggenc', '-b', 'BITRATE', '-']),
-        #doesn't work yet
-        #Encoder('ogg', ['ffmpeg', '-i', '-', '-f', 'ogg',
-        #                '-acodec', 'vorbis', '-']),
+        # encoders take input from stdin and write output to stout
+        # Encoder('ogg', ['ffmpeg', '-i', '-', '-f', 'ogg', '-c:a', 'libvorbis', '-b', 'KBITRATE', '-']),
+        Encoder('ogg', ['oggenc', '--resample', '44100', '-b', 'BITRATE', '-']),
         Encoder('mp3', ['lame', '-b', 'BITRATE', '-', '-']),
         Encoder('aac', ['faac', '-b', 'BITRATE', '-P', '-X', '-o', '-', '-']),
         Encoder('m4a', ['faac', '-b', 'BITRATE', '-P', '-X', '-o', '-', '-']),
