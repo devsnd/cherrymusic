@@ -12,6 +12,7 @@ import {
 } from 'react-bootstrap';
 import SpinnerImage from 'static/img/cherrymusic_loader.gif';
 import classes from './Browser.scss';
+import folderImage from 'static/img/folder.png';
 
 export class Browser extends React.Component {
   props: Props;
@@ -80,7 +81,12 @@ export class Browser extends React.Component {
               <ListGroupItem
                 key={collection.path}
                 onClick={() => {loadDirectory(collection.path)}}
-                header={collection.label}
+                header={
+                  <span>
+                    {collection.label}
+                    <img style={{float: 'left', paddingRight: 10}} src={folderImage} />
+                  </span>
+                }
               >
                 {collection.path}
               </ListGroupItem>

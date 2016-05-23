@@ -53,6 +53,8 @@ export class MainView extends React.Component {
   }
 
   render () {
+    const navBarHeight = 50;
+    const playerHeight = 64;
     return (
       <div>
         <Navbar>
@@ -95,7 +97,6 @@ export class MainView extends React.Component {
                 selectTrack={this.addTrackIdToOpenPlaylist}
               />
             </Col>
-
             {/* move the playlists up into the navbar area */}
             {/* style={{top: '-60px'}} */}
             <Col md={6}>
