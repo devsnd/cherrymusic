@@ -65,23 +65,28 @@ export function createPlaylist (activate = false) {
 }
 
 export function playNextTrack () {
-  dispatch({type: PLAY_NEXT_TRACK, payload: {}});
-  const state = _selectOwnState(getState());
-  if (
-    state.playingPlaylist !== null &&
-    state.playingPlaylist.length - 1 > state.playingTrackIdx
-  ) {
-    playTrackInPlaylist(state.playingPlaylist, state.playingTrackIdx + 1);
+  return (dispatch, getState) => {
+    dispatch({type: PLAY_NEXT_TRACK, payload: {}});
+    const state = _selectOwnState(getState());
+    const totalTrackCount = _selectPlayingPlaylistTrackCount(getState());
+    if (totalTrackCount > 0) {
+      const playingTrackIdx = _selectPlayingTrackIdx(getState());
+      if (totalTrackCount - 1 > playingTrackIdx) {
+        dispatch(playTrackInPlaylist(_selectPlayingPlaylist(getState()), playingTrackIdx + 1));
+      }
+    }
   }
 }
 export function playPreviousTrack () {
-  dispatch({type: PLAY_PREVIOUS_TRACK, payload: {}});
-  const state = _selectOwnState(getState());
-  if (
-    state.playingPlaylist !== null &&
-    state.playingTrackIdx > 0
-  ) {
-    playTrackInPlaylist(state.playingPlaylist, state.playingTrackIdx - 1);
+  return (dispatch, getState) => {
+    dispatch({type: PLAY_PREVIOUS_TRACK, payload: {}});
+    const totalTrackCount = _selectPlayingPlaylistTrackCount(getState());
+    if (totalTrackCount > 0) {
+      const playingTrackIdx = _selectPlayingTrackIdx(getState());
+      if (playingTrackIdx > 0) {
+        dispatch(playTrackInPlaylist(_selectPlayingPlaylist(getState()), playingTrackIdx - 1));
+      }
+    }
   }
 }
 
@@ -109,22 +114,28 @@ export function playTrackInPlaylist (playlist, trackidx) {
   }
 }
 
-function _selectOwnState (state) {
-  return state.playlist;
-}
+const _selectOwnState = (state) => state.playlist;
+const _selectPlayingPlaylist = (state) => _selectOwnState(state).playingPlaylist;
+const _selectPlayingTrackIdx = (state) => _selectOwnState(state).playingTrackIdx;
+const _selectPlayingPlaylistTrackCount = (state) => {
+  const playlist = _selectPlayingPlaylist(state);
+  if (playlist === null) {
+    return 0
+  }
+  return playlist.trackIds.length;
+};
+
 
 export function notifyPlaybackEnded (dispatch, getState) {
-  playNextTrack(dispatch, getState);
+  dispatch(playNextTrack());
 }
-
-
-const _someEmptyPlaylist = makeEmptyPlaylist();
+const _initialEmptyPlaylist = makeEmptyPlaylist();
 
 export const initialState = {
   playlists: [
-    _someEmptyPlaylist,
+    _initialEmptyPlaylist,
   ],
-  activePlaylist: _someEmptyPlaylist,
+  activePlaylist: _initialEmptyPlaylist,
   playingPlaylist: null,
   playingTrackIdx: null,
 };

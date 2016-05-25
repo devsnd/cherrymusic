@@ -34,7 +34,6 @@ export function login (username, password) {
       }
     ).then(
       (data) => {
-        console.log(data);
         dispatch(actionLogInSuccess(username, data['authtoken']));
         // http://stackoverflow.com/a/34863577/1191373
         dispatch(push('/main'));

@@ -63,3 +63,7 @@ doc/sphinx/_build
 
 /venv
 /venv2
+
+res/react-client/dist/
+dist/
+

@@ -1,7 +1,7 @@
 import React from 'react';
-import {LoadingStates} from 'redux/modules/CherryMusicApi';
-import {MessageOfTheDay} from 'components/MessageOfTheDay/MessageOfTheDay';
+
 import {
+  Button,
   Panel,
   ListGroup,
   ListGroupItem,
@@ -10,6 +10,9 @@ import {
   Breadcrumb,
   BreadcrumbItem
 } from 'react-bootstrap';
+
+import {LoadingStates} from 'redux/modules/CherryMusicApi';
+import TrackListItem from 'components/TrackListItem/TrackListItem';
 import SpinnerImage from 'static/img/cherrymusic_loader.gif';
 import classes from './Browser.scss';
 import folderImage from 'static/img/folder.png';
@@ -20,15 +23,16 @@ export class Browser extends React.Component {
   constructor (props) {
     super(props);
     this.state = {};
+    this.selectAll = (trackIds) => {
+      for (const trackId of trackIds) {
+        this.props.selectTrack(trackId);
+      }
+    }
   }
 
   render () {
     const {collections, tracks, entities, state, path} = this.props.fileBrowser;
     const {loadDirectory, selectTrack} = this.props;
-
-    if (state === LoadingStates.idle) {
-      return <MessageOfTheDay />;
-    }
 
     if (state === LoadingStates.loading) {
       return (
@@ -95,26 +99,28 @@ export class Browser extends React.Component {
         </ListGroup>
         }
 
-        {!!tracks.length &&
-          <Table hover>
-            <thead>
-              <tr>
-                <th>Artist</th>
-                <th>Trackname</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tracks.map((trackId) => {
-                const track = entities.track[trackId];
-                return (
-                  <tr key={track.path} onClick={() => {selectTrack(trackId)}}>
-                    <td>{track.label}</td>
-                    <td>{track.path}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </Table>
+        {!!tracks.length && <div>
+            <Button onClick={() => {this.selectAll(tracks)}}>
+              Add all to playlist
+            </Button>
+            <table className="table table-hover">
+              <tbody>
+                {tracks.map((trackId) => {
+                  const track = entities.track[trackId];
+                  return (
+                    <tr key={trackId}>
+                      <td>
+                        <TrackListItem
+                          track={track}
+                          onClick={() => {selectTrack(trackId)}}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         }
       </div>
     )

@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux'
 
-import {initPlayer, playerStates, seek} from 'redux/modules/Player'
+import {initPlayer, playerStates, seek, pause, resume} from 'redux/modules/Player'
 import {playNextTrack, playPreviousTrack} from 'redux/modules/Playlist'
 
 import classes from './AudioPlayer.scss';
@@ -19,6 +19,10 @@ export class AudioPlayer extends React.Component {
     // attach the HTML5 Player to the DOM element of this component
     this.initPlayer = bindActionCreators(this.props.initPlayer, this.props.dispatch);
     this.seek = bindActionCreators(this.props.seek, this.props.dispatch);
+    this.pause = bindActionCreators(this.props.pause, this.props.dispatch);
+    this.resume = bindActionCreators(this.props.resume, this.props.dispatch);
+    this.playPreviousTrack = bindActionCreators(this.props.playPreviousTrack, this.props.dispatch);
+    this.playNextTrack = bindActionCreators(this.props.playNextTrack, this.props.dispatch);
     this.initPlayer(this.refs.audioPlayer);
     this.handleProgressBarClick = this.handleProgressBarClick.bind(this);
   }
@@ -36,23 +40,31 @@ export class AudioPlayer extends React.Component {
   }
 
   render () {
+    const {playerState} = this.props;
     return (
       <div className={classes.CMAudioPlayer} ref="audioPlayer">
         {this.props.playerState === playerStates.uninitialized &&
           <h1>Initializing player...</h1>
         }
-        {this.props.playerState !== playerStates.uninitialized &&
+        {playerState !== playerStates.uninitialized &&
         <div>
           <div className={classes.buttonContainer}>
             <ButtonGroup>
-              <Button><Glyphicon glyph="step-backward"/></Button>
-              <Button><Glyphicon glyph="play"/></Button>
-              <Button><Glyphicon glyph="step-forward"/></Button>
-              <Button><Glyphicon glyph="stop"/></Button>
+              <Button onClick={this.playPreviousTrack}><Glyphicon glyph="step-backward"/></Button>
+              {playerState === playerStates.playing &&
+                <Button onClick={this.pause}><Glyphicon glyph="pause"/></Button>
+              }
+              {playerState !== playerStates.playing &&
+                <Button onClick={this.resume}><Glyphicon glyph="play"/></Button>
+              }
+              <Button onClick={this.playNextTrack}><Glyphicon glyph="step-forward"/></Button>
             </ButtonGroup>
             <ButtonGroup bsSize="xs">
-              <Button><Glyphicon glyph="volume-off"/></Button>
-              <Button><Glyphicon glyph="volume-up"/></Button>
+              {/*
+                lets remove the volume controls until somebody complains, maybe nobody uses them?
+                <Button><Glyphicon glyph="volume-off"/></Button>
+                <Button><Glyphicon glyph="volume-up"/></Button>
+              */}
               <Button><Glyphicon glyph="random"/></Button>
               <Button><Glyphicon glyph="retweet"/></Button>
             </ButtonGroup>
@@ -61,7 +73,7 @@ export class AudioPlayer extends React.Component {
             ref="progressBar"
             now={this.props.percentage}
             label={this.props.trackLabel}
-            striped={this.props.playerState === playerStates.startingPlay}
+            striped={playerState === playerStates.startingPlay}
             onClick={this.handleProgressBarClick}
           />
         </div>
@@ -83,6 +95,10 @@ export default connect(
     return {
       dispatch: dispatch,
       seek: seek,
+      pause: pause,
+      resume: resume,
+      playNextTrack: playNextTrack,
+      playPreviousTrack: playPreviousTrack,
       initPlayer: initPlayer
     };
   }

@@ -1,12 +1,35 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { Grid, Col, Row, Glyphicon, Input, Button, Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap';
+import {
+  Grid,
+  Col,
+  Row,
+  Glyphicon,
+  Input,
+  Button,
+  Navbar,
+  Nav,
+  NavItem,
+  NavDropdown,
+  MenuItem,
+  ListGroup,
+  ListGroupItem,
+} from 'react-bootstrap';
 
 import AudioPlayer from 'components/AudioPlayer/AudioPlayer';
 import Browser from 'components/Browser/Browser';
 import TabbedPlaylists from 'components/TabbedPlaylists/TabbedPlaylists';
+import PlaylistBrowser from 'components/PlaylistBrowser/PlaylistBrowser';
+import {MessageOfTheDay} from 'components/MessageOfTheDay/MessageOfTheDay';
 
-import { loadDirectory, search } from 'redux/modules/CherryMusicApi';
+import {
+  loadDirectory,
+  search,
+  actionPlaylistListRequested,
+  PlaylistSortModes,
+  LoadingStates,
+} from 'redux/modules/CherryMusicApi';
+import { setBrowserView, setPlaylistView, ViewStates } from 'redux/modules/UI';
 import { loginStates } from 'redux/modules/Auth';
 import { addTrackIdToOpenPlaylist } from 'redux/modules/Playlist';
 
@@ -30,8 +53,19 @@ export class MainView extends React.Component {
     super(props);
     this.state = {}; // initial UI state
     this.loadDirectory = bindActionCreators(this.props.loadDirectory, this.props.dispatch);
+    this.setBrowserView = bindActionCreators(this.props.setBrowserView, this.props.dispatch);
+    this.setPlaylistView = bindActionCreators(this.props.setPlaylistView, this.props.dispatch);
     this.search = bindActionCreators(this.props.search, this.props.dispatch);
     this.addTrackIdToOpenPlaylist = bindActionCreators(this.props.addTrackIdToOpenPlaylist, this.props.dispatch);
+
+    this.uiBrowseFiles = () => {
+      this.setBrowserView();
+      this.loadDirectory('');
+    };
+    this.uiLoadPlaylists = () => {
+      this.setPlaylistView();
+      this.props.dispatch(actionPlaylistListRequested(PlaylistSortModes.default, ''));
+    }
   }
 
   componentDidMount () {
@@ -49,12 +83,14 @@ export class MainView extends React.Component {
   }
 
   handleNavBarSearch () {
+    this.setBrowserView();
     this.search(this.refs.navBarSearchInput.refs.input.value);
   }
 
   render () {
     const navBarHeight = 50;
     const playerHeight = 64;
+    const {show} = this.props;
     return (
       <div>
         <Navbar>
@@ -68,7 +104,12 @@ export class MainView extends React.Component {
                 Cherry&nbsp;&nbsp;Music
               </a>
             </Navbar.Brand>
-            <NavItem eventKey={1} href="#" className="navItemSearchHack" >
+            <NavItem
+              eventKey={1}
+              href="#"
+              className="navItemSearchHack"
+              style={{width: '210px' /* workaround for chrome rendering the searchbar with 100% width */ }}
+            >
                 <Input
                   style={{width: '140px'}}
                   type="text"
@@ -78,8 +119,8 @@ export class MainView extends React.Component {
                   }
                 />
             </NavItem>
-            <NavItem eventKey={2} href="#" onClick={() => {this.loadDirectory('')}}>Browse files</NavItem>
-            <NavItem eventKey={2} href="#">Load Playlist</NavItem>
+            <NavItem eventKey={2} href="#" onClick={this.uiBrowseFiles}>Browse files</NavItem>
+            <NavItem eventKey={2} href="#" onClick={this.uiLoadPlaylists}>Load Playlist</NavItem>
             <NavDropdown eventKey={3} title={<Glyphicon glyph="wrench" />} id="basic-nav-dropdown">
               <MenuItem eventKey={3.1}>Options</MenuItem>
               <MenuItem eventKey={3.2}>Admin</MenuItem>
@@ -91,11 +132,19 @@ export class MainView extends React.Component {
         <Grid>
           <Row className="show-grid">
             <Col md={6}>
-              <Browser
-                fileBrowser={this.props.fileBrowser}
-                loadDirectory={this.loadDirectory}
-                selectTrack={this.addTrackIdToOpenPlaylist}
-              />
+              {show === ViewStates.motd &&
+                <MessageOfTheDay />
+              }
+              {show === ViewStates.browser &&
+                <Browser
+                  fileBrowser={this.props.fileBrowser}
+                  loadDirectory={this.loadDirectory}
+                  selectTrack={this.addTrackIdToOpenPlaylist}
+                />
+              }
+              {show === ViewStates.playlists &&
+                <PlaylistBrowser />
+              }
             </Col>
             {/* move the playlists up into the navbar area */}
             {/* style={{top: '-60px'}} */}
@@ -119,12 +168,15 @@ export default connect(
       // internalPropName: state.someGlobalApplicationState,
       loginState: state.auth.loginState,
       fileBrowser: state.api,
+      show: state.ui.viewState,
     };
   },
   (dispatch) => {
     return {
       dispatch: dispatch,
       loadDirectory: loadDirectory,
+      setBrowserView: setBrowserView,
+      setPlaylistView: setPlaylistView,
       search: search,
       addTrackIdToOpenPlaylist: addTrackIdToOpenPlaylist,
     };

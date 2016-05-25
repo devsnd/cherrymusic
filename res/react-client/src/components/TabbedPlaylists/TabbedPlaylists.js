@@ -5,6 +5,8 @@ import {PLAYBACK_ENDED} from 'redux/modules/Player';
 
 import {Tab, Tabs, Table} from 'react-bootstrap';
 
+import TrackListItem from 'components/TrackListItem/TrackListItem';
+
 import {
   createPlaylist,
   activatePlaylist,
@@ -100,8 +102,9 @@ class TabbedPlaylists extends React.Component {
                         onClick={() => {this.selectTrack(playlist, idx)}}
                         style={makeTrackStyle(playlist, idx, track)}
                       >
-                        <span>{track.label}</span>
-                        <span>{track.path}</span>
+                        <TrackListItem
+                          track={track}
+                        />
                       </div>
                     );
                   })}
