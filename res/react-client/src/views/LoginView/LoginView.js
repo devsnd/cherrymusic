@@ -38,6 +38,7 @@ export class LoginView extends React.Component {
   }
 
   render () {
+    const {loginState} = this.props;
     return (
       <div>
         <br />
@@ -49,14 +50,24 @@ export class LoginView extends React.Component {
                 alt='CherryMusic is very nice.'
               />
               <h3 style={{textAlign: 'center'}}>Cherry Music</h3>
-              <Well className={this.props.loginState === loginStates.logInFailed && 'shake-animation'}>
+              <Well className={loginState === loginStates.logInFailed && 'shake-animation'}>
                 <form ref="loginform">
-                  <Input type="text" ref="username" label="Username" placeholder="Username" />
-                  <Input type="password" ref="password" label="Password" placeholder="Password" />
+                  <Input
+                    type="text"
+                    ref="username"
+                    label="Username"
+                    placeholder="Username"
+                    disabled={loginState === loginStates.loggingIn}/>
+                  <Input
+                     type="password"
+                     ref="password"
+                     label="Password"
+                     placeholder="Password"
+                     disabled={loginState === loginStates.loggingIn}/>
                   <Button onClick={ this.handleLogin.bind(this) }>Login</Button>
                 </form>
                 <br />
-                {this.props.loginState === loginStates.logInFailed &&
+                {loginState === loginStates.logInFailed &&
                 <Alert bsStyle="warning">Login failed. Wrong username or password.</Alert>
                 }
                 <a className="fomori" target="_blank" href="http://www.fomori.org">
