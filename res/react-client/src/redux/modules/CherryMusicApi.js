@@ -16,6 +16,7 @@ export const getAuthToken = (state) => state.api.authtoken;
 export const PLAYLIST_LIST_REQUESTED = 'redux/cherrymusicapi/PLAYLIST_LIST_REQUESTED';
 export const PLAYLIST_LIST_LOADED = 'redux/cherrymusicapi/PLAYLIST_LIST_LOADED';
 export const PLAYLIST_LIST_LOAD_ERROR = 'redux/cherrymusicapi/PLAYLIST_LIST_LOAD_ERROR';
+export const PLAYLIST_LIST_SORT_BY = 'redux/cherrymusicapi/PLAYLIST_LIST_SORT_BY';
 
 export const PLAYLIST_OPEN_REQUESTED = 'redux/cherrymusicapi/PLAYLIST_OPEN_REQUESTED';
 export const PLAYLIST_DETAIL_LOADING = 'redux/cherrymusicapi/PLAYLIST_DETAIL_LOADING';
@@ -206,6 +207,10 @@ export function actionPlaylistListLoaded (playlists, sortby, filterby) {
   }
 }
 
+export function actionPlaylistListSortBy (sortMode) {
+  return {type: PLAYLIST_LIST_SORT_BY, payload: {sortBy: sortMode}};
+}
+
 export function selectAPI (state) {
   return state.api;
 }
@@ -233,6 +238,10 @@ export function selectPlaylistIds (state) {
 
 export function selectPlaylistsLoadingState (state) {
   return selectAPI(state).playlistsLoadingState;
+}
+
+export function selectPlaylistSortBy (state) {
+  return selectAPI(state).playlistSortBy;
 }
 
 export const initialState = {
@@ -330,7 +339,25 @@ const ACTION_HANDLERS = {
       playlistsLoadingState: LoadingStates.error,
     }
   },
-
+  [PLAYLIST_LIST_SORT_BY]: (state, action) => {
+    const playlistEntities = selectEntitiesPlaylist(state);
+    const {sortBy} = action.payload;
+    const sortKey = {
+      [PlaylistSortModes.default]: 'created',
+      [PlaylistSortModes.age]: 'created',
+      [PlaylistSortModes.username]: 'username',
+      [PlaylistSortModes.title]: 'title',
+    }[sortBy];
+    return {
+      ...state,
+      playlistSortBy: sortBy,
+      playlists: playlists.concat().sort((playlistIdA, playlistIdB) => {
+        const aVal = playlistEntities[playlistIdA][sortKey];
+        const bVal = playlistEntities[playlistIdB][sortKey];
+        return aVal > bVal;
+      })
+    }
+  },
   [DIRECTORY_LOADING]: (state, action) => {
     const {path} = action.payload;
     return {
