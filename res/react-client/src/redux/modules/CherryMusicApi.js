@@ -10,6 +10,7 @@ import {
 import {legacyAPICall} from 'utils/legacyApi';
 import {LOG_IN_SUCCESS} from 'redux/modules/Auth';
 import updateHelper from 'react-addons-update';
+import { createSelector } from 'reselect';
 
 export const getAuthToken = (state) => state.api.authtoken;
 
@@ -232,6 +233,37 @@ export function selectEntitiesPlaylist (state) {
   return selectAPI(state).entities.playlist;
 }
 
+export const selectSortedPlaylists = createSelector(
+  selectEntitiesPlaylist,
+  selectPlaylistSortBy,
+  selectPlaylistSortByReversed,
+  (playlistEntities, sortBy, reversed) => {
+    const sortedPlaylists = [];
+    Object.keys(playlistEntities).map((plid) => {
+      sortedPlaylists.push(playlistEntities[plid]);
+    });
+    const sortKeyFunc = {
+      [PlaylistSortModes.default]: (pl) => pl.created,
+      [PlaylistSortModes.age]: (pl) => pl.created,
+      [PlaylistSortModes.username]: (pl) => pl.username.toLowerCase().trim(),
+      [PlaylistSortModes.title]: (pl) => pl.title.toLowerCase().trim(),
+    }[sortBy];
+    sortedPlaylists.sort((playlistA, playlistB) => {
+      const aVal = sortKeyFunc(playlistA);
+      const bVal = sortKeyFunc(playlistB);
+      if (aVal === bVal) {
+        return 0
+      }
+      if (reversed) {
+        return aVal > bVal ? 1 : -1;
+      } else {
+        return aVal < bVal ? 1 : -1;
+      }
+    });
+    return sortedPlaylists;
+  }
+);
+
 export function selectPlaylistIds (state) {
   return selectAPI(state).playlists;
 }
@@ -242,6 +274,10 @@ export function selectPlaylistsLoadingState (state) {
 
 export function selectPlaylistSortBy (state) {
   return selectAPI(state).playlistSortBy;
+}
+
+export function selectPlaylistSortByReversed (state) {
+  return selectAPI(state).playlistSortByReversed;
 }
 
 export const initialState = {
@@ -340,22 +376,18 @@ const ACTION_HANDLERS = {
     }
   },
   [PLAYLIST_LIST_SORT_BY]: (state, action) => {
-    const playlistEntities = selectEntitiesPlaylist(state);
-    const {sortBy} = action.payload;
-    const sortKey = {
-      [PlaylistSortModes.default]: 'created',
-      [PlaylistSortModes.age]: 'created',
-      [PlaylistSortModes.username]: 'username',
-      [PlaylistSortModes.title]: 'title',
-    }[sortBy];
+    let sortReversed;
+    // if the same sorting action is triggered again, reverse the sorting
+    if (state.playlistSortBy == action.payload.sortBy) {
+      sortReversed = !state.playlistSortByReversed;
+    } else {
+      // but when changing to another sort criteria, reset the reversing:
+      sortReversed = false;
+    }
     return {
       ...state,
-      playlistSortBy: sortBy,
-      playlists: playlists.concat().sort((playlistIdA, playlistIdB) => {
-        const aVal = playlistEntities[playlistIdA][sortKey];
-        const bVal = playlistEntities[playlistIdB][sortKey];
-        return aVal > bVal;
-      })
+      playlistSortBy: action.payload.sortBy,
+      playlistSortByReversed:  sortReversed,
     }
   },
   [DIRECTORY_LOADING]: (state, action) => {

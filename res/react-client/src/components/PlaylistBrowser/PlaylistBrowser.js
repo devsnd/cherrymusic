@@ -13,10 +13,11 @@ import {
 import Username from 'components/Username/Username';
 
 import {
-  selectEntitiesPlaylist,
+  selectSortedPlaylists,
   selectPlaylistsLoadingState,
   selectPlaylistIds,
   selectPlaylistSortBy,
+  selectPlaylistSortByReversed,
   PlaylistSortModes as SortModes,
   actionPlaylistListSortBy,
   LoadingStates,
@@ -31,13 +32,13 @@ class PlaylistBrowser extends React.Component {
   constructor (props) {
     super(props);
     this.sortByTitle = () => {
-      this.props.dispatch(actionPlaylistListSortBy(SortModes.title))
+      this.props.dispatch(actionPlaylistListSortBy(SortModes.title));
     };
     this.sortByAge = () => {
-      this.props.dispatch(actionPlaylistListSortBy(SortModes.age))
+      this.props.dispatch(actionPlaylistListSortBy(SortModes.age));
     };
     this.sortByUsername = () => {
-      this.props.dispatch(actionPlaylistListSortBy(SortModes.username))
+      this.props.dispatch(actionPlaylistListSortBy(SortModes.username));
     };
   }
 
@@ -50,7 +51,7 @@ class PlaylistBrowser extends React.Component {
   }
 
   render () {
-    const {playlistEntities, playlistIds, loadingState, sortBy} = this.props;
+    const {sortedPlaylists, loadingState, sortBy, sortByReversed} = this.props;
     return (
       <div>
         {loadingState === LoadingStates.loading && <div>
@@ -79,15 +80,17 @@ class PlaylistBrowser extends React.Component {
             </Button>
           </ButtonGroup>
           <ListGroup>
-            {playlistIds.map((playlistId) => {
-              const playlist = playlistEntities[playlistId];
+            {sortedPlaylists.map((playlist) => {
+              const playlistId = playlist.plid;
               return (
                 <ListGroupItem
                   onClick={() => this.handleOpenPlaylist(playlistId)}
                   key={playlistId}
                 >
                   {playlist.title}
-                  <Age seconds={playlist.age} />
+                  <span style={{float: 'right'}}>
+                    <Age seconds={playlist.age} />
+                  </span>
                   {playlist.owner && <span>
                     {playlist.public &&
                       <Label bsStyle="success">
@@ -121,10 +124,10 @@ class PlaylistBrowser extends React.Component {
 export default connect(
   (state, dispatch) => {
     return {
-      playlistEntities: selectEntitiesPlaylist(state),
-      playlistIds: selectPlaylistIds(state),
+      sortedPlaylists: selectSortedPlaylists(state),
       loadingState: selectPlaylistsLoadingState(state),
       sortBy: selectPlaylistSortBy(state),
+      sortByReversed: selectPlaylistSortByReversed(state),
     };
   },
   (dispatch) => {
