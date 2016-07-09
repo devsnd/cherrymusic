@@ -65,3 +65,5 @@ res/ngclient/node_modules/
 res/ngclient/app/components/
 /venv
 /venv2
+
+node_modules
