@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # CherryMusic - a standalone music server
-# Copyright (c) 2012 - 2015 Tom Wallroth & Tilman Boerner
+# Copyright (c) 2012 - 2016 Tom Wallroth & Tilman Boerner
 #
 # Project page:
 #   http://fomori.org/cherrymusic/
@@ -32,7 +32,7 @@
 #python 2.6+ backward compability
 from __future__ import unicode_literals
 
-VERSION = "0.35.2"
+VERSION = "0.37.0"
 __version__ = VERSION
 DESCRIPTION = "an mp3 server for your browser"
 LONG_DESCRIPTION = """CherryMusic is a music streaming
@@ -148,20 +148,40 @@ def fake_wait_for_occupied_port(host, port):
 cherrypy.process.servers.wait_for_occupied_port = fake_wait_for_occupied_port
 # end of port patch
 
-# workaround for cherrypy not using unicode strings for URI, see:
-# https://bitbucket.org/cherrypy/cherrypy/issue/1148/wrong-encoding-for-urls-containing-utf-8
-cherrypy.lib.static.__serve_file = cherrypy.lib.static.serve_file
+# trying to detect the version to determine if we need to monkeypatch cherrypy
+if cherrypy.__version__ == 'unknown':
+    print(_(
+        'Could not determine cherrypy version. Please install cherrypy '
+        'using pip or your OS\'s package manager. Trying to detect version '
+        'automatically.'
+    ))
+    try:
+        # this decorator was added between 5.4 and 5.5
+        # https://github.com/cherrypy/cherrypy/pull/1428
+        # commit: dff09e92fb2e83fb4248826c9bc14cd3b6281706
+        import cherrypy._cptools.register
+        needs_serve_file_utf8_fix = False
+    except ImportError:
+        needs_serve_file_utf8_fix = True
+else:
+    cherrypy_version = tuple(int(v) for v in cherrypy.__version__.split('.'))
+    needs_serve_file_utf8_fix = cherrypy_version < (5, 5)
 
-def serve_file_utf8_fix(path, content_type=None, disposition=None,
-                        name=None, debug=False):
-    if sys.version_info >= (3,):
-        #python3+
-        # see also below: mirrored mangling of basedir for '/serve' static dir
-        path = codecs.decode(codecs.encode(path, 'latin-1'), 'utf-8')
-    return cherrypy.lib.static.__serve_file(path, content_type,
-                                            disposition, name, debug)
-cherrypy.lib.static.serve_file = serve_file_utf8_fix
-# end of unicode workaround
+if needs_serve_file_utf8_fix:
+    # workaround for cherrypy < 5.5.0 not using unicode strings for URI, see:
+    # https://bitbucket.org/cherrypy/cherrypy/issue/1148/wrong-encoding-for-urls-containing-utf-8
+    cherrypy.lib.static.__serve_file = cherrypy.lib.static.serve_file
+
+    def serve_file_utf8_fix(path, content_type=None, disposition=None,
+                            name=None, debug=False):
+        if sys.version_info >= (3,):
+            #python3+
+            # see also below: mirrored mangling of basedir for '/serve' static dir
+            path = codecs.decode(codecs.encode(path, 'latin-1'), 'utf-8')
+        return cherrypy.lib.static.__serve_file(path, content_type,
+                                                disposition, name, debug)
+    cherrypy.lib.static.serve_file = serve_file_utf8_fix
+    # end of unicode workaround
 
 from cherrymusicserver import configuration as cfg
 config = None
@@ -262,12 +282,23 @@ def start_server(cfg_override=None):
 def create_user(username, password):
     """ Creates a non-admin user with given username and password """
     non_alnum = re.compile('[^a-z0-9]', re.IGNORECASE)
-    if non_alnum.findall(username) or non_alnum.findall(password):
-        log.e(_('username and password may only contain english letters'
-                ' and digits'))
+    if non_alnum.findall(username):
+        log.e(_('usernames may only contain letters and digits'))
         return False
     return service.get('users').addUser(username, password, admin=False)
 
+def delete_user(username):
+    userservice = service.get('users')
+    userid = userservice.getIdByName(username)
+    if userid is None:
+        log.e(_('user with the name "%s" does not exist!'), username)
+        return False
+    return userservice.deleteUser(userid)
+
+def change_password(username, password):
+    userservice = service.get('users')
+    result = userservice.changePassword(username, password)
+    return result == 'success'
 
 def update_filedb(paths):
     """ Updates the file database in a separate thread,
@@ -337,7 +368,7 @@ class CherryMusic:
                         os.getpgid(int(pidfile.read()))
                     sys.exit(_("""============================================
 Process id file %s already exists.
-I've you are sure that cherrymusic is not running, you can delete this file and restart cherrymusic.
+If you are sure that cherrymusic is not running, you can delete this file and restart cherrymusic.
 ============================================""") % pathprovider.pidFile())
                 except OSError:
                     print('Stale process id file, removing.')

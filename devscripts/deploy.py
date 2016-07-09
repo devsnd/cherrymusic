@@ -19,6 +19,7 @@ def prog_exists(exe):
             prog = sp.Popen([exe], stdin=devnull, stdout=devnull)
             stout, sterr = prog.communicate('')
     except IOError:
+        print('Warning: "%s" was not found.' % exe)
         return False
     return True
     

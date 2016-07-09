@@ -32,6 +32,7 @@ from distutils.spawn import find_executable
 MIMETYPES = {
     'mp3': 'audio/mpeg',
     'ogg': 'audio/ogg',
+    'oga': 'audio/ogg',
     'flac': 'audio/flac',
     'aac': 'audio/aac',
     'm4a': 'audio/m4a',
@@ -69,6 +70,8 @@ class Encoder(Transcoder):
         cmd = [find_executable(self.command[0])] + self.command[1:]
         if 'BITRATE' in cmd:
             cmd[cmd.index('BITRATE')] = str(bitrate)
+        if 'KBITRATE' in cmd:
+            cmd[cmd.index('KBITRATE')] = str(bitrate) + 'k'
         return subprocess.Popen(cmd,
                                 stdin=decoder_process.stdout,
                                 stdout=subprocess.PIPE,
@@ -160,11 +163,9 @@ class AudioTranscode:
     or transcode_stream to get a generator of the encoded stream"""
     READ_BUFFER = 1024
     Encoders = [
-        #encoders take input from stdin and write output to stout
-        Encoder('ogg', ['oggenc', '-b', 'BITRATE', '-']),
-        #doesn't work yet
-        #Encoder('ogg', ['ffmpeg', '-i', '-', '-f', 'ogg',
-        #                '-acodec', 'vorbis', '-']),
+        # encoders take input from stdin and write output to stout
+        # Encoder('ogg', ['ffmpeg', '-i', '-', '-f', 'ogg', '-c:a', 'libvorbis', '-b', 'KBITRATE', '-']),
+        Encoder('ogg', ['oggenc', '--resample', '44100', '-b', 'BITRATE', '-']),
         Encoder('mp3', ['lame', '-b', 'BITRATE', '-', '-']),
         Encoder('aac', ['faac', '-b', 'BITRATE', '-P', '-X', '-o', '-', '-']),
         Encoder('m4a', ['faac', '-b', 'BITRATE', '-P', '-X', '-o', '-', '-']),
@@ -181,15 +182,30 @@ class AudioTranscode:
         Decoder('mp3', ['ffmpeg', '-ss', 'STARTTIME',
 	                '-i', 'INPUT', '-f', 'wav',
                         '-acodec', 'pcm_s16le', '-']),
-        Decoder('wma'  , ['ffmpeg', '-ss', 'STARTTIME',
-	                  '-i', 'INPUT', '-f', 'wav',
-			  '-acodec', 'pcm_s16le', '-']),
-        Decoder('ogg', ['oggdec', '-Q', '-b', '16', '-o', '-', 'INPUT']),
-        Decoder('ogg', ['ffmpeg', '-ss', 'STARTTIME',
-		        '-i', 'INPUT', '-f', 'wav',
+        Decoder('wma', ['ffmpeg', '-ss', 'STARTTIME',
+                        '-i', 'INPUT', '-f', 'wav',
                         '-acodec', 'pcm_s16le', '-']),
+        Decoder('ogg', ['oggdec', '-Q', '-b', '16', '-o', '-', 'INPUT']),
+        Decoder('ogg', ['ffmpeg',
+                        '-ss', 'STARTTIME',
+                        '-i', 'INPUT',
+                        '-f', 'wav',
+                        '-acodec', 'pcm_s16le',
+                        '-']),
+        # duplicate ogg decoders for oga files
+        Decoder('oga', ['oggdec', '-Q', '-b', '16', '-o', '-', 'INPUT']),
+        Decoder('oga', ['ffmpeg',
+                        '-ss', 'STARTTIME',
+                        '-i', 'INPUT',
+                        '-f', 'wav',
+                        '-acodec', 'pcm_s16le',
+                        '-']),
         Decoder('flac', ['flac', '-F', '-d', '-c', 'INPUT']),
         Decoder('aac', ['faad', '-w', 'INPUT']),
+        # prefer ffmpeg over faad for decoding to handle ALAC streams #584
+        Decoder('m4a', ['ffmpeg', '-ss', 'STARTTIME',
+                        '-i', 'INPUT', '-f', 'wav',
+                        '-acodec', 'pcm_s16le', '-']),
         Decoder('m4a', ['faad', '-w', 'INPUT']),
         Decoder('wav', ['cat', 'INPUT']),
         Decoder('opus', ['opusdec', 'INPUT', '--force-wav', '--quiet', '-']),
@@ -282,6 +298,7 @@ class AudioTranscode:
                     time.sleep(0.1)  # wait for new data...
                     break
                 yield data
+            yield encoder_process.stdout.read()
         finally:
             if decoder_process and decoder_process.poll() is None:
                 if decoder_process.stderr:
@@ -292,7 +309,6 @@ class AudioTranscode:
                     decoder_process.stdin.close()
                 decoder_process.terminate()
             if encoder_process:
-                encoder_process.stdout.read()
                 encoder_process.stdout.close()
                 if encoder_process.stdin:
                     encoder_process.stdin.close()

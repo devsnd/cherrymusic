@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # CherryMusic - a standalone music server
-# Copyright (c) 2012 - 2014 Tom Wallroth & Tilman Boerner
+# Copyright (c) 2012 - 2016 Tom Wallroth & Tilman Boerner
 #
 # Project page:
 #   http://fomori.org/cherrymusic/
@@ -75,13 +75,17 @@ class UserDB:
     def changePassword(self, username, newpassword):
         if not newpassword.strip():
             return _("not a valid password")
-        else:
-            newuser = User.create(username, newpassword, False) #dummy user for salt
-            self.conn.execute('''
-            UPDATE users SET password = ?, salt = ? WHERE username = ?
-            ''', (newuser.password, newuser.salt, newuser.name) )
-            self.conn.commit()
-            return "success"
+        if self.getIdByName(username) is None:
+            msg = 'cannot change password: "%s" does not exist!' % username
+            log.e(msg)
+            return msg
+
+        newuser = User.create(username, newpassword, False) #dummy user for salt
+        self.conn.execute('''
+        UPDATE users SET password = ?, salt = ? WHERE username = ?
+        ''', (newuser.password, newuser.salt, newuser.name) )
+        self.conn.commit()
+        return "success"
 
     def deleteUser(self, userid):
         if self.isDeletable(userid):
@@ -125,6 +129,12 @@ class UserDB:
         res = self.conn.execute('''SELECT username FROM users WHERE rowid = ?''',(userid,))
         username = res.fetchone()
         return username[0] if username else 'nobody'
+
+    def getIdByName(self, username):
+        res = self.conn.execute('''SELECT rowid FROM users WHERE username = ?''',(username,))
+        userid = res.fetchone()
+        if userid:
+            return userid[0]
 
 class Crypto(object):
 

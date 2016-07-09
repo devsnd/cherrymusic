@@ -189,6 +189,11 @@ ManagedPlaylist.prototype = {
                 if(typeof b.meta !== 'undefined'){
                     value_b = b.meta[sort_by];
                 }
+                // sort numerically if both values start with numbers
+                if(!!value_a.match(/^\d+/) && !!value_b.match(/^\d+/)){
+                    return parseInt(value_a) - parseInt(value_b);
+                }
+                // otherwise sort alphabetically
                 if(value_a > value_b){
                     return 1;
                 } else if(value_a < value_b){
@@ -493,42 +498,65 @@ PlaylistManager.prototype = {
             var completetimesec = epl.getPlayTimeSec(epl.jplayerplaylist.playlist);
             var remaintimesec = epl.getPlayTimeSec(remaintracks);
             var playingPlaylist = this.getPlayingPlaylist();
-            if(playingPlaylist && epl.id === playingPlaylist.id){
-                remaintimesec -= $(this.cssSelectorjPlayer).data("jPlayer").status.currentTime;
-            }
-            remaintimesec = remaintimesec < 0 ? 0 : remaintimesec;
-
-            var littleTimeLeft = false;
             var remainingStr = '';
             var proc = 0;
-            if(typeof remaintimesec !== 'undefined' && typeof completetimesec !== 'undefined' ){
-                //if there is enough time info, show remaining time
-                if(completetimesec != 0){
-                    proc = remaintimesec/completetimesec;
-                } else {
+
+            // check if we are in shuffle mode, in this case just show the
+            // complete playtime
+            if (playlistManager.shuffled) {
+                if (typeof completetimesec !== 'undefined' ) {
+                    remainingStr = epl.jplayerplaylist._formatTime(completetimesec) + ' total'
                     proc = 1;
                 }
-                littleTimeLeft = remaintimesec < 300;
-                remainingStr = epl.jplayerplaylist._formatTime(remaintimesec)+' remaining'
             } else {
-                //show remaining tracks
-                proc = remaintracks.length/epl.jplayerplaylist.playlist.length;
-                littleTimeLeft = remaintracks.length < 3;
-                remainingStr = remaintracks.length+' remaining tracks';
+                if(playingPlaylist && epl.id === playingPlaylist.id){
+                    remaintimesec -= $(this.cssSelectorjPlayer).data("jPlayer").status.currentTime;
+                }
+                remaintimesec = remaintimesec < 0 ? 0 : remaintimesec;
+
+                var littleTimeLeft = false;
+
+                if(typeof remaintimesec !== 'undefined' && typeof completetimesec !== 'undefined' ){
+                    //if there is enough time info, show remaining time
+                    if(completetimesec != 0){
+                        proc = remaintimesec/completetimesec;
+                    } else {
+                        proc = 1;
+                    }
+                    littleTimeLeft = remaintimesec < 300;
+                    remainingStr = (
+                        epl.jplayerplaylist._formatTime(remaintimesec) +
+                        ' / ' +
+                        epl.jplayerplaylist._formatTime(completetimesec) +
+                        ' remaining'
+                    );
+                } else {
+                    //show remaining tracks
+                    proc = remaintracks.length/epl.jplayerplaylist.playlist.length;
+                    littleTimeLeft = remaintracks.length < 3;
+                    remainingStr = (
+                        remaintracks.length +
+                        ' / ' +
+                        epl.jplayerplaylist.playlist.length +
+                        ' remaining tracks'
+                    );
+                }
+                if(littleTimeLeft){
+                    $('.remaining-tracks-or-time').removeClass('label-default');
+                    $('.remaining-tracks-or-time').addClass('label-danger');
+                    $('.playlist-progress-bar .progress-bar').addClass('progress-bar-danger');
+                    $('.playlist-progress-bar .progress-bar').removeClass('progress-bar-default');
+                } else {
+                    $('.remaining-tracks-or-time').addClass('label-default');
+                    $('.remaining-tracks-or-time').removeClass('label-danger');
+                    $('.playlist-progress-bar .progress-bar').addClass('progress-bar-default');
+                    $('.playlist-progress-bar .progress-bar').removeClass('progress-bar-danger');
+                }
             }
-            if(littleTimeLeft){
-                $('.remaining-tracks-or-time').removeClass('label-default');
-                $('.remaining-tracks-or-time').addClass('label-danger');
-                $('.playlist-progress-bar .progress-bar').addClass('progress-bar-danger');
-                $('.playlist-progress-bar .progress-bar').removeClass('progress-bar-default');
-            } else {
-                $('.remaining-tracks-or-time').addClass('label-default');
-                $('.remaining-tracks-or-time').removeClass('label-danger');
-                $('.playlist-progress-bar .progress-bar').addClass('progress-bar-default');
-                $('.playlist-progress-bar .progress-bar').removeClass('progress-bar-danger');
-            }
+
             $('.remaining-tracks-or-time').html(remainingStr);
             $('.playlist-progress-bar .progress-bar').css('width',parseInt(100-proc*100)+'%');
+
         }
     },
     refreshTabs : function(){
@@ -557,8 +585,9 @@ PlaylistManager.prototype = {
                 isunsaved += ' <em>(unsaved)</em>';
             }
 
-
-            pltabs += '<a href="#" onclick="playlistManager.showPlaylist('+pl.id+')">'+isplaying+' '+pl.name+ isunsaved;
+            // fix for CVE-2015-8310
+            var escaped_playlist_name = $("<div>").text(pl.name).html();
+            pltabs += '<a href="#" onclick="playlistManager.showPlaylist('+pl.id+')">'+isplaying+' '+escaped_playlist_name + isunsaved;
             if(pl.closable){
                 pltabs += '<span class="playlist-tab-closer pointer" href="#" onclick="playlistManager.closePlaylist('+pl.id+')">&times;</span>';
             }
@@ -746,7 +775,7 @@ PlaylistManager.prototype = {
     setAlbumArtDisplay : function(track) {
         if(userOptions.ui.display_album_art){
             // strip filename from url
-            var directory = track.url.substring(0,track.url.lastIndexOf('/'))
+            var directory = track.url;
             if (directory == '') // root directory
                 directory = '/';
             var api_param = JSON.stringify({directory: directory});

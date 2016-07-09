@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # CherryMusic - a standalone music server
-# Copyright (c) 2012 - 2014 Tom Wallroth & Tilman Boerner
+# Copyright (c) 2012 - 2016 Tom Wallroth & Tilman Boerner
 #
 # Project page:
 #   http://fomori.org/cherrymusic/
@@ -60,27 +60,34 @@ class PlaylistDB:
     def savePlaylist(self, userid, public, playlist, playlisttitle, overwrite=False):
         if not len(playlist):
             return _('I will not create an empty playlist. sorry.')
-        duplicateplaylistid = self.conn.execute("""SELECT rowid FROM playlists
-            WHERE userid = ? AND title = ?""",(userid,playlisttitle)).fetchone()
-        if duplicateplaylistid and overwrite:
-            self.deletePlaylist(duplicateplaylistid[0], userid)
-            duplicateplaylistid = False
-        if not duplicateplaylistid:
-            cursor = self.conn.cursor()
-            cursor.execute("""INSERT INTO playlists
-                (title, userid, public) VALUES (?,?,?)""",
-                (playlisttitle, userid, 1 if public else 0))
-            playlistid = cursor.lastrowid;
-            #put tracknumber to each track
-            numberedplaylist = []
-            for track, song in enumerate(playlist):
-                numberedplaylist.append((playlistid, track, song['url'], song['title']))
-            cursor.executemany("""INSERT INTO tracks (playlistid, track, url, title)
-                VALUES (?,?,?,?)""", numberedplaylist)
-            self.conn.commit()
-            return "success"
-        else:
-            return _("This playlist name already exists! Nothing saved.")
+        duplicate_playlist = self.conn.execute(
+            """SELECT rowid, public FROM playlists WHERE userid = ? AND title = ?""",
+            (userid, playlisttitle)
+            ).fetchone()
+
+        if duplicate_playlist:
+            if overwrite:
+                old_playlist_id, old_public_state = duplicate_playlist
+                # saving an existing playlist should keep the same public state:
+                public = old_public_state
+                self.deletePlaylist(old_playlist_id, userid)
+                duplicate_playlist = False
+            else:
+                return _("This playlist name already exists! Nothing saved.")
+
+        cursor = self.conn.cursor()
+        cursor.execute("""INSERT INTO playlists
+            (title, userid, public) VALUES (?,?,?)""",
+            (playlisttitle, userid, 1 if public else 0))
+        playlistid = cursor.lastrowid;
+        #put tracknumber to each track
+        numberedplaylist = []
+        for track, song in enumerate(playlist):
+            numberedplaylist.append((playlistid, track, song['url'], song['title']))
+        cursor.executemany("""INSERT INTO tracks (playlistid, track, url, title)
+            VALUES (?,?,?,?)""", numberedplaylist)
+        self.conn.commit()
+        return "success"
 
     def loadPlaylist(self, playlistid, userid):
         cursor = self.conn.cursor()

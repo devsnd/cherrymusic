@@ -48,6 +48,7 @@ var CHECK_MUSIC_PLAYING_INTERVAL = 2000;
 var HEARTBEAT_INTERVAL_MS = 30*1000;
 
 var playlistSelector = '.jp-playlist';
+var previousSorted = undefined
 
 var executeAfterConfigLoaded = []
 
@@ -461,6 +462,11 @@ function showPlaylists(sortby, filterby){
     };
     var error = errorFunc('error loading external playlists');
 
+    if(sortby == previousSorted){
+        sortby = '-' + sortby; 
+    }
+    previousSorted = sortby;
+
     busy('.search-results').hide().fadeIn('fast');
     api('showplaylists',
         {'sortby': sortby,
@@ -592,6 +598,8 @@ function download_editing_playlist(){
             if(msg == 'ok'){
                 //add tracks to hidden form and call to call download using post data
                 $('#download-redirect-files').val(encodeURIComponent(JSON.stringify(track_urls)));
+                // disable confirm-to-quit for the download link (will be reenabled automatically)
+                window.onbeforeunload = null
                 $('#download-redirect').submit();
             } else {
                 alert(msg);
