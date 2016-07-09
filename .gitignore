@@ -67,3 +67,4 @@ doc/sphinx/_build
 res/react-client/dist/
 dist/
 
+node_modules

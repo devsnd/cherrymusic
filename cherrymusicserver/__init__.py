@@ -32,7 +32,7 @@
 #python 2.6+ backward compability
 from __future__ import unicode_literals
 
-VERSION = "0.36.0"
+VERSION = "0.37.0"
 __version__ = VERSION
 DESCRIPTION = "an mp3 server for your browser"
 LONG_DESCRIPTION = """CherryMusic is a music streaming
@@ -148,20 +148,40 @@ def fake_wait_for_occupied_port(host, port):
 cherrypy.process.servers.wait_for_occupied_port = fake_wait_for_occupied_port
 # end of port patch
 
-# workaround for cherrypy not using unicode strings for URI, see:
-# https://bitbucket.org/cherrypy/cherrypy/issue/1148/wrong-encoding-for-urls-containing-utf-8
-cherrypy.lib.static.__serve_file = cherrypy.lib.static.serve_file
+# trying to detect the version to determine if we need to monkeypatch cherrypy
+if cherrypy.__version__ == 'unknown':
+    print(_(
+        'Could not determine cherrypy version. Please install cherrypy '
+        'using pip or your OS\'s package manager. Trying to detect version '
+        'automatically.'
+    ))
+    try:
+        # this decorator was added between 5.4 and 5.5
+        # https://github.com/cherrypy/cherrypy/pull/1428
+        # commit: dff09e92fb2e83fb4248826c9bc14cd3b6281706
+        import cherrypy._cptools.register
+        needs_serve_file_utf8_fix = False
+    except ImportError:
+        needs_serve_file_utf8_fix = True
+else:
+    cherrypy_version = tuple(int(v) for v in cherrypy.__version__.split('.'))
+    needs_serve_file_utf8_fix = cherrypy_version < (5, 5)
 
-def serve_file_utf8_fix(path, content_type=None, disposition=None,
-                        name=None, debug=False):
-    if sys.version_info >= (3,):
-        #python3+
-        # see also below: mirrored mangling of basedir for '/serve' static dir
-        path = codecs.decode(codecs.encode(path, 'latin-1'), 'utf-8')
-    return cherrypy.lib.static.__serve_file(path, content_type,
-                                            disposition, name, debug)
-cherrypy.lib.static.serve_file = serve_file_utf8_fix
-# end of unicode workaround
+if needs_serve_file_utf8_fix:
+    # workaround for cherrypy < 5.5.0 not using unicode strings for URI, see:
+    # https://bitbucket.org/cherrypy/cherrypy/issue/1148/wrong-encoding-for-urls-containing-utf-8
+    cherrypy.lib.static.__serve_file = cherrypy.lib.static.serve_file
+
+    def serve_file_utf8_fix(path, content_type=None, disposition=None,
+                            name=None, debug=False):
+        if sys.version_info >= (3,):
+            #python3+
+            # see also below: mirrored mangling of basedir for '/serve' static dir
+            path = codecs.decode(codecs.encode(path, 'latin-1'), 'utf-8')
+        return cherrypy.lib.static.__serve_file(path, content_type,
+                                                disposition, name, debug)
+    cherrypy.lib.static.serve_file = serve_file_utf8_fix
+    # end of unicode workaround
 
 from cherrymusicserver import configuration as cfg
 config = None
