@@ -323,9 +323,17 @@ class HTTPHandler(object):
         if is_binary:
             return handler(**handler_args)
         else:
-            required_args= inspect.getargspec(handler)[0][1:] # remove 'self'
-            if set(handler_args.keys()) != set(required_args):
-                msg = 'Invalid API arguments. Required arguments are: %s' % required_args
+            argspec = inspect.getargspec(handler)
+            arg_keys = argspec.args[1:] # remove 'self'
+            # only arguments without defaults are required:
+            default_arg_count = 0
+            if argspec.defaults:
+                default_arg_count = len(argspec.defaults)
+            required_args = arg_keys[default_arg_count:]
+            if not set(required_args).issubset(handler_args.keys()):
+                msg = 'Invalid API arguments. Required args are: %s (%s)' % (
+                    required_args, arg_keys
+                )
                 raise cherrypy.HTTPError(400, msg)
             return json.dumps({'data': handler(**handler_args)})
     api.exposed = True
