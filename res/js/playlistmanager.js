@@ -746,6 +746,7 @@ PlaylistManager.prototype = {
             //not natively supported (or bitrate limited) but no transcoding
             var msg = forced_bitrate ? "bitrate limit requested" : ("browser doesn't support filetype "+ext);
             msg += ' and transcoding is disabled. Transcoding can be enabled in the server configuration.';
+            errorFunc(msg)();
             window.console.log(msg);
             return;
         } else {
