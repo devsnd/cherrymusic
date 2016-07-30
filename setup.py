@@ -28,17 +28,19 @@ def gzipManPages():
                 manfilegz.writelines(manfile)
                 manfilegz.close()
 
-def listFilesRec(crawlpath, installpath, filterfunc=None):
-    filesperfolder = []
-    for r,d,f in os.walk(crawlpath):
+def list_files_in_dir(crawlpath, installpath, filterfunc=None, excluded_paths=None):
+    all_files = []
+    for dirpath, dirnames, filenames in os.walk(crawlpath):
+        if excluded_paths and any(dirpath.startswith(path) for path in excluded_paths):
+            continue
         files = []
-        for name in f:
+        for filename in filenames:
             if filterfunc:
-                if not filterfunc(name):
+                if not filterfunc(filename):
                     continue
-            files += [os.path.join(r,name)]
-        filesperfolder += [(os.path.join(installpath,r),files)]
-    return filesperfolder
+            files += [os.path.join(dirpath, filename)]
+        all_files += [(os.path.join(installpath, dirpath), files)]
+    return all_files
 
 def module(foldername):
     ret = [foldername]
@@ -77,7 +79,11 @@ gzipManPages()
 shareFolder = os.path.join('share',pathprovider.sharedFolderName)
 
 # files to put in /usr/share
-data_files = listFilesRec('res',shareFolder)
+data_files = list_files_in_dir(
+    'res',
+    shareFolder,
+    excluded_paths=['res/react-client/node_modules']
+)
 
 long_description = None
 if 'upload' in sys.argv or 'register' in sys.argv:
@@ -87,11 +93,11 @@ if 'upload' in sys.argv or 'register' in sys.argv:
     from urllib.parse import quote
     import json
 
-    url = 'http://johnmacfarlane.net/cgi-bin/trypandoc?text=%s&from=markdown&to=rst'
+    url = 'http://pandoc.org/cgi-bin/trypandoc?from=markdown&to=rst&text=%s'
     urlhandler = urlopen(url % quote(readmemd))
     result = json.loads(codecs.decode(urlhandler.read(), 'utf-8'))
-    
-    long_description = result['result']
+
+    long_description = result['html']
 else:
     long_description = "\n" + "\n".join([read('README.md')])
 
