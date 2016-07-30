@@ -32,7 +32,7 @@
 #python 2.6+ backward compability
 from __future__ import unicode_literals
 
-VERSION = "0.37.0"
+VERSION = "0.37.1"
 __version__ = VERSION
 DESCRIPTION = "an mp3 server for your browser"
 LONG_DESCRIPTION = """CherryMusic is a music streaming
@@ -50,6 +50,9 @@ import codecs
 import sys
 import threading
 import signal
+import logging
+
+logger = logging.getLogger(__name__)
 
 import gettext
 from cherrymusicserver import pathprovider
@@ -151,7 +154,7 @@ cherrypy.process.servers.wait_for_occupied_port = fake_wait_for_occupied_port
 try:
     cherrypy_version = tuple(int(v) for v in cherrypy.__version__.split('.'))
 except:
-    print(_(
+    logger.error(_(
         'Could not determine cherrypy version. Please install cherrypy '
         'using pip or your OS\'s package manager. Trying to detect version '
         'automatically.'
