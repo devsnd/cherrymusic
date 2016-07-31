@@ -166,7 +166,7 @@ if cherrypy_version == 'unknown':
     # decorator `cherrypy._cptools.register` was added between 5.4 and 5.5
     # https://github.com/cherrypy/cherrypy/pull/1428
     # commit: dff09e92fb2e83fb4248826c9bc14cd3b6281706
-    if 'register' in dir(cherrypy._cptools):
+    if 'register' in dir(cherrypy._cptools.Toolbox):
         needs_serve_file_utf8_fix = False
     else:
         needs_serve_file_utf8_fix = True
