@@ -6,6 +6,7 @@ import {PLAYBACK_ENDED} from 'redux/modules/Player';
 import {Tab, Tabs, Table} from 'react-bootstrap';
 
 import TrackListItem from 'components/TrackListItem/TrackListItem';
+import ScrollableView from 'components/ScrollableView/ScrollableView';
 
 import {
   createPlaylist,
@@ -18,6 +19,9 @@ import {
 
 class TabbedPlaylists extends React.Component {
   static propTypes = {
+    // attrs
+    height: PropTypes.number.isRequired,
+    // redux
     playlists: PropTypes.array.isRequired,
   };
 
@@ -89,26 +93,28 @@ class TabbedPlaylists extends React.Component {
                 </span>
               }
             >
-              <div style={{
-                overflow: 'auto',
-                height: '200px',
-                borderLeft: '1px solid #ddd',
-              }}>
-                  {playlist.trackIds.map((trackId, idx) => {
-                    const track = this.props.entities.track[trackId];
-                    return (
-                      <div
-                        key={idx}
-                        onClick={() => {this.selectTrack(playlist, idx)}}
-                        style={makeTrackStyle(playlist, idx, track)}
-                      >
-                        <TrackListItem
-                          track={track}
-                        />
-                      </div>
-                    );
-                  })}
-              </div>
+              <ScrollableView height={
+                this.props.height - 42 /* tab height */
+              }>
+                <div style={{
+                  borderLeft: '1px solid #ddd',
+                }}>
+                    {playlist.trackIds.map((trackId, idx) => {
+                      const track = this.props.entities.track[trackId];
+                      return (
+                        <div
+                          key={idx}
+                          onClick={() => {this.selectTrack(playlist, idx)}}
+                          style={makeTrackStyle(playlist, idx, track)}
+                        >
+                          <TrackListItem
+                            track={track}
+                          />
+                        </div>
+                      );
+                    })}
+                </div>
+              </ScrollableView>
             </Tab>
           );
         })}

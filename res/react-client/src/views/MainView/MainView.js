@@ -51,7 +51,9 @@ export class MainView extends React.Component {
 
   constructor (props) {
     super(props);
-    this.state = {}; // initial UI state
+    this.state = {
+      viewPortHeight: 500,
+    }; // initial UI state
     this.loadDirectory = bindActionCreators(this.props.loadDirectory, this.props.dispatch);
     this.setBrowserView = bindActionCreators(this.props.setBrowserView, this.props.dispatch);
     this.setPlaylistView = bindActionCreators(this.props.setPlaylistView, this.props.dispatch);
@@ -65,7 +67,8 @@ export class MainView extends React.Component {
     this.uiLoadPlaylists = () => {
       this.setPlaylistView();
       this.props.dispatch(actionPlaylistListRequested(PlaylistSortModes.default, ''));
-    }
+    };
+    this.updateViewPortSize = this.updateViewPortSize.bind(this);
   }
 
   componentDidMount () {
@@ -79,8 +82,20 @@ export class MainView extends React.Component {
       if (evt.keyCode == 13) {
         this.handleNavBarSearch();
       }
-    })
+    });
+
+    window.addEventListener('resize', this.updateViewPortSize);
+    this.updateViewPortSize();
   }
+
+  componentWillUnmount () {
+    window.removeEventListener('resize', this.updateViewPortSize);
+  }
+
+  updateViewPortSize () {
+    this.setState({viewPortHeight: window.innerHeight});
+  }
+
 
   handleNavBarSearch () {
     this.setBrowserView();
@@ -93,7 +108,7 @@ export class MainView extends React.Component {
     const {show} = this.props;
     return (
       <div>
-        <Navbar>
+        <Navbar fluid>
           <Nav>
             <Navbar.Brand>
               <a
@@ -101,7 +116,7 @@ export class MainView extends React.Component {
                 className={cssClasses.navbarBrandLogo}
                 style={{backgroundImage: 'url("' + navbarBrandLogoPng + '")'}}
               >
-                Cherry&nbsp;&nbsp;Music
+                Cherry&nbsp;&nbsp;Music {this.state.viewPortHeight}
               </a>
             </Navbar.Brand>
             <NavItem
@@ -129,9 +144,9 @@ export class MainView extends React.Component {
             </NavDropdown>
           </Nav>
         </Navbar>
-        <Grid>
+        <Grid fluid>
           <Row className="show-grid">
-            <Col md={6}>
+            <Col sm={6}>
               {show === ViewStates.motd &&
                 <MessageOfTheDay />
               }
@@ -140,7 +155,12 @@ export class MainView extends React.Component {
                   fileBrowser={this.props.fileBrowser}
                   loadDirectory={this.loadDirectory}
                   selectTrack={this.addTrackIdToOpenPlaylist}
+                  height={
+                    /* navbar height (51+20 pad) player height (70) */
+                    this.state.viewPortHeight - 71 - 70
+                  }
                 />
+                }
               }
               {show === ViewStates.playlists &&
                 <PlaylistBrowser />
@@ -148,8 +168,12 @@ export class MainView extends React.Component {
             </Col>
             {/* move the playlists up into the navbar area */}
             {/* style={{top: '-60px'}} */}
-            <Col md={6}>
+            <Col sm={6}>
               <TabbedPlaylists
+                height={
+                  /* navbar height (51+20 pad) player height (70) */
+                  this.state.viewPortHeight - 71 - 70
+                }
                 selectTrack={this.props.playPlaylistTrackNr}
               />
             </Col>
