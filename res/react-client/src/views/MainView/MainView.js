@@ -116,7 +116,7 @@ export class MainView extends React.Component {
                 className={cssClasses.navbarBrandLogo}
                 style={{backgroundImage: 'url("' + navbarBrandLogoPng + '")'}}
               >
-                Cherry&nbsp;&nbsp;Music {this.state.viewPortHeight}
+                Cherry&nbsp;&nbsp;Music
               </a>
             </Navbar.Brand>
             <NavItem
