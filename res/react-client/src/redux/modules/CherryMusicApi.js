@@ -226,7 +226,7 @@ export function selectEntityTrackById (state) {
 
 export function selectEntitiesTrackByNewTrack (state) {
   // returns a selector bound to the state to find tracks using their id.
-  return (newTrack) => selectEntityTrackById(trackSchema.getId(newTrack));
+  return (newTrack) => selectEntityTrackById(state)(trackSchema.getId(newTrack));
 }
 
 export function selectEntitiesPlaylist (state) {
