@@ -43,7 +43,7 @@ export class Browser extends React.Component {
   }
 
   render () {
-    const {collections, tracks, entities, state, path} = this.props.fileBrowser;
+    const {collections, compacts, tracks, entities, state, path} = this.props.fileBrowser;
     const {loadDirectory, selectTrack} = this.props;
 
     if (state === LoadingStates.loading) {
@@ -148,6 +148,53 @@ export class Browser extends React.Component {
                   >
                     <h4>{collection.label}</h4>
                     <p>{collection.path}</p>
+                  </Thumbnail>
+                );
+              })}
+            </div>}
+          </div>}
+
+          {!!compacts.length && <div>
+            {viewFormatList &&
+              <ListGroup>
+                {compacts.map((compactId) => {
+                  const compact = entities.compact[compactId];
+                  return (
+                    <ListGroupItem
+                      key={compact.path}
+                      onClick={() => {loadDirectory(compact.urlpath, compact.label)}}
+                      header={
+                          <span>
+                            {compact.label}
+                            <img
+                              src={folderImage}
+                              style={{
+                                float: 'left',
+                                paddingRight: 10,
+                                height: '36px',
+                              }} />
+                          </span>
+                        }
+                    >
+                      {compact.path}
+                    </ListGroupItem>
+                  );
+                })}
+              </ListGroup>
+            }
+            {viewFormatTile && <div>
+              {compacts.map((compactId) => {
+                const compact = entities.compact[compactId];
+                return (
+                  <Thumbnail
+                    onClick={() => {loadDirectory(compact.urlpath, compact.label)}}
+                    src={folderImage}
+                    key={compact.path}
+                    style={{width: '120px', display: 'inline-block', marginRight: '10px'}}
+                    alt="Thumbnail alt text"
+                  >
+                    <h4>{compact.label}</h4>
+                    <p>{compact.path}</p>
                   </Thumbnail>
                 );
               })}

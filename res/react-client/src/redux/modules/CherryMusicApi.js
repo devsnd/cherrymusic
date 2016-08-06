@@ -5,6 +5,7 @@ import {
   API_ENDPOINT_SEARCH,
   API_ENDPOINT_TRACK_METADATA,
   API_ENDPOINT_PLAYLIST_LIST,
+  API_ENDPOINT_COMPACT_LIST_DIRECTORY,
   API_ENDPOINT_PLAYLIST_DETAIL,
 } from 'constants';
 import {legacyAPICall} from 'utils/legacyApi';
@@ -37,6 +38,7 @@ export const METADATA_LOAD_ERROR = 'redux/cherrymusicapi/metadata_load_error';
 
 const trackSchema = new Schema('track', { idAttribute: 'path' });
 const collectionSchema = new Schema('collection', { idAttribute: 'path' });
+const compactSchema = new Schema('compact', { idAttribute: 'id' });
 const playlistSchema = new Schema('playlist', { idAttribute: 'plid' });
 
 export const LoadingStates = {
@@ -67,18 +69,27 @@ export function selectTrackMetaDataLoadingState (track) {
   return track.metadataLoadingState;
 }
 
-export function loadDirectory (path) {
+export function loadDirectory (path, startswith) {
   return (dispatch, getState) => {
     const authtoken = getAuthToken(getState());
     dispatch(actionDirectoryLoading(path));
     if(typeof path === 'undefined'){
       path = '';
     }
-    legacyAPICall(API_ENDPOINT_LIST_DIRECTORY, {'directory': path}, authtoken).then(
+    let endpoint = API_ENDPOINT_LIST_DIRECTORY;
+    let params = {'directory': path};
+    // this is all legacy: the compact directory listing filter should just
+    // be a filter on the `listdir` call but it has its own endpoint right now.
+    if (typeof startswith !== 'undefined') {
+      endpoint = API_ENDPOINT_COMPACT_LIST_DIRECTORY;
+      params = {'directory': path, 'filterstr': startswith}
+    }
+    legacyAPICall(endpoint, params, authtoken).then(
       (data) => {
-        const collections = data.filter((elem) => { return elem.type === 'dir'; });
-        const tracks = data.filter((elem) => { return elem.type !== 'dir'; });
-        dispatch(actionDirectoryLoaded(path, collections, tracks));
+        const collections = data.filter((elem) => elem.type === 'dir');
+        const tracks = data.filter((elem) => elem.type === 'track');
+        const compact = data.filter((elem) => elem.type === 'compact');
+        dispatch(actionDirectoryLoaded(path, collections, tracks, compact));
       },
       (error) => { console.log(error) }
     )
@@ -178,13 +189,14 @@ function actionDirectoryLoading(path){
   return {type: DIRECTORY_LOADING, payload: {path: path}};
 }
 
-function actionDirectoryLoaded(path, collections, tracks){
+function actionDirectoryLoaded(path, collections, tracks, compacts){
   return {
     type: DIRECTORY_LOADED,
     payload: {
       path: path,
       collections: collections,
-      tracks: tracks
+      tracks: tracks,
+      compacts: compacts,
     }
   };
 }
@@ -287,6 +299,7 @@ export const initialState = {
     [trackSchema.getKey()]: {},
     [collectionSchema.getKey()]: {},
     [playlistSchema.getKey()]: {},
+    [compactSchema.getKey()]: {},
   },
   path: null,
   collections: [],
@@ -401,9 +414,11 @@ const ACTION_HANDLERS = {
     }
   },
   [DIRECTORY_LOADED]: (state, action) => {
-    const {path, collections, tracks} = action.payload;
+    const {path, collections, tracks, compacts} = action.payload;
     const normCollection = normalize(collections, arrayOf(collectionSchema));
+    const normCompacts = normalize(compacts, arrayOf(compactSchema));
     const normTracks = normalize(
+      // insert metaDataLoading State into each track
       tracks.map((track) => {
         track.metadataLoadingState = MetaDataLoadingStates.idle;
         return track;
@@ -413,6 +428,7 @@ const ACTION_HANDLERS = {
     const receivedEntities = {
       ...normCollection.entities,
       ...normTracks.entities,
+      ...normCompacts.entities,
     };
     const newEntities = {...state.entities};
     for (const model of Object.keys(receivedEntities)) {
@@ -430,8 +446,9 @@ const ACTION_HANDLERS = {
       ...state,
       state: LoadingStates.loaded,
       entities: newEntities,
-      collections: normCollection.result,
-      tracks: normTracks.result,
+      [collectionSchema.getKey() + 's']: normCollection.result,
+      [trackSchema.getKey() + 's']: normTracks.result,
+      [compactSchema.getKey() + 's']: normCompacts.result,
     }
   },
   [DIRECTORY_LOAD_ERROR]: (state, action) => {

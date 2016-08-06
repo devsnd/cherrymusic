@@ -6,6 +6,7 @@ export const API_ENDPOINT_LOGIN = API_ENDPOINT + 'login';
 export const API_ENDPOINT_LOGOUT = API_ENDPOINT + 'logout';
 export const API_ENDPOINT_CHANGEPASSWORD = API_ENDPOINT + 'userchangepassword';
 export const API_ENDPOINT_LIST_DIRECTORY = API_ENDPOINT + 'listdir';
+export const API_ENDPOINT_COMPACT_LIST_DIRECTORY = API_ENDPOINT + 'compactlistdir';
 export const API_ENDPOINT_SEARCH = API_ENDPOINT + 'search';
 export const API_ENDPOINT_TRACK_METADATA = API_ENDPOINT + 'getsonginfo';
 export const API_ENDPOINT_PLAYLIST_LIST = API_ENDPOINT + 'showplaylists';
