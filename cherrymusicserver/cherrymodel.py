@@ -387,9 +387,12 @@ class MusicEntry:
     def to_dict(self):
         if self.compact:
             #compact
-            return {'type': 'compact',
-                    'urlpath': self.path,
-                    'label': self.repr}
+            return {
+                'type': 'compact',
+                'urlpath': self.path,
+                'label': self.repr,
+                'id': self.path + '/' + self.repr
+            }
         elif self.dir:
             #dir
             simplename = pathprovider.filename(self.path)
