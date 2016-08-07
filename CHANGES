@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+0.37.2 (2016-08-07)
+ - FIXED: more fixes for cherrypy detection (thanks Isgar)
+
 0.37.1 (2016-07-30)
  - FIXED: crash on start when not able to detect cherrypy version
 
