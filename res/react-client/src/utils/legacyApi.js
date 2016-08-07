@@ -16,7 +16,6 @@ export function legacyAPICall (endpoint, data, authtoken) {
       if (typeof authtoken !== 'undefined') {
         params['authtoken'] = authtoken;
       }
-      console.log(_encodeFormData(params));
       fetch(
         endpoint,
         {

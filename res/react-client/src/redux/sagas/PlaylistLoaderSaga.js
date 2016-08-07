@@ -7,6 +7,12 @@ import {
   fetchPlaylistList,
   actionPlaylistListLoaded,
   actionPlaylistListLoadError,
+
+  fetchPlaylistDetail,
+  actionPlaylistOpenRequested,
+  actionPlaylistDetailLoading,
+  actionPlaylistDetailLoaded,
+  actionPlaylistDetailLoadError,
 } from 'redux/modules/CherryMusicApi';
 
 export function* onPlaylistListRequested (action) {
@@ -24,10 +30,15 @@ export function* onPlaylistListRequested (action) {
 export function* onPlaylistOpenRequested (action) {
   const state = yield select();
   const getState = () => state;
-  //yield put(actionPlaylistDetailLoading, playlist);
-  //playlist = yield fetchPlaylistDetail(getState, action.payload.playlistId);
-  //yield put(actionPlaylistDetailLoaded, playlist);
-  //yield put(actionOpenPlaylist)
+  const {playlistId} = action.payload;
+  yield put(actionPlaylistDetailLoading(playlistId));
+  try {
+    playlist = yield fetchPlaylistDetail(getState, playlistId);
+    yield put(playlistId, actionPlaylistDetailLoaded(playlist));
+  } catch (error) {
+    yield put(actionPlaylistDetailLoadError(playlistId));
+  }
+  yield put(actionOpenPlaylist)
 }
 
 

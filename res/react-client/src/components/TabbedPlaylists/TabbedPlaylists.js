@@ -94,7 +94,7 @@ class TabbedPlaylists extends React.Component {
               }
             >
               <ScrollableView height={
-                this.props.height - 42 /* tab height */
+                this.props.height - 44 /* tab height */
               }>
                 <div style={{
                   borderLeft: '1px solid #ddd',

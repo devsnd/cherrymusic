@@ -11,6 +11,7 @@ import {
   Button,
 } from 'react-bootstrap';
 import Username from 'components/Username/Username';
+import ScrollableView from 'components/ScrollableView/ScrollableView';
 
 import {
   selectSortedPlaylists,
@@ -26,7 +27,8 @@ import Age from 'components/Age/Age'
 
 class PlaylistBrowser extends React.Component {
   static propTypes = {
-
+    // attrs
+    height: PropTypes.number,
   };
 
   constructor (props) {
@@ -62,7 +64,7 @@ class PlaylistBrowser extends React.Component {
         </div>}
         {loadingState === LoadingStates.loaded && <div>
           Sorted by<br />
-          <ButtonGroup style={{marginBottom: '10px'}}>
+          <ButtonGroup style={{marginBottom: '10px'}} bsSize="small">
             <Button
               onClick={this.sortByTitle}
               active={sortBy === SortModes.default || sortBy === SortModes.title}>
@@ -79,45 +81,49 @@ class PlaylistBrowser extends React.Component {
               Age
             </Button>
           </ButtonGroup>
-          <ListGroup>
-            {sortedPlaylists.map((playlist) => {
-              const playlistId = playlist.plid;
-              return (
-                <ListGroupItem
-                  onClick={() => this.handleOpenPlaylist(playlistId)}
-                  key={playlistId}
-                >
-                  {playlist.title}
-                  <span style={{float: 'right'}}>
-                    <Age seconds={playlist.age} />
-                  </span>
-                  {playlist.owner && <span>
-                    {playlist.public &&
-                      <Label bsStyle="success">
-                        public&nbsp;<input
-                          type="checkbox"
-                          checked
-                          onChange={this.handleSetPlaylistPublic}
-                        />
-                      </Label>
-                    }
-                    {!playlist.public &&
-                      <Label bsStyle="default">
-                        public&nbsp;<input
-                          type="checkbox"
-                          onChange={this.handleSetPlaylistPublic}
-                        />
-                      </Label>
-                    }
-                  </span>}
-                  <Username name={playlist.username} />
-                </ListGroupItem>
-              );
-            })}
-          </ListGroup>
+          <ScrollableView height={
+            this.props.height - 62 /* the sort buttons */
+          }>
+            <ListGroup>
+              {sortedPlaylists.map((playlist) => {
+                const playlistId = playlist.plid;
+                return (
+                  <ListGroupItem
+                    onClick={() => this.handleOpenPlaylist(playlistId)}
+                    key={playlistId}
+                  >
+                    {playlist.title}
+                    <span style={{float: 'right'}}>
+                      <Age seconds={playlist.age} />
+                    </span>
+                    {playlist.owner && <span>
+                      {playlist.public &&
+                        <Label bsStyle="success">
+                          public&nbsp;<input
+                            type="checkbox"
+                            checked
+                            onChange={this.handleSetPlaylistPublic}
+                          />
+                        </Label>
+                      }
+                      {!playlist.public &&
+                        <Label bsStyle="default">
+                          public&nbsp;<input
+                            type="checkbox"
+                            onChange={this.handleSetPlaylistPublic}
+                          />
+                        </Label>
+                      }
+                    </span>}
+                    <Username name={playlist.username} />
+                  </ListGroupItem>
+                );
+              })}
+            </ListGroup>
+          </ScrollableView>
         </div>}
       </div>
-    )
+    );
   }
 }
 

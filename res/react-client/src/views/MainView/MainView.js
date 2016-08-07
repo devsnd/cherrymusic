@@ -160,10 +160,14 @@ export class MainView extends React.Component {
                     this.state.viewPortHeight - 71 - 70
                   }
                 />
-                }
               }
               {show === ViewStates.playlists &&
-                <PlaylistBrowser />
+                <PlaylistBrowser
+                  height={
+                    /* navbar height (51+20 pad) player height (70) */
+                    this.state.viewPortHeight - 71 - 70
+                  }
+                />
               }
             </Col>
             {/* move the playlists up into the navbar area */}

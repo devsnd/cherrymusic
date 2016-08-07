@@ -24,6 +24,10 @@ export const PLAYLIST_OPEN_REQUESTED = 'redux/cherrymusicapi/PLAYLIST_OPEN_REQUE
 export const PLAYLIST_DETAIL_LOADING = 'redux/cherrymusicapi/PLAYLIST_DETAIL_LOADING';
 export const PLAYLIST_DETAIL_LOADED = 'redux/cherrymusicapi/PLAYLIST_DETAIL_LOADED';
 export const PLAYLIST_DETAIL_LOAD_ERROR = 'redux/cherrymusicapi/PLAYLIST_DETAIL_LOAD_ERROR';
+export const actionPlaylistOpenRequested = (playlistId) => ({type: PLAYLIST_OPEN_REQUESTED, payload: {playlistId: playlistId}});
+export const actionPlaylistDetailLoading = (playlistId) => ({type: PLAYLIST_DETAIL_LOADING, payload: {playlistId: playlistId}});
+export const actionPlaylistDetailLoaded = (playlistId) => ({type: PLAYLIST_DETAIL_LOADED, payload: {playlistId: playlistId}});
+export const actionPlaylistDetailLoadError = (playlistId) => ({type: PLAYLIST_DETAIL_LOAD_ERROR, payload: {playlistId: playlistId}});
 
 
 export const DIRECTORY_LOADING = 'redux/cherrymusicapi/directory_loading';
@@ -135,10 +139,6 @@ export function actionMetaDataLoaded (track, metadata) {
 
 export function actionMetaDataLoadError (track) {
   return {type: METADATA_LOAD_ERROR, payload: {track: track}};
-}
-
-export function actionPlaylistOpenRequested (playlistId) {
-  return {type: PLAYLIST_OPEN_REQUESTED, payload: {playlistId: playlistId}}
 }
 
 export function loadTrackMetaData (track) {
