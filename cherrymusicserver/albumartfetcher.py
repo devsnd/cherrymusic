@@ -115,7 +115,7 @@ class AlbumArtFetcher:
             log.e(_(('''unknown album art fetch method: '%(method)s', '''
                      '''using default.''')),
                   {'method': method})
-            method = 'google'
+            method = 'itunes'
         self.method = method
         self.timeout = timeout
 
