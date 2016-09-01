@@ -443,6 +443,15 @@ class HTTPHandler(object):
             try:
                 foldername = os.path.basename(directory)
                 keywords = foldername
+                # try metadata from the first file for a more
+                # accurate match
+                files = os.listdir(localpath)
+                if len(files):
+                    fname = files[0]
+                    path = os.path.join(localpath, fname)
+                    metad = metainfo.getSongInfo(path)
+                    if metad.artist and metad.album:
+                        keywords = '{} - {}'.format(metad.artist, metad.album)
                 log.i(_("Fetching album art for keywords {keywords!r}").format(keywords=keywords))
                 header, data = fetcher.fetch(keywords)
                 if header:
