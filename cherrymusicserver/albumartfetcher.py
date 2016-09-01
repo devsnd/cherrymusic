@@ -168,10 +168,6 @@ class AlbumArtFetcher:
             return header, data
         return None, ''
 
-        
-        return None, ''
-
-
     def fetchurls(self, searchterm):
         """fetch image urls based on the provided searchterms
 
