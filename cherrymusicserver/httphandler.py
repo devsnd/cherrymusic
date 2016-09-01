@@ -37,6 +37,7 @@ import os  # shouldn't have to list any folder in the future!
 import json
 import cherrypy
 import codecs
+import re
 import sys
 
 try:
@@ -443,6 +444,8 @@ class HTTPHandler(object):
             try:
                 foldername = os.path.basename(directory)
                 keywords = foldername
+                # remove any odd characters from the folder name
+                keywords = re.sub('[^a-z\s]', ' ', keywords)
                 # try metadata from the first file for a more
                 # accurate match
                 files = os.listdir(localpath)
@@ -452,6 +455,7 @@ class HTTPHandler(object):
                     metad = metainfo.getSongInfo(path)
                     if metad.artist and metad.album:
                         keywords = '{} - {}'.format(metad.artist, metad.album)
+
                 log.i(_("Fetching album art for keywords {keywords!r}").format(keywords=keywords))
                 header, data = fetcher.fetch(keywords)
                 if header:
