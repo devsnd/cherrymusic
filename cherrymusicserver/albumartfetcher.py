@@ -80,6 +80,12 @@ class AlbumArtFetcher:
     imageMagickAvailable = programAvailable('convert')
 
     methods = {
+        'itunes': {
+            'url': "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/wa/wsSearch?entity=album&term=",
+            'regexes': [
+                'artworkUrl60":"([^"]+)"',
+            ],
+        },
         'amazon': {
             'url': "http://www.amazon.com/s/?field-keywords=",
             'regexes': [
@@ -98,7 +104,7 @@ class AlbumArtFetcher:
         # },
     }
 
-    def __init__(self, method='amazon', timeout=10):
+    def __init__(self, method='itunes', timeout=10):
         """define the urls of the services and a regex to fetch images
         """
         self.MAX_IMAGE_SIZE_BYTES = 100*1024
