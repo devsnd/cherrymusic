@@ -445,7 +445,7 @@ class HTTPHandler(object):
                 foldername = os.path.basename(directory)
                 keywords = foldername
                 # remove any odd characters from the folder name
-                keywords = re.sub('[^a-z\s]', ' ', keywords)
+                keywords = re.sub('[^A-Za-z\s]', ' ', keywords)
                 # try metadata from the first file for a more
                 # accurate match
                 files = os.listdir(localpath)
