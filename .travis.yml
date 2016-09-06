@@ -45,7 +45,7 @@ matrix:
 install:
   - "pip install cherrypy${CHERRYPY_VERSION} --no-use-wheel"
   - "pip install coveralls pyyaml"
-  - "if [[ $TRAVIS_PYTHON_VERSION = 2.6 ]]; then pip install unittest2 --use-mirrors; fi"
+  - "if [[ $TRAVIS_PYTHON_VERSION = 2.6 ]]; then pip install unittest2; fi"
 
 # prepare test run; test local install
 before_script:
