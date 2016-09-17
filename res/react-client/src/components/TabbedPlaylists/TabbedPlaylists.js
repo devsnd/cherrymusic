@@ -97,7 +97,10 @@ class TabbedPlaylists extends React.Component {
                 this.props.height - 44 /* tab height */
               }>
                 <div style={{
+                  /* let the line of the tab continue as a separator to the
+                  file browser: */
                   borderLeft: '1px solid #ddd',
+                  minHeight: '100%',
                 }}>
                     {playlist.trackIds.map((trackId, idx) => {
                       const track = this.props.entities.track[trackId];

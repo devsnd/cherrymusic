@@ -3,11 +3,15 @@ import { connect } from 'react-redux';
 import { login } from 'redux/modules/Auth';
 import { Input, Button, Well, Alert, Grid, Row, Col } from 'react-bootstrap';
 import { loginStates } from 'redux/modules/Auth';
+import { errorMessage } from 'redux/modules/Messages';
 import classes from './LoginView.scss';
 import CherryMusicLogoImage from '../../static/img/cherrymusic_logo_big.png';
 
 export class LoginView extends React.Component {
   static propTypes = {
+    errorMessage: PropTypes.func.isRequired,
+    login: PropTypes.func.isRequired,
+    loginState: PropTypes.string.isRequired,
   };
 
   static contextTypes = {
@@ -28,13 +32,20 @@ export class LoginView extends React.Component {
       }
     });
     console.log("HACKED AUTOLOGIN!!!!");
-    this.props.login('u', 'p');
+    this.props.login('u', 'p')
   }
 
   handleLogin () {
     const username = this.refs.username.refs.input.value;
     const password = this.refs.password.refs.input.value;
-    this.props.login(username, password);
+    this.props.login(username, password).then(
+      (success) => {},
+      (error) => {
+        if (error === 'CONNECTION_ERROR') {
+          this.props.errorMessage('Error connecting to server.');
+        }
+      }
+    );
   }
 
   render () {
@@ -89,6 +100,7 @@ export default connect(
       loginState: state.auth.loginState,
     };
   }, {
-    login: login
+    login: login,
+    errorMessage: errorMessage,
   }
 )(LoginView);

@@ -111,6 +111,7 @@
     "normalizr": "^2.0.1",
     "postcss-loader": "^0.8.0",
     "react": "^15.1.0",
+    "react-addons-css-transition-group": "^15.3.0",
     "react-addons-update": "^15.1.0",
     "react-bootstrap": "^0.28.5",
     "react-dom": "^0.14.0",

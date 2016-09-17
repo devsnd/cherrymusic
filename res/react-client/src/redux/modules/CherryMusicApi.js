@@ -91,7 +91,7 @@ export function loadDirectory (path, startswith) {
     legacyAPICall(endpoint, params, authtoken).then(
       (data) => {
         const collections = data.filter((elem) => elem.type === 'dir');
-        const tracks = data.filter((elem) => elem.type === 'track');
+        const tracks = data.filter((elem) => elem.type === 'file');
         const compact = data.filter((elem) => elem.type === 'compact');
         dispatch(actionDirectoryLoaded(path, collections, tracks, compact));
       },
@@ -304,6 +304,7 @@ export const initialState = {
   path: null,
   collections: [],
   tracks: [],
+  compacts: [],
 
   playlistsLoadingState: LoadingStates.idle,
   playlistFilterBy: '',

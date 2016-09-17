@@ -17,6 +17,7 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   Thumbnail,
+  Glyphicon
 } from 'react-bootstrap';
 
 import {LoadingStates} from 'redux/modules/CherryMusicApi';
@@ -46,19 +47,9 @@ export class Browser extends React.Component {
     const {collections, compacts, tracks, entities, state, path} = this.props.fileBrowser;
     const {loadDirectory, selectTrack} = this.props;
 
-    if (state === LoadingStates.loading) {
-      return (
-        <img src={SpinnerImage} style={{
-          left: '50%',
-          marginLeft: '-40px',
-          position: 'relative'
-        }}/>
-      );
-    }
-
     // build breadcrumbs
     const breadCrumbs = [
-      {label: 'Basedir', path: ''}
+      {label: 'basedir', path: ''}
     ];
     if (path) {
       const splitPaths = path.split('/');
@@ -74,6 +65,8 @@ export class Browser extends React.Component {
         breadCrumbs.push({label: label, path: fullPath});
       }
     }
+    const parentPath = path ? path.split('/').slice(0, -1).join('/') : null;
+    const parentPathHandler = () => loadDirectory(parentPath);
 
     const viewFormatList = this.props.viewFormat === FileListingViewFormats.List;
     const viewFormatTile = this.props.viewFormat === FileListingViewFormats.Tile;
@@ -93,19 +86,36 @@ export class Browser extends React.Component {
               );
             })}
           </Breadcrumb>
-          <ButtonGroup style={{marginBottom: '10px'}}>
-            <Button active={viewFormatList} onClick={this.props.setListView} bsSize="small">
-              List
-            </Button>
-            <Button active={viewFormatTile} onClick={this.props.setTileView} bsSize="small">
-              Tile
-            </Button>
-          </ButtonGroup>
+          <div style={{marginBottom: '10px', height: '30px'}}>
+            {parentPath !== null &&
+              <Button
+                onClick={parentPathHandler}
+                bsSize="small">
+                  <Glyphicon glyph="arrow-left" /> go back
+              </Button>
+            }
+            <ButtonGroup style={{float: 'right'}}>
+              <Button active={viewFormatList} onClick={this.props.setListView} bsSize="small">
+                <Glyphicon glyph="th-list" />
+              </Button>
+              <Button active={viewFormatTile} onClick={this.props.setTileView} bsSize="small">
+                <Glyphicon glyph="th-large" />
+              </Button>
+            </ButtonGroup>
+          </div>
         </div>
+        {state === LoadingStates.loading &&
+          <img src={SpinnerImage} style={{
+            left: '50%',
+            marginLeft: '-40px',
+            position: 'relative'
+          }} />
+        }
+        {state !== LoadingStates.loading &&
         <ScrollableView
           height={
-            this.props.height - 81 /* breadcrumbs and sort buttons */
-          }
+              this.props.height - 83 /* breadcrumbs and sort buttons */
+            }
         >
           {!!collections.length && <div>
             {viewFormatList &&
@@ -117,17 +127,18 @@ export class Browser extends React.Component {
                     key={collection.path}
                     onClick={() => {loadDirectory(collection.path)}}
                     header={
-                        <span>
-                          {collection.label}
-                          <img
-                            src={folderImage}
-                            style={{
-                              float: 'left',
-                              paddingRight: 10,
-                              height: '36px',
-                            }} />
-                        </span>
-                      }
+                      <span>
+                        {collection.label}
+                        <img
+                          src={folderImage}
+                          style={{
+                            float: 'left',
+                            paddingRight: 10,
+                            height: '36px',
+                          }}
+                        />
+                      </span>
+                    }
                   >
                     {collection.path}
                   </ListGroupItem>
@@ -156,31 +167,31 @@ export class Browser extends React.Component {
 
           {!!compacts.length && <div>
             {viewFormatList &&
-              <ListGroup>
-                {compacts.map((compactId) => {
-                  const compact = entities.compact[compactId];
-                  return (
-                    <ListGroupItem
-                      key={compact.path}
-                      onClick={() => {loadDirectory(compact.urlpath, compact.label)}}
-                      header={
-                          <span>
-                            {compact.label}
-                            <img
-                              src={folderImage}
-                              style={{
-                                float: 'left',
-                                paddingRight: 10,
-                                height: '36px',
-                              }} />
-                          </span>
-                        }
-                    >
-                      {compact.path}
-                    </ListGroupItem>
-                  );
-                })}
-              </ListGroup>
+            <ListGroup>
+              {compacts.map((compactId) => {
+                const compact = entities.compact[compactId];
+                return (
+                  <ListGroupItem
+                    key={compact.path}
+                    onClick={() => {loadDirectory(compact.urlpath, compact.label)}}
+                    header={
+                      <span>
+                        {compact.label}
+                        <img
+                          src={folderImage}
+                          style={{
+                            float: 'left',
+                            paddingRight: 10,
+                            height: '36px',
+                          }} />
+                      </span>
+                    }
+                  >
+                    {compact.path}
+                  </ListGroupItem>
+                );
+              })}
+            </ListGroup>
             }
             {viewFormatTile && <div>
               {compacts.map((compactId) => {
@@ -202,19 +213,24 @@ export class Browser extends React.Component {
           </div>}
 
           {!!tracks.length && <div>
-            <Button onClick={() => {this.selectAll(tracks)}} style={{marginBottom: '10px'}}>
+            <Button
+              onClick={() => {this.selectAll(tracks)}}
+              style={{marginBottom: '10px'}}
+              bsStyle="primary"
+            >
               Add all to playlist
             </Button>
-            <table className="table table-hover" style={{display: 'inline-block'}}>
+            <table className="table table-hover"
+                   style={{display: 'inline-block'}}>
               <tbody style={{display: 'inline-block', width: '100%'}}>
               {tracks.map((trackId) => {
                 const track = entities.track[trackId];
                 return (
                   <tr key={trackId} style={{
-                    display: 'inline-block',
-                    width: '100%',
-                    overflow: 'hidden'
-                  }}>
+                      display: 'inline-block',
+                      width: '100%',
+                      overflow: 'hidden'
+                    }}>
                     <td style={{display: 'block'}}>
                       <TrackListItem
                         track={track}
@@ -228,6 +244,7 @@ export class Browser extends React.Component {
             </table>
           </div>}
         </ScrollableView>
+        }
       </div>
     )
   }

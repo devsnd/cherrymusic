@@ -9,8 +9,9 @@ export const ADD_TRACK_ID_TO_OPEN_PLAYLIST = 'redux/cmplaylists/ADD_TRACK_ID_TO_
 export const PLAY_TRACK_IN_PLAYLIST = 'redux/cmplaylists/PLAY_TRACK_IN_PLAYLIST';
 export const PLAY_NEXT_TRACK = 'redux/cmplaylists/PLAY_NEXT_TRACK';
 export const PLAY_PREVIOUS_TRACK = 'redux/cmplaylists/PLAY_PREVIOUS_TRACK';
+export const OPEN_LOADING_PLAYLIST = 'redux/cmplaylists/OPEN_LOADING_PLAYLIST';
 
-function makeEmptyPlaylist(){
+function makeEmptyPlaylist () {
   return {
     name: 'untitled',
     owner: PLAYLIST_OWNER_NOBODY,
@@ -20,7 +21,15 @@ function makeEmptyPlaylist(){
   }
 }
 
+function makeLoadingPlaylist () {
+  playlist = makeEmptyPlaylist ();
+  playlist.state = playlistStates.loading;
+  playlist.name = 'loading';
+  return playlist;
+}
+
 export const playlistStates = {
+  loading: 'loading',
   new: 'new',
   saving: 'saving',
   saved: 'saved',

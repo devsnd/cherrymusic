@@ -25,25 +25,28 @@ function actionLoggedOut () { return {type: LOGGED_OUT, payload: {}}; }
 
 export function login (username, password) {
   return (dispatch, getState) => {
-    dispatch(actionLoggingIn());
-    legacyAPICall(
-      API_ENDPOINT_LOGIN,
-      {
-        'username': username,
-        'password': password
-      }
-    ).then(
-      (data) => {
-        dispatch(actionLogInSuccess(username, data['authtoken']));
-        // http://stackoverflow.com/a/34863577/1191373
-        dispatch(push('/main'));
-      },
-      (error) => {
-        console.log(error);
-        dispatch(actionLogInFailed());
-      }
-    );
-  }
+    return new Promise((resolve, reject) => {
+      dispatch(actionLoggingIn());
+      legacyAPICall(
+        API_ENDPOINT_LOGIN,
+        {
+          'username': username,
+          'password': password
+        }
+      ).then(
+        (data) => {
+          dispatch(actionLogInSuccess(username, data['authtoken']));
+          // http://stackoverflow.com/a/34863577/1191373
+          dispatch(push('/main'));
+          resolve({username: username});
+        },
+        (error) => {
+          dispatch(actionLogInFailed());
+          reject(error);
+        }
+      );
+    });
+  };
 }
 
 export function logout () {

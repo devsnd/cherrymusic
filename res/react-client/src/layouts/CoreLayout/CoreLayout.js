@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 import '../../styles/core.scss';
+import MessageToaster from 'components/MessageToaster/MessageToaster';
 
 // Note: Stateless/function components *will not* hot reload!
 // react-transform *only* works on component classes.
@@ -13,6 +14,7 @@ import '../../styles/core.scss';
 function CoreLayout ({ children }) {
   return (
     <div className='page-container'>
+      <MessageToaster />
       <div className='view-container'>
         {children}
       </div>

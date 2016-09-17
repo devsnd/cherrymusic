@@ -24,8 +24,8 @@ export function legacyAPICall (endpoint, data, authtoken) {
           headers: {'Content-Type': 'application/x-www-form-urlencoded'},
           body: _encodeFormData(params)
         }
-      )
-        .then((response) => {
+      ).then(
+        (response) => {
           if (response.status >= 400 && response.status <= 599) {
             reject(response);
             return;
@@ -34,8 +34,14 @@ export function legacyAPICall (endpoint, data, authtoken) {
             (content) => { resolve(content.data);              },
             () => { reject('Error decoding json.'); }
           );
-        })
-        .catch((error) => { reject(error); });
+        },
+        (error) => {
+          console.log(error);
+          // fetch considers any http response as success, so if we get here
+          // the request itself did not work!
+          reject('CONNECTION_ERROR');
+        }
+      );
     });
 }
 

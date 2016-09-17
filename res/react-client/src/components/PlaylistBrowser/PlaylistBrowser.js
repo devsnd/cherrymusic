@@ -14,6 +14,7 @@ import Username from 'components/Username/Username';
 import ScrollableView from 'components/ScrollableView/ScrollableView';
 
 import {
+  // playlist listing
   selectSortedPlaylists,
   selectPlaylistsLoadingState,
   selectPlaylistIds,
@@ -22,6 +23,8 @@ import {
   PlaylistSortModes as SortModes,
   actionPlaylistListSortBy,
   LoadingStates,
+  // opening playlists
+  actionPlaylistOpenRequested,
 } from 'redux/modules/CherryMusicApi';
 import Age from 'components/Age/Age'
 
@@ -45,10 +48,6 @@ class PlaylistBrowser extends React.Component {
   }
 
   handleSetPlaylistPublic (evt) {
-
-  }
-
-  handleOpenPlaylist (playlistId) {
 
   }
 
@@ -89,7 +88,7 @@ class PlaylistBrowser extends React.Component {
                 const playlistId = playlist.plid;
                 return (
                   <ListGroupItem
-                    onClick={() => this.handleOpenPlaylist(playlistId)}
+                    onClick={() => this.props.openPlaylist(playlistId)}
                     key={playlistId}
                   >
                     {playlist.title}
@@ -138,7 +137,7 @@ export default connect(
   },
   (dispatch) => {
     return {
-      dispatch: dispatch
+      openPlaylist: (playlistId) => dispatch(actionPlaylistOpenRequested(playlistId))
     };
   }
 )(PlaylistBrowser);

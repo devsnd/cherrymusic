@@ -1,5 +1,6 @@
 include COPYING README.md CHANGES
 recursive-include res *
+recursive-exclude res/react-client/node_modules *
 recursive-include doc *
 recursive-include cherrymusicserver/database/defs *
 global-exclude *.pyc *.pyo
