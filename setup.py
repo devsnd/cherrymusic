@@ -31,7 +31,7 @@ def gzipManPages():
 def list_files_in_dir(crawlpath, installpath, filterfunc=None, excluded_paths=None):
     all_files = []
     for dirpath, dirnames, filenames in os.walk(crawlpath):
-        if excluded_paths and any(dirpath.startswith(path) for path in excluded_paths):
+        if excluded_paths and any(dirpath.startswith(excl) for excl in excluded_paths):
             continue
         files = []
         for filename in filenames:
