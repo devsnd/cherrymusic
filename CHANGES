@@ -1,11 +1,11 @@
 Changelog
 ---------
 
-0.38.0 (unreleased)
- - IMPROVEMENT: Switch to iTunes API for album art fetching
- - IMPROVEMENT: Use file metadata when album art fetching
- - IMPROVEMENT: Better filtering of directory names when fetching album art
-	
+0.38.0 (2016-09-17)
+ - FEATURE: Use file metadata when album art fetching (thanks mattss)
+ - IMPROVEMENT: Switch to iTunes API for album art fetching (thanks mattss)
+ - IMPROVEMENT: Better filtering of directory names when fetching album art (thanks mattss)
+
 0.37.2 (2016-08-07)
  - FIXED: more fixes for cherrypy detection (thanks Isgar)
 
