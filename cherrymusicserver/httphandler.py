@@ -440,21 +440,25 @@ class HTTPHandler(object):
             cherrypy.response.headers.update(header)
             return data
         elif cherry.config['media.fetch_album_art']:
+            # maximum of files to try to fetch metadata for albumart keywords
+            METADATA_ALBUMART_MAX_FILES = 10
             #fetch album art from online source
             try:
                 foldername = os.path.basename(directory)
                 keywords = foldername
                 # remove any odd characters from the folder name
                 keywords = re.sub('[^A-Za-z\s]', ' ', keywords)
-                # try metadata from the first file for a more
+                # try getting metadata from files in the folder for a more
                 # accurate match
                 files = os.listdir(localpath)
-                if len(files):
-                    fname = files[0]
-                    path = os.path.join(localpath, fname)
-                    metad = metainfo.getSongInfo(path)
-                    if metad.artist and metad.album:
-                        keywords = '{} - {}'.format(metad.artist, metad.album)
+                for i, filename in enumerate(files):
+                    if i >= METADATA_ALBUMART_MAX_FILES:
+                        break
+                    path = os.path.join(localpath, filename)
+                    metadata = metainfo.getSongInfo(path)
+                    if metadata.artist and metadata.album:
+                        keywords = '{} - {}'.format(metadata.artist, metadata.album)
+                        break
 
                 log.i(_("Fetching album art for keywords {keywords!r}").format(keywords=keywords))
                 header, data = fetcher.fetch(keywords)
