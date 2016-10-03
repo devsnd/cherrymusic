@@ -15,7 +15,12 @@ import {
   playTrackInPlaylist,
   closePlaylist,
   playlistStates,
-} from 'redux/modules/Playlist';
+  selectActivePlaylistId,
+} from 'redux/modules/PlaylistManager';
+
+import {
+  selectPlaylistById
+} from 'redux/modules/CherryMusicApi';
 
 class TabbedPlaylists extends React.Component {
   static propTypes = {
@@ -29,11 +34,7 @@ class TabbedPlaylists extends React.Component {
     super(props);
     this.state = {};
     this._newPlaylistPlaceholder = {};
-    this.createPlaylist = bindActionCreators(this.props.createPlaylist, this.props.dispatch);
-    this.activatePlaylist = bindActionCreators(this.props.activatePlaylist, this.props.dispatch);
-    this.setPlayingPlaylist = bindActionCreators(this.props.setPlayingPlaylist, this.props.dispatch);
-    this.playTrackInPlaylist = bindActionCreators(this.props.playTrackInPlaylist, this.props.dispatch);
-    this.closePlaylist = bindActionCreators(this.props.closePlaylist, this.props.dispatch);
+    this.renderPlaylistItems = this.renderPlaylistItems.bind(this);
   }
 
   selectTrack (playlist, tracknr) {
@@ -47,6 +48,24 @@ class TabbedPlaylists extends React.Component {
     } else {
       this.activatePlaylist(playlist);
     }
+  }
+
+  renderPlaylistItems (playlistId) {
+    const playlist = this.props.playlistById(playlistId);
+    return playlist.trackIds.map((trackId, idx) => {
+      const track = this.props.entities.track[trackId];
+      return (
+        <div
+          key={idx}
+          onClick={() => {this.selectTrack(playlist, idx)}}
+          style={makeTrackStyle(playlist, idx, track)}
+        >
+          <TrackListItem
+            track={track}
+          />
+        </div>
+      );
+    })
   }
 
   render () {
@@ -75,12 +94,12 @@ class TabbedPlaylists extends React.Component {
     };
 
     return (
-      <Tabs activeKey={this.props.activePlaylist} onSelect={this.handleSelect.bind(this)}>
+      <Tabs activeKey={this.props.activePlaylistId} onSelect={this.handleSelect.bind(this)}>
         {this.props.playlists.map((playlist) => {
           return (
             <Tab
               key={playlist.randid}
-              eventKey={playlist}
+              eventKey={playlist.id}
               title={
                 <span style={makePlaylistTabStyle(playlist)}>
                   {playlist.name}
@@ -102,20 +121,14 @@ class TabbedPlaylists extends React.Component {
                   borderLeft: '1px solid #ddd',
                   minHeight: '100%',
                 }}>
-                    {playlist.trackIds.map((trackId, idx) => {
-                      const track = this.props.entities.track[trackId];
-                      return (
-                        <div
-                          key={idx}
-                          onClick={() => {this.selectTrack(playlist, idx)}}
-                          style={makeTrackStyle(playlist, idx, track)}
-                        >
-                          <TrackListItem
-                            track={track}
-                          />
-                        </div>
-                      );
-                    })}
+                  {playlist.state === playlistStates.loading &&
+                    <span>
+                      loading...
+                    </span>
+                  }
+                  {playlist.state !== playlistStates.loading &&
+                    this.renderPlaylistItems(playlist.id)
+                  }
                 </div>
               </ScrollableView>
             </Tab>
@@ -131,21 +144,19 @@ export default connect(
   (state, dispatch) => {
     return {
       playlists: state.playlist.playlists,
-      activePlaylist: state.playlist.activePlaylist,
+      activePlaylistId: selectActivePlaylistId(state),
+      playlistById: selectPlaylistById(state),
       playingPlaylist: state.playlist.playingPlaylist,
       playingTrackIdx: state.playlist.playingTrackIdx,
       entities: state.api.entities,
     };
   },
-  (dispatch) => {
-    return {
-      dispatch: dispatch,
-      createPlaylist: createPlaylist,
-      activatePlaylist: activatePlaylist,
-      setPlayingPlaylist: setPlayingPlaylist,
-      playTrackInPlaylist: playTrackInPlaylist,
-      closePlaylist: closePlaylist,
-    };
+  {
+    createPlaylist: createPlaylist,
+    activatePlaylist: activatePlaylist,
+    setPlayingPlaylist: setPlayingPlaylist,
+    playTrackInPlaylist: playTrackInPlaylist,
+    closePlaylist: closePlaylist,
   }
 )(TabbedPlaylists);
 

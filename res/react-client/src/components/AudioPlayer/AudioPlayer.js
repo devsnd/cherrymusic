@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux'
 
 import {initPlayer, playerStates, seek, pause, resume} from 'redux/modules/Player'
-import {playNextTrack, playPreviousTrack} from 'redux/modules/Playlist'
+import {playNextTrack, playPreviousTrack} from 'redux/modules/PlaylistManager'
 
 import classes from './AudioPlayer.scss';
 import {ProgressBar, Glyphicon, Button, ButtonGroup} from 'react-bootstrap';

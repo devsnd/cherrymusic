@@ -1,4 +1,4 @@
-import reducer, { initialState } from 'redux/modules/Playlist'
+import reducer, { initialState } from 'redux/modules/PlaylistManager'
 
 describe('(Redux) Playlist', () => {
   describe('(Reducer)', () => {

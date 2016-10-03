@@ -1,0 +1,16 @@
+.slideDownEnter {
+  max-height: 0;
+}
+
+.slideDownEnterActive {
+  max-height: 1000px;
+  transition: max-height 500ms ease-out;
+}
+.slideDownLeave {
+  max-height: 1000px;
+}
+
+.slideDownLeaveActive {
+  max-height: 0;
+  transition: max-height 500ms ease-in;
+}

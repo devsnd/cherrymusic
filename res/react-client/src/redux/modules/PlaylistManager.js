@@ -1,30 +1,63 @@
 import {playTrack} from 'redux/modules/Player';
 import {SERVER_MEDIA_HOST} from 'constants';
 
+const makePlaylistAction = (type) => {
+  return (playlistId) => ({type: type, payload: {playlistId: playlistId}});
+};
+const makePlaylistThunk = (action) => {
+  return (playlistId) => (dispatch, getState) => dispatch(action(playlistId));
+};
+
 export const CREATE_PLAYLIST = 'redux/cmplaylists/CREATE_PLAYLIST';
-export const CLOSE_PLAYLIST = 'redux/cmplaylists/CLOSE_PLAYLIST';
+export const actionCreatePlaylist = () => ({type: CREATE_PLAYLIST, payload: {}});
+export const createPlaylist = (activate = false) => (dispatch, getState) => {
+  dispatch(actionCreatePlaylist());
+  if (activate) {
+    const playlists = getState().playlist.playlists;
+    dispatch(actionActivatePlaylist(playlists[playlists.length - 1]));
+  }
+};
+
+export const CLOSE_PLAYLIST_TAB = 'redux/cmplaylists/CLOSE_PLAYLIST_TAB';
+export const actionClosePlaylistTab = makePlaylistAction(CLOSE_PLAYLIST_TAB);
+export const closePlaylistTab = makePlaylistThunk(actionClosePlaylistTab);
+
 export const ACTIVATE_PLAYLIST = 'redux/cmplaylists/ACTIVATE_PLAYLIST';
+export const actionActivatePlaylist = makePlaylistAction(ACTIVATE_PLAYLIST);
+export const activatePlaylist = makePlaylistThunk(actionActivatePlaylist);
+
 export const SET_PLAYING_PLAYLIST = 'redux/cmplaylists/SET_PLAYING_PLAYLIST';
+export const actionSetPlayingPlaylist = makePlaylistAction(SET_PLAYING_PLAYLIST);
+export const setPlayingPlaylist = makePlaylistThunk(actionSetPlayingPlaylist);
+
 export const ADD_TRACK_ID_TO_OPEN_PLAYLIST = 'redux/cmplaylists/ADD_TRACK_ID_TO_OPEN_PLAYLIST';
 export const PLAY_TRACK_IN_PLAYLIST = 'redux/cmplaylists/PLAY_TRACK_IN_PLAYLIST';
+
 export const PLAY_NEXT_TRACK = 'redux/cmplaylists/PLAY_NEXT_TRACK';
+export const actionPlayNextTrack = () => ({type: PLAY_NEXT_TRACK, payload: {}});
+
 export const PLAY_PREVIOUS_TRACK = 'redux/cmplaylists/PLAY_PREVIOUS_TRACK';
-export const OPEN_LOADING_PLAYLIST = 'redux/cmplaylists/OPEN_LOADING_PLAYLIST';
+
+export const OPEN_PLAYLIST_TAB = 'redux/cmplaylists/OPEN_PLAYLIST_TAB';
+export const actionOpenPlaylistTab = makePlaylistAction(OPEN_PLAYLIST_TAB);
+
+export const CREATE_PLAYLIST_REQUESTED = 'redux/cmplaylists/CREATE_PLAYLIST_REQUESTED';
+export const actionCreatePlaylistRequested = () => {type: CREATE_PLAYLIST_REQUESTED};
 
 function makeEmptyPlaylist () {
   return {
     name: 'untitled',
+    // unsaved playlists have negative ids:
+    id: -Math.floor(Math.random() * 1000000),
     owner: PLAYLIST_OWNER_NOBODY,
     state: playlistStates.new,
-    trackIds: [],
-    randid: Math.floor(Math.random() * 1000000),
   }
 }
 
-function makeLoadingPlaylist () {
-  playlist = makeEmptyPlaylist ();
-  playlist.state = playlistStates.loading;
+function makeLoadingPlaylist (playlistId) {
+  const playlist = makeEmptyPlaylist ();
   playlist.name = 'loading';
+  playlist.id = playlistId;
   return playlist;
 }
 
@@ -39,43 +72,9 @@ export const playlistStates = {
 // owner is determined by the server on save.
 export const PLAYLIST_OWNER_NOBODY = {};
 
-function actionActivatePlaylist (playlist) {
-  return {type: ACTIVATE_PLAYLIST, payload: {playlist: playlist}};
-}
-
-export function activatePlaylist (playlist) {
-  return (dispatch, getState) => {
-    dispatch(actionActivatePlaylist(playlist));
-  }
-}
-
-function actionClosePlaylist (playlist) {
-  return {type: CLOSE_PLAYLIST, payload: {playlist: playlist}};
-}
-
-export function closePlaylist (playlist) {
-  return (dispatch, getstate) => {
-    dispatch(actionClosePlaylist(playlist))
-  }
-}
-
-function actionCreatePlaylist () {
-  return {type: CREATE_PLAYLIST, payload: {}};
-}
-
-export function createPlaylist (activate = false) {
-  return (dispatch, getState) => {
-    dispatch(actionCreatePlaylist());
-    if (activate) {
-      const playlists = getState().playlist.playlists;
-      dispatch(actionActivatePlaylist(playlists[playlists.length - 1]));
-    }
-  }
-}
-
 export function playNextTrack () {
   return (dispatch, getState) => {
-    dispatch({type: PLAY_NEXT_TRACK, payload: {}});
+    dispatch(actionPlayNextTrack());
     const state = _selectOwnState(getState());
     const totalTrackCount = _selectPlayingPlaylistTrackCount(getState());
     if (totalTrackCount > 0) {
@@ -107,12 +106,6 @@ export function addTrackIdToOpenPlaylist (trackId) {
   }
 }
 
-export function setPlayingPlaylist (playlist) {
-  return (dispatch, getState) => {
-    dispatch({type: SET_PLAYING_PLAYLIST, payload: {playlist: playlist}});
-  }
-}
-
 export function playTrackInPlaylist (playlist, trackidx) {
   return (dispatch, getState) => {
     dispatch(
@@ -124,6 +117,7 @@ export function playTrackInPlaylist (playlist, trackidx) {
 }
 
 const _selectOwnState = (state) => state.playlist;
+const _selectPlaylists = (state) => _selectOwnState(state).playlists;
 const _selectPlayingPlaylist = (state) => _selectOwnState(state).playingPlaylist;
 const _selectPlayingTrackIdx = (state) => _selectOwnState(state).playingTrackIdx;
 const _selectPlayingPlaylistTrackCount = (state) => {
@@ -134,6 +128,7 @@ const _selectPlayingPlaylistTrackCount = (state) => {
   return playlist.trackIds.length;
 };
 
+export const selectActivePlaylistId = (state) => _selectOwnState(state).activePlaylistId;
 
 export function notifyPlaybackEnded (dispatch, getState) {
   dispatch(playNextTrack());
@@ -141,55 +136,55 @@ export function notifyPlaybackEnded (dispatch, getState) {
 const _initialEmptyPlaylist = makeEmptyPlaylist();
 
 export const initialState = {
-  playlists: [
-    _initialEmptyPlaylist,
-  ],
-  activePlaylist: _initialEmptyPlaylist,
+  openPlaylistIds: [],
+  activePlaylistId: null,
   playingPlaylist: null,
   playingTrackIdx: null,
 };
 
 // Action HANDLERS
 const ACTION_HANDLERS = {
-  [CREATE_PLAYLIST]: (state, action) => {
+  [OPEN_PLAYLIST_TAB]: (state, action) => {
     return {
       ...state,
-      playlists: [
-        ...state.playlists,
-        makeEmptyPlaylist()
-      ]
-    };
+      openPlaylistIds: [...state.openPlaylistIds, action.payload.playlistId]
+    }
   },
-  [CLOSE_PLAYLIST]: (state, action) => {
-    const playlist = action.payload.playlist;
+  [CLOSE_PLAYLIST_TAB]: (state, action) => {
+    const {playlistId} = action.payload;
     return {
       ...state,
-      playlists: state.playlists.filter(
-        (iterPlaylist) => { return iterPlaylist !== playlist }
-      )
+      openPlaylistIds: state.openPlaylistIds.filter((id) => id !== playlistId)
     };
   },
   [ACTIVATE_PLAYLIST]: (state, action) => {
     return {
       ...state,
-      activePlaylist: action.payload.playlist
+      activePlaylistId: action.payload.playlistId
     }
   },
   [ADD_TRACK_ID_TO_OPEN_PLAYLIST]: (state, action) => {
-    const previousActivePlaylist = state.activePlaylist;
-    const newActivePlaylist = {
-      ...state.activePlaylist,
-      trackIds: [
-        ...state.activePlaylist.trackIds,
-        action.payload.trackId
-      ]
-    };
+    // find the correct playlist and create a modified verion that
+    // includes the track
+    const {playlistId, trackId} = action.payload;
+    for (const playlist of _selectPlaylists(state)) {
+      if (playlist.id == playlistId) {
+        // found the correct playlist
+        const modifiedPlaylist = {
+          ...playlist,
+          trackIds: [
+            ...playlist.trackIds,
+            trackId
+          ]
+        }
+      }
+    }
+
     return {
       ...state,
-      activePlaylist: newActivePlaylist,
       playlists: state.playlists.map((pl) => {
         // replace only the active playlist, leave all others in place:
-        return previousActivePlaylist === pl ? newActivePlaylist : pl
+        return playlistId === pl.id ? modifiedPlaylist : pl
       })
     }
   },

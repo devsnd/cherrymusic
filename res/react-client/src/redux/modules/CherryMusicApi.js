@@ -21,14 +21,17 @@ export const PLAYLIST_LIST_LOAD_ERROR = 'redux/cherrymusicapi/PLAYLIST_LIST_LOAD
 export const PLAYLIST_LIST_SORT_BY = 'redux/cherrymusicapi/PLAYLIST_LIST_SORT_BY';
 
 export const PLAYLIST_OPEN_REQUESTED = 'redux/cherrymusicapi/PLAYLIST_OPEN_REQUESTED';
-export const PLAYLIST_DETAIL_LOADING = 'redux/cherrymusicapi/PLAYLIST_DETAIL_LOADING';
-export const PLAYLIST_DETAIL_LOADED = 'redux/cherrymusicapi/PLAYLIST_DETAIL_LOADED';
-export const PLAYLIST_DETAIL_LOAD_ERROR = 'redux/cherrymusicapi/PLAYLIST_DETAIL_LOAD_ERROR';
 export const actionPlaylistOpenRequested = (playlistId) => ({type: PLAYLIST_OPEN_REQUESTED, payload: {playlistId: playlistId}});
+export const PLAYLIST_DETAIL_LOADING = 'redux/cherrymusicapi/PLAYLIST_DETAIL_LOADING';
 export const actionPlaylistDetailLoading = (playlistId) => ({type: PLAYLIST_DETAIL_LOADING, payload: {playlistId: playlistId}});
-export const actionPlaylistDetailLoaded = (playlistId) => ({type: PLAYLIST_DETAIL_LOADED, payload: {playlistId: playlistId}});
+export const PLAYLIST_DETAIL_LOADED = 'redux/cherrymusicapi/PLAYLIST_DETAIL_LOADED';
+export const actionPlaylistDetailLoaded = (playlistId, tracks) => ({type: PLAYLIST_DETAIL_LOADED, payload: {playlistId, tracks}});
+export const PLAYLIST_DETAIL_LOAD_ERROR = 'redux/cherrymusicapi/PLAYLIST_DETAIL_LOAD_ERROR';
 export const actionPlaylistDetailLoadError = (playlistId) => ({type: PLAYLIST_DETAIL_LOAD_ERROR, payload: {playlistId: playlistId}});
-
+export const PLAYLIST_CREATE = 'redux/cherrymusicapi/PLAYLIST_CREATE';
+export const actionPlaylistCreate = (playlistId) => ({type: PLAYLIST_CREATE, payload: {playlistId: playlistId}});
+export const PLAYLIST_ADD_TRACK = 'redux/cherrymusicapi/PLAYLIST_CREATE';
+export const actionPlaylistAddTrack = (playlistId, trackId) => ({type: PLAYLIST_ADD_TRACK, payload: {playlistId: playlistId, trackId: trackId}});
 
 export const DIRECTORY_LOADING = 'redux/cherrymusicapi/directory_loading';
 export const DIRECTORY_LOADED = 'redux/cherrymusicapi/directory_loaded';
@@ -280,6 +283,12 @@ export function selectPlaylistIds (state) {
   return selectAPI(state).playlists;
 }
 
+export function selectPlaylistById (state) {
+  return (playlistId) => {
+    return selectAPI(state).entities.playlist[playlistId];
+  }
+}
+
 export function selectPlaylistsLoadingState (state) {
   return selectAPI(state).playlistsLoadingState;
 }
@@ -315,6 +324,21 @@ export const initialState = {
 export function selectAPIState (state) {
   return state.api;
 }
+
+const mergeEntities = (currentEntities, newEntities) => {
+  const mergedEntities = {...currentEntities};
+  for (const model of Object.keys(newEntities)) {
+    const receivedModelEntities = newEntities[model];
+    const newModelEntities = mergedEntities[model];
+    for (const modelKey of Object.keys(receivedModelEntities)){
+      // do not overwrite any existing models:
+      if (typeof newModelEntities[modelKey] === 'undefined'){
+        newModelEntities[modelKey] = receivedModelEntities[modelKey];
+      }
+    }
+  }
+  return mergedEntities;
+};
 
 // Action HANDLERS
 const ACTION_HANDLERS = {
@@ -431,26 +455,65 @@ const ACTION_HANDLERS = {
       ...normTracks.entities,
       ...normCompacts.entities,
     };
-    const newEntities = {...state.entities};
-    for (const model of Object.keys(receivedEntities)) {
-      const receivedModelEntities = receivedEntities[model];
-      const newModelEntities = newEntities[model];
-      for (const modelKey of Object.keys(receivedModelEntities)){
-        // do not overwrite any existing models:
-        if (typeof newModelEntities[modelKey] === 'undefined'){
-          newModelEntities[modelKey] = receivedModelEntities[modelKey];
-        }
-      }
-    }
+    const mergedEntities = mergeEntities(state.entities, receivedEntities);
 
     return {
       ...state,
       state: LoadingStates.loaded,
-      entities: newEntities,
+      entities: mergedEntities,
       [collectionSchema.getKey() + 's']: normCollection.result,
       [trackSchema.getKey() + 's']: normTracks.result,
       [compactSchema.getKey() + 's']: normCompacts.result,
     }
+  },
+  [PLAYLIST_CREATE]: (state, action) => {
+    const playlistEntities = playlistSchema.getKey();
+    const {playlistId} = action.payload;
+    return updateHelper(
+      state,
+      {entities: {[playlistEntities]: {[playlistId]: {$set: {trackIds: []}}}}}
+    );
+  },
+  [PLAYLIST_ADD_TRACK]: (state, action) => {
+    const playlistEntities = playlistSchema.getKey();
+    const {playlistId, trackId} = action.payload;
+    return updateHelper(
+      state,
+      {entities: {[playlistEntities]: {[playlistId]: {trackIds: {$push: [trackId]}}}}}
+    );
+  },
+  [PLAYLIST_DETAIL_LOADED]: (state, action) => {
+    const {playlistId, tracks} = action.payload;
+    // insert all tracks into the state
+    const normTracks = normalize(
+      // insert metaDataLoading State into each track
+      tracks.map((track) => {
+        track.metadataLoadingState = MetaDataLoadingStates.idle;
+        return track;
+      }),
+      arrayOf(trackSchema)
+    );
+    const receivedEntities = {
+      ...normTracks.entities,
+    };
+    const mergedEntities = mergeEntities(state.entities, receivedEntities);
+    const stateWithTracks = {
+      ...state,
+      entities: mergedEntities,
+    };
+    // insert tracks into playlist
+    return updateHelper(
+      stateWithTracks,
+      {
+        entities: {
+          [playlistSchema.getKey()]: {
+            [playlistId]: {
+              trackIds: {$set: normTracks.result}
+            }
+          }
+        },
+      }
+    );
   },
   [DIRECTORY_LOAD_ERROR]: (state, action) => {
     return {

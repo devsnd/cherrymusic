@@ -31,7 +31,7 @@ import {
 } from 'redux/modules/CherryMusicApi';
 import { setBrowserView, setPlaylistView, ViewStates } from 'redux/modules/UI';
 import { loginStates } from 'redux/modules/Auth';
-import { addTrackIdToOpenPlaylist } from 'redux/modules/Playlist';
+import { addTrackIdToOpenPlaylist } from 'redux/modules/PlaylistManager';
 
 import { push } from 'react-router-redux';
 import { bindActionCreators } from 'redux';
@@ -95,7 +95,6 @@ export class MainView extends React.Component {
   updateViewPortSize () {
     this.setState({viewPortHeight: window.innerHeight});
   }
-
 
   handleNavBarSearch () {
     this.setBrowserView();

@@ -1,0 +1,73 @@
+.moveInLeftEnter {
+  position: absolute;
+  left: 100%;
+  width: 100%;
+  opacity: 0.01;
+}
+
+.moveInLeftEnterActive {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  opacity: 1.0;
+
+  -webkit-transition: left 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000), opacity 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000);
+  -moz-transition: left 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000), opacity 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000);
+  -o-transition: left 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000), opacity 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000);
+  transition: left 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000), opacity 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000);
+}
+
+.moveInLeftLeave {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  opacity: 1.0;
+}
+
+.moveInLeftLeaveActive {
+  position: absolute;
+  left: -100%;
+  width: 100%;
+  opacity: 0.01;
+
+  -webkit-transition: left 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000), opacity 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000);
+  -moz-transition: left 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000), opacity 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000);
+  -o-transition: left 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000), opacity 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000);
+  transition: left 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000), opacity 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000);
+}
+
+.moveInRightEnter {
+  position: absolute;
+  left: -100%;
+  width: 100%;
+  opacity: 0.01;
+}
+
+.moveInRightEnterActive {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  opacity: 1.0;
+  -webkit-transition: left 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000);
+  -moz-transition: left 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000);
+  -o-transition: left 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000);
+  transition: left 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000);
+}
+
+.moveInRightLeave {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  opacity: 1.0;
+}
+
+.moveInRightLeaveActive {
+  position: absolute;
+  width: 100%;
+  left: 100%;
+  opacity: 0.01;
+  -webkit-transition: left 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000);
+  -moz-transition: left 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000);
+  -o-transition: left 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000);
+  transition: left 500ms cubic-bezier(0.700, 0.000, 0.300, 1.000);
+}

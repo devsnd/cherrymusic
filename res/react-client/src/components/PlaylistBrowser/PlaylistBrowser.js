@@ -37,12 +37,15 @@ class PlaylistBrowser extends React.Component {
   constructor (props) {
     super(props);
     this.sortByTitle = () => {
+      this.props.sortByTitle();
       this.props.dispatch(actionPlaylistListSortBy(SortModes.title));
     };
     this.sortByAge = () => {
+      this.props.sortByAge();
       this.props.dispatch(actionPlaylistListSortBy(SortModes.age));
     };
     this.sortByUsername = () => {
+      this.props.sortByUsername();
       this.props.dispatch(actionPlaylistListSortBy(SortModes.username));
     };
   }
@@ -137,7 +140,10 @@ export default connect(
   },
   (dispatch) => {
     return {
-      openPlaylist: (playlistId) => dispatch(actionPlaylistOpenRequested(playlistId))
+      openPlaylist: (playlistId) => dispatch(actionPlaylistOpenRequested(playlistId)),
+      sortByTitle: () => dispatch(actionPlaylistListSortBy(SortModes.title)),
+      sortByAge: () => dispatch(actionPlaylistListSortBy(SortModes.age)),
+      sortByUsername: () => dispatch(actionPlaylistListSortBy(SortModes.username)),
     };
   }
 )(PlaylistBrowser);

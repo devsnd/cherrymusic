@@ -1,5 +1,5 @@
 // Constants
-import {notifyPlaybackEnded} from 'redux/modules/Playlist';
+import {notifyPlaybackEnded} from 'redux/modules/PlaylistManager';
 import {SERVER_MEDIA_HOST} from 'constants';
 import {selectEntityTrackById} from 'redux/modules/CherryMusicApi';
 
