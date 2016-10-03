@@ -32,13 +32,15 @@
 #python 2.6+ backward compability
 from __future__ import unicode_literals
 
+from test.test_descrtut import defaultdict
+
 import os
 import re
 import sqlite3
 import sys
 import traceback
 
-from collections import deque
+from collections import deque, Counter
 from operator import itemgetter
 
 import cherrymusicserver as cherry
@@ -64,7 +66,7 @@ except ImportError:
 
 scanreportinterval = 1
 AUTOSAVEINTERVAL = 100
-debug = False
+debug = True
 keepInRam = False
 
 #if debug:
@@ -107,8 +109,11 @@ class SQLiteCache(object):
 
     @classmethod
     def searchterms(cls, searchterm):
-        words = re.findall('(\w+|[^\s\w]+)',searchterm.replace('_', ' ').replace('%',' '),re.UNICODE)
-        words = [word.lower() for word in words]
+        searchterm = searchterm.replace('_', ' ').replace('%',' ')
+        words = [
+            word.lower() for word in
+            re.findall('(\w+|[^\s\w]+)', searchterm, re.UNICODE)
+        ]
         if UNIDECODE_AVAILABLE:
             unidecoded = [unidecode.unidecode(word) for word in words]
             words += unidecoded
@@ -145,7 +150,7 @@ class SQLiteCache(object):
                 log.d('Query used: %r, %r', sql, params)
             #print(self.conn.execute('EXPLAIN QUERY PLAN ' + sql, params).fetchall())
             self.db.execute(sql, params)
-            resultlist += self.db.fetchall()
+            resultlist += [t[0] for t in self.db.fetchall()]
         return resultlist
 
     def searchfor(self, value, maxresults=10):
@@ -175,21 +180,15 @@ class SQLiteCache(object):
 
             maxFileIdsPerTerm = file_search_limit
             with Performance(_('file id fetching')):
-                #unpack tuples
-                fileids = [t[0] for t in self.fetchFileIds(terms, maxFileIdsPerTerm, mode)]
+                fileids = self.fetchFileIds(terms, maxFileIdsPerTerm, mode)
 
             if len(fileids) > file_search_limit:
                 with Performance(_('sorting results by fileid occurrences')):
-                    resultfileids = {}
-                    for fileid in fileids:
-                        if fileid in resultfileids:
-                            resultfileids[fileid] += 1
-                        else:
-                            resultfileids[fileid] = 1
                     # sort items by occurrences and only return maxresults
-                    fileids = sorted(resultfileids.items(), key=itemgetter(1), reverse=True)
-                    fileids = [t[0] for t in fileids]
-                    fileids = fileids[:min(len(fileids), file_search_limit)]
+                    fileids = [
+                        fid[0] for fid in
+                        Counter(fileids).most_common(file_search_limit)
+                    ]
 
             if mode == 'normal':
                 with Performance(_('querying fullpaths for %s fileIds') % len(fileids)):
@@ -210,7 +209,7 @@ class SQLiteCache(object):
         if targetdir is None:
             log.e(_('media cache cannot listdir %r: path not in database'), path)
             return []
-        return list(map(lambda f: f.basename, self.fetch_child_files(targetdir)))
+        return [f.basename for f in self.fetch_child_files(targetdir)]
 
     def randomFileEntries(self, count):
         ''' Return a number of random entries from the file cache.
