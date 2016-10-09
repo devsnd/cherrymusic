@@ -32,8 +32,6 @@
 #python 2.6+ backward compability
 from __future__ import unicode_literals
 
-from test.test_descrtut import defaultdict
-
 import os
 import re
 import sqlite3
