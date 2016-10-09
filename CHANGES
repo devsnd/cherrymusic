@@ -1,6 +1,14 @@
 Changelog
 ---------
 
+0.39.1 (2016-10-09)
+ - FIXED: broken import
+
+0.39.0 (2016-10-09)
+ - FEATURE: ... new feature here!
+ - FIXED:
+ - IMPROVEMENT:
+
 0.38.0 (2016-09-17)
  - FEATURE: Use file metadata when album art fetching (thanks mattss)
  - IMPROVEMENT: Switch to iTunes API for album art fetching (thanks mattss)
