@@ -2,6 +2,7 @@ import React, {PropTypes} from 'react';
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux';
 import {PLAYBACK_ENDED} from 'redux/modules/Player';
+import CMComponent from 'utils/CMComponent';
 
 import {Tab, Tabs, Table} from 'react-bootstrap';
 
@@ -14,20 +15,20 @@ import {
   setPlayingPlaylist,
   playTrackInPlaylist,
   closePlaylist,
-  playlistStates,
   selectActivePlaylistId,
 } from 'redux/modules/PlaylistManager';
 
 import {
-  selectPlaylistById
+  playlistStates,
+  selectEntitiesPlaylist,
 } from 'redux/modules/CherryMusicApi';
 
-class TabbedPlaylists extends React.Component {
+class TabbedPlaylists extends CMComponent {
   static propTypes = {
     // attrs
     height: PropTypes.number.isRequired,
     // redux
-    playlists: PropTypes.array.isRequired,
+    openPlaylistIds: PropTypes.array.isRequired,
   };
 
   constructor (props) {
@@ -35,6 +36,7 @@ class TabbedPlaylists extends React.Component {
     this.state = {};
     this._newPlaylistPlaceholder = {};
     this.renderPlaylistItems = this.renderPlaylistItems.bind(this);
+    this.handleSelect = this.handleSelect.bind(this);
   }
 
   selectTrack (playlist, tracknr) {
@@ -43,15 +45,15 @@ class TabbedPlaylists extends React.Component {
   }
 
   handleSelect (playlist) {
+    console.log(playlist);
     if (playlist === this._newPlaylistPlaceholder){
       this.createPlaylist(true);
     } else {
-      this.activatePlaylist(playlist);
+      this.props.activatePlaylist(playlist);
     }
   }
 
-  renderPlaylistItems (playlistId) {
-    const playlist = this.props.playlistById(playlistId);
+  renderPlaylistItems (playlist) {
     return playlist.trackIds.map((trackId, idx) => {
       const track = this.props.entities.track[trackId];
       return (
@@ -68,7 +70,7 @@ class TabbedPlaylists extends React.Component {
     })
   }
 
-  render () {
+  safeRender () {
     const isPlayingTrack = (playlist, idx) => {
       return (
         playlist === this.props.playingPlaylist &&
@@ -94,8 +96,9 @@ class TabbedPlaylists extends React.Component {
     };
 
     return (
-      <Tabs activeKey={this.props.activePlaylistId} onSelect={this.handleSelect.bind(this)}>
-        {this.props.playlists.map((playlist) => {
+      <Tabs activeKey={this.props.activePlaylistId} onSelect={this.handleSelect}>
+        {this.props.openPlaylistIds.map((playlistId) => {
+          const playlist = this.props.playlistEntities[playlistId];
           return (
             <Tab
               key={playlist.randid}
@@ -127,7 +130,7 @@ class TabbedPlaylists extends React.Component {
                     </span>
                   }
                   {playlist.state !== playlistStates.loading &&
-                    this.renderPlaylistItems(playlist.id)
+                    this.renderPlaylistItems(playlist)
                   }
                 </div>
               </ScrollableView>
@@ -143,9 +146,9 @@ class TabbedPlaylists extends React.Component {
 export default connect(
   (state, dispatch) => {
     return {
-      playlists: state.playlist.playlists,
+      openPlaylistIds: state.playlist.openPlaylistIds,
       activePlaylistId: selectActivePlaylistId(state),
-      playlistById: selectPlaylistById(state),
+      playlistEntities: selectEntitiesPlaylist(state),
       playingPlaylist: state.playlist.playingPlaylist,
       playingTrackIdx: state.playlist.playingTrackIdx,
       entities: state.api.entities,

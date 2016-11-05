@@ -42,35 +42,7 @@ export const OPEN_PLAYLIST_TAB = 'redux/cmplaylists/OPEN_PLAYLIST_TAB';
 export const actionOpenPlaylistTab = makePlaylistAction(OPEN_PLAYLIST_TAB);
 
 export const CREATE_PLAYLIST_REQUESTED = 'redux/cmplaylists/CREATE_PLAYLIST_REQUESTED';
-export const actionCreatePlaylistRequested = () => {type: CREATE_PLAYLIST_REQUESTED};
-
-function makeEmptyPlaylist () {
-  return {
-    name: 'untitled',
-    // unsaved playlists have negative ids:
-    id: -Math.floor(Math.random() * 1000000),
-    owner: PLAYLIST_OWNER_NOBODY,
-    state: playlistStates.new,
-  }
-}
-
-function makeLoadingPlaylist (playlistId) {
-  const playlist = makeEmptyPlaylist ();
-  playlist.name = 'loading';
-  playlist.id = playlistId;
-  return playlist;
-}
-
-export const playlistStates = {
-  loading: 'loading',
-  new: 'new',
-  saving: 'saving',
-  saved: 'saved',
-};
-
-// placeholder for playlists that do not belong to anybody
-// owner is determined by the server on save.
-export const PLAYLIST_OWNER_NOBODY = {};
+export const actionCreatePlaylistRequested = () => ({type: CREATE_PLAYLIST_REQUESTED, payload: {}});
 
 export function playNextTrack () {
   return (dispatch, getState) => {
@@ -133,7 +105,6 @@ export const selectActivePlaylistId = (state) => _selectOwnState(state).activePl
 export function notifyPlaybackEnded (dispatch, getState) {
   dispatch(playNextTrack());
 }
-const _initialEmptyPlaylist = makeEmptyPlaylist();
 
 export const initialState = {
   openPlaylistIds: [],

@@ -30,7 +30,7 @@ export const PLAYLIST_DETAIL_LOAD_ERROR = 'redux/cherrymusicapi/PLAYLIST_DETAIL_
 export const actionPlaylistDetailLoadError = (playlistId) => ({type: PLAYLIST_DETAIL_LOAD_ERROR, payload: {playlistId: playlistId}});
 export const PLAYLIST_CREATE = 'redux/cherrymusicapi/PLAYLIST_CREATE';
 export const actionPlaylistCreate = (playlistId) => ({type: PLAYLIST_CREATE, payload: {playlistId: playlistId}});
-export const PLAYLIST_ADD_TRACK = 'redux/cherrymusicapi/PLAYLIST_CREATE';
+export const PLAYLIST_ADD_TRACK = 'redux/cherrymusicapi/PLAYLIST_ADD_TRACK';
 export const actionPlaylistAddTrack = (playlistId, trackId) => ({type: PLAYLIST_ADD_TRACK, payload: {playlistId: playlistId, trackId: trackId}});
 
 export const DIRECTORY_LOADING = 'redux/cherrymusicapi/directory_loading';
@@ -67,6 +67,13 @@ export const PlaylistSortModes = {
   title: 'title',
   username: 'username',
   age: 'age',
+};
+
+export const playlistStates = {
+  loading: 'loading',
+  new: 'new',
+  saving: 'saving',
+  saved: 'saved',
 };
 
 export function selectTrackMetaDataLoadingState (track) {
@@ -469,9 +476,15 @@ const ACTION_HANDLERS = {
   [PLAYLIST_CREATE]: (state, action) => {
     const playlistEntities = playlistSchema.getKey();
     const {playlistId} = action.payload;
+    const newPlaylist = {
+      trackIds: [],
+      name: "No Name",
+      ownerId: -1,
+      state: playlistStates.new,
+    };
     return updateHelper(
       state,
-      {entities: {[playlistEntities]: {[playlistId]: {$set: {trackIds: []}}}}}
+      {entities: {[playlistEntities]: {[playlistId]: {$set: newPlaylist}}}}
     );
   },
   [PLAYLIST_ADD_TRACK]: (state, action) => {

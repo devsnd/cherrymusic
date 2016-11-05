@@ -1,5 +1,5 @@
 import { takeEvery, takeLatest } from 'redux-saga'
-import { call, put, select } from 'redux-saga/effects'
+import { call, put, select, fork } from 'redux-saga/effects'
 
 import {
   // playlist list
@@ -61,25 +61,23 @@ export function* onPlaylistOpenRequested (action) {
   }
 }
 
-export function* onInit (action) {
-  yield
-}
-
 export function* onPlaylistCreateRequested (action) {
   const state = yield select();
   const newPlaylistId = -Math.floor(Math.random() * 1000000);
   yield put(actionPlaylistCreate(newPlaylistId));
   yield put(actionOpenPlaylistTab(newPlaylistId));
+  yield put(actionActivatePlaylist(newPlaylistId));
 }
 
-
 export function* PlaylistLoaderSaga () {
-  // init
-  yield fork(actionPlaylistCreateRequested());
   yield [
+    takeLatest(CREATE_PLAYLIST_REQUESTED, onPlaylistCreateRequested),
     takeLatest(PLAYLIST_LIST_REQUESTED, onPlaylistListRequested),
     takeLatest(PLAYLIST_OPEN_REQUESTED, onPlaylistOpenRequested),
-    takeLatest(CREATE_PLAYLIST_REQUESTED, onPlaylistCreateRequested)
+    // init
+    takeLatest('redux/cherrymusic/LOG_IN_SUCCESS', function* () {
+      yield put(actionCreatePlaylistRequested());
+    }),
   ];
 }
 
