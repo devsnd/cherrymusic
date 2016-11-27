@@ -3,7 +3,7 @@ import { call, put, select } from 'redux-saga/effects'
 
 import {
   DIRECTORY_LOADED,
-
+  PLAYLIST_DETAIL_LOADED,
   fetchTrackMetaData,
   selectEntitiesTrackByNewTrack,
   actionMetaDataLoaded,
@@ -20,12 +20,18 @@ import {
   METADATA_LOAD_ENQUEUE,
 } from 'redux/modules/CherryMusicApi';
 
-function* onDirectoryLoaded (action) {
+function* onTracksLoaded (action) {
+  console.log('onTracksLoaded triggered');
   const {tracks} = action.payload;
   const trackSelector = yield select(selectEntitiesTrackByNewTrack);
   for (const track of tracks) {
     const loadedTrack = trackSelector(track);
-    if (!loadedTrack || selectTrackMetaDataLoadingState(loadedTrack) === MetaDataLoadingStates.idle) {
+    if (
+      !loadedTrack
+      ||
+      // do not load meta data of any track twice
+      selectTrackMetaDataLoadingState(loadedTrack) === MetaDataLoadingStates.idle
+    ) {
       try {
         yield put(actionMetaDataLoading(track, metadata));
         const metadata = JSON.parse(yield call(fetchTrackMetaData, track));
@@ -38,5 +44,5 @@ function* onDirectoryLoaded (action) {
 }
 
 export function* MetaDataWatcher() {
-  yield* takeLatest(DIRECTORY_LOADED, onDirectoryLoaded);
+  yield* takeLatest([DIRECTORY_LOADED, PLAYLIST_DETAIL_LOADED], onTracksLoaded);
 }

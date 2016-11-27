@@ -256,12 +256,13 @@ export function selectEntitiesPlaylist (state) {
 }
 
 export const selectSortedPlaylists = createSelector(
+  selectPlaylistIds,
   selectEntitiesPlaylist,
   selectPlaylistSortBy,
   selectPlaylistSortByReversed,
-  (playlistEntities, sortBy, reversed) => {
+  (playlistIds, playlistEntities, sortBy, reversed) => {
     const sortedPlaylists = [];
-    Object.keys(playlistEntities).map((plid) => {
+    playlistIds.map((plid) => {
       sortedPlaylists.push(playlistEntities[plid]);
     });
     const sortKeyFunc = {
@@ -402,12 +403,33 @@ const ACTION_HANDLERS = {
   [PLAYLIST_LIST_LOADED]: (state, action) => {
     const { playlists, filterby, sortby } = action.payload;
     const normalizedPlaylists = normalize(playlists, arrayOf(playlistSchema));
+    // collect all playlists with details, so we do not clobber them with the
+    // less detailed list items
+    // NOTE: this does yet not remove deleted playlists on the client
+    const detailedPlaylistIds = new Set(
+      Object.entries(state.entities.playlist)
+      .map(([key, value]) => {
+        if (typeof value.trackIds !== 'undefined') {
+          return key
+        }
+      })
+      .filter((elem) => typeof elem !== 'undefined')
+    );
+    const newPlaylistEntities = {};
+    for (const [key, playlist] of Object.entries(normalizedPlaylists.entities.playlist)) {
+      if (!detailedPlaylistIds.has(key)) {
+        newPlaylistEntities[key] = playlist;
+      }
+    }
     return {
       ...state,
       playlists: normalizedPlaylists.result,
       entities: {
         ...state.entities,
-        ...normalizedPlaylists.entities,
+        playlist: {
+          ...state.entities.playlist,
+          ...newPlaylistEntities,
+        }
       },
       playlistsLoadingState: LoadingStates.loaded,
       playlistFilterBy: filterby,
@@ -478,9 +500,10 @@ const ACTION_HANDLERS = {
     const {playlistId} = action.payload;
     const newPlaylist = {
       trackIds: [],
-      name: "No Name",
+      title: "No Name",
       ownerId: -1,
       state: playlistStates.new,
+      plid: playlistId,
     };
     return updateHelper(
       state,

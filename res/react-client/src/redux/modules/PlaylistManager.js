@@ -8,16 +8,6 @@ const makePlaylistThunk = (action) => {
   return (playlistId) => (dispatch, getState) => dispatch(action(playlistId));
 };
 
-export const CREATE_PLAYLIST = 'redux/cmplaylists/CREATE_PLAYLIST';
-export const actionCreatePlaylist = () => ({type: CREATE_PLAYLIST, payload: {}});
-export const createPlaylist = (activate = false) => (dispatch, getState) => {
-  dispatch(actionCreatePlaylist());
-  if (activate) {
-    const playlists = getState().playlist.playlists;
-    dispatch(actionActivatePlaylist(playlists[playlists.length - 1]));
-  }
-};
-
 export const CLOSE_PLAYLIST_TAB = 'redux/cmplaylists/CLOSE_PLAYLIST_TAB';
 export const actionClosePlaylistTab = makePlaylistAction(CLOSE_PLAYLIST_TAB);
 export const closePlaylistTab = makePlaylistThunk(actionClosePlaylistTab);
@@ -43,6 +33,7 @@ export const actionOpenPlaylistTab = makePlaylistAction(OPEN_PLAYLIST_TAB);
 
 export const CREATE_PLAYLIST_REQUESTED = 'redux/cmplaylists/CREATE_PLAYLIST_REQUESTED';
 export const actionCreatePlaylistRequested = () => ({type: CREATE_PLAYLIST_REQUESTED, payload: {}});
+export const createPlaylist = () => (dispatch, getState) => dispatch(actionCreatePlaylistRequested())
 
 export function playNextTrack () {
   return (dispatch, getState) => {

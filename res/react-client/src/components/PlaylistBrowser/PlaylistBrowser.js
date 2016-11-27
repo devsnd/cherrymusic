@@ -38,16 +38,13 @@ class PlaylistBrowser extends React.Component {
     super(props);
     this.sortByTitle = () => {
       this.props.sortByTitle();
-      this.props.dispatch(actionPlaylistListSortBy(SortModes.title));
     };
     this.sortByAge = () => {
       this.props.sortByAge();
-      this.props.dispatch(actionPlaylistListSortBy(SortModes.age));
     };
     this.sortByUsername = () => {
       this.props.sortByUsername();
-      this.props.dispatch(actionPlaylistListSortBy(SortModes.username));
-    };
+   };
   }
 
   handleSetPlaylistPublic (evt) {
@@ -89,6 +86,7 @@ class PlaylistBrowser extends React.Component {
             <ListGroup>
               {sortedPlaylists.map((playlist) => {
                 const playlistId = playlist.plid;
+                const inputChecked = playlist.public ? {checked: true} : {};
                 return (
                   <ListGroupItem
                     onClick={() => this.props.openPlaylist(playlistId)}
@@ -99,23 +97,16 @@ class PlaylistBrowser extends React.Component {
                       <Age seconds={playlist.age} />
                     </span>
                     {playlist.owner && <span>
-                      {playlist.public &&
-                        <Label bsStyle="success">
+                      <Label
+                        bsStyle={playlist.public ? 'success' : 'default'}
+                        style={{float: 'right'}}
+                      >
                           public&nbsp;<input
-                            type="checkbox"
-                            checked
-                            onChange={this.handleSetPlaylistPublic}
-                          />
-                        </Label>
-                      }
-                      {!playlist.public &&
-                        <Label bsStyle="default">
-                          public&nbsp;<input
-                            type="checkbox"
-                            onChange={this.handleSetPlaylistPublic}
-                          />
-                        </Label>
-                      }
+                          type="checkbox"
+                          {...inputChecked}
+                          onChange={this.handleSetPlaylistPublic}
+                        />
+                      </Label>
                     </span>}
                     <Username name={playlist.username} />
                   </ListGroupItem>

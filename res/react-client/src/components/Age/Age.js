@@ -26,6 +26,9 @@ class Age extends React.Component {
 
   render() {
     const {seconds} = this.props;
+    if (typeof seconds === 'undefined') {
+      return (<span>error</span>);
+    }
 
     if (Math.abs(seconds) < 60) {
       return <span>just now</span>;

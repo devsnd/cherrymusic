@@ -40,6 +40,7 @@ export function* onPlaylistListRequested (action) {
     const playlists = yield fetchPlaylistList(getState, sortby, filterby);
     yield put(actionPlaylistListLoaded(playlists, sortby, filterby));
   } catch (error) {
+    console.log(error);
     yield put(actionPlaylistListLoadError());
   }
 }
