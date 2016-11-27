@@ -1,7 +1,7 @@
 {
-  "name": "react-redux-starter-kit",
-  "version": "2.0.0-alpha.3",
-  "description": "Get started with React, Redux, and React-Router!",
+  "name": "cherrymusic-client",
+  "version": "1.0.0-alpha.1",
+  "description": "CherryMusic react client",
   "main": "index.js",
   "engines": {
     "node": ">=4.2.0",
@@ -74,10 +74,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/davezuko/react-redux-starter-kit.git"
+    "url": "git+https://github.com/devsnd/cherrymusic.git"
   },
-  "author": "David Zukowski <david@zuko.me> (http://zuko.me)",
-  "license": "MIT",
+  "author": "Tom Wallroth (http://fomori.org/cherrymusic)",
+  "license": "GPL",
   "dependencies": {
     "babel-cli": "^6.5.1",
     "babel-core": "^6.3.17",
@@ -107,7 +107,7 @@
     "koa-convert": "^1.2.0",
     "koa-proxy": "^0.5.0",
     "koa-static": "^2.0.0",
-    "node-sass": "^3.3.3",
+    "node-sass": "~3.13.0",
     "normalizr": "^2.0.1",
     "postcss-loader": "^0.8.0",
     "react": "^15.1.0",
