@@ -27,12 +27,18 @@ export function legacyAPICall (endpoint, data, authtoken) {
       ).then(
         (response) => {
           if (response.status >= 400 && response.status <= 599) {
+            console.log(
+              'Could not fetch ' + endpoint + ' got HTTP ' + response.status
+            );
             reject(response);
             return;
           }
           response.json().then(
             (content) => { resolve(content.data);              },
-            () => { reject('Error decoding json.'); }
+            () => {
+              console.log('Could not decode json: ' + endpoint);
+              reject('Error decoding json.');
+            }
           );
         },
         (error) => {

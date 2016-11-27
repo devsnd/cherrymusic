@@ -41,6 +41,8 @@ import cherrypy
 import codecs
 import sys
 
+from base64 import b64encode
+
 try:
     from urllib.parse import unquote
 except ImportError:
@@ -130,6 +132,7 @@ class HTTPHandler(object):
             'compactlistdir': self.api_compactlistdir,
             'listdir': self.api_listdir,
             'fetchalbumart': self.api_fetchalbumart,
+            'fetchalbumartb64': self.api_fetchalbumartb64,
             'fetchalbumarturls': self.api_fetchalbumarturls,
             'albumart_set': self.api_albumart_set,
             'heartbeat': self.api_heartbeat,
@@ -511,6 +514,10 @@ class HTTPHandler(object):
             raise cherrypy.HTTPRedirect(default_folder_image, 302)
     api_fetchalbumart.noauth = True
     api_fetchalbumart.binary = True
+
+    def api_fetchalbumartb64(self, directory):
+        image = b64encode(self.api_fetchalbumart(directory))
+        return {'image': codecs.decode(image, 'ascii')}
 
     def albumartcache_load(self, imgb64path):
         if os.path.exists(imgb64path):

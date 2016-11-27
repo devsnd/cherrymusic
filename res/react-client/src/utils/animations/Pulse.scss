@@ -1,0 +1,27 @@
+@keyframes pluseAnimation {
+  0%   { opacity:0.5; }
+  50%  { opacity:1; }
+  100% { opacity:0.5; }
+}
+@-o-keyframes pluseAnimation{
+  0%   { opacity:0.5; }
+  50%  { opacity:1; }
+  100% { opacity:0.5; }
+}
+@-moz-keyframes pluseAnimation{
+  0%   { opacity:0.5; }
+  50%  { opacity:1; }
+  100% { opacity:0.5; }
+}
+@-webkit-keyframes pluseAnimation{
+  0%   { opacity:0.5; }
+  50%  { opacity:1; }
+  100% { opacity:0.5; }
+}
+
+.pulse {
+   -webkit-animation: pluseAnimation 2s infinite;
+   -moz-animation: pluseAnimation 2s infinite;
+   -o-animation: pluseAnimation 2s infinite;
+    animation: pluseAnimation 2s infinite;
+}

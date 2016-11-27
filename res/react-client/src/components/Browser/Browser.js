@@ -25,6 +25,7 @@ import TrackListItem from 'components/TrackListItem/TrackListItem';
 import ScrollableView from 'components/ScrollableView/ScrollableView';
 import SpinnerImage from 'static/img/cherrymusic_loader.gif';
 import classes from './Browser.scss';
+import AlbumArt from 'components/AlbumArt/AlbumArt';
 import folderImage from 'static/img/folder.png';
 
 export class Browser extends React.Component {
@@ -35,7 +36,10 @@ export class Browser extends React.Component {
 
   constructor (props) {
     super(props);
-    this.state = {};
+    this.state = {
+      // lastMove determines how to animate when navigating (e.g. LTR or RTL)
+      lastMove: 'child'  // 'parent' || 'child'
+    };
     this.selectAll = (trackIds) => {
       for (const trackId of trackIds) {
         this.props.selectTrack(trackId);
@@ -66,7 +70,14 @@ export class Browser extends React.Component {
       }
     }
     const parentPath = path ? path.split('/').slice(0, -1).join('/') : null;
-    const parentPathHandler = () => loadDirectory(parentPath);
+    const parentPathHandler = () => {
+      this.setState({lastMove: 'parent'});
+      loadDirectory(parentPath);
+    };
+    const handleOpenChildFolder = (path) => () => {
+      this.setState({lastMove: 'child'});
+      loadDirectory(path);
+    };
 
     const viewFormatList = this.props.viewFormat === FileListingViewFormats.List;
     const viewFormatTile = this.props.viewFormat === FileListingViewFormats.Tile;
@@ -114,9 +125,15 @@ export class Browser extends React.Component {
         {state !== LoadingStates.loading &&
         <ScrollableView
           height={
-              this.props.height - 83 /* breadcrumbs and sort buttons */
-            }
+            this.props.height - 83 /* breadcrumbs and sort buttons */
+          }
+          className={
+            this.state.lastMove === 'parent' ? classes.moveInLeft : classes.moveInRight
+          }
         >
+          {!collections.length && !compacts.length && !tracks.length && (
+            <p>No playable media files found</p>
+          )}
           {!!collections.length && <div>
             {viewFormatList &&
             <ListGroup>
@@ -125,18 +142,11 @@ export class Browser extends React.Component {
                 return (
                   <ListGroupItem
                     key={collection.path}
-                    onClick={() => {loadDirectory(collection.path)}}
+                    onClick={handleOpenChildFolder(collection.path)}
                     header={
                       <span>
                         {collection.label}
-                        <img
-                          src={folderImage}
-                          style={{
-                            float: 'left',
-                            paddingRight: 10,
-                            height: '36px',
-                          }}
-                        />
+                        <AlbumArt directory={collection.path} />
                       </span>
                     }
                   >
@@ -150,16 +160,48 @@ export class Browser extends React.Component {
               {collections.map((collectionId) => {
                 const collection = entities.collection[collectionId];
                 return (
-                  <Thumbnail
-                    onClick={() => {loadDirectory(collection.path)}}
-                    src={folderImage}
+                  <div
+                    className={classes.hoverItem}
+                    onClick={handleOpenChildFolder(collection.path)}
                     key={collection.path}
-                    style={{width: '120px', display: 'inline-block', marginRight: '10px'}}
+                    style={{
+                      width: '120px',
+                      display: 'inline-block',
+                      overflow: 'hidden',
+                      border: '1px solid #eee',
+                      borderRadius: 5,
+                      verticalAlign: 'top',
+                      marginRight: 10,
+                      marginBottom: 5
+                    }}
                     alt="Thumbnail alt text"
                   >
-                    <h4>{collection.label}</h4>
-                    <p>{collection.path}</p>
-                  </Thumbnail>
+                    <div style={{
+                      position: 'relative',
+                    }}>
+                      <AlbumArt
+                        directory={collection.path}
+                        style={{
+                          width: 120,
+                          height: 120,
+                        }}
+                      />
+                      <div
+                        style={{
+                          position: 'absolute',
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          backgroundColor: 'rgba(255,255,255,0.8)'
+                        }}
+                      >
+                        <h4 style={{padding: '0 5px'}}>{collection.label}</h4>
+                      </div>
+                    </div>
+                    <p style={{fontSize: 11, padding: '5px 5px 0 5px'}}>
+                      {collection.path}
+                    </p>
+                  </div>
                 );
               })}
             </div>}

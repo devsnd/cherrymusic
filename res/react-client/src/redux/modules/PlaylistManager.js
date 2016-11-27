@@ -1,4 +1,10 @@
+import {createSelector} from 'reselect';
+
 import {playTrack} from 'redux/modules/Player';
+import {
+  actionPlaylistAddTrack,
+  selectEntitiesPlaylist,
+} from 'redux/modules/CherryMusicApi';
 import {SERVER_MEDIA_HOST} from 'constants';
 
 const makePlaylistAction = (type) => {
@@ -20,7 +26,6 @@ export const SET_PLAYING_PLAYLIST = 'redux/cmplaylists/SET_PLAYING_PLAYLIST';
 export const actionSetPlayingPlaylist = makePlaylistAction(SET_PLAYING_PLAYLIST);
 export const setPlayingPlaylist = makePlaylistThunk(actionSetPlayingPlaylist);
 
-export const ADD_TRACK_ID_TO_OPEN_PLAYLIST = 'redux/cmplaylists/ADD_TRACK_ID_TO_OPEN_PLAYLIST';
 export const PLAY_TRACK_IN_PLAYLIST = 'redux/cmplaylists/PLAY_TRACK_IN_PLAYLIST';
 
 export const PLAY_NEXT_TRACK = 'redux/cmplaylists/PLAY_NEXT_TRACK';
@@ -39,11 +44,11 @@ export function playNextTrack () {
   return (dispatch, getState) => {
     dispatch(actionPlayNextTrack());
     const state = _selectOwnState(getState());
-    const totalTrackCount = _selectPlayingPlaylistTrackCount(getState());
+    const totalTrackCount = _selectActivePlaylistTrackCount(getState());
     if (totalTrackCount > 0) {
       const playingTrackIdx = _selectPlayingTrackIdx(getState());
       if (totalTrackCount - 1 > playingTrackIdx) {
-        dispatch(playTrackInPlaylist(_selectPlayingPlaylist(getState()), playingTrackIdx + 1));
+        dispatch(playTrackInPlaylist(_selectActivePlaylist(getState()), playingTrackIdx + 1));
       }
     }
   }
@@ -51,11 +56,11 @@ export function playNextTrack () {
 export function playPreviousTrack () {
   return (dispatch, getState) => {
     dispatch({type: PLAY_PREVIOUS_TRACK, payload: {}});
-    const totalTrackCount = _selectPlayingPlaylistTrackCount(getState());
+    const totalTrackCount = _selectActivePlaylistTrackCount(getState());
     if (totalTrackCount > 0) {
       const playingTrackIdx = _selectPlayingTrackIdx(getState());
       if (playingTrackIdx > 0) {
-        dispatch(playTrackInPlaylist(_selectPlayingPlaylist(getState()), playingTrackIdx - 1));
+        dispatch(playTrackInPlaylist(_selectActivePlaylist(getState()), playingTrackIdx - 1));
       }
     }
   }
@@ -63,9 +68,8 @@ export function playPreviousTrack () {
 
 export function addTrackIdToOpenPlaylist (trackId) {
   return (dispatch, getState) => {
-    dispatch(
-      {type: ADD_TRACK_ID_TO_OPEN_PLAYLIST, payload: {trackId: trackId}}
-    );
+    const activePlaylistId = selectActivePlaylistId(getState());
+    dispatch(actionPlaylistAddTrack(activePlaylistId, trackId));
   }
 }
 
@@ -80,11 +84,15 @@ export function playTrackInPlaylist (playlist, trackidx) {
 }
 
 const _selectOwnState = (state) => state.playlist;
-const _selectPlaylists = (state) => _selectOwnState(state).playlists;
-const _selectPlayingPlaylist = (state) => _selectOwnState(state).playingPlaylist;
+const _selectActivePlaylist = createSelector(
+  _selectOwnState, selectEntitiesPlaylist,
+  (state, playlistEntities) => {
+    return playlistEntities[state.activePlaylistId]
+  }
+);
 const _selectPlayingTrackIdx = (state) => _selectOwnState(state).playingTrackIdx;
-const _selectPlayingPlaylistTrackCount = (state) => {
-  const playlist = _selectPlayingPlaylist(state);
+const _selectActivePlaylistTrackCount = (state) => {
+  const playlist = _selectActivePlaylist(state);
   if (playlist === null) {
     return 0
   }
@@ -123,31 +131,6 @@ const ACTION_HANDLERS = {
     return {
       ...state,
       activePlaylistId: action.payload.playlistId
-    }
-  },
-  [ADD_TRACK_ID_TO_OPEN_PLAYLIST]: (state, action) => {
-    // find the correct playlist and create a modified verion that
-    // includes the track
-    const {playlistId, trackId} = action.payload;
-    for (const playlist of _selectPlaylists(state)) {
-      if (playlist.id == playlistId) {
-        // found the correct playlist
-        const modifiedPlaylist = {
-          ...playlist,
-          trackIds: [
-            ...playlist.trackIds,
-            trackId
-          ]
-        }
-      }
-    }
-
-    return {
-      ...state,
-      playlists: state.playlists.map((pl) => {
-        // replace only the active playlist, leave all others in place:
-        return playlistId === pl.id ? modifiedPlaylist : pl
-      })
     }
   },
   [SET_PLAYING_PLAYLIST]: (state, action) => {

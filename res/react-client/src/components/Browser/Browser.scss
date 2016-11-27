@@ -3,3 +3,41 @@
   margin-left: -40px;
   position: relative;
 }
+
+.hoverItem:hover {
+  opacity: 0.8;
+}
+
+@keyframes moveInLeftAnimation {
+  0% {
+    margin-left: -300px;
+    padding-right: 300px;
+    opacity: 0;
+  }
+  100% {
+    margin-left: 0;
+    padding-right: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes moveInRightAnimation {
+  0% {
+    margin-right: -300px;
+    padding-left: 300px;
+    opacity: 0;
+  }
+  100% {
+    margin-right: 0;
+    padding-left: 0;
+    opacity: 1;
+  }
+}
+
+.moveInLeft {
+  animation: moveInLeftAnimation 0.2s;
+}
+
+.moveInRight {
+  animation: moveInRightAnimation 0.2s;
+}

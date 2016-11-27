@@ -21,7 +21,6 @@ import {
 } from 'redux/modules/CherryMusicApi';
 
 function* onTracksLoaded (action) {
-  console.log('onTracksLoaded triggered');
   const {tracks} = action.payload;
   const trackSelector = yield select(selectEntitiesTrackByNewTrack);
   for (const track of tracks) {

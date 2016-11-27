@@ -7,6 +7,7 @@ import {
   API_ENDPOINT_PLAYLIST_LIST,
   API_ENDPOINT_COMPACT_LIST_DIRECTORY,
   API_ENDPOINT_PLAYLIST_DETAIL,
+  API_ENDPOINT_FETCH_ALBUM_ART,
 } from 'constants';
 import {legacyAPICall} from 'utils/legacyApi';
 import {LOG_IN_SUCCESS} from 'redux/modules/Auth';
@@ -107,6 +108,14 @@ export function loadDirectory (path, startswith) {
       },
       (error) => { console.log(error) }
     )
+  }
+}
+
+export function fetchAlbumArt (directory) {
+  return (dispatch, getState) => {
+    const authtoken = getAuthToken(getState());
+    const params = {directory: directory};
+    return legacyAPICall(API_ENDPOINT_FETCH_ALBUM_ART, params, authtoken);
   }
 }
 

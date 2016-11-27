@@ -173,6 +173,10 @@ export class MainView extends React.Component {
             {/* style={{top: '-60px'}} */}
             <Col sm={6}>
               <TabbedPlaylists
+                 /* lift the tabbed playlists over the file broser, so the
+                 browser animation is below the tabbed playlist
+                  */
+                style={{zIndex: 40, backgroundColor: '#fff'}}
                 height={
                   /* navbar height (51+20 pad) player height (70) */
                   this.state.viewPortHeight - 71 - 70

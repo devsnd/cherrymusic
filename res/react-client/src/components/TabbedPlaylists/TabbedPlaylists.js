@@ -27,6 +27,7 @@ class TabbedPlaylists extends CMComponent {
   static propTypes = {
     // attrs
     height: PropTypes.number.isRequired,
+    style: PropTypes.object,
     // redux
     openPlaylistIds: PropTypes.array.isRequired,
   };
@@ -40,8 +41,8 @@ class TabbedPlaylists extends CMComponent {
   }
 
   selectTrack (playlist, tracknr) {
-    this.setPlayingPlaylist(playlist);
-    this.playTrackInPlaylist(playlist, tracknr);
+    this.props.setPlayingPlaylist(playlist);
+    this.props.playTrackInPlaylist(playlist, tracknr);
   }
 
   handleTabSelect (playlist) {
@@ -55,7 +56,7 @@ class TabbedPlaylists extends CMComponent {
   renderPlaylistItems (playlist) {
     const isPlayingTrack = (playlist, idx) => {
       return (
-        playlist === this.props.playingPlaylist &&
+        playlist.plid === this.props.activePlaylistId &&
         idx === this.props.playingTrackIdx
       );
     };
@@ -94,8 +95,14 @@ class TabbedPlaylists extends CMComponent {
       return style;
     };
 
+    const style = this.props.style || {};
+
     return (
-      <Tabs activeKey={this.props.activePlaylistId} onSelect={this.handleTabSelect}>
+      <Tabs
+        activeKey={this.props.activePlaylistId}
+        onSelect={this.handleTabSelect}
+        style={style}
+      >
         {this.props.openPlaylistIds.map((playlistId) => {
           const playlist = this.props.playlistEntities[playlistId];
           return (
