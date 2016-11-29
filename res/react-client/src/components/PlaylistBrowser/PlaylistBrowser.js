@@ -47,6 +47,7 @@ class PlaylistBrowser extends React.Component {
       this.props.sortByUsername();
     };
     this.handleDeletePlaylist = ::this.handleDeletePlaylist;
+    this.handleCancelDeletePlaylistModal = ::this.handleCancelDeletePlaylistModal;
     this.state = {
       showDeletePlaylistModal: false,
       deletePlaylistId: null,
@@ -63,6 +64,13 @@ class PlaylistBrowser extends React.Component {
     };
   }
 
+  handleCancelDeletePlaylistModal () {
+    this.setState({
+      showDeletePlaylistModal: false,
+      deletePlaylistId: null,
+    });
+  }
+
   handleSetPlaylistPublic (evt) {
 
   }
@@ -74,6 +82,7 @@ class PlaylistBrowser extends React.Component {
         <DeletePlaylistModal
           playlistId={this.state.deletePlaylistId}
           show={this.state.showDeletePlaylistModal}
+          onCancel={this.handleCancelDeletePlaylistModal}
         />
         {loadingState === LoadingStates.loading && <div>
           loading...

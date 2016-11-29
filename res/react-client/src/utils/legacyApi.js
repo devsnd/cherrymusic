@@ -21,7 +21,7 @@ export function legacyAPICall (endpoint, data, authtoken) {
       {
         credentials: 'include',
         method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded' },
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: _encodeFormData(params),
       }
       ).then(
@@ -56,7 +56,7 @@ export function postForm (endpoint, data) {
     const params = {
       credentials: 'include',
       method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded' },
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
     };
     if (typeof data !== 'undefined') {
       params.body = (

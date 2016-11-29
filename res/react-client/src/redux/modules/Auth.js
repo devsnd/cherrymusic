@@ -43,7 +43,7 @@ export function login (username, password) {
           resolve({username: username });
         },
         (error) => {
-          if (error.indexOf('CONNECTION_ERROR') >= 0) {
+          if (('' + error).indexOf('CONNECTION_ERROR') >= 0) {
             dispatch(actionLogInError());
           } else {
             dispatch(actionLogInFailed());

@@ -1,8 +1,7 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { login } from 'redux/modules/Auth';
+import { login, loginStates } from 'redux/modules/Auth';
 import { Input, Button, Well, Alert, Grid, Row, Col } from 'react-bootstrap';
-import { loginStates } from 'redux/modules/Auth';
 import { errorMessage } from 'redux/modules/Messages';
 import classes from './LoginView.scss';
 import CherryMusicLogoImage from '../../static/img/cherrymusic_logo_big.png';
@@ -21,18 +20,19 @@ export class LoginView extends React.Component {
   constructor (props) {
     super(props);
     this.state = {}; // initial UI state
+    this.handleLogin = ::this.handleLogin;
   }
 
   componentDidMount () {
     this.refs.username.refs.input.focus();
     // submit form when pressing enter:
     this.refs.loginform.addEventListener('keydown', (evt) => {
-      if (evt.keyCode == 13) {
+      if (evt.keyCode === 13) {
         this.handleLogin();
       }
     });
-    console.log('HACKED AUTOLOGIN!!!!');
-    this.props.login('u', 'p');
+    //console.log('HACKED AUTOLOGIN!!!!');
+    //this.props.login('u', 'p');
   }
 
   handleLogin () {
@@ -42,7 +42,7 @@ export class LoginView extends React.Component {
   }
 
   render () {
-    const {loginState } = this.props;
+    const { loginState } = this.props;
     return (
       <div>
         <br />
@@ -53,7 +53,7 @@ export class LoginView extends React.Component {
                 src={CherryMusicLogoImage}
                 alt='CherryMusic is very nice.'
               />
-              <h3 style={{textAlign: 'center' }}>Cherry Music</h3>
+              <h3 style={{textAlign: 'center'}}>Cherry Music</h3>
               <Well className={loginState === loginStates.logInFailed && 'shake-animation'}>
                 <form ref="loginform">
                   <Input
@@ -69,7 +69,7 @@ export class LoginView extends React.Component {
                     placeholder="Password"
                     disabled={loginState === loginStates.loggingIn} />
                   <Button
-                    onClick={this.handleLogin.bind(this)}
+                    onClick={this.handleLogin}
                     bsStyle="primary"
                   >
                     Login

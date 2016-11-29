@@ -49,7 +49,7 @@ export default class MoveIn extends React.Component {
             /*
             the outer span gets the animation classes, the inner one makes that the child renders normally
             */
-            ? <span><span style={{'display': 'inline-block' }}>{this.props.children}</span></span>
+            ? <span><span style={{'display': 'inline-block'}}>{this.props.children}</span></span>
             : null
         }
       </ReactCSSTransitionGroup>

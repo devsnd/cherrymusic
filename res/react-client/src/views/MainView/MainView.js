@@ -12,22 +12,19 @@ import {
   NavItem,
   NavDropdown,
   MenuItem,
-  ListGroup,
-  ListGroupItem,
 } from 'react-bootstrap';
 
 import AudioPlayer from 'components/AudioPlayer/AudioPlayer';
 import Browser from 'components/Browser/Browser';
 import TabbedPlaylists from 'components/TabbedPlaylists/TabbedPlaylists';
 import PlaylistBrowser from 'components/PlaylistBrowser/PlaylistBrowser';
-import {MessageOfTheDay } from 'components/MessageOfTheDay/MessageOfTheDay';
+import {MessageOfTheDay} from 'components/MessageOfTheDay/MessageOfTheDay';
 
 import {
   loadDirectory,
   search,
   actionPlaylistListRequested,
   PlaylistSortModes,
-  LoadingStates,
 } from 'redux/modules/CherryMusicApi';
 import { setBrowserView, setPlaylistView, ViewStates } from 'redux/modules/UI';
 import { loginStates } from 'redux/modules/Auth';
@@ -42,6 +39,7 @@ import cssClasses from './MainView.scss';
 export class MainView extends React.Component {
   static propTypes = {
     loadDirectory: PropTypes.func.isRequired,
+    dispatch: PropTypes.func.isRequired,
     loginState: PropTypes.string.isRequired,
   };
 
@@ -176,7 +174,7 @@ export class MainView extends React.Component {
                  /* lift the tabbed playlists over the file broser, so the
                  browser animation is below the tabbed playlist
                   */
-                style={{zIndex: 40, backgroundColor: '#fff' }}
+                style={{zIndex: 40}}
                 height={
                   /* navbar height (51+20 pad) player height (70) */
                   this.state.viewPortHeight - 71 - 70
