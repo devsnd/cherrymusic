@@ -15,7 +15,7 @@ export class LoginView extends React.Component {
   };
 
   static contextTypes = {
-    store: PropTypes.object
+    store: PropTypes.object,
   };
 
   constructor (props) {
@@ -26,30 +26,23 @@ export class LoginView extends React.Component {
   componentDidMount () {
     this.refs.username.refs.input.focus();
     // submit form when pressing enter:
-    this.refs.loginform.addEventListener("keydown", (evt) => {
+    this.refs.loginform.addEventListener('keydown', (evt) => {
       if (evt.keyCode == 13) {
         this.handleLogin();
       }
     });
-    console.log("HACKED AUTOLOGIN!!!!");
-    this.props.login('u', 'p')
+    console.log('HACKED AUTOLOGIN!!!!');
+    this.props.login('u', 'p');
   }
 
   handleLogin () {
     const username = this.refs.username.refs.input.value;
     const password = this.refs.password.refs.input.value;
-    this.props.login(username, password).then(
-      (success) => {},
-      (error) => {
-        if (error === 'CONNECTION_ERROR') {
-          this.props.errorMessage('Error connecting to server.');
-        }
-      }
-    );
+    this.props.login(username, password);
   }
 
   render () {
-    const {loginState} = this.props;
+    const {loginState } = this.props;
     return (
       <div>
         <br />
@@ -60,7 +53,7 @@ export class LoginView extends React.Component {
                 src={CherryMusicLogoImage}
                 alt='CherryMusic is very nice.'
               />
-              <h3 style={{textAlign: 'center'}}>Cherry Music</h3>
+              <h3 style={{textAlign: 'center' }}>Cherry Music</h3>
               <Well className={loginState === loginStates.logInFailed && 'shake-animation'}>
                 <form ref="loginform">
                   <Input
@@ -68,18 +61,26 @@ export class LoginView extends React.Component {
                     ref="username"
                     label="Username"
                     placeholder="Username"
-                    disabled={loginState === loginStates.loggingIn}/>
+                    disabled={loginState === loginStates.loggingIn} />
                   <Input
-                     type="password"
-                     ref="password"
-                     label="Password"
-                     placeholder="Password"
-                     disabled={loginState === loginStates.loggingIn}/>
-                  <Button onClick={ this.handleLogin.bind(this) }>Login</Button>
+                    type="password"
+                    ref="password"
+                    label="Password"
+                    placeholder="Password"
+                    disabled={loginState === loginStates.loggingIn} />
+                  <Button
+                    onClick={this.handleLogin.bind(this)}
+                    bsStyle="primary"
+                  >
+                    Login
+                  </Button>
                 </form>
                 <br />
                 {loginState === loginStates.logInFailed &&
-                <Alert bsStyle="warning">Login failed. Wrong username or password.</Alert>
+                  <Alert bsStyle="warning">Login failed. Wrong username or password.</Alert>
+                }
+                {loginState === loginStates.logInError &&
+                  <Alert bsStyle="danger">Error connecting to server.</Alert>
                 }
                 <a className="fomori" target="_blank" href="http://www.fomori.org">
                   visit fomori.org

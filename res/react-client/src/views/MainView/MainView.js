@@ -20,7 +20,7 @@ import AudioPlayer from 'components/AudioPlayer/AudioPlayer';
 import Browser from 'components/Browser/Browser';
 import TabbedPlaylists from 'components/TabbedPlaylists/TabbedPlaylists';
 import PlaylistBrowser from 'components/PlaylistBrowser/PlaylistBrowser';
-import {MessageOfTheDay} from 'components/MessageOfTheDay/MessageOfTheDay';
+import {MessageOfTheDay } from 'components/MessageOfTheDay/MessageOfTheDay';
 
 import {
   loadDirectory,
@@ -46,7 +46,7 @@ export class MainView extends React.Component {
   };
 
   static contextTypes = {
-    store: PropTypes.object
+    store: PropTypes.object,
   };
 
   constructor (props) {
@@ -73,12 +73,12 @@ export class MainView extends React.Component {
 
   componentDidMount () {
     // make sure that we are logged in:
-    if (this.props.loginState !== loginStates.logInSuccess){
+    if (this.props.loginState !== loginStates.logInSuccess) {
       this.props.dispatch(push('/login'));
     }
 
     // hitting enter in the search bar starts a search:
-    this.refs.navBarSearchInput.refs.input.addEventListener("keydown", (evt) => {
+    this.refs.navBarSearchInput.refs.input.addEventListener('keydown', (evt) => {
       if (evt.keyCode == 13) {
         this.handleNavBarSearch();
       }
@@ -93,7 +93,7 @@ export class MainView extends React.Component {
   }
 
   updateViewPortSize () {
-    this.setState({viewPortHeight: window.innerHeight});
+    this.setState({viewPortHeight: window.innerHeight });
   }
 
   handleNavBarSearch () {
@@ -104,7 +104,7 @@ export class MainView extends React.Component {
   render () {
     const navBarHeight = 50;
     const playerHeight = 64;
-    const {show} = this.props;
+    const {show } = this.props;
     return (
       <div>
         <Navbar fluid>
@@ -113,7 +113,7 @@ export class MainView extends React.Component {
               <a
                 href="#"
                 className={cssClasses.navbarBrandLogo}
-                style={{backgroundImage: 'url("' + navbarBrandLogoPng + '")'}}
+                style={{backgroundImage: 'url("' + navbarBrandLogoPng + '")' }}
               >
                 Cherry&nbsp;&nbsp;Music
               </a>
@@ -125,7 +125,7 @@ export class MainView extends React.Component {
               style={{width: '210px' /* workaround for chrome rendering the searchbar with 100% width */ }}
             >
                 <Input
-                  style={{width: '140px'}}
+                  style={{width: '140px' }}
                   type="text"
                   ref="navBarSearchInput"
                   buttonAfter={
@@ -176,7 +176,7 @@ export class MainView extends React.Component {
                  /* lift the tabbed playlists over the file broser, so the
                  browser animation is below the tabbed playlist
                   */
-                style={{zIndex: 40, backgroundColor: '#fff'}}
+                style={{zIndex: 40, backgroundColor: '#fff' }}
                 height={
                   /* navbar height (51+20 pad) player height (70) */
                   this.state.viewPortHeight - 71 - 70

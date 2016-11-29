@@ -1,7 +1,7 @@
 // Constants
-import {notifyPlaybackEnded} from 'redux/modules/PlaylistManager';
-import {SERVER_MEDIA_HOST} from 'constants';
-import {selectEntityTrackById} from 'redux/modules/CherryMusicApi';
+import {notifyPlaybackEnded } from 'redux/modules/PlaylistManager';
+import {SERVER_MEDIA_HOST } from 'constants';
+import {selectEntityTrackById } from 'redux/modules/CherryMusicApi';
 
 export const INIT_PLAYER = 'redux/cherrymusic/player/INIT_PLAYER';
 export const PLAY_TRACK = 'redux/cherrymusic/player/PLAY_TRACK';
@@ -12,12 +12,12 @@ export const PLAYBACK_ENDED = 'redux/cherrymusic/player/PLAYBACK_ENDED';
 export const SEEK = 'redux/cherrymusic/player/SEEK';
 
 function actionInit (audioElement) {
-  return {type: INIT_PLAYER, payload: {audioElement: audioElement}};
+  return {type: INIT_PLAYER, payload: {audioElement: audioElement } };
 }
 
 export function initPlayer (domElement) {
   return (dispatch, getState) => {
-    var audioNode = document.createElement("audio");
+    var audioNode = document.createElement('audio');
     domElement.appendChild(audioNode);
     audioNode.ontimeupdate = (evt) => {
       dispatch(actionTimeUpdate(evt.target.currentTime, evt.target.duration));
@@ -33,26 +33,26 @@ export function initPlayer (domElement) {
       dispatch(actionPause());
     };
     dispatch(actionInit(audioNode));
-  }
+  };
 }
 
 function actionPlaybackEnded () {
-  return {type: PLAYBACK_ENDED, payload: {}};
+  return {type: PLAYBACK_ENDED, payload: {} };
 }
 
 function actionPause () {
-  return {type: PAUSE_TRACK, payload: {}};
+  return {type: PAUSE_TRACK, payload: {} };
 }
 
 function actionResume () {
-  return {type: RESUME_TRACK, payload: {}};
+  return {type: RESUME_TRACK, payload: {} };
 }
 
 function actionTimeUpdate (currentTime, duration) {
   return {
     type: TIME_UPDATE,
-    payload: {currentTime: currentTime, duration: duration}
-  }
+    payload: {currentTime: currentTime, duration: duration },
+  };
 }
 
 const _selectOwnState = (state) => state.player;
@@ -60,7 +60,7 @@ const _selectAudioElement = (state) => _selectOwnState(state).audioElement;
 const _selectDuration = (state) => _selectOwnState(state).duration;
 
 function actionSeek (positionSecs) {
-  return {type: SEEK, payload: {positionSecs: positionSecs}}
+  return {type: SEEK, payload: {positionSecs: positionSecs } };
 }
 
 export function seek (percentage) {
@@ -70,8 +70,8 @@ export function seek (percentage) {
     const audioElement = _selectAudioElement(state);
     audioElement.currentTime = newPositionSecs;
     audioElement.play();
-    dispatch(actionSeek (newPositionSecs));
-  }
+    dispatch(actionSeek(newPositionSecs));
+  };
 }
 
 export function playTrack (trackId) {
@@ -79,26 +79,26 @@ export function playTrack (trackId) {
     const state = getState();
     const audioElement = _selectAudioElement(state);
     const track = selectEntityTrackById(state)(trackId);
-    dispatch({type: PLAY_TRACK, payload: {trackId: trackId}});
+    dispatch({type: PLAY_TRACK, payload: {trackId: trackId } });
     audioElement.src = SERVER_MEDIA_HOST + track.urlpath;
-    audioElement.play()
-  }
+    audioElement.play();
+  };
 }
 
 export function pause () {
   return (dispatch, getState) => {
-    const {player} = getState();
+    const {player } = getState();
     dispatch(actionPause());
     player.audioElement.pause();
-  }
+  };
 }
 
 export function resume () {
   return (dispatch, getState) => {
-    const {player} = getState();
+    const {player } = getState();
     dispatch(actionResume());
     player.audioElement.play();
-  }
+  };
 }
 
 export const playerStates = {
@@ -126,7 +126,7 @@ const ACTION_HANDLERS = {
       ...state,
       state: playerStates.ready,
       audioElement: action.payload.audioElement,
-    }
+    };
   },
   [PLAY_TRACK]: (state, action) => {
     return {
@@ -134,29 +134,29 @@ const ACTION_HANDLERS = {
       state: playerStates.startingPlay,
       trackUrl: action.payload.trackUrl,
       trackLabel: action.payload.trackLabel,
-    }
+    };
   },
   [PAUSE_TRACK]: (state, action) => {
     return {
       ...state,
       state: playerStates.paused,
-    }
+    };
   },
   [RESUME_TRACK]: (state, action) => {
     return {
       ...state,
-      state: playerStates.startingPlay
-    }
+      state: playerStates.startingPlay,
+    };
   },
   [SEEK]: (state, action) => {
-    const {positionSecs, duration} = action.payload;
+    const {positionSecs, duration } = action.payload;
     const percentage = (positionSecs / duration) * 100;
     return {
       ...state,
       state: playerStates.startingPlay,
       currentTime: positionSecs,
       percentage: percentage,
-    }
+    };
   },
   [TIME_UPDATE]: (state, action) => {
     let percentage = 0;
@@ -169,8 +169,8 @@ const ACTION_HANDLERS = {
       duration: action.payload.duration,
       currentTime: action.payload.currentTime,
       percentage: percentage,
-    }
-  }
+    };
+  },
   // SOME_ACTION: (state, action) => {
   //   return state;
   // }

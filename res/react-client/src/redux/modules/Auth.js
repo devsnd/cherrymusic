@@ -1,12 +1,13 @@
-import {legacyAPICall, postForm} from 'utils/legacyApi';
-import {API_ENDPOINT_LOGOUT, API_ENDPOINT_LOGIN} from 'constants';
+import {legacyAPICall, postForm } from 'utils/legacyApi';
+import {API_ENDPOINT_LOGOUT, API_ENDPOINT_LOGIN } from 'constants';
 import { push } from 'react-router-redux';
 
 export const LOGGING_IN = 'redux/cherrymusic/LOGGING_IN';
 export const LOG_IN_SUCCESS = 'redux/cherrymusic/LOG_IN_SUCCESS';
 export const LOG_IN_FAILED = 'redux/cherrymusic/LOG_IN_FAILED';
+export const LOG_IN_ERROR = 'redux/cherrymusic/LOG_IN_ERROR';
 export const LOGGING_OUT = 'redux/cherrymusic/LOGGING_OUT';
-export const LOGGED_OUT= 'redux/cherrymusic/LOGGED_OUT';
+export const LOGGED_OUT = 'redux/cherrymusic/LOGGED_OUT';
 
 export const loginStates = {
   loggingIn: 'loggingIn',
@@ -17,11 +18,12 @@ export const loginStates = {
   logOutSuccess: 'logOutSuccess',
 };
 
-function actionLoggingIn () { return {type: LOGGING_IN, payload: {}}; }
-function actionLogInSuccess (username, authtoken) { return {type: LOG_IN_SUCCESS, payload: {username: username, authtoken: authtoken}}; }
-function actionLogInFailed (username) { return {type: LOG_IN_FAILED, payload: {}}; }
-function actionLoggingOut () { return {type: LOGGING_OUT, payload: {}}; }
-function actionLoggedOut () { return {type: LOGGED_OUT, payload: {}}; }
+function actionLoggingIn () { return {type: LOGGING_IN, payload: {} }; }
+function actionLogInSuccess (username, authtoken) { return {type: LOG_IN_SUCCESS, payload: {username: username, authtoken: authtoken } }; }
+function actionLogInFailed (username) { return {type: LOG_IN_FAILED, payload: {} }; }
+function actionLogInError (username) { return {type: LOG_IN_ERROR, payload: {} }; }
+function actionLoggingOut () { return {type: LOGGING_OUT, payload: {} }; }
+function actionLoggedOut () { return {type: LOGGED_OUT, payload: {} }; }
 
 export function login (username, password) {
   return (dispatch, getState) => {
@@ -31,17 +33,21 @@ export function login (username, password) {
         API_ENDPOINT_LOGIN,
         {
           'username': username,
-          'password': password
+          'password': password,
         }
       ).then(
         (data) => {
           dispatch(actionLogInSuccess(username, data['authtoken']));
           // http://stackoverflow.com/a/34863577/1191373
           dispatch(push('/main'));
-          resolve({username: username});
+          resolve({username: username });
         },
         (error) => {
-          dispatch(actionLogInFailed());
+          if (error.indexOf('CONNECTION_ERROR') >= 0) {
+            dispatch(actionLogInError());
+          } else {
+            dispatch(actionLogInFailed());
+          }
           reject(error);
         }
       );
@@ -54,9 +60,9 @@ export function logout () {
     dispatch(actionLoggingOut());
     legacyAPICall(API_ENDPOINT_LOGOUT).then(
       (data) => { dispatch(actionLogOutSuccess()); },
-      (error) => { alert('error logging out!') }
-    )
-  }
+      (error) => { alert('error logging out!'); }
+    );
+  };
 
 }
 
@@ -65,20 +71,20 @@ export function setPassword (oldPassword, newPassword) {
     legacyAPICall(
       API_ENDPOINT_CHANGEPASSWORD,
       {
-        "oldpassword": oldPassword,
-        "newpassword": newPassword
+        'oldpassword': oldPassword,
+        'newpassword': newPassword,
       }
     ).then(
-      (data) => { alert('Password changed successfully!')},
+      (data) => { alert('Password changed successfully!'); },
       (error) => { alert('Error changing password!'); console.log(error); }
-    )
-  }
+    );
+  };
 }
 
 export const initialState = {
   loginState: loginStates.logOutSuccess,
   user: null,
-  userOptions: {}
+  userOptions: {},
 };
 
 const ACTION_HANDLERS = {
@@ -86,27 +92,31 @@ const ACTION_HANDLERS = {
     return {
       ...state,
       loginState: loginStates.loggingIn,
-    }
+    };
   },
   [LOG_IN_SUCCESS]: (state, action) => {
     return {
       ...state,
       loginState: loginStates.logInSuccess,
       user: {
-        username: action.payload.username
+        username: action.payload.username,
       },
-    }
+    };
   },
   [LOG_IN_FAILED]: (state, action) => {
     return {
       ...state,
       loginState: loginStates.logInFailed,
       user: null,
-    }
-  }
-  // SOME_ACTION: (state, action) => {
-  //   return state;
-  // }
+    };
+  },
+  [LOG_IN_ERROR]: (state, action) => {
+    return {
+      ...state,
+      loginState: loginStates.logInError,
+      user: null,
+    };
+  },
 };
 
 export default function (state = initialState, action) {

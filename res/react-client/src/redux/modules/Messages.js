@@ -1,4 +1,4 @@
-import {createSelector} from 'reselect';
+import {createSelector } from 'reselect';
 // Constants
 export const ADD_MESSAGE = 'abend/redux/impersonate/ADD_MESSAGE';
 export const REMOVE_MESSAGES = 'abend/redux/impersonate/REMOVE_MESSAGES';
@@ -13,22 +13,22 @@ export const Level = {
 
 export const errorMessage = (errormessage) => {
   return (dispatch, getState) => {
-    _addMessage({level: Level.Error, message: errormessage})(dispatch, getState);
+    _addMessage({level: Level.Error, message: errormessage })(dispatch, getState);
   };
 };
 
 export const actionErrorMessage = (errormessage) => {
-  return actionAddMessage({level: Level.Error, message: errormessage});
+  return actionAddMessage({level: Level.Error, message: errormessage });
 };
 
 export const successMessage = (successMessage) => {
   return (dispatch, getState) => {
-    _addMessage({level: Level.Success, message: successMessage})(dispatch, getState);
+    _addMessage({level: Level.Success, message: successMessage })(dispatch, getState);
   };
 };
 
 export const actionSuccessMessage = (successmessage) => {
-  return actionAddMessage({level: Level.Success, message: successmessage});
+  return actionAddMessage({level: Level.Success, message: successmessage });
 };
 
 export const actionAddMessage = (message) => {
@@ -39,9 +39,9 @@ export const actionAddMessage = (message) => {
         level: message.level,
         message: message.message,
         dateCreated: new Date(),
-      }
-    }
-  }
+      },
+    },
+  };
 };
 
 const _addMessage = (message) => {
@@ -49,7 +49,7 @@ const _addMessage = (message) => {
     dispatch(actionAddMessage(message));
     // remove old messages just after this one expires:
     window.setTimeout(
-        () => { dispatch({type: REMOVE_MESSAGES, payload: {}}); }, REMOVE_MESSAGE_INTERVAL_MILLIS
+        () => { dispatch({type: REMOVE_MESSAGES, payload: {} }); }, REMOVE_MESSAGE_INTERVAL_MILLIS
     );
   };
 };
@@ -75,9 +75,9 @@ const ACTION_HANDLERS = {
         ...state.messages,
         {
           ...action.payload.message,
-          key: __messageKey++
-        }
-      ]
+          key: __messageKey++,
+        },
+      ],
     };
   },
   [REMOVE_MESSAGES]: (state, action) => {
@@ -92,9 +92,9 @@ const ACTION_HANDLERS = {
     }
     return {
       ...state,
-      messages: newMessages
+      messages: newMessages,
     };
-  }
+  },
 };
 
 export default function (state = initialState, action) {

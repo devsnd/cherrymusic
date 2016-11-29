@@ -8,7 +8,7 @@ export const ViewStates = {
   playlists: 'playlists',
 };
 
-export const actionSetView = (viewState) => {return {type: SET_VIEW, payload: {viewState: viewState}}};
+export const actionSetView = (viewState) => { return {type: SET_VIEW, payload: {viewState: viewState } }; };
 
 export function setBrowserView () {
   return (dispatch, getState) => dispatch(actionSetView(ViewStates.browser));
@@ -22,12 +22,12 @@ export const initialState = {
 };
 
 const ACTION_HANDLERS = {
-   [SET_VIEW]: (state, action) => {
-     return {
-       ...state,
-       viewState: action.payload.viewState,
-     };
-   }
+  [SET_VIEW]: (state, action) => {
+    return {
+      ...state,
+      viewState: action.payload.viewState,
+    };
+  },
 };
 
 export default function (state = initialState, action) {

@@ -1,10 +1,11 @@
-import { takeEvery, takeLatest } from 'redux-saga'
-import { call, put, select, fork } from 'redux-saga/effects'
+import { takeEvery, takeLatest } from 'redux-saga';
+import { call, put, select, fork } from 'redux-saga/effects';
 
 import {
   // playlist list
   PLAYLIST_LIST_REQUESTED,
   PLAYLIST_OPEN_REQUESTED,
+  PLAYLIST_DELETE_REQUESTED,
   fetchPlaylistList,
   actionPlaylistListLoaded,
   actionPlaylistListLoadError,
@@ -18,6 +19,9 @@ import {
 
   // playlist creation and saving
   actionPlaylistCreate,
+
+  // playlist deletion
+  actionPlaylistDeleted,
 } from 'redux/modules/CherryMusicApi';
 
 import {
@@ -33,7 +37,7 @@ import {
 } from 'redux/modules/Messages';
 
 export function* onPlaylistListRequested (action) {
-  const {sortby, filterby} = action.payload;
+  const {sortby, filterby } = action.payload;
   try {
     const state = yield select();
     const getState = () => state;
@@ -48,7 +52,7 @@ export function* onPlaylistListRequested (action) {
 export function* onPlaylistOpenRequested (action) {
   const state = yield select();
   const getState = () => state;
-  const {playlistId} = action.payload;
+  const {playlistId } = action.payload;
   yield put(actionPlaylistDetailLoading(playlistId));
   yield put(actionOpenPlaylistTab(playlistId));
   yield put(actionActivatePlaylist(playlistId));
@@ -58,7 +62,7 @@ export function* onPlaylistOpenRequested (action) {
   } catch (error) {
     console.log(error);
     yield put(actionClosePlaylistTab(playlistId));
-    yield put(actionErrorMessage("Error loading playlist"));
+    yield put(actionErrorMessage('Error loading playlist'));
   }
 }
 
@@ -70,11 +74,18 @@ export function* onPlaylistCreateRequested (action) {
   yield put(actionActivatePlaylist(newPlaylistId));
 }
 
+function* onPlaylistDeleteRequested (action) {
+  console.log('onPlaylistDeleteRequested');
+  const {playlistId } = action.payload;
+  yield put(actionPlaylistDeleted(playlistId));
+}
+
 export function* PlaylistLoaderSaga () {
   yield [
     takeLatest(CREATE_PLAYLIST_REQUESTED, onPlaylistCreateRequested),
     takeLatest(PLAYLIST_LIST_REQUESTED, onPlaylistListRequested),
     takeLatest(PLAYLIST_OPEN_REQUESTED, onPlaylistOpenRequested),
+    takeLatest(PLAYLIST_DELETE_REQUESTED, onPlaylistDeleteRequested),
     // init
     takeLatest('redux/cherrymusic/LOG_IN_SUCCESS', function* () {
       yield put(actionCreatePlaylistRequested());

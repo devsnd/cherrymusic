@@ -7,7 +7,7 @@ module.exports = {
     return {
       __smart__: (options) => {
         return options.settings.getSetting('smartPath');
-      }
+      },
     };
-  }
+  },
 };

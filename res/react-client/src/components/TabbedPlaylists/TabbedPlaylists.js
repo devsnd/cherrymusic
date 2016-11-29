@@ -1,10 +1,10 @@
-import React, {PropTypes} from 'react';
-import { bindActionCreators } from 'redux'
+import React, {PropTypes } from 'react';
+import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import {PLAYBACK_ENDED} from 'redux/modules/Player';
+import {PLAYBACK_ENDED } from 'redux/modules/Player';
 import CMComponent from 'utils/CMComponent';
 
-import {Tab, Tabs, Table} from 'react-bootstrap';
+import {Tab, Tabs, Table } from 'react-bootstrap';
 
 import TrackListItem from 'components/TrackListItem/TrackListItem';
 import ScrollableView from 'components/ScrollableView/ScrollableView';
@@ -46,7 +46,7 @@ class TabbedPlaylists extends CMComponent {
   }
 
   handleTabSelect (playlist) {
-    if (playlist === this._newPlaylistPlaceholder){
+    if (playlist === this._newPlaylistPlaceholder) {
       this.props.createPlaylist();
     } else {
       this.props.activatePlaylist(playlist);
@@ -74,7 +74,7 @@ class TabbedPlaylists extends CMComponent {
       return (
         <div
           key={idx}
-          onClick={() => {this.selectTrack(playlist, idx)}}
+          onClick={() => { this.selectTrack(playlist, idx); }}
           style={makeTrackStyle(playlist, idx, track)}
         >
           <TrackListItem
@@ -82,7 +82,7 @@ class TabbedPlaylists extends CMComponent {
           />
         </div>
       );
-    })
+    });
   }
 
   safeRender () {
@@ -113,8 +113,8 @@ class TabbedPlaylists extends CMComponent {
                 <span style={makePlaylistTabStyle(playlist)}>
                   {playlist.title}
                   <span
-                    onClick={() => { this.closePlaylist(playlist) }}
-                    style={{'fontWeight': 900, padding: '10 0 10 10'}}
+                    onClick={() => { this.closePlaylist(playlist); }}
+                    style={{'fontWeight': 900, padding: '10 0 10 10' }}
                   >
                     ×
                   </span>
@@ -144,7 +144,7 @@ class TabbedPlaylists extends CMComponent {
         })}
         <Tab eventKey={this._newPlaylistPlaceholder} title="+" />
       </Tabs>
-    )
+    );
   }
 }
 

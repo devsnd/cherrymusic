@@ -1,4 +1,4 @@
-import React, {PropTypes} from 'react';
+import React, {PropTypes } from 'react';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import classes from './MoveIn.scss';
 
@@ -49,7 +49,7 @@ export default class MoveIn extends React.Component {
             /*
             the outer span gets the animation classes, the inner one makes that the child renders normally
             */
-            ? <span><span style={{'display': 'inline-block'}}>{this.props.children}</span></span>
+            ? <span><span style={{'display': 'inline-block' }}>{this.props.children}</span></span>
             : null
         }
       </ReactCSSTransitionGroup>

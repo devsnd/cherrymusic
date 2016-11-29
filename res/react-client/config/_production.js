@@ -6,7 +6,7 @@ export default () => ({
   compiler_stats           : {
     chunks : true,
     chunkModules : true,
-    colors : true
+    colors : true,
   },
-  compiler_public_path: '/'
+  compiler_public_path: '/',
 });

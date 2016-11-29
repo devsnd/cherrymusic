@@ -1,4 +1,4 @@
-import React, {PropTypes} from 'react';
+import React, {PropTypes } from 'react';
 
 
 class Duration extends React.Component {
@@ -6,12 +6,12 @@ class Duration extends React.Component {
     seconds: PropTypes.number.isRequired,
   };
 
-  constructor(props) {
+  constructor (props) {
     super(props);
   }
 
-  render() {
-    const {seconds} = this.props;
+  render () {
+    const {seconds } = this.props;
     const hrs = Math.floor(seconds / 3600);
     let mins = Math.floor(seconds / 60) % 60;
     let secs = Math.floor(seconds) % 60;

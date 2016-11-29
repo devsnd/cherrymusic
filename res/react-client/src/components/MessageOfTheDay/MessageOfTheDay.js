@@ -4,7 +4,7 @@ export class MessageOfTheDay extends React.Component {
   constructor () {
     super();
     this.state = {
-      motd: 'Message of the day'
+      motd: 'Message of the day',
     };
   }
 
@@ -17,7 +17,7 @@ export class MessageOfTheDay extends React.Component {
       <div>
         {this.state.motd}
       </div>
-    )
+    );
   }
 }
 

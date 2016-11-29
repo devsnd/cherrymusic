@@ -9,8 +9,8 @@ import {
   API_ENDPOINT_PLAYLIST_DETAIL,
   API_ENDPOINT_FETCH_ALBUM_ART,
 } from 'constants';
-import {legacyAPICall} from 'utils/legacyApi';
-import {LOG_IN_SUCCESS} from 'redux/modules/Auth';
+import {legacyAPICall } from 'utils/legacyApi';
+import {LOG_IN_SUCCESS } from 'redux/modules/Auth';
 import updateHelper from 'react-addons-update';
 import { createSelector } from 'reselect';
 
@@ -22,17 +22,23 @@ export const PLAYLIST_LIST_LOAD_ERROR = 'redux/cherrymusicapi/PLAYLIST_LIST_LOAD
 export const PLAYLIST_LIST_SORT_BY = 'redux/cherrymusicapi/PLAYLIST_LIST_SORT_BY';
 
 export const PLAYLIST_OPEN_REQUESTED = 'redux/cherrymusicapi/PLAYLIST_OPEN_REQUESTED';
-export const actionPlaylistOpenRequested = (playlistId) => ({type: PLAYLIST_OPEN_REQUESTED, payload: {playlistId: playlistId}});
+export const actionPlaylistOpenRequested = (playlistId) => ({type: PLAYLIST_OPEN_REQUESTED, payload: {playlistId: playlistId } });
 export const PLAYLIST_DETAIL_LOADING = 'redux/cherrymusicapi/PLAYLIST_DETAIL_LOADING';
-export const actionPlaylistDetailLoading = (playlistId) => ({type: PLAYLIST_DETAIL_LOADING, payload: {playlistId: playlistId}});
+export const actionPlaylistDetailLoading = (playlistId) => ({type: PLAYLIST_DETAIL_LOADING, payload: {playlistId: playlistId } });
 export const PLAYLIST_DETAIL_LOADED = 'redux/cherrymusicapi/PLAYLIST_DETAIL_LOADED';
-export const actionPlaylistDetailLoaded = (playlistId, tracks) => ({type: PLAYLIST_DETAIL_LOADED, payload: {playlistId, tracks}});
+export const actionPlaylistDetailLoaded = (playlistId, tracks) => ({type: PLAYLIST_DETAIL_LOADED, payload: {playlistId, tracks } });
 export const PLAYLIST_DETAIL_LOAD_ERROR = 'redux/cherrymusicapi/PLAYLIST_DETAIL_LOAD_ERROR';
-export const actionPlaylistDetailLoadError = (playlistId) => ({type: PLAYLIST_DETAIL_LOAD_ERROR, payload: {playlistId: playlistId}});
+export const actionPlaylistDetailLoadError = (playlistId) => ({type: PLAYLIST_DETAIL_LOAD_ERROR, payload: {playlistId: playlistId } });
 export const PLAYLIST_CREATE = 'redux/cherrymusicapi/PLAYLIST_CREATE';
-export const actionPlaylistCreate = (playlistId) => ({type: PLAYLIST_CREATE, payload: {playlistId: playlistId}});
+export const actionPlaylistCreate = (playlistId) => ({type: PLAYLIST_CREATE, payload: {playlistId: playlistId } });
 export const PLAYLIST_ADD_TRACK = 'redux/cherrymusicapi/PLAYLIST_ADD_TRACK';
-export const actionPlaylistAddTrack = (playlistId, trackId) => ({type: PLAYLIST_ADD_TRACK, payload: {playlistId: playlistId, trackId: trackId}});
+export const actionPlaylistAddTrack = (playlistId, trackId) => ({type: PLAYLIST_ADD_TRACK, payload: {playlistId: playlistId, trackId: trackId } });
+
+export const PLAYLIST_DELETE_REQUESTED = 'redux/cherrymusicapi/PLAYLIST_DELETE_REQUESTED';
+export const actionPlaylistDeleteRequested = (playlistId) => ({type: PLAYLIST_DELETE_REQUESTED, payload: {playlistId: playlistId } });
+export const PLAYLIST_DELETED = 'redux/cherrymusicapi/PLAYLIST_DELETED';
+export const actionPlaylistDeleted = (playlistId) => ({type: PLAYLIST_DELETED, payload: {playlistId: playlistId } });
+
 
 export const DIRECTORY_LOADING = 'redux/cherrymusicapi/directory_loading';
 export const DIRECTORY_LOADED = 'redux/cherrymusicapi/directory_loaded';
@@ -88,16 +94,16 @@ export function loadDirectory (path, startswith) {
   return (dispatch, getState) => {
     const authtoken = getAuthToken(getState());
     dispatch(actionDirectoryLoading(path));
-    if(typeof path === 'undefined'){
+    if (typeof path === 'undefined') {
       path = '';
     }
     let endpoint = API_ENDPOINT_LIST_DIRECTORY;
-    let params = {'directory': path};
+    let params = {'directory': path };
     // this is all legacy: the compact directory listing filter should just
     // be a filter on the `listdir` call but it has its own endpoint right now.
     if (typeof startswith !== 'undefined') {
       endpoint = API_ENDPOINT_COMPACT_LIST_DIRECTORY;
-      params = {'directory': path, 'filterstr': startswith}
+      params = {'directory': path, 'filterstr': startswith };
     }
     legacyAPICall(endpoint, params, authtoken).then(
       (data) => {
@@ -106,21 +112,21 @@ export function loadDirectory (path, startswith) {
         const compact = data.filter((elem) => elem.type === 'compact');
         dispatch(actionDirectoryLoaded(path, collections, tracks, compact));
       },
-      (error) => { console.log(error) }
-    )
-  }
+      (error) => { console.log(error); }
+    );
+  };
 }
 
 export function fetchAlbumArt (directory) {
   return (dispatch, getState) => {
     const authtoken = getAuthToken(getState());
-    const params = {directory: directory};
+    const params = {directory: directory };
     return legacyAPICall(API_ENDPOINT_FETCH_ALBUM_ART, params, authtoken);
-  }
+  };
 }
 
-export function fetchPlaylistList (getState, sortby='default', filterby) {
-  const params = {sortby: sortby};
+export function fetchPlaylistList (getState, sortby = 'default', filterby) {
+  const params = {sortby: sortby };
   if (typeof filterby !== 'undefined') {
     params.filterby = filterby;
   }
@@ -132,7 +138,7 @@ export function fetchPlaylistDetail (getState, playlistId) {
   const authtoken = getAuthToken(getState());
   return legacyAPICall(
     API_ENDPOINT_PLAYLIST_DETAIL,
-    {playlistid: playlistId},
+    {playlistid: playlistId },
     authtoken
   );
 }
@@ -145,45 +151,45 @@ export function isTrackVisible (apistate, track) {
 }
 
 export function fetchTrackMetaData (track) {
-  return legacyAPICall(API_ENDPOINT_TRACK_METADATA, {path: track.path});
+  return legacyAPICall(API_ENDPOINT_TRACK_METADATA, {path: track.path });
 }
 
 export function actionMetaDataLoading (track, metadata) {
-  return {type: METADATA_LOADING, payload: {track: track}};
+  return {type: METADATA_LOADING, payload: {track: track } };
 }
 
 export function actionMetaDataLoaded (track, metadata) {
-  return {type: METADATA_LOADED, payload: {track: track, metadata: metadata}};
+  return {type: METADATA_LOADED, payload: {track: track, metadata: metadata } };
 }
 
 export function actionMetaDataLoadError (track) {
-  return {type: METADATA_LOAD_ERROR, payload: {track: track}};
+  return {type: METADATA_LOAD_ERROR, payload: {track: track } };
 }
 
 export function loadTrackMetaData (track) {
   return (dispatch, getState) => {
     const state = selectTrackMetaDataLoadingState(track);
     if (state === MetaDataLoadingStates.idle) {
-      dispatch({type: METADATA_LOADING, payload: {track: track}});
-      legacyAPICall(API_ENDPOINT_TRACK_METADATA, {path: track.path}).then(
+      dispatch({type: METADATA_LOADING, payload: {track: track } });
+      legacyAPICall(API_ENDPOINT_TRACK_METADATA, {path: track.path }).then(
         (data) => {
           const metadata = data;
-          dispatch({type: METADATA_LOADED, payload: {track: track, metadata: data}});
+          dispatch({type: METADATA_LOADED, payload: {track: track, metadata: data } });
         },
         (error) => {
           console.log(error);
-          dispatch({type: METADATA_LOAD_ERROR, payload: {track: track}});
+          dispatch({type: METADATA_LOAD_ERROR, payload: {track: track } });
         }
-      )
+      );
     }
-  }
+  };
 }
 
 export function search (searchterm) {
   return (dispatch, getState) => {
     const authtoken = getAuthToken(getState());
     dispatch(actionDirectoryLoading(searchterm));
-    legacyAPICall(API_ENDPOINT_SEARCH, {'searchstring': searchterm}, authtoken).then(
+    legacyAPICall(API_ENDPOINT_SEARCH, {'searchstring': searchterm }, authtoken).then(
       (data) => {
         const collections = data.filter((elem) => {
           return elem.type === 'dir';
@@ -198,17 +204,17 @@ export function search (searchterm) {
         ));
       },
       (error) => {
-        console.log(error)
+        console.log(error);
       }
     );
-  }
+  };
 }
 
-function actionDirectoryLoading(path){
-  return {type: DIRECTORY_LOADING, payload: {path: path}};
+function actionDirectoryLoading (path) {
+  return {type: DIRECTORY_LOADING, payload: {path: path } };
 }
 
-function actionDirectoryLoaded(path, collections, tracks, compacts){
+function actionDirectoryLoaded (path, collections, tracks, compacts) {
   return {
     type: DIRECTORY_LOADED,
     payload: {
@@ -216,16 +222,16 @@ function actionDirectoryLoaded(path, collections, tracks, compacts){
       collections: collections,
       tracks: tracks,
       compacts: compacts,
-    }
+    },
   };
 }
 
 export function actionPlaylistListRequested (sortby, filterby) {
-  return {type: PLAYLIST_LIST_REQUESTED, payload: {sortby: sortby, filterby: filterby}};
+  return {type: PLAYLIST_LIST_REQUESTED, payload: {sortby: sortby, filterby: filterby } };
 }
 
 export function actionPlaylistListLoadError () {
-  return {type: PLAYLIST_LIST_LOAD_ERROR, payload: {}};
+  return {type: PLAYLIST_LIST_LOAD_ERROR, payload: {} };
 }
 
 export function actionPlaylistListLoaded (playlists, sortby, filterby) {
@@ -235,12 +241,12 @@ export function actionPlaylistListLoaded (playlists, sortby, filterby) {
       playlists: playlists,
       sortby: sortby,
       filterby: filterby,
-    }
-  }
+    },
+  };
 }
 
 export function actionPlaylistListSortBy (sortMode) {
-  return {type: PLAYLIST_LIST_SORT_BY, payload: {sortBy: sortMode}};
+  return {type: PLAYLIST_LIST_SORT_BY, payload: {sortBy: sortMode } };
 }
 
 export function selectAPI (state) {
@@ -252,7 +258,7 @@ export function selectEntitiesTrack (state) {
 }
 
 export function selectEntityTrackById (state) {
-  return (trackId) =>  selectEntitiesTrack(state)[trackId];
+  return (trackId) => selectEntitiesTrack(state)[trackId];
 }
 
 export function selectEntitiesTrackByNewTrack (state) {
@@ -284,7 +290,7 @@ export const selectSortedPlaylists = createSelector(
       const aVal = sortKeyFunc(playlistA);
       const bVal = sortKeyFunc(playlistB);
       if (aVal === bVal) {
-        return 0
+        return 0;
       }
       if (reversed) {
         return aVal > bVal ? 1 : -1;
@@ -303,7 +309,7 @@ export function selectPlaylistIds (state) {
 export function selectPlaylistById (state) {
   return (playlistId) => {
     return selectAPI(state).entities.playlist[playlistId];
-  }
+  };
 }
 
 export function selectPlaylistsLoadingState (state) {
@@ -343,13 +349,13 @@ export function selectAPIState (state) {
 }
 
 const mergeEntities = (currentEntities, newEntities) => {
-  const mergedEntities = {...currentEntities};
+  const mergedEntities = {...currentEntities };
   for (const model of Object.keys(newEntities)) {
     const receivedModelEntities = newEntities[model];
     const newModelEntities = mergedEntities[model];
-    for (const modelKey of Object.keys(receivedModelEntities)){
+    for (const modelKey of Object.keys(receivedModelEntities)) {
       // do not overwrite any existing models:
-      if (typeof newModelEntities[modelKey] === 'undefined'){
+      if (typeof newModelEntities[modelKey] === 'undefined') {
         newModelEntities[modelKey] = receivedModelEntities[modelKey];
       }
     }
@@ -360,54 +366,54 @@ const mergeEntities = (currentEntities, newEntities) => {
 // Action HANDLERS
 const ACTION_HANDLERS = {
   [METADATA_LOAD_ENQUEUE]: (state, action) => {
-    const {track} = action.payload;
+    const {track } = action.payload;
     return updateHelper(
       state,
       {
         entities: {[trackSchema.getKey()]: {[trackSchema.getId(track)]: {
-          metadataLoadingState: {$set: MetaDataLoadingStates.idle}
-        }}},
+          metadataLoadingState: {$set: MetaDataLoadingStates.idle },
+        } } },
       }
-    )
+    );
   },
   [METADATA_LOADING]: (state, action) => {
-    const {track} = action.payload;
+    const {track } = action.payload;
     return updateHelper(
       state,
       {entities: {[trackSchema.getKey()]: {[trackSchema.getId(track)]: {
-        metadataLoadingState: {$set: MetaDataLoadingStates.loading}
-      }}}}
-    )
+        metadataLoadingState: {$set: MetaDataLoadingStates.loading },
+      } } } }
+    );
   },
   [METADATA_LOADED]: (state, action) => {
-    const {track, metadata} = action.payload;
+    const {track, metadata } = action.payload;
     return updateHelper(
       state,
       {
         entities: {[trackSchema.getKey()]: {[trackSchema.getId(track)]: {
-          metadataLoadingState: {$set: MetaDataLoadingStates.loaded},
-          metadata: {$set: metadata},
-        }}},
+          metadataLoadingState: {$set: MetaDataLoadingStates.loaded },
+          metadata: {$set: metadata },
+        } } },
       }
-    )
+    );
 
   },
   [METADATA_LOAD_ERROR]: (state, action) => {
-    const {track} = action.payload;
+    const {track } = action.payload;
     return updateHelper(
       state,
       {
         entities: {[trackSchema.getKey()]: {[trackSchema.getId(track)]: {
-          metadataLoadingState: {$set: MetaDataLoadingStates.error}
-        }}},
+          metadataLoadingState: {$set: MetaDataLoadingStates.error },
+        } } },
       }
-    )
+    );
   },
   [PLAYLIST_LIST_REQUESTED]: (state, action) => {
     return {
       ...state,
       playlistsLoadingState: LoadingStates.loading,
-    }
+    };
   },
   [PLAYLIST_LIST_LOADED]: (state, action) => {
     const { playlists, filterby, sortby } = action.payload;
@@ -417,15 +423,15 @@ const ACTION_HANDLERS = {
     // NOTE: this does yet not remove deleted playlists on the client
     const detailedPlaylistIds = new Set(
       Object.entries(state.entities.playlist)
-      .map(([key, value]) => {
+      .map(([key, value ]) => {
         if (typeof value.trackIds !== 'undefined') {
-          return key
+          return key;
         }
       })
       .filter((elem) => typeof elem !== 'undefined')
     );
     const newPlaylistEntities = {};
-    for (const [key, playlist] of Object.entries(normalizedPlaylists.entities.playlist)) {
+    for (const [key, playlist ] of Object.entries(normalizedPlaylists.entities.playlist)) {
       if (!detailedPlaylistIds.has(key)) {
         newPlaylistEntities[key] = playlist;
       }
@@ -438,18 +444,18 @@ const ACTION_HANDLERS = {
         playlist: {
           ...state.entities.playlist,
           ...newPlaylistEntities,
-        }
+        },
       },
       playlistsLoadingState: LoadingStates.loaded,
       playlistFilterBy: filterby,
       playlistSortBy: sortby,
-    }
+    };
   },
   [PLAYLIST_LIST_LOAD_ERROR]: (state, action) => {
     return {
       ...state,
       playlistsLoadingState: LoadingStates.error,
-    }
+    };
   },
   [PLAYLIST_LIST_SORT_BY]: (state, action) => {
     let sortReversed;
@@ -463,21 +469,21 @@ const ACTION_HANDLERS = {
     return {
       ...state,
       playlistSortBy: action.payload.sortBy,
-      playlistSortByReversed:  sortReversed,
-    }
+      playlistSortByReversed: sortReversed,
+    };
   },
   [DIRECTORY_LOADING]: (state, action) => {
-    const {path} = action.payload;
+    const {path } = action.payload;
     return {
       ...state,
       state: LoadingStates.loading,
       path: path,
       collections: [],
       tracks: [],
-    }
+    };
   },
   [DIRECTORY_LOADED]: (state, action) => {
-    const {path, collections, tracks, compacts} = action.payload;
+    const {path, collections, tracks, compacts } = action.payload;
     const normCollection = normalize(collections, arrayOf(collectionSchema));
     const normCompacts = normalize(compacts, arrayOf(compactSchema));
     const normTracks = normalize(
@@ -502,33 +508,33 @@ const ACTION_HANDLERS = {
       [collectionSchema.getKey() + 's']: normCollection.result,
       [trackSchema.getKey() + 's']: normTracks.result,
       [compactSchema.getKey() + 's']: normCompacts.result,
-    }
+    };
   },
   [PLAYLIST_CREATE]: (state, action) => {
     const playlistEntities = playlistSchema.getKey();
-    const {playlistId} = action.payload;
+    const {playlistId } = action.payload;
     const newPlaylist = {
       trackIds: [],
-      title: "No Name",
+      title: 'No Name',
       ownerId: -1,
       state: playlistStates.new,
       plid: playlistId,
     };
     return updateHelper(
       state,
-      {entities: {[playlistEntities]: {[playlistId]: {$set: newPlaylist}}}}
+      {entities: {[playlistEntities]: {[playlistId]: {$set: newPlaylist } } } }
     );
   },
   [PLAYLIST_ADD_TRACK]: (state, action) => {
     const playlistEntities = playlistSchema.getKey();
-    const {playlistId, trackId} = action.payload;
+    const {playlistId, trackId } = action.payload;
     return updateHelper(
       state,
-      {entities: {[playlistEntities]: {[playlistId]: {trackIds: {$push: [trackId]}}}}}
+      {entities: {[playlistEntities]: {[playlistId]: {trackIds: {$push: [trackId ] } } } } }
     );
   },
   [PLAYLIST_DETAIL_LOADED]: (state, action) => {
-    const {playlistId, tracks} = action.payload;
+    const {playlistId, tracks } = action.payload;
     // insert all tracks into the state
     const normTracks = normalize(
       // insert metaDataLoading State into each track
@@ -553,10 +559,24 @@ const ACTION_HANDLERS = {
         entities: {
           [playlistSchema.getKey()]: {
             [playlistId]: {
-              trackIds: {$set: normTracks.result}
-            }
-          }
+              trackIds: {$set: normTracks.result },
+            },
+          },
         },
+      }
+    );
+  },
+  [PLAYLIST_DELETED]: (state, action) => {
+    const {playlistId } = action.payload;
+    const playlistEntities = {
+      ...state.entities[playlistSchema.getKey()],
+    };
+    delete playlistEntities[playlistId];
+    return updateHelper(
+      state,
+      {
+        entities: {[playlistSchema.getKey()]: {$set: playlistEntities } },
+        playlists: {$set: state.playlists.filter((plid) => plid !== playlistId) },
       }
     );
   },
@@ -568,16 +588,16 @@ const ACTION_HANDLERS = {
         collections: {
           state: LoadingStates.error,
           data: [],
-        }
-      }
-    }
+        },
+      },
+    };
   },
   [LOG_IN_SUCCESS]: (state, action) => {
     return {
       ...state,
-      authtoken: action.payload.authtoken
-    }
-  }
+      authtoken: action.payload.authtoken,
+    };
+  },
 };
 
 export default function (state = initialState, action) {

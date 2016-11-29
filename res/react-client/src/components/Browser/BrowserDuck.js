@@ -6,11 +6,11 @@ export const FileListingViewFormats = {
 };
 
 export const initialState = {
-  fileListingViewFormat: FileListingViewFormats.Tile
+  fileListingViewFormat: FileListingViewFormats.Tile,
 };
 
 export function actionSetFileListingViewFormat (format) {
-  return {type: SET_FILE_LISTING_VIEW_FORMAT, payload: {format: format}};
+  return {type: SET_FILE_LISTING_VIEW_FORMAT, payload: {format: format } };
 }
 
 function select (state) {
@@ -25,8 +25,8 @@ const ACTION_HANDLERS = {
   [SET_FILE_LISTING_VIEW_FORMAT]: (state, action) => {
     return {
       ...state,
-      fileListingViewFormat: action.payload.format
-    }
+      fileListingViewFormat: action.payload.format,
+    };
   },
 };
 

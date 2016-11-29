@@ -16,7 +16,7 @@ export default function (compiler, publicPath) {
     quiet: config.compiler_quiet,
     noInfo: config.compiler_quiet,
     lazy: false,
-    stats: config.compiler_stats
+    stats: config.compiler_stats,
   });
 
   return async function koaWebpackDevMiddleware (ctx, next) {
@@ -24,7 +24,7 @@ export default function (compiler, publicPath) {
       end: (content) => (ctx.body = content),
       setHeader: function () {
         ctx.set.apply(ctx, arguments);
-      }
+      },
     });
 
     if (hasNext) {

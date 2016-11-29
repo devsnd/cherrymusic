@@ -53,7 +53,7 @@ class MessageToaster extends React.Component {
 export default connect(
   (state) => {
     return {
-      messages: selectMessages(state)
+      messages: selectMessages(state),
     };
   }
 )(MessageToaster);

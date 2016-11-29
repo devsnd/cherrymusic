@@ -9,5 +9,5 @@ module.exports = {
 
   afterInstall () {
     console.log('After installation hook!');
-  }
+  },
 };

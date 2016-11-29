@@ -34,7 +34,7 @@ const config = {
   compiler_stats           : {
     chunks : false,
     chunkModules : false,
-    colors : true
+    colors : true,
   },
   compiler_vendor : [
     'history',
@@ -42,7 +42,7 @@ const config = {
     'react-redux',
     'react-router',
     'react-router-redux',
-    'redux'
+    'redux',
   ],
 
   // ----------------------------------
@@ -51,8 +51,8 @@ const config = {
   coverage_enabled   : !argv.watch,
   coverage_reporters : [
     { type : 'text-summary' },
-    { type : 'lcov', dir : 'coverage' }
-  ]
+    { type : 'lcov', dir : 'coverage' },
+  ],
 };
 
 /************************************************
@@ -70,7 +70,7 @@ Edit at Your Own Risk
 // N.B.: globals added here must _also_ be added to .eslintrc
 config.globals = {
   'process.env'  : {
-    'NODE_ENV' : JSON.stringify(config.env)
+    'NODE_ENV' : JSON.stringify(config.env),
   },
   'NODE_ENV'     : config.env,
   '__DEV__'      : config.env === 'development',
@@ -78,7 +78,7 @@ config.globals = {
   '__TEST__'     : config.env === 'test',
   '__DEBUG__'    : config.env === 'development' && !argv.no_debug,
   '__DEBUG_NEW_WINDOW__' : !!argv.nw,
-  '__BASENAME__' : JSON.stringify(process.env.BASENAME || '')
+  '__BASENAME__' : JSON.stringify(process.env.BASENAME || ''),
 };
 
 // ------------------------------------
@@ -104,12 +104,12 @@ config.utils_paths = (() => {
   const resolve = path.resolve;
 
   const base = (...args) =>
-    resolve.apply(resolve, [config.path_base, ...args]);
+    resolve.apply(resolve, [config.path_base, ...args ]);
 
   return {
     base   : base,
     client : base.bind(null, config.dir_client),
-    dist   : base.bind(null, config.dir_dist)
+    dist   : base.bind(null, config.dir_dist),
   };
 })();
 

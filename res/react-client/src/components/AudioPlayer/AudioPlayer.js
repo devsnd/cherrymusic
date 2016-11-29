@@ -1,12 +1,12 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux'
+import { bindActionCreators } from 'redux';
 
-import {initPlayer, playerStates, seek, pause, resume} from 'redux/modules/Player'
-import {playNextTrack, playPreviousTrack} from 'redux/modules/PlaylistManager'
+import {initPlayer, playerStates, seek, pause, resume } from 'redux/modules/Player';
+import {playNextTrack, playPreviousTrack } from 'redux/modules/PlaylistManager';
 
 import classes from './AudioPlayer.scss';
-import {ProgressBar, Glyphicon, Button, ButtonGroup} from 'react-bootstrap';
+import {ProgressBar, Glyphicon, Button, ButtonGroup } from 'react-bootstrap';
 
 export class AudioPlayer extends React.Component {
   constructor (props) {
@@ -29,7 +29,7 @@ export class AudioPlayer extends React.Component {
 
   handleProgressBarClick (event) {
     let target = event.target;
-    if (target.className.indexOf('progress-bar') >= 0){
+    if (target.className.indexOf('progress-bar') >= 0) {
       // we hit the progress indicator instead of the complete progress bar:
       target = target.parentNode;  // this should be the .progress class now.
     }
@@ -40,7 +40,7 @@ export class AudioPlayer extends React.Component {
   }
 
   render () {
-    const {playerState} = this.props;
+    const {playerState } = this.props;
     return (
       <div className={classes.CMAudioPlayer} ref="audioPlayer">
         {this.props.playerState === playerStates.uninitialized &&
@@ -50,14 +50,14 @@ export class AudioPlayer extends React.Component {
         <div>
           <div className={classes.buttonContainer}>
             <ButtonGroup>
-              <Button onClick={this.playPreviousTrack}><Glyphicon glyph="step-backward"/></Button>
+              <Button onClick={this.playPreviousTrack}><Glyphicon glyph="step-backward" /></Button>
               {playerState === playerStates.playing &&
-                <Button onClick={this.pause}><Glyphicon glyph="pause"/></Button>
+                <Button onClick={this.pause}><Glyphicon glyph="pause" /></Button>
               }
               {playerState !== playerStates.playing &&
-                <Button onClick={this.resume}><Glyphicon glyph="play"/></Button>
+                <Button onClick={this.resume}><Glyphicon glyph="play" /></Button>
               }
-              <Button onClick={this.playNextTrack}><Glyphicon glyph="step-forward"/></Button>
+              <Button onClick={this.playNextTrack}><Glyphicon glyph="step-forward" /></Button>
             </ButtonGroup>
             <ButtonGroup bsSize="xs">
               {/*
@@ -65,8 +65,8 @@ export class AudioPlayer extends React.Component {
                 <Button><Glyphicon glyph="volume-off"/></Button>
                 <Button><Glyphicon glyph="volume-up"/></Button>
               */}
-              <Button><Glyphicon glyph="random"/></Button>
-              <Button><Glyphicon glyph="retweet"/></Button>
+              <Button><Glyphicon glyph="random" /></Button>
+              <Button><Glyphicon glyph="retweet" /></Button>
             </ButtonGroup>
           </div>
           <ProgressBar
@@ -99,7 +99,7 @@ export default connect(
       resume: resume,
       playNextTrack: playNextTrack,
       playPreviousTrack: playPreviousTrack,
-      initPlayer: initPlayer
+      initPlayer: initPlayer,
     };
   }
 )(AudioPlayer);

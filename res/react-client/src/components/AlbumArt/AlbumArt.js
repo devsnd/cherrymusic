@@ -1,7 +1,7 @@
-import React, {PropTypes} from 'react';
+import React, {PropTypes } from 'react';
 import folderImage from 'static/img/folder.png';
-import {fetchAlbumArt} from 'redux/modules/CherryMusicApi';
-import {connect} from 'react-redux';
+import {fetchAlbumArt } from 'redux/modules/CherryMusicApi';
+import {connect } from 'react-redux';
 import classes from 'utils/animations/Pulse.scss';
 
 const loading = 0;
@@ -19,19 +19,19 @@ export class AlbumArt extends React.Component {
     this.state = {
       loadingState: loading,
       b64image: null,
-    }
+    };
   }
 
   componentDidMount () {
     this.props.fetchAlbumArt(this.props.directory).then(
       (data) => {
-      this.setState({
+        this.setState({
           b64image: 'data:image/jpg;base64,' + data.image,
           loadingState: loaded,
         });
       },
       () => this.setState({
-        loadingState: error
+        loadingState: error,
       })
     );
   }
@@ -42,13 +42,13 @@ export class AlbumArt extends React.Component {
     let cssClass;
     if (this.state.loadingState === loading) {
       imageUrl = folderImage;
-      cssClass = {className: classes.pulse}
+      cssClass = {className: classes.pulse };
     } else if (this.state.loadingState === error) {
       imageUrl = folderImage;
-      cssClass = {}
+      cssClass = {};
     } else {
       imageUrl = this.state.b64image;
-      cssClass = {}
+      cssClass = {};
     }
 
     return (

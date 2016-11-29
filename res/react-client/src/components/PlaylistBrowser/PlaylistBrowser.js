@@ -1,5 +1,5 @@
-import React, {PropTypes} from 'react';
-import { bindActionCreators } from 'redux'
+import React, {PropTypes } from 'react';
+import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
 import {
@@ -12,6 +12,7 @@ import {
 } from 'react-bootstrap';
 import Username from 'components/Username/Username';
 import ScrollableView from 'components/ScrollableView/ScrollableView';
+import DeletePlaylistModal from './DeletePlaylistModal';
 
 import {
   // playlist listing
@@ -26,7 +27,7 @@ import {
   // opening playlists
   actionPlaylistOpenRequested,
 } from 'redux/modules/CherryMusicApi';
-import Age from 'components/Age/Age'
+import Age from 'components/Age/Age';
 
 class PlaylistBrowser extends React.Component {
   static propTypes = {
@@ -44,7 +45,22 @@ class PlaylistBrowser extends React.Component {
     };
     this.sortByUsername = () => {
       this.props.sortByUsername();
-   };
+    };
+    this.handleDeletePlaylist = ::this.handleDeletePlaylist;
+    this.state = {
+      showDeletePlaylistModal: false,
+      deletePlaylistId: null,
+    };
+  }
+
+  handleDeletePlaylist (playlistId) {
+    return (evt) => {
+      evt.stopPropagation();
+      this.setState({
+        showDeletePlaylistModal: true,
+        deletePlaylistId: playlistId,
+      });
+    };
   }
 
   handleSetPlaylistPublic (evt) {
@@ -52,9 +68,13 @@ class PlaylistBrowser extends React.Component {
   }
 
   render () {
-    const {sortedPlaylists, loadingState, sortBy, sortByReversed} = this.props;
+    const {sortedPlaylists, loadingState, sortBy, sortByReversed } = this.props;
     return (
       <div>
+        <DeletePlaylistModal
+          playlistId={this.state.deletePlaylistId}
+          show={this.state.showDeletePlaylistModal}
+        />
         {loadingState === LoadingStates.loading && <div>
           loading...
         </div>}
@@ -63,7 +83,7 @@ class PlaylistBrowser extends React.Component {
         </div>}
         {loadingState === LoadingStates.loaded && <div>
           Sorted by<br />
-          <ButtonGroup style={{marginBottom: '10px'}} bsSize="small">
+          <ButtonGroup style={{marginBottom: '10px' }} bsSize="small">
             <Button
               onClick={this.sortByTitle}
               active={sortBy === SortModes.default || sortBy === SortModes.title}>
@@ -86,28 +106,36 @@ class PlaylistBrowser extends React.Component {
             <ListGroup>
               {sortedPlaylists.map((playlist) => {
                 const playlistId = playlist.plid;
-                const inputChecked = playlist.public ? {checked: true} : {};
+                const inputChecked = playlist.public ? {checked: true } : {};
                 return (
                   <ListGroupItem
                     onClick={() => this.props.openPlaylist(playlistId)}
                     key={playlistId}
                   >
                     {playlist.title}
-                    <span style={{float: 'right'}}>
-                      <Age seconds={playlist.age} />
-                    </span>
                     {playlist.owner && <span>
+                      <Button
+                        bsStyle="danger"
+                        bsSize="xsmall"
+                        style={{float: 'right', marginLeft: 10 }}
+                        onClick={this.handleDeletePlaylist(playlist.plid)}
+                      >
+                        &times;
+                      </Button>
                       <Label
                         bsStyle={playlist.public ? 'success' : 'default'}
-                        style={{float: 'right'}}
+                        style={{float: 'right' }}
                       >
                           public&nbsp;<input
-                          type="checkbox"
-                          {...inputChecked}
-                          onChange={this.handleSetPlaylistPublic}
+                            type="checkbox"
+                            {...inputChecked}
+                            onChange={this.handleSetPlaylistPublic}
                         />
                       </Label>
                     </span>}
+                    <span style={{float: 'right' }}>
+                      <Age seconds={playlist.age} />
+                    </span>
                     <Username name={playlist.username} />
                   </ListGroupItem>
                 );

@@ -1,2 +1,2 @@
-import MainViewView from './MainViewView'
-export default MainViewView
+import MainViewView from './MainViewView';
+export default MainViewView;

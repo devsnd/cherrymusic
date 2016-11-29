@@ -1,11 +1,11 @@
 /**
  * Created by tom on 5/23/16.
  */
-import React, {PropTypes} from 'react';
+import React, {PropTypes } from 'react';
 
 import { Glyphicon } from 'react-bootstrap';
 
-import {MetaDataLoadingStates, selectTrackMetaDataLoadingState} from 'redux/modules/CherryMusicApi';
+import {MetaDataLoadingStates, selectTrackMetaDataLoadingState } from 'redux/modules/CherryMusicApi';
 import Duration from 'components/Duration/Duration';
 import classes from './TrackListItem.scss';
 
@@ -14,19 +14,19 @@ class TrackListItem extends React.Component {
     track: PropTypes.object.isRequired,
   };
 
-  constructor(props) {
+  constructor (props) {
     super(props);
   }
 
-  zeropad (n, zeros=1) {
+  zeropad (n, zeros = 1) {
     if (n < 10) {
-      return '0'*zeros + n;
+      return '0' * zeros + n;
     }
     return n;
   }
 
   render () {
-    const {track} = this.props;
+    const {track } = this.props;
     const metaLoadState = selectTrackMetaDataLoadingState(track);
     const validMetaData = (
       metaLoadState === MetaDataLoadingStates.loaded
@@ -81,7 +81,7 @@ class TrackListItem extends React.Component {
           </tr>
         </tbody>
       </table>
-    )
+    );
   }
 }
 

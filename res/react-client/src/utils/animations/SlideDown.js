@@ -1,4 +1,4 @@
-import React, {PropTypes} from 'react';
+import React, {PropTypes } from 'react';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import classes from './SlideDown.scss';
 
@@ -7,7 +7,7 @@ export default class SlideDown extends React.Component {
     speed: PropTypes.string,
     children: React.PropTypes.oneOfType([
       React.PropTypes.arrayOf(React.PropTypes.node),
-      React.PropTypes.node
+      React.PropTypes.node,
     ]),
   };
 

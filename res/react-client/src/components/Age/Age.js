@@ -1,4 +1,4 @@
-import React, {PropTypes} from 'react';
+import React, {PropTypes } from 'react';
 
 
 class Age extends React.Component {
@@ -6,7 +6,7 @@ class Age extends React.Component {
     seconds: PropTypes.number.isRequired,
   };
 
-  constructor(props) {
+  constructor (props) {
     super(props);
   }
 
@@ -17,15 +17,15 @@ class Age extends React.Component {
   secondsPerYear = this.secondsPerDay * 365;
 
   units = [
-    [this.secondsPerMinute, 'minute', 'minutes'],
-    [this.secondsPerHour, 'hour', 'hours'],
-    [this.secondsPerDay, 'day', 'days'],
-    [this.secondsPerMonth, 'month', 'months'],
-    [this.secondsPerYear, 'year', 'years'],
+    [this.secondsPerMinute, 'minute', 'minutes' ],
+    [this.secondsPerHour, 'hour', 'hours' ],
+    [this.secondsPerDay, 'day', 'days' ],
+    [this.secondsPerMonth, 'month', 'months' ],
+    [this.secondsPerYear, 'year', 'years' ],
   ];
 
-  render() {
-    const {seconds} = this.props;
+  render () {
+    const {seconds } = this.props;
     if (typeof seconds === 'undefined') {
       return (<span>error</span>);
     }
@@ -45,14 +45,14 @@ class Age extends React.Component {
     const count = Math.floor(seconds / currentUnit[0]);
 
     if (count > 1) {
-      return <span>{count} {currentUnit[2]} ago</span>
+      return <span>{count} {currentUnit[2]} ago</span>;
     } else if (count == 1) {
-      return <span>1 {currentUnit[1]} ago</span>
+      return <span>1 {currentUnit[1]} ago</span>;
     }
     if (count < -1) {
-      return <span>in {count} {currentUnit[2]}</span>
+      return <span>in {count} {currentUnit[2]}</span>;
     } else if (count == -1) {
-      return <span>in 1 {currentUnit[1]}</span>
+      return <span>in 1 {currentUnit[1]}</span>;
     }
   }
 }

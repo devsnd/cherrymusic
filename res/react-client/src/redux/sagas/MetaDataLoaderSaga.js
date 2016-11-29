@@ -1,5 +1,5 @@
-import { takeEvery, takeLatest } from 'redux-saga'
-import { call, put, select } from 'redux-saga/effects'
+import { takeEvery, takeLatest } from 'redux-saga';
+import { call, put, select } from 'redux-saga/effects';
 
 import {
   DIRECTORY_LOADED,
@@ -21,7 +21,7 @@ import {
 } from 'redux/modules/CherryMusicApi';
 
 function* onTracksLoaded (action) {
-  const {tracks} = action.payload;
+  const {tracks } = action.payload;
   const trackSelector = yield select(selectEntitiesTrackByNewTrack);
   for (const track of tracks) {
     const loadedTrack = trackSelector(track);
@@ -42,6 +42,6 @@ function* onTracksLoaded (action) {
   }
 }
 
-export function* MetaDataWatcher() {
-  yield* takeLatest([DIRECTORY_LOADED, PLAYLIST_DETAIL_LOADED], onTracksLoaded);
+export function* MetaDataWatcher () {
+  yield * takeLatest([DIRECTORY_LOADED, PLAYLIST_DETAIL_LOADED ], onTracksLoaded);
 }

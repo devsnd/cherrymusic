@@ -2,9 +2,9 @@ import { applyMiddleware, compose, createStore } from 'redux';
 import thunk from 'redux-thunk';
 import rootReducer from './rootReducer';
 import { routerMiddleware } from 'react-router-redux';
-import createSagaMiddleware from 'redux-saga'
-import {MetaDataWatcher} from 'redux/sagas/MetaDataLoaderSaga';
-import {PlaylistLoaderSaga} from 'redux/sagas/PlaylistLoaderSaga';
+import createSagaMiddleware from 'redux-saga';
+import {MetaDataWatcher } from 'redux/sagas/MetaDataLoaderSaga';
+import {PlaylistLoaderSaga } from 'redux/sagas/PlaylistLoaderSaga';
 
 export default function configureStore (initialState = {}, history) {
   // Compose final middleware and use devtools in debug environment

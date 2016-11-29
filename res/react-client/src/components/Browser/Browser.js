@@ -1,5 +1,5 @@
-import React, {PropTypes} from 'react';
-import {connect} from 'react-redux';
+import React, {PropTypes } from 'react';
+import {connect } from 'react-redux';
 import {
   selectFileListingViewFormat,
   FileListingViewFormats,
@@ -17,10 +17,10 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   Thumbnail,
-  Glyphicon
+  Glyphicon,
 } from 'react-bootstrap';
 
-import {LoadingStates} from 'redux/modules/CherryMusicApi';
+import {LoadingStates } from 'redux/modules/CherryMusicApi';
 import TrackListItem from 'components/TrackListItem/TrackListItem';
 import ScrollableView from 'components/ScrollableView/ScrollableView';
 import SpinnerImage from 'static/img/cherrymusic_loader.gif';
@@ -38,7 +38,7 @@ export class Browser extends React.Component {
     super(props);
     this.state = {
       // lastMove determines how to animate when navigating (e.g. LTR or RTL)
-      lastMove: 'child'  // 'parent' || 'child'
+      lastMove: 'child',  // 'parent' || 'child'
     };
     this.selectAll = (trackIds) => {
       for (const trackId of trackIds) {
@@ -48,17 +48,17 @@ export class Browser extends React.Component {
   }
 
   render () {
-    const {collections, compacts, tracks, entities, state, path} = this.props.fileBrowser;
-    const {loadDirectory, selectTrack} = this.props;
+    const {collections, compacts, tracks, entities, state, path } = this.props.fileBrowser;
+    const {loadDirectory, selectTrack } = this.props;
 
     // build breadcrumbs
     const breadCrumbs = [
-      {label: 'basedir', path: ''}
+      {label: 'basedir', path: '' },
     ];
     if (path) {
       const splitPaths = path.split('/');
       let fullPath = null;
-      for (let i=0; i < splitPaths.length; i++){
+      for (let i = 0; i < splitPaths.length; i++) {
         const label = splitPaths[i];
         let fullPathToPart;
         if (i === 0) {
@@ -66,16 +66,16 @@ export class Browser extends React.Component {
         } else {
           fullPath = fullPath + '/' + splitPaths[i];
         }
-        breadCrumbs.push({label: label, path: fullPath});
+        breadCrumbs.push({label: label, path: fullPath });
       }
     }
     const parentPath = path ? path.split('/').slice(0, -1).join('/') : null;
     const parentPathHandler = () => {
-      this.setState({lastMove: 'parent'});
+      this.setState({lastMove: 'parent' });
       loadDirectory(parentPath);
     };
     const handleOpenChildFolder = (path) => () => {
-      this.setState({lastMove: 'child'});
+      this.setState({lastMove: 'child' });
       loadDirectory(path);
     };
 
@@ -85,7 +85,7 @@ export class Browser extends React.Component {
     return (
       <div>
         <div ref="header">
-          <Breadcrumb style={{marginBottom: '5px'}}>
+          <Breadcrumb style={{marginBottom: '5px' }}>
             {breadCrumbs.map((bc) => {
               return (
                 <Breadcrumb.Item
@@ -97,7 +97,7 @@ export class Browser extends React.Component {
               );
             })}
           </Breadcrumb>
-          <div style={{marginBottom: '10px', height: '30px'}}>
+          <div style={{marginBottom: '10px', height: '30px' }}>
             {parentPath !== null &&
               <Button
                 onClick={parentPathHandler}
@@ -105,7 +105,7 @@ export class Browser extends React.Component {
                   <Glyphicon glyph="arrow-left" /> go back
               </Button>
             }
-            <ButtonGroup style={{float: 'right'}}>
+            <ButtonGroup style={{float: 'right' }}>
               <Button active={viewFormatList} onClick={this.props.setListView} bsSize="small">
                 <Glyphicon glyph="th-list" />
               </Button>
@@ -119,7 +119,7 @@ export class Browser extends React.Component {
           <img src={SpinnerImage} style={{
             left: '50%',
             marginLeft: '-40px',
-            position: 'relative'
+            position: 'relative',
           }} />
         }
         {state !== LoadingStates.loading &&
@@ -172,7 +172,7 @@ export class Browser extends React.Component {
                       borderRadius: 5,
                       verticalAlign: 'top',
                       marginRight: 10,
-                      marginBottom: 5
+                      marginBottom: 5,
                     }}
                     alt="Thumbnail alt text"
                   >
@@ -192,13 +192,13 @@ export class Browser extends React.Component {
                           left: 0,
                           right: 0,
                           bottom: 0,
-                          backgroundColor: 'rgba(255,255,255,0.8)'
+                          backgroundColor: 'rgba(255,255,255,0.8)',
                         }}
                       >
-                        <h4 style={{padding: '0 5px'}}>{collection.label}</h4>
+                        <h4 style={{padding: '0 5px' }}>{collection.label}</h4>
                       </div>
                     </div>
-                    <p style={{fontSize: 11, padding: '5px 5px 0 5px'}}>
+                    <p style={{fontSize: 11, padding: '5px 5px 0 5px' }}>
                       {collection.path}
                     </p>
                   </div>
@@ -215,7 +215,7 @@ export class Browser extends React.Component {
                 return (
                   <ListGroupItem
                     key={compact.path}
-                    onClick={() => {loadDirectory(compact.urlpath, compact.label)}}
+                    onClick={() => { loadDirectory(compact.urlpath, compact.label); }}
                     header={
                       <span>
                         {compact.label}
@@ -240,10 +240,10 @@ export class Browser extends React.Component {
                 const compact = entities.compact[compactId];
                 return (
                   <Thumbnail
-                    onClick={() => {loadDirectory(compact.urlpath, compact.label)}}
+                    onClick={() => { loadDirectory(compact.urlpath, compact.label); }}
                     src={folderImage}
                     key={compact.path}
-                    style={{width: '120px', display: 'inline-block', marginRight: '10px'}}
+                    style={{width: '120px', display: 'inline-block', marginRight: '10px' }}
                     alt="Thumbnail alt text"
                   >
                     <h4>{compact.label}</h4>
@@ -256,27 +256,27 @@ export class Browser extends React.Component {
 
           {!!tracks.length && <div>
             <Button
-              onClick={() => {this.selectAll(tracks)}}
-              style={{marginBottom: '10px'}}
+              onClick={() => { this.selectAll(tracks); }}
+              style={{marginBottom: '10px' }}
               bsStyle="primary"
             >
               Add all to playlist
             </Button>
             <table className="table table-hover"
-                   style={{display: 'inline-block'}}>
-              <tbody style={{display: 'inline-block', width: '100%'}}>
+              style={{display: 'inline-block' }}>
+              <tbody style={{display: 'inline-block', width: '100%' }}>
               {tracks.map((trackId) => {
                 const track = entities.track[trackId];
                 return (
                   <tr key={trackId} style={{
-                      display: 'inline-block',
-                      width: '100%',
-                      overflow: 'hidden'
-                    }}>
-                    <td style={{display: 'block'}}>
+                    display: 'inline-block',
+                    width: '100%',
+                    overflow: 'hidden',
+                  }}>
+                    <td style={{display: 'block' }}>
                       <TrackListItem
                         track={track}
-                        onClick={() => {selectTrack(trackId)}}
+                        onClick={() => { selectTrack(trackId); }}
                       />
                     </td>
                   </tr>
@@ -288,21 +288,21 @@ export class Browser extends React.Component {
         </ScrollableView>
         }
       </div>
-    )
+    );
   }
 }
 
 export default connect(
   (state) => {
     return {
-      viewFormat: selectFileListingViewFormat(state)
-    }
+      viewFormat: selectFileListingViewFormat(state),
+    };
   },
   (dispatch) => {
     return {
       setListView: () => dispatch(actionSetFileListingViewFormat(FileListingViewFormats.List)),
       setTileView: () => dispatch(actionSetFileListingViewFormat(FileListingViewFormats.Tile)),
-    }
+    };
   }
 )(Browser);
 
