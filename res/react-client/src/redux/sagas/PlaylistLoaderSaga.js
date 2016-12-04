@@ -22,6 +22,7 @@ import {
 
   // playlist deletion
   actionPlaylistDeleted,
+  deletePlaylist,
 } from 'redux/modules/CherryMusicApi';
 
 import {
@@ -75,9 +76,15 @@ export function* onPlaylistCreateRequested (action) {
 }
 
 function* onPlaylistDeleteRequested (action) {
-  console.log('onPlaylistDeleteRequested');
-  const {playlistId } = action.payload;
-  yield put(actionPlaylistDeleted(playlistId));
+  const {playlistId} = action.payload;
+  const state = yield select();
+  const getState = () => state;
+  try {
+    yield deletePlaylist(getState, playlistId)
+    yield put(actionPlaylistDeleted(playlistId));
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 export function* PlaylistLoaderSaga () {

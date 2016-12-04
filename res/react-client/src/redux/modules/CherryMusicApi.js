@@ -7,6 +7,7 @@ import {
   API_ENDPOINT_PLAYLIST_LIST,
   API_ENDPOINT_COMPACT_LIST_DIRECTORY,
   API_ENDPOINT_PLAYLIST_DETAIL,
+  API_ENDPOINT_PLAYLIST_DELETE,
   API_ENDPOINT_FETCH_ALBUM_ART,
 } from 'constants';
 import {legacyAPICall } from 'utils/legacyApi';
@@ -138,6 +139,15 @@ export function fetchPlaylistDetail (getState, playlistId) {
   const authtoken = getAuthToken(getState());
   return legacyAPICall(
     API_ENDPOINT_PLAYLIST_DETAIL,
+    {playlistid: playlistId },
+    authtoken
+  );
+}
+
+export function deletePlaylist (getState, playlistId) {
+  const authtoken = getAuthToken(getState());
+  return legacyAPICall(
+    API_ENDPOINT_PLAYLIST_DELETE,
     {playlistid: playlistId },
     authtoken
   );

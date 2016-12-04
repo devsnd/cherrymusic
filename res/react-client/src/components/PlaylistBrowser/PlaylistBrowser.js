@@ -1,3 +1,5 @@
+import {actionPlaylistDeleteRequested} from 'redux/modules/CherryMusicApi';
+import {selectEntitiesPlaylist} from 'redux/modules/CherryMusicApi';
 import React, {PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
@@ -48,6 +50,7 @@ class PlaylistBrowser extends React.Component {
     };
     this.handleDeletePlaylist = ::this.handleDeletePlaylist;
     this.handleCancelDeletePlaylistModal = ::this.handleCancelDeletePlaylistModal;
+    this.handleConfirmDeletePlaylistModal = ::this.handleConfirmDeletePlaylistModal;
     this.state = {
       showDeletePlaylistModal: false,
       deletePlaylistId: null,
@@ -71,18 +74,28 @@ class PlaylistBrowser extends React.Component {
     });
   }
 
+  handleConfirmDeletePlaylistModal () {
+    this.props.requestPlaylistDelete(this.state.deletePlaylistId);
+    this.setState({
+      showDeletePlaylistModal: false,
+      deletePlaylistId: null,
+    });
+  }
+
   handleSetPlaylistPublic (evt) {
 
   }
 
   render () {
-    const {sortedPlaylists, loadingState, sortBy, sortByReversed } = this.props;
+    const {sortedPlaylists, loadingState, sortBy, playlistEntities} = this.props;
+    const deletablePlaylist = playlistEntities[this.state.deletePlaylistId];
     return (
       <div>
         <DeletePlaylistModal
-          playlistId={this.state.deletePlaylistId}
+          playlist={deletablePlaylist}
           show={this.state.showDeletePlaylistModal}
           onCancel={this.handleCancelDeletePlaylistModal}
+          onDelete={this.handleConfirmDeletePlaylistModal}
         />
         {loadingState === LoadingStates.loading && <div>
           loading...
@@ -161,6 +174,7 @@ export default connect(
   (state, dispatch) => {
     return {
       sortedPlaylists: selectSortedPlaylists(state),
+      playlistEntities: selectEntitiesPlaylist(state),
       loadingState: selectPlaylistsLoadingState(state),
       sortBy: selectPlaylistSortBy(state),
       sortByReversed: selectPlaylistSortByReversed(state),
@@ -168,6 +182,7 @@ export default connect(
   },
   (dispatch) => {
     return {
+      requestPlaylistDelete: (playlistId) => dispatch(actionPlaylistDeleteRequested(playlistId)),
       openPlaylist: (playlistId) => dispatch(actionPlaylistOpenRequested(playlistId)),
       sortByTitle: () => dispatch(actionPlaylistListSortBy(SortModes.title)),
       sortByAge: () => dispatch(actionPlaylistListSortBy(SortModes.age)),
