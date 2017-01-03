@@ -130,6 +130,9 @@ export class Browser extends React.Component {
           className={
             this.state.lastMove === 'parent' ? classes.moveInLeft : classes.moveInRight
           }
+          style={{
+            paddingRight: 10
+          }}
         >
           {!collections.length && !compacts.length && !tracks.length && (
             <p>No playable media files found</p>
@@ -137,20 +140,38 @@ export class Browser extends React.Component {
           {!!collections.length && <div>
             {viewFormatList &&
             <ListGroup>
-              {collections.map((collectionId) => {
+              {collections.map((collectionId, idx) => {
+                const firstItem = idx === 0;
+                const lastItem = idx === collections.length;
                 const collection = entities.collection[collectionId];
                 return (
-                  <ListGroupItem
+                  <ListGroupItem className="list-group-item"
                     key={collection.path}
                     onClick={handleOpenChildFolder(collection.path)}
-                    header={
-                      <span>
-                        {collection.label}
-                        <AlbumArt directory={collection.path} />
-                      </span>
-                    }
+                    style={{
+                      padding: 0,
+                      height: 52,
+                    }}
                   >
-                    {collection.path}
+                    <div style={{display: 'inline-block'}}>
+                      <AlbumArt
+                        directory={collection.path}
+                        /* round the corner of the first and last items */
+                        style={{
+                          borderTopLeftRadius: firstItem ? 4 : 0,
+                          borderBottomLeftRadius: lastItem ? 4 : 0
+                        }}
+                      />
+                    </div>
+                    <div style={{display: 'inline-block', verticalAlign: 'top'}}>
+                      <span style={{paddingLeft: '10px'}}>
+                        {collection.label}
+                      </span>
+                      <br />
+                      <span style={{paddingLeft: '10px'}}>
+                          <small>{collection.path}</small>
+                      </span>
+                    </div>
                   </ListGroupItem>
                 );
               })}
