@@ -5,7 +5,8 @@
     "standard-react"
   ],
   "plugins" : [
-    "flow-vars"
+    "flow-vars",
+    "productivity"
   ],
   "env"     : {
     "browser" : true
@@ -22,6 +23,9 @@
     "semi" : [2, "always"],
     "max-len": [2, 120, 2],
     "flow-vars/define-flow-type": 1,
-    "flow-vars/use-flow-type": 1
+    "flow-vars/use-flow-type": 1,
+    "generator-star-spacing": 0,
+    "comma-dangle": ["error", "always-multiline"],
+    "productivity/auto-import-hack": [2]
   }
 }
