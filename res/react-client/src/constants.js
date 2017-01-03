@@ -13,5 +13,6 @@ export const API_ENDPOINT_TRACK_METADATA = API_ENDPOINT + 'getsonginfo';
 export const API_ENDPOINT_PLAYLIST_LIST = API_ENDPOINT + 'showplaylists';
 export const API_ENDPOINT_PLAYLIST_DETAIL = API_ENDPOINT + 'loadplaylist';
 export const API_ENDPOINT_PLAYLIST_DELETE = API_ENDPOINT + 'deleteplaylist';
+export const API_ENDPOINT_PLAYLIST_CHANGE = API_ENDPOINT + 'changeplaylist';
 
 export const API_ENDPOINT_FETCH_ALBUM_ART = API_ENDPOINT + 'fetchalbumartb64';

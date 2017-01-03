@@ -14,8 +14,6 @@ export class DeletePlaylistModal extends React.Component {
     show: PropTypes.bool.isRequired,
     onCancel: PropTypes.func.isRequired,
     onDelete: PropTypes.func.isRequired,
-    // redux
-    playlistEntities: PropTypes.object.isRequired,
   };
 
   render () {

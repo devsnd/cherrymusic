@@ -5,7 +5,6 @@ import {
   // playlist list
   PLAYLIST_LIST_REQUESTED,
   PLAYLIST_OPEN_REQUESTED,
-  PLAYLIST_DELETE_REQUESTED,
   fetchPlaylistList,
   actionPlaylistListLoaded,
   actionPlaylistListLoadError,
@@ -21,8 +20,13 @@ import {
   actionPlaylistCreate,
 
   // playlist deletion
+  PLAYLIST_DELETE_REQUESTED,
   actionPlaylistDeleted,
   deletePlaylist,
+
+  // playlist modification
+  playlistSetPublic,
+  PLAYLIST_SET_PUBLIC_REQUESTED
 } from 'redux/modules/CherryMusicApi';
 
 import {
@@ -47,6 +51,7 @@ export function* onPlaylistListRequested (action) {
   } catch (error) {
     console.log(error);
     yield put(actionPlaylistListLoadError());
+    throw error;
   }
 }
 
@@ -87,12 +92,26 @@ function* onPlaylistDeleteRequested (action) {
   }
 }
 
+function* onPlaylistSetPublicRequested (action) {
+  const {playlistId} = action.payload;
+  const state = yield select();
+  const getState = () => state;
+  try {
+    yield playlistSetPublic(getState, playlistId);
+    const playlistData = yield fetchPlaylistDetail(getState, playlistId);
+    yield put(actionPlaylistDetailLoaded(playlistId, playlistData));
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 export function* PlaylistLoaderSaga () {
   yield [
     takeLatest(CREATE_PLAYLIST_REQUESTED, onPlaylistCreateRequested),
     takeLatest(PLAYLIST_LIST_REQUESTED, onPlaylistListRequested),
     takeLatest(PLAYLIST_OPEN_REQUESTED, onPlaylistOpenRequested),
     takeLatest(PLAYLIST_DELETE_REQUESTED, onPlaylistDeleteRequested),
+    takeLatest(PLAYLIST_SET_PUBLIC_REQUESTED, onPlaylistSetPublicRequested),
     // init
     takeLatest('redux/cherrymusic/LOG_IN_SUCCESS', function* () {
       yield put(actionCreatePlaylistRequested());

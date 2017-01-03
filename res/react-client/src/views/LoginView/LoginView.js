@@ -31,8 +31,8 @@ export class LoginView extends React.Component {
         this.handleLogin();
       }
     });
-    //console.log('HACKED AUTOLOGIN!!!!');
-    //this.props.login('u', 'p');
+    console.log('HACKED AUTOLOGIN!!!!');
+    this.props.login('u', 'p');
   }
 
   handleLogin () {

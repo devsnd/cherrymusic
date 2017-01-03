@@ -1,4 +1,7 @@
-import {actionPlaylistDeleteRequested} from 'redux/modules/CherryMusicApi';
+import {
+  actionPlaylistDeleteRequested,
+  actionPlaylistSetPublicRequested
+} from 'redux/modules/CherryMusicApi';
 import {selectEntitiesPlaylist} from 'redux/modules/CherryMusicApi';
 import React, {PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
@@ -15,6 +18,7 @@ import {
 import Username from 'components/Username/Username';
 import ScrollableView from 'components/ScrollableView/ScrollableView';
 import DeletePlaylistModal from './DeletePlaylistModal';
+import PlaylistBrowserItem from './PlaylistBrowserItem';
 
 import {
   // playlist listing
@@ -49,12 +53,17 @@ class PlaylistBrowser extends React.Component {
       this.props.sortByUsername();
     };
     this.handleDeletePlaylist = ::this.handleDeletePlaylist;
+    this.handleOpenPlaylist = ::this.handleOpenPlaylist;
     this.handleCancelDeletePlaylistModal = ::this.handleCancelDeletePlaylistModal;
     this.handleConfirmDeletePlaylistModal = ::this.handleConfirmDeletePlaylistModal;
     this.state = {
       showDeletePlaylistModal: false,
       deletePlaylistId: null,
     };
+  }
+
+  handleOpenPlaylist (playlistId) {
+    return () => this.props.openPlaylist(playlistId);
   }
 
   handleDeletePlaylist (playlistId) {
@@ -82,8 +91,11 @@ class PlaylistBrowser extends React.Component {
     });
   }
 
-  handleSetPlaylistPublic (evt) {
-
+  handleSetPlaylistPublic (playlistId) {
+    return (evt) => {
+      evt.stopPropagation();
+      this.props.requestPlaylistSetPublic(playlistId);
+    }
   }
 
   render () {
@@ -127,39 +139,14 @@ class PlaylistBrowser extends React.Component {
           }>
             <ListGroup>
               {sortedPlaylists.map((playlist) => {
-                const playlistId = playlist.plid;
-                const inputChecked = playlist.public ? {checked: true } : {};
                 return (
-                  <ListGroupItem
-                    onClick={() => this.props.openPlaylist(playlistId)}
-                    key={playlistId}
-                  >
-                    {playlist.title}
-                    {playlist.owner && <span>
-                      <Button
-                        bsStyle="danger"
-                        bsSize="xsmall"
-                        style={{float: 'right', marginLeft: 10 }}
-                        onClick={this.handleDeletePlaylist(playlist.plid)}
-                      >
-                        &times;
-                      </Button>
-                      <Label
-                        bsStyle={playlist.public ? 'success' : 'default'}
-                        style={{float: 'right' }}
-                      >
-                          public&nbsp;<input
-                            type="checkbox"
-                            {...inputChecked}
-                            onChange={this.handleSetPlaylistPublic}
-                        />
-                      </Label>
-                    </span>}
-                    <span style={{float: 'right' }}>
-                      <Age seconds={playlist.age} />
-                    </span>
-                    <Username name={playlist.username} />
-                  </ListGroupItem>
+                  <PlaylistBrowserItem
+                    playlist={playlist}
+                    open={this.handleOpenPlaylist(playlist.plid)}
+                    delete={this.handleDeletePlaylist(playlist.plid)}
+                    setPublic={this.handleSetPlaylistPublic(playlist.plid)}
+                    key={playlist.plid}
+                  />
                 );
               })}
             </ListGroup>
@@ -183,6 +170,7 @@ export default connect(
   (dispatch) => {
     return {
       requestPlaylistDelete: (playlistId) => dispatch(actionPlaylistDeleteRequested(playlistId)),
+      requestPlaylistSetPublic: (playlistId, isPublic) => dispatch(actionPlaylistSetPublicRequested(playlistId, isPublic)),
       openPlaylist: (playlistId) => dispatch(actionPlaylistOpenRequested(playlistId)),
       sortByTitle: () => dispatch(actionPlaylistListSortBy(SortModes.title)),
       sortByAge: () => dispatch(actionPlaylistListSortBy(SortModes.age)),
