@@ -131,14 +131,19 @@ Available Encoders:
 )
 
 
-cherrypyReqVersion = '3'
-cherrypyCurrVersion = str(cherrypy.__version__)
-if cherrypyCurrVersion < cherrypyReqVersion:
+cherrypyReqVersion = 3
+cherrypyCurrVersion = str(cherrypy.__version__).split('.', 1)[0]
+_badCherrypyVersion = (
+    not cherrypyCurrVersion.isdigit()
+    or
+    int(cherrypyCurrVersion) < cherrypyReqVersion
+)
+if _badCherrypyVersion:
     print(_("""
 cherrypy version is too old!
 Current version: %(current_version)s
 Required version: %(required_version)s or higher
-""") % {'current_version': cherrypyCurrVersion,
+""") % {'current_version': cherrypy.__version__,
         'required_version': cherrypyReqVersion})
     sys.exit(1)
 
