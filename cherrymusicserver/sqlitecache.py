@@ -38,7 +38,7 @@ import sqlite3
 import sys
 import traceback
 
-from collections import deque, Counter
+from backport.collections import deque, Counter
 from operator import itemgetter
 
 import cherrymusicserver as cherry
