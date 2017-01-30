@@ -198,6 +198,7 @@ function loadConfig(executeAfter){
             'transcode_path': dictatedClientConfig.transcodepath,
             'auto_login': dictatedClientConfig.auto_login,
             'version': dictatedClientConfig.version,
+            'rootpath': dictatedClientConfig.rootpath,
         }
 
         executeAfter();
@@ -615,7 +616,8 @@ OTHER
 
 function reloadPage(){
     //reconstruct url to suppress page reload post-data warning
-    var reloadurl = window.location.protocol+'//'+window.location.host;
+    var rootpath = '/' + SERVER_CONFIG.rootpath.replace(/^[/]/, '');
+    var reloadurl = window.location.protocol+'//'+window.location.host+rootpath;
     window.location.href = reloadurl;
 }
 

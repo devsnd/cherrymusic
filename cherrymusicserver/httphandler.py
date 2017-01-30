@@ -735,6 +735,7 @@ class HTTPHandler(object):
             'servepath': 'serve/',
             'transcodepath': 'trans/',
             'auto_login': self.autoLoginActive(),
+            'rootpath': cherry.config['server.rootpath'],
             'version': cherry.REPO_VERSION or cherry.VERSION,
         }
         if cherry.config['media.transcode']:
