@@ -94,7 +94,8 @@ class AlbumArtFetcher:
         },
         'bestbuy.com': {
             'url': 'http://www.bestbuy.com/site/searchpage.jsp?_dyncharset=UTF-8&id=pcat17071&st=',
-            'regexes': ['<div class="thumb".+?<img.+?src="([^"]+)"']
+            'regexes': ['<div class="thumb".+?<img.+?src="([^"]+)"'],
+            'user_agent': 'curl/7.52.1',
         },
         # buy.com is now rakuten.com
         # with a new search API that nobody bothered to figure out yet
@@ -176,12 +177,13 @@ class AlbumArtFetcher:
         """
         # choose the webservice to retrieve the images from
         method = self.methods[self.method]
+        user_agent = method.get('user_agent')
         # use unidecode if it's available
         searchterm = unidecode(searchterm).lower()
         # the keywords must always be appenable to the method-url
         url = method['url']+urllib.parse.quote(searchterm)
         #download the webpage and decode the data to utf-8
-        html = codecs.decode(self.retrieveData(url)[0], 'UTF-8')
+        html = codecs.decode(self.retrieveData(url, user_agent)[0], 'UTF-8')
         # fetch all urls in the page
         matches = []
         for regex in method['regexes']:
@@ -209,17 +211,18 @@ class AlbumArtFetcher:
         else:
             return None, ''
 
-    def retrieveData(self, url):
+    def retrieveData(self, url, user_agent=None):
         """
         use a fake user agent to retrieve data from a webaddress
 
         Returns:
             the binary data and the http header of the request
         """
-        user_agent = ('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.19 '
-                      '(KHTML, like Gecko) Ubuntu/12.04 '
-                      'Chromium/18.0.1025.168 Chrome/18.0.1025.168 '
-                      'Safari/535.19')
+        if not user_agent:
+            user_agent = ('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.19 '
+                          '(KHTML, like Gecko) Ubuntu/12.04 '
+                          'Chromium/18.0.1025.168 Chrome/18.0.1025.168 '
+                          'Safari/535.19')
         req = urllib.request.Request(url, headers={'User-Agent': user_agent})
         urlhandler = urllib.request.urlopen(req, timeout=self.timeout)
         return urlhandler.read(), urlhandler.info()
