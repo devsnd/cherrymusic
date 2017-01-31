@@ -615,9 +615,10 @@ OTHER
 *****/
 
 function reloadPage(){
-    //reconstruct url to suppress page reload post-data warning
+    // make sure rootpath starts with a '/'
     var rootpath = '/' + SERVER_CONFIG.rootpath.replace(/^[/]/, '');
-    var reloadurl = window.location.protocol+'//'+window.location.host+rootpath;
+    //reconstruct url to suppress page reload post-data warning
+    var reloadurl = window.location.protocol + '//' + window.location.host + rootpath;
     window.location.href = reloadurl;
 }
 
