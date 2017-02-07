@@ -92,9 +92,8 @@ class PlaylistBrowser extends React.Component {
   }
 
   handleSetPlaylistPublic (playlistId) {
-    return (evt) => {
-      evt.stopPropagation();
-      this.props.requestPlaylistSetPublic(playlistId);
+    return (isPublic) => {
+      this.props.requestPlaylistSetPublic(playlistId, isPublic);
     }
   }
 

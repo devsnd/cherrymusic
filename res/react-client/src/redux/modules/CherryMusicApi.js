@@ -42,7 +42,9 @@ export const PLAYLIST_DELETED = 'redux/cherrymusicapi/PLAYLIST_DELETED';
 export const actionPlaylistDeleted = (playlistId) => ({type: PLAYLIST_DELETED, payload: {playlistId: playlistId } });
 
 export const PLAYLIST_SET_PUBLIC_REQUESTED = 'redux/cherrymusicapi/PLAYLIST_SET_PUBLIC_REQUESTED';
-export const actionPlaylistSetPublicRequested = (playlistId, isPublic) => ({type: PLAYLIST_SET_PUBLIC_REQUESTED, payload: {playlistId: playlistId, public: isPublic}});
+export const actionPlaylistSetPublicRequested = (playlistId, isPublic) => ({
+  type: PLAYLIST_SET_PUBLIC_REQUESTED, payload: {playlistId: playlistId, isPublic: isPublic}
+});
 
 export const DIRECTORY_LOADING = 'redux/cherrymusicapi/directory_loading';
 export const DIRECTORY_LOADED = 'redux/cherrymusicapi/directory_loaded';
@@ -222,7 +224,8 @@ export function search (searchterm) {
         dispatch(actionDirectoryLoaded(
           'Search: ' + searchterm,
           collections,
-          tracks
+          tracks,
+          []
         ));
       },
       (error) => {

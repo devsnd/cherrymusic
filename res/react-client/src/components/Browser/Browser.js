@@ -153,25 +153,27 @@ export class Browser extends React.Component {
                       height: 52,
                     }}
                   >
-                    <div style={{display: 'inline-block'}}>
-                      <AlbumArt
-                        directory={collection.path}
-                        /* round the corner of the first and last items */
-                        style={{
-                          borderTopLeftRadius: firstItem ? 4 : 0,
-                          borderBottomLeftRadius: lastItem ? 4 : 0
-                        }}
-                      />
-                    </div>
-                    <div style={{display: 'inline-block', verticalAlign: 'top'}}>
-                      <span style={{paddingLeft: '10px'}}>
-                        {collection.label}
-                      </span>
-                      <br />
-                      <span style={{paddingLeft: '10px'}}>
-                          <small>{collection.path}</small>
-                      </span>
-                    </div>
+                    <table className={classes.nopadTable}><tbody><tr>
+                      <td>
+                        <AlbumArt
+                          directory={collection.path}
+                          /* round the corner of the first and last items */
+                          style={{
+                            borderTopLeftRadius: firstItem ? 4 : 0,
+                            borderBottomLeftRadius: lastItem ? 4 : 0
+                          }}
+                        />
+                      </td>
+                      <td>
+                        <span className={classes.nowrap} style={{paddingLeft: '10px'}}>
+                          {collection.label}
+                        </span>
+                        <br />
+                        <span className={classes.nowrap} style={{paddingLeft: '10px'}}>
+                            <small>{collection.path}</small>
+                        </span>
+                      </td>
+                    </tr></tbody></table>
                   </ListGroupItem>
                 );
               })}

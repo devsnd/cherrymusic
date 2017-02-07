@@ -543,7 +543,7 @@ class HTTPHandler(object):
 
     def api_search(self, searchstring):
         if not searchstring.strip():
-            jsonresults = '[]'
+            jsonresults = []
         else:
             with Performance(_('processing whole search request')):
                 searchresults = self.model.search(searchstring.strip())

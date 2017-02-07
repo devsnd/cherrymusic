@@ -41,3 +41,19 @@
 .moveInRight {
   animation: moveInRightAnimation 0.2s;
 }
+
+.nopadTable, .nopadTable > tbody, .nopadTable > tbody > tr {
+  padding: 0;
+  margin: 0;
+}
+
+.nopadTable {
+  width: 100%;
+  display: block;
+  overflow: hidden;
+}
+
+.nowrap {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

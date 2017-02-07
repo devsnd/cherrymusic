@@ -51,6 +51,7 @@ export class MainView extends React.Component {
     super(props);
     this.state = {
       viewPortHeight: 500,
+      navBarExpanded: false,
     }; // initial UI state
     this.loadDirectory = bindActionCreators(this.props.loadDirectory, this.props.dispatch);
     this.setBrowserView = bindActionCreators(this.props.setBrowserView, this.props.dispatch);
@@ -61,12 +62,16 @@ export class MainView extends React.Component {
     this.uiBrowseFiles = () => {
       this.setBrowserView();
       this.loadDirectory('');
+      this.setState({navBarExpanded: false});
     };
     this.uiLoadPlaylists = () => {
       this.setPlaylistView();
       this.props.dispatch(actionPlaylistListRequested(PlaylistSortModes.default, ''));
+      this.setState({navBarExpanded: false});
     };
     this.updateViewPortSize = this.updateViewPortSize.bind(this);
+    this.handleNavBarSearch = this.handleNavBarSearch.bind(this)
+    this.handleNavBarToggle = this.handleNavBarToggle.bind(this)
   }
 
   componentDidMount () {
@@ -94,6 +99,10 @@ export class MainView extends React.Component {
     this.setState({viewPortHeight: window.innerHeight });
   }
 
+  handleNavBarToggle () {
+    this.setState({navBarExpanded: !this.state.navBarExpanded});
+  }
+
   handleNavBarSearch () {
     this.setBrowserView();
     this.search(this.refs.navBarSearchInput.refs.input.value);
@@ -103,43 +112,63 @@ export class MainView extends React.Component {
     const navBarHeight = 50;
     const playerHeight = 64;
     const {show } = this.props;
+
+    const SearchBar = (
+      <Input
+        style={{width: '140px', display: 'inline-table'}}
+        groupClassName={cssClasses.fixReactBootstrapInput}
+        type="text"
+        ref="navBarSearchInput"
+        buttonAfter={
+          <Button onClick={this.handleNavBarSearch}>Search</Button>
+        }
+      />
+    );
+
     return (
       <div>
-        <Navbar fluid>
-          <Nav>
+        <Navbar
+          fluid
+          onToggle={this.handleNavBarToggle}
+          expanded={this.state.navBarExpanded}>
+          <Navbar.Header>
             <Navbar.Brand>
               <a
                 href="#"
                 className={cssClasses.navbarBrandLogo}
                 style={{backgroundImage: 'url("' + navbarBrandLogoPng + '")' }}
               >
-                Cherry&nbsp;&nbsp;Music
+                <span className="hidden-xs">Cherry&nbsp;&nbsp;Music</span>
               </a>
             </Navbar.Brand>
-            <NavItem
-              eventKey={1}
-              href="#"
-              className="navItemSearchHack"
-              style={{width: '210px' /* workaround for chrome rendering the searchbar with 100% width */ }}
-            >
-                <Input
-                  style={{width: '140px' }}
-                  type="text"
-                  ref="navBarSearchInput"
-                  buttonAfter={
-                    <Button onClick={this.handleNavBarSearch.bind(this)}>Search</Button>
-                  }
-                />
-            </NavItem>
-            <NavItem eventKey={2} href="#" onClick={this.uiBrowseFiles}>Browse files</NavItem>
-            <NavItem eventKey={2} href="#" onClick={this.uiLoadPlaylists}>Load Playlist</NavItem>
-            <NavDropdown eventKey={3} title={<Glyphicon glyph="wrench" />} id="basic-nav-dropdown">
-              <MenuItem eventKey={3.1}>Options</MenuItem>
-              <MenuItem eventKey={3.2}>Admin</MenuItem>
-              <MenuItem divider />
-              <MenuItem eventKey={3.3}>Logout</MenuItem>
-            </NavDropdown>
-          </Nav>
+            {/* add searchbar in header on mobile */}
+            <Navbar.Brand>
+              <span className="visible-xs" style={{padding: 9}}>
+                {SearchBar}
+              </span>
+            </Navbar.Brand>
+            <Navbar.Toggle />
+          </Navbar.Header>
+          <Navbar.Collapse>
+            <Nav>
+              <NavItem
+                eventKey={1}
+                href="#"
+                className="navItemSearchHack hidden-xs"
+                style={{width: '210px' /* workaround for chrome rendering the searchbar with 100% width */ }}
+              >
+                  {SearchBar}
+              </NavItem>
+              <NavItem eventKey={2} href="#" onClick={this.uiBrowseFiles}>Browse files</NavItem>
+              <NavItem eventKey={2} href="#" onClick={this.uiLoadPlaylists}>Load Playlist</NavItem>
+              <NavDropdown eventKey={3} title={<Glyphicon glyph="wrench" />} id="basic-nav-dropdown">
+                <MenuItem eventKey={3.1}>Options</MenuItem>
+                <MenuItem eventKey={3.2}>Admin</MenuItem>
+                <MenuItem divider />
+                <MenuItem eventKey={3.3}>Logout</MenuItem>
+              </NavDropdown>
+            </Nav>
+          </Navbar.Collapse>
         </Navbar>
         <Grid fluid>
           <Row className="show-grid">

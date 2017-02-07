@@ -1,3 +1,5 @@
+import {PlaylistSortModes} from 'redux/modules/CherryMusicApi';
+import {actionPlaylistListRequested} from 'redux/modules/CherryMusicApi';
 import { takeEvery, takeLatest } from 'redux-saga';
 import { call, put, select, fork } from 'redux-saga/effects';
 
@@ -26,7 +28,7 @@ import {
 
   // playlist modification
   playlistSetPublic,
-  PLAYLIST_SET_PUBLIC_REQUESTED
+  PLAYLIST_SET_PUBLIC_REQUESTED,
 } from 'redux/modules/CherryMusicApi';
 
 import {
@@ -85,7 +87,7 @@ function* onPlaylistDeleteRequested (action) {
   const state = yield select();
   const getState = () => state;
   try {
-    yield deletePlaylist(getState, playlistId)
+    yield deletePlaylist(getState, playlistId);
     yield put(actionPlaylistDeleted(playlistId));
   } catch (error) {
     console.error(error);
@@ -93,13 +95,12 @@ function* onPlaylistDeleteRequested (action) {
 }
 
 function* onPlaylistSetPublicRequested (action) {
-  const {playlistId} = action.payload;
+  const {playlistId, isPublic} = action.payload;
   const state = yield select();
   const getState = () => state;
   try {
-    yield playlistSetPublic(getState, playlistId);
-    const playlistData = yield fetchPlaylistDetail(getState, playlistId);
-    yield put(actionPlaylistDetailLoaded(playlistId, playlistData));
+    yield playlistSetPublic(getState, playlistId, isPublic);
+    put(actionPlaylistListRequested(PlaylistSortModes.default, ''));
   } catch (error) {
     console.error(error);
   }
