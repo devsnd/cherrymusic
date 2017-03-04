@@ -95,7 +95,7 @@ def from_defaults():
         # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
         fetch.doc = _("""
                     Tries to fetch the album cover from various locations in the web,
-                    if no image is found locally. By default it will be fetched from amazon.
+                    if no image is found locally. By default it will be fetched from iTunes.
                     They will be shown next to folders that qualify as a possible
                     album.
                             """)
