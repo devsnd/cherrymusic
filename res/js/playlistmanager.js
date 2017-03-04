@@ -297,6 +297,9 @@ PlaylistManager.prototype = {
         //hack to use flash AND HTML solution in every case
         //https://github.com/happyworm/jPlayer/issues/136#issuecomment-12941923
         availablejPlayerFormats.push("m4v");
+        console.log('available jPlayer formats: ' + availablejPlayerFormats);
+        console.log('available encoders: ' + availableEncoders);
+        console.log('available decoders: ' + availableDecoders);
 
         var usedSolution = "html, flash";
         if(detectBrowser() == 'midori'){
