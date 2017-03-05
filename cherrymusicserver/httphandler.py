@@ -383,11 +383,12 @@ class HTTPHandler(object):
         else:
             return "error: not permitted. Only admins can change other users options"
 
-    def api_fetchalbumarturls(self, searchterm):
+    def api_fetchalbumarturls(self, searchterm, method=None):
         if not cherrypy.session['admin']:
             raise cherrypy.HTTPError(401, 'Unauthorized')
         _save_and_release_session()
-        fetcher = albumartfetcher.AlbumArtFetcher()
+        fetch_args = {} if method is None else {'method': method}
+        fetcher = albumartfetcher.AlbumArtFetcher(**fetch_args)
         imgurls = fetcher.fetchurls(searchterm)
         # show no more than 10 images
         return imgurls[:min(len(imgurls), 10)]
@@ -737,6 +738,8 @@ class HTTPHandler(object):
             'auto_login': self.autoLoginActive(),
             'rootpath': cherry.config['server.rootpath'],
             'version': cherry.REPO_VERSION or cherry.VERSION,
+            'albumart_search_methods': list(
+                albumartfetcher.AlbumArtFetcher.methods),
         }
         if cherry.config['media.transcode']:
             decoders = list(self.model.transcoder.available_decoder_formats())

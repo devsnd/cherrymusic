@@ -306,17 +306,20 @@
         </div>
         <div class="modal-body">
             <div class="content">
+            <form class="form-inline">
                 <div class="form-group">
-                    <label for="albumart-search-term" class="col-lg-3 control-label" >Search for art:</label>
-                    <div class="col-lg-7">
-                        <input type="text" class="form-control" id="albumart-search-term">
-                    </div>
-                    <div class="col-lg-2">
-                        <div class="btn btn-default" onclick="searchAlbumArt()">search</div>
-                    </div>
+                    <label for="albumart-search-method" class="sr-only">Method</label>
+                    <select id="albumart-search-method" class="form-control"></select>
                 </div>
-                <div class="coverart-tryout">
+                <div class="form-group">
+                    <label for="albumart-search-term" class="sr-only">Search</label>
+                    <input type="text" name="albumart-search-term" id="albumart-search-term" class="form-control">
                 </div>
+                <div class="form-group">
+                    <div class="btn btn-default" onclick="searchAlbumArt()">search</div>
+                </div>
+                <div class="coverart-tryout"></div>
+            </form>
             </div>
         </div>
         <div class="modal-footer">
