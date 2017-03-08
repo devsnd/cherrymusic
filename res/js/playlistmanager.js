@@ -136,7 +136,6 @@ ManagedPlaylist.prototype = {
             // estimate the length of the playlist
             return (durationsec / tracks_with_duration) * playlist.length;
         }
-        
     },
     getRemainingTracks : function(){
         if(playlistManager.shuffled){
@@ -874,7 +873,8 @@ PlaylistManager.prototype = {
             }
         }
         $('.cm-songtitle').html(songtitle);
-        $('title').text(tabtitle);
+        // $('title').text(tabtitle) can briefly make the URL show in title (#664):
+        document.title = tabtitle;
     },
     rememberPlaylist : function(){
         "use strict";

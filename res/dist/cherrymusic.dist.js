@@ -1407,7 +1407,7 @@ if(any_info_received){self.getEditingPlaylist().jplayerplaylist._refresh(true);}
 window.setTimeout(function(){api('getsonginfo',{'path':decodeURIComponent(path)},success,errorFunc('error getting song metainfo'),true);},1000);},clearPlaylist:function(){"use strict";this.getEditingPlaylist().remove();if(this.getEditingPlaylist()==this.getPlayingPlaylist()){$(this.cssSelectorjPlayer).jPlayer("clearMedia");}
 return false;},displayCurrentSong:function(){var pl=this.getPlayingPlaylist();if(typeof pl==='undefined'){return;}
 var jPlaylist=pl.jplayerplaylist;var songtitle='';var tabtitle='CherryMusic';if(typeof this.jPlayerInstance!=='undefined'){var currentTitle=this.jPlayerInstance.data().jPlayer.status.media.title;if(typeof currentTitle!=='undefined'){songtitle=currentTitle;tabtitle=currentTitle+' | CherryMusic';}}
-$('.cm-songtitle').html(songtitle);$('title').text(tabtitle);},rememberPlaylist:function(){"use strict";var self=this;var canonicalPlaylists=[]
+$('.cm-songtitle').html(songtitle);document.title=tabtitle;},rememberPlaylist:function(){"use strict";var self=this;var canonicalPlaylists=[]
 for(var i=0;i<this.managedPlaylists.length;i++){var cano=this.managedPlaylists[i].getCanonicalPlaylist();if(cano.playlist.length||cano.reason_open=='queue'){canonicalPlaylists.push(cano);}}
 var newToRememberPlaylist=JSON.stringify(canonicalPlaylists)
 if(this.lastRememberedPlaylist!==newToRememberPlaylist){var error=errorFunc('cannot remember playlist: failed to connect to server.');var success=function(){self.lastRememberedPlaylist=newToRememberPlaylist;}
