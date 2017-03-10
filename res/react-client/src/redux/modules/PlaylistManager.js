@@ -13,14 +13,20 @@ const makePlaylistAction = (type) => {
 const makePlaylistThunk = (action) => {
   return (playlistId) => (dispatch, getState) => dispatch(action(playlistId));
 };
-
-export const CLOSE_PLAYLIST_TAB = 'redux/cmplaylists/CLOSE_PLAYLIST_TAB';
-export const actionClosePlaylistTab = makePlaylistAction(CLOSE_PLAYLIST_TAB);
-export const closePlaylistTab = makePlaylistThunk(actionClosePlaylistTab);
-
 export const ACTIVATE_PLAYLIST = 'redux/cmplaylists/ACTIVATE_PLAYLIST';
 export const actionActivatePlaylist = makePlaylistAction(ACTIVATE_PLAYLIST);
 export const activatePlaylist = makePlaylistThunk(actionActivatePlaylist);
+export const CLOSE_PLAYLIST_TAB = 'redux/cmplaylists/CLOSE_PLAYLIST_TAB';
+
+export const actionClosePlaylistTab = makePlaylistAction(CLOSE_PLAYLIST_TAB);
+export const closePlaylistTab = (playlistId) => (dispatch, getState) => {
+  const state = getState().playlist;
+  dispatch(actionClosePlaylistTab(playlistId));
+  // if the currently active playlist is closed, open the next one available:
+  if (state.openPlaylistIds.length > 0 && state.activePlaylistId === playlistId){
+    dispatch(actionActivatePlaylist(state.openPlaylistIds[0]))
+  }
+};
 
 export const SET_PLAYING_PLAYLIST = 'redux/cmplaylists/SET_PLAYING_PLAYLIST';
 export const actionSetPlayingPlaylist = makePlaylistAction(SET_PLAYING_PLAYLIST);
@@ -128,9 +134,16 @@ const ACTION_HANDLERS = {
     };
   },
   [ACTIVATE_PLAYLIST]: (state, action) => {
+    const activateId = action.payload.playlistId;
+    const isOpen = (playlistId) => playlistId === activateId;
+    // make sure that the playlist to activate is opened already
+    if (!state.openPlaylistIds.some(isOpen)){
+      return state;
+    }
+
     return {
       ...state,
-      activePlaylistId: action.payload.playlistId,
+      activePlaylistId: activateId,
     };
   },
   [SET_PLAYING_PLAYLIST]: (state, action) => {

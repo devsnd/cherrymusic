@@ -1,3 +1,4 @@
+import {Button} from 'react-bootstrap';
 import React, {PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
@@ -14,7 +15,7 @@ import {
   activatePlaylist,
   setPlayingPlaylist,
   playTrackInPlaylist,
-  closePlaylist,
+  closePlaylistTab,
   selectActivePlaylistId,
 } from 'redux/modules/PlaylistManager';
 
@@ -112,12 +113,13 @@ class TabbedPlaylists extends CMComponent {
               title={
                 <span style={makePlaylistTabStyle(playlist)}>
                   {playlist.title}
-                  <span
-                    onClick={() => { this.closePlaylist(playlist); }}
-                    style={{'fontWeight': 900, padding: '10 0 10 10' }}
+                  <Button
+                    bsSize="xsmall"
+                    onClick={() => { this.props.closePlaylistTab(playlistId); }}
+                    style={{fontWeight: 900, fontStyle: 'normal', marginLeft: 10}}
                   >
                     ×
-                  </span>
+                  </Button>
                 </span>
               }
             >
@@ -164,7 +166,7 @@ export default connect(
     activatePlaylist: activatePlaylist,
     setPlayingPlaylist: setPlayingPlaylist,
     playTrackInPlaylist: playTrackInPlaylist,
-    closePlaylist: closePlaylist,
+    closePlaylistTab: closePlaylistTab,
   }
 )(TabbedPlaylists);
 
