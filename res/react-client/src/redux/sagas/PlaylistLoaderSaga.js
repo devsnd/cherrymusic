@@ -1,5 +1,8 @@
-import {PlaylistSortModes} from 'redux/modules/CherryMusicApi';
-import {actionPlaylistListRequested} from 'redux/modules/CherryMusicApi';
+import {
+  actionHammer,
+  actionPlaylistListRequested,
+  PlaylistSortModes
+} from 'redux/modules/CherryMusicApi';
 import { takeEvery, takeLatest } from 'redux-saga';
 import { call, put, select, fork } from 'redux-saga/effects';
 
@@ -100,10 +103,13 @@ function* onPlaylistSetPublicRequested (action) {
   const getState = () => state;
   try {
     yield playlistSetPublic(getState, playlistId, isPublic);
-    put(actionPlaylistListRequested(PlaylistSortModes.default, ''));
   } catch (error) {
     console.error(error);
+    return
   }
+  yield put(actionHammer(
+    {entities: {playlist: {[playlistId]: {'public': {$set: isPublic}}}}}
+  ));
 }
 
 export function* PlaylistLoaderSaga () {

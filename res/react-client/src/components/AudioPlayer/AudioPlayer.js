@@ -40,7 +40,7 @@ export class AudioPlayer extends React.Component {
   }
 
   render () {
-    const {playerState } = this.props;
+    const { playerState } = this.props;
     return (
       <div className={classes.CMAudioPlayer} ref="audioPlayer">
         {this.props.playerState === playerStates.uninitialized &&
@@ -67,6 +67,7 @@ export class AudioPlayer extends React.Component {
               */}
               <Button><Glyphicon glyph="random" /></Button>
               <Button><Glyphicon glyph="retweet" /></Button>
+              <Button><Glyphicon glyph="expand" /> autoplay next playlist</Button>
             </ButtonGroup>
           </div>
           <ProgressBar

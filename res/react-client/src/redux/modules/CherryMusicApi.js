@@ -18,6 +18,10 @@ import { createSelector } from 'reselect';
 
 export const getAuthToken = (state) => state.api.authtoken;
 
+// the hammer is a mighty device, that can create AND destroy many things.
+export const HAMMER = 'redux/HAMMER/can_touch_this';
+export const actionHammer = (justDoIt) => ({type: HAMMER, payload: justDoIt});
+
 export const PLAYLIST_LIST_REQUESTED = 'redux/cherrymusicapi/PLAYLIST_LIST_REQUESTED';
 export const PLAYLIST_LIST_LOADED = 'redux/cherrymusicapi/PLAYLIST_LIST_LOADED';
 export const PLAYLIST_LIST_LOAD_ERROR = 'redux/cherrymusicapi/PLAYLIST_LIST_LOAD_ERROR';
@@ -623,6 +627,18 @@ const ACTION_HANDLERS = {
       authtoken: action.payload.authtoken,
     };
   },
+  [HAMMER]: (state, action) => {
+    // the hammer is either a set of immutable transformations (an Array)
+    // or a single transformation:
+    if (Array.isArray(action.payload)) {
+      action.payload.map((trans) => {
+        state = updateHelper(state, trans)
+      });
+      return state;
+    } else {
+      return updateHelper(state, action.payload)
+    }
+  }
 };
 
 export default function (state = initialState, action) {

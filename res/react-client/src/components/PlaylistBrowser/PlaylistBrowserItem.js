@@ -13,6 +13,15 @@ export class PlaylistBrowserItem extends React.Component {
 
   constructor (props) {
     super(props);
+    this.handleListItemClick = (evt) => {
+      // this handler is fired even when we hit children of the listItem,
+      // but we only want to trigger the handler if the listitem is clicked
+      // directly
+      if (evt.target.dataset.type === 'parentListItem') {
+        this.props.open(evt);
+      }
+    };
+
     this.setPublicEnabled = (evt) => {
       evt.stopPropagation();
       this.props.setPublic(true);
@@ -28,7 +37,8 @@ export class PlaylistBrowserItem extends React.Component {
     const inputChecked = playlist.public ? {checked: true } : {};
     return (
       <ListGroupItem
-        onClick={this.props.open}
+        onClickCapture={this.handleListItemClick}
+        data-type="parentListItem"
         key={playlist.plid}
       >
         {playlist.title}
