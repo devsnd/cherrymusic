@@ -50,6 +50,46 @@ export const actionPlaylistSetPublicRequested = (playlistId, isPublic) => ({
   type: PLAYLIST_SET_PUBLIC_REQUESTED, payload: {playlistId: playlistId, isPublic: isPublic}
 });
 
+export const sortPlaylistTracksBy = (playlistId, sortBy) => (dispatch, getState) => {
+  const state = getState().api;
+  // create a list of tuples, containing the trackId and the track itself:
+  const currentTracks = state.entities.playlist[playlistId].trackIds.map(
+    (trackId) => [trackId, state.entities.track[trackId]]
+  );
+  // now sort the list of tuples
+  let keyFunc;
+  if (sortBy === 'track') {
+      keyFunc = (trackTuple) => {
+        const trackId = parseInt(trackTuple[1].metadata.track);
+        if (isNaN(trackId)) {
+          return -1
+        }
+        return trackId;
+      }
+  } else if (sortBy === 'title') {
+
+  } else {
+    console.log(`sorting by {sortBy} not implemented!`);
+    return () => 0;
+  }
+  currentTracks.sort((a, b) => {
+    const aVal = keyFunc(a);
+    const bVal = keyFunc(b);
+    if (aVal < bVal) {
+      return 1;
+    } else if (aVal > bVal) {
+      return -1;
+    }
+    return 0;
+  });
+  // unpack the track ids from the tuples
+  const sortedTrackIds = currentTracks.map((tuple) => tuple[0]);
+  // now hammer the changes into the state:
+  dispatch(actionHammer(
+    {entities: {playlist: {[playlistId]: {trackIds: {$set: sortedTrackIds}}}}}
+  ));
+};
+
 export const DIRECTORY_LOADING = 'redux/cherrymusicapi/directory_loading';
 export const DIRECTORY_LOADED = 'redux/cherrymusicapi/directory_loaded';
 export const DIRECTORY_LOAD_ERROR = 'redux/cherrymusicapi/directory_load_error';

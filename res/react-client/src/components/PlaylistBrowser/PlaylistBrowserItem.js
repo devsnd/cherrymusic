@@ -57,6 +57,7 @@ export class PlaylistBrowserItem extends React.Component {
             onClick={playlist.public ? this.setPublicDisabled : this.setPublicEnabled}
           >
               public&nbsp;<input
+                readOnly="readOnly"
                 type="checkbox"
                 {...inputChecked}
             />

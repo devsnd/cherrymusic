@@ -96,7 +96,7 @@
     "react": "~15.1.0",
     "react-addons-css-transition-group": "~15.1.0",
     "react-addons-update": "~15.1.0",
-    "react-bootstrap": "~0.28.5",
+    "react-bootstrap": "~0.30.8",
     "react-dom": "~15.1.0",
     "react-redux": "^4.0.0",
     "react-router": "~2.0.0",

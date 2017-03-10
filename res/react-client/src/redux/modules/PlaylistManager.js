@@ -46,6 +46,7 @@ export const CREATE_PLAYLIST_REQUESTED = 'redux/cmplaylists/CREATE_PLAYLIST_REQU
 export const actionCreatePlaylistRequested = () => ({type: CREATE_PLAYLIST_REQUESTED, payload: {} });
 export const createPlaylist = () => (dispatch, getState) => dispatch(actionCreatePlaylistRequested());
 
+
 export function playNextTrack () {
   return (dispatch, getState) => {
     dispatch(actionPlayNextTrack());
