@@ -59,7 +59,7 @@ class PlaylistDB:
 
     def savePlaylist(self, userid, public, playlist, playlisttitle, overwrite=False):
         if not len(playlist):
-            return _('I will not create an empty playlist. sorry.')
+            return None, _('I will not create an empty playlist. sorry.')
         duplicate_playlist = self.conn.execute(
             """SELECT rowid, public FROM playlists WHERE userid = ? AND title = ?""",
             (userid, playlisttitle)
@@ -73,7 +73,7 @@ class PlaylistDB:
                 self.deletePlaylist(old_playlist_id, userid)
                 duplicate_playlist = False
             else:
-                return _("This playlist name already exists! Nothing saved.")
+                return None, _("This playlist name already exists! Nothing saved.")
 
         cursor = self.conn.cursor()
         cursor.execute("""INSERT INTO playlists
@@ -87,7 +87,7 @@ class PlaylistDB:
         cursor.executemany("""INSERT INTO tracks (playlistid, track, url, title)
             VALUES (?,?,?,?)""", numberedplaylist)
         self.conn.commit()
-        return "success"
+        return playlistid, 'success'
 
     def loadPlaylist(self, playlistid, userid):
         cursor = self.conn.cursor()

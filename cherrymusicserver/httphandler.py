@@ -555,16 +555,16 @@ class HTTPHandler(object):
         cherrypy.session['playlist'] = playlist
 
     def api_saveplaylist(self, playlist, public, playlistname, overwrite=False):
-        res = self.playlistdb.savePlaylist(
+        playlistId, retval = self.playlistdb.savePlaylist(
             userid=self.getUserId(),
             public=1 if public else 0,
             playlist=playlist,
             playlisttitle=playlistname,
             overwrite=overwrite)
-        if res == "success":
-            return res
+        if retval == "success":
+            return {'id': playlistId}
         else:
-            raise cherrypy.HTTPError(400, res)
+            raise cherrypy.HTTPError(400, retval)
 
     def api_deleteplaylist(self, playlistid):
         res = self.playlistdb.deletePlaylist(playlistid,
