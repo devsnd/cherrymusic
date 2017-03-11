@@ -9,6 +9,7 @@ import {
   API_ENDPOINT_PLAYLIST_DETAIL,
   API_ENDPOINT_PLAYLIST_DELETE,
   API_ENDPOINT_PLAYLIST_CHANGE,
+  API_ENDPOINT_PLAYLIST_SAVE,
   API_ENDPOINT_FETCH_ALBUM_ART,
 } from 'constants';
 import {legacyAPICall } from 'utils/legacyApi';
@@ -32,11 +33,11 @@ export const actionPlaylistOpenRequested = (playlistId) => ({type: PLAYLIST_OPEN
 export const PLAYLIST_DETAIL_LOADING = 'redux/cherrymusicapi/PLAYLIST_DETAIL_LOADING';
 export const actionPlaylistDetailLoading = (playlistId) => ({type: PLAYLIST_DETAIL_LOADING, payload: {playlistId: playlistId } });
 export const PLAYLIST_DETAIL_LOADED = 'redux/cherrymusicapi/PLAYLIST_DETAIL_LOADED';
-export const actionPlaylistDetailLoaded = (playlistId, tracks) => ({type: PLAYLIST_DETAIL_LOADED, payload: {playlistId, tracks } });
+export const actionPlaylistDetailLoaded = (playlistId, tracks) => ({type: PLAYLIST_DETAIL_LOADED, payload: {playlistId: playlistId, tracks: tracks} });
 export const PLAYLIST_DETAIL_LOAD_ERROR = 'redux/cherrymusicapi/PLAYLIST_DETAIL_LOAD_ERROR';
 export const actionPlaylistDetailLoadError = (playlistId) => ({type: PLAYLIST_DETAIL_LOAD_ERROR, payload: {playlistId: playlistId } });
 export const PLAYLIST_CREATE = 'redux/cherrymusicapi/PLAYLIST_CREATE';
-export const actionPlaylistCreate = (playlistId) => ({type: PLAYLIST_CREATE, payload: {playlistId: playlistId } });
+export const actionPlaylistCreate = (playlistId, data) => ({type: PLAYLIST_CREATE, payload: {playlistId: playlistId, data: data} });
 export const PLAYLIST_ADD_TRACK = 'redux/cherrymusicapi/PLAYLIST_ADD_TRACK';
 export const actionPlaylistAddTrack = (playlistId, trackId) => ({type: PLAYLIST_ADD_TRACK, payload: {playlistId: playlistId, trackId: trackId } });
 
@@ -193,6 +194,21 @@ export function fetchPlaylistDetail (getState, playlistId) {
   );
 }
 
+export function fetchPlaylistDetailThunk (playlistId) {
+  return (dispatch, getState) => {
+    return new Promise((resolve, reject) => {
+      dispatch(actionPlaylistDetailLoading(playlistId));
+      fetchPlaylistDetail(getState, playlistId).then(
+        (tracks) => {
+          dispatch(actionPlaylistDetailLoaded(playlistId, tracks));
+          resolve();
+        },
+        reject
+      );
+    });
+  }
+}
+
 export function deletePlaylist (getState, playlistId) {
   const authtoken = getAuthToken(getState());
   return legacyAPICall(
@@ -200,6 +216,47 @@ export function deletePlaylist (getState, playlistId) {
     {playlistid: playlistId },
     authtoken
   );
+}
+
+export function saveNewPlaylist (localPlaylistId, playlistTitle, isPublic) {
+  return (dispatch, getState) => {
+    const state = getState();
+    const authtoken = getAuthToken(state);
+    const playlist = selectEntitiesPlaylist(state)[localPlaylistId];
+    const tracks = selectEntitiesTrack(state);
+    const legacyTrackList = playlist.trackIds.map((trackId) => {
+      const track = tracks[trackId];
+      return {url: track.urlpath, title: track.label};
+    });
+    const legacyApiFormat = {
+      playlist: legacyTrackList,
+      public: isPublic,
+      playlistname: playlistTitle,
+      overwrite: false
+    };
+    return new Promise((resolve, reject) => {
+      legacyAPICall(API_ENDPOINT_PLAYLIST_SAVE, legacyApiFormat, authtoken).then(
+        (playlistData) => {
+          // insert the playlist into the state:
+          dispatch(actionPlaylistCreate(
+            playlistData.id,
+            {
+              title: playlistTitle,
+              public: isPublic,
+              owner: true,
+              trackIds: playlist.trackIds
+            }
+          ));
+          resolve(playlistData)
+        },
+        reject
+      );
+    })
+  }
+}
+
+export function localPlaylistToSavedPlaylist (localId, savedId, playlistTitle) {
+
 }
 
 export function playlistSetPublic (getState, playlistId, isPublic) {
@@ -432,6 +489,16 @@ const mergeEntities = (currentEntities, newEntities) => {
   return mergedEntities;
 };
 
+const makePlaylistSkeleton = (playlistId) => {
+  return {
+      trackIds: [],
+      title: 'No Name',
+      ownerId: -1,
+      state: playlistStates.new,
+      plid: playlistId,
+    }
+};
+
 // Action HANDLERS
 const ACTION_HANDLERS = {
   [METADATA_LOAD_ENQUEUE]: (state, action) => {
@@ -582,13 +649,11 @@ const ACTION_HANDLERS = {
   [PLAYLIST_CREATE]: (state, action) => {
     const playlistEntities = playlistSchema.getKey();
     const {playlistId } = action.payload;
-    const newPlaylist = {
-      trackIds: [],
-      title: 'No Name',
-      ownerId: -1,
-      state: playlistStates.new,
-      plid: playlistId,
-    };
+    let newPlaylist = makePlaylistSkeleton(playlistId);
+    if (typeof action.payload.data !== 'undefined') {
+      // update the playlist with additional data
+      newPlaylist = {...newPlaylist, ...action.payload.data};
+    }
     return updateHelper(
       state,
       {entities: {[playlistEntities]: {[playlistId]: {$set: newPlaylist } } } }
@@ -602,8 +667,23 @@ const ACTION_HANDLERS = {
       {entities: {[playlistEntities]: {[playlistId]: {trackIds: {$push: [trackId ] } } } } }
     );
   },
+  [PLAYLIST_DETAIL_LOADING]: (state, action) => {
+    const playlistKey = playlistSchema.getKey();
+    const {playlistId} = action.payload;
+    // make sure the skeleton of the playlist exists:
+    if (typeof state.entities[playlistKey][playlistId] === 'undefined') {
+      state = updateHelper(state,
+        {entities: {[playlistKey]: {[playlistId]: {$set: makePlaylistSkeleton(playlistId)}}}}
+      );
+    }
+    // update the loading state:
+    return updateHelper(
+      state,
+      {entities: {[playlistKey]: {[playlistId]: {state: {$set: playlistStates.loading}}}}}
+    );
+  },
   [PLAYLIST_DETAIL_LOADED]: (state, action) => {
-    const {playlistId, tracks } = action.payload;
+    const {playlistId, tracks} = action.payload;
     // insert all tracks into the state
     const normTracks = normalize(
       // insert metaDataLoading State into each track

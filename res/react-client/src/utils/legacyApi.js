@@ -21,7 +21,7 @@ export function legacyAPICall (endpoint, data, authtoken) {
       {
         credentials: 'include',
         method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
         body: _encodeFormData(params),
       }
       ).then(

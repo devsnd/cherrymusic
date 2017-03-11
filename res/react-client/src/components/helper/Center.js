@@ -17,3 +17,5 @@ export class Center extends React.Component {
     );
   }
 }
+
+export default Center;

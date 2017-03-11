@@ -2,6 +2,7 @@ import {createSelector } from 'reselect';
 // Constants
 export const ADD_MESSAGE = 'abend/redux/impersonate/ADD_MESSAGE';
 export const REMOVE_MESSAGES = 'abend/redux/impersonate/REMOVE_MESSAGES';
+export const REMOVE_MESSAGE = 'abend/redux/impersonate/REMOVE_MESSAGE';
 const REMOVE_MESSAGE_INTERVAL_MILLIS = 8000;
 
 export const Level = {
@@ -44,6 +45,12 @@ export const actionAddMessage = (message) => {
   };
 };
 
+export const removeMessage = (messageKey) => {
+  return (dispatch, getState) => {
+    dispatch({type: REMOVE_MESSAGE, payload: {messageKey: messageKey}});
+  };
+};
+
 const _addMessage = (message) => {
   return (dispatch, getState) => {
     dispatch(actionAddMessage(message));
@@ -78,6 +85,13 @@ const ACTION_HANDLERS = {
           key: __messageKey++,
         },
       ],
+    };
+  },
+  [REMOVE_MESSAGE]: (state, action) => {
+    const {messageKey} = action.payload;
+    return {
+      ...state,
+      messages: state.messages.filter((msg) => msg.key !== messageKey),
     };
   },
   [REMOVE_MESSAGES]: (state, action) => {

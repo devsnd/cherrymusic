@@ -12,6 +12,7 @@ import classes from './TrackListItem.scss';
 class TrackListItem extends React.Component {
   static propTypes = {
     track: PropTypes.object.isRequired,
+    compact: PropTypes.bool,
   };
 
   constructor (props) {
@@ -73,12 +74,14 @@ class TrackListItem extends React.Component {
               </td>
             </tr>
           }
-          <tr>
-            <td />
-            <th colSpan={3} className={classes.Path}>
-              {track.path}
-            </th>
-          </tr>
+          {!this.props.compact && (
+            <tr>
+              <td />
+              <th colSpan={3} className={classes.Path}>
+                {track.path}
+              </th>
+            </tr>
+          )}
         </tbody>
       </table>
     );

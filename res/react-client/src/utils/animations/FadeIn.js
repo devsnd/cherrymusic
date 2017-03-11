@@ -24,9 +24,9 @@ export default class FadeIn extends React.Component {
       <ReactCSSTransitionGroup
         transitionName={transitionNames}
         transitionAppear
-        transitionAppearTimeout={500}
-        transitionEnterTimeout={500}
-        transitionLeaveTimeout={500}
+        transitionAppearTimeout={200}
+        transitionEnterTimeout={200}
+        transitionLeaveTimeout={200}
       >
         {this.props.children}
       </ReactCSSTransitionGroup>

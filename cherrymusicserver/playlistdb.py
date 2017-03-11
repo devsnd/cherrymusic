@@ -73,7 +73,7 @@ class PlaylistDB:
                 self.deletePlaylist(old_playlist_id, userid)
                 duplicate_playlist = False
             else:
-                return None, _("This playlist name already exists! Nothing saved.")
+                return None, _("This playlist name already exists! Please use another name.")
 
         cursor = self.conn.cursor()
         cursor.execute("""INSERT INTO playlists

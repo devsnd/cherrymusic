@@ -1,3 +1,4 @@
+import {errorMessage} from 'redux/modules/Messages';
 import React, {PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
@@ -12,7 +13,7 @@ import {
   Button,
   Tab,
   Tabs,
-  Table
+  Table,
 } from 'react-bootstrap';
 
 import TrackListItem from 'components/TrackListItem/TrackListItem';
@@ -25,12 +26,15 @@ import {
   playTrackInPlaylist,
   closePlaylistTab,
   selectActivePlaylistId,
+  replacePlaylist,
 } from 'redux/modules/PlaylistManager';
 
 import {
   playlistStates,
   selectEntitiesPlaylist,
   sortPlaylistTracksBy,
+  saveNewPlaylist,
+  fetchPlaylistDetailThunk,
 } from 'redux/modules/CherryMusicApi';
 
 class TabbedPlaylists extends CMComponent {
@@ -47,8 +51,9 @@ class TabbedPlaylists extends CMComponent {
     this.state = {
       playlistToSave: null,
       showSavePlaylistModal: false,
+      isSavingPlaylist: false,
     };
-    this.handleCancelSavePlaylistModal = this.handleCancelSavePlaylistModal.bind(this);
+    this.handleCancelSavePlaylistModal = () => { this.setState({showSavePlaylistModal: false}); };
     this.handleOpenSavePlaylistModal = this.handleOpenSavePlaylistModal.bind(this);
     this.handleSavePlaylistModal = this.handleSavePlaylistModal.bind(this);
 
@@ -75,33 +80,60 @@ class TabbedPlaylists extends CMComponent {
   handleSort (playlistId) {
     return (eventKey) => {
       this.props.sortPlaylistTracksBy(playlistId, eventKey);
+    };
+  }
+
+  handleSavePlaylistModal (playlistData) {
+    this.setState({isSavingPlaylist: true});
+    // if the playlist id is < 0 it means that the id is local and not saved
+    // to the server yet, so we call `saveNewPlaylist`
+    if (this.state.playlistToSave.plid < 0) {
+      const localPlaylistId = this.state.playlistToSave.plid;
+      this.props.saveNewPlaylist(
+        localPlaylistId,
+        playlistData.title,
+        playlistData.isPublic,
+      ).then(
+        (playlistData) => {
+          const newPlaylistId = playlistData.id;
+          this.setState({
+            isSavingPlaylist: false,
+            showSavePlaylistModal: false,
+          });
+          this.props.replacePlaylist(localPlaylistId, newPlaylistId)
+        },
+        (error) => {
+          // saving either failed because the server is down, or because the
+          // playlist name already exists. unfortunately the legacy API just
+          // delivers ugly HTML
+          this.props.errorMessage(`A playlist with that name already exists. Please use
+          another name or try again later`);
+          console.error(error);
+          this.setState({isSavingPlaylist: false});
+        },
+      );
+    } else {
+      alert('updating of existing playlist is not implemented');
     }
   }
 
-  handleCancelSavePlaylistModal () {
-    this.setState({
-      playlistToSave: null,
-      showSavePlaylistModal: false
-    });
-  }
-
-  handleSavePlaylistModal () {
-    alert('not implemented!')
-  }
-
   handleOpenSavePlaylistModal () {
-    const activatePlaylist = this.props.playlistEntities[this.props.activePlaylistId];
     this.setState({
-      playlistToSave: activatePlaylist,
+      playlistToSave: this.props.playlistEntities[this.props.activePlaylistId],
       showSavePlaylistModal: true,
-    })
+    });
   }
 
   renderPlaylistActions (playlist) {
     const playlistId = playlist.plid;
     return (
-      <div style={{padding: 10}}>
-        <Button bsStyle="primary" bsSize="xsmall" onClick={this.handleOpenSavePlaylistModal}>
+      <div style={{padding: '10px 0'}}>
+        <Button
+          bsStyle="primary"
+          bsSize="xsmall"
+          onClick={this.handleOpenSavePlaylistModal}
+          disabled={playlist.trackIds.length === 0}
+        >
           save
         </Button>
         <ButtonGroup>
@@ -149,9 +181,7 @@ class TabbedPlaylists extends CMComponent {
           onClick={() => { this.selectTrack(playlist, idx); }}
           style={makeTrackStyle(playlist, idx, track)}
         >
-          <TrackListItem
-            track={track}
-          />
+          <TrackListItem track={track} compact />
         </div>
       );
     });
@@ -176,6 +206,7 @@ class TabbedPlaylists extends CMComponent {
           show={this.state.showSavePlaylistModal}
           onCancel={this.handleCancelSavePlaylistModal}
           onSave={this.handleSavePlaylistModal}
+          isSaving={this.state.isSavingPlaylist}
         />
         <Tabs
           activeKey={this.props.activePlaylistId}
@@ -216,7 +247,7 @@ class TabbedPlaylists extends CMComponent {
                         loading...
                       </span>
                     ) : (
-                      <div>
+                      <div style={{paddingLeft: 10}}>
                         {this.renderPlaylistActions(playlist)}
                         {this.renderPlaylistItems(playlist)}
                       </div>
@@ -251,6 +282,10 @@ export default connect(
     setPlayingPlaylist: setPlayingPlaylist,
     playTrackInPlaylist: playTrackInPlaylist,
     closePlaylistTab: closePlaylistTab,
+    saveNewPlaylist: saveNewPlaylist,
+    errorMessage: errorMessage,
+    replacePlaylist: replacePlaylist,
+    fetchPlaylistDetailThunk: fetchPlaylistDetailThunk,
   }
 )(TabbedPlaylists);
 

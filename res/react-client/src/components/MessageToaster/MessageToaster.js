@@ -1,13 +1,23 @@
 import React, { PropTypes } from 'react';
-import { selectMessages, Level } from 'redux/modules/Messages';
+import { removeMessage, selectMessages, Level } from 'redux/modules/Messages';
 import { connect } from 'react-redux';
-import { Alert } from 'react-bootstrap';
+import { Alert, Button } from 'react-bootstrap';
 import FadeIn from 'utils/animations/FadeIn';
 
 class MessageToaster extends React.Component {
   static propTypes = {
     messages: PropTypes.array.isRequired,
+    removeMessage: PropTypes.func.isRequired,
   };
+
+  constructor (props) {
+    super(props);
+    this.removeMessage = this.removeMessage.bind(this);
+  }
+
+  removeMessage (messageKey) {
+    return () => this.props.removeMessage(messageKey);
+  }
 
   render () {
     const bsStyleByLevel = {
@@ -40,6 +50,9 @@ class MessageToaster extends React.Component {
                 style={style}
                 key={message.key}
               >
+                <Button bsSize="xsmall" onClick={this.removeMessage(message.key)}>
+                  ×
+                </Button>
                 {message.message}
               </Alert>
             );
@@ -55,5 +68,8 @@ export default connect(
     return {
       messages: selectMessages(state),
     };
+  },
+  {
+    removeMessage: removeMessage
   }
 )(MessageToaster);

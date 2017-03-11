@@ -46,6 +46,9 @@ export const CREATE_PLAYLIST_REQUESTED = 'redux/cmplaylists/CREATE_PLAYLIST_REQU
 export const actionCreatePlaylistRequested = () => ({type: CREATE_PLAYLIST_REQUESTED, payload: {} });
 export const createPlaylist = () => (dispatch, getState) => dispatch(actionCreatePlaylistRequested());
 
+export const REPLACE_PLAYLIST = 'redux/cmplaylists/REPLACE_PLAYLIST';
+export const actionReplacePlaylist = (oldId, newId) => ({type: REPLACE_PLAYLIST, payload: {oldId, newId}});
+export const replacePlaylist = (oldId, newId) => (dispatch, getState) => dispatch(actionReplacePlaylist(oldId, newId));
 
 export function playNextTrack () {
   return (dispatch, getState) => {
@@ -159,9 +162,16 @@ const ACTION_HANDLERS = {
       playingTrackIdx: action.payload.trackidx,
     };
   },
-  // SOME_ACTION: (state, action) => {
-  //   return state;
-  // }
+  [REPLACE_PLAYLIST]: (state, action) => {
+    const {oldId, newId} = action.payload;
+    return {
+      ...state,
+      openPlaylistIds: state.openPlaylistIds.map((playlistId) => {
+        return oldId === playlistId ? newId : playlistId
+      }),
+      activePlaylistId: oldId == state.activePlaylistId ? newId : state.activePlaylistId
+    }
+  }
 };
 
 export default function (state = initialState, action) {
