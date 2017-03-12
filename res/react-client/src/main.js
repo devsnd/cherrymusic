@@ -27,6 +27,15 @@ const history = syncHistoryWithStore(browserHistory, store, {
 // hooks such as `onEnter`.
 const routes = makeRoutes(store);
 
+if (process.env.NODE_ENV !== 'production') {
+  window.ReactPerf = require('react-addons-perf');
+  // e.g.:
+  // window.ReactPerf.start()
+  // window.ReactPerf.stop()
+  // window.ReactPerf.printWasted(window.ReactPerf.getLastMeasurements())
+}
+
+
 // Now that redux and react-router have been configured, we can render the
 // React application to the DOM!
 ReactDOM.render(
