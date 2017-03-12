@@ -1,4 +1,6 @@
 import React from 'react';
+import PureRenderMixin from 'react-addons-pure-render-mixin';
+
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
@@ -8,9 +10,26 @@ import {playNextTrack, playPreviousTrack } from 'redux/modules/PlaylistManager';
 import classes from './AudioPlayer.scss';
 import {ProgressBar, Glyphicon, Button, ButtonGroup } from 'react-bootstrap';
 
+const RERENDER_PROGRESS_THRES = 0.2;
+
 export class AudioPlayer extends React.Component {
   constructor (props) {
     super(props);
+    this.lastRenderedPercentage = this.props.percentage;
+    this.shouldComponentUpdate = (nextProps, nextState) => {
+      const update = (
+        nextProps.playerState !== this.props.playerState
+        ||
+        nextProps.trackLabel !== this.props.trackLabel
+        ||
+        Math.abs(nextProps.percentage - this.lastRenderedPercentage) > RERENDER_PROGRESS_THRES
+      );
+      if (update) {
+        this.lastRenderedPercentage = nextProps.percentage;
+      }
+      return update;
+    };
+
     this.state = {};
     this.handleProgressBarClick = this.handleProgressBarClick.bind(this);
   }
@@ -42,43 +61,49 @@ export class AudioPlayer extends React.Component {
   render () {
     const { playerState } = this.props;
     return (
-      <div className={classes.CMAudioPlayer} ref="audioPlayer">
-        {this.props.playerState === playerStates.uninitialized &&
-          <h1>Initializing player...</h1>
-        }
-        {playerState !== playerStates.uninitialized &&
-        <div>
-          <div className={classes.buttonContainer}>
-            <ButtonGroup>
-              <Button onClick={this.playPreviousTrack}><Glyphicon glyph="step-backward" /></Button>
-              {playerState === playerStates.playing &&
-                <Button onClick={this.pause}><Glyphicon glyph="pause" /></Button>
-              }
-              {playerState !== playerStates.playing &&
-                <Button onClick={this.resume}><Glyphicon glyph="play" /></Button>
-              }
-              <Button onClick={this.playNextTrack}><Glyphicon glyph="step-forward" /></Button>
-            </ButtonGroup>
-            <ButtonGroup bsSize="xs">
-              {/*
-                lets remove the volume controls until somebody complains, maybe nobody uses them?
-                <Button><Glyphicon glyph="volume-off"/></Button>
-                <Button><Glyphicon glyph="volume-up"/></Button>
-              */}
-              <Button><Glyphicon glyph="random" /></Button>
-              <Button><Glyphicon glyph="retweet" /></Button>
-              <Button><Glyphicon glyph="expand" /> autoplay next playlist</Button>
-            </ButtonGroup>
+      <div className={classes.CMAudioPlayer} ref="audioPlayer" key="audio-player">
+        {this.props.playerState === playerStates.uninitialized ? (
+          <h1 key="ap-init">Initializing player...</h1>
+        ) : (
+          <div key="ap-container">
+            <div className={classes.buttonContainer} key="ap-buttons">
+              <ButtonGroup key="ap-btn-group">
+                <Button onClick={this.playPreviousTrack} key={0}>
+                  <Glyphicon glyph="step-backward" />
+                </Button>
+                {playerState === playerStates.playing ? (
+                  <Button onClick={this.pause} key={1}>
+                    <Glyphicon glyph="pause"/>
+                  </Button>
+                ) : (
+                  <Button onClick={this.resume} key={1}>
+                    <Glyphicon glyph="play"/>
+                  </Button>
+                )}
+                <Button onClick={this.playNextTrack} key={2}>
+                  <Glyphicon glyph="step-forward" />
+                </Button>
+              </ButtonGroup>
+              <ButtonGroup bsSize="xs" key="ap-small-buttons">
+                {/*
+                  lets remove the volume controls until somebody complains, maybe nobody uses them?
+                  <Button><Glyphicon glyph="volume-off"/></Button>
+                  <Button><Glyphicon glyph="volume-up"/></Button>
+                */}
+                <Button key={0}><Glyphicon glyph="random" /></Button>
+                <Button key={1}><Glyphicon glyph="retweet" /></Button>
+                <Button key={2}><Glyphicon glyph="expand" /> autoplay next playlist</Button>
+              </ButtonGroup>
+            </div>
+            <ProgressBar
+              ref="progressBar"
+              now={this.props.percentage}
+              label={this.props.trackLabel}
+              striped={playerState === playerStates.startingPlay}
+              onClick={this.handleProgressBarClick}
+            />
           </div>
-          <ProgressBar
-            ref="progressBar"
-            now={this.props.percentage}
-            label={this.props.trackLabel}
-            striped={playerState === playerStates.startingPlay}
-            onClick={this.handleProgressBarClick}
-          />
-        </div>
-        }
+        )}
       </div>
     );
   }
