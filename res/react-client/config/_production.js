@@ -8,5 +8,5 @@ export default () => ({
     chunkModules : true,
     colors : true,
   },
-  compiler_public_path: '/',
+  compiler_public_path: './',
 });
