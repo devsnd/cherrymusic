@@ -427,6 +427,7 @@ If you are sure that cherrymusic is not running, you can delete this file and re
             socket_host = "::" if ipv6_enabled else "0.0.0.0"
 
         resourcedir = os.path.abspath(pathprovider.getResourcePath('res'))
+        react_client_dir = os.path.abspath(pathprovider.getResourcePath('res/react-client/dist'))
 
         if config['server.ssl_enabled']:
             cert = pathprovider.absOrConfigPath(config['server.ssl_certificate'])
@@ -491,6 +492,14 @@ If you are sure that cherrymusic is not running, you can delete this file and re
         cherrypy.tree.mount(
             httphandler, scriptname,
             config={
+                '/beta': {
+                    'tools.staticdir.on': True,
+                    'tools.staticdir.dir': react_client_dir,
+                    'tools.staticdir.index': 'index.html',
+                    'tools.caching.on': False,
+                    'tools.gzip.mime_types': ['text/html', 'text/plain', 'text/javascript', 'text/css'],
+                    'tools.gzip.on': True,
+                },
                 '/res': {
                     'tools.staticdir.on': True,
                     'tools.staticdir.dir': resourcedir,
