@@ -1,5 +1,6 @@
 import React, {PropTypes } from 'react';
 import {connect } from 'react-redux';
+import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {
   selectFileListingViewFormat,
   FileListingViewFormats,
@@ -36,6 +37,8 @@ export class Browser extends React.Component {
 
   constructor (props) {
     super(props);
+    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+
     this.state = {
       // lastMove determines how to animate when navigating (e.g. LTR or RTL)
       lastMove: 'child',  // 'parent' || 'child'
@@ -188,7 +191,7 @@ export class Browser extends React.Component {
                     onClick={handleOpenChildFolder(collection.path)}
                     key={collection.path}
                     style={{
-                      width: '120px',
+                      width: '100px',
                       display: 'inline-block',
                       overflow: 'hidden',
                       border: '1px solid #eee',
@@ -205,8 +208,8 @@ export class Browser extends React.Component {
                       <AlbumArt
                         directory={collection.path}
                         style={{
-                          width: 120,
-                          height: 120,
+                          width: 100,
+                          height: 100,
                         }}
                       />
                       <div

@@ -132,7 +132,7 @@ export class MainView extends React.Component {
           onToggle={this.handleNavBarToggle}
           expanded={this.state.navBarExpanded}>
           <Navbar.Header>
-            <Navbar.Brand>
+            <Navbar.Brand key={0}>
               <a
                 href="#"
                 className={cssClasses.navbarBrandLogo}
@@ -142,7 +142,7 @@ export class MainView extends React.Component {
               </a>
             </Navbar.Brand>
             {/* add searchbar in header on mobile */}
-            <Navbar.Brand>
+            <Navbar.Brand key={1}>
               <span className="visible-xs" style={{padding: 9}}>
                 {SearchBar}
               </span>
@@ -152,6 +152,7 @@ export class MainView extends React.Component {
           <Navbar.Collapse>
             <Nav>
               <NavItem
+                key={0}
                 eventKey={1}
                 href="#"
                 className="navItemSearchHack hidden-xs"
@@ -159,20 +160,20 @@ export class MainView extends React.Component {
               >
                   {SearchBar}
               </NavItem>
-              <NavItem eventKey={2} href="#" onClick={this.uiBrowseFiles}>Browse files</NavItem>
-              <NavItem eventKey={2} href="#" onClick={this.uiLoadPlaylists}>Load Playlist</NavItem>
+              <NavItem key={1} eventKey={2} href="#" onClick={this.uiBrowseFiles}>Browse files</NavItem>
+              <NavItem key={2} eventKey={2} href="#" onClick={this.uiLoadPlaylists}>Load Playlist</NavItem>
               <NavDropdown eventKey={3} title={<Glyphicon glyph="wrench" />} id="basic-nav-dropdown">
-                <MenuItem eventKey={3.1}>Options</MenuItem>
-                <MenuItem eventKey={3.2}>Admin</MenuItem>
-                <MenuItem divider />
-                <MenuItem eventKey={3.3}>Logout</MenuItem>
+                <MenuItem key={0} eventKey={3.1}>Options</MenuItem>
+                <MenuItem key={1} eventKey={3.2}>Admin</MenuItem>
+                <MenuItem key={2} divider />
+                <MenuItem key={3} eventKey={3.3}>Logout</MenuItem>
               </NavDropdown>
             </Nav>
           </Navbar.Collapse>
         </Navbar>
         <Grid fluid>
           <Row className="show-grid">
-            <Col sm={6}>
+            <Col sm={6} key={0}>
               {show === ViewStates.motd &&
                 <MessageOfTheDay />
               }
@@ -198,7 +199,7 @@ export class MainView extends React.Component {
             </Col>
             {/* move the playlists up into the navbar area */}
             {/* style={{top: '-60px'}} */}
-            <Col sm={6}>
+            <Col sm={6} key={1}>
               <TabbedPlaylists
                  /* lift the tabbed playlists over the file broser, so the
                  browser animation is below the tabbed playlist

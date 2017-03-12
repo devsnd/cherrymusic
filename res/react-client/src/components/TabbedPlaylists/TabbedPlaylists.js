@@ -1,9 +1,10 @@
-import {errorMessage} from 'redux/modules/Messages';
 import React, {PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import PureRenderMixin from 'react-addons-pure-render-mixin';
+
+import {errorMessage} from 'redux/modules/Messages';
 import {PLAYBACK_ENDED } from 'redux/modules/Player';
-import CMComponent from 'utils/CMComponent';
 import SavePlaylistModal from './SavePlaylistModal';
 
 import {
@@ -37,7 +38,7 @@ import {
   fetchPlaylistDetailThunk,
 } from 'redux/modules/CherryMusicApi';
 
-class TabbedPlaylists extends CMComponent {
+class TabbedPlaylists extends React.Component {
   static propTypes = {
     // attrs
     height: PropTypes.number.isRequired,
@@ -48,6 +49,8 @@ class TabbedPlaylists extends CMComponent {
 
   constructor (props) {
     super(props);
+    this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
+
     this.state = {
       playlistToSave: null,
       showSavePlaylistModal: false,
@@ -58,7 +61,7 @@ class TabbedPlaylists extends CMComponent {
     this.handleSavePlaylistModal = this.handleSavePlaylistModal.bind(this);
 
     this._newPlaylistPlaceholder = {};
-    this.renderPlaylistItems = this.renderPlaylistItems.bind(this);
+    this.renderActivePlaylistTracks = this.renderActivePlaylistTracks.bind(this);
     this.handleSort = this.handleSort.bind(this);
     this.renderPlaylistActions = this.renderPlaylistActions.bind(this);
     this.handleTabSelect = this.handleTabSelect.bind(this);
@@ -119,7 +122,7 @@ class TabbedPlaylists extends CMComponent {
 
   handleOpenSavePlaylistModal () {
     this.setState({
-      playlistToSave: this.props.playlistEntities[this.props.activePlaylistId],
+      playlistToSave: this.props.activePlaylist,
       showSavePlaylistModal: true,
     });
   }
@@ -127,7 +130,7 @@ class TabbedPlaylists extends CMComponent {
   renderPlaylistActions (playlist) {
     const playlistId = playlist.plid;
     return (
-      <div style={{padding: '10px 0'}}>
+      <div style={{padding: '10px 0'}} key={'pl-actions'}>
         <Button
           bsStyle="primary"
           bsSize="xsmall"
@@ -138,16 +141,18 @@ class TabbedPlaylists extends CMComponent {
         </Button>
         <ButtonGroup>
           <DropdownButton
+            key={0}
             id="playlist-sort-options"
             bsSize="xsmall"
             title="sort"
             onSelect={this.handleSort(playlistId)}
           >
-            <MenuItem eventKey="track">by track number</MenuItem>
-            <MenuItem eventKey="title">by title</MenuItem>
-            <MenuItem eventKey="artist">by artist</MenuItem>
+            <MenuItem key={0} eventKey="track">by track number</MenuItem>
+            <MenuItem key={1} eventKey="title">by title</MenuItem>
+            <MenuItem key={2} eventKey="artist">by artist</MenuItem>
           </DropdownButton>
           <Button
+            key={1}
             onClick={() => alert('not implemented')}
             bsSize="xsmall">
             download
@@ -157,29 +162,24 @@ class TabbedPlaylists extends CMComponent {
     );
   }
 
-  renderPlaylistItems (playlist) {
+  renderActivePlaylistTracks (playlist, tracks) {
     const isPlayingTrack = (playlist, idx) => {
       return (
-        playlist.plid === this.props.activePlaylistId &&
+        playlist.plid === this.props.activePlaylist.plid &&
         idx === this.props.playingTrackIdx
       );
     };
 
-    const makeTrackStyle = (playlist, idx, track) => {
-      const style = {};
-      if (isPlayingTrack(playlist, idx)) {
-        style.backgroundColor = '#ddeedd';
-      }
-      return style;
-    };
+    const playingStyle = {backgroundColor: '#ddeedd'};
+    const nonPlayingStyle = {};
 
-    return playlist.trackIds.map((trackId, idx) => {
-      const track = this.props.entities.track[trackId];
+    return tracks.map((track, idx) => {
+      const isPlaying = isPlayingTrack(playlist, idx);
       return (
         <div
           key={idx}
-          onClick={() => { this.selectTrack(playlist, idx); }}
-          style={makeTrackStyle(playlist, idx, track)}
+          onClick={() => this.selectTrack(playlist, idx)}
+          style={isPlaying ? playingStyle : nonPlayingStyle}
         >
           <TrackListItem track={track} compact />
         </div>
@@ -187,7 +187,7 @@ class TabbedPlaylists extends CMComponent {
     });
   }
 
-  safeRender () {
+  render () {
     const makePlaylistTabStyle = (playlist) => {
       const style = {};
       if (playlist.state === playlistStates.new) {
@@ -198,6 +198,13 @@ class TabbedPlaylists extends CMComponent {
     };
 
     const style = this.props.style || {};
+    const activePlaylist = this.props.activePlaylist;
+    const activePlaylistTracks = this.props.activePlaylistTracks;
+    const activeTabKey = (
+      typeof this.props.activePlaylist === 'undefined'
+        ? '-'
+        : this.props.activePlaylist.plid
+    );
 
     return (
       <div>
@@ -209,13 +216,12 @@ class TabbedPlaylists extends CMComponent {
           isSaving={this.state.isSavingPlaylist}
         />
         <Tabs
-          activeKey={this.props.activePlaylistId}
+          activeKey={activeTabKey}
           onSelect={this.handleTabSelect}
           style={style}
           id="playlist-tabs-container"
         >
-          {this.props.openPlaylistIds.map((playlistId) => {
-            const playlist = this.props.playlistEntities[playlistId];
+          {this.props.openPlaylists.map((playlist) => {
             return (
               <Tab
                 key={playlist.plid}
@@ -225,7 +231,7 @@ class TabbedPlaylists extends CMComponent {
                     {playlist.title}
                     <Button
                       bsSize="xsmall"
-                      onClick={() => { this.props.closePlaylistTab(playlistId); }}
+                      onClick={() => { this.props.closePlaylistTab(playlist.plid); }}
                       style={{fontWeight: 900, fontStyle: 'normal', marginLeft: 10}}
                     >
                       ×
@@ -233,32 +239,40 @@ class TabbedPlaylists extends CMComponent {
                   </span>
                 }
               >
-                <ScrollableView height={
-                  this.props.height - 44 /* tab height */
-                }>
-                  <div style={{
-                    /* let the line of the tab continue as a separator to the
-                    file browser: */
-                    borderLeft: '1px solid #ddd',
-                    minHeight: '100%',
-                  }}>
-                    {typeof playlist.trackIds === 'undefined' ? (
-                      <span>
-                        loading...
-                      </span>
-                    ) : (
-                      <div style={{paddingLeft: 10}}>
-                        {this.renderPlaylistActions(playlist)}
-                        {this.renderPlaylistItems(playlist)}
-                      </div>
-                    )}
-                  </div>
-                </ScrollableView>
               </Tab>
             );
           })}
-          <Tab eventKey={this._newPlaylistPlaceholder} title="+" />
+          <Tab key={'+'} eventKey={this._newPlaylistPlaceholder} title="+" />
         </Tabs>
+        {/* for some reason the pure render mixin does not play nice with the
+        react-bootstrap tabs, so we render the active playlist below the tabs,
+        instead of inside them
+         */}
+        {typeof activePlaylist === 'undefined' ? (
+          <span>initializing...</span>
+        ) : (
+          <ScrollableView height={
+            this.props.height - 44 /* tab height */
+          }>
+            <div style={{
+              /* let the line of the tab continue as a separator to the
+               file browser: */
+              borderLeft: '1px solid #ddd',
+              minHeight: '100%',
+            }}>
+              {typeof activePlaylist.trackIds === 'undefined' ? (
+                  <span>
+                loading...
+              </span>
+                ) : (
+                  <div style={{paddingLeft: 10}}>
+                    {this.renderPlaylistActions(activePlaylist)}
+                    {this.renderActivePlaylistTracks(activePlaylist, activePlaylistTracks)}
+                  </div>
+                )}
+            </div>
+          </ScrollableView>
+        )}
       </div>
     );
   }
@@ -266,13 +280,22 @@ class TabbedPlaylists extends CMComponent {
 
 export default connect(
   (state, dispatch) => {
+    const playlistEntities = selectEntitiesPlaylist(state);
+    const activePlaylist = playlistEntities[selectActivePlaylistId(state)];
     return {
-      openPlaylistIds: state.playlist.openPlaylistIds,
-      activePlaylistId: selectActivePlaylistId(state),
-      playlistEntities: selectEntitiesPlaylist(state),
+      openPlaylists: state.playlist.openPlaylistIds.map(
+        (openPlaylistId) => playlistEntities[openPlaylistId]
+      ),
+      activePlaylist: activePlaylist,
+      activePlaylistTracks: (
+        typeof activePlaylist === 'undefined' ? (
+          []
+        ) : (
+          activePlaylist.trackIds.map((trackId) => state.api.entities.track[trackId])
+        )
+      ),
       playingPlaylist: state.playlist.playingPlaylist,
       playingTrackIdx: state.playlist.playingTrackIdx,
-      entities: state.api.entities,
     };
   },
   {
