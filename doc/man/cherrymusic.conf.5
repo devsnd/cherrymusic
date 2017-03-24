@@ -69,6 +69,9 @@ When "permit_remote_admin_login" is set to "False", admin users may only log in 
 .IP "\fB    keep_session_in_ram = True | False\fP"
 If enabled, this option will keep the user sessions in RAM instead of a file in the configuration directory. This means, that any unsaved playlists will be lost when the server is restarted.
 
+.IP "\fB    session_duration = 1440\fP"
+Duration in minutes of the user sessions. Note that this will not affect auto logged-in users.
+
 .IP "\fB    ssl_enabled = True | False\fP"
 This option allows you to use CherryMusic with HTTPS encryption. To enable this option you also have to specify "ssl_port", "ssl_certificate" and "ssl_private_key". If this option is set to "False", all other SSL specific options will be ommited.
 
