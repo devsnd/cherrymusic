@@ -458,7 +458,7 @@ If you are sure that cherrymusic is not running, you can delete this file and re
             'server.socket_host': socket_host,
             'server.thread_pool': 30,
             'tools.sessions.on': True,
-            'tools.sessions.timeout': 60 * 24,
+            'tools.sessions.timeout': int(config.get('server.session_duration', 60 * 24)),
         })
 
         if not config['server.keep_session_in_ram']:

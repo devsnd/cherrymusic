@@ -222,6 +222,14 @@ def from_defaults():
                     playlists will be lost when the server is restarted.
                             ''')
 
+    with c['server.session_duration'] as session_duration:
+        session_duration.value = 60 * 24
+        # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+        session_duration.doc = _('''
+                    Duration in minutes of the user sessions. Note that this
+                    will not affect auto logged-in users.
+                            ''')
+
     with c['server.ssl_enabled'] as ssl_enabled:
         ssl_enabled.value = False
         # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
