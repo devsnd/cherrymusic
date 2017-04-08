@@ -1,6 +1,14 @@
 Changelog
 ---------
 
+0.40.0 (2017-04-08)
+ - FEATURE: Added option to select Album Art Source for manual searches
+ - FIXED: Server refused to start when not able to detect cherrypy version
+ - FIXED: No more blinking page title in Chrome
+ - FIXED: Corrected redirect after logout when for custom "server.rootpath"
+ - IMPROVEMENT: Using iTunes as default method to fetch album art
+ - IMPROVEMENT: Session duration can now be set in the config (thanks regisb)
+
 0.39.1 (2016-10-09)
  - FIXED: broken import
 
