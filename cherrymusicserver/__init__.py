@@ -131,23 +131,6 @@ Available Encoders:
 )
 
 
-cherrypyReqVersion = 3
-cherrypyCurrVersion = str(cherrypy.__version__).split('.', 1)[0]
-_badCherrypyVersion = (
-    not cherrypyCurrVersion.isdigit()
-    or
-    int(cherrypyCurrVersion) < cherrypyReqVersion
-)
-if _badCherrypyVersion:
-    print(_("""
-cherrypy version is too old!
-Current version: %(current_version)s
-Required version: %(required_version)s or higher
-""") % {'current_version': cherrypy.__version__,
-        'required_version': cherrypyReqVersion})
-    sys.exit(1)
-
-
 # patch cherrypy crashing on startup because of double checking
 # for loopback interface, see:
 # https://bitbucket.org/cherrypy/cherrypy/issue/1100/cherrypy-322-gives-engine-error-when
@@ -158,7 +141,15 @@ cherrypy.process.servers.wait_for_occupied_port = fake_wait_for_occupied_port
 
 try:
     cherrypy_version = tuple(int(v) for v in cherrypy.__version__.split('.'))
-except:
+    min_major_cherrypy_version = 3
+    if cherrypy_version[0] < min_major_cherrypy_version:
+        print(_(
+            'cherrypy version is too old!\n'
+            'Current version: %s\n'
+            'Required version: %s or higher\n'
+        ) % (cherrypy.__version__, min_major_cherrypy_version))
+        sys.exit(1)
+except Exception as exc:
     logger.error(_(
         'Could not determine cherrypy version. Please install cherrypy '
         'using pip or your OS\'s package manager. Trying to detect version '
