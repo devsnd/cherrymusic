@@ -247,6 +247,7 @@ PlaylistManager = function(){
     this.playingPlaylist = 0;
     this.editingPlaylist = 0;
     this.shuffled = false;
+    this.playedTracksHistory = []
     this.cssSelector = {}
     this.lastRememberedPlaylist = '';
     this.nrOfCreatedPlaylists = 0;
@@ -395,11 +396,19 @@ PlaylistManager.prototype = {
         $(this.cssSelectorjPlayer).jPlayer("stop");
     },
     cmd_previous : function(){
+        if(this.shuffled && (this.playedTracksHistory.length > 1) ){
+            this.getPlayingPlaylist().jplayerplaylist.play(this.playedTracksHistory[ this.playedTracksHistory.length - 2]);
+            this.playedTracksHistory = this.playedTracksHistory.slice(0, this.playedTracksHistory.length - 1);
+            return false;
+        }
+        this.playedTracksHistory = []
         this.getPlayingPlaylist().jplayerplaylist.previous();
+        return false;
     },
     cmd_next : function(){
         if(this.shuffled){
             this.getPlayingPlaylist().jplayerplaylist.playRandomTrack();
+            this.playedTracksHistory.push(this.getPlayingPlaylist().jplayerplaylist.current);
             return false;
         } else {
             var currentPL = this.getPlayingPlaylist();
