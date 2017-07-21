@@ -1198,6 +1198,7 @@ $(document).ready(function(){
         dontCloseWindowIfMusicPlays();
         $('#albumart').toggle(userOptions.ui.display_album_art)
     });
+    loadBrowser(); // default left-side screen, instead of empty search results
     $('#search-panel').on('scroll', function(){
         //enable loading of images when in viewport
         MediaBrowser.static.albumArtLoader('#search-panel');
