@@ -5218,8 +5218,8 @@ body:after {
 }
 .list-dir-item {
   display: inline-block;
-  width: 105px;
-  height: 130px;
+  width: 110px;
+  height: 150px;
   vertical-align: middle;
   overflow: hidden;
 }
