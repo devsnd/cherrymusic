@@ -7,16 +7,12 @@
  * http://opensource.org/licenses/MIT
  *
  * Author: Mark J Panaghiston
- * Version: 2.7.1
- * Date: 19th September 2014
+ * Version: 2.9.2
+ * Date: 14th December 2014
  */
 
-/* Code verified using http://www.jshint.com/ */
-/*jshint asi:false, bitwise:false, boss:false, browser:true, curly:true, debug:false, eqeqeq:true, eqnull:false, evil:false, forin:false, immed:false, jquery:true, laxbreak:false, newcap:true, noarg:true, noempty:true, nonew:true, onevar:false, passfail:false, plusplus:false, regexp:false, undef:true, sub:false, strict:false, white:false, smarttabs:true */
-/*global define:false, ActiveXObject:false, alert:false */
-
 /* Support for Zepto 1.0 compiled with optional data module.
- * For AMD support, you will need to manually switch the 2 lines in the code below.
+ * For AMD or NODE/CommonJS support, you will need to manually switch the related 2 lines in the code below.
  * Search terms: "jQuery Switch" and "Zepto Switch"
  */
 
@@ -25,6 +21,10 @@
 		// AMD. Register as an anonymous module.
 		define(['jquery'], factory); // jQuery Switch
 		// define(['zepto'], factory); // Zepto Switch
+	} else if (typeof exports === 'object') {
+		// Node/CommonJS
+		factory(require('jquery')); // jQuery Switch
+		//factory(require('zepto')); // Zepto Switch
 	} else {
 		// Browser globals
 		if(root.jQuery) { // Use jQuery if available
@@ -175,6 +175,7 @@
 	];
 
 	$.jPlayer.pause = function() {
+		$.jPlayer.prototype.destroyRemoved();
 		$.each($.jPlayer.prototype.instances, function(i, element) {
 			if(element.data("jPlayer").status.srcSet) { // Check that media is set otherwise would cause error event.
 				element.jPlayer("pause");
@@ -353,13 +354,22 @@
 						'webkitExitFullscreen',
 						'',
 						''
+					],
+					ms: [
+						'',
+						'msFullscreenElement',
+						'msRequestFullscreen',
+						'msExitFullscreen',
+						'MSFullscreenChange',
+						'MSFullscreenError'
 					]
 				},
 				specOrder = [
 					'w3c',
 					'moz',
 					'webkit',
-					'webkitVideo'
+					'webkitVideo',
+					'ms'
 				],
 				fs, i, il;
 
@@ -368,7 +378,8 @@
 					w3c: !!d[spec.w3c[0]],
 					moz: !!d[spec.moz[0]],
 					webkit: typeof d[spec.webkit[3]] === 'function',
-					webkitVideo: typeof v[spec.webkitVideo[2]] === 'function'
+					webkitVideo: typeof v[spec.webkitVideo[2]] === 'function',
+					ms: typeof v[spec.ms[2]] === 'function'
 				},
 				used: {}
 			};
@@ -392,7 +403,7 @@
 						return elem[s[1]];
 					},
 					requestFullscreen: function(elem) {
-						return elem[s[2]]();
+						return elem[s[2]](); // Chrome and Opera want parameter (Element.ALLOW_KEYBOARD_INPUT) but Safari fails if flag used.
 					},
 					exitFullscreen: function(elem) {
 						elem = elem ? elem : d; // Video element required for webkitVideo
@@ -423,38 +434,33 @@
 	// The current jPlayer instance in focus.
 	$.jPlayer.focus = null;
 
-	// (fallback) The list of element node names to ignore with key controls.
+	// The list of element node names to ignore with key controls.
 	$.jPlayer.keyIgnoreElementNames = "A INPUT TEXTAREA SELECT BUTTON";
 
 	// The function that deals with key presses.
 	var keyBindings = function(event) {
-
 		var f = $.jPlayer.focus,
-			pageFocus = document.activeElement,
 			ignoreKey;
 
 		// A jPlayer instance must be in focus. ie., keyEnabled and the last one played.
 		if(f) {
 			// What generated the key press?
-			if(typeof pageFocus !== 'undefined') {
-				if(pageFocus !== null && pageFocus.nodeName.toUpperCase() !== "BODY") {
+			$.each( $.jPlayer.keyIgnoreElementNames.split(/\s+/g), function(i, name) {
+				// The strings should already be uppercase.
+				if(event.target.nodeName.toUpperCase() === name.toUpperCase()) {
 					ignoreKey = true;
+					return false; // exit each.
 				}
-			} else {
-				// Fallback for no document.activeElement support.
-				$.each( $.jPlayer.keyIgnoreElementNames.split(/\s+/g), function(i, name) {
-					// The strings should already be uppercase.
-					if(event.target.nodeName.toUpperCase() === name.toUpperCase()) {
-						ignoreKey = true;
-						return false; // exit each.
-					}
-				});
-			}
+			});
 			if(!ignoreKey) {
 				// See if the key pressed matches any of the bindings.
 				$.each(f.options.keyBindings, function(action, binding) {
 					// The binding could be a null when the default has been disabled. ie., 1st clause in if()
-					if(binding && event.which === binding.key && $.isFunction(binding.fn)) {
+					if(
+						(binding && $.isFunction(binding.fn)) &&
+						((typeof binding.key === 'number' && event.which === binding.key) ||
+						(typeof binding.key === 'string' && event.key === binding.key))
+					) {
 						event.preventDefault(); // Key being used by jPlayer, so prevent default operation.
 						binding.fn(f);
 						return false; // exit each.
@@ -479,14 +485,15 @@
 	$.jPlayer.prototype = {
 		count: 0, // Static Variable: Change it via prototype.
 		version: { // Static Object
-			script: "2.7.1",
-			needFlash: "2.7.0",
+			script: "2.9.2",
+			needFlash: "2.9.0",
 			flash: "unknown"
 		},
 		options: { // Instanced in $.jPlayer() constructor
-			swfPath: "js", // Path to Jplayer.swf. Can be relative, absolute or server root relative.
-			solution: "html, flash", // Valid solutions: html, flash. Order defines priority. 1st is highest,
+			swfPath: "js", // Path to jquery.jplayer.swf. Can be relative, absolute or server root relative.
+			solution: "html, flash", // Valid solutions: html, flash, aurora. Order defines priority. 1st is highest,
 			supplied: "mp3", // Defines which formats jPlayer will try and support and the priority by the order. 1st is highest,
+			auroraFormats: "wav", // List the aurora.js codecs being loaded externally. Its core supports "wav". Specify format in jPlayer context. EG., The aac.js codec gives the "m4a" format.
 			preload: 'metadata',  // HTML5 Spec values: none, metadata, auto.
 			volume: 0.8, // The volume. Number 0 to 1.
 			muted: false,
@@ -529,7 +536,8 @@
 				seeking: "jp-state-seeking",
 				muted: "jp-state-muted",
 				looped: "jp-state-looped",
-				fullScreen: "jp-state-full-screen"
+				fullScreen: "jp-state-full-screen",
+				noVolume: "jp-state-no-volume"
 			},
 			useStateClassSkin: false, // A state class skin relies on the state classes to change the visual appearance. The single control toggles the effect, for example: play then pause, mute then unmute.
 			autoBlur: true, // GUI control handlers will drop focus after clicks.
@@ -563,7 +571,7 @@
 				iphone: /iphone/,
 				ipod: /ipod/,
 				android_pad: /android [0-3]\.(?!.*?mobile)/,
-				android_phone: /android.*?mobile/,
+				android_phone: /(?=.*android)(?!.*chrome)(?=.*mobile)/,
 				blackberry: /blackberry/,
 				windows_ce: /windows ce/,
 				iemobile: /iemobile/,
@@ -591,7 +599,7 @@
 				// The parameter, f = $.jPlayer.focus, will be checked truethy before attempting to call any of these functions.
 				// Properties may be added to this object, in key/fn pairs, to enable other key controls. EG, for the playlist add-on.
 				play: {
-					key: 32, // space
+					key: 80, // p
 					fn: function(f) {
 						if(f.status.paused) {
 							f.play();
@@ -601,7 +609,7 @@
 					}
 				},
 				fullScreen: {
-					key: 13, // enter
+					key: 70, // f
 					fn: function(f) {
 						if(f.status.video || f.options.audioFullScreen) {
 							f._setOption("fullScreen", !f.options.fullScreen);
@@ -609,21 +617,27 @@
 					}
 				},
 				muted: {
-					key: 8, // backspace
+					key: 77, // m
 					fn: function(f) {
 						f._muted(!f.options.muted);
 					}
 				},
 				volumeUp: {
-					key: 38, // UP
+					key: 190, // .
 					fn: function(f) {
 						f.volume(f.options.volume + 0.1);
 					}
 				},
 				volumeDown: {
-					key: 40, // DOWN
+					key: 188, // ,
 					fn: function(f) {
 						f.volume(f.options.volume - 0.1);
+					}
+				},
+				loop: {
+					key: 76, // l
+					fn: function(f) {
+						f._loop(!f.options.loop);
 					}
 				}
 			},
@@ -702,10 +716,12 @@
 			// domNode: undefined
 			// htmlDlyCmdId: undefined
 			// autohideId: undefined
+			// mouse: undefined
 			// cmdsIgnored
 		},
 		solution: { // Static Object: Defines the solutions built in jPlayer.
 			html: true,
+			aurora: true,
 			flash: true
 		},
 		// 'MPEG-4 support' : canPlayType('video/mp4; codecs="mp4v.20.8"')
@@ -836,6 +852,9 @@
 			this.html = {}; // In _init()'s this.desired code and setmedia(): Accessed via this[solution], where solution from this.solutions array.
 			this.html.audio = {};
 			this.html.video = {};
+			this.aurora = {}; // In _init()'s this.desired code and setmedia(): Accessed via this[solution], where solution from this.solutions array.
+			this.aurora.formats = [];
+			this.aurora.properties = [];
 			this.flash = {}; // In _init()'s this.desired code and setmedia(): Accessed via this[solution], where solution from this.solutions array.
 			
 			this.css = {};
@@ -879,6 +898,23 @@
 					}
 				}
 			});
+				
+			// Create Aurora.js formats array
+			$.each(this.options.auroraFormats.toLowerCase().split(","), function(index1, value1) {
+				var format = value1.replace(/^\s+|\s+$/g, ""); //trim
+				if(self.format[format]) { // Check format is valid.
+					var dupFound = false;
+					$.each(self.aurora.formats, function(index2, value2) { // Check for duplicates
+						if(format === value2) {
+							dupFound = true;
+							return false;
+						}
+					});
+					if(!dupFound) {
+						self.aurora.formats.push(format);
+					}
+				}
+			});
 
 			this.internal.instance = "jp_" + this.count;
 			this.instances[this.internal.instance] = this.element;
@@ -903,7 +939,7 @@
 			this.internal.flash = $.extend({}, {
 				id: this.options.idPrefix + "_flash_" + this.count,
 				jq: undefined,
-				swf: this.options.swfPath + (this.options.swfPath.toLowerCase().slice(-4) !== ".swf" ? (this.options.swfPath && this.options.swfPath.slice(-1) !== "/" ? "/" : "") + "Jplayer.swf" : "")
+				swf: this.options.swfPath + (this.options.swfPath.toLowerCase().slice(-4) !== ".swf" ? (this.options.swfPath && this.options.swfPath.slice(-1) !== "/" ? "/" : "") + "jquery.jplayer.swf" : "")
 			});
 			this.internal.poster = $.extend({}, {
 				id: this.options.idPrefix + "_poster_" + this.count,
@@ -985,12 +1021,15 @@
 			this.flash.available = this._checkForFlash(10.1);
 
 			this.html.canPlay = {};
+			this.aurora.canPlay = {};
 			this.flash.canPlay = {};
 			$.each(this.formats, function(priority, format) {
 				self.html.canPlay[format] = self.html[self.format[format].media].available && "" !== self.htmlElement[self.format[format].media].canPlayType(self.format[format].codec);
+				self.aurora.canPlay[format] = ($.inArray(format, self.aurora.formats) > -1);
 				self.flash.canPlay[format] = self.format[format].flashCanPlay && self.flash.available;
 			});
 			this.html.desired = false;
+			this.aurora.desired = false;
 			this.flash.desired = false;
 			$.each(this.solutions, function(solutionPriority, solution) {
 				if(solutionPriority === 0) {
@@ -1012,13 +1051,16 @@
 			});
 			// This is what jPlayer will support, based on solution and supplied.
 			this.html.support = {};
+			this.aurora.support = {};
 			this.flash.support = {};
 			$.each(this.formats, function(priority, format) {
 				self.html.support[format] = self.html.canPlay[format] && self.html.desired;
+				self.aurora.support[format] = self.aurora.canPlay[format] && self.aurora.desired;
 				self.flash.support[format] = self.flash.canPlay[format] && self.flash.desired;
 			});
 			// If jPlayer is supporting any format in a solution, then the solution is used.
 			this.html.used = false;
+			this.aurora.used = false;
 			this.flash.used = false;
 			$.each(this.solutions, function(solutionPriority, solution) {
 				$.each(self.formats, function(formatPriority, format) {
@@ -1036,8 +1078,8 @@
 			// Set up the css selectors for the control and feedback entities.
 			this._cssSelectorAncestor(this.options.cssSelectorAncestor);
 			
-			// If neither html nor flash are being used by this browser, then media playback is not possible. Trigger an error event.
-			if(!(this.html.used || this.flash.used)) {
+			// If neither html nor aurora nor flash are being used by this browser, then media playback is not possible. Trigger an error event.
+			if(!(this.html.used || this.aurora.used || this.flash.used)) {
 				this._error( {
 					type: $.jPlayer.error.NO_SOLUTION, 
 					context: "{solution:'" + this.options.solution + "', supplied:'" + this.options.supplied + "'}",
@@ -1137,13 +1179,18 @@
 					});
 				}
 			}
+			
+			// Add the Aurora.js solution if being used.
+			if(this.aurora.used) {
+				// Aurora.js player need to be created for each media, see setMedia function.
+			}
 
 			// Create the bridge that emulates the HTML Media element on the jPlayer DIV
 			if( this.options.emulateHtml ) {
 				this._emulateHtmlBridge();
 			}
 
-			if(this.html.used && !this.flash.used) { // If only HTML, then emulate flash ready() call after 100ms.
+			if((this.html.used || this.aurora.used) && !this.flash.used) { // If only HTML, then emulate flash ready() call after 100ms.
 				setTimeout( function() {
 					self.internal.ready = true;
 					self.version.flash = "n/a";
@@ -1203,6 +1250,17 @@
 			this.element.empty(); // Remove the inserted child elements
 			
 			delete this.instances[this.internal.instance]; // Clear the instance on the static instance object
+		},
+		destroyRemoved: function() { // Destroy any instances that have gone away.
+			var self = this;
+			$.each(this.instances, function(i, element) {
+				if(self.element !== element) { // Do not destroy this instance.
+					if(!element.data("jPlayer")) { // Check that element is a real jPlayer.
+						element.jPlayer("destroy");
+						delete self.instances[i];
+					}
+				}
+			});
 		},
 		enable: function() { // Plan to implement
 			// options.disabled = false
@@ -1440,6 +1498,77 @@
 				}, false);
 			});
 		},
+		_addAuroraEventListeners : function(player, entity) {
+			var self = this;
+			//player.preload = this.options.preload;
+			//player.muted = this.options.muted;
+			player.volume = this.options.volume * 100;
+
+			// Create the event listeners
+			// Only want the active entity to affect jPlayer and bubble events.
+			// Using entity.gate so that object is referenced and gate property always current
+			
+			player.on("progress", function() {
+				if(entity.gate) {
+					if(self.internal.cmdsIgnored && this.readyState > 0) { // Detect iOS executed the command
+						self.internal.cmdsIgnored = false;
+					}
+					self._getAuroraStatus(player);
+					self._updateInterface();
+					self._trigger($.jPlayer.event.progress);
+					// Progress with song duration, we estimate timeupdate need to be triggered too.
+					if (player.duration > 0) {
+						self._trigger($.jPlayer.event.timeupdate);
+					}
+				}
+			}, false);
+			player.on("ready", function() {
+				if(entity.gate) {
+					self._trigger($.jPlayer.event.loadeddata);
+				}
+			}, false);
+			player.on("duration", function() {
+				if(entity.gate) {
+					self._getAuroraStatus(player);
+					self._updateInterface();
+					self._trigger($.jPlayer.event.durationchange);
+				}
+			}, false);
+			player.on("end", function() {
+				if(entity.gate) {
+					// Order of the next few commands are important. Change the time and then pause.
+					self._updateButtons(false);
+					self._getAuroraStatus(player, true);
+					self._updateInterface();
+					self._trigger($.jPlayer.event.ended);
+				}
+			}, false);
+			player.on("error", function() {
+				if(entity.gate) {
+					self._updateButtons(false);
+					self._seeked();
+					if(self.status.srcSet) { // Deals with case of clearMedia() causing an error event.
+						self.status.waitForLoad = true; // Allows the load operation to try again.
+						self.status.waitForPlay = true; // Reset since a play was captured.
+						if(self.status.video && !self.status.nativeVideoControls) {
+							self.internal.video.jq.css({'width':'0px', 'height':'0px'});
+						}
+						if(self._validString(self.status.media.poster) && !self.status.nativeVideoControls) {
+							self.internal.poster.jq.show();
+						}
+						if(self.css.jq.videoPlay.length) {
+							self.css.jq.videoPlay.show();
+						}
+						self._error( {
+							type: $.jPlayer.error.URL,
+							context: self.status.src, // this.src shows absolute urls. Want context to show the url given.
+							message: $.jPlayer.errorMsg.URL,
+							hint: $.jPlayer.errorHint.URL
+						});
+					}
+				}
+			}, false);
+		},
 		_getHtmlStatus: function(media, override) {
 			var ct = 0, cpa = 0, sp = 0, cpr = 0;
 
@@ -1480,6 +1609,39 @@
 			this.status.playbackRate = media.playbackRate;
 			this.status.ended = media.ended;
 		},
+		_getAuroraStatus: function(player, override) {
+			var ct = 0, cpa = 0, sp = 0, cpr = 0;
+
+			this.status.duration = player.duration / 1000;
+
+			ct = player.currentTime / 1000;
+			cpa = (this.status.duration > 0) ? 100 * ct / this.status.duration : 0;
+			if(player.buffered > 0) {
+				sp = (this.status.duration > 0) ? (player.buffered * this.status.duration) / this.status.duration : 100;
+				cpr = (this.status.duration > 0) ? ct / (player.buffered * this.status.duration) : 0;
+			} else {
+				sp = 100;
+				cpr = cpa;
+			}
+			
+			if(override) {
+				ct = 0;
+				cpr = 0;
+				cpa = 0;
+			}
+
+			this.status.seekPercent = sp;
+			this.status.currentPercentRelative = cpr;
+			this.status.currentPercentAbsolute = cpa;
+			this.status.currentTime = ct;
+
+			this.status.remaining = this.status.duration - this.status.currentTime;
+
+			this.status.readyState = 4; // status.readyState;
+			this.status.networkState = 0; // status.networkState;
+			this.status.playbackRate = 1; // status.playbackRate;
+			this.status.ended = false; // status.ended;
+		},
 		_resetStatus: function() {
 			this.status = $.extend({}, this.status, $.jPlayer.prototype.status); // Maintains the status properties that persist through a reset.
 		},
@@ -1490,6 +1652,7 @@
 			event.jPlayer.options = $.extend(true, {}, this.options); // Deep copy
 			event.jPlayer.status = $.extend(true, {}, this.status); // Deep copy
 			event.jPlayer.html = $.extend(true, {}, this.html); // Deep copy
+			event.jPlayer.aurora = $.extend(true, {}, this.aurora); // Deep copy
 			event.jPlayer.flash = $.extend(true, {}, this.flash); // Deep copy
 			if(error) {
 				event.jPlayer.error = $.extend({}, error);
@@ -1744,10 +1907,12 @@
 		_resetGate: function() {
 			this.html.audio.gate = false;
 			this.html.video.gate = false;
+			this.aurora.gate = false;
 			this.flash.gate = false;
 		},
 		_resetActive: function() {
 			this.html.active = false;
+			this.aurora.active = false;
 			this.flash.active = false;
 		},
 		_escapeHtml: function(s) {
@@ -1761,7 +1926,7 @@
 		_absoluteMediaUrls: function(media) {
 			var self = this;
 			$.each(media, function(type, url) {
-				if(url && self.format[type]) {
+				if(url && self.format[type] && url.substr(0, 5) !== "data:") {
 					media[type] = self._qualifyURL(url);
 				}
 			});
@@ -1806,6 +1971,7 @@
 				$.each(self.solutions, function(solutionPriority, solution) {
 					if(self[solution].support[format] && self._validString(media[format])) { // Format supported in solution and url given for format.
 						var isHtml = solution === 'html';
+						var isAurora = solution === 'aurora';
 
 						if(isVideo) {
 							if(isHtml) {
@@ -1831,6 +1997,10 @@
 								if($.jPlayer.platform.android) {
 									self.androidFix.setMedia = true;
 								}
+							} else if(isAurora) {
+								self.aurora.gate = true;
+								self._aurora_setAudio(media);
+								self.aurora.active = true;
 							} else {
 								self.flash.gate = true;
 								self._flash_setAudio(media);
@@ -1864,15 +2034,15 @@
 						}
 					}
 				}
-				if(this.css.jq.title.length) {
-					if(typeof media.title === 'string') {
+				if(typeof media.title === 'string') {
+					if(this.css.jq.title.length) {
 						this.css.jq.title.html(media.title);
-						if(this.htmlElement.audio) {
-							this.htmlElement.audio.setAttribute('title', media.title);
-						}
-						if(this.htmlElement.video) {
-							this.htmlElement.video.setAttribute('title', media.title);
-						}
+					}
+					if(this.htmlElement.audio) {
+						this.htmlElement.audio.setAttribute('title', media.title);
+					}
+					if(this.htmlElement.video) {
+						this.htmlElement.video.setAttribute('title', media.title);
 					}
 				}
 				this.status.srcSet = true;
@@ -1901,6 +2071,8 @@
 
 			if(this.html.active) {
 				this._html_resetMedia();
+			} else if(this.aurora.active) {
+				this._aurora_resetMedia();
 			} else if(this.flash.active) {
 				this._flash_resetMedia();
 			}
@@ -1910,6 +2082,8 @@
 
 			if(this.html.active) {
 				this._html_clearMedia();
+			} else if(this.aurora.active) {
+				this._aurora_clearMedia();
 			} else if(this.flash.active) {
 				this._flash_clearMedia();
 			}
@@ -1921,6 +2095,8 @@
 			if(this.status.srcSet) {
 				if(this.html.active) {
 					this._html_load();
+				} else if(this.aurora.active) {
+					this._aurora_load();
 				} else if(this.flash.active) {
 					this._flash_load();
 				}
@@ -1943,6 +2119,8 @@
 					this.focus();
 					if(this.html.active) {
 						this._html_play(time);
+					} else if(this.aurora.active) {
+						this._aurora_play(time);
 					} else if(this.flash.active) {
 						this._flash_play(time);
 					}
@@ -1959,6 +2137,8 @@
 			if(this.status.srcSet) {
 				if(this.html.active) {
 					this._html_pause(time);
+				} else if(this.aurora.active) {
+					this._aurora_pause(time);
 				} else if(this.flash.active) {
 					this._flash_pause(time);
 				}
@@ -1978,6 +2158,7 @@
 				args.splice(1, 1); // Remove the conditions from the arguments
 			}
 
+			$.jPlayer.prototype.destroyRemoved();
 			$.each(this.instances, function() {
 				// Remember that "this" is the instance's "element" in the $.each() loop.
 				if(self.element !== this) { // Do not tell my instance.
@@ -1997,6 +2178,8 @@
 			if(this.status.srcSet) {
 				if(this.html.active) {
 					this._html_pause(0);
+				} else if(this.aurora.active) {
+					this._aurora_pause(0);
 				} else if(this.flash.active) {
 					this._flash_pause(0);
 				}
@@ -2009,6 +2192,8 @@
 			if(this.status.srcSet) {
 				if(this.html.active) {
 					this._html_playHead(p);
+				} else if(this.aurora.active) {
+					this._aurora_playHead(p);
 				} else if(this.flash.active) {
 					this._flash_playHead(p);
 				}
@@ -2029,6 +2214,9 @@
 			this.options.muted = muted;
 			if(this.html.used) {
 				this._html_setProperty('muted', muted);
+			}
+			if(this.aurora.used) {
+				this._aurora_mute(muted);
 			}
 			if(this.flash.used) {
 				this._flash_mute(muted);
@@ -2092,6 +2280,9 @@
 			if(this.html.used) {
 				this._html_setProperty('volume', v);
 			}
+			if(this.aurora.used) {
+				this._aurora_volume(v);
+			}
 			if(this.flash.used) {
 				this._flash_volume(v);
 			}
@@ -2128,6 +2319,7 @@
 			v = this.options.muted ? 0 : v;
 
 			if(this.status.noVolume) {
+				this.addStateClass('noVolume');
 				if(this.css.jq.volumeBar.length) {
 					this.css.jq.volumeBar.hide();
 				}
@@ -2138,6 +2330,7 @@
 					this.css.jq.volumeMax.hide();
 				}
 			} else {
+				this.removeStateClass('noVolume');
 				if(this.css.jq.volumeBar.length) {
 					this.css.jq.volumeBar.show();
 				}
@@ -2203,6 +2396,8 @@
 							self[fn](e);
 							if(self.options.autoBlur) {
 								$(this).blur();
+							} else {
+								$(this).focus(); // Force focus for ARIA.
 							}
 						};
 						this.css.jq[fn].bind("click.jPlayer", handler); // Using jPlayer namespace
@@ -2577,13 +2772,31 @@
 				event = "mousemove.jPlayer",
 				namespace = ".jPlayerAutohide",
 				eventType = event + namespace,
-				handler = function() {
-					self.css.jq.gui.fadeIn(self.options.autohide.fadeIn, function() {
-						clearTimeout(self.internal.autohideId);
-						self.internal.autohideId = setTimeout( function() {
-							self.css.jq.gui.fadeOut(self.options.autohide.fadeOut);
-						}, self.options.autohide.hold);
-					});
+				handler = function(event) {
+					var moved = false,
+						deltaX, deltaY;
+					if(typeof self.internal.mouse !== "undefined") {
+						//get the change from last position to this position
+						deltaX = self.internal.mouse.x - event.pageX;
+						deltaY = self.internal.mouse.y - event.pageY;
+						moved = (Math.floor(deltaX) > 0) || (Math.floor(deltaY)>0); 
+					} else {
+						moved = true;
+					}
+					// store current position for next method execution
+					self.internal.mouse = {
+							x : event.pageX,
+							y : event.pageY
+					};
+					// if mouse has been actually moved, do the gui fadeIn/fadeOut
+					if (moved) {
+						self.css.jq.gui.fadeIn(self.options.autohide.fadeIn, function() {
+							clearTimeout(self.internal.autohideId);
+							self.internal.autohideId = setTimeout( function() {
+								self.css.jq.gui.fadeOut(self.options.autohide.fadeOut);
+							}, self.options.autohide.hold);
+						});
+					}
 				};
 
 			if(this.css.jq.gui.length) {
@@ -2594,6 +2807,8 @@
 
 				// Removes the fadeOut operation from the fadeIn callback.
 				clearTimeout(this.internal.autohideId);
+				// undefine mouse
+				delete this.internal.mouse;
 
 				this.element.unbind(namespace);
 				this.css.jq.gui.unbind(namespace);
@@ -2878,6 +3093,99 @@
 			if(this.html.video.available) {
 				this.htmlElement.video[property] = value;
 			}
+		},
+		_aurora_setAudio: function(media) {
+			var self = this;            
+			
+			// Always finds a format due to checks in setMedia()
+			$.each(this.formats, function(priority, format) {
+				if(self.aurora.support[format] && media[format]) {
+					self.status.src = media[format];
+					self.status.format[format] = true;
+					self.status.formatType = format;
+			
+					return false;
+				}
+			});
+			
+			this.aurora.player = new AV.Player.fromURL(this.status.src);
+			this._addAuroraEventListeners(this.aurora.player, this.aurora);
+
+			if(this.options.preload === 'auto') {
+				this._aurora_load();
+				this.status.waitForLoad = false;
+			}
+		},
+		_aurora_resetMedia: function() {
+			if (this.aurora.player) {
+				this.aurora.player.stop();
+			}
+		},
+		_aurora_clearMedia: function() {
+			// Nothing to clear.
+		},
+		_aurora_load: function() {
+			if(this.status.waitForLoad) {
+				this.status.waitForLoad = false;
+				this.aurora.player.preload();
+			}
+		},
+		_aurora_play: function(time) {
+			if (!this.status.waitForLoad) {
+				if (!isNaN(time)) {
+					this.aurora.player.seek(time);
+				}
+			}
+			if (!this.aurora.player.playing) {
+				this.aurora.player.play();
+			}
+			this.status.waitForLoad = false;
+			this._aurora_checkWaitForPlay();
+			
+			// No event from the player, update UI now.
+			this._updateButtons(true);
+			this._trigger($.jPlayer.event.play);
+		},
+		_aurora_pause: function(time) {
+			if (!isNaN(time)) {
+				this.aurora.player.seek(time * 1000);
+			}
+			this.aurora.player.pause();
+			
+			if(time > 0) { // Avoids a setMedia() followed by stop() or pause(0) hiding the video play button.
+				this._aurora_checkWaitForPlay();
+			}
+			
+			// No event from the player, update UI now.
+			this._updateButtons(false);
+			this._trigger($.jPlayer.event.pause);
+		},
+		_aurora_playHead: function(percent) {
+			if(this.aurora.player.duration > 0) {
+				// The seek() sould be in milliseconds, but the only codec that works with seek (aac.js) uses seconds.
+				this.aurora.player.seek(percent * this.aurora.player.duration / 100); // Using seconds
+			}
+				
+			if(!this.status.waitForLoad) {
+				this._aurora_checkWaitForPlay();
+			}
+		},
+		_aurora_checkWaitForPlay: function() {
+			if(this.status.waitForPlay) {
+				this.status.waitForPlay = false;
+			}
+		},
+		_aurora_volume: function(v) {
+			this.aurora.player.volume = v * 100;
+		},
+		_aurora_mute: function(m) {
+			if (m) {
+				this.aurora.properties.lastvolume = this.aurora.player.volume;
+				this.aurora.player.volume = 0;
+			} else {
+				this.aurora.player.volume = this.aurora.properties.lastvolume;
+			}
+			this.aurora.properties.muted = m;
 		},
 		_flash_setAudio: function(media) {
 			var self = this;
