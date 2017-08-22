@@ -54,11 +54,17 @@ class UserDB:
             return False
         user = User.create(username, password, admin)
         try:
-            self.conn.execute('''
-            INSERT INTO users
-            (username, admin, password, salt)
-            VALUES (?,?,?,?)''',
-            (user.name, 1 if user.isadmin else 0, user.password, user.salt))
+            exists = self.conn.execute('SELECT username'
+                                 ' FROM users WHERE lower(username) = lower(?)',
+                                 (username,)).fetchone()
+            if (not exists):
+                self.conn.execute('''
+                INSERT INTO users
+                (username, admin, password, salt)
+                VALUES (?,?,?,?)''',
+                (user.name, 1 if user.isadmin else 0, user.password, user.salt))
+            else:
+                raise sqlite3.IntegrityError;
         except sqlite3.IntegrityError:
             log.e('cannot create user "%s", already exists!' % user.name)
             return False
@@ -82,7 +88,7 @@ class UserDB:
 
         newuser = User.create(username, newpassword, False) #dummy user for salt
         self.conn.execute('''
-        UPDATE users SET password = ?, salt = ? WHERE username = ?
+        UPDATE users SET password = ?, salt = ? WHERE lower(username) = lower(?)
         ''', (newuser.password, newuser.salt, newuser.name) )
         self.conn.commit()
         return "success"
@@ -103,7 +109,7 @@ class UserDB:
             return User.nobody()
 
         rows = self.conn.execute('SELECT rowid, username, admin, password, salt'
-                                 ' FROM users WHERE username = ?', (username,))\
+                                 ' FROM users WHERE lower(username) = lower(?)', (username,))\
                                  .fetchall()
         assert len(rows) <= 1
         if rows:
@@ -131,7 +137,7 @@ class UserDB:
         return username[0] if username else 'nobody'
 
     def getIdByName(self, username):
-        res = self.conn.execute('''SELECT rowid FROM users WHERE username = ?''',(username,))
+        res = self.conn.execute('''SELECT rowid FROM users WHERE lower(username) = lower(?)''',(username,))
         userid = res.fetchone()
         if userid:
             return userid[0]
