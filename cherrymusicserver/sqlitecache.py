@@ -39,6 +39,7 @@ import sys
 import traceback
 
 from backport.collections import deque, Counter
+from contextlib import closing
 from operator import itemgetter
 
 import cherrymusicserver as cherry
@@ -92,8 +93,10 @@ class SQLiteCache(object):
         self.db = self.conn.cursor()
 
         #I don't care about journaling!
-        self.conn.execute('PRAGMA synchronous = OFF')
-        self.conn.execute('PRAGMA journal_mode = MEMORY')
+        with closing(self.conn.execute('PRAGMA synchronous = OFF')):
+            pass
+        with closing(self.conn.execute('PRAGMA journal_mode = MEMORY')):
+            pass
         self.load_db_to_memory()
 
     def file_db_in_memory(self):
@@ -310,8 +313,8 @@ class SQLiteCache(object):
 
 
     def add_to_file_table(self, fileobj):
-        cursor = self.conn.execute('INSERT INTO files (parent, filename, filetype, isdir) VALUES (?,?,?,?)', (fileobj.parent.uid if fileobj.parent else -1, fileobj.name, fileobj.ext, 1 if fileobj.isdir else 0))
-        rowid = cursor.lastrowid
+        with closing(self.conn.execute('INSERT INTO files (parent, filename, filetype, isdir) VALUES (?,?,?,?)', (fileobj.parent.uid if fileobj.parent else -1, fileobj.name, fileobj.ext, 1 if fileobj.isdir else 0))) as cursor:
+            rowid = cursor.lastrowid
         fileobj.uid = rowid
         return fileobj
 
@@ -319,9 +322,11 @@ class SQLiteCache(object):
     def add_to_dictionary_table(self, filename):
         word_ids = []
         for word in set(SQLiteCache.searchterms(filename)):
-            wordrowid = self.conn.execute('''SELECT rowid FROM dictionary WHERE word = ? LIMIT 0,1''', (word,)).fetchone()
+            with closing(self.conn.execute('''SELECT rowid FROM dictionary WHERE word = ? LIMIT 0,1''', (word,))) as cursor:
+                wordrowid = cursor.fetchone()
             if wordrowid is None:
-                wordrowid = self.conn.execute('''INSERT INTO dictionary (word) VALUES (?)''', (word,)).lastrowid
+                with closing(self.conn.execute('''INSERT INTO dictionary (word) VALUES (?)''', (word,))) as cursor:
+                    wordrowid = cursor.lastrowid
             else:
                 wordrowid = wordrowid[0]
             word_ids.append(wordrowid)
@@ -329,8 +334,10 @@ class SQLiteCache(object):
 
 
     def add_to_search_table(self, file_id, word_id_seq):
-        self.conn.executemany('INSERT INTO search (drowid, frowid) VALUES (?,?)',
-                              ((wid, file_id) for wid in word_id_seq))
+        with closing(
+            self.conn.executemany('INSERT INTO search (drowid, frowid) VALUES (?,?)',
+                                  ((wid, file_id) for wid in word_id_seq))):
+            pass
 
 
     def remove_recursive(self, fileobj, progress=None):
@@ -385,18 +392,19 @@ class SQLiteCache(object):
         '''remove all references to the given fileid from the search table.
         returns a list of all wordids which had their last search references
         deleted during this operation.'''
-        foundlist = self.conn.execute(
+        with closing(self.conn.execute(
                             'SELECT drowid FROM search' \
-                            ' WHERE frowid=?', (fileid,)) \
-                            .fetchall()
+                            ' WHERE frowid=?', (fileid,))) as cursor:
+            foundlist = cursor.fetchall()
         wordset = set([t[0] for t in foundlist])
 
-        self.conn.execute('DELETE FROM search WHERE frowid=?', (fileid,))
+        with closing(self.conn.execute('DELETE FROM search WHERE frowid=?', (fileid,))):
+            pass
 
         for wid in set(wordset):
-            count = self.conn.execute('SELECT count(*) FROM search'
-                                      ' WHERE drowid=?', (wid,)) \
-                                      .fetchone()[0]
+            with closing(self.conn.execute('SELECT count(*) FROM search'
+                                      ' WHERE drowid=?', (wid,))) as cursor:
+                count = cursor.fetchone()[0]
             if count:
                 wordset.remove(wid)
         return wordset
@@ -407,12 +415,14 @@ class SQLiteCache(object):
         if not wordids:
             return
         args = list(zip(wordids))
-        self.conn.executemany('DELETE FROM dictionary WHERE rowid=(?)', args)
+        with closing(self.conn.executemany('DELETE FROM dictionary WHERE rowid=(?)', args)):
+            pass
 
 
     def remove_from_files(self, fileid):
         '''deletes the given file id from the files table'''
-        self.conn.execute('DELETE FROM files WHERE rowid=?', (fileid,))
+        with closing(self.conn.execute('DELETE FROM files WHERE rowid=?', (fileid,))):
+            pass
 
 
     def db_recursive_filelister(self, fileobj, factory=None):
@@ -437,10 +447,10 @@ class SQLiteCache(object):
     def fetch_child_files(self, fileobj, sort=True, reverse=False):
         '''fetches from files table a list of all File objects that have the
         argument fileobj as their parent.'''
-        id_tuples = self.conn.execute(
-                            'SELECT rowid, filename, filetype, isdir' \
-                            ' FROM files where parent=?', (fileobj.uid,)) \
-                            .fetchall()
+        with closing(self.conn.execute(
+                                    'SELECT rowid, filename, filetype, isdir' \
+                                    ' FROM files where parent=?', (fileobj.uid,))) as cursor:
+            id_tuples = cursor.fetchall()
         if sort:
             id_tuples = sorted(id_tuples, key=lambda t: t[1], reverse=reverse)
         return (File(name + ext,
@@ -556,9 +566,10 @@ class SQLiteCache(object):
 
     def update_word_occurrences(self):
         log.i(_('updating word occurrences...'))
-        self.conn.execute('''UPDATE dictionary SET occurrences = (
+        with closing(self.conn.execute('''UPDATE dictionary SET occurrences = (
                 select count(*) from search WHERE search.drowid = dictionary.rowid
-            )''')
+            )''')):
+            pass
 
     def enumerate_fs_with_db(self, startpath, itemfactory=None):
         '''
