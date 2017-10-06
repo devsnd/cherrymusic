@@ -16,7 +16,7 @@ import re
 here = os.path.abspath(os.path.dirname(__file__))
 
 def get_global_str_from_file(rel_filepath, var):
-    prog = re.compile(r'^{} = ("|\')(.*?)("|\')'.format(var))
+    prog = re.compile(r'^{0} = ("|\')(.*?)("|\')'.format(var))
     with open(os.path.join(here, rel_filepath), 'r') as f:
         for line in f.readlines():
             res = prog.match(line)
