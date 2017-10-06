@@ -654,7 +654,7 @@ class HTTPHandler(object):
         return playlists
 
     def api_logout(self):
-        cherrypy.lib.sessions.expire()
+        cherrypy.session['username'] = None
     api_logout.no_auth = True
 
     def api_downloadpls(self, plid, hostaddr):
