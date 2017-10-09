@@ -347,7 +347,7 @@ class HTTPHandler(object):
             _save_and_release_session()
             zipmime = 'application/x-zip-compressed'
             cherrypy.response.headers["Content-Type"] = zipmime
-            zipname = 'attachment; filename="music.zip"'
+            zipname = 'attachment; filename="CherryMusic-archive.zip"'
             cherrypy.response.headers['Content-Disposition'] = zipname
             basedir = cherry.config['media.basedir']
             fullpath_filelist = [os.path.join(basedir, f) for f in filelist]

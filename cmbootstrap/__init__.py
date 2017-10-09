@@ -97,7 +97,7 @@ def bootstrap():
         download it for you and put it in the folder in which currently
         CherryMusic resides.
         ''')
-        if input("Download cherrypy now? (y/n)") == 'y':
+        if input("Download cherrypy now? (y/N)\n") in ('y', 'yes'):
             inst = DependencyInstaller()
             inst.install_cherrypy()
             print('Successfully installed cherrymusic dependencies! You can now start cherrymusic.')

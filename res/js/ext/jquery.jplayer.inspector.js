@@ -1,17 +1,16 @@
 /*
- * jPlayerInspector Plugin for jPlayer (2.0.0+) Plugin for jQuery JavaScript Library
- * http://www.happyworm.com/jquery/jplayer
+ * jPlayerInspector Plugin for jPlayer Plugin for jQuery JavaScript Library
+ * http://www.jplayer.org
  *
- * Copyright (c) 2009 - 2011 Happyworm Ltd
- * Dual licensed under the MIT and GPL licenses.
- *  - http://www.opensource.org/licenses/mit-license.php
- *  - http://www.gnu.org/copyleft/gpl.html
+ * Copyright (c) 2009 - 2014 Happyworm Ltd
+ * Licensed under the MIT license.
+ * http://www.opensource.org/licenses/MIT
  *
  * Author: Mark J Panaghiston
- * Version: 1.0.3
- * Date: 7th August 2011
+ * Version: 1.0.5
+ * Date: 1st April 2014
  *
- * For use with jPlayer Version: 2.0.29
+ * For use with jPlayer Version: 2.6.0+
  *
  * Note: Declare inspector instances after jPlayer instances. ie., Otherwise the jPlayer instance is nonsense.
  */
@@ -71,17 +70,18 @@
 			// MJP: Doing it longhand so order and layout easier to control.
 			structure +=
 						'<div id="' + config.eventId[$.jPlayer.event.ready] + '" style="' + eventStyle + '"></div>'
+						+ '<div id="' + config.eventId[$.jPlayer.event.setmedia] + '" style="' + eventStyle + '"></div>'
 						+ '<div id="' + config.eventId[$.jPlayer.event.flashreset] + '" style="' + eventStyle + '"></div>'
 						+ '<div id="' + config.eventId[$.jPlayer.event.resize] + '" style="' + eventStyle + '"></div>'
 						+ '<div id="' + config.eventId[$.jPlayer.event.repeat] + '" style="' + eventStyle + '"></div>'
 						+ '<div id="' + config.eventId[$.jPlayer.event.click] + '" style="' + eventStyle + '"></div>'
-						+ '<div id="' + config.eventId[$.jPlayer.event.error] + '" style="' + eventStyle + '"></div>'
 						+ '<div id="' + config.eventId[$.jPlayer.event.warning] + '" style="' + eventStyle + '"></div>'
 
 						+ '<div id="' + config.eventId[$.jPlayer.event.loadstart] + '" style="clear:left;' + eventStyle + '"></div>'
 						+ '<div id="' + config.eventId[$.jPlayer.event.progress] + '" style="' + eventStyle + '"></div>'
 						+ '<div id="' + config.eventId[$.jPlayer.event.timeupdate] + '" style="' + eventStyle + '"></div>'
 						+ '<div id="' + config.eventId[$.jPlayer.event.volumechange] + '" style="' + eventStyle + '"></div>'
+						+ '<div id="' + config.eventId[$.jPlayer.event.error] + '" style="' + eventStyle + '"></div>'
 
 						+ '<div id="' + config.eventId[$.jPlayer.event.play] + '" style="clear:left;' + eventStyle + '"></div>'
 						+ '<div id="' + config.eventId[$.jPlayer.event.pause] + '" style="' + eventStyle + '"></div>'
@@ -255,6 +255,13 @@
 				jPlayerInfo += "&nbsp;" + prop + ": " + $(this).data("jPlayerInspector").jPlayer.data("jPlayer").status.media[prop] + "<br />"; // Some are strings
 			}
 			jPlayerInfo += "};</code></p>"
+
+			jPlayerInfo += "<p>";
+			jPlayerInfo += "<code>status.videoWidth = '" + $(this).data("jPlayerInspector").jPlayer.data("jPlayer").status.videoWidth + "'</code>";
+			jPlayerInfo += " | <code>status.videoHeight = '" + $(this).data("jPlayerInspector").jPlayer.data("jPlayer").status.videoHeight + "'</code>";
+			jPlayerInfo += "<br /><code>status.width = '" + $(this).data("jPlayerInspector").jPlayer.data("jPlayer").status.width + "'</code>";
+			jPlayerInfo += " | <code>status.height = '" + $(this).data("jPlayerInspector").jPlayer.data("jPlayer").status.height + "'</code>";
+			jPlayerInfo += "</p>";
 
 			+ "<p>Raw browser test for HTML5 support. Should equal a function if HTML5 is available.<br />";
 			if($(this).data("jPlayerInspector").jPlayer.data("jPlayer").html.audio.available) {
