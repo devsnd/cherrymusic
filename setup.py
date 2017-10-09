@@ -7,14 +7,25 @@ except ImportError:
 import os
 import sys
 import codecs
-import cherrymusicserver
-from cherrymusicserver import pathprovider
 try:
     import py2exe
 except ImportError:
     pass
+import re
 
 here = os.path.abspath(os.path.dirname(__file__))
+
+def get_global_str_from_file(rel_filepath, var):
+    prog = re.compile(r'^{0} = ("|\')(.*?)("|\')'.format(var))
+    with open(os.path.join(here, rel_filepath), 'r') as f:
+        for line in f.readlines():
+            res = prog.match(line)
+            if res is not None:
+                return str(res.group(2))
+
+initFile = 'cherrymusicserver/__init__.py'
+VERSION = get_global_str_from_file(initFile, 'VERSION')
+DESCRIPTION = get_global_str_from_file(initFile, 'DESCRIPTION')
 
 import gzip
 def gzipManPages():
@@ -76,7 +87,10 @@ def packagedata(pkgfolder, childpath=''):
 
 #setup preparations:
 gzipManPages()
-shareFolder = os.path.join('share',pathprovider.sharedFolderName)
+pathproviderFile = os.path.join('cherrymusicserver/pathprovider.py')
+shareFolder = os.path.join(
+    'share', get_global_str_from_file(pathproviderFile, 'sharedFolderName')
+)
 
 # files to put in /usr/share
 data_files = list_files_in_dir(
@@ -103,8 +117,8 @@ else:
 
 setup_options = {
     'name': 'CherryMusic',
-    'version': cherrymusicserver.VERSION,
-    'description': cherrymusicserver.DESCRIPTION,
+    'version': VERSION,
+    'description': DESCRIPTION,
     'long_description': long_description,
     'author': 'Tom Wallroth & Tilman Boerner',
     'author_email': 'tomwallroth@gmail.com, tilman.boerner@gmx.net',
