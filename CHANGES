@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+0.41.0 (2017-10-09)
+ - FIXED: Installing CherryMusic via pip (thanks to rjsberry)
+ - IMPROVEMENT: updated jPlayer to 2.9.2, improved mobile compatibility (thansk to Max Leiter)
+ - IMPROVEMENT: Increased List Directory Item Size (thansk to Max Leiter)
+ - IMPROVEMENT: Made usernames case-insensitive (thanks to Max Leiter)
+ - IMPROVEMENT: Changed download zip archive name (thanks to Max Leiter)
+
 0.40.0 (2017-04-08)
  - FEATURE: Added option to select Album Art Source for manual searches
  - FIXED: Server refused to start when not able to detect cherrypy version
