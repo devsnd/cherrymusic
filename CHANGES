@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+0.41.1 (2017-10-10)
+ - FIXED: reverted jPlayer update, because it broke everything
+
 0.41.0 (2017-10-09)
  - FIXED: Installing CherryMusic via pip (thanks to rjsberry)
  - IMPROVEMENT: updated jPlayer to 2.9.2, improved mobile compatibility (thansk to Max Leiter)
