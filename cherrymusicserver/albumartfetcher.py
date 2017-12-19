@@ -97,6 +97,10 @@ class AlbumArtFetcher:
             'regexes': ['<div class="thumb".+?<img.+?src="([^"]+)"'],
             'user_agent': 'curl/7.52.1',
         },
+        'bandcamp': {
+            'url': "https://bandcamp.com/search?q=",
+            'regexes': ['<div class="art".+?<img src="([^"]+)"']
+        }
         # buy.com is now rakuten.com
         # with a new search API that nobody bothered to figure out yet
         # 'buy.com': {
