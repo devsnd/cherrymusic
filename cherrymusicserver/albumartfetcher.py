@@ -90,7 +90,10 @@ class AlbumArtFetcher:
             'url': "http://www.amazon.com/s/?field-keywords=",
             'regexes': [
                 '<img[^>]+?alt="Product Details"[^>]+?src="([^"]+)"',
-                '<img[^>]+?src="([^"]+)"[^>]+?alt="Product Details"'],
+                '<img[^>]+?src="([^"]+)"[^>]+?alt="Product Details"',
+                '<img[^>]+?src="([^"]+)"[^>]+?class="s-access-image',
+                '<img[^>]+?src="([^"]+)"[^>]+?data-search-image',
+            ],
         },
         'bestbuy.com': {
             'url': 'http://www.bestbuy.com/site/searchpage.jsp?_dyncharset=UTF-8&id=pcat17071&st=',
