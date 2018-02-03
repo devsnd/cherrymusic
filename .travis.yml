@@ -51,6 +51,7 @@ matrix:
     - python: "3.4"
       env: "CHERRYPY_VERSION='>=12.0,<13.0'"
   allow_failures:
+    - python: "3.7-dev"
     - env: "CHERRYPY_VERSION='>=3.3,<3.4'"
     - env: "CHERRYPY_VERSION='>=3.4,<3.5'"
     - env: "CHERRYPY_VERSION='>=3.5,<3.6'"
