@@ -253,7 +253,7 @@ class HTTPHandler(object):
             path = os.path.sep.join(path)
             if sys.version_info < (3, 0):       # workaround for #327 (cherrypy issue)
                 path = path.decode('utf-8')     # make it work with non-ascii
-            else:
+            elif cherry.needs_serve_file_utf8_fix:
                 path = codecs.decode(codecs.encode(path, 'latin1'), 'utf-8')
             fullpath = os.path.join(cherry.config['media.basedir'], path)
 
