@@ -3,6 +3,7 @@ Changelog
 
 0.41.2 (2018-02-04)
  - FIXED: '--setup' now works for CherryPy 12 and upwards  (thanks to TangoSierraAlfaVI)
+ - IMPROVEMENT: Added Bandcamp album cover fetching (thanks to its-wednesday)
 
 0.41.1 (2017-10-10)
  - FIXED: reverted jPlayer update, because it broke everything
