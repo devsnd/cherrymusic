@@ -326,12 +326,11 @@ def test_trans():
     import sys
     if sys.version_info < (3, 0):
         test_paths = ['path', ('p\xc3\xb6th', u'pöth')]
+    elif cherry.needs_serve_file_utf8_fix:
+        test_paths = ['path',
+                      ('pöth'.encode('utf-8').decode('latin-1'), 'pöth')]
     else:
-        if cherry.needs_serve_file_utf8_fix:
-            test_paths = ['path',
-                          ('pöth'.encode('utf-8').decode('latin-1'), 'pöth')]
-        else:
-            test_paths = ['path', 'pöth']
+        test_paths = ['path', 'pöth']
     for path in test_paths:
         yield check_trans, path
 
