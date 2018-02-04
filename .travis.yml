@@ -5,6 +5,10 @@
 #
 
 language: python
+sudo: False
+cache:
+  - pip
+
 python:
   - "2.7"
   - "3.3"
@@ -55,6 +59,7 @@ matrix:
     - env: "CHERRYPY_VERSION='>=3.3,<3.4'"
     - env: "CHERRYPY_VERSION='>=3.4,<3.5'"
     - env: "CHERRYPY_VERSION='>=3.5,<3.6'"
+  fast_finish: true
 
 # command to install dependencies
 install:
