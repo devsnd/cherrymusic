@@ -32,7 +32,7 @@
 #python 2.6+ backward compability
 from __future__ import unicode_literals
 
-VERSION = "0.41.1"
+VERSION = "0.41.2"
 __version__ = VERSION
 DESCRIPTION = "an mp3 server for your browser"
 LONG_DESCRIPTION = """CherryMusic is a music streaming
@@ -466,10 +466,11 @@ If you are sure that cherrymusic is not running, you can delete this file and re
             basedirpath = codecs.encode(basedirpath, 'utf-8')
             scriptname = codecs.encode(config['server.rootpath'], 'utf-8')
         else:
-            # fix cherrypy unicode issue (only for Python3)
-            # see patch to cherrypy.lib.static.serve_file way above and
-            # https://bitbucket.org/cherrypy/cherrypy/issue/1148/wrong-encoding-for-urls-containing-utf-8
-            basedirpath = codecs.decode(codecs.encode(basedirpath, 'utf-8'), 'latin-1')
+            if needs_serve_file_utf8_fix:
+                # fix cherrypy unicode issue (only for Python3)
+                # see patch to cherrypy.lib.static.serve_file way above and
+                # https://bitbucket.org/cherrypy/cherrypy/issue/1148/wrong-encoding-for-urls-containing-utf-8
+                basedirpath = codecs.decode(codecs.encode(basedirpath, 'utf-8'), 'latin-1')
             scriptname = config['server.rootpath']
         cherrypy.tree.mount(
             httphandler, scriptname,

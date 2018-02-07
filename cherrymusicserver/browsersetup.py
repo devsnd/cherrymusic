@@ -163,6 +163,5 @@ If you run the server locally, use: localhost:{port}.
 '''.format(port=port)))
 
         cherrypy.lib.caching.expires(0)
-        cherrypy.engine.timeout_monitor.frequency = 1
         cherrypy.engine.start()
         cherrypy.engine.block()

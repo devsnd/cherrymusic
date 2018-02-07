@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 #
 # CherryMusic - a standalone music server
 # Copyright (c) 2012 - 2014 Tom Wallroth & Tilman Boerner
@@ -44,7 +45,6 @@ from cherrymusicserver import httphandler
 from cherrymusicserver import service
 from cherrymusicserver.cherrymodel import CherryModel, MusicEntry
 
-from cherrymusicserver import log
 
 class MockAction(Exception):
     pass
@@ -321,19 +321,34 @@ class TestHTTPHandler(unittest.TestCase):
         session is used to authenticate the http request."""
         self.assertRaises(AttributeError, self.http.api, 'userchangepassword')
 
-    def test_trans(self):
-        import os
-        config = {'media.basedir': 'BASEDIR', 'media.transcode': True}
-        with mock_auth():
-            with patch('cherrymusicserver.httphandler.cherry.config', config):
-                with patch('cherrymusicserver.httphandler.cherrypy'):
-                    with patch('cherrymusicserver.httphandler.audiotranscode.AudioTranscode') as transcoder:
-                        transcoder.return_value = transcoder
-                        expectPath = os.path.join(config['media.basedir'], 'path')
 
-                        httphandler.HTTPHandler(config).trans('newformat', 'path', bitrate=111)
+def test_trans():
+    import sys
+    if sys.version_info < (3, 0):
+        test_paths = ['path', ('p\xc3\xb6th', u'pöth')]
+    elif cherry.needs_serve_file_utf8_fix:
+        test_paths = ['path',
+                      ('pöth'.encode('utf-8').decode('latin-1'), 'pöth')]
+    else:
+        test_paths = ['path', 'pöth']
+    for path in test_paths:
+        yield check_trans, path
 
-                        transcoder.transcode_stream.assert_called_with(expectPath, 'newformat', bitrate=111, starttime=0)
+
+def check_trans(path):
+    import os
+    path, expectPath = (path, path) if isinstance(path, str) else path
+    config = {'media.basedir': 'BASEDIR', 'media.transcode': True}
+    with mock_auth():
+        with patch('cherrymusicserver.httphandler.cherry.config', config):
+            with patch('cherrymusicserver.httphandler.cherrypy'):
+                with patch('cherrymusicserver.httphandler.audiotranscode.AudioTranscode') as transcoder:
+                    transcoder.return_value = transcoder
+                    expectPath = os.path.join(config['media.basedir'], expectPath)
+
+                    httphandler.HTTPHandler(config).trans('newformat', path, bitrate=111)
+
+                    transcoder.transcode_stream.assert_called_with(expectPath, 'newformat', bitrate=111, starttime=0)
 
 
 if __name__ == "__main__":

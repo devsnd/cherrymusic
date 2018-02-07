@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+0.41.2 (2018-02-07)
+ - FIXED: Make jPlayer work again in master branch (merge 0.41.1 into master)
+ - FIXED: '--setup' now works for CherryPy 12 and upwards  (thanks to TangoSierraAlfaVI)
+ - FIXED: UnicodeError when transcoding non-ASCII URLs (thanks to evetsso)
+ - IMPROVEMENT: Added Bandcamp album cover fetching (thanks to its-wednesday)
+
 0.41.1 (2017-10-10)
  - FIXED: reverted jPlayer update, because it broke everything
 

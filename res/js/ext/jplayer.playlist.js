@@ -2,57 +2,33 @@
  * Playlist Object for the jPlayer Plugin
  * http://www.jplayer.org
  *
- * Copyright (c) 2009 - 2014 Happyworm Ltd
- * Licensed under the MIT license.
- * http://www.opensource.org/licenses/MIT
+ * Copyright (c) 2009 - 2011 Happyworm Ltd
+ * Dual licensed under the MIT and GPL licenses.
+ *  - http://www.opensource.org/licenses/mit-license.php
+ *  - http://www.gnu.org/copyleft/gpl.html
  *
  * Author: Mark J Panaghiston
- * Version: 2.4.1
- * Date: 19th November 2014
- *
- * Requires:
- *  - jQuery 1.7.0+
- *  - jPlayer 2.8.2+
+ * Version: 2.1.0 (jPlayer 2.1.0)
+ * Date: 1st September 2011
  */
 
-/*global jPlayerPlaylist:true */
+/* Code verified using http://www.jshint.com/ */
+/*jshint asi:false, bitwise:false, boss:false, browser:true, curly:true, debug:false, eqeqeq:true, eqnull:false, evil:false, forin:false, immed:false, jquery:true, laxbreak:false, newcap:true, noarg:true, noempty:true, nonew:true, nomem:false, onevar:false, passfail:false, plusplus:false, regexp:false, undef:true, sub:false, strict:false, white:false */
+/*global  jPlayerPlaylist: true, jQuery:false, alert:false */
 
 (function($, undefined) {
 
 	jPlayerPlaylist = function(cssSelector, playlist, options) {
 		var self = this;
 
+        this.active = false;
 		this.current = 0;
 		this.loop = false; // Flag used with the jPlayer repeat event
 		this.shuffled = false;
 		this.removing = false; // Flag is true during remove animation, disabling the remove() method until complete.
 
 		this.cssSelector = $.extend({}, this._cssSelector, cssSelector); // Object: Containing the css selectors for jPlayer and its cssSelectorAncestor
-		this.options = $.extend(true, {
-			keyBindings: {
-				next: {
-					key: 221, // ]
-					fn: function() {
-						self.next();
-					}
-				},
-				previous: {
-					key: 219, // [
-					fn: function() {
-						self.previous();
-					}
-				},
-				shuffle: {
-					key: 83, // s
-					fn: function() {
-						self.shuffle();
-					}
-				}
-			},
-			stateClass: {
-				shuffled: "jp-state-shuffled"
-			}
-		}, this._options, options); // Object: The jPlayer constructor options for this playlist and the playlist options
+		this.options = $.extend(true, {}, this._options, options); // Object: The jPlayer constructor options for this playlist and the playlist options
 
 		this.playlist = []; // Array of Objects: The current playlist displayed (Un-shuffled or Shuffled)
 		this.original = []; // Array of Objects: The original playlist
@@ -60,8 +36,12 @@
 		this._initPlaylist(playlist); // Copies playlist to this.original. Then mirrors this.original to this.playlist. Creating two arrays, where the element pointers match. (Enables pointer comparison.)
 
 		// Setup the css selectors for the extra interface items used by the playlist.
-		this.cssSelector.details = this.cssSelector.cssSelectorAncestor + " .jp-details"; // Note that jPlayer controls the text in the title element.
-		this.cssSelector.playlist = this.cssSelector.cssSelectorAncestor + " .jp-playlist";
+		this.cssSelector.title = this.cssSelector.cssSelectorAncestor + " .jp-title"; // Note that the text is written to the decendant li node.
+		if(this.options.playlistOptions.playlistSelector) {
+			this.cssSelector.playlist = this.options.playlistOptions.playlistSelector;
+		} else {
+			this.cssSelector.playlist = this.cssSelector.cssSelectorAncestor + " .jp-playlist";
+		}
 		this.cssSelector.next = this.cssSelector.cssSelectorAncestor + " .jp-next";
 		this.cssSelector.previous = this.cssSelector.cssSelectorAncestor + " .jp-previous";
 		this.cssSelector.shuffle = this.cssSelector.cssSelectorAncestor + " .jp-shuffle";
@@ -76,70 +56,44 @@
 		};
 
 		// Create a ready event handler to initialize the playlist
-		$(this.cssSelector.jPlayer).bind($.jPlayer.event.ready, function() {
+        // is now handled by cherrymusic
+		/*$(this.cssSelector.jPlayer).bind($.jPlayer.event.ready, function(event) {
 			self._init();
-		});
+		});*/
 
 		// Create an ended event handler to move to the next item
-		$(this.cssSelector.jPlayer).bind($.jPlayer.event.ended, function() {
-			self.next();
-		});
+		/*$(this.cssSelector.jPlayer).bind($.jPlayer.event.ended, function(event) {
+            if(self.active){
+                self.next();
+            }
+		});*/
 
 		// Create a play event handler to pause other instances
-		$(this.cssSelector.jPlayer).bind($.jPlayer.event.play, function() {
+		$(this.cssSelector.jPlayer).bind($.jPlayer.event.play, function(event) {
 			$(this).jPlayer("pauseOthers");
 		});
 
 		// Create a resize event handler to show the title in full screen mode.
 		$(this.cssSelector.jPlayer).bind($.jPlayer.event.resize, function(event) {
 			if(event.jPlayer.options.fullScreen) {
-				$(self.cssSelector.details).show();
+				$(self.cssSelector.title).show();
 			} else {
-				$(self.cssSelector.details).hide();
+				$(self.cssSelector.title).hide();
 			}
 		});
-
-		// Create click handlers for the extra buttons that do playlist functions.
-		$(this.cssSelector.previous).click(function(e) {
-			e.preventDefault();
-			self.previous();
-			self.blur(this);
-		});
-
-		$(this.cssSelector.next).click(function(e) {
-			e.preventDefault();
-			self.next();
-			self.blur(this);
-		});
-
-		$(this.cssSelector.shuffle).click(function(e) {
-			e.preventDefault();
-			if(self.shuffled && $(self.cssSelector.jPlayer).jPlayer("option", "useStateClassSkin")) {
-				self.shuffle(false);
-			} else {
-				self.shuffle(true);
-			}
-			self.blur(this);
-		});
-		$(this.cssSelector.shuffleOff).click(function(e) {
-			e.preventDefault();
-			self.shuffle(false);
-			self.blur(this);
-		}).hide();
 
 		// Put the title in its initial display state
 		if(!this.options.fullScreen) {
-			$(this.cssSelector.details).hide();
+			$(this.cssSelector.title).hide();
 		}
 
 		// Remove the empty <li> from the page HTML. Allows page to be valid HTML, while not interfereing with display animations
-		$(this.cssSelector.playlist + " ul").empty();
+		$(this.cssSelector.playlist + " ul.playlist-container-list").empty();
 
-		// Create .on() handlers for the playlist items along with the free media and remove controls.
+		// Create .live() handlers for the playlist items along with the free media and remove controls.
 		this._createItemHandlers();
 
-		// Instance jPlayer
-		$(this.cssSelector.jPlayer).jPlayer(this.options);
+		
 	};
 
 	jPlayerPlaylist.prototype = {
@@ -160,8 +114,16 @@
 				itemClass: "jp-playlist-item",
 				freeGroupClass: "jp-free-media",
 				freeItemClass: "jp-playlist-item-free",
-				removeItemClass: "jp-playlist-item-remove"
-			}
+				removeItemClass: "jp-playlist-item-remove",
+				actionItemClass: "jp-playlist-item-action",
+				parentFolderItemClass: "jp-playlist-item-show-parent-folder",
+				playlistSelector: false,
+				playtimeClass: "jp-playlist-playtime",
+			},
+            hooks: {
+                //can transform track before playing in jPlayer
+                "setMedia" : function(track){return track}, 
+            },
 		},
 		option: function(option, value) { // For changing playlist options only
 			if(value === undefined) {
@@ -189,12 +151,15 @@
 			this._refresh(function() {
 				if(self.options.playlistOptions.autoPlay) {
 					self.play(self.current);
-				} else {
-					self.select(self.current);
 				}
 			});
 		},
 		_initPlaylist: function(playlist) {
+            for(var i=0; i<playlist.length; i++){
+                if(typeof playlist[i].wasPlayed === 'undefined'){
+                    playlist[i].wasPlayed = 0;
+                }
+            }
 			this.current = 0;
 			this.shuffled = false;
 			this.removing = false;
@@ -205,7 +170,7 @@
 			var self = this;
 			this.playlist = [];
 			// Make both arrays point to the same object elements. Gives us 2 different arrays, each pointing to the same actual object. ie., Not copies of the object.
-			$.each(this.original, function(i) {
+			$.each(this.original, function(i,v) {
 				self.playlist[i] = self.original[i];
 			});
 		},
@@ -218,20 +183,24 @@
 			var self = this;
 
 			if(instant && !$.isFunction(instant)) {
-				$(this.cssSelector.playlist + " ul").empty();
-				$.each(this.playlist, function(i) {
-					$(self.cssSelector.playlist + " ul").append(self._createListItem(self.playlist[i]));
+				$(this.cssSelector.playlist + " ul.playlist-container-list").empty();
+				$.each(this.playlist, function(i,v) {
+					$(self.cssSelector.playlist + " ul.playlist-container-list").append(self._createListItem(self.playlist[i]));
+                    var litem = $(self.cssSelector.playlist + " > ul > li:last");
+                    litem.attr('name', litem.index());
 				});
 				this._updateControls();
 			} else {
-				var displayTime = $(this.cssSelector.playlist + " ul").children().length ? this.options.playlistOptions.displayTime : 0;
+				var displayTime = $(this.cssSelector.playlist + " ul.playlist-container-list").children().length ? this.options.playlistOptions.displayTime : 0;
 
-				$(this.cssSelector.playlist + " ul").slideUp(displayTime, function() {
+				$(this.cssSelector.playlist + " ul.playlist-container-list").slideUp(displayTime, function() {
 					var $this = $(this);
 					$(this).empty();
 					
-					$.each(self.playlist, function(i) {
-						$this.append(self._createListItem(self.playlist[i]));
+					$.each(self.playlist, function(i,v) {
+                        $this.append(self._createListItem(self.playlist[i]));
+						var litem = $(self.cssSelector.playlist + " > ul.playlist-container-list > li:last");
+                        litem.attr('name', litem.index());
 					});
 					self._updateControls();
 					if($.isFunction(instant)) {
@@ -244,6 +213,35 @@
 					}
 				});
 			}
+            this._updatePlaytime();
+            this._highlight(this.current);
+            this._createItemHandlers();
+		},
+        _updatePlaytime: function(){
+            var self = this;
+            var playtimeSum = 0;
+		    $.each(this.playlist, function(i,v) {
+			if(self.playlist[i].duration){
+			    playtimeSum += self.playlist[i].duration;
+			}
+		    });
+		    if(playtimeSum){
+                $(self.cssSelector.playlist+"-playtime-sum").html("<div><span href='javascript:;'>"+self._formatTime(playtimeSum)+"</span></div>");
+		    } else {
+                $(self.cssSelector.playlist+"-playtime-sum").html("");
+            }  
+        },
+		_formatTime: function(secs) {
+			secs = Math.floor(secs);
+            var mins = Math.floor(secs/60);
+            var hours = Math.floor(mins/60);
+            
+			var s = secs%60;
+			if(s<10){ s='0'+s; }
+			var m = mins%60;
+			if(m<10){ m='0'+m; }
+            var h = hours>0 ? hours+':' : '';
+			return h+m+':'+s;
 		},
 		_createListItem: function(media) {
 			var self = this;
@@ -251,8 +249,23 @@
 			// Wrap the <li> contents in a <div>
 			var listItem = "<li><div>";
 
+            // create track action menu
+			listItem += '<div class="btn-group ' + this.options.playlistOptions.actionItemClass + '">'+
+            '  <button type="button" class="btn-transparent btn-xs dropdown-toggle" data-toggle="dropdown">'+
+            '    <span class="caret"></span>'+
+            '  </button>'+
+            '  <ul class="dropdown-menu" role="menu">'+
+            '    <li><a class="'+this.options.playlistOptions.parentFolderItemClass+'" href="#">Show parent folder</a></li>'+
+            '  </ul>'+
+            '</div>';
+            
+			// Create Playtime
+            if(media.duration){
+                listItem += "<span href='javascript:;' class='" + this.options.playlistOptions.playtimeClass + "'>"+self._formatTime(media.duration)+"</span>";
+            }
 			// Create remove control
 			listItem += "<a href='javascript:;' class='" + this.options.playlistOptions.removeItemClass + "'>&times;</a>";
+            
 
 			// Create links to free media
 			if(media.free) {
@@ -265,46 +278,62 @@
 						} else {
 							listItem += " | ";
 						}
-						listItem += "<a class='" + self.options.playlistOptions.freeItemClass + "' href='" + value + "' tabindex='-1'>" + property + "</a>";
+						listItem += "<a class='" + self.options.playlistOptions.freeItemClass + "' href='" + value + "' tabindex='1'>" + property + "</a>";
 					}
 				});
 				listItem += ")</span>";
 			}
 
 			// The title is given next in the HTML otherwise the float:right on the free media corrupts in IE6/7
-			listItem += "<a href='javascript:;' class='" + this.options.playlistOptions.itemClass + "' tabindex='0'>" + media.title + (media.artist ? " <span class='jp-artist'>by " + media.artist + "</span>" : "") + "</a>";
+			listItem += "<a href='javascript:;' class='" + this.options.playlistOptions.itemClass + "' tabindex='1'>" + media.title + (media.artist ? " <span class='jp-artist'>by " + media.artist + "</span>" : "") + "</a>";
 			listItem += "</div></li>";
 
 			return listItem;
 		},
 		_createItemHandlers: function() {
 			var self = this;
-			// Create live handlers for the playlist items
-			$(this.cssSelector.playlist).off("click", "a." + this.options.playlistOptions.itemClass).on("click", "a." + this.options.playlistOptions.itemClass, function(e) {
-				e.preventDefault();
+			// Create .live() handlers for the playlist items
+			$(this.cssSelector.playlist + " a." + this.options.playlistOptions.itemClass).off("click").on("click", function() {
+                $(self.options.playlistOptions.playlistSelector).trigger('requestPlay', [self.options.playlistOptions.playlistSelector]);
 				var index = $(this).parent().parent().index();
-				if(self.current !== index) {
+				//if(self.current !== index) {
 					self.play(index);
-				} else {
-					$(self.cssSelector.jPlayer).jPlayer("play");
-				}
-				self.blur(this);
+				//} else {
+				//	$(self.cssSelector.jPlayer).jPlayer("play");
+				//}
+				$(this).blur();
+				return false;
 			});
 
-			// Create live handlers that disable free media links to force access via right click
-			$(this.cssSelector.playlist).off("click", "a." + this.options.playlistOptions.freeItemClass).on("click", "a." + this.options.playlistOptions.freeItemClass, function(e) {
-				e.preventDefault();
+			// Create .live() handlers that disable free media links to force access via right click
+			$(self.cssSelector.playlist + " a." + this.options.playlistOptions.freeItemClass).off("click").on("click", function(event) {
 				$(this).parent().parent().find("." + self.options.playlistOptions.itemClass).click();
-				self.blur(this);
+				$(this).blur();
+				return false;
 			});
 
-			// Create live handlers for the remove controls
-			$(this.cssSelector.playlist).off("click", "a." + this.options.playlistOptions.removeItemClass).on("click", "a." + this.options.playlistOptions.removeItemClass, function(e) {
-				e.preventDefault();
+			// Create .live() handlers for the remove controls
+			$(self.cssSelector.playlist + " a." + this.options.playlistOptions.removeItemClass).off("click").on("click", function(event) {
+                event.stopPropagation();
 				var index = $(this).parent().parent().index();
 				self.remove(index);
-				self.blur(this);
+				$(this).blur();
+				return false;
 			});
+            
+            // create handlers for showing the parent folder of a file
+            $(self.cssSelector.playlist + " a." + this.options.playlistOptions.parentFolderItemClass).off('click').on("click", function(event) {
+                var index = $(this).parent().parent().parent().parent().parent().index();
+                var folder = decodeURIComponent(self.playlist[index].url);
+                lastFolderSeparator = folder.lastIndexOf('/');
+                if(lastFolderSeparator == -1){
+                    // if there is no "/" in the path it is the basedir
+                    folder = '';
+                } else {
+                    folder = folder.slice(0, lastFolderSeparator);
+                }
+                loadBrowser(folder, folder);
+            });
 		},
 		_updateControls: function() {
 			if(this.options.playlistOptions.enableRemoveControls) {
@@ -312,54 +341,58 @@
 			} else {
 				$(this.cssSelector.playlist + " ." + this.options.playlistOptions.removeItemClass).hide();
 			}
-
 			if(this.shuffled) {
-				$(this.cssSelector.jPlayer).jPlayer("addStateClass", "shuffled");
+				$(this.cssSelector.shuffleOff).show();
+				$(this.cssSelector.shuffle).hide();
 			} else {
-				$(this.cssSelector.jPlayer).jPlayer("removeStateClass", "shuffled");
-			}
-			if($(this.cssSelector.shuffle).length && $(this.cssSelector.shuffleOff).length) {
-				if(this.shuffled) {
-					$(this.cssSelector.shuffleOff).show();
-					$(this.cssSelector.shuffle).hide();
-				} else {
-					$(this.cssSelector.shuffleOff).hide();
-					$(this.cssSelector.shuffle).show();
-				}
+				$(this.cssSelector.shuffleOff).hide();
+				$(this.cssSelector.shuffle).show();
 			}
 		},
 		_highlight: function(index) {
 			if(this.playlist.length && index !== undefined) {
 				$(this.cssSelector.playlist + " .jp-playlist-current").removeClass("jp-playlist-current");
-				$(this.cssSelector.playlist + " li:nth-child(" + (index + 1) + ")").addClass("jp-playlist-current").find(".jp-playlist-item").addClass("jp-playlist-current");
-				// $(this.cssSelector.details + " li").html("<span class='jp-title'>" + this.playlist[index].title + "</span>" + (this.playlist[index].artist ? " <span class='jp-artist'>by " + this.playlist[index].artist + "</span>" : ""));
+				$(this.cssSelector.playlist + ">ul>li:nth-child(" + (index + 1) + ")").addClass("jp-playlist-current").find(".jp-playlist-item").addClass("jp-playlist-current");
+				$(this.cssSelector.title + " li").html(this.playlist[index].title + (this.playlist[index].artist ? " <span class='jp-artist'>by " + this.playlist[index].artist + "</span>" : ""));
 			}
 		},
 		setPlaylist: function(playlist) {
 			this._initPlaylist(playlist);
 			this._init();
 		},
-		add: function(media, playNow) {
-			$(this.cssSelector.playlist + " ul").append(this._createListItem(media)).find("li:last-child").hide().slideDown(this.options.playlistOptions.addTime);
+		add: function(media, playNow, animate) {
+            var self = this;
+            if(typeof animate === 'undefined'){
+                animate = true;
+            }
+            if(animate){
+                $(this.cssSelector.playlist + " ul.playlist-container-list").append(this._createListItem(media)).find("li:last-child").hide().slideDown(this.options.playlistOptions.addTime);
+            } else {
+                $(this.cssSelector.playlist + " ul.playlist-container-list").append(this._createListItem(media));
+            }
 			this._updateControls();
+            this._createItemHandlers();
 			this.original.push(media);
 			this.playlist.push(media); // Both array elements share the same object pointer. Comforms with _initPlaylist(p) system.
 
 			if(playNow) {
 				this.play(this.playlist.length - 1);
-			} else {
+			} /*else {
 				if(this.original.length === 1) {
 					this.select(0);
 				}
-			}
+			}*/
+            $(self.options.playlistOptions.playlistSelector).trigger('addedItem', [self.options.playlistOptions.playlistSelector]);
 		},
 		remove: function(index) {
 			var self = this;
-
+            $(self.options.playlistOptions.playlistSelector).trigger('removedItem', [self.options.playlistOptions.playlistSelector]);
 			if(index === undefined) {
 				this._initPlaylist([]);
 				this._refresh(function() {
-					$(self.cssSelector.jPlayer).jPlayer("clearMedia");
+                    if(self.active){
+                        $(self.cssSelector.jPlayer).jPlayer("clearMedia");
+                    }
 				});
 				return true;
 			} else {
@@ -371,12 +404,12 @@
 					if(0 <= index && index < this.playlist.length) {
 						this.removing = true;
 
-						$(this.cssSelector.playlist + " li:nth-child(" + (index + 1) + ")").slideUp(this.options.playlistOptions.removeTime, function() {
+						$(this.cssSelector.playlist + ">ul>li:nth-child(" + (index + 1) + ")").slideUp(this.options.playlistOptions.removeTime, function() {
 							$(this).remove();
 
 							if(self.shuffled) {
 								var item = self.playlist[index];
-								$.each(self.original, function(i) {
+								$.each(self.original, function(i,v) {
 									if(self.original[i] === item) {
 										self.original.splice(i, 1);
 										return false; // Exit $.each
@@ -401,8 +434,10 @@
 								self.shuffled = false;
 								self._updateControls();
 							}
-
+                            self._updatePlaytime();
 							self.removing = false;
+                            //make sure all "name" attributes are correctly numbered
+                            self._refresh(true);
 						});
 					}
 					return true;
@@ -414,7 +449,11 @@
 			if(0 <= index && index < this.playlist.length) {
 				this.current = index;
 				this._highlight(index);
-				$(this.cssSelector.jPlayer).jPlayer("setMedia", this.playlist[this.current]);
+                this.playlist[this.current].wasPlayed += 1;
+                var self = this;
+				$(this.cssSelector.jPlayer).jPlayer("setMedia", 
+                    self.options.hooks["setMedia"](this.playlist[this.current])
+                );
 			} else {
 				this.current = 0;
 			}
@@ -434,63 +473,61 @@
 			$(this.cssSelector.jPlayer).jPlayer("pause");
 		},
 		next: function() {
-			var index = (this.current + 1 < this.playlist.length) ? this.current + 1 : 0;
-
-			if(this.loop) {
-				// See if we need to shuffle before looping to start, and only shuffle if more than 1 item.
-				if(index === 0 && this.shuffled && this.options.playlistOptions.shuffleOnLoop && this.playlist.length > 1) {
-					this.shuffle(true, true); // playNow
-				} else {
+            if(this.shuffled){
+                playRandomTrack();
+            } else {
+                var index = (this.current + 1 < this.playlist.length) ? this.current + 1 : 0;
+                // The index will be zero if it just looped round
+				if(this.loop || index > 0) {
 					this.play(index);
 				}
-			} else {
-				// The index will be zero if it just looped round
-				if(index > 0) {
-					this.play(index);
-				}
-			}
+            }
 		},
+        playRandomTrack: function(){
+            var weighted = [];
+            for(var i=0; i<this.playlist.length; i++){
+                if( typeof this.playlist[i].wasPlayed === 'undefined' ){
+                    this.playlist.wasPlayed[i] = 0;
+                }
+                weighted.push([i,this.playlist[i].wasPlayed]);
+            }
+            weighted.sort(function(a,b){
+                return a[1]-b[1]
+            });
+            //pick from top half of least played tracks
+            var index = weighted[parseInt(Math.random()*this.playlist.length/2)][0];
+            this.play(index);  
+        },
 		previous: function() {
-			var index = (this.current - 1 >= 0) ? this.current - 1 : this.playlist.length - 1;
-
-			if(this.loop && this.options.playlistOptions.loopOnPrevious || index < this.playlist.length - 1) {
-				this.play(index);
-			}
+            if(this.shuffled){
+                playRandomTrack();
+            } else {
+                var index = (this.current - 1 >= 0) ? this.current - 1 : this.playlist.length - 1;
+                if(this.loop && this.options.playlistOptions.loopOnPrevious || index < this.playlist.length - 1) {
+                    this.play(index);
+                }
+            }
 		},
 		shuffle: function(shuffled, playNow) {
-			var self = this;
-
-			if(shuffled === undefined) {
-				shuffled = !this.shuffled;
-			}
-
-			if(shuffled || shuffled !== this.shuffled) {
-
-				$(this.cssSelector.playlist + " ul").slideUp(this.options.playlistOptions.shuffleTime, function() {
-					self.shuffled = shuffled;
-					if(shuffled) {
-						self.playlist.sort(function() {
-							return 0.5 - Math.random();
-						});
-					} else {
-						self._originalPlaylist();
-					}
-					self._refresh(true); // Instant
-
-					if(playNow || !$(self.cssSelector.jPlayer).data("jPlayer").status.paused) {
-						self.play(0);
-					} else {
-						self.select(0);
-					}
-
-					$(this).slideDown(self.options.playlistOptions.shuffleTime);
-				});
-			}
+			this.shuffled = !this.shuffled;
+            this._updateControls();
 		},
-		blur: function(that) {
-			if($(this.cssSelector.jPlayer).jPlayer("option", "autoBlur")) {
-				$(that).blur();
-			}
-		}
+        scan: function() {
+            var self = this;
+            var isAdjusted = false;
+
+            var replace = [];
+            $.each($(this.cssSelector.playlist + " > ul.playlist-container-list > li"), function(index, value) {
+                replace[index] = self.original[$(value).attr('name')];
+                if(!isAdjusted && self.current === parseInt($(value).attr('name'), 10)) {
+                    self.current = index;
+                    isAdjusted = true;
+                }
+                $(value).attr('name', index);
+            });
+            this.original = replace;
+            this._originalPlaylist();
+            $(self.options.playlistOptions.playlistSelector).trigger('sortedItems', [self.options.playlistOptions.playlistSelector]);
+        }
 	};
 })(jQuery);

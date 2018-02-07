@@ -90,13 +90,20 @@ class AlbumArtFetcher:
             'url': "http://www.amazon.com/s/?field-keywords=",
             'regexes': [
                 '<img[^>]+?alt="Product Details"[^>]+?src="([^"]+)"',
-                '<img[^>]+?src="([^"]+)"[^>]+?alt="Product Details"'],
+                '<img[^>]+?src="([^"]+)"[^>]+?alt="Product Details"',
+                '<img[^>]+?src="([^"]+)"[^>]+?class="s-access-image',
+                '<img[^>]+?src="([^"]+)"[^>]+?data-search-image',
+            ],
         },
         'bestbuy.com': {
             'url': 'http://www.bestbuy.com/site/searchpage.jsp?_dyncharset=UTF-8&id=pcat17071&st=',
             'regexes': ['<div class="thumb".+?<img.+?src="([^"]+)"'],
             'user_agent': 'curl/7.52.1',
         },
+        'bandcamp': {
+            'url': "https://bandcamp.com/search?q=",
+            'regexes': ['<div class="art".+?<img src="([^"]+)"']
+        }
         # buy.com is now rakuten.com
         # with a new search API that nobody bothered to figure out yet
         # 'buy.com': {
