@@ -1,3 +1,5 @@
 # Django==1.11.17
 -e git://github.com/django/django#egg=Django
 djangorestframework==3.9.0
+coreapi-cli==1.0.9
+pyyaml==3.13
