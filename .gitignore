@@ -67,3 +67,4 @@ cherrymusic/client/static/client/bower_components/
 /static
 /venv
 
+cherrymusic/conf/db.sqlite3

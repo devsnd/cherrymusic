@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'core',
     'storage',
     'client',
+    'playlist',
 ]
 
 MIDDLEWARE = [

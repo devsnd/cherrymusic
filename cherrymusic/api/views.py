@@ -1,30 +1,29 @@
-from rest_framework.decorators import action
-from wsgiref.util import FileWrapper
+import time
 
-from core.pluginmanager import PluginManager
-import os
 import logging
+import os
 from django.contrib.auth import get_user_model
-from django.http import HttpResponse, StreamingHttpResponse, Http404
+from django.http import StreamingHttpResponse, Http404
+from django.utils.translation import ugettext_lazy as _
 from rest_framework import viewsets
+from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-import time
+
 from api.helper import ImageResponse, ImageRenderer
 from core import pathprovider
 from core.albumartfetcher import AlbumArtFetcher
 from core.config import Config
-from core.models import Playlist, Track
-from ext import audiotranscode
+from core.pluginmanager import PluginManager
 from ext.audiotranscode import AudioTranscode
 from ext.tinytag import TinyTag
+from playlist.models import Track, Playlist
+from storage.models import File, Directory
+from storage.status import ServerStatus
 from .serializers import FileSerializer, DirectorySerializer, UserSerializer, \
     PlaylistDetailSerializer, TrackSerializer, PlaylistListSerializer
-
-from storage.status import ServerStatus
-from storage.models import File, Directory
 
 logger = logging.getLogger(__name__)
 
@@ -128,6 +127,7 @@ class UserViewSet(SlowServerMixin, viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+
 class TrackViewSet(SlowServerMixin, viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, )
     queryset = Track.objects.all()
@@ -139,23 +139,6 @@ class ServerStatusView(SlowServerMixin, APIView):
 
     def get(self, request, format=None):
         return Response([ServerStatus.get_latest()])
-
-def stream(request, path):
-    start_time = float(request.GET.get('start_time', 0))
-    basedir = Directory.get_basedir().absolute_path()
-    mime_type = 'audio/ogg'
-    return StreamingHttpResponse(
-        stream_audio(str(basedir / path), start_time),
-        content_type=mime_type
-    )
-
-        #
-        #
-        #
-        # buffer = f.read(1024)
-        # while buffer:
-        #     yield buffer
-        #     buffer = f.read(1024)
 
 
 class AlbumArtView(APIView):

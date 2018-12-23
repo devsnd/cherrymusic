@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from storage.models import File, Directory, MetaData, Artist, Album, Genre
-from core.models import Playlist, Track
+from playlist.models import Playlist, Track
 
 
 User = get_user_model()

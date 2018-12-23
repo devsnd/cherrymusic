@@ -1,7 +1,7 @@
 from django.conf.urls import url, include
 from rest_framework import routers
 from .views import FileViewSet, DirectoryViewSet, ServerStatusView, PlaylistViewSet, UserViewSet, \
-    TrackViewSet, stream, BrowseView, IndexDirectoryView, AlbumArtView
+    TrackViewSet, BrowseView, IndexDirectoryView, AlbumArtView
 
 router = routers.DefaultRouter()
 router.register(r'file', FileViewSet)
