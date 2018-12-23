@@ -12,7 +12,7 @@ router.register(r'track', TrackViewSet)
 
 urlpatterns = [
     url(r'status/$', ServerStatusView.as_view()),
-    url(r'stream/(?P<path>.*)', stream),
+    # url(r'stream/(?P<path>.*)', stream),
     url(r'browse/(?P<path>.*)', BrowseView.as_view()),
     url(r'index/(?P<path>.*)', IndexDirectoryView.as_view()),
     url(r'albumart/(?P<path>.*)', AlbumArtView.as_view()),

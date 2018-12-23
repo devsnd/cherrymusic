@@ -1,3 +1,6 @@
+from rest_framework.decorators import action
+from wsgiref.util import FileWrapper
+
 from core.pluginmanager import PluginManager
 import os
 import logging
@@ -15,6 +18,7 @@ from core.albumartfetcher import AlbumArtFetcher
 from core.config import Config
 from core.models import Playlist, Track
 from ext import audiotranscode
+from ext.audiotranscode import AudioTranscode
 from ext.tinytag import TinyTag
 from .serializers import FileSerializer, DirectorySerializer, UserSerializer, \
     PlaylistDetailSerializer, TrackSerializer, PlaylistListSerializer
@@ -72,6 +76,35 @@ class FileViewSet(SlowServerMixin, viewsets.ReadOnlyModelViewSet):
     queryset = File.objects.all()
     serializer_class = FileSerializer
 
+    @action(detail=True, methods=['get'])
+    def transcode(self, request, pk=None):
+        def transcode_stream(audiofile, format, start_time):
+            yield from AudioTranscode().transcode_stream(
+                audiofile, newformat=format, starttime=int(start_time)
+            )
+        file = self.get_object()
+        return StreamingHttpResponse(
+            transcode_stream(str(file.absolute_path()), 'ogg', 0),
+            content_type='application/octet-stream'
+        )
+
+    @action(detail=True, methods=['get'])
+    def stream(self, request, pk=None):
+        def file_iterator(filepath, chunk_size=512):
+            with open(filepath, 'rb') as fh:
+                while True:
+                    data = fh.read(chunk_size)
+                    if data:
+                        yield data
+                    else:
+                        break
+
+        file = self.get_object()
+        return StreamingHttpResponse(
+            file_iterator(file.absolute_path(), 8192),
+            content_type='application/octet-stream'
+        )
+
 
 class DirectoryViewSet(SlowServerMixin, viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -116,9 +149,6 @@ def stream(request, path):
         content_type=mime_type
     )
 
-def stream_audio(audiofile, start_time):
-    print(start_time)
-    yield from audiotranscode.AudioTranscode().transcode_stream(audiofile, newformat='mp3', starttime=int(start_time))
         #
         #
         #

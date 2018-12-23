@@ -5,6 +5,7 @@ import os
 
 logger = logging.getLogger(__name__)
 
+
 class PluginManager(object):
     _event_listeners = defaultdict(list)
 
@@ -33,7 +34,6 @@ class PluginManager(object):
         for callback in PluginManager._event_listeners[event]:
             payload = callback(user, payload)
         return payload
-
 
     @classmethod
     def initialize_plugins(cls):

@@ -1,14 +1,59 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from storage.models import File, Directory
+from storage.models import File, Directory, MetaData, Artist, Album, Genre
 from core.models import Playlist, Track
 
 
 User = get_user_model()
 
+class AlbumSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Album
+        fields = (
+            'name',
+        )
+
+
+class ArtistSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Artist
+        fields = (
+            'id',
+            'name',
+        )
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genre
+        fields = (
+            'id',
+            'name',
+        )
+
+
+class MetaDataSerializer(serializers.ModelSerializer):
+    artist = ArtistSerializer(read_only=True)
+    genre = GenreSerializer(read_only=True)
+    album = AlbumSerializer(read_only=True)
+
+    class Meta:
+        model = MetaData
+        fields = (
+            'track',
+            'track_total',
+            'title',
+            'artist',
+            'album',
+            'year',
+            'genre',
+            'duration',
+        )
+
 
 class FileSerializer(serializers.ModelSerializer):
     path = serializers.SerializerMethodField('get_relative_path')
+    meta_data = MetaDataSerializer(read_only=True)
 
     class Meta:
         model = File
@@ -16,19 +61,13 @@ class FileSerializer(serializers.ModelSerializer):
             'id',
             'filename',
             'path',
-            'meta_track',
-            'meta_track_total',
-            'meta_title',
-            'meta_artist',
-            'meta_album',
-            'meta_year',
-            'meta_genre',
-            'meta_duration',
+            'meta_data',
         )
 
     @staticmethod
     def get_relative_path(file):
         return str(file.relative_path())
+
 
 class DirectorySerializer(serializers.ModelSerializer):
     path = serializers.SerializerMethodField('get_sanitized_path')
@@ -60,6 +99,7 @@ class TrackSerializer(serializers.ModelSerializer):
         else:
             raise KeyError('Cannot serialize Track %s of type %s' % (track, track.type))
 
+
 class PlayListSerializer(serializers.ModelSerializer):
     tracks = serializers.SerializerMethodField()
     owner_name = serializers.SerializerMethodField()
@@ -76,6 +116,7 @@ class PlayListSerializer(serializers.ModelSerializer):
     def get_tracks(obj):
         serializer = TrackSerializer()
         return [serializer.to_representation(track) for track in obj.track_set.all().order_by('order')]
+
 
 class PlaylistDetailSerializer(PlayListSerializer):
     tracks = serializers.SerializerMethodField()

@@ -1,3 +1,3 @@
-Django==1.8
-django-pipeline==1.5.1
-djangorestframework==3.1.3
+# Django==1.11.17
+-e git://github.com/django/django#egg=Django
+djangorestframework==3.9.0

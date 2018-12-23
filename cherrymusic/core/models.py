@@ -10,23 +10,24 @@ class User(AbstractUser):
 
 class Playlist(models.Model):
     name = models.CharField(max_length=255)
-    owner = models.ForeignKey(User)
+    owner = models.ForeignKey(User, on_delete=models.PROTECT)
     public = models.BooleanField(default=True)
 
 
 class Track(models.Model):
     class TYPE:
-        LOCAL_STORAGE = 0
-        STREAM_URL = 1
+        FILE = 0
+        YOUTUBE_URL = 1
 
     TYPE_CHOICES = (
-        (TYPE.LOCAL_STORAGE, 'LOCAL_STORAGE'),
-        (TYPE.STREAM_URL, 'STREAM_URL'),
+        (TYPE.FILE, 'FILE'),
+        (TYPE.YOUTUBE_URL, 'YOUTUBE_URL'),
     )
 
-    playlist = models.ForeignKey(Playlist)
-    order = models.IntegerField()
-    type = models.IntegerField(choices=TYPE_CHOICES, default=TYPE.LOCAL_STORAGE)
+    playlist = models.ForeignKey(Playlist, on_delete=models.PROTECT)
+    order = models.PositiveSmallIntegerField(unique=True)
+    type = models.PositiveSmallIntegerField(choices=TYPE_CHOICES, default=TYPE.FILE)
 
-    file = models.ForeignKey(File, null=True) # local storage
+    file = models.ForeignKey(File, null=True, on_delete=models.PROTECT) # local storage
+    youtube_url = models.URLField(null=True)
 

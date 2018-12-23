@@ -42,22 +42,20 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'pipeline',
     'core',
     'storage',
     'client',
 ]
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-)
+]
 
 ROOT_URLCONF = 'conf.urls'
 
@@ -72,10 +70,10 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                ],
-            },
+            ],
         },
-    ]
+    },
+]
 
 WSGI_APPLICATION = 'conf.wsgi.application'
 
@@ -87,56 +85,14 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'conf/db.sqlite3'),
-        }
+    }
 }
 
-# pipeline config
-STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'pipeline.finders.PipelineFinder',
 )
-PIPELINE_COMPILERS = (
-    'pipeline.compilers.less.LessCompiler',
-)
-PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
-
-PIPELINE_CSS = {
-    'client': {
-        'source_filenames': (
-            'client/bower_components/bootstrap/less/bootstrap.less',
-            'client/style/cherrymusic.less',
-        ),
-        'output_filename': 'client/cherrymusic.css',
-        }
-}
-PIPELINE_JS = {
-    'client': {
-        'source_filenames': (
-            'client/bower_components/angular/angular.js',
-            'client/bower_components/angular-resource/angular-resource.js',
-            'client/js/lib/angular-drag-and-drop-lists.js',
-            'client/bower_components/angular-bootstrap/ui-bootstrap.js',
-            'client/bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
-            'client/bower_components/jquery/dist/jquery.js',
-            'client/bower_components/jplayer/dist/jplayer/jquery.jplayer.js',
-            'client/bower_components/underscore/underscore.js',
-            'client/js/main.js',
-            'client/js/resources.js',
-            'client/js/track.js',
-            'client/js/playlistbrowser.js',
-            'client/js/filebrowser.js',
-            'client/js/directives/progressbar.js',
-            'client/js/directives/file.js',
-            'client/js/filters/timeformat.js',
-            'client/js/mediaplayer.js',
-            'client/js/playback_service.js',
-            'client/js/playback_service_jplayer.js',
-        ),
-        'output_filename': 'client/cherrymusic.js'
-    }
-}
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -156,3 +112,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+
+from .storage import *
