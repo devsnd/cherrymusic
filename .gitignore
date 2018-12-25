@@ -68,3 +68,5 @@ cherrymusic/client/static/client/bower_components/
 /venv
 
 cherrymusic/conf/db.sqlite3
+client/node_modules/
+cherrymusic/api/generator/schema.yaml
