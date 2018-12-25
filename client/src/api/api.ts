@@ -12,6 +12,9 @@
 
 export module API {
 
+    export abstract class APIEndpoint {
+    }
+
     export class Settings {
         static baseUrl: string = '';
 
@@ -40,8 +43,8 @@ export module API {
     }
 
     
-    export class Directory {
-        static async list () {
+    export class Directory implements APIEndpoint {
+        static async list (limit?: Number, offset?: Number) {
             return Settings.call('get', `/api/v1/directory/`);
         }
 
@@ -50,8 +53,8 @@ export module API {
         }
     }
     
-    export class File {
-        static async list () {
+    export class File implements APIEndpoint {
+        static async list (limit?: Number, offset?: Number) {
             return Settings.call('get', `/api/v1/file/`);
         }
 
@@ -68,7 +71,7 @@ export module API {
         }
     }
     
-    export class Playlist {
+    export class Playlist implements APIEndpoint {
         static async create () {
             return Settings.call('post', `/api/v1/playlist/`);
         }
@@ -77,7 +80,7 @@ export module API {
             return Settings.call('delete', `/api/v1/playlist/${id}/`);
         }
 
-        static async list () {
+        static async list (limit?: Number, offset?: Number) {
             return Settings.call('get', `/api/v1/playlist/`);
         }
 
@@ -94,13 +97,13 @@ export module API {
         }
     }
     
-    export class Status {
+    export class Status implements APIEndpoint {
         static async list () {
             return Settings.call('get', `/api/v1/status/`);
         }
     }
     
-    export class Track {
+    export class Track implements APIEndpoint {
         static async create () {
             return Settings.call('post', `/api/v1/track/`);
         }
@@ -109,7 +112,7 @@ export module API {
             return Settings.call('delete', `/api/v1/track/${id}/`);
         }
 
-        static async list () {
+        static async list (limit?: Number, offset?: Number) {
             return Settings.call('get', `/api/v1/track/`);
         }
 
@@ -126,7 +129,7 @@ export module API {
         }
     }
     
-    export class User {
+    export class User implements APIEndpoint {
         static async create () {
             return Settings.call('post', `/api/v1/user/`);
         }
@@ -135,7 +138,7 @@ export module API {
             return Settings.call('delete', `/api/v1/user/${id}/`);
         }
 
-        static async list () {
+        static async list (limit?: Number, offset?: Number) {
             return Settings.call('get', `/api/v1/user/`);
         }
 

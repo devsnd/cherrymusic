@@ -1,17 +1,37 @@
 import Vue from "vue";
-import HelloComponent from "./components/Hello.vue";
+import MainView from "./vue/MainView.vue";
+
+import BootstrapVue from 'bootstrap-vue'
+
+// enable bootstrap vuew
+Vue.use(BootstrapVue);
+import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap-vue/dist/bootstrap-vue.css';
+
+// enable vue gettext
+import GetTextPlugin from 'vue-gettext'
+import translations from './translations.json'
+Vue.use(GetTextPlugin, {
+    translations: translations,
+    availableLanguages: {
+        'en_US': 'English',
+        'de_DE': 'Deutsch',
+    }
+});
+
+import store from '@/store/store';
+
 
 let v = new Vue({
     el: "#app",
     template: `
     <div>
-        Name: <input v-model="name" type="text">
-        <h1>Hello Component</h1>
-        <hello-component :name="name" :initialEnthusiasm="5" />
+        <main-view></main-view>
     </div>
     `,
     data: { name: "World" },
+    store: store,
     components: {
-        HelloComponent,
+        MainView,
     }
 });

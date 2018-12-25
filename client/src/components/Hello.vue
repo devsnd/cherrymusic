@@ -18,9 +18,9 @@ export default Vue.extend({
         }
     },
     methods: {
-        increment() {
+        async increment() {
             API.Settings.setBaseUrl('http://localhost:8000');
-            API.File.list().then((data) => console.log(data));
+            console.log(await API.File.list());
 
         },
         decrement() {

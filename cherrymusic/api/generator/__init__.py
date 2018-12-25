@@ -21,6 +21,9 @@ typescript_template = '''
 
 export module API {
 
+    export abstract class APIEndpoint {
+    }
+
     export class Settings {
         static baseUrl: string = '';
 
@@ -49,8 +52,8 @@ export module API {
     }
 
     {% for namespace in api_namespaces %}
-    export class {{namespace.name | upper_camel_case}} {
-        {% for api_call in namespace.api_calls %}static async {{api_call.name | lower_camel_case}} ({% for param in api_call.parameters %}{{param.to_typescript}}{%endfor%}) {
+    export class {{namespace.name | upper_camel_case}} implements APIEndpoint {
+        {% for api_call in namespace.api_calls %}static async {{api_call.name | lower_camel_case}} ({% for param in api_call.parameters %}{{param.to_typescript}}{% if not forloop.last %}, {% endif %}{%endfor%}) {
             return Settings.call('{{api_call.method}}', {{api_call.f_string_path}});
         }{% if not forloop.last %}
 
@@ -132,7 +135,7 @@ def generate_typescript_api(schema):
             parameters = [
                 APICallParameter(
                     name=parameter['name'],
-                    required=parameter['required'],
+                    required=parameter.get('required', False),
                     type_=parameter['schema']['type'],
                 )
                 for parameter in specs.get('parameters', [])

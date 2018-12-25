@@ -1,0 +1,22 @@
+# German translations for cherrymusic-typescript-vue package.
+# Copyright (C) 2018 THE cherrymusic-typescript-vue'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the cherrymusic-typescript-vue package.
+# Automatically generated, 2018.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: cherrymusic-typescript-vue 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-12-25 19:28+0100\n"
+"PO-Revision-Date: 2018-12-25 19:24+0100\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: src/components/Header.vue:33
+msgid "Settings"
+msgstr "Einstellungen"
