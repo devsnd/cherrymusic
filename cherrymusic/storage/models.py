@@ -14,6 +14,14 @@ class Directory(models.Model):
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.PROTECT)
     path = models.CharField(max_length=255)
 
+    @property
+    def subdirectories(self):
+        return Directory.objects.filter(parent=self)
+
+    @property
+    def files(self):
+        return File.objects.filter(directory=self)
+
     def __str__(self):
         return self.path
 

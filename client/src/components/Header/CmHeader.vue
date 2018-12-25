@@ -7,7 +7,7 @@
 
     <b-collapse is-nav id="nav_collapse">
       <b-nav-form>
-        <b-form-input size="sm" class="mr-sm-2" type="text" placeholder="Search"/>
+        <b-form-input size="sm" class="mr-sm-2" type="text" placeholder="Search" v-model="searchText"/>
         <b-button size="sm" class="my-2 my-sm-0" type="submit">Search</b-button>
       </b-nav-form>
 
@@ -38,17 +38,22 @@
   </b-navbar>
 </template>
 <script lang="ts">
-import Vue from 'vue';
-import LanguageSwitcher from './LanguageSwitcher';
+    import Vue from 'vue';
+    import LanguageSwitcher from './LanguageSwitcher';
 
-export default Vue.extend({
-  name: 'cm-header',
-  components: {
-      LanguageSwitcher,
-  },
-  computed: {
-  },
-  methods: {
-  }
-});
+    export default Vue.extend({
+        name: 'cm-header',
+        data: function () {
+            return {
+                searchText: '',
+            };
+        },
+        components: {
+            LanguageSwitcher,
+        },
+        computed: {
+        },
+        methods: {
+        }
+    });
 </script>

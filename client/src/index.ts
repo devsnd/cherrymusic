@@ -8,6 +8,9 @@ Vue.use(BootstrapVue);
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 
+// add font awesome
+import 'font-awesome/css/font-awesome.css';
+
 // enable vue gettext
 import GetTextPlugin from 'vue-gettext'
 import translations from './translations.json'

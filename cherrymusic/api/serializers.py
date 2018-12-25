@@ -69,12 +69,47 @@ class FileSerializer(serializers.ModelSerializer):
         return str(file.relative_path())
 
 
-class DirectorySerializer(serializers.ModelSerializer):
+class SimpleDirectorySerializer(serializers.ModelSerializer):
     path = serializers.SerializerMethodField('get_sanitized_path')
 
     class Meta:
         model = Directory
         fields = ('parent', 'path', 'id')
+
+    @staticmethod
+    def get_sanitized_path(dir):
+        # do not serialize the basedir path
+        if dir.parent is None:
+            return
+        else:
+            return dir.path
+
+class DirectorySerializer(serializers.ModelSerializer):
+    path = serializers.SerializerMethodField('get_sanitized_path')
+    sub_directories = serializers.SerializerMethodField()
+    files = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Directory
+        fields = (
+            'parent',
+            'path',
+            'id',
+            'sub_directories',
+            'files',
+        )
+
+    def get_sub_directories(self, obj):
+        return [
+            SimpleDirectorySerializer().to_representation(dir)
+            for dir in obj.subdirectories
+        ]
+
+    def get_files(self, obj):
+        return [
+            FileSerializer().to_representation(file)
+            for file in obj.files
+        ]
 
     @staticmethod
     def get_sanitized_path(dir):

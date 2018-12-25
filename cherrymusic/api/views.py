@@ -5,6 +5,7 @@ import os
 from django.contrib.auth import get_user_model
 from django.http import StreamingHttpResponse, Http404
 from django.utils.translation import ugettext_lazy as _
+from django_filters import FilterSet, BooleanFilter
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
@@ -105,10 +106,20 @@ class FileViewSet(SlowServerMixin, viewsets.ReadOnlyModelViewSet):
         )
 
 
+class DirectoryFilter(FilterSet):
+    ''' filter on snapshot fields '''
+    basedir = BooleanFilter(field_name='parent', lookup_expr='isnull')
+
+    class Meta:
+        model = Directory
+        fields = ('basedir', )
+
+
 class DirectoryViewSet(SlowServerMixin, viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = Directory.objects.all()
     serializer_class = DirectorySerializer
+    filter_class = DirectoryFilter
 
 
 class PlaylistViewSet(SlowServerMixin, MultiSerializerViewSetMixin, viewsets.ModelViewSet):

@@ -6,7 +6,7 @@
         "module": "es2015",
         "moduleResolution": "node",
         "target": "es5",
-        "lib": [ "es2015", "dom" ],
+        "lib": [ "es2017", "dom" ],
         "experimentalDecorators": true,
         "baseUrl": "./src",
         "paths": {

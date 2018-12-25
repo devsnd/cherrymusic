@@ -1,17 +1,17 @@
 <template>
-  <div>
-    <b-container>
-      <cm-header></cm-header>
-      <b-row>
-        <b-col>
-          <file-browser></file-browser>
-        </b-col>
-        <b-col>
-          <PlaylistManager></PlaylistManager>
-        </b-col>
-      </b-row>
-    </b-container>
-  </div>
+    <div>
+        <b-container>
+            <cm-header></cm-header>
+            <b-row>
+                <b-col>
+                    <file-browser></file-browser>
+                </b-col>
+                <b-col>
+                    <PlaylistManager></PlaylistManager>
+                </b-col>
+            </b-row>
+        </b-container>
+    </div>
 </template>
 
 <script lang="ts">

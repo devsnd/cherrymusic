@@ -19,48 +19,78 @@ typescript_template = '''
 //      make generate_api
 //
 
-export module API {
-
-    export abstract class APIEndpoint {
-    }
-
-    export class Settings {
-        static baseUrl: string = '';
-
-        static setBaseUrl (baseUrl: string) {
-            this.baseUrl = baseUrl;
-        }
-
-        static getBaseUrl (): string {
-            return this.baseUrl;
-        }
-
-        static async call (method: string, path: string, data?: any) {
-            const url = Settings.getBaseUrl() + path;
-            let options: any = {
-                method: method,
-            }
-            if (data) {
-                options = {...options, body: JSON.stringify(data)};
-            }
-            const response = await fetch(url, options);
-            if (!response.ok) {
-                throw new Error(response.statusText)
-            }
-            return response.json()
-        }
-    }
-
-    {% for namespace in api_namespaces %}
-    export class {{namespace.name | upper_camel_case}} implements APIEndpoint {
-        {% for api_call in namespace.api_calls %}static async {{api_call.name | lower_camel_case}} ({% for param in api_call.parameters %}{{param.to_typescript}}{% if not forloop.last %}, {% endif %}{%endfor%}) {
-            return Settings.call('{{api_call.method}}', {{api_call.f_string_path}});
-        }{% if not forloop.last %}
-
-        {% endif %}{% endfor %}
-    }
-    {% endfor %}
+export abstract class APIEndpoint {
 }
+
+
+type HTTPMethod = 'get' | 'post' | 'delete' | 'patch' | 'put';
+
+
+export class Settings {
+    static baseUrl: string = '';
+
+    static setBaseUrl (baseUrl: string) {
+        this.baseUrl = baseUrl;
+    }
+
+    static getBaseUrl (): string {
+        return this.baseUrl;
+    }
+    
+    static encodeGetParams (params: {[key:string]: string}): string {
+      return (
+          Object.entries(params)
+          .map(([key, value]) => (key + '=' + encodeURIComponent(value)))
+          .join("&")
+      );
+    }
+
+    static async call (method: HTTPMethod, path: string, data?: any) {
+        let url = Settings.getBaseUrl() + path;
+        let options: any = {
+            method: method,
+        };
+        if (data) {
+            if (method === 'post') {
+                options = {...options, body: JSON.stringify(data)};
+            } else if (method === 'get') {
+                url = url + '?' + Settings.encodeGetParams(data);        
+            }
+        }
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            throw new Error(response.statusText)
+        }
+        return response.json()
+    }
+}
+
+// generate the argument types for each api call which
+{% for namespace in api_namespaces %}\
+{% for api_call in namespace.api_calls %}
+type {{namespace.name | upper_camel_case}}{{api_call.name | upper_camel_case}}Args = {
+{% for param in api_call.query_parameters %}    {{param.name}}{% if not param.required %}?{% endif %}: {{param.typescript_type}},
+{% endfor %}\
+}
+{% endfor %}
+\
+export class {{namespace.name | upper_camel_case}} implements APIEndpoint {
+{% for api_call in namespace.api_calls %}\
+    static async {{api_call.name | lower_camel_case}} \
+(\
+{% for param in api_call.path_parameters %}\
+{{param.name}}{% if not param.required %}?{% endif %}: {{param.typescript_type}}{% if not forloop.last %}, {% endif %}\
+{% endfor %}\
+{% if api_call.path_parameters %}, {% endif %}\
+params?: {{namespace.name | upper_camel_case}}{{api_call.name | upper_camel_case}}Args) {
+        return Settings.call('{{api_call.method}}', {{api_call.f_string_path}}, params);
+    }\
+{% if not forloop.last %}
+
+{% endif %}{% endfor %}
+}
+{% endfor %}
+
 '''
 
 
@@ -75,6 +105,7 @@ class APICallParameter:
     name: str
     required: bool
     type_: str
+    in_: str
 
     _typescript_type_mapping = {
         'integer': 'Number',
@@ -103,7 +134,8 @@ class APICallParameter:
 class APICall:
     path: str
     name: str
-    parameters: List[APICallParameter]
+    query_parameters: List[APICallParameter]
+    path_parameters: List[APICallParameter]
     method: str
 
     @property
@@ -132,18 +164,31 @@ def generate_typescript_api(schema):
         for method, specs in path_spec.items():
             namespace_name = specs['tags'][0]  # use the first tag to group the api calls
             call_name = specs['operationId'][len(namespace_name) + 1:]
-            parameters = [
+            query_parameters = [
                 APICallParameter(
+                    in_=parameter['in'],
                     name=parameter['name'],
                     required=parameter.get('required', False),
                     type_=parameter['schema']['type'],
                 )
                 for parameter in specs.get('parameters', [])
+                if parameter['in'] == 'query'
+            ]
+            path_parameters = [
+                APICallParameter(
+                    in_=parameter['in'],
+                    name=parameter['name'],
+                    required=parameter.get('required', False),
+                    type_=parameter['schema']['type'],
+                )
+                for parameter in specs.get('parameters', [])
+                if parameter['in'] == 'path'
             ]
             api_call = APICall(
                 path=path,
                 name=call_name,
-                parameters=parameters,
+                query_parameters=query_parameters,
+                path_parameters=path_parameters,
                 method=method,
             )
             api_namespaces[namespace_name].append(api_call)
