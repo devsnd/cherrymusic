@@ -23,15 +23,15 @@ export module API {
 
     export class Settings {
         static baseUrl: string = '';
-        
+
         static setBaseUrl (baseUrl: string) {
             this.baseUrl = baseUrl;
         }
-        
+
         static getBaseUrl (): string {
             return this.baseUrl;
         }
-        
+
         static async call (method: string, path: string, data?: any) {
             const url = Settings.getBaseUrl() + path;
             let options: any = {
@@ -53,7 +53,7 @@ export module API {
         {% for api_call in namespace.api_calls %}static async {{api_call.name | lower_camel_case}} ({% for param in api_call.parameters %}{{param.to_typescript}}{%endfor%}) {
             return Settings.call('{{api_call.method}}', {{api_call.f_string_path}});
         }{% if not forloop.last %}
-        
+
         {% endif %}{% endfor %}
     }
     {% endfor %}

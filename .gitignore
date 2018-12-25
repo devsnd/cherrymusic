@@ -12,7 +12,6 @@ var
 sdist
 develop-eggs
 .installed.cfg
-src
 pkg
 
 # Installer logs
