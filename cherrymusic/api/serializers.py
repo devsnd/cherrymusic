@@ -1,5 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from rest_framework.reverse import reverse
+
 from storage.models import File, Directory, MetaData, Artist, Album, Genre
 from playlist.models import Playlist, Track
 
@@ -52,7 +54,7 @@ class MetaDataSerializer(serializers.ModelSerializer):
 
 
 class FileSerializer(serializers.ModelSerializer):
-    path = serializers.SerializerMethodField('get_relative_path')
+    stream_url = serializers.SerializerMethodField()
     meta_data = MetaDataSerializer(read_only=True)
 
     class Meta:
@@ -60,13 +62,13 @@ class FileSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'filename',
-            'path',
             'meta_data',
+            'stream_url',
+
         )
 
-    @staticmethod
-    def get_relative_path(file):
-        return str(file.relative_path())
+    def get_stream_url(self, obj):
+        return reverse('file-stream', args=[obj.id])
 
 
 class SimpleDirectorySerializer(serializers.ModelSerializer):
@@ -74,7 +76,11 @@ class SimpleDirectorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Directory
-        fields = ('parent', 'path', 'id')
+        fields = [
+            'id',
+            'parent',
+            'path',
+        ]
 
     @staticmethod
     def get_sanitized_path(dir):
@@ -84,40 +90,28 @@ class SimpleDirectorySerializer(serializers.ModelSerializer):
         else:
             return dir.path
 
-class DirectorySerializer(serializers.ModelSerializer):
-    path = serializers.SerializerMethodField('get_sanitized_path')
+class DirectorySerializer(SimpleDirectorySerializer):
     sub_directories = serializers.SerializerMethodField()
     files = serializers.SerializerMethodField()
 
     class Meta:
         model = Directory
-        fields = (
-            'parent',
-            'path',
-            'id',
+        fields = SimpleDirectorySerializer.Meta.fields + [
             'sub_directories',
             'files',
-        )
+        ]
 
     def get_sub_directories(self, obj):
         return [
             SimpleDirectorySerializer().to_representation(dir)
-            for dir in obj.subdirectories
+            for dir in obj.subdirectories.order_by('path').all()
         ]
 
     def get_files(self, obj):
         return [
             FileSerializer().to_representation(file)
-            for file in obj.files
+            for file in obj.files.order_by('filename')
         ]
-
-    @staticmethod
-    def get_sanitized_path(dir):
-        # do not serialize the basedir path
-        if dir.parent is None:
-            return
-        else:
-            return dir.path
 
 class TrackSerializer(serializers.ModelSerializer):
     data = serializers.SerializerMethodField('serialize_data')

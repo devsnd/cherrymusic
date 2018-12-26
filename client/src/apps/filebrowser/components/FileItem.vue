@@ -1,0 +1,65 @@
+<template>
+    <b-list-group-item
+        :active="active"
+        variant="secondary"
+        class="d-flex justify-content-between align-items-center hover file-item"
+    >
+        <span style="width: 30px; text-align: right" class="pr-2">{{track}}</span>
+        <span class="file-name flex-grow-1">{{prettyFileName}}</span>
+        <b-badge variant="dark" pill>{{prettyDuration}}</b-badge>
+    </b-list-group-item>
+</template>
+
+<script lang="ts">
+    import Vue from 'vue';
+    import {FileInterface} from '@/api/types';
+
+    export default Vue.extend({
+        name: '',
+        props: {
+            file: Object as () => FileInterface,
+            active: Object as () => boolean,
+        },
+        computed: {
+            track: function () {
+                const file = (this.file as FileInterface);
+                if (file.meta_data && file.meta_data.track) {
+                    return file.meta_data.track;
+                }
+            },
+            prettyFileName: function () {
+                const file = (this.file as FileInterface);
+                if (file.meta_data === null) {
+                    return file.filename;
+                }
+                return `${file.meta_data.artist.name} - ${file.meta_data.title}`;
+            },
+            prettyDuration: function () {
+                const file = (this.file as FileInterface);
+                if (file.meta_data === null || file.meta_data.duration === null) {
+                    return '';
+                }
+                const duration = Math.round(file.meta_data.duration);
+                const secs = duration % 60;
+                const mins = ((duration / 60) % 60) | 0;
+                const hrs = ((duration / 3600) % 60) | 0;
+                return hrs ? `${hrs}:${mins}:${secs}` : `${mins}:${secs}`;
+            }
+        }
+    });
+</script>
+
+<style scoped>
+    .file-name {
+        max-width: 85%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .file-item {
+        height: 35px;
+        white-space: nowrap;
+    }
+    .hover:hover {
+        background-color: #eee;
+    }
+</style>

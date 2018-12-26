@@ -6,7 +6,7 @@ module.exports = {
   entry: './src/index.ts',
   output: {
     path: path.resolve(__dirname, '../cherrymusic/client/static/client'),
-    publicPath: '/dist/',
+    publicPath: '/static/client/',
     filename: 'build.js'
   },
   module: {

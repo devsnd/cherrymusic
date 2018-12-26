@@ -12,7 +12,7 @@
       </b-nav-form>
 
       <b-navbar-nav>
-        <b-nav-item href="#">
+        <b-nav-item href="#" @click="browseFiles()">
           Browse Files
         </b-nav-item>
         <b-nav-item href="#">
@@ -40,6 +40,7 @@
 <script lang="ts">
     import Vue from 'vue';
     import LanguageSwitcher from './LanguageSwitcher';
+    import {mapActions} from "vuex";
 
     export default Vue.extend({
         name: 'cm-header',
@@ -54,6 +55,12 @@
         computed: {
         },
         methods: {
+            browseFiles: function () {
+                (this as any).loadDir(1);
+            },
+            ...mapActions({
+                loadDir: 'filebrowser/loadDir',
+            })
         }
     });
 </script>

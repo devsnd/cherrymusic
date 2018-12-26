@@ -16,8 +16,10 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@types/lodash": "^4.14.119",
     "bootstrap-vue": "^2.0.0-rc.11",
     "font-awesome": "^4.7.0",
+    "lodash": "^4.17.11",
     "vue": "^2.5.2",
     "vue-class-component": "^6.0.0",
     "vue-gettext": "^2.1.1",

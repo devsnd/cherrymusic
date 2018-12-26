@@ -11,16 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 class Directory(models.Model):
-    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.PROTECT)
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.PROTECT, related_name='subdirectories')
     path = models.CharField(max_length=255)
-
-    @property
-    def subdirectories(self):
-        return Directory.objects.filter(parent=self)
-
-    @property
-    def files(self):
-        return File.objects.filter(directory=self)
 
     def __str__(self):
         return self.path
@@ -211,7 +203,7 @@ class MetaData(models.Model):
 
 class File(models.Model):
     filename = models.CharField(max_length=255)
-    directory = models.ForeignKey(Directory, on_delete=models.PROTECT)
+    directory = models.ForeignKey(Directory, on_delete=models.PROTECT, related_name='files')
 
     meta_indexed_at = models.DateField(null=True, blank=True)
     meta_data = models.OneToOneField(MetaData, null=True, blank=True, on_delete=models.SET_NULL)

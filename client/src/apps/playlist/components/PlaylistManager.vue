@@ -6,20 +6,24 @@
       :active="index == activePlaylistIdx"
       :title="playlist.name"
     >
-      <Playlist :playlist="playlist"></Playlist>
+      <Scrollable>
+        <Playlist :playlist="playlist"></Playlist>
+      </Scrollable>
     </b-tab>
     <b-tab :key="0" @click="addNewPlaylist()" title="+"></b-tab>
   </b-tabs>
 </template>
 <script lang="ts">
 import {mapGetters, mapActions} from 'vuex';
-import Playlist from '@/components/PlaylistManager/Playlist';
+import Playlist from './Playlist';
+import Scrollable from '@/containers/Scrollable';
 import Vue from "vue";
 
 export default Vue.extend({
   name: 'playlistmanager',
   components: {
-    Playlist
+    Playlist,
+    Scrollable,
   },
   data: function () {
     return {
