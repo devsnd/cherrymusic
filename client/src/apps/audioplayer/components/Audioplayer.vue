@@ -8,6 +8,14 @@
                     <b-progress :value="currentPlaytime" :max="duration"></b-progress>
                 </b-col>
             </b-row>
+            <b-row>
+                <b-btn>
+                    <span class="fa fa-3x fa-pause-circle"></span>
+                </b-btn>
+                <b-btn>
+                    <span class="fa fa-3x fa-play-circle"></span>
+                </b-btn>
+            </b-row>
         </b-container>
     </div>
 </template>

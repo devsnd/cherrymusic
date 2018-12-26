@@ -1,5 +1,5 @@
 <template>
-    <b-nav-item-dropdown right :text='`<i class="fas fa-language"></i>`'>
+    <b-nav-item-dropdown right :text='`<i class="fa fa-2x fa-language"></i>`'>
         <b-dropdown-item v-for="(language, key) in $language.available" :key="key" @click="setLanguage(key)">
             {{language}}
         </b-dropdown-item>

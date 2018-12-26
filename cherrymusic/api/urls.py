@@ -1,5 +1,7 @@
 from django.conf.urls import url, include
 from rest_framework import routers, permissions
+
+from youtube.views import YoutubeViewSet
 from .views import FileViewSet, DirectoryViewSet, ServerStatusView, PlaylistViewSet, UserViewSet, \
     TrackViewSet, BrowseView, IndexDirectoryView, AlbumArtView
 
@@ -9,6 +11,7 @@ router.register(r'directory', DirectoryViewSet)
 router.register(r'playlist', PlaylistViewSet)
 router.register(r'user', UserViewSet)
 router.register(r'track', TrackViewSet)
+router.register(r'youtube', YoutubeViewSet, basename='youtube')
 
 from rest_framework.schemas import get_schema_view
 

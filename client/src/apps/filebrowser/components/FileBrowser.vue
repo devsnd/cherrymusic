@@ -20,7 +20,7 @@
                     <b-list-group>
                         <FileItem
                             v-for="file in currentDirectory.files"
-                             @click.native="playFile(file.stream_url)"
+                             @click.native="playFile(file)"
                             :file="file"
                             :key="file.id"
                         ></FileItem>

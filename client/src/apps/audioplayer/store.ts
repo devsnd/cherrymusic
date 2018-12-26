@@ -3,6 +3,7 @@ import {Module} from "vuex";
 const SET_AUDIO_TAG = 'SET_AUDIO_TAG';
 const SET_PLAYTIME = 'SET_PLAYTIME';
 const SET_DURATION = 'SET_DURATION';
+const SET_META_DATA_DURATION = 'SET_META_DATA_DURATION';
 
 
 type AudioPlayerState = {
@@ -14,6 +15,7 @@ type AudioPlayerState = {
 }
 
 import * as _ from 'lodash';
+import {FileInterface} from "@/api/types";
 
 const AudioPlayerStore: Module<AudioPlayerState, any> = {
     namespaced: true,
@@ -45,13 +47,17 @@ const AudioPlayerStore: Module<AudioPlayerState, any> = {
             );
             commit(SET_AUDIO_TAG, audioTag);
         },
-        playFile ({commit, state}, filePath) {
-            console.log('playing ', filePath);
+        playFile ({commit, state}, file: FileInterface) {
+            const metaDataDuration = (
+                file.meta_data && file.meta_data.duration || null
+            );
+            commit(SET_META_DATA_DURATION, metaDataDuration);
+
             if (state.audioTag === null) {
                 console.error('Cannot play file, audioTag not set!');
                 return;
             }
-            state.audioTag.src = filePath;
+            state.audioTag.src = file.stream_url;
             state.audioTag.play();
         }
     },

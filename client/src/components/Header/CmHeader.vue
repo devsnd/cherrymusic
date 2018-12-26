@@ -27,7 +27,7 @@
         <b-nav-item-dropdown right>
           <!-- Using button-content slot -->
           <template slot="button-content">
-            <translate>Settings</translate>
+            <span class="fa fa-wrench"></span>
           </template>
           <b-dropdown-item href="#" v-translate>Admin</b-dropdown-item>
           <b-dropdown-item href="#">Options</b-dropdown-item>

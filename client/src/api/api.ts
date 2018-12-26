@@ -257,4 +257,13 @@ export class User implements APIEndpoint {
     }
 }
 
+type YoutubeSearchArgs = {
+}
+
+export class Youtube implements APIEndpoint {
+    static async search (params?: YoutubeSearchArgs) {
+        return Settings.call('get', `/api/v1/youtube/search/`, params);
+    }
+}
+
 

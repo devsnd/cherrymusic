@@ -122,15 +122,10 @@ class DirectoryViewSet(SlowServerMixin, viewsets.ReadOnlyModelViewSet):
     filter_class = DirectoryFilter
 
 
-class PlaylistViewSet(SlowServerMixin, MultiSerializerViewSetMixin, viewsets.ModelViewSet):
+class PlaylistViewSet(SlowServerMixin, viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, )
     queryset = Playlist.objects.all()
     serializer_class = PlaylistDetailSerializer
-
-    serializer_action_classes = {
-        'list': PlaylistListSerializer,
-        'retrieve': PlaylistDetailSerializer,
-    }
 
 
 class UserViewSet(SlowServerMixin, viewsets.ModelViewSet):
