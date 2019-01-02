@@ -1,3 +1,4 @@
+import dataclasses
 import re
 import requests
 from dataclasses import dataclass
@@ -13,6 +14,9 @@ class YoutubeSearchResult:
     title: str
     views: int
     duration: str
+
+    def asdict(self):
+        return dataclasses.asdict(self)
 
 
 def video_data_to_search_result(video_data):

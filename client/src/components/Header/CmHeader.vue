@@ -7,8 +7,17 @@
 
     <b-collapse is-nav id="nav_collapse">
       <b-nav-form>
-        <b-form-input size="sm" class="mr-sm-2" type="text" placeholder="Search" v-model="searchText"/>
-        <b-button size="sm" class="my-2 my-sm-0" type="submit">Search</b-button>
+        <b-form-input
+          size="sm"
+          class="mr-sm-2"
+          type="text"
+          placeholder="Search"
+          v-model="searchText"
+          :disabled="searching"
+        />
+        <b-button size="sm" class="my-2 my-sm-0" @click="search()">
+          Search
+        </b-button>
       </b-nav-form>
 
       <b-navbar-nav>
@@ -41,12 +50,14 @@
     import Vue from 'vue';
     import LanguageSwitcher from './LanguageSwitcher';
     import {mapActions} from "vuex";
+    import {Search} from "../../api/api";
 
     export default Vue.extend({
         name: 'cm-header',
         data: function () {
             return {
                 searchText: '',
+                searching: false,
             };
         },
         components: {
@@ -55,6 +66,12 @@
         computed: {
         },
         methods: {
+            search: async function () {
+                this.searching = true;
+                const results = await Search.search({query: this.searchText});
+                console.log(results);
+                this.searching = false;
+            },
             browseFiles: function () {
                 (this as any).loadDir(1);
             },

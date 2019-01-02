@@ -12,7 +12,9 @@ from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import GenericViewSet
 
+from api.generator.schemas import action_kwargs, ActionKwarg
 from api.helper import ImageResponse, ImageRenderer
 from core import pathprovider
 from core.albumartfetcher import AlbumArtFetcher
@@ -244,3 +246,11 @@ class MessageOfTheDayView(APIView):
         Response(
             PluginManager.digest(PluginManager.Event.GET_MOTD, request.user, message_of_the_day)
         )
+
+
+class SearchView(GenericViewSet):
+    @action(methods=['get'], detail=False)
+    @action_kwargs(ActionKwarg('query'))
+    def search(self, request):
+        query = request._request.GET['query']
+        return Response([])

@@ -156,6 +156,16 @@ export class Playlist implements APIEndpoint {
     }
 }
 
+type SearchSearchArgs = {
+    query: string,
+}
+
+export class Search implements APIEndpoint {
+    static async search (params?: SearchSearchArgs) {
+        return Settings.call('get', `/api/v1/search/search/`, params);
+    }
+}
+
 type StatusListArgs = {
 }
 
@@ -258,6 +268,7 @@ export class User implements APIEndpoint {
 }
 
 type YoutubeSearchArgs = {
+    query: string,
 }
 
 export class Youtube implements APIEndpoint {
