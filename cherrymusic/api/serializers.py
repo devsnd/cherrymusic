@@ -8,13 +8,6 @@ from playlist.models import Playlist, Track
 
 User = get_user_model()
 
-class AlbumSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Album
-        fields = (
-            'name',
-        )
-
 
 class ArtistSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,6 +15,18 @@ class ArtistSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'name',
+        )
+
+
+class AlbumSerializer(serializers.ModelSerializer):
+    albumartist = ArtistSerializer(read_only=True)
+
+    class Meta:
+        model = Album
+        fields = (
+            'name',
+            'albumartist',
+            'thumbnail_gif_b64',
         )
 
 

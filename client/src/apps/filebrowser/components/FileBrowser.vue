@@ -34,7 +34,7 @@
 <script lang="ts">
     import Vue from 'vue';
     import {Directory} from "@/api/api";
-    import FileItem from './FileItem';
+    import FileItem from '@/components/common/FileItem';
     import DirectoryItem from './DirectoryItem';
     import LoadingAnimation from '@/components/LoadingAnimation/LoadingAnimation'
     import {mapActions, mapGetters} from "vuex";

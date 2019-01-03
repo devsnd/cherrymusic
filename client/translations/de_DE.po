@@ -17,6 +17,14 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/components/Header.vue:33
-msgid "Settings"
-msgstr "Einstellungen"
+#: src/components/Header/CmHeader.vue:27
+msgid "Browse Files"
+msgstr "Datei Browser"
+
+#: src/components/Header/CmHeader.vue:32
+msgid "Load Playlist"
+msgstr "Playlist Laden"
+
+#: src/components/Header/CmHeader.vue:19
+msgid "Search"
+msgstr "Suchen"

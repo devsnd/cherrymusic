@@ -1,5 +1,9 @@
 import time
 
+import operator
+from django.db.models import Q
+from functools import reduce
+
 import logging
 import os
 from django.contrib.auth import get_user_model
@@ -23,10 +27,10 @@ from core.pluginmanager import PluginManager
 from ext.audiotranscode import AudioTranscode
 from ext.tinytag import TinyTag
 from playlist.models import Track, Playlist
-from storage.models import File, Directory
+from storage.models import File, Directory, Artist, Album
 from storage.status import ServerStatus
 from .serializers import FileSerializer, DirectorySerializer, UserSerializer, \
-    PlaylistDetailSerializer, TrackSerializer, PlaylistListSerializer
+    PlaylistDetailSerializer, TrackSerializer, PlaylistListSerializer, ArtistSerializer, AlbumSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -35,11 +39,10 @@ User = get_user_model()
 DEBUG_SLOW_SERVER = False
 
 class SlowServerMixin(object):
-    def get_object(self):
+    def dispatch(self, *args, **kwargs):
         if DEBUG_SLOW_SERVER:
-            time.sleep(2)
-
-        return super().get_object()
+            time.sleep(1)
+        return super().dispatch(*args, **kwargs)
 
 
 # http://stackoverflow.com/a/22922156/1191373
@@ -248,9 +251,58 @@ class MessageOfTheDayView(APIView):
         )
 
 
-class SearchView(GenericViewSet):
+class SearchView(SlowServerMixin, GenericViewSet):
+    ARTIST_LIMIT = 6
+    ALBUM_LIMIT = 6
+    SONG_LIMIT = 8
+
+    @classmethod
+    def make_word_filter(cls, words, prefix):
+        filters = ({f'{prefix}__icontains': word} for word in words)
+        qs = (Q(**filter) for filter in filters)
+        return reduce(operator.or_, qs)
+
     @action(methods=['get'], detail=False)
     @action_kwargs(ActionKwarg('query'))
     def search(self, request):
         query = request._request.GET['query']
-        return Response([])
+        words = query.strip().split()
+        if not words:
+            return Response({
+                'artists': [],
+                'albums': [],
+                'files': [],
+            })
+
+        artists = list(
+            Artist.objects
+            .filter(SearchView.make_word_filter(words, 'name'))
+            [:SearchView.ARTIST_LIMIT]
+        )
+
+        album_filters = [Q(SearchView.make_word_filter(words, 'name'))]
+        if artists:
+            # find all albums made by the artist that was found in addition to
+            # the albums that have the proper name
+            album_filters.append(
+                reduce(operator.or_, (Q(albumartist=artist) for artist in artists))
+            )
+        albums = (
+            Album.objects.filter(reduce(operator.or_, album_filters))
+            [:SearchView.ALBUM_LIMIT]
+        )
+
+        file_filters = [SearchView.make_word_filter(words, 'meta_data__title')]
+        # find tracks made by this artist, if any
+        file_filters.append(
+            reduce(operator.or_, (Q(meta_data__artist=artist) for artist in artists))
+        )
+        files = (
+            File.objects.filter(reduce(operator.or_, file_filters))
+            [:SearchView.SONG_LIMIT]
+        )
+        return Response({
+            'artists': [ArtistSerializer().to_representation(i) for i in artists],
+            'albums': [AlbumSerializer().to_representation(i) for i in albums],
+            'files': [FileSerializer().to_representation(i) for i in files],
+        })

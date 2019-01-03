@@ -3,3 +3,5 @@
 djangorestframework==3.9.0
 coreapi-cli==1.0.9
 pyyaml==3.13
+django-background-tasks==1.2.0
+Pillow==5.4.0

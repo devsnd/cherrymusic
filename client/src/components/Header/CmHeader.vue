@@ -6,26 +6,36 @@
     <b-navbar-brand href="#">CherryMusic</b-navbar-brand>
 
     <b-collapse is-nav id="nav_collapse">
-      <b-nav-form>
-        <b-form-input
-          size="sm"
-          class="mr-sm-2"
-          type="text"
-          placeholder="Search"
-          v-model="searchText"
-          :disabled="searching"
-        />
-        <b-button size="sm" class="my-2 my-sm-0" @click="search()">
-          Search
-        </b-button>
+      <b-nav-form @submit="search">
+        <b-input-group>
+          <b-form-input
+            size="sm"
+            type="text"
+            :placeholder="this.$gettext('Search')"
+            :formatter="searchWhileTyping"
+            v-model="searchText"
+            :disabled="searching"
+          />
+          <b-input-group-append>
+            <b-button size="sm" class="my-2 my-sm-0" @click="search()">
+              <translate>
+                Search
+              </translate>
+            </b-button>
+          </b-input-group-append>
+        </b-input-group>
       </b-nav-form>
 
       <b-navbar-nav>
         <b-nav-item href="#" @click="browseFiles()">
-          Browse Files
+          <translate>
+            Browse Files
+          </translate>
         </b-nav-item>
         <b-nav-item href="#">
-          Load Playlist
+          <translate>
+            Load Playlist
+          </translate>
         </b-nav-item>
       </b-navbar-nav>
 
@@ -50,7 +60,6 @@
     import Vue from 'vue';
     import LanguageSwitcher from './LanguageSwitcher';
     import {mapActions} from "vuex";
-    import {Search} from "../../api/api";
 
     export default Vue.extend({
         name: 'cm-header',
@@ -66,17 +75,30 @@
         computed: {
         },
         methods: {
-            search: async function () {
-                this.searching = true;
-                const results = await Search.search({query: this.searchText});
-                console.log(results);
-                this.searching = false;
+            search: async function (e?: Event) {
+                if (e) {
+                  e.preventDefault();
+                }
+                (this as any).setViewMode('search');
+                (this as any).debouncedSearch(this.searchText);
+            },
+            searchWhileTyping: function (value: string, event: Event) {
+              if (event && event.type === 'change') {
+                // omit blur and focus events
+                return value;
+              }
+              this.search();
+              return value;
             },
             browseFiles: function () {
+                (this as any).setViewMode('browse');
                 (this as any).loadDir(1);
             },
             ...mapActions({
                 loadDir: 'filebrowser/loadDir',
+                debouncedSearch: 'search/debouncedSearch',
+                searchIsCached: 'search/searchIsCached',
+                setViewMode: 'mainview/setViewMode',
             })
         }
     });

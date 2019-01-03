@@ -12,14 +12,15 @@ import 'bootstrap-vue/dist/bootstrap-vue.css';
 import 'font-awesome/css/font-awesome.css';
 
 // enable vue gettext
-import GetTextPlugin from 'vue-gettext'
+import VueGettext from 'vue-gettext'
 import translations from './translations.json'
-Vue.use(GetTextPlugin, {
+Vue.use(VueGettext, {
     translations: translations,
     availableLanguages: {
         'en_US': 'English',
         'de_DE': 'Deutsch',
-    }
+    },
+    silent: true,
 });
 
 import store from '@/store/store';

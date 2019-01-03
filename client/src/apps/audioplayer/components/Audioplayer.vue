@@ -9,12 +9,14 @@
                 </b-col>
             </b-row>
             <b-row>
-                <b-btn>
-                    <span class="fa fa-3x fa-pause-circle"></span>
-                </b-btn>
-                <b-btn>
-                    <span class="fa fa-3x fa-play-circle"></span>
-                </b-btn>
+                <b-col style="text-align: center">
+                    <b-btn>
+                        <span class="fa fa-3x fa-pause-circle"></span>
+                    </b-btn>
+                    <b-btn>
+                        <span class="fa fa-3x fa-play-circle"></span>
+                    </b-btn>
+                </b-col>
             </b-row>
         </b-container>
     </div>

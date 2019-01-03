@@ -9,6 +9,12 @@
       <Scrollable>
         <Playlist :playlist="playlist"></Playlist>
       </Scrollable>
+      Once the playlist finishes:
+      <select>
+        <option>Play next playlist tab</option>
+        <option>repeat playlist from the beginning</option>
+        <option>do nothing</option>
+      </select>
     </b-tab>
     <b-tab :key="0" @click="addNewPlaylist()" title="+"></b-tab>
   </b-tabs>

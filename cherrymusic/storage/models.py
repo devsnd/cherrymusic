@@ -1,5 +1,10 @@
+import base64
+import os
+
+from PIL import Image
 from django.conf import settings
 from django.db import models
+from io import BytesIO
 from pathlib import Path
 import logging
 from django.utils import timezone
@@ -63,8 +68,7 @@ class Directory(models.Model):
         indexed_files = 0
         indexed_directories = 0
         # remove all stale files
-        for f in self.file_set.all():
-            print(f)
+        for f in self.files.all():
             if not f.exists():
                 f.delete()
                 deleted_files += 1
@@ -147,6 +151,42 @@ class Album(models.Model):
         on_delete=models.PROTECT,
         related_name='albums'
     )
+    thumbnail_gif = models.BinaryField(max_length=20 * 1024, null=True, blank=True)
+
+    thumbnail_size = (8, 8)
+
+    @property
+    def thumbnail_gif_b64(self):
+        if self.thumbnail_gif:
+            b64_string = base64.b64encode(self.thumbnail_gif).decode('ascii')
+            return f'data:image/gif;base64,{b64_string}'
+
+    @classmethod
+    def img_data_to_thumbnail(cls, img):
+        im = Image.open(img)
+        im.thumbnail(cls.thumbnail_size)
+        out_stream = BytesIO()
+        im = im.convert('P', palette=Image.ADAPTIVE, colors=32)
+        im.save(out_stream, "GIF")
+        out_stream.seek(0)
+        return out_stream.read()
+
+    def get_image_from_tracks(self):
+        for file in File.objects.filter(meta_data__album=self):
+            image_data = file.get_meta_data_image()
+            if image_data is not None:
+                self.thumbnail_gif = Album.img_data_to_thumbnail(BytesIO(image_data))
+                self.save()
+                return
+        for file in File.objects.filter(meta_data__album=self):
+            dir_path = os.path.dirname(file.absolute_path())
+            for file in os.listdir(dir_path):
+                if file.lower().endswith(('.jpg', '.gif', '.jpeg')):
+                    abs_path = os.path.join(dir_path, file)
+                    self.thumbnail_gif = Album.img_data_to_thumbnail(abs_path)
+                    self.save()
+                    return
+
 
     @classmethod
     def get_for_name(cls, album, albumartist):
@@ -207,6 +247,10 @@ class File(models.Model):
 
     meta_indexed_at = models.DateField(null=True, blank=True)
     meta_data = models.OneToOneField(MetaData, null=True, blank=True, on_delete=models.SET_NULL)
+
+    def get_meta_data_image(self):
+        tinytag = TinyTag.get(str(self.absolute_path()), image=True)
+        return tinytag.get_image()
 
     def update_metadata(self):
         meta_data = MetaData.create_from_path(str(self.absolute_path()))

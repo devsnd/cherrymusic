@@ -3,6 +3,14 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Language: \n"
 
-#: src/components/Header.vue:33
-msgid "Settings"
+#: src/components/Header/CmHeader.vue:27
+msgid "Browse Files"
+msgstr ""
+
+#: src/components/Header/CmHeader.vue:32
+msgid "Load Playlist"
+msgstr ""
+
+#: src/components/Header/CmHeader.vue:19
+msgid "Search"
 msgstr ""
