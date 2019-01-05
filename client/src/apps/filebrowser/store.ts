@@ -34,7 +34,12 @@ const FileBrowserStore: Module<FileBrowserState, any> = {
         async loadDir ({commit, state}, id: number) {
             if (state.directoryById[id] === undefined) {
                 commit(SET_LOADING, true);
-                const directory: DirectoryInterface = await Directory.read(id);
+                let directory: DirectoryInterface;
+                if (id === -1) {
+                    directory = await Directory.basedirs();
+                } else {
+                    directory = await Directory.read(id);
+                }
                 commit(UPDATE_DIRECTORY, directory);
                 commit(SET_CURRENT_DIRECTORY_ID, directory.id);
                 commit(SET_PARENT_DIRECTORY_ID, directory.parent)

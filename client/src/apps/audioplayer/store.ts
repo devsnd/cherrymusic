@@ -1,4 +1,6 @@
 import {Module} from "vuex";
+import * as _ from 'lodash';
+import {FileInterface, TrackInterface, TrackType} from "@/api/types";
 
 const SET_AUDIO_TAG = 'SET_AUDIO_TAG';
 const SET_PLAYTIME = 'SET_PLAYTIME';
@@ -13,9 +15,6 @@ type AudioPlayerState = {
     metaDataDuration: null | number,
     audioTag: HTMLMediaElement | null,
 }
-
-import * as _ from 'lodash';
-import {FileInterface} from "@/api/types";
 
 const AudioPlayerStore: Module<AudioPlayerState, any> = {
     namespaced: true,
@@ -36,7 +35,6 @@ const AudioPlayerStore: Module<AudioPlayerState, any> = {
     actions: {
         async registerAudioTag ({commit, state}, audioTag) {
             const setCurrentPlaytime = () => {
-                console.log('debounce');
                 commit(SET_PLAYTIME, audioTag.currentTime)
                 commit(SET_DURATION, audioTag.duration);
             };
@@ -46,6 +44,13 @@ const AudioPlayerStore: Module<AudioPlayerState, any> = {
                 {trailing: true}
             );
             commit(SET_AUDIO_TAG, audioTag);
+        },
+        play ({commit, state, dispatch}, {track}) {
+            if (track.type === TrackType.File) {
+                dispatch('playFile', track.file);
+            } else {
+                alert(`Don't know how to play track type ${track.type}`)
+            }
         },
         playFile ({commit, state}, file: FileInterface) {
             const metaDataDuration = (
@@ -70,6 +75,9 @@ const AudioPlayerStore: Module<AudioPlayerState, any> = {
         },
         [SET_DURATION] (state, duration) {
             state.duration = duration;
+        },
+        [SET_META_DATA_DURATION] (state, duration) {
+            state.metaDataDuration = duration;
         }
     },
 };

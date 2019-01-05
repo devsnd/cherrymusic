@@ -58,6 +58,9 @@ export class Settings {
 
 // generate the argument types for each api call which
 
+type DirectoryBasedirsArgs = {
+}
+
 type DirectoryListArgs = {
     limit?: Number,
     offset?: Number,
@@ -69,6 +72,10 @@ type DirectoryReadArgs = {
 }
 
 export class Directory implements APIEndpoint {
+    static async basedirs (params?: DirectoryBasedirsArgs) {
+        return Settings.call('get', `/api/v1/directory/basedirs/`, params);
+    }
+
     static async list (params?: DirectoryListArgs) {
         return Settings.call('get', `/api/v1/directory/`, params);
     }

@@ -20,7 +20,7 @@
                     <b-list-group>
                         <FileItem
                             v-for="file in currentDirectory.files"
-                             @click.native="playFile(file)"
+                             @click.native="addFileToVisiblePlaylist(file)"
                             :file="file"
                             :key="file.id"
                         ></FileItem>
@@ -61,7 +61,8 @@
             },
             ...mapActions({
                 loadDir: 'filebrowser/loadDir',
-                playFile: 'audioplayer/playFile',
+                // playFile: 'audioplayer/playFile',
+                addFileToVisiblePlaylist: 'playlist/addFileToVisiblePlaylist',
             })
         }
     });

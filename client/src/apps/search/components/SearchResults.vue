@@ -1,7 +1,8 @@
+<script src="../../../index.ts"></script>
 <template>
     <div>
         <LoadingAnimation v-if="searching"></LoadingAnimation>
-        <div v-if="noResults">
+        <div v-if="!searching && noResults">
             <h3>Nothing found.</h3>
         </div>
         <div v-if="results.artists.length">
@@ -17,6 +18,9 @@
                 >
                     <span style="background-color: rgba(255,255,255,0.75);">
                         {{artist.name}}
+                        <div v-for="b64 in artist.album_thumbnail_gif_b64">
+                            <img :src="b64" style="width: 30px">
+                        </div>
                     </span>
                 </b-card>
             </div>
@@ -42,6 +46,7 @@
             <b-list-group>
                 <FileItem
                     v-for="file in results.files"
+                    @click.native="addFileToVisiblePlaylist(file)"
                     :file="file"
                     :key="file.id"
                 ></FileItem>
@@ -52,7 +57,7 @@
 
 <script lang="ts">
     import Vue from 'vue';
-    import {mapGetters} from 'vuex';
+    import {mapActions, mapGetters} from 'vuex';
     import LoadingAnimation from '@/components/LoadingAnimation/LoadingAnimation';
     import FileItem from '@/components/common/FileItem';
 
@@ -81,6 +86,11 @@
                     vm.results.files.length === 0
                 );
             }
+        },
+        methods: {
+            ...mapActions({
+                addFileToVisiblePlaylist: 'playlist/addFileToVisiblePlaylist',
+            })
         }
     });
 </script>

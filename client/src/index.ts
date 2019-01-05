@@ -23,8 +23,12 @@ Vue.use(VueGettext, {
     silent: true,
 });
 
-import store from '@/store/store';
+// enable v-sortable directive for the playlist
+//@ts-ignore there are no type definitions for vue-sortable
+import Sortable from '@/lib/sortable/vue-sortable';
+Vue.use(Sortable);
 
+import store from '@/store/store';
 
 let v = new Vue({
     el: "#app",

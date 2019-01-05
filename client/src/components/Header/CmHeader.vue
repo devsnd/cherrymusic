@@ -43,7 +43,7 @@
       <b-navbar-nav class="ml-auto">
         <LanguageSwitcher></LanguageSwitcher>
 
-        <b-nav-item-dropdown right>
+        <b-nav-item-dropdown right class="p-0">
           <!-- Using button-content slot -->
           <template slot="button-content">
             <span class="fa fa-wrench"></span>
@@ -92,7 +92,9 @@
             },
             browseFiles: function () {
                 (this as any).setViewMode('browse');
-                (this as any).loadDir(1);
+                // -1 is the id of the virtual basedirs folder that contains
+                // all the base dirs
+                (this as any).loadDir(-1);
             },
             ...mapActions({
                 loadDir: 'filebrowser/loadDir',

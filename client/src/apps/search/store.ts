@@ -21,7 +21,11 @@ const SearchStore: Module<SearchState, any> = {
     namespaced: true,
     state () {
         return {
-            results: {},
+            results: {
+                artists: [],
+                albums: [],
+                files: [],
+            },
             lastQuery: '',
             searching: false,
             cache: new Map<string,SearchResults>(),

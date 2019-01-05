@@ -4,7 +4,7 @@
             <b-row>
                 <b-col>
                     <audio ref="audiotag"></audio>
-                    {{currentPlaytime}} / {{duration}}
+                    {{currentPlaytime | formatDuration}} / {{duration | formatDuration}}
                     <b-progress :value="currentPlaytime" :max="duration"></b-progress>
                 </b-col>
             </b-row>
@@ -25,6 +25,7 @@
 <script lang="ts">
     import Vue from 'vue';
     import {mapActions, mapGetters} from "vuex";
+    import {formatDuration} from "../../../common/utils";
     export default Vue.extend({
         name: '',
         mounted: function () {
@@ -35,6 +36,9 @@
                 currentPlaytime: 'audioplayer/currentPlaytime',
                 duration: 'audioplayer/duration',
             })
+        },
+        filters: {
+            formatDuration: formatDuration,
         },
         methods: {
             ...mapActions({

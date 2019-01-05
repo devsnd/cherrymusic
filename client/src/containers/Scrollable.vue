@@ -14,7 +14,7 @@
 
 <style scoped>
     .scrollable {
-        max-height: 300px;
+        max-height: 500px;
         overflow-y: scroll;
     }
 </style>

@@ -16,7 +16,9 @@
                     <file-browser></file-browser>
                 </div>
                 <div v-else-if="viewMode === 'search'">
-                    <search-results></search-results>
+                    <Scrollable>
+                        <search-results></search-results>
+                    </Scrollable>
                 </div>
                 <div v-else-if="viewMode === 'ytsearch'">
                     <youtube-search></youtube-search>
@@ -45,6 +47,7 @@
     import FileBrowser from '@/apps/filebrowser/components/FileBrowser';
     import YoutubeSearch from '@/apps/youtube/components/YoutubeSearch'
     import Vue from "vue";
+    import Scrollable from '@/containers/Scrollable';
 
     export default Vue.extend({
         name: 'dashboard',
@@ -57,6 +60,7 @@
             Audioplayer,
             YoutubeSearch,
             SearchResults,
+            Scrollable,
         },
         computed: {
             ...mapGetters({
