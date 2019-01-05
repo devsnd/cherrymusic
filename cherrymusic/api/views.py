@@ -137,7 +137,7 @@ class DirectoryViewSet(SlowServerMixin, viewsets.ReadOnlyModelViewSet):
         data = {
             'id': -1,
             'parent': None,
-            'path': '',
+            'path': 'Root',
             'sub_directories': sub_directories,
             'files': []
         }

@@ -29,6 +29,16 @@ const FileBrowserStore: Module<FileBrowserState, any> = {
         loading: (state) => state.loading,
         currentDirectory: (state) => state.currentId === null ? null : state.directoryById[state.currentId],
         parentDirectory: (state) => state.parentId === null ? null : state.directoryById[state.parentId],
+        breadcrumbs: (state, getters) => {
+            const breadcrumbs = [getters.currentDirectory];
+            let upId = state.parentId;
+            while (upId !== null) {
+                const upDir = state.directoryById[upId];
+                breadcrumbs.push(upDir);
+                upId = upDir.parent;
+            }
+            return breadcrumbs.reverse();
+        },
     },
     actions: {
         async loadDir ({commit, state}, id: number) {

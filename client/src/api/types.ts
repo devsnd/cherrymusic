@@ -5,7 +5,7 @@ export enum TrackType {
 
 export interface SimpleDirectoryInterface {
     id: number,
-    parent: string,
+    parent: number,
     path: string,
 }
 

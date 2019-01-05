@@ -4,9 +4,15 @@
             <LoadingAnimation></LoadingAnimation>
         </template>
         <template v-else>
-            <b-btn @click="goUp()">
-                &lt;--
-            </b-btn>
+            <b-alert show variant="secondary">
+                <b-btn @click="goUp()">
+                    <i class="fa fa-level-up"></i>
+                </b-btn>
+                <template v-for="(breadcrumb, idx) in breadcrumbs">
+                    <a @click="goTo(breadcrumb.id)" href="#">{{ breadcrumb.path }}</a>
+                    <span v-if="idx < breadcrumbs.length - 1"> / </span>
+                </template>
+            </b-alert>
             <Scrollable>
                 <div v-if="currentDirectory !== null">
                     <b-list-group>
@@ -53,9 +59,13 @@
                 loading: 'filebrowser/loading',
                 currentDirectory: 'filebrowser/currentDirectory',
                 parentDirectory: 'filebrowser/parentDirectory',
-            })
+                breadcrumbs: 'filebrowser/breadcrumbs',
+            }),
         },
         methods: {
+            goTo: function (id) {
+              (this as any).loadDir(id);
+            },
             goUp: function () {
                 (this as any).loadDir(this.parentDirectory.id);
             },
