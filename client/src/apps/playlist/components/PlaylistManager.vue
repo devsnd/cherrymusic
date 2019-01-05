@@ -48,12 +48,10 @@
                         <translate>This playlist is empty.</translate>
                         <translate>Search or Browse to add tracks.</translate>
                     </div>
-                    <Scrollable>
-                        <Playlist
-                            :playlist="playlists[visiblePlaylistIdx]"
-                            :triggerPlay="playTrackInPlaylist(visiblePlaylistIdx)"
-                        ></Playlist>
-                    </Scrollable>
+                    <Playlist
+                        :playlist="playlists[visiblePlaylistIdx]"
+                        :triggerPlay="playTrackInPlaylist(visiblePlaylistIdx)"
+                    ></Playlist>
                 </div>
             </div>
         </div>

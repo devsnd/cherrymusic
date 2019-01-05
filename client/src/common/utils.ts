@@ -26,3 +26,36 @@ export function formatDuration (duration: number) {
     }
     return `${mins}:${zPad(secs, 2)}`;
 }
+
+export function randomId () {
+  return Math.random().toString(36).substr(2, 10);
+}
+
+export function sum (list: Array<number>) {
+  return list.reduce((accu, elem) => accu + elem, 0);
+}
+
+export function avg (list: Array<number>) {
+  if (list.length === 0) {
+    return null;
+  }
+  return sum(list) / list.length;
+}
+
+export function any (args: Array<boolean>) {
+  for (const arg of args) {
+    if (arg) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function all (args: Array<boolean>) {
+  for (const arg of args) {
+    if (!arg) {
+      return false;
+    }
+  }
+  return true;
+}

@@ -1,9 +1,13 @@
-<script src="../../../index.ts"></script>
 <template>
     <div>
         <LoadingAnimation v-if="searching"></LoadingAnimation>
         <div v-if="!searching && noResults">
-            <h3>Nothing found.</h3>
+            <h3><translate>No search results.</translate></h3>
+            <br>
+            <p>You can try searching on youtube.</p>
+            <b-btn @click="showYoutubeSearch()" variant="primary">
+                Search on youtube
+            </b-btn>
         </div>
         <div v-if="results.artists.length">
             <h3>Artists</h3>
@@ -14,7 +18,7 @@
                     :key="artist.id"
                     :img-src="defaultImage"
                     class="mb-1 mr-1 artist-card"
-                    style="width: 175px; height: 175px; display: inline-block"
+                    style="width: 160px; height: 160px; display: inline-block"
                 >
                     <span style="background-color: rgba(255,255,255,0.75);">
                         {{artist.name}}
@@ -33,7 +37,7 @@
                 :key="album.id"
                 :img-src="album.thumbnail_gif_b64 ? album.thumbnail_gif_b64 : defaultImage"
                 class="mb-1 mr-1 album-card"
-                style="width: 175px; height: 175px; display: inline-block"
+                style="width: 160px; height: 160px; display: inline-block"
             >
                 <span style="background-color: rgba(255,255,255,0.75);">
                     {{album.name}}<br><br>
@@ -90,7 +94,12 @@
         methods: {
             ...mapActions({
                 addFileToVisiblePlaylist: 'playlist/addFileToVisiblePlaylist',
-            })
+                setViewMode: 'mainview/setViewMode',
+            }),
+            showYoutubeSearch: function () {
+                (this as any).setViewMode('ytsearch');
+            }
+
         }
     });
 </script>

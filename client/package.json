@@ -20,12 +20,14 @@
     "bootstrap-vue": "^2.0.0-rc.11",
     "font-awesome": "^4.7.0",
     "lodash": "^4.17.11",
+    "sortablejs": "^1.4.2",
     "vue": "^2.5.2",
     "vue-class-component": "^6.0.0",
     "vue-gettext": "^2.1.1",
     "vue-property-decorator": "^6.0.0",
     "vue-router": "^3.0.1",
-    "vuex": "^3.0.1"
+    "vuex": "^3.0.1",
+    "youtube-player": "^5.5.2"
   },
   "devDependencies": {
     "css-loader": "^0.28.1",

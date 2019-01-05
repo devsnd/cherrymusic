@@ -1,30 +1,72 @@
+import {TrackType} from "../../../api/types";
+import {TrackType} from "../../../api/types";
 <template>
-    <b-list-group v-sortable="{onUpdate: onChangedSorting}">
-        <template
-            v-for="(track, index) in playlist.tracks"
-        >
-            <template v-if="track.type === TrackType.File">
-                <FileItem
-                    :key="track.renderId"
-                    :file="track.file"
-                    :active="index === playlist.activeTrackIdx"
-                    @click.native="playTrack(index)"
-                ></FileItem>
-            </template>
-        </template>
-    </b-list-group>
-
+    <div>
+        <b-badge :variant="littleTimeLeft ? 'danger' : 'light'" style="display: inline">
+            {{elapsedTime | formatDuration}} / {{duration | formatDuration}}
+        </b-badge>
+        <b-progress :max="duration" style="height: 4px" class="mb-2">
+            <b-progress-bar
+                :variant="littleTimeLeft ? 'danger' : 'secondary'"
+                :value="elapsedTime"
+            ></b-progress-bar>
+        </b-progress>
+        <Scrollable>
+            <b-list-group v-sortable="{onUpdate: onChangedSorting}">
+                <template
+                    v-for="(track, index) in playlist.tracks"
+                >
+                    <template v-if="track.type === TrackType.File">
+                        <FileItem
+                            :key="track.renderId"
+                            :file="track.file"
+                            :active="index === playlist.activeTrackIdx"
+                            @click.native="playTrack(index)"
+                        ></FileItem>
+                    </template>
+                    <template v-if="track.type === TrackType.Youtube">
+                        <YoutubeItem
+                            :key="track.renderId"
+                            :youtube="track.youtube"
+                            :active="index === playlist.activeTrackIdx"
+                            @click.native="playTrack(index)"
+                        ></YoutubeItem>
+                    </template>
+                </template>
+            </b-list-group>
+        </Scrollable>
+    </div>
 </template>
 <script lang="ts">
+    import {formatDuration, sum} from "../../../common/utils";
+    import {mapActions} from 'vuex';
+    import Vue from "vue";
+    import FileItem from '@/components/common/FileItem';
+    import {TrackType} from "@/api/types";
+    import {PlaylistType} from "../store";
+    import YoutubeItem from './YoutubeItem';
+    import {TrackInterface} from "../../../api/types";
+    import Scrollable from '@/containers/Scrollable';
+
     interface SortableEvent {
         oldIndex: number,
         newIndex: number,
     }
 
-    import {mapGetters, mapActions} from 'vuex';
-    import Vue from "vue";
-    import FileItem from '@/components/common/FileItem';
-    import {TrackType} from "@/api/types";
+    function getTrackDurations (tracks: TrackInterface[]) {
+        return tracks.map((track) => {
+            if (track.type === TrackType.File) {
+                return (
+                    track.file !== null &&
+                    track.file.meta_data !== null &&
+                    track.file.meta_data.duration || 0
+                );
+            } else if (track.type === TrackType.Youtube) {
+                return track.youtube && track.youtube.duration || 0;
+            }
+            return 0;
+        })
+    }
 
     export default Vue.extend({
         name: 'playlist',
@@ -43,6 +85,8 @@
         },
         components: {
             FileItem,
+            YoutubeItem,
+            Scrollable,
         },
         methods: {
             ...mapActions({
@@ -54,11 +98,35 @@
             onChangedSorting: function (event: SortableEvent) {
                 const oldIndex = event.oldIndex;
                 const newIndex = event.newIndex;
-                this.swapTrackInActivePlaylist({oldIndex, newIndex});
+                (this as any).swapTrackInActivePlaylist({oldIndex, newIndex});
             },
         },
         computed: {
-            ...mapGetters({}),
-        }
+            duration: function () {
+                const playlist = (this.playlist as PlaylistType);
+                const tracksDurations = getTrackDurations(playlist.tracks);
+                if (tracksDurations.length === 0) {
+                    return 0
+                }
+                const durationSum = sum(tracksDurations);
+                const avgDuration = durationSum / tracksDurations.length;
+                const unestimated = playlist.tracks.length - tracksDurations.length;
+                return durationSum + unestimated * avgDuration;
+            },
+            elapsedTime: function () {
+                const playlist = (this.playlist as PlaylistType);
+                const trackDurations = getTrackDurations(playlist.tracks.slice(0, playlist.activeTrackIdx));
+                return sum(trackDurations) + playlist.playbackPosition;
+            },
+            remainingTime: function () {
+                return this.duration - this.elapsedTime;
+            },
+            littleTimeLeft: function () {
+                return this.remainingTime < 300;
+            }
+        },
+        filters: {
+            formatDuration: formatDuration,
+        },
     });
 </script>

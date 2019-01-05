@@ -8,6 +8,7 @@ import filebrowser from '@/apps/filebrowser/store';
 import audioplayer from '@/apps/audioplayer/store';
 import playlist from '@/apps/playlist/store';
 import search from '@/apps/search/store';
+import youtube from '@/apps/youtube/store';
 import mainview from '@/apps/mainview/store';
 
 
@@ -18,5 +19,6 @@ export default new Vuex.Store({
         playlist,
         mainview,
         search,
+        youtube,
     }
 })

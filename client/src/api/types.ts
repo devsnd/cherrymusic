@@ -1,6 +1,6 @@
 export enum TrackType {
     File = 0,
-    YoutubeUrl = 1,
+    Youtube = 1,
 };
 
 export interface SimpleDirectoryInterface {
@@ -30,12 +30,20 @@ export interface FileInterface {
     meta_data: null | MetaDataInterface,
 }
 
+export interface YoutubeInterface {
+    youtube_id: string,
+    thumbnail_url: string,
+    title: string,
+    views: number,
+    duration: number,
+}
+
 export interface TrackInterface {
     playlist: number,
     order: number,
     type: TrackType,
     file: FileInterface | null,
-    youtube_url: null,
+    youtube: YoutubeInterface | null,
     renderId: number,
 }
 

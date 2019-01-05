@@ -1,8 +1,9 @@
 <template>
     <div>
+        <LoadingAnimation v-if="searching"></LoadingAnimation>
         <b-btn @click="searchYoutube()">search yt</b-btn>
         <b-card
-            v-for="video in searchResults"
+            v-for="video in results"
             :key="video.youtube_id"
             :img-src="video.thumbnail_url"
             :title="video.title"
@@ -16,9 +17,9 @@
                 {{ video.views }} views<br>
                 {{ video.youtube_id }}
             </p>
-            <b-button href="#" variant="primary">
+            <b-btn variant="primary" @click="addToPlaylist(video)">
                 PLAY
-            </b-button>
+            </b-btn>
           </b-card>
     </div>
 </template>
@@ -26,23 +27,29 @@
 <script lang="ts">
     import Vue from "vue";
     import {Youtube} from "@/api/api";
+    import {mapActions, mapGetters} from "vuex";
+    import LoadingAnimation from '@/components/LoadingAnimation/LoadingAnimation'
+    import {YoutubeInterface} from "../../../api/types";
 
     export default Vue.extend({
         name: 'youtubesearch',
-        props: {
-        },
-        data: function () {
-            return {
-                searchResults: []
-            };
-        },
         components: {
-
+            LoadingAnimation,
+        },
+        computed: {
+            ...mapGetters({
+                results: 'youtube/results',
+                searching: 'youtube/searching',
+            })
         },
         methods: {
-          searchYoutube: async function () {
-              this.searchResults = await Youtube.search({query: 'gas königsforst'});
-          }
+            addToPlaylist: function (video: YoutubeInterface) {
+                this.addYoutubeToVisiblePlaylist(video);
+            },
+            ...mapActions({
+                searchYoutube: 'youtube/search',
+                addYoutubeToVisiblePlaylist: 'playlist/addYoutubeToVisiblePlaylist',
+            }),
         },
     });
 </script>

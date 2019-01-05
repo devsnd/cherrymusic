@@ -1,30 +1,32 @@
 <template>
     <b-container style="height: 100%">
         <cm-header></cm-header>
-        <b-row>
-            <b-col style="max-width: 50%" class="mt-2">
-                <div v-if="viewMode === 'motd'">
-                    <b-jumbotron
-                            header="Cherry Music II"
-                            lead="Oh My Gaush, it's finally here" >
-                        <p>
-                            Kapow!
-                        </p>
-                    </b-jumbotron>
-                </div>
-                <div v-else-if="viewMode === 'browse'">
-                    <file-browser></file-browser>
-                </div>
-                <div v-else-if="viewMode === 'search'">
-                    <Scrollable>
-                        <search-results></search-results>
-                    </Scrollable>
-                </div>
-                <div v-else-if="viewMode === 'ytsearch'">
-                    <youtube-search></youtube-search>
-                </div>
+        <b-row class="mt-3">
+            <b-col md="6">
+                <b-card>
+                    <div v-if="viewMode === 'motd'">
+                        <b-jumbotron
+                                header="Cherry Music II"
+                                lead="Oh My Gaush, it's finally here" >
+                            <p>
+                                Kapow!
+                            </p>
+                        </b-jumbotron>
+                    </div>
+                    <div v-else-if="viewMode === 'browse'">
+                        <file-browser></file-browser>
+                    </div>
+                    <div v-else-if="viewMode === 'search'">
+                        <Scrollable>
+                            <search-results></search-results>
+                        </Scrollable>
+                    </div>
+                    <div v-else-if="viewMode === 'ytsearch'">
+                        <youtube-search></youtube-search>
+                    </div>
+                </b-card>
             </b-col>
-            <b-col style="max-width: 50%" class="mt-2">
+            <b-col md="6">
                 <PlaylistManager></PlaylistManager>
             </b-col>
         </b-row>
