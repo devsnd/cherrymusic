@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class Directory(models.Model):
-    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.PROTECT, related_name='subdirectories')
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='subdirectories')
     path = models.CharField(max_length=255)
 
     def __str__(self):
@@ -78,17 +78,20 @@ class Directory(models.Model):
                 d.delete()
                 deleted_directories += 1
         # add all files and directories
-        for sub_path in Path(self.absolute_path()).iterdir():
-            if sub_path.is_file():
+        parent_path = self.absolute_path()
+        for sub_path in Path(parent_path).iterdir():
+            if sub_path.is_file() and File.indexable(sub_path.name):
+                abs_path = parent_path / sub_path
                 # index all indexable files
-                f = File(filename=sub_path.name, directory=self)
-                if f.indexable():
-                    try:
-                        # check if the file was already indexed:
-                        f = File.objects.get(filename=sub_path.name, directory=self)
-                    except File.DoesNotExist:
-                        f.save()
-                        indexed_files += 1
+                created, file = File.objects.get_or_create(
+                    filename=sub_path.name,
+                    directory=self,
+                    defaults=dict(
+                        size=os.stat(abs_path.absolute()).st_size,
+                    )
+                )
+                if created:
+                    indexed_files += 1
             elif sub_path.is_dir():
                 if sub_path.name == '.':
                     continue
@@ -209,19 +212,21 @@ class MetaData(models.Model):
     track = models.IntegerField(null=True, blank=True)
     track_total = models.IntegerField(null=True, blank=True)
     title = models.CharField(max_length=255, null=True, blank=True)
-    artist = models.ForeignKey(Artist, null=True, blank=True, on_delete=models.CASCADE, related_name='tracks')
-    album = models.ForeignKey(Album, null=True, blank=True, on_delete=models.PROTECT, related_name='tracks')
+    artist = models.ForeignKey(Artist, null=True, blank=True, on_delete=models.SET_NULL, related_name='tracks')
+    album = models.ForeignKey(Album, null=True, blank=True, on_delete=models.SET_NULL, related_name='tracks')
     year = models.IntegerField(null=True, blank=True)
-    genre = models.ForeignKey(Genre, null=True, blank=True, on_delete=models.PROTECT)
+    genre = models.ForeignKey(Genre, null=True, blank=True, on_delete=models.SET_NULL)
     duration = models.FloatField(null=True, blank=True)
+
+    file = models.OneToOneField('storage.File', on_delete=models.CASCADE, related_name='meta_data')
 
     def __str__(self):
         return f'{self.track} {self.artist} - {self.title}'
 
     @classmethod
-    def create_from_path(cls, path):
+    def create_for_file(cls, file):
         try:
-            tag = TinyTag.get(path)
+            tag = TinyTag.get(str(file.absolute_path()))
         except TinyTagException:
             return
         artist = Artist.get_for_name(tag.artist)
@@ -237,24 +242,24 @@ class MetaData(models.Model):
             year=int(tag.year) if tag.year else None,
             genre=genre,
             duration=tag.duration,
+            file=file,
         )
         return meta_data
 
 
 class File(models.Model):
     filename = models.CharField(max_length=255)
-    directory = models.ForeignKey(Directory, on_delete=models.PROTECT, related_name='files')
+    directory = models.ForeignKey(Directory, on_delete=models.CASCADE, related_name='files')
+    size = models.PositiveIntegerField()
 
     meta_indexed_at = models.DateField(null=True, blank=True)
-    meta_data = models.OneToOneField(MetaData, null=True, blank=True, on_delete=models.SET_NULL)
 
     def get_meta_data_image(self):
         tinytag = TinyTag.get(str(self.absolute_path()), image=True)
         return tinytag.get_image()
 
     def update_metadata(self):
-        meta_data = MetaData.create_from_path(str(self.absolute_path()))
-        self.meta_data = meta_data
+        MetaData.create_for_file(self)
         self.meta_indexed_at = timezone.now()
         self.save()
 
@@ -266,9 +271,10 @@ class File(models.Model):
     def __str__(self):
         return self.filename
 
-    def indexable(self):
+    @classmethod
+    def indexable(self, path):
         supported_file_types = tuple(settings.SUPPORTED_FILETYPES)
-        return self.filename.lower().endswith(supported_file_types)
+        return path.lower().endswith(supported_file_types)
 
     def absolute_path(self):
         return self.directory.absolute_path() / self.filename

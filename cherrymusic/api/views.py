@@ -30,7 +30,8 @@ from playlist.models import Track, Playlist
 from storage.models import File, Directory, Artist, Album
 from storage.status import ServerStatus
 from .serializers import FileSerializer, DirectorySerializer, UserSerializer, \
-    PlaylistDetailSerializer, TrackSerializer, PlaylistListSerializer, ArtistSerializer, AlbumSerializer
+    PlaylistDetailSerializer, TrackSerializer, PlaylistListSerializer, ArtistSerializer, AlbumSerializer, \
+    SimpleDirectorySerializer
 
 logger = logging.getLogger(__name__)
 
@@ -125,6 +126,25 @@ class DirectoryViewSet(SlowServerMixin, viewsets.ReadOnlyModelViewSet):
     queryset = Directory.objects.all()
     serializer_class = DirectorySerializer
     filter_class = DirectoryFilter
+
+    @action(methods=['get'], detail=False)
+    def basedirs(self, request, *args, **kwargs):
+        base_dirs = Directory.objects.filter(parent__isnull=True)
+        serializer = SimpleDirectorySerializer()
+        sub_directories = [
+            serializer.to_representation(base_dir) for base_dir in base_dirs
+        ]
+        data = {
+            'id': -1,
+            'parent': None,
+            'path': '',
+            'sub_directories': sub_directories,
+            'files': []
+        }
+        return Response(data)
+
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
 
 
 class PlaylistViewSet(SlowServerMixin, viewsets.ModelViewSet):
@@ -277,6 +297,7 @@ class SearchView(SlowServerMixin, GenericViewSet):
         artists = list(
             Artist.objects
             .filter(SearchView.make_word_filter(words, 'name'))
+            .order_by('name')
             [:SearchView.ARTIST_LIMIT]
         )
 
@@ -288,17 +309,22 @@ class SearchView(SlowServerMixin, GenericViewSet):
                 reduce(operator.or_, (Q(albumartist=artist) for artist in artists))
             )
         albums = (
-            Album.objects.filter(reduce(operator.or_, album_filters))
+            Album.objects
+            .filter(reduce(operator.or_, album_filters))
+            .order_by('name')
             [:SearchView.ALBUM_LIMIT]
         )
 
         file_filters = [SearchView.make_word_filter(words, 'meta_data__title')]
         # find tracks made by this artist, if any
-        file_filters.append(
-            reduce(operator.or_, (Q(meta_data__artist=artist) for artist in artists))
-        )
+        if artists:
+            file_filters.append(
+                reduce(operator.or_, (Q(meta_data__artist=artist) for artist in artists))
+            )
         files = (
-            File.objects.filter(reduce(operator.or_, file_filters))
+            File.objects
+            .filter(reduce(operator.or_, file_filters))
+            .order_by('meta_data__album', 'meta_data__track')
             [:SearchView.SONG_LIMIT]
         )
         return Response({

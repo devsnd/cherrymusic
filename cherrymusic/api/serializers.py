@@ -1,3 +1,5 @@
+import os
+
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.reverse import reverse
@@ -10,11 +12,23 @@ User = get_user_model()
 
 
 class ArtistSerializer(serializers.ModelSerializer):
+    album_thumbnail_gif_b64 = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Artist
         fields = (
             'id',
             'name',
+            'album_thumbnail_gif_b64',
+        )
+
+    def get_album_thumbnail_gif_b64(self, instance):
+        return (
+            album.thumbnail_gif_b64
+            for album in
+            Album.objects
+            .filter(albumartist=instance)
+            .only('thumbnail_gif')
         )
 
 
@@ -78,6 +92,7 @@ class FileSerializer(serializers.ModelSerializer):
 
 class SimpleDirectorySerializer(serializers.ModelSerializer):
     path = serializers.SerializerMethodField('get_sanitized_path')
+    parent = serializers.SerializerMethodField()
 
     class Meta:
         model = Directory
@@ -87,11 +102,17 @@ class SimpleDirectorySerializer(serializers.ModelSerializer):
             'path',
         ]
 
+    def get_parent(self, instance):
+        if instance.parent is None:
+            return -1
+        return instance.parent.id
+
     @staticmethod
     def get_sanitized_path(dir):
         # do not serialize the basedir path
         if dir.parent is None:
-            return
+            path = dir.path[:-1] if dir.path.endswith(os.path.sep) else dir.path
+            return path.rsplit(os.path.sep, 1)[-1]
         else:
             return dir.path
 
@@ -119,20 +140,18 @@ class DirectorySerializer(SimpleDirectorySerializer):
         ]
 
 class TrackSerializer(serializers.ModelSerializer):
-    data = serializers.SerializerMethodField('serialize_data')
+    file = FileSerializer()
+    youtube_url = serializers.URLField()
 
     class Meta:
         model = Track
-        fields = ('type', 'data', 'playlist')
-
-    @staticmethod
-    def serialize_data(track):
-        if track.type == Track.TYPE.LOCAL_STORAGE:
-            serializer = FileSerializer()
-            return serializer.to_representation(track.file)
-        else:
-            raise KeyError('Cannot serialize Track %s of type %s' % (track, track.type))
-
+        fields = (
+            'playlist',
+            'order',
+            'type',
+            'file',
+            'youtube_url',
+        )
 
 class PlayListSerializer(serializers.ModelSerializer):
     tracks = serializers.SerializerMethodField()
