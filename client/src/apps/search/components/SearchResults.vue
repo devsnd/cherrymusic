@@ -3,11 +3,6 @@
         <LoadingAnimation v-if="searching"></LoadingAnimation>
         <div v-if="!searching && noResults">
             <h3><translate>No search results.</translate></h3>
-            <br>
-            <p>You can try searching on youtube.</p>
-            <b-btn @click="showYoutubeSearch()" variant="primary">
-                Search on youtube
-            </b-btn>
         </div>
         <div v-if="results.artists.length">
             <h3>Artists</h3>
@@ -56,6 +51,15 @@
                 ></FileItem>
             </b-list-group>
         </div>
+        <hr>
+        <div>
+            <h3>Youtube</h3>
+            <p>You can try searching on youtube.</p>
+            <b-btn @click="searchOnYoutube()" variant="primary">
+                Search on youtube
+            </b-btn>
+            <youtube-search></youtube-search>
+        </div>
     </div>
 </template>
 
@@ -64,12 +68,14 @@
     import {mapActions, mapGetters} from 'vuex';
     import LoadingAnimation from '@/components/LoadingAnimation/LoadingAnimation';
     import FileItem from '@/components/common/FileItem';
+    import YoutubeSearch from '@/apps/youtube/components/YoutubeSearch';
 
     export default Vue.extend({
         name: '',
         components: {
             LoadingAnimation,
             FileItem,
+            YoutubeSearch,
         },
         data: function () {
             return {
@@ -80,6 +86,7 @@
             ...mapGetters({
                 searching: 'search/searching',
                 results: 'search/results',
+                lastQuery: 'search/lastQuery',
             }),
             noResults: function (): boolean {
                 const vm = (this as any);
@@ -95,9 +102,11 @@
             ...mapActions({
                 addFileToVisiblePlaylist: 'playlist/addFileToVisiblePlaylist',
                 setViewMode: 'mainview/setViewMode',
+                searchYoutube: 'youtube/search',
             }),
-            showYoutubeSearch: function () {
-                (this as any).setViewMode('ytsearch');
+            searchOnYoutube: function () {
+                const vm = (this as any);
+                vm.searchYoutube(vm.lastQuery);
             }
 
         }

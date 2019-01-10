@@ -36,8 +36,6 @@ store.dispatch(
     'audioplayer/addPlayerListener',
     (e: PlayerEvent) => store.dispatch('playlist/onPlayerEvent', e)
 );
-// keep this separate, so we can create a free as in stallman version as well.
-store.dispatch('audioplayer/initYoutubePlayer');
 
 let v = new Vue({
     el: "#app",

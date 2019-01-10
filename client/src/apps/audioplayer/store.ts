@@ -1,22 +1,36 @@
 import {Module} from "vuex";
 import * as _ from 'lodash';
 import {FileInterface, TrackInterface, TrackType, YoutubeInterface} from "@/api/types";
+//@ts-ignore
+import YouTubePlayerWrapper from 'youtube-player';
+import {injectCSS} from "@/common/html";
 
-const SET_AUDIO_TAG = 'SET_AUDIO_TAG';
+const SET_ACTIVE_PLAYER = 'SET_ACTIVE_PLAYER';
 const SET_PLAYTIME = 'SET_PLAYTIME';
 const SET_DURATION = 'SET_DURATION';
 const SET_META_DATA_DURATION = 'SET_META_DATA_DURATION';
 const ADD_PLAYER_STATE_LISTENER = 'ADD_PLAYER_STATE_LISTENER';
-const SET_YOUTUBE_PLAYER = 'SET_YOUTUBE_PLAYER';
+const ADD_AUDIO_PLAYER = 'ADD_AUDIO_PLAYER';
 
 export enum PlayerEventType {
     Ended,
     TimeUpdate,
+    MetaDuration,
+    UnrecoverablePlaybackError,
 }
 
-export type PlayerEvent = {
+interface PlayerEventPayloadTimeUpdate {
+    currentTime: number,
+    duration: number,
+}
+
+interface PlayerEventPayloadMetaDuration {
+    duration: number | null,
+}
+
+export interface PlayerEvent {
     type: PlayerEventType,
-    payload?: any,
+    payload?: PlayerEventPayloadTimeUpdate | PlayerEventPayloadMetaDuration,
 }
 
 
@@ -25,9 +39,9 @@ type AudioPlayerState = {
     currentPlaytime: number,
     duration: number,
     metaDataDuration: null | number,
-    audioTag: HTMLMediaElement | null,
     playerStateListeners: Function[],
-    youtubePlayer: null | any,
+    activePlayer: AudioPlayer | null,
+    audioPlayers: AudioPlayer[],
 }
 
 
@@ -40,14 +54,226 @@ enum YoutubeStateChangeData {
     video_cued = 5,
 }
 
-type YoutubeStateChange = {
+type YoutubeStateChangeEvent = {
     data: YoutubeStateChangeData,
     target: any,
 }
 
+enum YoutubeErrorType {
+    invalidId = 2,
+    cannotPlayInHTML5 = 5,
+    videoNotFound = 100,
+    videoNotEmbeddable = 101,
+    videoNotEmbeddable2 = 150,
+}
 
-//@ts-ignore
-import YouTubePlayer from 'youtube-player';
+type YoutubeErrorEvent = {
+    target: any,
+    data: YoutubeErrorType,
+}
+
+
+abstract class AudioPlayer {
+    _currentTrack: TrackInterface | null;
+    _supportedTrackTypes: TrackType[] = [];
+    _playerEventListener: Function[];
+    _currentTime: number = 0;
+    _duration: number = 0;
+    _metaDuration: number | null = null;
+
+    play (track: TrackInterface): void {
+        if (this._supportedTrackTypes.indexOf(track.type) === -1) {
+            throw new Error(`${this} cannot play track of type ${track.type}`)
+        }
+        this._currentTrack = track;
+        // reset the meta duration of the track. It should be set by
+        // `_callCurrentTrack`.
+        this.setMetaDuration(null);
+        this._playCurrentTrack();
+    }
+
+    abstract _playCurrentTrack (): void;
+    abstract stop  (): void;
+    abstract pause  (): void;
+    abstract resume  (): void;
+    abstract seekTo (seconds: number): void;
+
+    canPlayTrack (track: TrackInterface) {
+        return this._supportedTrackTypes.indexOf(track.type) !== -1;
+    }
+
+    seekToPercentage (percentage: number) {
+        const duration = this._metaDuration || this._duration;
+        this.seekTo(duration * percentage);
+    }
+
+    setMetaDuration (duration: number | null) {
+        // sometimes we only know the length of the stream from meta-data
+        // and not while actually streaming the track. This can be called
+        // to override the "duration" set by `setTimeAndDuration`.
+        // Call this in the beginning of `_playCurrentTrack`.
+        this.emitEvent(
+            {type: PlayerEventType.MetaDuration, payload: {duration: duration}}
+        );
+    }
+
+    setTimeAndDuration (currentTime: number, duration: number): void {
+        this._currentTime = currentTime;
+        this._duration = duration;
+        this.emitEvent({
+            type: PlayerEventType.TimeUpdate,
+            payload: {
+                currentTime: currentTime,
+                duration: duration,
+            }
+        });
+    };
+
+    constructor (supportedTrackTypes: TrackType[]) {
+        this._playerEventListener = [];
+        this._currentTrack = null;
+        this._supportedTrackTypes = supportedTrackTypes;
+    }
+
+    addPlayerEventListener (listener: Function) {
+        this._playerEventListener.push(listener);
+    }
+
+    emitEvent (event: PlayerEvent) {
+        for (const listener of this._playerEventListener) {
+            listener(event);
+        }
+    }
+}
+
+
+class YoutubePlayer extends AudioPlayer {
+
+    _youtubePlayer: any;
+
+    constructor () {
+        super([TrackType.Youtube]);
+
+        const youtubeContainer = document.createElement('div');
+        youtubeContainer.id = 'youtube-container';
+        document.body.appendChild(youtubeContainer);
+        injectCSS('#youtube-container { display: none; }');
+
+        this._youtubePlayer = YouTubePlayerWrapper('youtube-container');
+        this._youtubePlayer.on('stateChange', (event: YoutubeStateChangeEvent) => {
+            if (event.data === YoutubeStateChangeData.ended) {
+                this.emitEvent({type: PlayerEventType.Ended});
+            }
+        });
+        this._youtubePlayer.on('error', (event: YoutubeErrorEvent) => {
+            this.emitEvent({type: PlayerEventType.UnrecoverablePlaybackError});
+        });
+        // check regularly if the youtube video is progressing
+        let lastCurrentTime: number = -1;
+        window.setInterval(
+            async () => {
+                const currentTime = await this._youtubePlayer.getCurrentTime();
+                const duration = await this._youtubePlayer.getDuration();
+                if (lastCurrentTime !== currentTime) {
+                    // the player did something, lets tell the others.
+                    lastCurrentTime = currentTime;
+                    this.setTimeAndDuration(currentTime, duration);
+
+                }
+            }, 1000
+        );
+    }
+
+    pause (): void {
+        this._youtubePlayer.pauseVideo();
+    }
+
+    resume (): void {
+        this._youtubePlayer.playVideo();
+    }
+
+    stop (): void {
+        this._youtubePlayer.stopVideo();
+    }
+
+    _playCurrentTrack (): void {
+        if (this._currentTrack === null) {
+            throw new Error('_currenTrack is null');
+        }
+        if (this._currentTrack.youtube === null) {
+            throw new Error('youtube is null');
+        }
+        this._youtubePlayer.loadVideoById(this._currentTrack.youtube.youtube_id, 0.1);
+        this._youtubePlayer.playVideo();
+    }
+
+    seekTo(seconds: number): void {
+        this._youtubePlayer.seekTo(seconds);
+    }
+}
+
+class HTMLPlayer extends AudioPlayer {
+    private htmlAudioTag: HTMLMediaElement;
+
+    constructor () {
+        super([TrackType.File]);
+
+        this.htmlAudioTag = document.createElement('audio');
+        this.htmlAudioTag.id = 'html-audio-player';
+        document.body.appendChild(this.htmlAudioTag);
+
+        const setCurrentPlaytime = () => this.setTimeAndDuration(
+            this.htmlAudioTag.currentTime,
+            this.htmlAudioTag.duration
+        );
+        this.htmlAudioTag.ontimeupdate = _.throttle(
+            setCurrentPlaytime,
+            1000,
+            {trailing: true}
+        );
+        this.htmlAudioTag.onended = () => {
+            this.emitEvent({type: PlayerEventType.Ended});
+        };
+    }
+
+    _playCurrentTrack (): void {
+        if (this._currentTrack === null) {
+            throw new Error('_currentTrack is null')
+        }
+        if (this._currentTrack.file === null) {
+            throw new Error('_currentTrack.file is null!');
+        }
+        const file = this._currentTrack.file;
+        const metaDuration = (
+            file.meta_data && file.meta_data.duration || null
+        );
+        if (metaDuration) {
+            this.setMetaDuration(metaDuration)
+        }
+
+        this.htmlAudioTag.src = this._currentTrack.file.stream_url;
+        this.htmlAudioTag.play();
+    }
+
+    pause (): void {
+        this.htmlAudioTag.pause();
+    }
+
+    resume (): void {
+        this.htmlAudioTag.play();
+    }
+
+    seekTo(seconds: number): void {
+        this.htmlAudioTag.currentTime = seconds;
+    }
+
+    stop (): void {
+        this.htmlAudioTag.pause();
+        this.htmlAudioTag.currentTime = 0;
+    }
+
+}
+
 
 const AudioPlayerStore: Module<AudioPlayerState, any> = {
     namespaced: true,
@@ -57,9 +283,9 @@ const AudioPlayerStore: Module<AudioPlayerState, any> = {
             currentPlaytime: 0,
             duration: 1,
             metaDataDuration: null,
-            audioTag: null,
             playerStateListeners: [],
-            youtubePlayer: null,
+            audioPlayers: [],
+            activePlayer: null,
         };
     },
     getters: {
@@ -68,111 +294,49 @@ const AudioPlayerStore: Module<AudioPlayerState, any> = {
         src: (state) => state.src,
     },
     actions: {
-        setCurrentPlaytime ({commit, dispatch}, {currentTime, duration}) {
-            commit(SET_PLAYTIME, currentTime);
-            if (duration !== null) {
-                commit(SET_DURATION, duration);
-            }
-            dispatch(
-                'emitEvent',
-                {
-                    type: PlayerEventType.TimeUpdate,
-                    payload: {currentTime: currentTime}
+        init ({commit, state, dispatch}) {
+            dispatch('addAudioPlayer', new HTMLPlayer());
+            dispatch('addAudioPlayer', new YoutubePlayer());
+        },
+        addAudioPlayer ({commit, state}, audioPlayer: AudioPlayer) {
+            commit(ADD_AUDIO_PLAYER, audioPlayer);
+            audioPlayer.addPlayerEventListener((event: PlayerEvent) => {
+                if (event.type === PlayerEventType.TimeUpdate) {
+                    if (!event.payload) throw new Error('event payload is null');
+                    commit(SET_DURATION, event.payload.duration);
+                    //TODO why?
+                    commit(SET_PLAYTIME, (event.payload as any).currentTime);
                 }
-            )
-        },
-        async registerAudioTag ({commit, state, dispatch}, audioTag) {
-            const setCurrentPlaytime = () => (
-                dispatch(
-                    'setCurrentPlaytime',
-                    {currentTime: audioTag.currentTime, duration: audioTag.duration}
-                )
-            );
-            audioTag.ontimeupdate = _.throttle(
-                setCurrentPlaytime,
-                1000,
-                {trailing: true}
-            );
-            audioTag.onended = () => {
-                dispatch('emitEvent', {type: PlayerEventType.Ended});
-            };
-            commit(SET_AUDIO_TAG, audioTag);
-        },
-        initYoutubePlayer ({commit, dispatch}) {
-            const youtubeContainer = document.createElement('div');
-            youtubeContainer.id = 'youtube-container';
-            document.body.appendChild(youtubeContainer);
-            const youtubePlayer = YouTubePlayer('youtube-container');
-            youtubePlayer.on('stateChange', (event: YoutubeStateChange) => {
-                if (event.data === YoutubeStateChangeData.ended) {
-                    dispatch('emitEvent', {type: PlayerEventType.Ended});
+                for (const listener of state.playerStateListeners) {
+                    listener(event);
                 }
-            });
-            // check regularly if the youtube video is progressing
-            let lastCurrentTime: number = -1;
-            window.setInterval(
-                async () => {
-                    const currentTime = await youtubePlayer.getCurrentTime();
-                    if (lastCurrentTime !== currentTime) {
-                        // the player did something, lets tell the others.
-                        lastCurrentTime = currentTime;
-                        const duration = await youtubePlayer.getDuration();
-                        dispatch('setCurrentPlaytime', {currentTime, duration})
-                    }
-                }, 1000
-            );
-
-            commit(SET_YOUTUBE_PLAYER, youtubePlayer);
-        },
-        emitEvent ({state}, event: PlayerEvent) {
-            for (const listener of state.playerStateListeners) {
-                listener(event);
-            }
+            })
         },
         addPlayerListener ({commit}, listener) {
             commit(ADD_PLAYER_STATE_LISTENER, listener);
         },
         play ({commit, state, dispatch}, {track}) {
-            if (track.type === TrackType.File) {
-                dispatch('playFile', track.file);
-            } else if (track.type === TrackType.Youtube) {
-                dispatch('playYoutube', track.youtube);
-            } else {
-                alert(`Don't know how to play track type ${track.type}`)
+            // stop all players
+            for (const player of state.audioPlayers) {
+                player.stop();
             }
-        },
-        playFile ({commit, state}, file: FileInterface) {
-            const metaDataDuration = (
-                file.meta_data && file.meta_data.duration || null
-            );
-            commit(SET_META_DATA_DURATION, metaDataDuration);
-
-            if (state.audioTag === null) {
-                console.error('Cannot play file, audioTag not set!');
-                return;
+            for (const player of state.audioPlayers) {
+                if (player.canPlayTrack(track)) {
+                    commit(SET_ACTIVE_PLAYER, player);
+                    player.play(track);
+                    return;
+                }
             }
-            state.audioTag.src = file.stream_url;
-            state.audioTag.play();
-        },
-        playYoutube ({commit, state}, youtube: YoutubeInterface) {
-            if (state.youtubePlayer === null) {
-                alert('Cannot play youtube video, youtube player not initialized');
-                return;
-            }
-            state.youtubePlayer.loadVideoById(youtube.youtube_id);
-            state.youtubePlayer.playVideo();
+            alert(`Don't know how to play track type ${track.type}`);
         },
         jumpToPercentage ({state, getters}, percentage) {
-            if (state.audioTag === null) {
+            if (state.activePlayer === null) {
                 throw new Error('Audioplayer not initialized, cannot jump.');
             }
-            state.audioTag.currentTime = getters.duration * percentage;
+            state.activePlayer.seekToPercentage(percentage);
         }
     },
     mutations: {
-        [SET_AUDIO_TAG] (state, audioTag) {
-            state.audioTag = audioTag;
-        },
         [SET_PLAYTIME] (state, playtime) {
             state.currentPlaytime = playtime;
         },
@@ -185,8 +349,11 @@ const AudioPlayerStore: Module<AudioPlayerState, any> = {
         [ADD_PLAYER_STATE_LISTENER] (state, listener) {
             state.playerStateListeners.push(listener);
         },
-        [SET_YOUTUBE_PLAYER] (state, youtubePlayer) {
-            state.youtubePlayer = youtubePlayer;
+        [SET_ACTIVE_PLAYER] (state, activePlayer) {
+            state.activePlayer = activePlayer;
+        },
+        [ADD_AUDIO_PLAYER] (state, audioPlayer) {
+            state.audioPlayers.push(audioPlayer);
         }
     },
 };

@@ -35,6 +35,7 @@ const SearchStore: Module<SearchState, any> = {
         results: (state) => state.results,
         searching: (state) => state.searching,
         cache: (state) => state.cache,
+        lastQuery: (state) => state.lastQuery,
     },
     actions: {
         searchIsCached: function ({getters}, query) {
@@ -56,10 +57,10 @@ const SearchStore: Module<SearchState, any> = {
             }
         },
         search: async function ({dispatch, commit, getters}, query: string) {
+            commit(SET_LAST_QUERY, query);
             let results = getters.cache.get(query);
             if (results === undefined) {
                 commit(SET_SEARCHING, true);
-                commit(SET_LAST_QUERY, query);
                 results = await Search.search({query: query});
                 getters.cache.set(query, results);
             }

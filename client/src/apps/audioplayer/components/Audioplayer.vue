@@ -3,7 +3,6 @@
         <b-container>
             <b-row>
                 <b-col>
-                    <audio ref="audiotag"></audio>
                     {{currentPlaytime | formatDuration}} / {{duration | formatDuration}}
                     <b-progress
                         :value="currentPlaytime"
@@ -39,13 +38,17 @@
     import {formatDuration} from "../../../common/utils";
     export default Vue.extend({
         name: '',
-        mounted: function () {
-            this.registerAudioTag(this.$refs.audiotag);
+        mounted () {
+            this.init();
         },
         computed: {
             ...mapGetters({
                 currentPlaytime: 'audioplayer/currentPlaytime',
                 duration: 'audioplayer/duration',
+                pause: 'audioplayer/pause',
+                resume: 'audioplayer/resume',
+                nextTrack: 'playlist/playNextTrack',
+                previousTrack: 'playlist/playPreviousTrack',
             })
         },
         filters: {
@@ -53,8 +56,8 @@
         },
         methods: {
             ...mapActions({
-                registerAudioTag: 'audioplayer/registerAudioTag',
                 jumpToPercentage: 'audioplayer/jumpToPercentage',
+                init: 'audioplayer/init',
             }),
             onProgressBarClick: function (e: MouseEvent) {
                 const target = (e.currentTarget as Element);

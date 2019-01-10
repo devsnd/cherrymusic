@@ -1,26 +1,16 @@
 <template>
     <div>
         <LoadingAnimation v-if="searching"></LoadingAnimation>
-        <b-btn @click="searchYoutube()">search yt</b-btn>
-        <b-card
+        <SearchResultTile
             v-for="video in results"
             :key="video.youtube_id"
-            :img-src="video.thumbnail_url"
-            :title="video.title"
-            :img-alt="video.title"
-            overlay
-            class="mb-2 youtube-card"
+            :img="video.thumbnail_url"
+            @click.native="addYoutubeToVisiblePlaylist(video)"
         >
-            <p class="card-text">
-                <br>
-                {{ video.duration }}<br><br>
-                {{ video.views }} views<br>
-                {{ video.youtube_id }}
-            </p>
-            <b-btn variant="primary" @click="addToPlaylist(video)">
-                PLAY
-            </b-btn>
-          </b-card>
+            {{video.title}}<br>
+            {{ video.duration }}<br><br>
+            {{ video.views }} views<br>
+        </SearchResultTile>
     </div>
 </template>
 
@@ -30,11 +20,13 @@
     import {mapActions, mapGetters} from "vuex";
     import LoadingAnimation from '@/components/LoadingAnimation/LoadingAnimation'
     import {YoutubeInterface} from "../../../api/types";
+    import SearchResultTile from '@/components/common/SearchResultTile';
 
     export default Vue.extend({
         name: 'youtubesearch',
         components: {
             LoadingAnimation,
+            SearchResultTile,
         },
         computed: {
             ...mapGetters({
@@ -56,7 +48,7 @@
 
 <style scoped>
     .youtube-card > .card-body > .card-title, .youtube-card > .card-body > .card-text {
-        background-color: rgba(255,255,255,0.4);
+        background-color: rgba(255,255,255,0.8);
         display: inline;
     }
 </style>
