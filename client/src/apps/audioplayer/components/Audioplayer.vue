@@ -14,16 +14,16 @@
             </b-row>
             <b-row>
                 <b-col style="text-align: center">
-                    <b-btn>
+                    <b-btn @click="previousTrack()">
                         <span class="fa fa-2x fa-step-backward"></span>
                     </b-btn>
-                    <b-btn>
+                    <b-btn @click="pause()">
                         <span class="fa fa-3x fa-pause-circle"></span>
                     </b-btn>
-                    <b-btn>
+                    <b-btn @click="resume()">
                         <span class="fa fa-3x fa-play-circle"></span>
                     </b-btn>
-                    <b-btn>
+                    <b-btn @click="nextTrack()">
                         <span class="fa fa-2x fa-step-forward"></span>
                     </b-btn>
                 </b-col>
@@ -45,10 +45,6 @@
             ...mapGetters({
                 currentPlaytime: 'audioplayer/currentPlaytime',
                 duration: 'audioplayer/duration',
-                pause: 'audioplayer/pause',
-                resume: 'audioplayer/resume',
-                nextTrack: 'playlist/playNextTrack',
-                previousTrack: 'playlist/playPreviousTrack',
             })
         },
         filters: {
@@ -56,6 +52,10 @@
         },
         methods: {
             ...mapActions({
+                pause: 'audioplayer/pause',
+                resume: 'audioplayer/resume',
+                nextTrack: 'playlist/playNextTrack',
+                previousTrack: 'playlist/playPreviousTrack',
                 jumpToPercentage: 'audioplayer/jumpToPercentage',
                 init: 'audioplayer/init',
             }),

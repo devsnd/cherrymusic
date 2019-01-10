@@ -147,6 +147,15 @@ const AudioPlayerStore: Module<PlaylistManagerState, any> = {
                 },
             );
         },
+        playPreviousTrack: function ({getters, dispatch}) {
+            dispatch(
+                'play',
+                {
+                    playlistIdx: getters.activePlaylistIdx,
+                    trackIdx: Math.max(0, getters.activePlaylist.activeTrackIdx - 1),
+                },
+            );
+        },
         triggerEndOfPlaylistAction: function () {
             alert('triggerEndOfPlaylistAction not implemented');
         },

@@ -329,6 +329,20 @@ const AudioPlayerStore: Module<AudioPlayerState, any> = {
             }
             alert(`Don't know how to play track type ${track.type}`);
         },
+        resume ({state}) {
+            if (state.activePlayer === null) {
+                console.error('activePlayer is null, cannot resume');
+                return;
+            }
+            state.activePlayer.resume();
+        },
+        pause ({state}) {
+            if (state.activePlayer === null) {
+                console.error('activePlayer is null, cannot pause');
+                return;
+            }
+            state.activePlayer.pause();
+        },
         jumpToPercentage ({state, getters}, percentage) {
             if (state.activePlayer === null) {
                 throw new Error('Audioplayer not initialized, cannot jump.');
