@@ -21,8 +21,19 @@ import {TrackType} from "../../../api/types";
                             :key="track.renderId"
                             :file="track.file"
                             :active="index === playlist.activeTrackIdx"
-                            @click.native="playTrack(index)"
-                        ></FileItem>
+                            :onClick="() => playTrack(index)"
+                        >
+                        </FileItem>
+                        <template>
+                            <span class="pl-1">
+                                <i v-if="isAvailableOffline(track.file.id)" class="fa fa-plane"></i>
+                                <i
+                                    v-if="!isAvailableOffline(track.file.id)"
+                                    @click="makeAvailableOffline(track)"
+                                    class="fa fa-wifi"
+                                ></i>
+                            </span>
+                        </template>
                     </template>
                     <template v-if="track.type === TrackType.Youtube">
                         <YoutubeItem
@@ -39,7 +50,7 @@ import {TrackType} from "../../../api/types";
 </template>
 <script lang="ts">
     import {formatDuration, sum} from "../../../common/utils";
-    import {mapActions} from 'vuex';
+    import {mapActions, mapGetters} from 'vuex';
     import Vue from "vue";
     import FileItem from '@/components/common/FileItem';
     import {TrackType} from "@/api/types";
@@ -91,6 +102,7 @@ import {TrackType} from "../../../api/types";
         methods: {
             ...mapActions({
                 swapTrackInActivePlaylist: 'playlist/swapTrackInActivePlaylist',
+                addToOfflineTracks: 'offline/addToOfflineTracks',
             }),
             playTrack: function (trackIdx: number) {
                 this.triggerPlay(trackIdx);
@@ -100,6 +112,14 @@ import {TrackType} from "../../../api/types";
                 const newIndex = event.newIndex;
                 (this as any).swapTrackInActivePlaylist({oldIndex, newIndex});
             },
+            isAvailableOffline: function (fileId) {
+                return this.offlineTrackIds.indexOf(fileId) !== -1;
+            },
+            makeAvailableOffline: async function (track) {
+                const response: Response = await fetch(track.file.stream_url);
+                const data = await response.blob();
+                this.addToOfflineTracks({track: track, data: data});
+            }
         },
         computed: {
             duration: function () {
@@ -123,7 +143,10 @@ import {TrackType} from "../../../api/types";
             },
             littleTimeLeft: function () {
                 return this.remainingTime < 300;
-            }
+            },
+            ...mapGetters({
+                offlineTrackIds: 'offline/offlineTrackIds',
+            })
         },
         filters: {
             formatDuration: formatDuration,

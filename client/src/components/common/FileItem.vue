@@ -3,10 +3,13 @@
         :active="active"
         variant="secondary"
         class="d-flex justify-content-between align-items-center hover file-item"
+        @click="onClick ? onClick() : null"
     >
+        <slot name="left"></slot>
         <span style="width: 30px; text-align: right" class="pr-2">{{track}}</span>
         <span class="file-name flex-grow-1">{{prettyFileName}}</span>
         <b-badge variant="dark" pill>{{prettyDuration}}</b-badge>
+        <slot name="right"></slot>
     </b-list-group-item>
 </template>
 
@@ -18,8 +21,9 @@
     export default Vue.extend({
         name: '',
         props: [
-          'file',
-          'active',
+            'file',
+            'active',
+            'onClick',
         ],
         computed: {
             track: function () {

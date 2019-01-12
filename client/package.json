@@ -19,6 +19,7 @@
     "@types/lodash": "^4.14.119",
     "bootstrap-vue": "^2.0.0-rc.11",
     "font-awesome": "^4.7.0",
+    "idb-kv-store": "^4.4.0",
     "lodash": "^4.17.11",
     "sortablejs": "^1.4.2",
     "vue": "^2.5.2",

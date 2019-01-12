@@ -21,6 +21,12 @@
                             :directory="dir"
                         ></DirectoryItem>
                     </b-list-group>
+                    <b-btn
+                        v-if="currentDirectory.files.length > 0"
+                        @click="addFilesToPlaylist(currentDirectory.files)"
+                    >
+                        Add all files to playlist
+                    </b-btn>
                     <b-list-group>
                         <FileItem
                             v-for="file in currentDirectory.files"
@@ -66,6 +72,11 @@
             },
             goUp: function () {
                 (this as any).loadDir(this.parentDirectory.id);
+            },
+            addFilesToPlaylist: function (files) {
+                for (const file of files) {
+                    this.addFileToVisiblePlaylist(file);
+                }
             },
             ...mapActions({
                 loadDir: 'filebrowser/loadDir',

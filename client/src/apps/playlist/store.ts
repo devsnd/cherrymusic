@@ -71,7 +71,7 @@ const AudioPlayerStore: Module<PlaylistManagerState, any> = {
                             order: 1,
                             type: TrackType.File,
                             file: {
-                                id: 0,
+                                id: 1,
                                 filename: '',
                                 stream_url: '',
                                 meta_data: {

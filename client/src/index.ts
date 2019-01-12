@@ -36,6 +36,8 @@ store.dispatch(
     'audioplayer/addPlayerListener',
     (e: PlayerEvent) => store.dispatch('playlist/onPlayerEvent', e)
 );
+// load the list of offline tracks
+store.dispatch('offline/init');
 
 let v = new Vue({
     el: "#app",
