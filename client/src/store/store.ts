@@ -10,6 +10,7 @@ import playlist from '@/apps/playlist/store';
 import search from '@/apps/search/store';
 import youtube from '@/apps/youtube/store';
 import mainview from '@/apps/mainview/store';
+import shortcuts from '@/apps/shortcuts/store';
 
 
 export default new Vuex.Store({
@@ -20,5 +21,6 @@ export default new Vuex.Store({
         mainview,
         search,
         youtube,
+        shortcuts,
     }
 })

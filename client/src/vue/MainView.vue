@@ -41,7 +41,7 @@
 </style>
 
 <script lang="ts">
-    import { mapGetters } from 'vuex';
+    import {mapActions, mapGetters} from 'vuex';
     import PlaylistManager from '@/apps/playlist/components/PlaylistManager';
     import Audioplayer from '@/apps/audioplayer/components/Audioplayer';
     import SearchResults from '@/apps/search/components/SearchResults';
@@ -53,6 +53,9 @@
 
     export default Vue.extend({
         name: 'dashboard',
+        mounted: function {
+            this.initShortcuts();
+        },
         props: {
         },
         components: {
@@ -67,6 +70,11 @@
         computed: {
             ...mapGetters({
                 viewMode: 'mainview/viewMode'
+            })
+        },
+        methods: {
+            ...mapActions({
+                initShortcuts: 'shortcuts/init',
             })
         }
     });

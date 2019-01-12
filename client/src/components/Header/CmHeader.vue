@@ -28,6 +28,7 @@
                         :formatter="searchWhileTyping"
                         v-model="searchText"
                         :disabled="searching"
+                        id="header-search-field"
                     />
                     <b-input-group-append>
                         <b-button size="sm" class="my-2 my-sm-0" @click="search()">
