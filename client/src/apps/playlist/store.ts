@@ -34,64 +34,6 @@ const AudioPlayerStore: Module<PlaylistManagerState, any> = {
             activePlaylistIdx: 0,
             visiblePlaylistIdx: 0,
             playlists: [
-                {
-                    id: -1,
-                    name: 'Lumpi',
-                    activeTrackIdx: 0,
-                    playbackPosition: 0,
-                    tracks: [
-                        {
-                            renderId: 1,
-                            playlist: -1,
-                            order: 0,
-                            type: TrackType.File,
-                            file: {
-                                id: 0,
-                                filename: '',
-                                stream_url: '',
-                                meta_data: {
-                                    track: 1,
-                                    track_total: 5,
-                                    title: 'hello',
-                                    artist: {
-                                        name: 'artist',
-                                        id: 1,
-                                    },
-                                    album: 'album',
-                                    year: 2071,
-                                    genre: 'rock',
-                                    duration: 1238,
-                                }
-                            },
-                            youtube: null,
-                        },
-                        {
-                            renderId: 2,
-                            playlist: -1,
-                            order: 1,
-                            type: TrackType.File,
-                            file: {
-                                id: 1,
-                                filename: '',
-                                stream_url: '',
-                                meta_data: {
-                                    track: 1,
-                                    track_total: 5,
-                                    title: 'hello2',
-                                    artist: {
-                                        name: 'artist2',
-                                        id: 2,
-                                    },
-                                    album: 'album',
-                                    year: 2071,
-                                    genre: 'rock',
-                                    duration: 238,
-                                }
-                            },
-                            youtube: null,
-                        },
-                    ]
-                },
             ]
         };
     },

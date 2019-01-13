@@ -53,7 +53,7 @@
 
     export default Vue.extend({
         name: 'dashboard',
-        mounted: function {
+        mounted: function () {
             this.initShortcuts();
         },
         props: {

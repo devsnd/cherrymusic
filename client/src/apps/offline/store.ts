@@ -1,6 +1,5 @@
 import {Module} from "vuex";
 import {OfflineStorage} from "@/apps/offline/storage";
-import {TrackInterface, TrackType} from "@/api/types";
 
 type OfflineStoreState = {
     offlineTrackIds: number[],
@@ -27,8 +26,6 @@ const OfflineStore: Module<OfflineStoreState, any> = {
         },
         addToOfflineTracks: function ({commit}, {track, data}) {
             const storage = OfflineStorage.getInstance();
-            console.log(storage);
-            // storage.set(keyForTrack(track), data)
             storage.set(track, data);
             commit(ADD_OFFLINE_TRACK_ID, track.file.id);
         }

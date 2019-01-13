@@ -49,6 +49,7 @@
     import LoadingAnimation from '@/components/LoadingAnimation/LoadingAnimation'
     import {mapActions, mapGetters} from "vuex";
     import Scrollable from '@/containers/Scrollable';
+    import {FileInterface} from "../../../api/types";
 
     export default Vue.extend({
         name: '',
@@ -73,7 +74,7 @@
             goUp: function () {
                 (this as any).loadDir(this.parentDirectory.id);
             },
-            addFilesToPlaylist: function (files) {
+            addFilesToPlaylist: function (files: FileInterface[]) {
                 for (const file of files) {
                     this.addFileToVisiblePlaylist(file);
                 }

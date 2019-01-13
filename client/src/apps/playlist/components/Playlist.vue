@@ -112,10 +112,13 @@ import {TrackType} from "../../../api/types";
                 const newIndex = event.newIndex;
                 (this as any).swapTrackInActivePlaylist({oldIndex, newIndex});
             },
-            isAvailableOffline: function (fileId) {
+            isAvailableOffline: function (fileId: number): boolean {
                 return this.offlineTrackIds.indexOf(fileId) !== -1;
             },
-            makeAvailableOffline: async function (track) {
+            makeAvailableOffline: async function (track: TrackInterface) {
+                if (track.file === null) {
+                    throw new Error('Cannot make track available offline, it does not have a `file`')
+                }
                 const response: Response = await fetch(track.file.stream_url);
                 const data = await response.blob();
                 this.addToOfflineTracks({track: track, data: data});
@@ -146,7 +149,7 @@ import {TrackType} from "../../../api/types";
             },
             ...mapGetters({
                 offlineTrackIds: 'offline/offlineTrackIds',
-            })
+            }),
         },
         filters: {
             formatDuration: formatDuration,
