@@ -17,14 +17,26 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/components/Header/CmHeader.vue:27
+#: src/components/Header/CmHeader.vue:51
 msgid "Browse Files"
 msgstr "Datei Browser"
 
-#: src/components/Header/CmHeader.vue:32
+#: src/components/Header/CmHeader.vue:55
 msgid "Load Playlist"
 msgstr "Playlist Laden"
 
-#: src/components/Header/CmHeader.vue:19
+#: src/apps/search/components/SearchResults.vue:5
+msgid "No search results."
+msgstr ""
+
+#: src/components/Header/CmHeader.vue:35
 msgid "Search"
 msgstr "Suchen"
+
+#: src/apps/playlist/components/PlaylistManager.vue:49
+msgid "Search or Browse to add tracks."
+msgstr ""
+
+#: src/apps/playlist/components/PlaylistManager.vue:48
+msgid "This playlist is empty."
+msgstr ""
