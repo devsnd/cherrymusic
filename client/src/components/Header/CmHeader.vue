@@ -3,9 +3,14 @@
         <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
         <b-navbar-brand href="#">
             <span class="d-none d-md-block d-lg-none">
-                <img src="../../static/img/cherrymusic_logo_big.png">
+                <!-- tablet logo -->
+                <img
+                        src="../../static/img/cherrymusic_logo_big.png"
+                        style="height: 50px"
+                >
             </span>
             <span class="d-none d-lg-block">
+                <!-- desktop logo -->
                 Cherry&nbsp;&nbsp;&nbsp;Music
                 <img
                     src="../../static/img/cherrymusic_logo_big.png"
@@ -18,38 +23,39 @@
                 >
             </span>
         </b-navbar-brand>
+        <b-nav-form @submit="search" style="max-width: calc(100% - 75px);">
+            <b-input-group>
+                <b-form-input
+                    size="sm"
+                    type="text"
+                    :placeholder="this.$gettext('Search')"
+                    :formatter="searchWhileTyping"
+                    v-model="searchText"
+                    :disabled="searching"
+                    id="header-search-field"
+                />
+                <b-input-group-append>
+                    <b-button size="sm" class="my-sm-0" @click="search()" variant="primary">
+                        <translate>
+                            Search
+                        </translate>
+                    </b-button>
+                </b-input-group-append>
+                <b-dropdown size="sm" slot="append" variant="primary">
+                    <b-dropdown-item @click="searchYoutube(searchText)">
+                        Youtube Search
+                    </b-dropdown-item>
+                </b-dropdown>
+            </b-input-group>
+        </b-nav-form>
         <b-collapse is-nav id="nav_collapse">
-            <b-nav-form @submit="search">
-                <b-input-group>
-                    <b-form-input
-                        size="sm"
-                        type="text"
-                        :placeholder="this.$gettext('Search')"
-                        :formatter="searchWhileTyping"
-                        v-model="searchText"
-                        :disabled="searching"
-                        id="header-search-field"
-                    />
-                    <b-input-group-append>
-                        <b-button size="sm" class="my-2 my-sm-0" @click="search()">
-                            <translate>
-                                Search
-                            </translate>
-                        </b-button>
-                    </b-input-group-append>
-                    <b-dropdown size="sm" slot="append">
-                        <b-dropdown-item @click="searchYoutube(searchText)">
-                            Youtube Search
-                        </b-dropdown-item>
-                    </b-dropdown>
-                </b-input-group>
-            </b-nav-form>
+            <div class="pt-3">
+
+            </div>
 
             <b-navbar-nav>
-                <b-nav-item class="ml-3" href="#" @click="browseFiles()">
-                    <span class="d-none d-md-block">
-                        <translate>Browse Files</translate>
-                    </span>
+                <b-nav-item href="#" @click="browseFiles()">
+                    <translate>Browse Files</translate>
                 </b-nav-item>
                 <b-nav-item href="#">
                     <translate>
