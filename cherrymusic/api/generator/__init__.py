@@ -7,9 +7,7 @@ from typing import List
 from django.template import Template, Context
 
 
-typescript_template = '''
-{% load api_generator %}
-
+typescript_template = '''{% load api_generator %}
 //
 //  AUTO-GENERATED API INTERFACE
 //
@@ -18,6 +16,10 @@ typescript_template = '''
 //
 //      make generate_api
 //
+
+import * as _ from 'lodash';
+import {dict} from "@/common/utils";
+
 
 export abstract class APIEndpoint {
 }
@@ -28,6 +30,7 @@ type HTTPMethod = 'get' | 'post' | 'delete' | 'patch' | 'put';
 
 export class Settings {
     static baseUrl: string = '';
+    private static authtoken: string | null = null;
 
     static setBaseUrl (baseUrl: string) {
         this.baseUrl = baseUrl;
@@ -35,6 +38,14 @@ export class Settings {
 
     static getBaseUrl (): string {
         return this.baseUrl;
+    }
+    
+    static setAuthtoken (authtoken: string) {
+        this.authtoken = authtoken;
+    }
+    
+    static getAuthToken (): string | null {
+        return this.authtoken;
     }
     
     static encodeGetParams (params: {[key:string]: string}): string {
@@ -49,14 +60,24 @@ export class Settings {
         let url = Settings.getBaseUrl() + path;
         let options: any = {
             method: method,
+            headers: new Headers({'content-type': 'application/json'}),
         };
-        if (data) {
-            if (method === 'post') {
-                options = {...options, body: JSON.stringify(data)};
-            } else if (method === 'get') {
-                url = url + '?' + Settings.encodeGetParams(data);        
-            }
+        if (data === undefined) {
+            data = {};
         }
+        if (Settings.authtoken !== null) {
+            data.authtoken = Settings.authtoken;
+        }
+        
+        // map all calls to snake case
+        data = dict(Object.entries(data).map((elem: any) => [_.snakeCase(elem[0]), elem[1]]));
+
+        if (method === 'post') {
+            options = {...options, body: JSON.stringify(data)};
+        } else if (method === 'get') {
+            url = url + '?' + Settings.encodeGetParams(data);        
+        }
+
         const response = await fetch(url, options);
         if (!response.ok) {
             throw new Error(response.statusText)

@@ -2,6 +2,7 @@ import {Module} from "vuex";
 import {FileInterface, TrackInterface, TrackType} from "@/api/types";
 import {enumerate} from "@/common/utils";
 import {PlayerEventType} from "@/apps/audioplayer/store";
+import {Playlist} from "@/api/api";
 
 export type PlaylistType = {
     id: number,
@@ -27,6 +28,8 @@ const SET_ACTIVE_TRACK_IDX_IN_PLAYLIST = 'SET_ACTIVE_TRACK_IDX_IN_PLAYLIST';
 const SET_PLAYBACK_POSITION = 'SET_PLAYBACK_POSITION';
 
 
+const deepcopy = (data: any): any => JSON.parse(JSON.stringify(data));
+
 const AudioPlayerStore: Module<PlaylistManagerState, any> = {
     namespaced: true,
     state () {
@@ -34,6 +37,13 @@ const AudioPlayerStore: Module<PlaylistManagerState, any> = {
             activePlaylistIdx: 0,
             visiblePlaylistIdx: 0,
             playlists: [
+                {
+                    id: -1,
+                    name: 'New Playlist',
+                    activeTrackIdx: 0,
+                    playbackPosition: 0,
+                    tracks: [],
+                }
             ]
         };
     },
@@ -41,6 +51,7 @@ const AudioPlayerStore: Module<PlaylistManagerState, any> = {
         playlists: (state) => state.playlists,
         activePlaylistIdx: (state) => state.activePlaylistIdx,
         visiblePlaylistIdx: (state) => state.visiblePlaylistIdx,
+        _visiblePlaylist: (state) => state.playlists[state.visiblePlaylistIdx],
         activePlaylist: (state) => state.playlists[state.activePlaylistIdx],
         activeTrack: (state, getters) => {
             const pl = getters.activePlaylist;
@@ -52,21 +63,41 @@ const AudioPlayerStore: Module<PlaylistManagerState, any> = {
         },
     },
     actions: {
+        withUndo: function ({dispatch, getters}, actionFunction) {
+            const before = deepcopy(getters._visiblePlaylist);
+            const after = getters._visiblePlaylist;
+            actionFunction();
+            dispatch('playlistChanged', {before, after});
+        },
+        playlistChanged: function ({commit}, {before, after}) {
+            console.log(after);
+            if (after.id < 0) { // unsaved playlist
+                Playlist.create(after);
+            } else {
+                Playlist.update(after);
+            }
+        },
         addNewPlaylist: function ({commit, getters}) {
             commit(ADD_NEW_PLAYLIST);
             commit(SET_VISIBLE_PLAYLIST_IDX, getters.playlists.length - 1);
         },
-        addFileToVisiblePlaylist: function ({commit, getters}, file) {
+        addFileToVisiblePlaylist: function ({commit, getters, dispatch}, file) {
             const playlistIdx = getters.visiblePlaylistIdx;
-            commit(ADD_FILE_TO_PLAYLIST, {playlistIdx, file});
+            dispatch('withUndo', () => {
+                commit(ADD_FILE_TO_PLAYLIST, {playlistIdx, file});
+            });
         },
-        addYoutubeToVisiblePlaylist: function ({commit, getters}, youtube) {
+        addYoutubeToVisiblePlaylist: function ({commit, getters, dispatch}, youtube) {
             const playlistIdx = getters.visiblePlaylistIdx;
-            commit(ADD_YOUTUBE_TO_PLAYLIST, {playlistIdx, youtube});
+            dispatch('withUndo', () => {
+                commit(ADD_YOUTUBE_TO_PLAYLIST, {playlistIdx, youtube});
+            })
         },
-        swapTrackInActivePlaylist: function ({commit, getters}, {oldIndex, newIndex}) {
+        swapTrackInActivePlaylist: function ({commit, getters, dispatch}, {oldIndex, newIndex}) {
             const playlistIdx = getters.visiblePlaylistIdx;
-            commit(SWAP_TRACK, {playlistIdx, oldIndex, newIndex});
+            dispatch('withUndo', () => {
+                commit(SWAP_TRACK, {playlistIdx, oldIndex, newIndex});
+            });
         },
         setActivePlaylistIdx: function ({commit}, playlistIdx) {
             commit(SET_ACTIVE_PLAYLIST_IDX, playlistIdx);
@@ -126,7 +157,7 @@ const AudioPlayerStore: Module<PlaylistManagerState, any> = {
         [ADD_FILE_TO_PLAYLIST]: (state, {playlistIdx, file}) => {
             state.playlists[playlistIdx].tracks.push({
                 renderId: (Math.random() * 10000000) | 0,
-                playlist: -1,
+                playlist: null,
                 order: state.playlists[playlistIdx].tracks.length,
                 type: TrackType.File,
                 file: file,
@@ -136,7 +167,7 @@ const AudioPlayerStore: Module<PlaylistManagerState, any> = {
         [ADD_YOUTUBE_TO_PLAYLIST]: (state, {playlistIdx, youtube}) => {
             state.playlists[playlistIdx].tracks.push({
                 renderId: (Math.random() * 10000000) | 0,
-                playlist: -1,
+                playlist: null,
                 order: state.playlists[playlistIdx].tracks.length,
                 type: TrackType.Youtube,
                 file: null,

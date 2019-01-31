@@ -7,40 +7,40 @@ import {TrackType} from "../../../api/types";
         </b-badge>
         <b-progress :max="duration" style="height: 4px" class="mb-2">
             <b-progress-bar
-                :variant="littleTimeLeft ? 'danger' : 'secondary'"
-                :value="elapsedTime"
+                    :variant="littleTimeLeft ? 'danger' : 'secondary'"
+                    :value="elapsedTime"
             ></b-progress-bar>
         </b-progress>
         <Scrollable>
             <b-list-group v-sortable="{onUpdate: onChangedSorting}">
                 <template
-                    v-for="(track, index) in playlist.tracks"
+                        v-for="(track, index) in playlist.tracks"
                 >
                     <template v-if="track.type === TrackType.File">
                         <FileItem
-                            :key="track.renderId"
-                            :file="track.file"
-                            :active="index === playlist.activeTrackIdx"
-                            :onClick="() => playTrack(index)"
+                                :key="track.renderId"
+                                :file="track.file"
+                                :active="index === playlist.activeTrackIdx"
+                                :onClick="() => playTrack(index)"
                         >
                         </FileItem>
                         <template>
                             <span class="pl-1">
                                 <i v-if="isAvailableOffline(track.file.id)" class="fa fa-plane"></i>
                                 <i
-                                    v-if="!isAvailableOffline(track.file.id)"
-                                    @click="makeAvailableOffline(track)"
-                                    class="fa fa-wifi"
+                                        v-if="!isAvailableOffline(track.file.id)"
+                                        @click="makeAvailableOffline(track)"
+                                        class="fa fa-wifi"
                                 ></i>
                             </span>
                         </template>
                     </template>
                     <template v-if="track.type === TrackType.Youtube">
                         <YoutubeItem
-                            :key="track.renderId"
-                            :youtube="track.youtube"
-                            :active="index === playlist.activeTrackIdx"
-                            @click.native="playTrack(index)"
+                                :key="track.renderId"
+                                :youtube="track.youtube"
+                                :active="index === playlist.activeTrackIdx"
+                                @click.native="playTrack(index)"
                         ></YoutubeItem>
                     </template>
                 </template>
@@ -58,6 +58,7 @@ import {TrackType} from "../../../api/types";
     import YoutubeItem from './YoutubeItem';
     import {TrackInterface} from "../../../api/types";
     import Scrollable from '@/containers/Scrollable';
+    import {OfflineStoreState} from "../../offline/store";
 
     interface SortableEvent {
         oldIndex: number,
@@ -78,6 +79,7 @@ import {TrackType} from "../../../api/types";
             return 0;
         })
     }
+
 
     export default Vue.extend({
         name: 'playlist',
@@ -113,7 +115,7 @@ import {TrackType} from "../../../api/types";
                 (this as any).swapTrackInActivePlaylist({oldIndex, newIndex});
             },
             isAvailableOffline: function (fileId: number): boolean {
-                return this.offlineTrackIds.indexOf(fileId) !== -1;
+                return (this as any).offlineTrackIds.indexOf(fileId) !== -1;
             },
             makeAvailableOffline: async function (track: TrackInterface) {
                 if (track.file === null) {
@@ -121,7 +123,7 @@ import {TrackType} from "../../../api/types";
                 }
                 const response: Response = await fetch(track.file.stream_url);
                 const data = await response.blob();
-                this.addToOfflineTracks({track: track, data: data});
+                (this as any).addToOfflineTracks({track: track, data: data});
             }
         },
         computed: {

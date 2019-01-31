@@ -59,3 +59,15 @@ export function all (args: Array<boolean>) {
   }
   return true;
 }
+
+export function dict (keyValPairs: any[]) {
+  let retval: {[key: string]: any} = {};
+  for (const keyVal of keyValPairs) {
+    if (Array.isArray(keyVal)) {
+      retval[keyVal[0]] = keyVal[1];
+    } else {
+      retval = {...retval, ...keyVal};
+    }
+  }
+  return retval;
+}

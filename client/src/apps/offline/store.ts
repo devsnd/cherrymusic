@@ -1,7 +1,7 @@
 import {Module} from "vuex";
 import {OfflineStorage} from "@/apps/offline/storage";
 
-type OfflineStoreState = {
+export type OfflineStoreState = {
     offlineTrackIds: number[],
 }
 

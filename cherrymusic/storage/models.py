@@ -247,6 +247,14 @@ class MetaData(models.Model):
         return meta_data
 
 
+class Youtube(models.Model):
+    youtube_id = models.CharField(max_length=255, unique=True)
+    thumbnail_url = models.URLField()
+    title = models.CharField(max_length=255)
+    views = models.PositiveIntegerField()
+    duration = models.PositiveIntegerField()
+
+
 class File(models.Model):
     filename = models.CharField(max_length=255)
     directory = models.ForeignKey(Directory, on_delete=models.CASCADE, related_name='files')

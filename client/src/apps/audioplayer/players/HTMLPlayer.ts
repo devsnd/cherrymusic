@@ -3,6 +3,7 @@ import * as _ from "lodash";
 import {PlayerEventType} from "@/apps/audioplayer/store";
 import {AbstractAudioPlayer} from "@/apps/audioplayer/players/AbstractAudioPlayer";
 import {OfflineStorage} from "@/apps/offline/storage";
+import {Settings} from "@/api/api";
 
 
 export class HTMLPlayer extends AbstractAudioPlayer {
@@ -49,7 +50,7 @@ export class HTMLPlayer extends AbstractAudioPlayer {
         if (offlineTrack) {
             this.htmlAudioTag.src = URL.createObjectURL(offlineTrack);
         } else {
-            this.htmlAudioTag.src = this._currentTrack.file.stream_url;
+            this.htmlAudioTag.src = this._currentTrack.file.stream_url + '?authtoken=' + Settings.getAuthToken();
         }
         this.htmlAudioTag.play();
     }

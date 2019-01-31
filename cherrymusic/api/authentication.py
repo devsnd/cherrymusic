@@ -7,6 +7,6 @@ class TokenHTTPAuthentication(TokenAuthentication):
         if request._request.method == 'GET':
             token = request._request.GET.get('authtoken', '')
         elif request._request.method == 'POST':
-            token = request._request.POST.get('authtoken', '')
+            token = request.data.get('authtoken', '')
         return self.authenticate_credentials(token)
 

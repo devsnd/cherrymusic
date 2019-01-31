@@ -1,15 +1,14 @@
 import time
 
-import operator
-from django.db.models import Q
-from functools import reduce
-
 import logging
+import operator
 import os
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 from django.http import StreamingHttpResponse, Http404
 from django.utils.translation import ugettext_lazy as _
 from django_filters import FilterSet, BooleanFilter
+from functools import reduce
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
@@ -30,7 +29,7 @@ from playlist.models import Track, Playlist
 from storage.models import File, Directory, Artist, Album
 from storage.status import ServerStatus
 from .serializers import FileSerializer, DirectorySerializer, UserSerializer, \
-    PlaylistDetailSerializer, TrackSerializer, PlaylistListSerializer, ArtistSerializer, AlbumSerializer, \
+    TrackSerializer, PlaylistSerializer, ArtistSerializer, AlbumSerializer, \
     SimpleDirectorySerializer
 
 logger = logging.getLogger(__name__)
@@ -150,7 +149,13 @@ class DirectoryViewSet(SlowServerMixin, viewsets.ReadOnlyModelViewSet):
 class PlaylistViewSet(SlowServerMixin, viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, )
     queryset = Playlist.objects.all()
-    serializer_class = PlaylistDetailSerializer
+    serializer_class = PlaylistSerializer
+
+    def get_serializer(self, *args, **kwargs):
+        kwargs['data']['owner'] = self.request.user.id
+        serializer = super().get_serializer(*args, **kwargs)
+        return serializer
+
 
 
 class UserViewSet(SlowServerMixin, viewsets.ModelViewSet):

@@ -1,12 +1,12 @@
 import os
 
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
-from storage.models import File, Directory, MetaData, Artist, Album, Genre
-from playlist.models import Playlist, Track
-
+from storage.models import File, Directory, MetaData, Artist, Album, Genre, Youtube
+from playlist.models import Playlist, Track, PlaylistPosition
 
 User = get_user_model()
 
@@ -90,6 +90,18 @@ class FileSerializer(serializers.ModelSerializer):
         return reverse('file-stream', args=[obj.id])
 
 
+class YoutubeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Youtube
+        fields = (
+            'id',
+            'youtube_id',
+            'title',
+            'views',
+            'duration',
+        )
+
+
 class SimpleDirectorySerializer(serializers.ModelSerializer):
     path = serializers.SerializerMethodField('get_sanitized_path')
     parent = serializers.SerializerMethodField()
@@ -139,9 +151,11 @@ class DirectorySerializer(SimpleDirectorySerializer):
             for file in obj.files.order_by('filename')
         ]
 
+
 class TrackSerializer(serializers.ModelSerializer):
-    file = FileSerializer()
-    youtube_url = serializers.URLField()
+    file = FileSerializer(allow_null=True)
+    youtube = YoutubeSerializer(allow_null=True)
+    playlist = serializers.PrimaryKeyRelatedField(allow_null=True, read_only=True)
 
     class Meta:
         model = Track
@@ -150,41 +164,95 @@ class TrackSerializer(serializers.ModelSerializer):
             'order',
             'type',
             'file',
-            'youtube_url',
+            'youtube',
         )
 
-class PlayListSerializer(serializers.ModelSerializer):
-    tracks = serializers.SerializerMethodField()
-    owner_name = serializers.SerializerMethodField()
+class PlaylistSerializer(serializers.ModelSerializer):
+    tracks = TrackSerializer(many=True)
+    owner_name = serializers.SerializerMethodField(read_only=True)
+    active_track_idx = serializers.IntegerField(source='get_active_track_idx')
+    playback_position = serializers.IntegerField(source='get_playback_position')
 
     class Meta:
         model = Playlist
-        fields = ('id', 'name', 'owner', 'public', 'tracks')
+        fields = [
+            'id',
+            'name',
+            'owner',
+            'owner_name',
+            'tracks',
+            'active_track_idx',
+            'playback_position',
+       ]
+
+    def get_active_track_idx(self, instance):
+        position = PlaylistPosition.objects.filter(
+            playlist=instance,
+            user=self.request.user,
+        ).first()
+        if position:
+            return position.active_track_id
+        return 0
+
+    def get_playback_position(self, instance):
+        position = PlaylistPosition.objects.filter(
+            playlist=instance,
+            user=self.request.user,
+        ).first()
+        if position:
+            return position.playback_position
+        return 0.0
 
     @staticmethod
     def get_owner_name(obj):
         return obj.owner.username
 
-    @staticmethod
-    def get_tracks(obj):
-        serializer = TrackSerializer()
-        return [serializer.to_representation(track) for track in obj.track_set.all().order_by('order')]
+    def create(self, validated_data):
+        print(validated_data)
+        active_track_idx = validated_data.pop('active_track_idx')
+        playlist_position = validated_data.pop('playlist_position')
+        tracks_data = validated_data.pop('tracks')
+        validated_data.pop('id')  # new playlist have id = -1, which is invalid
 
+        with transaction.atomic():
+            playlist = Playlist.objects.create(**validated_data)
+            # sync playback position
+            PlaylistPosition.objects.update_or_create(
+                user=self.request.user,
+                playlist=playlist,
+                defaults=dict(
+                    playlist_position=playlist_position,
+                    active_track_idx=active_track_idx,
+                )
+            )
+            # sync tracks
+            for idx, track_data in enumerate(tracks_data):
+                # make sure the order is not corrupted when saving to db
+                track_data['order'] = idx
+                track_data.pop('id', '')  # this will be set by the database
+                track_data.pop('playlist', '')  # references playlist id = -1
+                print(track_data)
 
-class PlaylistDetailSerializer(PlayListSerializer):
-    tracks = serializers.SerializerMethodField()
-    owner_name = serializers.SerializerMethodField()
+                youtube = None
+                youtube_data = track_data.pop('youtube')
+                if youtube_data:
+                    youtube_id = youtube_data.pop('youtube_id')
+                    youtube = Youtube.objects.get_or_create(
+                        video_id=youtube_id,
+                        defaults=youtube_data
+                    )[0]
+                file = None
+                file_data = track_data.pop('file')
+                if file_data:
+                    file = File.objects.get(file_data['id'])
 
-    class Meta:
-        model = Playlist
-        fields = ('id', 'name', 'owner', 'public', 'tracks', 'owner_name')
-
-
-class PlaylistListSerializer(PlayListSerializer):
-    class Meta:
-        model = Playlist
-        fields = ('id', 'name', 'owner', 'public')
-
+                Track.objects.create(
+                    playlist=playlist,
+                    file=file,
+                    youtube=youtube,
+                    **track_data
+                )
+        return playlist
 
 
 class UserSerializer(serializers.ModelSerializer):

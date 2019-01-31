@@ -39,7 +39,7 @@ export interface YoutubeInterface {
 }
 
 export interface TrackInterface {
-    playlist: number,
+    playlist: number | null,
     order: number,
     type: TrackType,
     file: FileInterface | null,

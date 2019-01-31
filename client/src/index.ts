@@ -39,6 +39,10 @@ store.dispatch(
 // load the list of offline tracks
 store.dispatch('offline/init');
 
+// initialize the api with a new auth token. This should be done in a login view later
+import {Settings} from '@/api/api';
+Settings.setAuthtoken('47e7f3ca7a06b2d0ab86d6c6734426bbf1ebaef4');
+
 let v = new Vue({
     el: "#app",
     template: `
