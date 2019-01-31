@@ -105,7 +105,7 @@
         },
         methods: {
             _hackRegisterNavBarState: function () {
-               this.$root.$on('bv::collapse::state', (id, isOpen) => {
+               this.$root.$on('bv::collapse::state', (id: string, isOpen: boolean) => {
                    this._isNavBarOpen = isOpen;
                });
             },

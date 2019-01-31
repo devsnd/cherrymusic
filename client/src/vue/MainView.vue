@@ -1,37 +1,44 @@
 <template>
-    <b-container style="height: 100%; padding: 0">
-        <cm-header></cm-header>
-        <b-row class="mt-3">
-            <b-col md="6">
-                <b-card>
-                    <div v-if="viewMode === 'motd'">
-                        <b-jumbotron
-                                header="Cherry Music II"
-                                lead="Oh My Gaush, it's finally here" >
-                            <p>
-                                Kapow!
-                            </p>
-                        </b-jumbotron>
-                    </div>
-                    <div v-else-if="viewMode === 'browse'">
-                        <file-browser></file-browser>
-                    </div>
-                    <div v-else-if="viewMode === 'search'">
-                        <Scrollable>
-                            <search-results></search-results>
-                        </Scrollable>
-                    </div>
-                    <div v-else-if="viewMode === 'ytsearch'">
-                        <youtube-search></youtube-search>
-                    </div>
-                </b-card>
-            </b-col>
-            <b-col md="6">
-                <PlaylistManager></PlaylistManager>
-            </b-col>
-        </b-row>
-        <Audioplayer></Audioplayer>
-    </b-container>
+    <div>
+        <div style="position: fixed; z-index: 1; top: 0; width: 100%;">
+            <b-container style="padding: 0">
+                <cm-header></cm-header>
+            </b-container>
+        </div>
+        <b-container style="height: 100%;">
+            <b-row style="height: 50px"><!-- space for the fixed navbar --></b-row>
+            <b-row class="mt-3">
+                <b-col md="6">
+                    <b-card>
+                        <div v-if="viewMode === 'motd'">
+                            <b-jumbotron
+                                    header="Cherry Music II"
+                                    lead="Oh My Gaush, it's finally here" >
+                                <p>
+                                    Kapow!
+                                </p>
+                            </b-jumbotron>
+                        </div>
+                        <div v-else-if="viewMode === 'browse'">
+                            <file-browser></file-browser>
+                        </div>
+                        <div v-else-if="viewMode === 'search'">
+                            <Scrollable>
+                                <search-results></search-results>
+                            </Scrollable>
+                        </div>
+                        <div v-else-if="viewMode === 'ytsearch'">
+                            <youtube-search></youtube-search>
+                        </div>
+                    </b-card>
+                </b-col>
+                <b-col md="6">
+                    <PlaylistManager></PlaylistManager>
+                </b-col>
+            </b-row>
+            <Audioplayer></Audioplayer>
+        </b-container>
+    </div>
 </template>
 
 <style>

@@ -20,15 +20,17 @@
     export default Vue.extend({
         name: 'keepscreenon',
         mounted: function () {
-          this.videoTag = this.$refs.loopVideo;
+          (this as any).videoTag = this.$refs.loopVideo;
         },
         watch: {
             keepScreenOn: function (keepItOn) {
+                if (this.videoTag === null) {
+                    return;
+                }
                 if (keepItOn) {
-                    this.videoTag.play();
-                    console.log(this.videoTag);
+                    (this as any).videoTag.play();
                 } else {
-                    this.videoTag.pause();
+                    (this as any).videoTag.pause();
                 }
             }
         },

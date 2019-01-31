@@ -3,13 +3,17 @@
         <b-container>
             <b-row>
                 <b-col>
-                    {{currentPlaytime | formatDuration}} / {{duration | formatDuration}}
-                    <b-progress
-                        :value="currentPlaytime"
-                        :max="duration"
-                        class="playback-bar"
-                        @click.native="onProgressBarClick"
-                    ></b-progress>
+                    <div style="position: relative">
+                        <span style="text-align: center; position: absolute; width: 100%">
+                            {{currentPlaytime | formatDuration}} / {{duration | formatDuration}}
+                        </span>
+                        <b-progress
+                            :value="currentPlaytime"
+                            :max="duration"
+                            class="playback-bar"
+                            @click.native="onProgressBarClick"
+                        ></b-progress>
+                    </div>
                 </b-col>
             </b-row>
             <b-row>
@@ -77,6 +81,7 @@
 <style scoped>
     .playback-bar {
         cursor: pointer;
+        height: 25px;
     }
     .audioplayer {
         position: fixed;
