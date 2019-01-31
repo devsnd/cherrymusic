@@ -57,7 +57,7 @@
                 <b-nav-item href="#" @click="browseFiles()">
                     <translate>Browse Files</translate>
                 </b-nav-item>
-                <b-nav-item href="#">
+                <b-nav-item href="#" @click="">
                     <translate>
                         Load Playlist
                     </translate>
@@ -92,7 +92,11 @@
             return {
                 searchText: '',
                 searching: false,
+                _isNavBarOpen: false,
             };
+        },
+        mounted: function () {
+            this._hackRegisterNavBarState();
         },
         components: {
             LanguageSwitcher,
@@ -100,10 +104,22 @@
         computed: {
         },
         methods: {
+            _hackRegisterNavBarState: function () {
+               this.$root.$on('bv::collapse::state', (id, isOpen) => {
+                   this._isNavBarOpen = isOpen;
+               });
+            },
+            _hackCloseCollapseNavBar: function () {
+                // workaround for collapsed nav bar not closing when an menu item is pressed
+                if (this._isNavBarOpen) {
+                    this.$root.$emit('bv::toggle::collapse', 'nav_collapse')
+                }
+            },
             search: async function (e?: Event) {
                 if (e) {
                     e.preventDefault();
                 }
+                (this as any)._hackCloseCollapseNavBar();
                 (this as any).setViewMode('search');
                 (this as any).debouncedSearch(this.searchText);
             },
@@ -116,10 +132,12 @@
                 return value;
             },
             searchYoutube: function (query: string) {
+                (this as any)._hackCloseCollapseNavBar();
                 (this as any).setViewMode('ytsearch');
                 (this as any)._searchYoutube(query);
             },
             browseFiles: function () {
+                (this as any)._hackCloseCollapseNavBar();
                 (this as any).setViewMode('browse');
                 // -1 is the id of the virtual basedirs folder that contains
                 // all the base dirs
