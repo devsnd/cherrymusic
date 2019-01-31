@@ -1,5 +1,5 @@
 <template>
-    <b-container style="height: 100%">
+    <b-container style="height: 100%; padding: 0">
         <cm-header></cm-header>
         <b-row class="mt-3">
             <b-col md="6">
