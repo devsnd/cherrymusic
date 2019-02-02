@@ -63,7 +63,7 @@ export class Settings {
         // map all calls to snake case
         data = dict(Object.entries(data).map((elem: any) => [_.snakeCase(elem[0]), elem[1]]));
 
-        if (method === 'post') {
+        if (['post', 'put'].indexOf(method) !== -1) {
             options = {...options, body: JSON.stringify(data)};
         } else if (method === 'get') {
             url = url + '?' + Settings.encodeGetParams(data);        

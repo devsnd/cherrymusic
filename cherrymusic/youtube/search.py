@@ -28,12 +28,16 @@ def parse_duration_string(duration_string):
 
 def video_data_to_search_result(video_data):
     duration_str = video_data['videoRenderer']['lengthText']['simpleText']
+    try:
+        views = int(re.sub('\D', '', video_data['videoRenderer']['viewCountText']['simpleText']))
+    except:
+        views = 0
     return YoutubeSearchResult(
         youtube_id=video_data['videoRenderer']['videoId'],
         thumbnail_url=video_data['videoRenderer']['thumbnail']['thumbnails'][0]['url'],
         title=video_data['videoRenderer']['title']['simpleText'],
         duration=parse_duration_string(duration_str),
-        views=int(re.sub('\D', '', video_data['videoRenderer']['viewCountText']['simpleText'])),
+        views=views,
     )
 
 

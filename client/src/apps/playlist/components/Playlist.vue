@@ -26,11 +26,12 @@ import {TrackType} from "../../../api/types";
                         </FileItem>
                         <template>
                             <span class="pl-1">
-                                <i v-if="isAvailableOffline(track.file.id)" class="fa fa-plane"></i>
+                                <i v-if="isAvailableOffline(track.file.id)" class="fa fa-save"></i>
                                 <i
                                         v-if="!isAvailableOffline(track.file.id)"
                                         @click="makeAvailableOffline(track)"
-                                        class="fa fa-wifi"
+                                        class="fa fa-save"
+                                        style="opacity: 0.3"
                                 ></i>
                             </span>
                         </template>

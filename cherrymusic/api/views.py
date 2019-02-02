@@ -146,16 +146,15 @@ class DirectoryViewSet(SlowServerMixin, viewsets.ReadOnlyModelViewSet):
         return super().retrieve(request, *args, **kwargs)
 
 
-class PlaylistViewSet(SlowServerMixin, viewsets.ModelViewSet):
+class PlaylistViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, )
     queryset = Playlist.objects.all()
     serializer_class = PlaylistSerializer
 
     def get_serializer(self, *args, **kwargs):
-        kwargs['data']['owner'] = self.request.user.id
+        kwargs['data']['owner'] = UserSerializer().to_representation(self.request.user)
         serializer = super().get_serializer(*args, **kwargs)
         return serializer
-
 
 
 class UserViewSet(SlowServerMixin, viewsets.ModelViewSet):

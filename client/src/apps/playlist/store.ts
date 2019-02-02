@@ -22,6 +22,7 @@ const ADD_FILE_TO_PLAYLIST = 'ADD_FILE_TO_PLAYLIST';
 const ADD_YOUTUBE_TO_PLAYLIST = 'ADD_YOUTUBE_TO_PLAYLIST';
 const SWAP_TRACK = 'SWAP_TRACK';
 const ADD_NEW_PLAYLIST = 'ADD_NEW_PLAYLIST';
+const SET_PLAYLIST_ID = 'SET_PLAYLIST_ID';
 const SET_ACTIVE_PLAYLIST_IDX = 'SET_ACTIVE_PLAYLIST_IDX';
 const SET_VISIBLE_PLAYLIST_IDX = 'SET_VISIBLE_PLAYLIST_IDX';
 const SET_ACTIVE_TRACK_IDX_IN_PLAYLIST = 'SET_ACTIVE_TRACK_IDX_IN_PLAYLIST';
@@ -69,12 +70,14 @@ const AudioPlayerStore: Module<PlaylistManagerState, any> = {
             actionFunction();
             dispatch('playlistChanged', {before, after});
         },
-        playlistChanged: function ({commit}, {before, after}) {
-            console.log(after);
+        playlistChanged: async function ({commit}, {before, after}) {
             if (after.id < 0) { // unsaved playlist
-                Playlist.create(after);
+                const oldId = after.id
+                const savedPlaylist = await Playlist.create(after);
+                const newId = savedPlaylist.id;
+                commit(SET_PLAYLIST_ID, {oldId, newId});
             } else {
-                Playlist.update(after);
+                Playlist.update(after.id, after);
             }
         },
         addNewPlaylist: function ({commit, getters}) {
@@ -196,6 +199,14 @@ const AudioPlayerStore: Module<PlaylistManagerState, any> = {
                     playbackPosition: 0,
                 }
             ]
+        },
+        [SET_PLAYLIST_ID]: (state, {oldId, newId}) => {
+          state.playlists = state.playlists.map((playlist) => {
+              if (playlist.id === oldId) {
+                  playlist.id = newId;
+              }
+              return playlist;
+          })
         },
         [SET_ACTIVE_PLAYLIST_IDX]: (state, playlistIdx) => {
             state.activePlaylistIdx = playlistIdx;

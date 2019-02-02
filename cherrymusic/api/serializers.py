@@ -75,6 +75,7 @@ class MetaDataSerializer(serializers.ModelSerializer):
 class FileSerializer(serializers.ModelSerializer):
     stream_url = serializers.SerializerMethodField()
     meta_data = MetaDataSerializer(read_only=True)
+    id = serializers.IntegerField()
 
     class Meta:
         model = File
@@ -167,11 +168,23 @@ class TrackSerializer(serializers.ModelSerializer):
             'youtube',
         )
 
-class PlaylistSerializer(serializers.ModelSerializer):
+
+class UserSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+
+    class Meta:
+        model = User
+        fields = ['id']
+
+
+
+class PlaylistSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField(max_length=255)
     tracks = TrackSerializer(many=True)
-    owner_name = serializers.SerializerMethodField(read_only=True)
+    owner = UserSerializer()
     active_track_idx = serializers.IntegerField(source='get_active_track_idx')
-    playback_position = serializers.IntegerField(source='get_playback_position')
+    playback_position = serializers.FloatField(source='get_playback_position')
 
     class Meta:
         model = Playlist
@@ -179,49 +192,31 @@ class PlaylistSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'owner',
-            'owner_name',
             'tracks',
             'active_track_idx',
             'playback_position',
        ]
 
-    def get_active_track_idx(self, instance):
-        position = PlaylistPosition.objects.filter(
-            playlist=instance,
-            user=self.request.user,
-        ).first()
-        if position:
-            return position.active_track_id
-        return 0
-
-    def get_playback_position(self, instance):
-        position = PlaylistPosition.objects.filter(
-            playlist=instance,
-            user=self.request.user,
-        ).first()
-        if position:
-            return position.playback_position
-        return 0.0
-
-    @staticmethod
-    def get_owner_name(obj):
-        return obj.owner.username
+    def get_owner_name(self, instance):
+        return instance.owner.username
 
     def create(self, validated_data):
-        print(validated_data)
-        active_track_idx = validated_data.pop('active_track_idx')
-        playlist_position = validated_data.pop('playlist_position')
+        validated_data.pop('id', -1)  # new playlist have id = -1, which is invalid
         tracks_data = validated_data.pop('tracks')
-        validated_data.pop('id')  # new playlist have id = -1, which is invalid
+        # repack owner so that the playlist serializer is happy
+        owner = validated_data.pop('owner')
+        validated_data['owner'] = User.objects.get(id=owner['id'])
 
         with transaction.atomic():
+            playback_position = validated_data.pop('get_playback_position')
+            active_track_idx = validated_data.pop('get_active_track_idx')
             playlist = Playlist.objects.create(**validated_data)
             # sync playback position
             PlaylistPosition.objects.update_or_create(
-                user=self.request.user,
+                user_id=owner['id'],
                 playlist=playlist,
                 defaults=dict(
-                    playlist_position=playlist_position,
+                    playback_position=playback_position,
                     active_track_idx=active_track_idx,
                 )
             )
@@ -231,7 +226,6 @@ class PlaylistSerializer(serializers.ModelSerializer):
                 track_data['order'] = idx
                 track_data.pop('id', '')  # this will be set by the database
                 track_data.pop('playlist', '')  # references playlist id = -1
-                print(track_data)
 
                 youtube = None
                 youtube_data = track_data.pop('youtube')
@@ -244,7 +238,7 @@ class PlaylistSerializer(serializers.ModelSerializer):
                 file = None
                 file_data = track_data.pop('file')
                 if file_data:
-                    file = File.objects.get(file_data['id'])
+                    file = File.objects.get(id=file_data['id'])
 
                 Track.objects.create(
                     playlist=playlist,
@@ -253,9 +247,3 @@ class PlaylistSerializer(serializers.ModelSerializer):
                     **track_data
                 )
         return playlist
-
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('username',)
