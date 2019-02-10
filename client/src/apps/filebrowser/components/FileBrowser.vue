@@ -11,7 +11,7 @@
                     <span v-if="idx < breadcrumbs.length - 1"> / </span>
                 </template>
             </b-alert>
-            <Scrollable>
+            <Scrollable :bottom="130">
                 <div v-if="currentDirectory !== null">
                     <b-list-group>
                         <DirectoryItem

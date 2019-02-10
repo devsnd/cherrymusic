@@ -1,11 +1,11 @@
 <template>
     <div>
         <div style="position: fixed; z-index: 1; top: 0; width: 100%;">
-            <b-container style="padding: 0">
+            <cm-container style="padding: 0">
                 <cm-header></cm-header>
-            </b-container>
+            </cm-container>
         </div>
-        <b-container style="height: 100%;">
+        <cm-container style="height: 100%;">
             <b-row style="height: 50px"><!-- space for the fixed navbar --></b-row>
             <b-row class="mt-3">
                 <b-col md="6">
@@ -37,7 +37,7 @@
                 </b-col>
             </b-row>
             <Audioplayer></Audioplayer>
-        </b-container>
+        </cm-container>
     </div>
 </template>
 
@@ -57,6 +57,7 @@
     import YoutubeSearch from '@/apps/youtube/components/YoutubeSearch'
     import Vue from "vue";
     import Scrollable from '@/containers/Scrollable';
+    import CmContainer from '@/components/layout/CmContainer';
 
     export default Vue.extend({
         name: 'dashboard',
@@ -73,6 +74,7 @@
             YoutubeSearch,
             SearchResults,
             Scrollable,
+            CmContainer,
         },
         computed: {
             ...mapGetters({

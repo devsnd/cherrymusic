@@ -1,6 +1,6 @@
 <template>
     <div class="audioplayer bg-secondary">
-        <b-container>
+        <b-container fluid style="max-width: 1200px">
             <b-row>
                 <b-col>
                     <div style="position: relative">

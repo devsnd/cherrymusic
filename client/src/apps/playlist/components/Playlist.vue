@@ -11,7 +11,7 @@ import {TrackType} from "../../../api/types";
                     :value="elapsedTime"
             ></b-progress-bar>
         </b-progress>
-        <Scrollable>
+        <Scrollable :bottom="130">
             <b-list-group v-sortable="{onUpdate: onChangedSorting}">
                 <template
                         v-for="(track, index) in playlist.tracks"
