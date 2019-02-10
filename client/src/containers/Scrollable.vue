@@ -1,5 +1,5 @@
 <template>
-    <div class="scrollable" ref="scrollable" :style="{'max-height': maxHeight}">
+    <div class="scrollable" ref="scrollable" :style="scrollableStyle">
         <slot></slot>
     </div>
 </template>
@@ -13,6 +13,10 @@
           bottom: {
               type: Number,
               default: 0,
+          },
+          fill: {
+              type: Boolean,
+              default: false,
           }
         },
         data: function () {
@@ -28,6 +32,13 @@
         computed: {
             maxHeight: function () {
                 return `${this.viewportHeight - this.y - this.bottom}px`;
+            },
+            scrollableStyle: function () {
+                let scrollableStyle: any = {'max-height': this.maxHeight};
+                if (this.fill) {
+                    scrollableStyle['min-height'] = this.maxHeight;
+                }
+                return scrollableStyle;
             }
         },
         methods: {
@@ -46,9 +57,7 @@
         },
         mounted: function () {
             (this as any).updateMesurement();
-            window.onresize = () => {
-                (this as any).updateMesurement();
-            }
+            window.addEventListener('resize', (this as any).updateMesurement);
         }
     });
 </script>

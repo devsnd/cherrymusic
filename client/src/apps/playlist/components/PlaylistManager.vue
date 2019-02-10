@@ -44,10 +44,6 @@
             </div>
             <div class="tab-content">
                 <div role="tabpanel" aria-hidden="false" aria-expanded="true" class="tab-pane card-body show fade active">
-                    <div v-if="playlists[visiblePlaylistIdx].tracks.length === 0">
-                        <translate>This playlist is empty.</translate>
-                        <translate>Search or Browse to add tracks.</translate>
-                    </div>
                     <Playlist
                         :playlist="playlists[visiblePlaylistIdx]"
                         :triggerPlay="playTrackInPlaylist(visiblePlaylistIdx)"
@@ -56,11 +52,11 @@
             </div>
         </div>
         <div class="p-2">
-            Once the playlist finishes:
-            <select>
+            At the end of the list
+            <select style="display: inline-block">
                 <option>Play next playlist tab</option>
-                <option>repeat playlist from the beginning</option>
-                <option>do nothing</option>
+                <option>Repeat playlist</option>
+                <option selected="selected">do nothing</option>
             </select>
         </div>
     </b-card>

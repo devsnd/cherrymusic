@@ -11,30 +11,38 @@ import {TrackType} from "../../../api/types";
                     :value="elapsedTime"
             ></b-progress-bar>
         </b-progress>
-        <Scrollable :bottom="130">
+        <Scrollable :bottom="180" fill>
+            <div v-if="playlist.tracks.length === 0">
+                <translate>This playlist is empty.</translate>
+                <translate>Search or Browse to add tracks.</translate>
+            </div>
+
             <b-list-group v-sortable="{onUpdate: onChangedSorting}">
                 <template
                         v-for="(track, index) in playlist.tracks"
                 >
                     <template v-if="track.type === TrackType.File">
-                        <FileItem
-                                :key="track.renderId"
-                                :file="track.file"
-                                :active="index === playlist.activeTrackIdx"
-                                :onClick="() => playTrack(index)"
+                        <div
+                            :key="track.renderId"
+                            :onClick="() => playTrack(index)"
                         >
-                        </FileItem>
-                        <template>
-                            <span class="pl-1">
-                                <i v-if="isAvailableOffline(track.file.id)" class="fa fa-save"></i>
-                                <i
-                                        v-if="!isAvailableOffline(track.file.id)"
-                                        @click="makeAvailableOffline(track)"
-                                        class="fa fa-save"
-                                        style="opacity: 0.3"
-                                ></i>
-                            </span>
-                        </template>
+                            <div>
+                                <span class="pl-1">
+                                    <i v-if="isAvailableOffline(track.file.id)" class="fa fa-save"></i>
+                                    <i
+                                            v-if="!isAvailableOffline(track.file.id)"
+                                            @click="makeAvailableOffline(track)"
+                                            class="fa fa-save"
+                                            style="opacity: 0.3"
+                                    ></i>
+                                </span>
+                            </div>
+                            <FileItem
+                                    :file="track.file"
+                                    :active="index === playlist.activeTrackIdx"
+                            >
+                            </FileItem>
+                        </div>
                     </template>
                     <template v-if="track.type === TrackType.Youtube">
                         <YoutubeItem
