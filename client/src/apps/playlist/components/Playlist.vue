@@ -1,5 +1,3 @@
-import {TrackType} from "../../../api/types";
-import {TrackType} from "../../../api/types";
 <template>
     <div>
         <b-badge :variant="littleTimeLeft ? 'danger' : 'light'" style="display: inline">
@@ -11,7 +9,7 @@ import {TrackType} from "../../../api/types";
                     :value="elapsedTime"
             ></b-progress-bar>
         </b-progress>
-        <Scrollable :bottom="180" fill>
+        <Scrollable :bottom="200" fill>
             <div v-if="playlist.tracks.length === 0">
                 <translate>This playlist is empty.</translate>
                 <translate>Search or Browse to add tracks.</translate>

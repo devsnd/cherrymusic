@@ -10,7 +10,7 @@
                         <b-progress
                             :value="currentPlaytime"
                             :max="duration"
-                            class="playback-bar"
+                            class="playback-bar mt-1"
                             @click.native="onProgressBarClick"
                         ></b-progress>
                     </div>
@@ -31,7 +31,6 @@
                         <span class="fa fa-2x fa-step-forward"></span>
                     </b-btn>
                 </b-col>
-                <KeepScreenOn></KeepScreenOn>
             </b-row>
         </b-container>
     </div>
@@ -41,7 +40,6 @@
     import Vue from 'vue';
     import {mapActions, mapGetters} from "vuex";
     import {formatDuration} from "../../../common/utils";
-    import KeepScreenOn from '@/components/KeepScreenOn/KeepScreenOn';
 
     export default Vue.extend({
         name: '',
@@ -49,7 +47,6 @@
             this.init();
         },
         components: {
-            KeepScreenOn,
         },
         computed: {
             ...mapGetters({

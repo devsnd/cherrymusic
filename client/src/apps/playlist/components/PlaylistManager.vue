@@ -53,11 +53,11 @@
         </div>
         <div class="p-2">
             At the end of the list
-            <select style="display: inline-block">
-                <option>Play next playlist tab</option>
-                <option>Repeat playlist</option>
-                <option selected="selected">do nothing</option>
-            </select>
+            <b-dropdown id="ddown-dropup" dropup text="Play next playlist tab" variant="secondary" class="m-2" size="sm">
+                <b-dropdown-item>Play next playlist tab</b-dropdown-item>
+                <b-dropdown-item>Repeat playlist</b-dropdown-item>
+                <b-dropdown-item selected="selected">do nothing</b-dropdown-item>
+            </b-dropdown>
         </div>
     </b-card>
 </template>
