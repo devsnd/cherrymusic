@@ -12,7 +12,7 @@ const OfflineStore: Module<StoreState, any> = {
     state () {
         return {
             isMobile: false,
-            forceIsMobile: true,
+            forceIsMobile: null,
         };
     },
     getters: {

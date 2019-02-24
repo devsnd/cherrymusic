@@ -8,54 +8,55 @@
         <cm-container style="height: 100%;">
             <b-row style="height: 50px"><!-- space for the fixed navbar --></b-row>
             <b-row class="mt-3">
-
+                <template v-if="isMobile">
+                    <b-col md="12">
+                        <swiper style="height: 100%">
+                            <swiper-slide>
+                                <div v-if="viewMode === 'motd'">
+                                    <MOTD></MOTD>
+                                </div>
+                                <div v-else-if="viewMode === 'browse'">
+                                    <file-browser></file-browser>
+                                </div>
+                                <div v-else-if="viewMode === 'search'">
+                                    <Scrollable>
+                                        <search-results></search-results>
+                                    </Scrollable>
+                                </div>
+                                <div v-else-if="viewMode === 'ytsearch'">
+                                    <youtube-search></youtube-search>
+                                </div>
+                            </swiper-slide>
+                            <swiper-slide>
+                                 <PlaylistManager></PlaylistManager>
+                            </swiper-slide>
+                        </swiper>
+                    </b-col>
+                </template>
+                <template v-else>
+                    <b-col md="6">
+                        <b-card>
+                            <div v-if="viewMode === 'motd'">
+                                <MOTD></MOTD>
+                            </div>
+                            <div v-else-if="viewMode === 'browse'">
+                                <file-browser></file-browser>
+                            </div>
+                            <div v-else-if="viewMode === 'search'">
+                                <Scrollable>
+                                    <search-results></search-results>
+                                </Scrollable>
+                            </div>
+                            <div v-else-if="viewMode === 'ytsearch'">
+                                <youtube-search></youtube-search>
+                            </div>
+                        </b-card>
+                    </b-col>
+                    <b-col md="6">
+                        <PlaylistManager></PlaylistManager>
+                    </b-col>
+                </template>
             </b-row>
-            <template v-if="isMobile">
-                <swiper>
-                    <swiper-slide>
-                        <div v-if="viewMode === 'motd'">
-                            <MOTD></MOTD>
-                        </div>
-                        <div v-else-if="viewMode === 'browse'">
-                            <file-browser></file-browser>
-                        </div>
-                        <div v-else-if="viewMode === 'search'">
-                            <Scrollable>
-                                <search-results></search-results>
-                            </Scrollable>
-                        </div>
-                        <div v-else-if="viewMode === 'ytsearch'">
-                            <youtube-search></youtube-search>
-                        </div>
-                    </swiper-slide>
-                    <swiper-slide>
-                         <PlaylistManager></PlaylistManager>
-                    </swiper-slide>
-                </swiper>
-            </template>
-            <template v-else>
-                <b-col md="6">
-                    <b-card>
-                        <div v-if="viewMode === 'motd'">
-                            <MOTD></MOTD>
-                        </div>
-                        <div v-else-if="viewMode === 'browse'">
-                            <file-browser></file-browser>
-                        </div>
-                        <div v-else-if="viewMode === 'search'">
-                            <Scrollable>
-                                <search-results></search-results>
-                            </Scrollable>
-                        </div>
-                        <div v-else-if="viewMode === 'ytsearch'">
-                            <youtube-search></youtube-search>
-                        </div>
-                    </b-card>
-                </b-col>
-                <b-col md="6">
-                    <PlaylistManager></PlaylistManager>
-                </b-col>
-            </template>
             <Audioplayer></Audioplayer>
         </cm-container>
         <OptionsModal></OptionsModal>
