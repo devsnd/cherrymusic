@@ -38,6 +38,7 @@
             </b-row>
             <Audioplayer></Audioplayer>
         </cm-container>
+        <OptionsModal></OptionsModal>
     </div>
 </template>
 
@@ -58,6 +59,7 @@
     import Vue from "vue";
     import Scrollable from '@/containers/Scrollable';
     import CmContainer from '@/components/layout/CmContainer';
+    import OptionsModal from '@/components/options/OptionsModal';
 
     export default Vue.extend({
         name: 'dashboard',
@@ -75,6 +77,7 @@
             SearchResults,
             Scrollable,
             CmContainer,
+            OptionsModal,
         },
         computed: {
             ...mapGetters({

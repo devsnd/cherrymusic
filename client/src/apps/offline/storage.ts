@@ -9,6 +9,7 @@ interface idbKvStoreInstance {
     getMultiple: (keys: string[]) => Promise<any>;
     remove: (key: string) => Promise<any>;
     keys: (range?: IDBKeyRange) => Promise<any>;
+    clear: () => any;
 }
 
 const keyForTrack = (track: TrackInterface): string => {
@@ -48,5 +49,9 @@ export class OfflineStorage {
 
     get(track: TrackInterface) {
         return this.kvStore.get(keyForTrack(track));
+    }
+
+    clear() {
+        this.kvStore.clear();
     }
 }

@@ -74,7 +74,9 @@
                         <span class="fa fa-wrench fa-2x" style="margin-top: -8px; margin-bottom: -8px"></span>
                     </template>
                     <b-dropdown-item href="#" v-translate>Admin</b-dropdown-item>
-                    <b-dropdown-item href="#">Options</b-dropdown-item>
+                    <b-dropdown-item @click="showOptionsModal()">
+                        Options
+                    </b-dropdown-item>
                 </b-nav-item-dropdown>
             </b-navbar-nav>
 
@@ -104,6 +106,10 @@
         computed: {
         },
         methods: {
+            showOptionsModal: function () {
+                console.log(this.$root);
+                this.$root.$emit('bv::show::modal', 'optionsModal');
+            },
             _hackRegisterNavBarState: function () {
                this.$root.$on('bv::collapse::state', (id: string, isOpen: boolean) => {
                    this._isNavBarOpen = isOpen;

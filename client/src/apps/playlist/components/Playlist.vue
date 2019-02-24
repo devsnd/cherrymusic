@@ -24,32 +24,32 @@ import {TrackType} from "../../../api/types";
                     <template v-if="track.type === TrackType.File">
                         <div
                             :key="track.renderId"
-                            :onClick="() => playTrack(index)"
+                            @click="playTrack(index)"
                         >
                             <div>
                                 <span class="pl-1">
                                     <i v-if="isAvailableOffline(track.file.id)" class="fa fa-save"></i>
                                     <i
-                                            v-if="!isAvailableOffline(track.file.id)"
-                                            @click="makeAvailableOffline(track)"
-                                            class="fa fa-save"
-                                            style="opacity: 0.3"
+                                        v-if="!isAvailableOffline(track.file.id)"
+                                        @click="makeAvailableOffline(track)"
+                                        class="fa fa-save"
+                                        style="opacity: 0.3"
                                     ></i>
                                 </span>
                             </div>
                             <FileItem
-                                    :file="track.file"
-                                    :active="index === playlist.activeTrackIdx"
+                                :file="track.file"
+                                :active="index === playlist.activeTrackIdx"
                             >
                             </FileItem>
                         </div>
                     </template>
                     <template v-if="track.type === TrackType.Youtube">
                         <YoutubeItem
-                                :key="track.renderId"
-                                :youtube="track.youtube"
-                                :active="index === playlist.activeTrackIdx"
-                                @click.native="playTrack(index)"
+                            :key="track.renderId"
+                            :youtube="track.youtube"
+                            :active="index === playlist.activeTrackIdx"
+                            @click.native="playTrack(index)"
                         ></YoutubeItem>
                     </template>
                 </template>

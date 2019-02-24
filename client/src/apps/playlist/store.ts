@@ -7,6 +7,7 @@ import {Playlist} from "@/api/api";
 export type PlaylistType = {
     id: number,
     name: string,
+    public: boolean,
     activeTrackIdx: number,
     playbackPosition: number,
     tracks: TrackInterface[],
@@ -41,6 +42,7 @@ const AudioPlayerStore: Module<PlaylistManagerState, any> = {
                 {
                     id: -1,
                     name: 'New Playlist',
+                    public: true,
                     activeTrackIdx: 0,
                     playbackPosition: 0,
                     tracks: [],
@@ -72,7 +74,7 @@ const AudioPlayerStore: Module<PlaylistManagerState, any> = {
         },
         playlistChanged: async function ({commit}, {before, after}) {
             if (after.id < 0) { // unsaved playlist
-                const oldId = after.id
+                const oldId = after.id;
                 const savedPlaylist = await Playlist.create(after);
                 const newId = savedPlaylist.id;
                 commit(SET_PLAYLIST_ID, {oldId, newId});
@@ -197,6 +199,7 @@ const AudioPlayerStore: Module<PlaylistManagerState, any> = {
                     activeTrackIdx: 0,
                     tracks: [],
                     playbackPosition: 0,
+                    public: true,
                 }
             ]
         },
