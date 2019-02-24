@@ -4,7 +4,7 @@
             <b-row>
                 <b-col>
                     <div style="position: relative">
-                        <span style="text-align: center; position: absolute; width: 100%">
+                        <span style="text-align: center; position: absolute; width: 100%; pointer-events: none">
                             {{currentPlaytime | formatDuration}} / {{duration | formatDuration}}
                         </span>
                         <b-progress
