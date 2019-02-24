@@ -1,40 +1,52 @@
 <template>
-    <div class="scrollable" ref="scrollable" :style="scrollableStyle">
+    <div ref="scrollable" :style="scrollableStyle">
         <slot></slot>
     </div>
 </template>
 
 <script lang="ts">
     import Vue from 'vue';
+    import {mapGetters} from "vuex";
 
     export default Vue.extend({
         name: '',
         props: {
-          bottom: {
-              type: Number,
-              default: 0,
-          },
-          fill: {
-              type: Boolean,
-              default: false,
-          }
+            bottom: {
+                type: Number,
+                default: 0,
+            },
+            fill: {
+                type: Boolean,
+                default: false,
+            },
+            disableOnMobile: {
+                type: Boolean,
+                default: true,
+
+            }
         },
         data: function () {
-          return {
-              viewportHeight: 1000,
-              viewportWidth: 1000,
-              width: 1000,
-              height: 1000,
-              x: 0,
-              y: 0,
-          }
+            return {
+                viewportHeight: 1000,
+                viewportWidth: 1000,
+                width: 1000,
+                height: 1000,
+                x: 0,
+                y: 0,
+            }
         },
         computed: {
+            ...mapGetters({
+                isMobile: 'mobilemode/isMobile'
+            }),
             maxHeight: function () {
                 return `${this.viewportHeight - this.y - this.bottom}px`;
             },
             scrollableStyle: function () {
-                let scrollableStyle: any = {'max-height': this.maxHeight};
+                if ((this as any).isMobile && this.disableOnMobile) {
+                    return {};
+                }
+                let scrollableStyle: any = {'max-height': this.maxHeight, 'overflow-y': 'scroll'};
                 if (this.fill) {
                     scrollableStyle['min-height'] = this.maxHeight;
                 }
@@ -61,9 +73,3 @@
         }
     });
 </script>
-
-<style scoped>
-    .scrollable {
-        overflow-y: scroll;
-    }
-</style>
