@@ -57,11 +57,11 @@ class Track(models.Model):
 
     def __str__(self):
         if self.type == Track.TYPE.FILE:
-            return f'{self.order} FILE {self.file.filename}'
+            return f'{self.order:03d} FILE {self.file.filename}'
         elif self.type == Track.TYPE.YOUTUBE_URL:
-            return f'{self.order} YOUTUBE {self.youtube.title}'
+            return f'{self.order:03d} YOUTUBE {self.youtube.title}'
         else:
-            return f'{self.order} TYPE {self.type}'
+            return f'{self.order:03d} TYPE {self.type}'
 
     playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE, related_name='tracks')
     order = models.PositiveSmallIntegerField()

@@ -152,6 +152,7 @@ class PlaylistViewSet(viewsets.ModelViewSet):
     serializer_class = PlaylistSerializer
 
     def get_serializer(self, *args, **kwargs):
+        # always inject the current user in to the playlist data
         kwargs['data']['owner'] = UserSerializer().to_representation(self.request.user)
         serializer = super().get_serializer(*args, **kwargs)
         return serializer

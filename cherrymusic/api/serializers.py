@@ -182,9 +182,10 @@ class PlaylistSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField(max_length=255)
     tracks = TrackSerializer(many=True)
-    owner = UserSerializer()
+    owner = UserSerializer(allow_null=True)
     active_track_idx = serializers.IntegerField(source='get_active_track_idx')
     playback_position = serializers.FloatField(source='get_playback_position')
+    public = serializers.BooleanField()
 
     class Meta:
         model = Playlist
@@ -200,27 +201,23 @@ class PlaylistSerializer(serializers.Serializer):
     def get_owner_name(self, instance):
         return instance.owner.username
 
-    def create(self, validated_data):
-        validated_data.pop('id', -1)  # new playlist have id = -1, which is invalid
-        tracks_data = validated_data.pop('tracks')
-        # repack owner so that the playlist serializer is happy
-        owner = validated_data.pop('owner')
-        validated_data['owner'] = User.objects.get(id=owner['id'])
-
-        with transaction.atomic():
-            playback_position = validated_data.pop('get_playback_position')
-            active_track_idx = validated_data.pop('get_active_track_idx')
-            playlist = Playlist.objects.create(**validated_data)
-            # sync playback position
-            PlaylistPosition.objects.update_or_create(
-                user_id=owner['id'],
-                playlist=playlist,
-                defaults=dict(
-                    playback_position=playback_position,
-                    active_track_idx=active_track_idx,
-                )
+    @classmethod
+    def set_playback_position(cls, playlist, active_track_idx, playback_position, user):
+        PlaylistPosition.objects.update_or_create(
+            user_id=user.id,
+            playlist=playlist,
+            defaults=dict(
+                playback_position=playback_position,
+                active_track_idx=active_track_idx,
             )
-            # sync tracks
+        )
+
+    @classmethod
+    def sync_tracks(cls, playlist, tracks_data):
+        with transaction.atomic():
+            # just wipe all tracks and create them anew
+            Track.objects.filter(playlist=playlist).delete()
+
             for idx, track_data in enumerate(tracks_data):
                 # make sure the order is not corrupted when saving to db
                 track_data['order'] = idx
@@ -246,4 +243,35 @@ class PlaylistSerializer(serializers.Serializer):
                     youtube=youtube,
                     **track_data
                 )
+
+    def update(self, instance, validated_data):
+        print(validated_data)
+        id = validated_data.pop('id', -1)  # new playlist have id = -1, which is invalid
+        tracks_data = validated_data.pop('tracks')
+        user = User.objects.get(id=validated_data.pop('owner')['id'])
+
+        with transaction.atomic():
+            Playlist.objects.filter(id=id).update(
+                name=validated_data['name'],
+                public=validated_data['public'],
+            )
+            playlist = Playlist.objects.get(id=id)
+            playback_position = validated_data.pop('get_playback_position')
+            active_track_idx = validated_data.pop('get_active_track_idx')
+            self.__class__.set_playback_position(playlist, playback_position, active_track_idx, user)
+            self.__class__.sync_tracks(playlist, tracks_data)
+        return playlist
+
+    def create(self, validated_data):
+        id = validated_data.pop('id', -1)  # new playlist have id = -1, which is invalid
+        tracks_data = validated_data.pop('tracks')
+        # repack owner so that the playlist serializer is happy
+        validated_data['owner'] = user = User.objects.get(id=validated_data.pop('owner')['id'])
+
+        with transaction.atomic():
+            playback_position = validated_data.pop('get_playback_position')
+            active_track_idx = validated_data.pop('get_active_track_idx')
+            playlist = Playlist.objects.create(**validated_data)
+            self.__class__.set_playback_position(playlist, active_track_idx, playback_position, user)
+            self.__class__.sync_tracks(playlist, tracks_data)
         return playlist
