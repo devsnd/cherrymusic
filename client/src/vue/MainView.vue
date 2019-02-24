@@ -12,23 +12,25 @@
                     <b-col md="12">
                         <swiper style="height: 100%">
                             <swiper-slide>
-                                <div v-if="viewMode === 'motd'">
-                                    <MOTD></MOTD>
-                                </div>
-                                <div v-else-if="viewMode === 'browse'">
-                                    <file-browser></file-browser>
-                                </div>
-                                <div v-else-if="viewMode === 'search'">
-                                    <Scrollable>
-                                        <search-results></search-results>
-                                    </Scrollable>
-                                </div>
-                                <div v-else-if="viewMode === 'ytsearch'">
-                                    <youtube-search></youtube-search>
-                                </div>
+                                <Scrollable fill :disableOnMobile="false">
+                                    <div v-if="viewMode === 'motd'">
+                                        <MOTD></MOTD>
+                                    </div>
+                                    <div v-else-if="viewMode === 'browse'">
+                                        <file-browser></file-browser>
+                                    </div>
+                                    <div v-else-if="viewMode === 'search'">
+                                        <Scrollable>
+                                            <search-results></search-results>
+                                        </Scrollable>
+                                    </div>
+                                    <div v-else-if="viewMode === 'ytsearch'">
+                                        <youtube-search></youtube-search>
+                                    </div>
+                                </Scrollable>
                             </swiper-slide>
                             <swiper-slide>
-                                 <PlaylistManager></PlaylistManager>
+                                <PlaylistManager></PlaylistManager>
                             </swiper-slide>
                         </swiper>
                     </b-col>
@@ -43,7 +45,7 @@
                                 <file-browser></file-browser>
                             </div>
                             <div v-else-if="viewMode === 'search'">
-                                <Scrollable>
+                                <Scrollable :bottom="130">
                                     <search-results></search-results>
                                 </Scrollable>
                             </div>

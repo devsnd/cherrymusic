@@ -23,7 +23,7 @@
                     </b-list-group>
                     <b-btn
                         v-if="currentDirectory.files.length > 0"
-                        @click="addFilesToPlaylist(currentDirectory.files)"
+                        @click="addManyToVisiblePlaylist(currentDirectory.files)"
                     >
                         Add all files to playlist
                     </b-btn>
@@ -74,15 +74,11 @@
             goUp: function () {
                 (this as any).loadDir(this.parentDirectory.id);
             },
-            addFilesToPlaylist: function (files: FileInterface[]) {
-                for (const file of files) {
-                    this.addFileToVisiblePlaylist(file);
-                }
-            },
             ...mapActions({
                 loadDir: 'filebrowser/loadDir',
                 // playFile: 'audioplayer/playFile',
                 addFileToVisiblePlaylist: 'playlist/addFileToVisiblePlaylist',
+                addManyToVisiblePlaylist: 'playlist/addManyToVisiblePlaylist',
             })
         }
     });

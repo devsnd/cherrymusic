@@ -9,12 +9,13 @@
                     :value="elapsedTime"
             ></b-progress-bar>
         </b-progress>
-        <Scrollable :bottom="200" fill>
+        <Scrollable :bottom="200" fill :disableOnMobile="false">
             <div v-if="playlist.tracks.length === 0">
                 <translate>This playlist is empty.</translate>
                 <translate>Search or Browse to add tracks.</translate>
             </div>
 
+            <!-- <b-list-group v-sortable="{onUpdate: onChangedSorting}"> -->
             <b-list-group v-sortable="{onUpdate: onChangedSorting}">
                 <template
                         v-for="(track, index) in playlist.tracks"

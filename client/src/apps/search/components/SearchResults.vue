@@ -42,6 +42,9 @@
         </div>
         <div v-if="results.files.length">
             <h3>Songs</h3>
+            <b-btn @click="addManyToVisiblePlaylist(results.files)">
+                Add all to playlist
+            </b-btn>
             <b-list-group>
                 <FileItem
                     v-for="file in results.files"
@@ -101,6 +104,7 @@
         methods: {
             ...mapActions({
                 addFileToVisiblePlaylist: 'playlist/addFileToVisiblePlaylist',
+                addManyToVisiblePlaylist: 'playlist/addManyToVisiblePlaylist',
                 setViewMode: 'mainview/setViewMode',
                 searchYoutube: 'youtube/search',
             }),

@@ -92,6 +92,14 @@ const AudioPlayerStore: Module<PlaylistManagerState, any> = {
                 commit(ADD_FILE_TO_PLAYLIST, {playlistIdx, file});
             });
         },
+        addManyToVisiblePlaylist: function ({commit, getters, dispatch}, files) {
+            const playlistIdx = getters.visiblePlaylistIdx;
+            dispatch('withUndo', () => {
+                for (const file of files) {
+                    commit(ADD_FILE_TO_PLAYLIST, {playlistIdx, file});
+                }
+            });
+        },
         addYoutubeToVisiblePlaylist: function ({commit, getters, dispatch}, youtube) {
             const playlistIdx = getters.visiblePlaylistIdx;
             dispatch('withUndo', () => {
