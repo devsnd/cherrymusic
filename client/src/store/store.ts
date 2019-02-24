@@ -8,6 +8,7 @@ import youtube from '@/apps/youtube/store';
 import mainview from '@/apps/mainview/store';
 import shortcuts from '@/apps/shortcuts/store';
 import offline from '@/apps/offline/store';
+import mobilemode from '@/apps/mobilemode/store';
 
 Vue.use(Vuex);
 
@@ -22,5 +23,6 @@ export default new Vuex.Store({
         search,
         shortcuts,
         youtube,
+        mobilemode,
     }
 })

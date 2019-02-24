@@ -38,6 +38,8 @@ store.dispatch(
 );
 // load the list of offline tracks
 store.dispatch('offline/init');
+// detect if we should use mobile mode
+store.dispatch('mobilemode/init');
 
 // initialize the api with a new auth token. This should be done in a login view later
 import {Settings} from '@/api/api';
