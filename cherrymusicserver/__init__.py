@@ -458,7 +458,7 @@ If you are sure that cherrymusic is not running, you can delete this file and re
             if not os.path.exists(sessiondir):
                 os.mkdir(sessiondir)
             cherrypy.config.update({
-                'tools.sessions.storage_type': "file",
+                'tools.sessions.storage_class': cherrypy.lib.sessions.FileSession,
                 'tools.sessions.storage_path': sessiondir,
             })
         basedirpath = config['media.basedir']
