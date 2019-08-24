@@ -1,5 +1,6 @@
 <template>
     <div>
+        <slot name="playlist-actions"></slot>
         <b-badge :variant="littleTimeLeft ? 'danger' : 'light'" style="display: inline">
             {{elapsedTime | formatDuration}} / {{duration | formatDuration}}
         </b-badge>
@@ -113,6 +114,7 @@
             ...mapActions({
                 swapTrackInActivePlaylist: 'playlist/swapTrackInActivePlaylist',
                 addToOfflineTracks: 'offline/addToOfflineTracks',
+                makeAvailableOffline: 'offline/makeAvailableOffline',
             }),
             playTrack: function (trackIdx: number) {
                 this.triggerPlay(trackIdx);
@@ -125,14 +127,6 @@
             isAvailableOffline: function (fileId: number): boolean {
                 return (this as any).offlineTrackIds.indexOf(fileId) !== -1;
             },
-            makeAvailableOffline: async function (track: TrackInterface) {
-                if (track.file === null) {
-                    throw new Error('Cannot make track available offline, it does not have a `file`')
-                }
-                const response: Response = await fetch(track.file.stream_url);
-                const data = await response.blob();
-                (this as any).addToOfflineTracks({track: track, data: data});
-            }
         },
         computed: {
             duration: function () {

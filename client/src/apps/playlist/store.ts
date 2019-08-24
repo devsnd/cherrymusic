@@ -28,9 +28,18 @@ const SET_ACTIVE_PLAYLIST_IDX = 'SET_ACTIVE_PLAYLIST_IDX';
 const SET_VISIBLE_PLAYLIST_IDX = 'SET_VISIBLE_PLAYLIST_IDX';
 const SET_ACTIVE_TRACK_IDX_IN_PLAYLIST = 'SET_ACTIVE_TRACK_IDX_IN_PLAYLIST';
 const SET_PLAYBACK_POSITION = 'SET_PLAYBACK_POSITION';
+const REMOVE_PLAYLIST = 'REMOVE_PLAYLIST';
 
 
 const deepcopy = (data: any): any => JSON.parse(JSON.stringify(data));
+const makeEmptyPlaylist = () => ({
+    id: -(Math.random() * 1000000 | 0),
+    name: 'New Playlist',
+    activeTrackIdx: 0,
+    tracks: [],
+    playbackPosition: 0,
+    public: true,
+});
 
 const AudioPlayerStore: Module<PlaylistManagerState, any> = {
     namespaced: true,
@@ -105,6 +114,9 @@ const AudioPlayerStore: Module<PlaylistManagerState, any> = {
             dispatch('withUndo', () => {
                 commit(ADD_YOUTUBE_TO_PLAYLIST, {playlistIdx, youtube});
             })
+        },
+        closePlaylist: function ({commit, dispatch}, playlistId) {
+            commit(REMOVE_PLAYLIST, playlistId);
         },
         swapTrackInActivePlaylist: function ({commit, getters, dispatch}, {oldIndex, newIndex}) {
             const playlistIdx = getters.visiblePlaylistIdx;
@@ -201,15 +213,18 @@ const AudioPlayerStore: Module<PlaylistManagerState, any> = {
         [ADD_NEW_PLAYLIST]: (state) => {
             state.playlists = [
                 ...state.playlists,
-                {
-                    id: -(Math.random() * 1000000 | 0),
-                    name: 'New Playlist',
-                    activeTrackIdx: 0,
-                    tracks: [],
-                    playbackPosition: 0,
-                    public: true,
-                }
+                makeEmptyPlaylist()
             ]
+        },
+        [REMOVE_PLAYLIST]: (state, playlistId) => {
+            // make sure there's always one empty playlist
+            if (state.playlists.length === 1) {
+                state.playlists = [...state.playlists, makeEmptyPlaylist()];
+            }
+            state.playlists = state.playlists.filter(
+              (playlist) => playlist.id !== playlistId
+            );
+            state.visiblePlaylistIdx = Math.max(0, state.visiblePlaylistIdx - 1);
         },
         [SET_PLAYLIST_ID]: (state, {oldId, newId}) => {
           state.playlists = state.playlists.map((playlist) => {
