@@ -12,7 +12,8 @@ type FileBrowserState = {
     loading: boolean,
     currentId: null | number,
     parentId: null | number,
-    directoryById: {[key: number]: DirectoryInterface}
+    directoryById: {[key: number]: DirectoryInterface},
+    cachingEnabled: boolean,
 }
 
 const FileBrowserStore: Module<FileBrowserState, any> = {
@@ -23,6 +24,7 @@ const FileBrowserStore: Module<FileBrowserState, any> = {
             currentId: null,
             parentId: null,
             directoryById: {},
+            cachingEnabled: false,
         };
     },
     getters: {
@@ -42,7 +44,7 @@ const FileBrowserStore: Module<FileBrowserState, any> = {
     },
     actions: {
         async loadDir ({commit, state}, id: number) {
-            if (state.directoryById[id] === undefined) {
+            if (state.directoryById[id] === undefined || !state.cachingEnabled) {
                 commit(SET_LOADING, true);
                 let directory: DirectoryInterface;
                 if (id === -1) {

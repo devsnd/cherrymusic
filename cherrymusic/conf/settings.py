@@ -14,6 +14,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 import os
 import sys
 
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE_DIR + '/../apps')
 sys.path.insert(0, BASE_DIR + '/../ext')
@@ -28,7 +29,11 @@ SECRET_KEY = 'ywps9g4&cs-fs)118(4snx8cb&185wr=d)7b+2hh#vw5*o!f5@'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '192.168.1.1',
+    'localhost',
+    '192.168.178.80',
+]
 
 AUTH_USER_MODEL = 'core.User'
 
@@ -48,6 +53,7 @@ INSTALLED_APPS = [
     'storage',
     'client',
     'playlist',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -128,6 +134,10 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
     'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
     'DEFAULT_SCHEMA_CLASS': 'api.generator.schemas.AutoSchemaPlus',
+}
+
+SWAGGER_SETTINGS = {
+    'DEFAULT_INFO': 'conf.openapi_info.openapi_info'
 }
 
 from .logging import *

@@ -30,6 +30,7 @@ type HTTPMethod = 'get' | 'post' | 'delete' | 'patch' | 'put';
 
 export class Settings {
     static baseUrl: string = '';
+    static basePath: string = '{{base_path}}';
     private static authtoken: string | null = null;
 
     static setBaseUrl (baseUrl: string) {
@@ -57,7 +58,7 @@ export class Settings {
     }
 
     static async call (method: HTTPMethod, path: string, data?: any) {
-        let url = Settings.getBaseUrl() + path;
+        let url = Settings.getBaseUrl() + Settings.basePath + path;
         let options: any = {
             method: method,
             headers: new Headers({'content-type': 'application/json'}),
@@ -86,7 +87,7 @@ export class Settings {
     }
 }
 
-// generate the argument types for each api call which
+// generate the argument types for each api call
 {% for namespace in api_namespaces %}\
 {% for api_call in namespace.api_calls %}
 type {{namespace.name | upper_camel_case}}{{api_call.name | upper_camel_case}}Args = {
@@ -182,6 +183,7 @@ class APINamespace:
 def generate_typescript_api(schema):
     api_namespaces = defaultdict(list)
     for path, path_spec in schema['paths'].items():
+        parameters = path_spec.pop('parameters', [])
         for method, specs in path_spec.items():
             namespace_name = specs['tags'][0]  # use the first tag to group the api calls
             call_name = specs['operationId'][len(namespace_name) + 1:]
@@ -190,9 +192,9 @@ def generate_typescript_api(schema):
                     in_=parameter['in'],
                     name=parameter['name'],
                     required=parameter.get('required', False),
-                    type_=parameter['schema']['type'],
+                    type_=parameter['type'],
                 )
-                for parameter in specs.get('parameters', [])
+                for parameter in parameters
                 if parameter['in'] == 'query'
             ]
             path_parameters = [
@@ -200,9 +202,9 @@ def generate_typescript_api(schema):
                     in_=parameter['in'],
                     name=parameter['name'],
                     required=parameter.get('required', False),
-                    type_=parameter['schema']['type'],
+                    type_=parameter['type'],
                 )
-                for parameter in specs.get('parameters', [])
+                for parameter in parameters
                 if parameter['in'] == 'path'
             ]
             api_call = APICall(
@@ -222,7 +224,11 @@ def generate_typescript_api(schema):
         ),
         key=lambda group: group.name
     )
+    base_path = schema.get('basePath', '')
 
     t = Template(typescript_template)
-    c = Context({"api_namespaces": api_namespaces})
+    c = Context({
+        "api_namespaces": api_namespaces,
+        "base_path": base_path,
+    })
     return t.render(c)
