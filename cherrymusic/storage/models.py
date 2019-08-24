@@ -79,35 +79,36 @@ class Directory(models.Model):
                 deleted_directories += 1
         # add all files and directories
         parent_path = self.absolute_path()
-        for sub_path in Path(parent_path).iterdir():
-            if sub_path.is_file() and File.indexable(sub_path.name):
-                abs_path = parent_path / sub_path
-                # index all indexable files
-                created, file = File.objects.get_or_create(
-                    filename=sub_path.name,
-                    directory=self,
-                    defaults=dict(
-                        size=os.stat(abs_path.absolute()).st_size,
+        if parent_path.exists():
+            for sub_path in Path(parent_path).iterdir():
+                if sub_path.is_file() and File.indexable(sub_path.name):
+                    abs_path = parent_path / sub_path
+                    # index all indexable files
+                    created, file = File.objects.get_or_create(
+                        filename=sub_path.name,
+                        directory=self,
+                        defaults=dict(
+                            size=os.stat(abs_path.absolute()).st_size,
+                        )
                     )
-                )
-                if created:
-                    indexed_files += 1
-            elif sub_path.is_dir():
-                if sub_path.name == '.':
-                    continue
-                sub_dir, created = Directory.objects.get_or_create(parent=self, path=sub_path.name)
-                if created:
-                    indexed_directories += 1
+                    if created:
+                        indexed_files += 1
+                elif sub_path.is_dir():
+                    if sub_path.name == '.':
+                        continue
+                    sub_dir, created = Directory.objects.get_or_create(parent=self, path=sub_path.name)
+                    if created:
+                        indexed_directories += 1
 
-                if recursively:
-                    # index everything recursively, keep track of total files indexed
-                    del_files, del_directories, idx_files, idx_directories = sub_dir.reindex()
-                    deleted_files += del_files
-                    deleted_directories += del_directories
-                    indexed_files += idx_files
-                    indexed_directories += idx_directories
-            else:
-                logger.info('Unknown filetype %s', sub_path)
+                    if recursively:
+                        # index everything recursively, keep track of total files indexed
+                        del_files, del_directories, idx_files, idx_directories = sub_dir.reindex()
+                        deleted_files += del_files
+                        deleted_directories += del_directories
+                        indexed_files += idx_files
+                        indexed_directories += idx_directories
+                else:
+                    logger.info('Unknown filetype %s', sub_path)
         return (
             deleted_files,
             deleted_directories,
