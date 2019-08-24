@@ -157,7 +157,7 @@ class Album(models.Model):
     )
     thumbnail_gif = models.BinaryField(max_length=20 * 1024, null=True, blank=True)
 
-    thumbnail_size = (8, 8)
+    thumbnail_size = (32, 32)
 
     @property
     def thumbnail_gif_b64(self):

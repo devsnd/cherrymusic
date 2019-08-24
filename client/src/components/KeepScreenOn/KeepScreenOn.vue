@@ -3,6 +3,8 @@
         <b-checkbox v-model="keepScreenOn">Keep Screen On</b-checkbox>
         <!-- this image is just to get webpack to copy the video for me, something something fileloader -->
         <img style="visibility: hidden" src="../../static/img/logo_video.png"></img>
+        <!-- same here... the laziness sets in -->
+        <img style="visibility: hidden" src="../../static/img/default_album.png"></img>
         <video class="hideVideo" src="../../static/client/logo_video.png" loop="loop" ref="loopVideo"></video>
     </div>
 </template>

@@ -82,7 +82,7 @@
         },
         data: function () {
             return {
-                defaultImage: 'https://picsum.photos/400/400/?image=36',
+                defaultImage: 'static/client/default_album.png',
             };
         },
         computed: {
