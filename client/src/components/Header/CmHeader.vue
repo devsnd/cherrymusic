@@ -73,7 +73,13 @@
                     <template slot="button-content">
                         <span class="fa fa-wrench fa-2x" style="margin-top: -8px; margin-bottom: -8px"></span>
                     </template>
-                    <b-dropdown-item href="#" v-translate>Admin</b-dropdown-item>
+                    <b-dropdown-item
+                        v-translate
+                        disabled="disabled"
+                        @click="alert('admin not implemented')"
+                    >
+                        Admin
+                    </b-dropdown-item>
                     <b-dropdown-item @click="showOptionsModal()">
                         Options
                     </b-dropdown-item>

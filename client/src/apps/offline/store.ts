@@ -1,6 +1,7 @@
 import {Module} from "vuex";
 import {OfflineStorage} from "@/apps/offline/storage";
 import {TrackInterface} from "@/api/types";
+import {Settings} from "@/api/api";
 
 export type OfflineStoreState = {
     offlineTrackIds: number[],
@@ -30,7 +31,8 @@ const OfflineStore: Module<OfflineStoreState, any> = {
             if (track.file === null) {
                 throw new Error('Cannot make track available offline, it does not have a `file`')
             }
-            const response: Response = await fetch(track.file.stream_url);
+            const url = track.file.stream_url + '?authtoken=' + Settings.getAuthToken()
+            const response: Response = await fetch(url);
             const data = await response.blob();
             dispatch('addToOfflineTracks', {track: track, data: data});
         },
