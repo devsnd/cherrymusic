@@ -79,6 +79,17 @@ ManagedPlaylist.prototype = {
         $(this.playlistSelector).bind('addedItem', function(event,playlistSelector) {
             self.setSaved(false);
         });
+
+        // constantly check if we need to recalculate the layout
+        window.setInterval(
+            self.recalculateLayout,
+            1000
+        )
+    },
+    recalculateLayout: function () {
+        // move down the playlist depending on the number of tabs
+        var abovePlaylistHeight = $('#searchfield').height() + $('#jplayer').height();
+        $('.playlist-container-parent').css('top', abovePlaylistHeight + 'px');
     },
     setSaved : function(issaved){
         this.saved = issaved;
