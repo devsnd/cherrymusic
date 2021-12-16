@@ -59,11 +59,13 @@
                 that.viewportHeight = document.documentElement.clientHeight;
                 that.viewportWidth = document.documentElement.clientWidth;
                 const elem = (this as any).$refs.scrollable;
-                const rect = elem.getBoundingClientRect();
-                that.height = rect.height;
-                that.width = rect.width;
-                that.x = rect.x;
-                that.y = rect.y;
+                if (!!elem) {
+                  const rect = elem.getBoundingClientRect();
+                  that.height = rect.height;
+                  that.width = rect.width;
+                  that.x = rect.x;
+                  that.y = rect.y;
+                }
 
             }
         },
