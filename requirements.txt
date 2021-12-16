@@ -8,3 +8,4 @@ Pillow==6.1.0
 drf-yasg
 drf-yasg[validation]
 packaging
+django-filter==21.1
