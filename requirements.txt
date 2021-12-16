@@ -5,7 +5,7 @@ coreapi-cli==1.0.9
 pyyaml==5.1.2
 django-background-tasks==1.2.0
 Pillow==6.1.0
-drf-yasg
+drf-yasg==1.20.0
 drf-yasg[validation]
 packaging
 django-filter==21.1
