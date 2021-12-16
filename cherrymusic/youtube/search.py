@@ -35,7 +35,7 @@ def video_data_to_search_result(video_data):
     return YoutubeSearchResult(
         youtube_id=video_data['videoRenderer']['videoId'],
         thumbnail_url=video_data['videoRenderer']['thumbnail']['thumbnails'][0]['url'],
-        title=video_data['videoRenderer']['title']['simpleText'],
+        title=video_data['videoRenderer']['title']['runs'][0]['text'],
         duration=parse_duration_string(duration_str),
         views=views,
     )
@@ -47,7 +47,7 @@ def youtube_search(query):
     resp = requests.get(url, headers={
         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:64.0) Gecko/20100101 Firefox/64.0'
     })
-    js_obj = get_js_object_as_dict_after_marker('window["ytInitialData"] = ', resp.text)
+    js_obj = get_js_object_as_dict_after_marker('var ytInitialData = ', resp.text)
     videos = js_obj['contents']['twoColumnSearchResultsRenderer']['primaryContents']['sectionListRenderer']['contents'][0]['itemSectionRenderer']['contents']
     return [
         video_data_to_search_result(video)
