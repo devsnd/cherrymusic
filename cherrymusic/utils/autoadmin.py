@@ -1,9 +1,9 @@
 import inspect
-from django.conf.urls import url
 from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import ManyToOneRel, ManyToManyRel, ManyToManyField
 from django.http import HttpResponseRedirect
+from django.urls import path
 
 
 def generate_auto_model_admin(model, hidden_fields=('id',), object_actions=(), **kwargs):
@@ -93,7 +93,7 @@ class ModelActionAdminMixin:
         urls = super().get_urls()
         info = self.model._meta.app_label, self.model._meta.model_name
         return [
-            url(r'^model-action/$', self.model_action_view, name='%s_%s_model_action' % info),
+            path(r'^model-action/$', self.model_action_view, name='%s_%s_model_action' % info),
         ] + urls
 
     def model_action_view(self, request):

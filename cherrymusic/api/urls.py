@@ -1,4 +1,5 @@
-from django.conf.urls import url, include
+from django.conf.urls import include
+from django.urls import path
 from rest_framework import routers, permissions
 
 from youtube.views import YoutubeViewSet
@@ -19,12 +20,12 @@ from rest_framework.schemas import get_schema_view
 schema_view = get_schema_view(title="CherryMusic API")
 
 urlpatterns = [
-    url(r'schema/$', schema_view),
-    url(r'status/$', ServerStatusView.as_view()),
-    # url(r'stream/(?P<path>.*)', stream),
-    # url(r'browse/(?P<path>.*)', BrowseView.as_view()),
-    # url(r'index/(?P<path>.*)', IndexDirectoryView.as_view()),
-    # url(r'albumart/(?P<path>.*)', AlbumArtView.as_view()),
-    url(r'^', include(router.urls)),
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+    path(r'schema/$', schema_view),
+    path(r'status/$', ServerStatusView.as_view()),
+    # path(r'stream/(?P<path>.*)', stream),
+    # path(r'browse/(?P<path>.*)', BrowseView.as_view()),
+    # path(r'index/(?P<path>.*)', IndexDirectoryView.as_view()),
+    # path(r'albumart/(?P<path>.*)', AlbumArtView.as_view()),
+    path(r'', include(router.urls)),
+    path(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]

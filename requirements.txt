@@ -1,6 +1,6 @@
 # Django==1.11.17
-Django==2.2.4
-djangorestframework==3.10.2
+Django==4.0.0
+djangorestframework==3.13.1
 coreapi-cli==1.0.9
 pyyaml==5.1.2
 django-background-tasks==1.2.0
@@ -9,3 +9,4 @@ drf-yasg
 drf-yasg[validation]
 packaging
 django-filter==21.1
+django_extensions==3.1.5
