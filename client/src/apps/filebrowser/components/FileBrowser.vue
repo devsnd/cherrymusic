@@ -5,7 +5,7 @@
         </template>
         <template v-else>
             <b-alert show variant="secondary">
-                <b-btn @click="goUp()"><i class="fa fa-level-up"></i></b-btn>
+                <b-btn v-if="this.parentDirectory !== null" @click="goUp()"><i class="fa fa-level-up"></i></b-btn>
                 <template v-for="(breadcrumb, idx) in breadcrumbs">
                     <a @click="goTo(breadcrumb.id)" href="#">{{ breadcrumb.path }}</a>
                     <span v-if="idx < breadcrumbs.length - 1"> / </span>
@@ -72,7 +72,7 @@
               (this as any).loadDir(id);
             },
             goUp: function () {
-                (this as any).loadDir(this.parentDirectory.id);
+              (this as any).loadDir(this.parentDirectory.id);
             },
             ...mapActions({
                 loadDir: 'filebrowser/loadDir',
