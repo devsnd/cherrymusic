@@ -38,7 +38,11 @@ import os
 import re
 import weakref
 
-from collections import Mapping, namedtuple
+try:
+    from collections.abc import Mapping
+except ImportError:
+    from collections import Mapping
+from collections import namedtuple
 from backport.collections import OrderedDict
 from backport import callable
 
