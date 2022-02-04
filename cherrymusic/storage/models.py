@@ -10,12 +10,13 @@ import logging
 from django.utils import timezone
 
 from ext.tinytag import TinyTag, TinyTagException
+from utils.models import BaseModel
 from utils.natural_language import normalize_name
 
 logger = logging.getLogger(__name__)
 
 
-class Directory(models.Model):
+class Directory(BaseModel):
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='subdirectories')
     path = models.CharField(max_length=255)
 
@@ -117,7 +118,7 @@ class Directory(models.Model):
         )
 
 
-class Artist(models.Model):
+class Artist(BaseModel):
     name = models.CharField(max_length=255)
     norm_name = models.CharField(max_length=255)
 
@@ -146,7 +147,7 @@ class Artist(models.Model):
         return artist
 
 
-class Album(models.Model):
+class Album(BaseModel):
     name = models.CharField(max_length=255)
     albumartist = models.ForeignKey(
         Artist,
@@ -197,7 +198,7 @@ class Album(models.Model):
         return cls.objects.get_or_create(name=album, albumartist=albumartist)[0]
 
 
-class Genre(models.Model):
+class Genre(BaseModel):
     name = models.CharField(max_length=255)
 
     def save(self, *args, **kwargs):
@@ -209,7 +210,7 @@ class Genre(models.Model):
         return Genre.objects.get_or_create(name=normalize_name(genre))[0]
 
 
-class MetaData(models.Model):
+class MetaData(BaseModel):
     track = models.IntegerField(null=True, blank=True)
     track_total = models.IntegerField(null=True, blank=True)
     title = models.CharField(max_length=255, null=True, blank=True)
@@ -248,7 +249,7 @@ class MetaData(models.Model):
         return meta_data
 
 
-class Youtube(models.Model):
+class Youtube(BaseModel):
     youtube_id = models.CharField(max_length=255, unique=True)
     thumbnail_url = models.URLField()
     title = models.CharField(max_length=255)
@@ -256,7 +257,7 @@ class Youtube(models.Model):
     duration = models.PositiveIntegerField()
 
 
-class File(models.Model):
+class File(BaseModel):
     filename = models.CharField(max_length=255)
     directory = models.ForeignKey(Directory, on_delete=models.CASCADE, related_name='files')
     size = models.PositiveIntegerField()

@@ -78,7 +78,7 @@ export class Settings {
     }
 }
 
-// generate the argument types for each api call which
+// generate the argument types for each api call
 
 type DirectoryBasedirsArgs = {
 }
@@ -98,7 +98,7 @@ export class Directory implements APIEndpoint {
         return Settings.call('get', `/directory/`, params);
     }
 
-    static async read (id: Number, params?: DirectoryReadArgs) {
+    static async read (id: string, params?: DirectoryReadArgs) {
         return Settings.call('get', `/directory/${id}/`, params);
     }
 }
@@ -120,15 +120,15 @@ export class File implements APIEndpoint {
         return Settings.call('get', `/file/`, params);
     }
 
-    static async read (id: Number, params?: FileReadArgs) {
+    static async read (id: string, params?: FileReadArgs) {
         return Settings.call('get', `/file/${id}/`, params);
     }
 
-    static async stream (id: Number, params?: FileStreamArgs) {
+    static async stream (id: string, params?: FileStreamArgs) {
         return Settings.call('get', `/file/${id}/stream/`, params);
     }
 
-    static async transcode (id: Number, params?: FileTranscodeArgs) {
+    static async transcode (id: string, params?: FileTranscodeArgs) {
         return Settings.call('get', `/file/${id}/transcode/`, params);
     }
 }
@@ -156,7 +156,7 @@ export class Playlist implements APIEndpoint {
         return Settings.call('post', `/playlist/`, params);
     }
 
-    static async delete (id: Number, params?: PlaylistDeleteArgs) {
+    static async delete (id: string, params?: PlaylistDeleteArgs) {
         return Settings.call('delete', `/playlist/${id}/`, params);
     }
 
@@ -164,15 +164,15 @@ export class Playlist implements APIEndpoint {
         return Settings.call('get', `/playlist/`, params);
     }
 
-    static async partialUpdate (id: Number, params?: PlaylistPartialupdateArgs) {
+    static async partialUpdate (id: string, params?: PlaylistPartialupdateArgs) {
         return Settings.call('patch', `/playlist/${id}/`, params);
     }
 
-    static async read (id: Number, params?: PlaylistReadArgs) {
+    static async read (id: string, params?: PlaylistReadArgs) {
         return Settings.call('get', `/playlist/${id}/`, params);
     }
 
-    static async update (id: Number, params?: PlaylistUpdateArgs) {
+    static async update (id: string, params?: PlaylistUpdateArgs) {
         return Settings.call('put', `/playlist/${id}/`, params);
     }
 }
@@ -218,7 +218,7 @@ export class Track implements APIEndpoint {
         return Settings.call('post', `/track/`, params);
     }
 
-    static async delete (id: Number, params?: TrackDeleteArgs) {
+    static async delete (id: string, params?: TrackDeleteArgs) {
         return Settings.call('delete', `/track/${id}/`, params);
     }
 
@@ -226,15 +226,15 @@ export class Track implements APIEndpoint {
         return Settings.call('get', `/track/`, params);
     }
 
-    static async partialUpdate (id: Number, params?: TrackPartialupdateArgs) {
+    static async partialUpdate (id: string, params?: TrackPartialupdateArgs) {
         return Settings.call('patch', `/track/${id}/`, params);
     }
 
-    static async read (id: Number, params?: TrackReadArgs) {
+    static async read (id: string, params?: TrackReadArgs) {
         return Settings.call('get', `/track/${id}/`, params);
     }
 
-    static async update (id: Number, params?: TrackUpdateArgs) {
+    static async update (id: string, params?: TrackUpdateArgs) {
         return Settings.call('put', `/track/${id}/`, params);
     }
 }
@@ -262,7 +262,7 @@ export class User implements APIEndpoint {
         return Settings.call('post', `/user/`, params);
     }
 
-    static async delete (id: Number, params?: UserDeleteArgs) {
+    static async delete (id: string, params?: UserDeleteArgs) {
         return Settings.call('delete', `/user/${id}/`, params);
     }
 
@@ -270,15 +270,15 @@ export class User implements APIEndpoint {
         return Settings.call('get', `/user/`, params);
     }
 
-    static async partialUpdate (id: Number, params?: UserPartialupdateArgs) {
+    static async partialUpdate (id: string, params?: UserPartialupdateArgs) {
         return Settings.call('patch', `/user/${id}/`, params);
     }
 
-    static async read (id: Number, params?: UserReadArgs) {
+    static async read (id: string, params?: UserReadArgs) {
         return Settings.call('get', `/user/${id}/`, params);
     }
 
-    static async update (id: Number, params?: UserUpdateArgs) {
+    static async update (id: string, params?: UserUpdateArgs) {
         return Settings.call('put', `/user/${id}/`, params);
     }
 }

@@ -122,6 +122,20 @@ def snake_to_camel_case(snake):
     return head + ''.join(elem.title() for elem in rest)
 
 
+class TypeScriptType:
+    _typescript_type_mapping = {
+        'integer': 'Number',
+        'string': 'string',
+    }
+
+    @classmethod
+    def open_api_type_to_ts_type(cls, open_api_type):
+        try:
+            return cls._typescript_type_mapping[open_api_type]
+        except KeyError:
+            return 'UNKNOWN_TYPE'
+
+
 @dataclass
 class APICallParameter:
     name: str
@@ -129,17 +143,9 @@ class APICallParameter:
     type_: str
     in_: str
 
-    _typescript_type_mapping = {
-        'integer': 'Number',
-        'string': 'string',
-    }
-
     @property
     def typescript_type(self):
-        try:
-            return self.__class__._typescript_type_mapping[self.type_]
-        except KeyError:
-            return 'UNKNOWN_TYPE'
+        return TypeScriptType.open_api_type_to_ts_type(self.type_)
 
     @property
     def required_flag(self):
@@ -180,8 +186,27 @@ class APINamespace:
         return sorted(self._api_calls, key=lambda call: call.name)
 
 
+
+@dataclass
+class Property:
+    name: str
+    type_: str
+
+    @property
+    def typescript_type(self):
+        return TypeScriptType.open_api_type_to_ts_type(self.type_)
+
+
+@dataclass
+class Type:
+    ref: str
+    name: str
+    properties: List[Property]
+
+
 def generate_typescript_api(schema):
     api_namespaces = defaultdict(list)
+    types = []
     for path, path_spec in schema['paths'].items():
         parameters = path_spec.pop('parameters', [])
         for method, specs in path_spec.items():
@@ -215,6 +240,9 @@ def generate_typescript_api(schema):
                 method=method,
             )
             api_namespaces[namespace_name].append(api_call)
+    print(schema['definitions'])
+    for definition in schema['definitions']:
+        print(definition.__dict__)
 
     # sort namespaces by name so that the template is rendered reproducable
     api_namespaces = sorted(
@@ -229,6 +257,7 @@ def generate_typescript_api(schema):
     t = Template(typescript_template)
     c = Context({
         "api_namespaces": api_namespaces,
+        "types": types,
         "base_path": base_path,
     })
     return t.render(c)

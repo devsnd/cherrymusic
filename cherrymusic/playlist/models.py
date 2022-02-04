@@ -2,13 +2,14 @@ from django.contrib.auth import get_user_model
 from django.db import models
 
 from storage.models import File, Youtube
+from utils.models import BaseModel
 
 User = get_user_model()
 
 
 
 
-class Playlist(models.Model):
+class Playlist(BaseModel):
     name = models.CharField(max_length=255)
     owner = models.ForeignKey(User, on_delete=models.PROTECT)
     public = models.BooleanField(default=True)
@@ -26,7 +27,7 @@ class Playlist(models.Model):
         return 0.0
 
 
-class PlaylistPosition(models.Model):
+class PlaylistPosition(BaseModel):
     playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
@@ -40,7 +41,7 @@ class PlaylistPosition(models.Model):
         ]
 
 
-class Track(models.Model):
+class Track(BaseModel):
     class Meta:
         unique_together = (
             ('playlist', 'order'),

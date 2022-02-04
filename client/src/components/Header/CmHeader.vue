@@ -1,3 +1,4 @@
+<script src="../../apps/playlist/store.ts"></script>
 <template>
     <b-navbar toggleable="md" type="dark" variant="dark" class="rounded-nav-bar">
         <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
@@ -57,7 +58,7 @@
                 <b-nav-item href="#" @click="browseFiles()">
                     <translate>Browse Files</translate>
                 </b-nav-item>
-                <b-nav-item href="#" @click="">
+                <b-nav-item href="#" @click="loadPlaylists()">
                     <translate>
                         Load Playlist
                     </translate>
@@ -155,8 +156,16 @@
                 // all the base dirs
                 (this as any).loadDir(-1);
             },
+            loadPlaylists: function () {
+                (this as any)._hackCloseCollapseNavBar();
+                (this as any).setViewMode('playlist');
+                // -1 is the id of the virtual basedirs folder that contains
+                // all the base dirs
+                (this as any).loadDir(-1);
+            },
             ...mapActions({
                 loadDir: 'filebrowser/loadDir',
+                loadPlaylistList: 'playlistbrowser/loadPlaylistList',
                 debouncedSearch: 'search/debouncedSearch',
                 searchIsCached: 'search/searchIsCached',
                 setViewMode: 'mainview/setViewMode',
