@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+0.41.3 (2022-03-04)
+ - FIXED: python 3.10 compatibility
+
 0.41.2 (2018-02-07)
  - FIXED: Make jPlayer work again in master branch (merge 0.41.1 into master)
  - FIXED: '--setup' now works for CherryPy 12 and upwards  (thanks to TangoSierraAlfaVI)
