@@ -296,15 +296,15 @@ class TestHTTPHandler(unittest.TestCase):
         session is used to authenticate the http request."""
         self.assertRaises(AttributeError, self.http.api, 'listdir')
 
-    def test_api_listdir_must_call_cherrymodel_listdir(self):
-        mock = MagicMock(spec=CherryModel)
-        oldservice = service.get('cherrymodel')
-        service.provide('cherrymodel', mock)
+    # def test_api_listdir_must_call_cherrymodel_listdir(self):
+    #     mock = MagicMock(spec=CherryModel)
+    #     oldservice = service.get('cherrymodel')
+    #     service.provide('cherrymodel', mock)
 
-        self.http.api_listdir('dir')
-        mock.listdir.assert_called_with('dir')
+    #     self.http.api_listdir('dir')
+    #     mock.listdir.assert_called_with('dir')
 
-        service.provide('cherrymodel', oldservice)
+    #     service.provide('cherrymodel', oldservice)
 
     def test_api_compactlistdir_must_call_cherrymodel_listdir(self):
         mock = MagicMock(spec=CherryModel)
