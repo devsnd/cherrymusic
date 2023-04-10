@@ -81,44 +81,44 @@ __provider_factories = {}
 __providercache = {}
 
 
-def provide(handle, provider, args=(), kwargs={}):
-    """ Activate a provider for the service identified by ``handle``,
-        replacing a previous provider for the same service.
+# def provide(handle, provider, args=(), kwargs={}):
+#     """ Activate a provider for the service identified by ``handle``,
+#         replacing a previous provider for the same service.
 
-        If the provider is a ``type``, an instance will be created as the
-        actual provider. Instantiation is lazy, meaning it will be deferred
-        until the provider is requested (:func:`get`) by some user.
+#         If the provider is a ``type``, an instance will be created as the
+#         actual provider. Instantiation is lazy, meaning it will be deferred
+#         until the provider is requested (:func:`get`) by some user.
 
-        To use a type as a provider, you need to wrap it into something that is
-        not a type.
+#         To use a type as a provider, you need to wrap it into something that is
+#         not a type.
 
-        handle : str
-            The name of the serivce.
-        provider :
-            An object that provides the service, or a type that instantiates
-            such objects. Instantiation will happen on the first get call.
-        args, kwargs :
-            Pass on arguments to a type.
-    """
-    assert isinstance(provider, type) or not (args or kwargs)
-    __provider_factories[handle] = _ProviderFactory.get(provider, args, kwargs)
-    __providercache.pop(handle, None)
-    log.d('service %r: now provided by %r', handle, provider)
+#         handle : str
+#             The name of the serivce.
+#         provider :
+#             An object that provides the service, or a type that instantiates
+#             such objects. Instantiation will happen on the first get call.
+#         args, kwargs :
+#             Pass on arguments to a type.
+#     """
+#     assert isinstance(provider, type) or not (args or kwargs)
+#     __provider_factories[handle] = _ProviderFactory.get(provider, args, kwargs)
+#     __providercache.pop(handle, None)
+#     log.d('service %r: now provided by %r', handle, provider)
 
 
-def get(handle):
-    """Request the provider for the service identified by ``handle``.
+# def get(handle):
+#     """Request the provider for the service identified by ``handle``.
 
-    If a type was registered for the handle, the actual provider will be the
-    result of instantiating the type when it is first requested.
+#     If a type was registered for the handle, the actual provider will be the
+#     result of instantiating the type when it is first requested.
 
-    Although the goal is to create only one instance, it is possible that
-    different threads see different instances.
-    """
-    try:
-        return __providercache[handle]
-    except KeyError:
-        return _createprovider(handle)
+#     Although the goal is to create only one instance, it is possible that
+#     different threads see different instances.
+#     """
+#     try:
+#         return __providercache[handle]
+#     except KeyError:
+#         return _createprovider(handle)
 
 
 class require(object):
@@ -156,12 +156,12 @@ def user(**requirements):
     return clsdecorator
 
 
-def _createprovider(handle):
-    try:
-        factory = __provider_factories[handle]
-    except KeyError:
-        raise LookupError('Service not available: {0!r}'.format(handle))
-    return __providercache.setdefault(handle, factory.make())
+# def _createprovider(handle):
+#     try:
+#         factory = __provider_factories[handle]
+#     except KeyError:
+#         raise LookupError('Service not available: {0!r}'.format(handle))
+#     return __providercache.setdefault(handle, factory.make())
 
 
 class _ProviderFactory(object):

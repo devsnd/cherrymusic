@@ -47,7 +47,7 @@ class SetupHandler:
     def saveconfig(self, values):
         collect_errors = cfg.error_collector()
         baseconfig = cfg.from_defaults()
-        newconfig = json.loads(values, encoding='str')
+        newconfig = json.loads(values)
         customcfg = baseconfig.replace(newconfig, collect_errors)
         if collect_errors:
             badkeys = (e.key for e in collect_errors)
