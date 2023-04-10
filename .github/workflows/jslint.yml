@@ -1,0 +1,18 @@
+name: JS Linting
+
+on: [push]
+
+jobs:
+  prettier:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Prettify code
+        uses: creyD/prettier_action@v3.1
+        with:
+          # This part is also where you can pass other options, for example:
+          prettier_options: --write **/*.{js,md}
+          only_changed: True

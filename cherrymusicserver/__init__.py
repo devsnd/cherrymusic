@@ -55,6 +55,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import gettext
+import gettext as _
 from cherrymusicserver import pathprovider
 
 

@@ -4,7 +4,7 @@ import sys
 
 if sys.version_info < (3,0):
     from . import urllib
-    input = raw_input
+    input = input()
 else:
     input = input
 
@@ -29,6 +29,6 @@ else:
     callable = callable
 
 if sys.version_info < (3,0):
-    unichr = unichr
+    unichr = chr
 else:
     unichr = chr
