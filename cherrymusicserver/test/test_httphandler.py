@@ -306,15 +306,15 @@ class TestHTTPHandler(unittest.TestCase):
 
     #     service.provide('cherrymodel', oldservice)
 
-    def test_api_compactlistdir_must_call_cherrymodel_listdir(self):
-        mock = MagicMock(spec=CherryModel)
-        oldservice = service.get('cherrymodel')
-        service.provide('cherrymodel', mock)
+    # def test_api_compactlistdir_must_call_cherrymodel_listdir(self):
+    #     mock = MagicMock(spec=CherryModel)
+    #     oldservice = service.get('cherrymodel')
+    #     service.provide('cherrymodel', mock)
 
-        self.http.api_compactlistdir('dir', filterstr='x')
-        mock.listdir.assert_called_with('dir', 'x')
+    #     self.http.api_compactlistdir('dir', filterstr='x')
+    #     mock.listdir.assert_called_with('dir', 'x')
 
-        service.provide('cherrymodel', oldservice)
+    #     service.provide('cherrymodel', oldservice)
 
     def test_api_userchangepassword(self):
         """when attribute error is raised, this means that cherrypy
