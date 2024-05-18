@@ -36,7 +36,7 @@ hocuspocus heuristics"""
 from cherrymusicserver import pathprovider
 from cherrymusicserver import log
 import cherrymusicserver.tweak
-from imp import reload
+from importlib import reload
 from cherrymusicserver.util import Performance
 
 class ResultOrder:

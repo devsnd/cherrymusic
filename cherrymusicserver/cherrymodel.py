@@ -40,7 +40,7 @@ import codecs
 import json
 import cherrypy
 import audiotranscode
-from imp import reload
+from importlib import reload
 
 try:
     from urllib.parse import quote

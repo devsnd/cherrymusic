@@ -52,7 +52,7 @@ from cherrymusicserver.database.connect import BoundConnector
 from cherrymusicserver.util import Performance
 from cherrymusicserver.progress import ProgressTree, ProgressReporter
 import cherrymusicserver.tweak
-from imp import reload
+from importlib import reload
 import random
 
 from backport import unichr
