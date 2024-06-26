@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+0.41.4 (2024-06-26)
+ - FIXED: Python 3.12 compatibility
+
 0.41.3 (2022-03-04)
  - FIXED: python 3.10 compatibility
 
