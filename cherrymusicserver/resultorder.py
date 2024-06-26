@@ -33,10 +33,14 @@
 fetched from the database by some mystic-voodoo-
 hocuspocus heuristics"""
 
+try:
+    from imp import reload
+except ModuleNotFoundError:
+    from importlib import reload
+
 from cherrymusicserver import pathprovider
 from cherrymusicserver import log
 import cherrymusicserver.tweak
-from imp import reload
 from cherrymusicserver.util import Performance
 
 class ResultOrder:

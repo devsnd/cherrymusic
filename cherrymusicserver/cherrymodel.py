@@ -40,7 +40,11 @@ import codecs
 import json
 import cherrypy
 import audiotranscode
-from imp import reload
+
+try:
+    from imp import reload
+except ModuleNotFoundError:
+    from importlib import reload
 
 try:
     from urllib.parse import quote

@@ -42,6 +42,11 @@ from backport.collections import deque, Counter
 from contextlib import closing
 from operator import itemgetter
 
+try:
+    from imp import reload
+except ModuleNotFoundError:
+    from importlib import reload
+
 import cherrymusicserver as cherry
 from cherrymusicserver import database
 from cherrymusicserver import log
@@ -52,7 +57,6 @@ from cherrymusicserver.database.connect import BoundConnector
 from cherrymusicserver.util import Performance
 from cherrymusicserver.progress import ProgressTree, ProgressReporter
 import cherrymusicserver.tweak
-from imp import reload
 import random
 
 from backport import unichr
