@@ -297,8 +297,9 @@ def from_configparser(filepath):
     except ImportError:
         from backport.configparser import ConfigParser
     cfgp = ConfigParser()
+    read_file = cfgp.read_file if hasattr(cfgp, "read_file") else cfgp.readfp
     with open(filepath, encoding='utf-8') as fp:
-        cfgp.readfp(fp)
+        read_file(fp)
     dic = OrderedDict()
     for section_name in cfgp.sections():
         if 'DEFAULT' == section_name:
